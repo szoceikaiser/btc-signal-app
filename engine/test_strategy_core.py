@@ -112,6 +112,18 @@ def test_kompass_muster2_derivate_pump():
     assert classify_pattern(candles, flow) == Pattern.DERIVATE_PUMP
 
 
+def test_kompass_muster2_ohne_futures_cvd():
+    # US-Geo-Block-Fall: Futures-CVD-Serie ist 0 -> Pump-Erkennung ueber OI+Funding+Spot
+    n = 12
+    candles = trend_candles(n, 100000, 103000)
+    flow = flow_series(
+        spot=[100] * n,                                            # Spot flach
+        fut=[0] * n,                                               # keine Quelle
+        oi=[1000 + i * 5 for i in range(n)],                       # OI +5,5 %
+        funding=[0.00005 + i * 0.00002 for i in range(n)])
+    assert classify_pattern(candles, flow) == Pattern.DERIVATE_PUMP
+
+
 def test_kompass_muster3_short_covering():
     n = 12
     candles = trend_candles(n, 100000, 103000)                     # Preis hoch

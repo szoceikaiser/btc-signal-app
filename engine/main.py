@@ -1,11 +1,20 @@
 """Engine-Hauptprogramm (E4b): Daten holen -> Strategie auswerten -> Signale senden.
 
 Laeuft auf GitHub Actions (Cron). Nur Standardbibliothek.
+
+Datenquellen (alle ohne API-Key, von US-Servern erreichbar):
+- Kerzen + Spot-CVD: Binance Public-Data-Spiegel (data-api.binance.vision).
+  Hinweis: fapi.binance.com (Futures) blockiert US-IPs (HTTP 451) -> nicht nutzbar.
+- Open Interest + Funding: Kraken Futures (futures.kraken.com, PF_XBTUSD).
+  OI gibt es nur als Snapshot -> die Engine baut eine eigene Historie auf
+  (site/data/oi_history.json), die mit jedem Lauf waechst.
+
 Ausgaben (fuer die Chart-Webseite, werden vom Workflow committet):
   site/data/state.json    — Position + aktuelle Fib-Zonen + Engine-Stand
   site/data/signals.json  — Signal-Historie (Chart-Marker)
+  site/data/oi_history.json — selbst aufgebaute OI-Zeitreihe
 
-Offline testbar: run_engine() akzeptiert injizierte Fetch-Funktionen (siehe smoke_test).
+Offline testbar: run_engine() akzeptiert injizierte Fetch-Funktionen (siehe test_main).
 """
 
 from __future__ import annotations
@@ -15,6 +24,7 @@ import os
 import sys
 import time
 import urllib.request
+from datetime import datetime
 from pathlib import Path
 
 from strategy_core import (Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
@@ -29,11 +39,9 @@ LIMIT = 400                                            # ~66 Tage Kontext
 
 SPOT_URL = ("https://data-api.binance.vision/api/v3/klines"
             f"?symbol=BTCUSDT&interval={TIMEFRAME}&limit={LIMIT}")
-FUT_URL = ("https://fapi.binance.com/fapi/v1/klines"
-           f"?symbol=BTCUSDT&interval={TIMEFRAME}&limit={LIMIT}")
-OI_URL = ("https://fapi.binance.com/futures/data/openInterestHist"
-          f"?symbol=BTCUSDT&period={TIMEFRAME}&limit=200")
-FUND_URL = "https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=100"
+KRAKEN_TICKERS_URL = "https://futures.kraken.com/derivatives/api/v3/tickers"
+KRAKEN_FUNDING_URL = ("https://futures.kraken.com/derivatives/api/v4/"
+                      "historicalfundingrates?symbol=PF_XBTUSD")
 
 
 def _get_json(url: str, tries: int = 3):
@@ -49,54 +57,81 @@ def _get_json(url: str, tries: int = 3):
     raise RuntimeError(f"Abruf fehlgeschlagen: {url} ({last})")
 
 
+def _iso_to_ms(iso: str) -> int:
+    return int(datetime.fromisoformat(iso.replace("Z", "+00:00")).timestamp() * 1000)
+
+
+def _latest_leq(pairs, ts, default=0.0):
+    val = default
+    for t, v in pairs:
+        if t <= ts:
+            val = v
+        else:
+            break
+    return val
+
+
 # ------------------------------------------------------------- Daten-Layer
 
-def fetch_market_data(now_ms: int | None = None):
-    """Holt Kerzen (Futures = Handelsbasis), Spot-/Futures-CVD, OI, Funding.
+def fetch_oi_snapshot() -> tuple[int, float]:
+    """Aktuelles Open Interest (USD) von Kraken Futures (PF_XBTUSD)."""
+    data = _get_json(KRAKEN_TICKERS_URL)
+    for t in data.get("tickers", []):
+        if t.get("symbol") == "PF_XBTUSD":
+            oi_usd = float(t["openInterest"]) * float(t["markPrice"])
+            return int(time.time() * 1000), oi_usd
+    raise RuntimeError("PF_XBTUSD nicht in Kraken-Tickers gefunden")
 
-    Rueckgabe: (candles, flow) — nur ABGESCHLOSSENE Kerzen.
-    Hinweis (dokumentierte Abweichung, STRATEGIE.md §8): V1 nutzt Binance statt
-    Boersen-Aggregation; Bybit/OKX-Aggregation ist eine E4b-Verfeinerung.
+
+def fetch_funding_8h() -> list[tuple[int, float]]:
+    """Kraken-Funding (stuendlich, relativ) -> auf 8h-Aequivalent skaliert."""
+    data = _get_json(KRAKEN_FUNDING_URL)
+    out = []
+    for r in data.get("rates", []):
+        out.append((_iso_to_ms(r["timestamp"]), float(r["relativeFundingRate"]) * 8.0))
+    out.sort()
+    return out
+
+
+def fetch_market_data(oi_history: list[list] | None = None,
+                      now_ms: int | None = None):
+    """Holt Kerzen (Spot = Preisbasis), Spot-CVD, OI-Historie, Funding.
+
+    Rueckgabe: (candles, flow, oi_history_neu) — nur ABGESCHLOSSENE Kerzen.
+    Dokumentierte Abweichungen (docs/STRATEGIE.md §8 / ARCHITEKTUR.md):
+    - Preisbasis Spot statt Perp (Differenz minimal), da Binance-Futures-API
+      US-Server blockiert.
+    - Futures-CVD nicht verfuegbar -> 0; der Kompass erkennt den Derivate-Pump
+      stattdessen ueber OI + Funding + flaches Spot-CVD.
+    - OI von Kraken (kleinere Boerse, aber gleiche Richtung); Historie waechst
+      mit jedem Lauf — die ersten ~2 Tage sind die OI-Muster noch neutral.
     """
     now_ms = now_ms or int(time.time() * 1000)
-    fut_raw = _get_json(FUT_URL)
     spot_raw = _get_json(SPOT_URL)
-    oi_raw = _get_json(OI_URL)
-    fund_raw = _get_json(FUND_URL)
+    funding = fetch_funding_8h()
 
-    fut = [k for k in fut_raw if int(k[6]) <= now_ms]          # nur geschlossene
-    spot = {int(k[0]): k for k in spot_raw}
+    oi_history = list(oi_history or [])
+    ts, oi = fetch_oi_snapshot()
+    if not oi_history or ts - oi_history[-1][0] >= 30 * 60 * 1000:   # max. alle 30 Min
+        oi_history.append([ts, oi])
+    oi_history = oi_history[-2000:]
+    oi_pairs = [(int(t), float(v)) for t, v in oi_history]
 
     candles: list[Candle] = []
     flow: list[FlowPoint] = []
-    spot_cvd = fut_cvd = 0.0
-    oi_by_ts = sorted((int(o["timestamp"]), float(o["sumOpenInterestValue"]))
-                      for o in oi_raw)
-    fund_by_ts = sorted((int(f["fundingTime"]), float(f["fundingRate"]))
-                        for f in fund_raw)
-
-    def latest_leq(pairs, ts, default=0.0):
-        val = default
-        for t, v in pairs:
-            if t <= ts:
-                val = v
-            else:
-                break
-        return val
-
-    for k in fut:
-        ts = int(k[0])
-        candles.append(Candle(ts, float(k[1]), float(k[2]), float(k[3]), float(k[4])))
-        # CVD in USD: Taker-Buy-Quote minus Taker-Sell-Quote (= quoteVol - takerBuyQuote)
-        fut_cvd += 2.0 * float(k[10]) - float(k[7])
-        s = spot.get(ts)
-        if s is not None:
-            spot_cvd += 2.0 * float(s[10]) - float(s[7])
-        close_ts = ts + CANDLE_MS
-        flow.append(FlowPoint(ts, spot_cvd, fut_cvd,
-                              latest_leq(oi_by_ts, close_ts),
-                              latest_leq(fund_by_ts, close_ts)))
-    return candles, flow
+    spot_cvd = 0.0
+    first_oi = oi_pairs[0][1] if oi_pairs else 0.0
+    for k in spot_raw:
+        if int(k[6]) > now_ms:                                       # nur geschlossene
+            continue
+        c_ts = int(k[0])
+        candles.append(Candle(c_ts, float(k[1]), float(k[2]), float(k[3]), float(k[4])))
+        spot_cvd += 2.0 * float(k[10]) - float(k[7])                 # Taker-Delta in USD
+        close_ts = c_ts + CANDLE_MS
+        flow.append(FlowPoint(c_ts, spot_cvd, 0.0,
+                              _latest_leq(oi_pairs, close_ts, default=first_oi),
+                              _latest_leq(funding, close_ts)))
+    return candles, flow, oi_history
 
 
 # --------------------------------------------------------- State-Persistenz
@@ -147,6 +182,7 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     data_dir.mkdir(parents=True, exist_ok=True)
     state_path = data_dir / "state.json"
     signals_path = data_dir / "signals.json"
+    oi_path = data_dir / "oi_history.json"
 
     old_state = {}
     if state_path.exists():
@@ -155,7 +191,11 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
             old_state = {}                                  # Demo-Daten verwerfen
     pos = pos_from_state(old_state)
 
-    candles, flow = fetch()
+    oi_history = []
+    if oi_path.exists():
+        oi_history = json.loads(oi_path.read_text(encoding="utf-8"))
+
+    candles, flow, oi_history = fetch(oi_history)
     if not candles:
         print("Keine Kerzen erhalten — Abbruch.")
         return []
@@ -186,11 +226,12 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
 
     state_path.write_text(json.dumps(state, indent=1), encoding="utf-8")
     signals_path.write_text(json.dumps(hist, indent=1), encoding="utf-8")
+    oi_path.write_text(json.dumps(oi_history), encoding="utf-8")
 
     if new_signals:
         send_signals(new_signals, dry_run=dry_run)
     print(f"Lauf ok: {len(candles)} Kerzen, {len(new_signals)} neue Signale, "
-          f"Position: {pos.direction}/{pos.state.value}")
+          f"OI-Punkte: {len(oi_history)}, Position: {pos.direction}/{pos.state.value}")
     return new_signals
 
 

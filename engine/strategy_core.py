@@ -238,9 +238,17 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
     if price_chg >= sharp_move_pct / 2 and oi_chg <= -0.02:
         return Pattern.SHORT_COVERING
     # 2: Derivate-Pump — Futures-CVD stark hoch, Spot flach/runter, OI deutlich hoch, Funding zieht an
-    if (price_chg > 0 and fut > 0 and spot <= fut / 3 and oi_chg >= 0.03
-            and (funding_rising or funding_now >= funding_hot)):
-        return Pattern.DERIVATE_PUMP
+    has_fut = any(p.fut_cvd for p in f)
+    if has_fut:
+        if (price_chg > 0 and fut > 0 and spot <= fut / 3 and oi_chg >= 0.03
+                and (funding_rising or funding_now >= funding_hot)):
+            return Pattern.DERIVATE_PUMP
+    else:
+        # Ohne Futures-CVD-Quelle (US-Geo-Block): Pump-Erkennung ueber die uebrigen
+        # Merkmale aus Furkans Notizen — OI deutlich hoch, Funding zieht an, Spot flach
+        if (price_chg > 0 and oi_chg >= 0.03 and spot <= 0.01
+                and (funding_rising or funding_now >= funding_hot)):
+            return Pattern.DERIVATE_PUMP
     # 1: Gesunder Trend — Preis hoch, Spot-CVD traegt, Funding unauffaellig
     if (price_chg > 0 and spot > 0 and abs(funding_now) < funding_hot
             and 0 <= oi_chg <= 0.10):

@@ -18,8 +18,11 @@ def _c(i, o, h, l, cl):
     return Candle(TS0 + i * H4, o, h, l, cl)
 
 
-def szenario():
-    """Impuls 100->110 (Pivots mit n=5 bestaetigt), letzte Kerze beruehrt 0.5-Level."""
+def szenario(oi_history=None):
+    """Impuls 100->110 (Pivots mit n=5 bestaetigt), letzte Kerze beruehrt 0.5-Level.
+
+    Signatur wie fetch_market_data: nimmt die OI-Historie, gibt sie (ergaenzt) zurueck.
+    """
     rows = [
         (0, 103.5, 104.0, 103.0, 103.5), (1, 103.0, 103.5, 102.5, 103.0),
         (2, 102.6, 103.0, 102.2, 102.6), (3, 102.2, 102.6, 101.8, 102.2),
@@ -34,7 +37,8 @@ def szenario():
     ]
     candles = [_c(*r) for r in rows]
     flow = [FlowPoint(c.ts, 100.0, 100.0, 1000.0, 0.0) for c in candles]
-    return candles, flow
+    oi_history = list(oi_history or []) + [[candles[-1].ts, 1000.0]]
+    return candles, flow, oi_history
 
 
 def test_run_engine_erzeugt_signal_und_dateien():

@@ -2,7 +2,7 @@ name: Signal-Engine
 
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"
+    - cron: "7,22,37,52 * * * *"   # alle 15 Min, versetzt zur vollen Stunde (weniger Verzoegerung)
   workflow_dispatch:
     inputs:
       test_telegram:
