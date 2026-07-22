@@ -282,7 +282,9 @@ TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
 
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
-             pivot_n: int = 5, k_atr: float = 3.0) -> list[Signal]:
+             pivot_n: int = 5, k_atr: float = 2.0) -> list[Signal]:
+    # Defaults kalibriert per Backtest 2026-07-22 (BACKTEST.md): n=5, k=2.0 beste
+    # Kombination (Recall 45 %, Kaufseite 65 %, Praezision 54 %).
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
