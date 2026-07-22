@@ -1,32 +1,139 @@
 {
-  "demo": true,
-  "hinweis": "Demo-Daten aus docs/GEGENCHECK.md (echte Termine Jan 2026). Wird von der Engine (E4b) ueberschrieben.",
-  "signals": [
-    {
-      "ts": 1767657600000,
-      "type": "KAUF_1",
-      "label": "KAUF 1 (Teilposition am 0.5-Level)",
-      "price": 90556.8,
-      "tranche_pct": 25,
-      "reason": "0.5-Retracement des Impulses 86349->94765",
-      "stop_ref": 86348.7
-    },
-    {
-      "ts": 1767830400000,
-      "type": "KAUF_2",
-      "label": "KAUF 2 (Kernposition im Golden Pocket)",
-      "price": 89563.6,
-      "tranche_pct": 50,
-      "reason": "Golden Pocket 89294-89564 + Bestaetigung",
-      "stop_ref": 86348.7
-    },
-    {
-      "ts": 1768348800000,
-      "type": "TEILVERKAUF_1",
-      "label": "TEILVERKAUF 1 (Extension 1.0)",
-      "price": 97727.1,
-      "tranche_pct": 40,
-      "reason": "Extension 1.0 erreicht (97727)"
-    }
-  ]
+ "signals": [
+  {
+   "ts": 1779638400000,
+   "type": "SHORT_2",
+   "price": 76706.22720000001,
+   "tranche_pct": 75,
+   "reason": "Golden Pocket 76706-76831 + Bestaetigung (GESUNDER_TREND)",
+   "stop_ref": 78200.0,
+   "label": "SHORT 2 (Kernposition im Golden Pocket)"
+  },
+  {
+   "ts": 1779667200000,
+   "type": "SHORT_NACHLEGEN",
+   "price": 77363.1744,
+   "tranche_pct": 25,
+   "reason": "0.786-Zone erreicht, Struktur intakt",
+   "stop_ref": 78200.0,
+   "label": "SHORT NACHLEGEN (0.786-Zone)"
+  },
+  {
+   "ts": 1779926400000,
+   "type": "SHORT_TP_1",
+   "price": 74169.6,
+   "tranche_pct": 40,
+   "reason": "Extension 1.0 erreicht (74170)",
+   "stop_ref": null,
+   "label": "SHORT TEILGEWINN 1 (Extension 1.0)"
+  },
+  {
+   "ts": 1780084800000,
+   "type": "SHORT_COVER_REST",
+   "price": 73460.78,
+   "tranche_pct": 20,
+   "reason": "Gegen-Muster am Ziel: GESUNDER_TREND",
+   "stop_ref": null,
+   "label": "SHORT Rest schliessen"
+  },
+  {
+   "ts": 1780228800000,
+   "type": "KAUF_1",
+   "price": 73513.29500000001,
+   "tranche_pct": 25,
+   "reason": "0.5-Retracement des Impulses 72512->74514",
+   "stop_ref": 72512.49,
+   "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1780272000000,
+   "type": "KAUF_2",
+   "price": 73277.10502,
+   "tranche_pct": 50,
+   "reason": "Golden Pocket 73213-73277 + Bestaetigung (GESUNDER_TREND)",
+   "stop_ref": 72512.49,
+   "label": "KAUF 2 (Kernposition im Golden Pocket)"
+  },
+  {
+   "ts": 1780286400000,
+   "type": "NACHKAUF",
+   "price": 72940.83454000001,
+   "tranche_pct": 25,
+   "reason": "0.786-Zone erreicht, Struktur intakt",
+   "stop_ref": 72512.49,
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1780300800000,
+   "type": "STOPLOSS",
+   "price": 72479.99,
+   "tranche_pct": 100,
+   "reason": "Kerzenschluss unter Invalidierung 72512",
+   "stop_ref": null,
+   "label": "STOPLOSS"
+  },
+  {
+   "ts": 1781035200000,
+   "type": "KAUF_1",
+   "price": 61682.795,
+   "tranche_pct": 25,
+   "reason": "0.5-Retracement des Impulses 59131->64235",
+   "stop_ref": 59130.91,
+   "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1781481600000,
+   "type": "TEILVERKAUF_1",
+   "price": 65858.76999999999,
+   "tranche_pct": 40,
+   "reason": "Extension 1.0 erreicht (65859)",
+   "stop_ref": null,
+   "label": "TEILVERKAUF 1 (Extension 1.0)"
+  },
+  {
+   "ts": 1782820800000,
+   "type": "STOPLOSS",
+   "price": 58381.99,
+   "tranche_pct": 100,
+   "reason": "Kerzenschluss unter Invalidierung 59131",
+   "stop_ref": null,
+   "label": "STOPLOSS"
+  },
+  {
+   "ts": 1782921600000,
+   "type": "KAUF_1",
+   "price": 59840.29,
+   "tranche_pct": 25,
+   "reason": "0.5-Retracement des Impulses 58900->60781",
+   "stop_ref": 58900.01,
+   "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1782950400000,
+   "type": "KAUF_2",
+   "price": 59618.38392,
+   "tranche_pct": 50,
+   "reason": "Golden Pocket 59558-59618 + Bestaetigung (GESUNDER_TREND)",
+   "stop_ref": 58900.01,
+   "label": "KAUF 2 (Kernposition im Golden Pocket)"
+  },
+  {
+   "ts": 1782993600000,
+   "type": "TEILVERKAUF_1",
+   "price": 61468.56,
+   "tranche_pct": 40,
+   "reason": "Extension 1.0 erreicht (61469)",
+   "stop_ref": null,
+   "label": "TEILVERKAUF 1 (Extension 1.0)"
+  },
+  {
+   "ts": 1783108800000,
+   "type": "TEILVERKAUF_2",
+   "price": 62630.74608,
+   "tranche_pct": 40,
+   "reason": "Extension 1.618 erreicht (62631)",
+   "stop_ref": null,
+   "label": "TEILVERKAUF 2 (Extension 1.618)"
+  }
+ ]
 }

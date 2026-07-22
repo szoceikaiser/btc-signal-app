@@ -1,17 +1,27 @@
 {
-  "demo": true,
-  "updated_at": "2026-07-22T00:00:00Z",
-  "direction": "LONG",
-  "pos_state": "TP1",
-  "zones": {
-    "impuls_start": 86348.7,
-    "impuls_ende": 94764.8,
-    "level_05": 90556.8,
-    "gp_upper": 89563.6,
-    "gp_lower": 89294.3,
-    "level_0786": 88149.7,
-    "invalidation": 86348.7,
-    "ext1": 97727.1,
-    "ext2": 102928.4
-  }
+ "direction": "LONG",
+ "pos_state": "TP2",
+ "last_signal_ts": 1784736000000,
+ "retrace_extreme": 59588.0,
+ "zones": {
+  "impuls_start": 58900.01,
+  "impuls_start_ts": 1782691200000,
+  "impuls_start_kind": "L",
+  "impuls_ende": 60780.57,
+  "impuls_ende_ts": 1782734400000,
+  "impuls_ende_kind": "H",
+  "level_05": 59840.29,
+  "gp_upper": 59618.38392,
+  "gp_lower": 59558.206,
+  "level_0786": 59302.44984,
+  "invalidation": 58900.01,
+  "ext1": 61468.56,
+  "ext2": 62630.74608
+ },
+ "config": {
+  "bias_long": true,
+  "bias_short": true
+ },
+ "updated_at": "2026-07-22T20:22:04Z",
+ "last_close": 65923.19
 }
