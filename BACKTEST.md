@@ -1,6 +1,6 @@
 # Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger
 
-Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, 1585 Stueck) · Stand: 2026-07-22 20:48 UTC
+Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, 1585 Stueck) · Stand: 2026-07-22 21:19 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -24,6 +24,12 @@ Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verk
 - Verkauf-Trigger getroffen: 7/24 — 16.10.25, 12.11.25, 23.11.25, 28.11.25, 14.01.26, 25.01.26, 17.03.26
 - Verkauf verpasst: 25.09.25, 02.10.25, 03.10.25, 10.10.25, 04.11.25, 02.12.25, 03.12.25, 17.12.25, 06.01.26, 02.02.26, 23.02.26, 28.02.26, 02.03.26, 08.04.26, 14.04.26, 17.04.26, 22.04.26
 - Engine-Signal-Tage gesamt: 15 Kauf / 20 Verkauf
+
+## P&L-Simulation (beste Kombination)
+
+Start 10.000 € -> **9,399 €** (-6.0 %) · Buy&Hold im Zeitraum: -28.4 % · 18 Verkaufs-Vorgaenge, davon 10 im Gewinn · Gebuehr 0.1 % je Order, kein Hebel.
+
+WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, KEIN Gewinn. Der Gewinn steht nur in dieser P&L-Zeile.
 
 ## Einschraenkungen
 
