@@ -68,6 +68,10 @@ const FIB_LINES = [
   ["ext1","Ziel Ext. 1.0","#16a34a"], ["ext2","Ziel Ext. 1.618","#0d9488"],
 ];
 
+// Signal-/State-Daten IMMER frisch aus dem Repo laden (Pages-Kopie veraltet, weil
+// Engine-Commits kein Redeploy ausloesen); Fallback: lokale Kopie (z. B. lokaler Test).
+const RAW = "https://raw.githubusercontent.com/szoceikaiser/btc-signal-app/main/site/data/";
+
 const el = document.getElementById("chart");
 const chart = LightweightCharts.createChart(el, {
   layout: { background:{color:"#0f1218"}, textColor:"#8b94a7" },
@@ -111,8 +115,12 @@ async function load(tf) {
   try {
     const [candles, sig, state] = await Promise.all([
       loadCandles(tf),
-      fetchJson("data/signals.json").catch(() => ({ signals:[] })),
-      fetchJson("data/state.json").catch(() => null),
+      fetchJson(RAW + "signals.json?t=" + Date.now())
+        .catch(() => fetchJson("data/signals.json"))
+        .catch(() => ({ signals:[] })),
+      fetchJson(RAW + "state.json?t=" + Date.now())
+        .catch(() => fetchJson("data/state.json"))
+        .catch(() => null),
     ]);
     series.setData(candles);
     document.getElementById("demoBadge").hidden = !(sig.demo || (state && state.demo));
