@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BTC Signal-Chart — Order-Flow-Strategie</title>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  :root { --bg:#0f1218; --panel:#171c26; --text:#dde3ee; --muted:#8b94a7; --acc:#2962ff; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--text); font:15px/1.45 system-ui, sans-serif; padding:12px; }
+  header { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
+  h1 { font-size:17px; margin-right:auto; }
+  .badge { background:#7c2d12; color:#fdba74; border-radius:6px; padding:2px 8px; font-size:12px; }
+  .tfs { display:flex; flex-wrap:wrap; gap:6px; }
+  .tfs button { background:var(--panel); color:var(--text); border:1px solid #2a3242;
+    border-radius:8px; padding:6px 12px; font-size:14px; cursor:pointer; }
+  .tfs button.active { background:var(--acc); border-color:var(--acc); color:#fff; }
+  #chart { width:100%; height:62vh; min-height:380px; border:1px solid #2a3242; border-radius:10px; }
+  #status { color:var(--muted); font-size:13px; margin:8px 2px; }
+  .legend { display:flex; flex-wrap:wrap; gap:10px 16px; font-size:13px; color:var(--muted);
+    background:var(--panel); border-radius:10px; padding:10px 12px; margin-top:10px; }
+  .legend b { color:var(--text); font-weight:600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>BTC — Order-Flow-Strategie (nach Furkan Yildirim)</h1>
+  <span id="demoBadge" class="badge" hidden>DEMO-DATEN</span>
+  <nav class="tfs" id="tfs"></nav>
+</header>
+<div id="chart"></div>
+<div id="status">Lade…</div>
+<div class="legend">
+  <span><b>K1/K2</b> Kauf 0.5 / Golden Pocket</span>
+  <span><b>NK</b> Nachkauf 0.786</span>
+  <span><b>TV1/TV2</b> Teilverkauf Ext. 1.0 / 1.618</span>
+  <span><b>V/SL</b> Verkauf Rest / Stoploss</span>
+  <span><b>S…</b> Short-Seite</span>
+  <span><b>W</b> Warnung Derivate-Pump</span>
+  <span>Linien: Fib-Zonen der aktuellen Struktur</span>
+</div>
+<script>
+"use strict";
+const TFS = { "1h":"1h", "4h":"4h", "1D":"1d", "3D":"3d", "1W":"1w", "1M":"1M" };
+const API = "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&limit=1000&interval=";
+const MARKER_STYLE = {
+  KAUF_1:{c:"#16a34a",s:"arrowUp",p:"belowBar",t:"K1"},
+  KAUF_2:{c:"#16a34a",s:"arrowUp",p:"belowBar",t:"K2"},
+  NACHKAUF:{c:"#0d9488",s:"arrowUp",p:"belowBar",t:"NK"},
+  TEILVERKAUF_1:{c:"#f59e0b",s:"arrowDown",p:"aboveBar",t:"TV1"},
+  TEILVERKAUF_2:{c:"#f59e0b",s:"arrowDown",p:"aboveBar",t:"TV2"},
+  VERKAUF_REST:{c:"#dc2626",s:"arrowDown",p:"aboveBar",t:"V"},
+  STOPLOSS:{c:"#dc2626",s:"circle",p:"aboveBar",t:"SL"},
+  WARNUNG:{c:"#eab308",s:"circle",p:"aboveBar",t:"W"},
+  SHORT_1:{c:"#b91c1c",s:"arrowDown",p:"aboveBar",t:"S1"},
+  SHORT_2:{c:"#b91c1c",s:"arrowDown",p:"aboveBar",t:"S2"},
+  SHORT_NACHLEGEN:{c:"#9f1239",s:"arrowDown",p:"aboveBar",t:"SNK"},
+  SHORT_TP_1:{c:"#8b5cf6",s:"arrowUp",p:"belowBar",t:"STP1"},
+  SHORT_TP_2:{c:"#8b5cf6",s:"arrowUp",p:"belowBar",t:"STP2"},
+  SHORT_COVER_REST:{c:"#dc2626",s:"arrowUp",p:"belowBar",t:"SC"},
+  SHORT_STOPLOSS:{c:"#dc2626",s:"circle",p:"belowBar",t:"SSL"},
+};
+const FIB_LINES = [
+  ["level_05","0.5","#64748b"], ["gp_upper","0.618 GP","#d4a017"],
+  ["gp_lower","0.65 GP","#d4a017"], ["level_0786","0.786","#7c8494"],
+  ["invalidation","Invalidierung (1.0)","#dc2626"],
+  ["ext1","Ziel Ext. 1.0","#16a34a"], ["ext2","Ziel Ext. 1.618","#0d9488"],
+];
+
+const el = document.getElementById("chart");
+const chart = LightweightCharts.createChart(el, {
+  layout: { background:{color:"#0f1218"}, textColor:"#8b94a7" },
+  grid: { vertLines:{color:"#1c2330"}, horzLines:{color:"#1c2330"} },
+  timeScale: { timeVisible:true, borderColor:"#2a3242" },
+  rightPriceScale: { borderColor:"#2a3242" },
+  localization: { locale:"de-DE" },
+});
+const series = chart.addCandlestickSeries({
+  upColor:"#16a34a", downColor:"#dc2626", borderVisible:false,
+  wickUpColor:"#16a34a", wickDownColor:"#dc2626",
+});
+new ResizeObserver(() => chart.applyOptions({ width: el.clientWidth, height: el.clientHeight }))
+  .observe(el);
+
+let priceLines = [];
+async function fetchJson(url) {
+  const r = await fetch(url, { cache:"no-store" });
+  if (!r.ok) throw new Error(url + " -> HTTP " + r.status);
+  return r.json();
+}
+
+async function loadCandles(tf) {
+  try {
+    const raw = await fetchJson(API + TFS[tf]);
+    return raw.map(k => ({ time:k[0]/1000, open:+k[1], high:+k[2], low:+k[3], close:+k[4] }));
+  } catch (e) {  // Fallback: von der Engine committete Kerzen (E4b)
+    const raw = await fetchJson("data/candles_" + TFS[tf] + ".json");
+    return raw.map(k => ({ time:k[0]/1000, open:+k[1], high:+k[2], low:+k[3], close:+k[4] }));
+  }
+}
+
+function snap(tsSec, candles) {  // Marker auf die passende Kerze legen
+  let best = null;
+  for (const c of candles) { if (c.time <= tsSec) best = c.time; else break; }
+  return best;
+}
+
+async function load(tf) {
+  document.getElementById("status").textContent = "Lade " + tf + "…";
+  try {
+    const [candles, sig, state] = await Promise.all([
+      loadCandles(tf),
+      fetchJson("data/signals.json").catch(() => ({ signals:[] })),
+      fetchJson("data/state.json").catch(() => null),
+    ]);
+    series.setData(candles);
+    document.getElementById("demoBadge").hidden = !(sig.demo || (state && state.demo));
+
+    const markers = (sig.signals || []).map(s => {
+      const st = MARKER_STYLE[s.type] || { c:"#8b94a7", s:"circle", p:"aboveBar", t:"?" };
+      const time = snap(s.ts / 1000, candles);
+      return time === null ? null : {
+        time, position:st.p, shape:st.s, color:st.c,
+        text: st.t + " " + Math.round(s.price).toLocaleString("de-DE"),
+      };
+    }).filter(Boolean);
+    markers.sort((a, b) => a.time - b.time);
+    series.setMarkers(markers);
+
+    priceLines.forEach(l => series.removePriceLine(l));
+    priceLines = [];
+    if (state && state.zones) {
+      for (const [key, title, color] of FIB_LINES) {
+        const v = state.zones[key];
+        if (typeof v === "number") priceLines.push(series.createPriceLine({
+          price:v, color, lineWidth:1, lineStyle:LightweightCharts.LineStyle.Dashed,
+          axisLabelVisible:true, title,
+        }));
+      }
+    }
+    const upd = state && state.updated_at ? new Date(state.updated_at).toLocaleString("de-DE") : "—";
+    document.getElementById("status").textContent =
+      tf + " · " + candles.length + " Kerzen · " + markers.length +
+      " Trigger im Zeitraum · Engine-Stand: " + upd;
+  } catch (e) {
+    document.getElementById("status").textContent = "Fehler beim Laden: " + e.message;
+  }
+}
+
+const nav = document.getElementById("tfs");
+Object.keys(TFS).forEach((tf, i) => {
+  const b = document.createElement("button");
+  b.textContent = tf;
+  if (i === 1) b.classList.add("active");            // Default: 4h (primaerer Takt)
+  b.onclick = () => { nav.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+                      b.classList.add("active"); load(tf); };
+  nav.appendChild(b);
+});
+load("4h");
+</script>
+</body>
+</html>

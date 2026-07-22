@@ -1,0 +1,32 @@
+{
+  "demo": true,
+  "hinweis": "Demo-Daten aus docs/GEGENCHECK.md (echte Termine Jan 2026). Wird von der Engine (E4b) ueberschrieben.",
+  "signals": [
+    {
+      "ts": 1767657600000,
+      "type": "KAUF_1",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)",
+      "price": 90556.8,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 86349->94765",
+      "stop_ref": 86348.7
+    },
+    {
+      "ts": 1767830400000,
+      "type": "KAUF_2",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)",
+      "price": 89563.6,
+      "tranche_pct": 50,
+      "reason": "Golden Pocket 89294-89564 + Bestaetigung",
+      "stop_ref": 86348.7
+    },
+    {
+      "ts": 1768348800000,
+      "type": "TEILVERKAUF_1",
+      "label": "TEILVERKAUF 1 (Extension 1.0)",
+      "price": 97727.1,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (97727)"
+    }
+  ]
+}

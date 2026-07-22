@@ -1,0 +1,17 @@
+{
+  "demo": true,
+  "updated_at": "2026-07-22T00:00:00Z",
+  "direction": "LONG",
+  "pos_state": "TP1",
+  "zones": {
+    "impuls_start": 86348.7,
+    "impuls_ende": 94764.8,
+    "level_05": 90556.8,
+    "gp_upper": 89563.6,
+    "gp_lower": 89294.3,
+    "level_0786": 88149.7,
+    "invalidation": 86348.7,
+    "ext1": 97727.1,
+    "ext2": 102928.4
+  }
+}
