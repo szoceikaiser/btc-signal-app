@@ -16,7 +16,13 @@
   .tfs button { background:var(--panel); color:var(--text); border:1px solid #2a3242;
     border-radius:8px; padding:6px 12px; font-size:14px; cursor:pointer; }
   .tfs button.active { background:var(--acc); border-color:var(--acc); color:#fff; }
+  #wrap { position:relative; }
   #chart { width:100%; height:62vh; min-height:380px; border:1px solid #2a3242; border-radius:10px; }
+  #ohlc { position:absolute; top:10px; left:12px; z-index:5; pointer-events:none;
+    background:rgba(23,28,38,.85); border:1px solid #2a3242; border-radius:8px;
+    padding:6px 10px; font-size:13px; line-height:1.5; }
+  #ohlc b { font-weight:600; }
+  .up { color:#16a34a; } .down { color:#dc2626; }
   #status { color:var(--muted); font-size:13px; margin:8px 2px; }
   .legend { display:flex; flex-wrap:wrap; gap:10px 16px; font-size:13px; color:var(--muted);
     background:var(--panel); border-radius:10px; padding:10px 12px; margin-top:10px; }
@@ -29,7 +35,10 @@
   <span id="demoBadge" class="badge" hidden>DEMO-DATEN</span>
   <nav class="tfs" id="tfs"></nav>
 </header>
-<div id="chart"></div>
+<div id="wrap">
+  <div id="chart"></div>
+  <div id="ohlc" hidden></div>
+</div>
 <div id="status">Lade…</div>
 <div class="legend">
   <span><b>K1/K2</b> Kauf 0.5 / Golden Pocket</span>
@@ -87,6 +96,30 @@ const series = chart.addCandlestickSeries({
 new ResizeObserver(() => chart.applyOptions({ width: el.clientWidth, height: el.clientHeight }))
   .observe(el);
 
+// --- OHLC-Overlay (wie TradingView): Werte der Kerze unter dem Mauszeiger/Finger
+const ohlcEl = document.getElementById("ohlc");
+const fmtP = v => v.toLocaleString("de-DE", { maximumFractionDigits: 0 });
+let lastBar = null;
+function showBar(bar) {
+  if (!bar) { ohlcEl.hidden = true; return; }
+  const chg = (bar.close - bar.open) / bar.open * 100;
+  const cls = chg >= 0 ? "up" : "down";
+  const when = new Date(bar.time * 1000).toLocaleString("de-DE",
+    { day:"2-digit", month:"2-digit", year:"2-digit", hour:"2-digit", minute:"2-digit", timeZone:"UTC" });
+  ohlcEl.innerHTML =
+    `<b>${when} UTC</b><br>` +
+    `O <b>${fmtP(bar.open)}</b> · H <b class="up">${fmtP(bar.high)}</b> · ` +
+    `L <b class="down">${fmtP(bar.low)}</b> · C <b>${fmtP(bar.close)}</b> ` +
+    `<b class="${cls}">${chg >= 0 ? "+" : ""}${chg.toFixed(2)} %</b>`;
+  ohlcEl.hidden = false;
+}
+chart.subscribeCrosshairMove(param => {
+  const d = param && param.seriesData ? param.seriesData.get(series) : null;
+  showBar(d ? { ...d, time: param.time } : lastBar);
+});
+// Doppelklick/Doppeltipp: Zoom zuruecksetzen
+el.addEventListener("dblclick", () => chart.timeScale().fitContent());
+
 let priceLines = [];
 async function fetchJson(url) {
   const r = await fetch(url, { cache:"no-store" });
@@ -123,6 +156,8 @@ async function load(tf) {
         .catch(() => null),
     ]);
     series.setData(candles);
+    lastBar = candles[candles.length - 1] || null;
+    showBar(lastBar);
     document.getElementById("demoBadge").hidden = !(sig.demo || (state && state.demo));
 
     const markers = (sig.signals || []).map(s => {

@@ -1,0 +1,24 @@
+name: Backtest
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backtest ausfuehren
+        run: cd engine && python3 backtest.py
+      - name: Bericht committen
+        run: |
+          git config user.name "backtest"
+          git config user.email "actions@users.noreply.github.com"
+          git pull --no-rebase
+          git add BACKTEST.md
+          git diff --cached --quiet || git commit -m "Backtest-Bericht aktualisiert"
+          git push
