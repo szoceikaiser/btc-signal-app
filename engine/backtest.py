@@ -130,6 +130,78 @@ def score(signals: list[dict], tol_days: int = 1) -> dict:
     }
 
 
+def simulate(signals: list[dict], candles, fee: float = 0.001,
+             start_capital: float = 10000.0) -> dict:
+    """Tranchen-genaue P&L-Simulation der Signale.
+
+    Annahmen (dokumentiert): kein Hebel; Kauf-Tranchen als %-Anteil des beim
+    Ladder-Start verfuegbaren Kapitals (aus tranche_pct des Signals); Teilverkaeufe
+    40 %/40 %/Rest der vollen Position; 0,1 % Gebuehr je Order; Shorts nominal
+    ohne Funding-Kosten. Ergebnis inkl. Buy&Hold-Vergleich ueber denselben Zeitraum.
+    """
+    cash, units, peak_units, l_avg = start_capital, 0.0, 0.0, 0.0
+    s_units, s_peak, s_avg = 0.0, 0.0, 0.0            # Short-Seite
+    alloc = 0.0
+    trades_closed = wins = 0
+    equity = []
+
+    def equity_now(price):
+        return cash + units * price + s_units * (s_avg - price)
+
+    for s in signals:
+        p, t = s["price"], s["type"]
+        if t in ("KAUF_1", "KAUF_2", "NACHKAUF"):
+            if units == 0.0:
+                alloc, peak_units, l_avg = cash, 0.0, 0.0
+            spend = min(cash, alloc * s["tranche_pct"] / 100.0)
+            new_u = spend * (1 - fee) / p
+            l_avg = (l_avg * units + spend) / (units + new_u) if (units + new_u) else 0.0
+            units += new_u
+            peak_units = max(peak_units, units)
+            cash -= spend
+        elif t in ("TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS"):
+            sell = units if t in ("VERKAUF_REST", "STOPLOSS") else min(units, 0.4 * peak_units)
+            if sell > 0:
+                proceeds = sell * p * (1 - fee)
+                pnl = proceeds - sell * l_avg
+                trades_closed += 1
+                wins += 1 if pnl > 0 else 0
+                cash += proceeds
+                units -= sell
+        elif t in ("SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"):
+            if s_units == 0.0:
+                alloc, s_peak, s_avg = cash, 0.0, 0.0
+            nominal = min(cash, alloc * s["tranche_pct"] / 100.0)
+            new_units = nominal / p
+            s_avg = (s_avg * s_units + p * new_units) / (s_units + new_units)
+            s_units += new_units
+            s_peak = max(s_peak, s_units)
+            cash -= nominal * fee                      # Eroeffnungsgebuehr
+        elif t in ("SHORT_TP_1", "SHORT_TP_2", "SHORT_COVER_REST", "SHORT_STOPLOSS"):
+            cover = s_units if t in ("SHORT_COVER_REST", "SHORT_STOPLOSS") \
+                else min(s_units, 0.4 * s_peak)
+            if cover > 0:
+                pnl = cover * (s_avg - p) - cover * p * fee
+                trades_closed += 1
+                wins += 1 if pnl > 0 else 0
+                cash += pnl
+                s_units -= cover
+        equity.append({"ts": s["ts"], "equity": round(equity_now(p), 2)})
+
+    last_price = candles[-1].close
+    end_equity = equity_now(last_price)
+    hold_start = next(c for c in candles if c.ts >= START_MS).close
+    return {
+        "start": start_capital,
+        "ende": round(end_equity, 2),
+        "rendite_pct": round((end_equity / start_capital - 1) * 100, 2),
+        "buyhold_pct": round((last_price / hold_start - 1) * 100, 2),
+        "trades": trades_closed, "gewinn_trades": wins,
+        "fee_pct": fee * 100, "equity": equity,
+        "offene_position": round(units * last_price + s_units * (s_avg - last_price), 2),
+    }
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -153,6 +225,7 @@ def main():
 
     best = max(results, key=lambda r: (r[3]["recall"], r[3]["precision"]))
     n, k, sigs, sc = best
+    pnl = simulate(sigs, candles)
 
     lines = [
         "# Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger",
@@ -184,6 +257,16 @@ def main():
         f"- Verkauf verpasst: " + (", ".join(d.strftime('%d.%m.%y') for d in sc["miss_v"]) or "—"),
         f"- Engine-Signal-Tage gesamt: {len(sc['buy_days'])} Kauf / {len(sc['sell_days'])} Verkauf",
         "",
+        "## P&L-Simulation (beste Kombination)",
+        "",
+        f"Start 10.000 € -> **{pnl['ende']:,.0f} €** ({pnl['rendite_pct']:+.1f} %) · "
+        f"Buy&Hold im Zeitraum: {pnl['buyhold_pct']:+.1f} % · "
+        f"{pnl['trades']} Verkaufs-Vorgaenge, davon {pnl['gewinn_trades']} im Gewinn · "
+        f"Gebuehr {pnl['fee_pct']:.1f} % je Order, kein Hebel.",
+        "",
+        "WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, "
+        "KEIN Gewinn. Der Gewinn steht nur in dieser P&L-Zeile.",
+        "",
         "## Einschraenkungen",
         "",
         "- Open Interest: keine kostenlose Historie fuer den Zeitraum -> OI-Muster neutral.",
@@ -194,8 +277,22 @@ def main():
         "abweichend von (5, 3.0).",
     ]
     (ROOT / "BACKTEST.md").write_text("\n".join(lines), encoding="utf-8")
-    print(f"\nBericht geschrieben: BACKTEST.md — beste Kombination n={n}, k={k}, "
-          f"Recall {sc['recall']:.0%}")
+
+    # JSON fuer das Panel auf der Chart-Webseite
+    panel = {
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "zeitraum": "01.09.2025 - 30.04.2026",
+        "params": {"pivot_n": n, "k_atr": k},
+        "recall_kauf": f"{len(sc['hit_k'])}/{len(KAUF_DATEN)}",
+        "recall_verkauf": f"{len(sc['hit_v'])}/{len(VERKAUF_DATEN)}",
+        "recall_pct": round(sc["recall"] * 100),
+        "precision_pct": round(sc["precision"] * 100),
+        "pnl": {kk: vv for kk, vv in pnl.items() if kk != "equity"},
+    }
+    (ROOT / "site" / "data" / "backtest.json").write_text(
+        json.dumps(panel, indent=1), encoding="utf-8")
+    print(f"\nBericht geschrieben: BACKTEST.md + site/data/backtest.json — "
+          f"n={n}, k={k}, Recall {sc['recall']:.0%}, Rendite {pnl['rendite_pct']:+.1f} %")
 
 
 if __name__ == "__main__":

@@ -40,6 +40,7 @@
   <div id="ohlc" hidden></div>
 </div>
 <div id="status">Lade…</div>
+<div class="legend" id="btpanel" hidden></div>
 <div class="legend">
   <span><b>K1/K2</b> Kauf 0.5 / Golden Pocket</span>
   <span><b>NK</b> Nachkauf 0.786</span>
@@ -48,6 +49,9 @@
   <span><b>S…</b> Short-Seite</span>
   <span><b>W</b> Warnung Derivate-Pump</span>
   <span>Linien: Fib-Zonen der aktuellen Struktur</span>
+  <span>Bedienung: Mausrad/Pinch = Zoom · Ziehen = Verschieben · Doppelklick = Reset</span>
+  <span><a href="https://github.com/szoceikaiser/btc-signal-app/blob/main/ANLEITUNG-EINSTELLUNGEN.md"
+    style="color:#2962ff" target="_blank">⚙ Einstellungen ändern (Anleitung)</a></span>
 </div>
 <script>
 "use strict";
@@ -119,6 +123,27 @@ chart.subscribeCrosshairMove(param => {
 });
 // Doppelklick/Doppeltipp: Zoom zuruecksetzen
 el.addEventListener("dblclick", () => chart.timeScale().fitContent());
+
+// --- Backtest-/P&L-Panel (einmalig laden; erscheint nur, wenn ein Backtest lief)
+(async () => {
+  try {
+    const bt = await fetchJson(RAW + "backtest.json?t=" + Date.now())
+      .catch(() => fetchJson("data/backtest.json"));
+    const p = bt.pnl;
+    const cls = p.rendite_pct >= 0 ? "up" : "down";
+    const clsBH = p.buyhold_pct >= 0 ? "up" : "down";
+    document.getElementById("btpanel").innerHTML =
+      `<span><b>Backtest ${bt.zeitraum}</b> (Stand ${new Date(bt.generated_at)
+        .toLocaleDateString("de-DE")})</span>` +
+      `<span>Simulation: 10.000 € → <b class="${cls}">${p.ende.toLocaleString("de-DE",
+        { maximumFractionDigits: 0 })} € (${p.rendite_pct >= 0 ? "+" : ""}${p.rendite_pct} %)</b></span>` +
+      `<span>Buy&amp;Hold zum Vergleich: <b class="${clsBH}">${p.buyhold_pct >= 0 ? "+" : ""}${p.buyhold_pct} %</b></span>` +
+      `<span>${p.trades} Verkaufs-Vorgänge, ${p.gewinn_trades} im Gewinn · Gebühr ${p.fee_pct} %/Order · kein Hebel</span>` +
+      `<span>Ähnlichkeit zu Furkans Terminen: Kauf ${bt.recall_kauf}, Verkauf ${bt.recall_verkauf} — ` +
+      `<b>Ähnlichkeit ≠ Gewinn</b></span>`;
+    document.getElementById("btpanel").hidden = false;
+  } catch (e) { /* kein Backtest vorhanden -> Panel bleibt verborgen */ }
+})();
 
 let priceLines = [];
 async function fetchJson(url) {

@@ -19,6 +19,6 @@ jobs:
           git config user.name "backtest"
           git config user.email "actions@users.noreply.github.com"
           git pull --no-rebase
-          git add BACKTEST.md
+          git add BACKTEST.md site/data/backtest.json
           git diff --cached --quiet || git commit -m "Backtest-Bericht aktualisiert"
           git push

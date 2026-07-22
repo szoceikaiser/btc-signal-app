@@ -58,6 +58,13 @@ Ab jetzt läuft alles automatisch (alle 15 Min). Fertig.
 | SL / SSL | Stoploss (Kerzenschluss hinter Invalidierung) | 100 % |
 | W | Warnung: Derivate-Pump aktiv | — |
 
+## Weiterführende Anleitungen
+
+- [ANLEITUNG-EINSTELLUNGEN.md](ANLEITUNG-EINSTELLUNGEN.md) — Long/Short schalten,
+  Takt ändern, Backtest starten, Parameter, git-Updates (inkl. bekannter Fehler)
+- [ANLEITUNG-TELEGRAM.md](ANLEITUNG-TELEGRAM.md) — Telegram von Null einrichten,
+  mit Kontrollpunkten und Fehlerdiagnose-Tabelle
+
 ## Technik
 
 - `engine/strategy_core.py` — Strategie-Regeln (Swings, dynamische Fib-Zonen,
