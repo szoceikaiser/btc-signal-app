@@ -283,11 +283,11 @@ TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
              pivot_n: int = 5, k_atr: float = 2.0,
-             flush_entry: str = "t1") -> list[Signal]:
-    # Defaults kalibriert per Backtest (BACKTEST.md). flush_entry steuert den
-    # Capitulation-/Squeeze-Einstieg bei GP-Durchschlag: "off" = kein Einstieg,
-    # "t1" = kleine erste Tranche 25 % (Ladder der Folgetage bleibt erhalten),
-    # "core" = Kernposition 75 % (kannibalisiert die Ladder — Backtest 23.07.).
+             flush_entry: str = "off") -> list[Signal]:
+    # Defaults kalibriert per Backtest 2026-07-23 (BACKTEST.md): n=5, k=2.0,
+    # flush='off' — beste Kombination (Recall 45 %, Praezision 54 %, Rendite -6,0 %
+    # vs. Buy&Hold -28,4 %). flush_entry ("off"/"t1"/"core") bleibt schaltbar:
+    # mit echter Live-OI-Historie (Muster 4 aktiv) in E8.3 erneut testen.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).

@@ -179,16 +179,24 @@ def test_long_lebenszyklus_kauf1_kauf2_tp1_tp2():
     assert abs(k1.price - 105.0) < 0.01 and k1.tranche_pct == 25 and k1.stop_ref == 100
 
 
-def test_capitulation_einstieg_default_t1():
+def test_capitulation_einstieg_modus_t1():
     # Flush-Kerze: Tief 101.5 durchschlaegt das GP (103.5-103.82), Schluss 104 ueber
-    # der Invalidierung (100) -> Default "t1": kleine erste Tranche (Ladder bleibt)
+    # der Invalidierung (100) -> Modus "t1": kleine erste Tranche (Ladder bleibt).
+    # Default ist "off" (Backtest 23.07.) -> ohne Angabe kein Signal (separater Test).
     base = zigzag_candles()
     path = base + [c(8, 105.5, 106.0, 101.5, 104.0)]
     pos = Position()
-    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2)
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, flush_entry="t1")
     assert [s.type for s in sigs] == [SignalType.KAUF_1]
     assert sigs[0].tranche_pct == 25 and "Capitulation" in sigs[0].reason
     assert pos.state == PosState.T1 and pos.retrace_extreme == 101.5
+
+
+def test_default_flush_off_kein_signal():
+    base = zigzag_candles()
+    path = base + [c(8, 105.5, 106.0, 101.5, 104.0)]
+    pos = Position()
+    assert run_incremental(path, neg_funding_flow(), pos, pivot_n=2) == []
 
 
 def test_capitulation_einstieg_modus_core_und_off():
