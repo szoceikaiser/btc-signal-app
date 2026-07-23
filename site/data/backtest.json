@@ -1,22 +1,22 @@
 {
- "generated_at": "2026-07-22T21:19:12Z",
+ "generated_at": "2026-07-23T05:24:25Z",
  "zeitraum": "01.09.2025 - 30.04.2026",
  "params": {
   "pivot_n": 5,
   "k_atr": 2.0
  },
- "recall_kauf": "13/20",
- "recall_verkauf": "7/24",
- "recall_pct": 45,
- "precision_pct": 54,
+ "recall_kauf": "8/20",
+ "recall_verkauf": "8/24",
+ "recall_pct": 36,
+ "precision_pct": 47,
  "pnl": {
   "start": 10000.0,
-  "ende": 9399.04,
-  "rendite_pct": -6.01,
+  "ende": 9015.9,
+  "rendite_pct": -9.84,
   "buyhold_pct": -28.36,
-  "trades": 18,
-  "gewinn_trades": 10,
+  "trades": 21,
+  "gewinn_trades": 12,
   "fee_pct": 0.1,
-  "offene_position": -697.26
+  "offene_position": -668.84
  }
 }
