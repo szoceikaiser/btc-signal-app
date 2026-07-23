@@ -1,6 +1,6 @@
 # Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger
 
-Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, 1585 Stueck) · Stand: 2026-07-23 05:24 UTC
+Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, 1585 Stueck) · Stand: 2026-07-23 19:25 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
