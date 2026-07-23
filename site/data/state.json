@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "TP2",
- "last_signal_ts": 1784808000000,
+ "last_signal_ts": 1784822400000,
  "retrace_extreme": 59588.0,
  "zones": {
   "impuls_start": 58900.01,
@@ -22,6 +22,6 @@
   "bias_long": true,
   "bias_short": true
  },
- "updated_at": "2026-07-23T19:49:06Z",
- "last_close": 64958.36
+ "updated_at": "2026-07-23T20:45:44Z",
+ "last_close": 64846.94
 }
