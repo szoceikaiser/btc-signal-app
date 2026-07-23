@@ -152,10 +152,22 @@ async function fetchJson(url) {
   return r.json();
 }
 
+async function fetchKlines(tf, endTime) {
+  const url = API + TFS[tf] + (endTime ? "&endTime=" + endTime : "");
+  const raw = await fetchJson(url);
+  return raw.map(k => ({ time:k[0]/1000, open:+k[1], high:+k[2], low:+k[3], close:+k[4] }));
+}
 async function loadCandles(tf) {
   try {
-    const raw = await fetchJson(API + TFS[tf]);
-    return raw.map(k => ({ time:k[0]/1000, open:+k[1], high:+k[2], low:+k[3], close:+k[4] }));
+    // Mehr Historie auf kleinen Zeitebenen: 1h = 3 Seiten (~4 Monate), 4h = 2 (~11 Monate)
+    const pages = tf === "1h" ? 3 : (tf === "4h" ? 2 : 1);
+    let out = await fetchKlines(tf);
+    for (let i = 1; i < pages && out.length; i++) {
+      const older = await fetchKlines(tf, out[0].time * 1000 - 1);
+      if (!older.length) break;
+      out = older.concat(out);
+    }
+    return out;
   } catch (e) {  // Fallback: von der Engine committete Kerzen (E4b)
     const raw = await fetchJson("data/candles_" + TFS[tf] + ".json");
     return raw.map(k => ({ time:k[0]/1000, open:+k[1], high:+k[2], low:+k[3], close:+k[4] }));

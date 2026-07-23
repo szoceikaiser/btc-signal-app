@@ -322,6 +322,19 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           TRANCHEN["T1"] + TRANCHEN["CORE"],
                                           f"Golden Pocket {z.gp_lower:.0f}-{z.gp_upper:.0f} + Bestaetigung ({pattern.name})",
                                           stop_ref=z.invalidation))
+            elif cur.low < z.gp_lower and cur.close > z.invalidation:
+                # Capitulation-Einstieg (E8.1): Kerze durchschlaegt das GP nach unten
+                # (Flush-Tage wie 10.10./04.11.), schliesst aber ueber der Invalidierung
+                ok = (pattern == Pattern.CAPITULATION_RESET
+                      or (flow and flow[-1].funding <= 0)
+                      or (len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd))
+                if ok:
+                    pos.direction, pos.state, pos.zones = "LONG", PosState.CORE, z
+                    pos.retrace_extreme = cur.low
+                    signals.append(Signal(cur.ts, SignalType.KAUF_2, cur.close,
+                                          TRANCHEN["T1"] + TRANCHEN["CORE"],
+                                          f"Capitulation: GP durchschlagen (Tief {cur.low:.0f}), Schluss ueber Invalidierung ({pattern.name})",
+                                          stop_ref=z.invalidation))
         elif (not imp.up) and bias_short and pattern != Pattern.CAPITULATION_RESET:
             if cur.high >= z.level_05 and cur.high < z.gp_upper:
                 pos.direction, pos.state, pos.zones = "SHORT", PosState.T1, z
@@ -339,6 +352,19 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
                                           TRANCHEN["T1"] + TRANCHEN["CORE"],
                                           f"Golden Pocket {z.gp_upper:.0f}-{z.gp_lower:.0f} + Bestaetigung ({pattern.name})",
+                                          stop_ref=z.invalidation))
+            elif cur.high > z.gp_lower and cur.close < z.invalidation:
+                # Squeeze-Einstieg (E8.1, Spiegelbild): Kerze durchschlaegt das GP nach
+                # oben, schliesst aber unter der Invalidierung
+                ok = (pattern == Pattern.DERIVATE_PUMP
+                      or (flow and flow[-1].funding > 0)
+                      or (len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd))
+                if ok:
+                    pos.direction, pos.state, pos.zones = "SHORT", PosState.CORE, z
+                    pos.retrace_extreme = cur.high
+                    signals.append(Signal(cur.ts, SignalType.SHORT_2, cur.close,
+                                          TRANCHEN["T1"] + TRANCHEN["CORE"],
+                                          f"Squeeze: GP durchschlagen (Hoch {cur.high:.0f}), Schluss unter Invalidierung ({pattern.name})",
                                           stop_ref=z.invalidation))
 
     # --- Positions-Management
