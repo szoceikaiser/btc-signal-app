@@ -282,9 +282,12 @@ TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
 
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
-             pivot_n: int = 5, k_atr: float = 2.0) -> list[Signal]:
-    # Defaults kalibriert per Backtest 2026-07-22 (BACKTEST.md): n=5, k=2.0 beste
-    # Kombination (Recall 45 %, Kaufseite 65 %, Praezision 54 %).
+             pivot_n: int = 5, k_atr: float = 2.0,
+             flush_entry: str = "t1") -> list[Signal]:
+    # Defaults kalibriert per Backtest (BACKTEST.md). flush_entry steuert den
+    # Capitulation-/Squeeze-Einstieg bei GP-Durchschlag: "off" = kein Einstieg,
+    # "t1" = kleine erste Tranche 25 % (Ladder der Folgetage bleibt erhalten),
+    # "core" = Kernposition 75 % (kannibalisiert die Ladder — Backtest 23.07.).
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -322,17 +325,21 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           TRANCHEN["T1"] + TRANCHEN["CORE"],
                                           f"Golden Pocket {z.gp_lower:.0f}-{z.gp_upper:.0f} + Bestaetigung ({pattern.name})",
                                           stop_ref=z.invalidation))
-            elif cur.low < z.gp_lower and cur.close > z.invalidation:
+            elif (flush_entry != "off" and cur.low < z.gp_lower
+                  and cur.close > z.invalidation):
                 # Capitulation-Einstieg (E8.1): Kerze durchschlaegt das GP nach unten
                 # (Flush-Tage wie 10.10./04.11.), schliesst aber ueber der Invalidierung
                 ok = (pattern == Pattern.CAPITULATION_RESET
                       or (flow and flow[-1].funding <= 0)
                       or (len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd))
                 if ok:
-                    pos.direction, pos.state, pos.zones = "LONG", PosState.CORE, z
+                    small = flush_entry == "t1"
+                    st = PosState.T1 if small else PosState.CORE
+                    sig_t = SignalType.KAUF_1 if small else SignalType.KAUF_2
+                    tr = TRANCHEN["T1"] if small else TRANCHEN["T1"] + TRANCHEN["CORE"]
+                    pos.direction, pos.state, pos.zones = "LONG", st, z
                     pos.retrace_extreme = cur.low
-                    signals.append(Signal(cur.ts, SignalType.KAUF_2, cur.close,
-                                          TRANCHEN["T1"] + TRANCHEN["CORE"],
+                    signals.append(Signal(cur.ts, sig_t, cur.close, tr,
                                           f"Capitulation: GP durchschlagen (Tief {cur.low:.0f}), Schluss ueber Invalidierung ({pattern.name})",
                                           stop_ref=z.invalidation))
         elif (not imp.up) and bias_short and pattern != Pattern.CAPITULATION_RESET:
@@ -353,17 +360,21 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           TRANCHEN["T1"] + TRANCHEN["CORE"],
                                           f"Golden Pocket {z.gp_upper:.0f}-{z.gp_lower:.0f} + Bestaetigung ({pattern.name})",
                                           stop_ref=z.invalidation))
-            elif cur.high > z.gp_lower and cur.close < z.invalidation:
+            elif (flush_entry != "off" and cur.high > z.gp_lower
+                  and cur.close < z.invalidation):
                 # Squeeze-Einstieg (E8.1, Spiegelbild): Kerze durchschlaegt das GP nach
                 # oben, schliesst aber unter der Invalidierung
                 ok = (pattern == Pattern.DERIVATE_PUMP
                       or (flow and flow[-1].funding > 0)
                       or (len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd))
                 if ok:
-                    pos.direction, pos.state, pos.zones = "SHORT", PosState.CORE, z
+                    small = flush_entry == "t1"
+                    st = PosState.T1 if small else PosState.CORE
+                    sig_t = SignalType.SHORT_1 if small else SignalType.SHORT_2
+                    tr = TRANCHEN["T1"] if small else TRANCHEN["T1"] + TRANCHEN["CORE"]
+                    pos.direction, pos.state, pos.zones = "SHORT", st, z
                     pos.retrace_extreme = cur.high
-                    signals.append(Signal(cur.ts, SignalType.SHORT_2, cur.close,
-                                          TRANCHEN["T1"] + TRANCHEN["CORE"],
+                    signals.append(Signal(cur.ts, sig_t, cur.close, tr,
                                           f"Squeeze: GP durchschlagen (Hoch {cur.high:.0f}), Schluss unter Invalidierung ({pattern.name})",
                                           stop_ref=z.invalidation))
 

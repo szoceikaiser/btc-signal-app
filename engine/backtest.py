@@ -49,7 +49,8 @@ BUY_TYPES = {"KAUF_1", "KAUF_2", "NACHKAUF",
 SELL_TYPES = {"TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS",
               "SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"}
 
-GRID = [(n, k) for n in (3, 4, 5, 6) for k in (2.0, 3.0)]
+# Grid: k_atr=2.0 fix (3.0 war durchgehend schlechter); Flush-Modus wird mitgetestet
+GRID = [(n, 2.0, mode) for n in (3, 4, 5, 6) for mode in ("off", "t1", "core")]
 
 
 def fetch_candles_range(start_ms: int, end_ms: int) -> list:
@@ -90,7 +91,8 @@ def build_series(raw: list, funding: list[tuple[int, float]]):
     return candles, flow
 
 
-def run_backtest(candles, flow, pivot_n: int, k_atr: float) -> list[dict]:
+def run_backtest(candles, flow, pivot_n: int, k_atr: float,
+                 flush_entry: str = "t1") -> list[dict]:
     pos = Position()
     signals = []
     for i in range(len(candles)):
@@ -98,7 +100,7 @@ def run_backtest(candles, flow, pivot_n: int, k_atr: float) -> list[dict]:
             pos.last_signal_ts = candles[i].ts                 # Warmup ohne Signale
             continue
         for s in evaluate(candles[:i + 1], flow[:i + 1], pos,
-                          pivot_n=pivot_n, k_atr=k_atr):
+                          pivot_n=pivot_n, k_atr=k_atr, flush_entry=flush_entry):
             signals.append(s.to_dict())
     return signals
 
@@ -215,17 +217,18 @@ def main():
     candles, flow = build_series(raw, funding)
 
     results = []
-    for n, k in GRID:
+    for n, k, mode in GRID:
         t0 = time.time()
-        sigs = run_backtest(candles, flow, n, k)
+        sigs = run_backtest(candles, flow, n, k, flush_entry=mode)
         sc = score(sigs)
-        results.append((n, k, sigs, sc))
-        print(f"n={n} k={k}: Recall {sc['recall']:.0%}, Praezision {sc['precision']:.0%}, "
+        p = simulate(sigs, candles)
+        results.append((n, k, mode, sigs, sc, p))
+        print(f"n={n} k={k} flush={mode}: Recall {sc['recall']:.0%}, "
+              f"Praezision {sc['precision']:.0%}, Rendite {p['rendite_pct']:+.1f} %, "
               f"{len(sigs)} Signale ({time.time()-t0:.0f}s)")
 
-    best = max(results, key=lambda r: (r[3]["recall"], r[3]["precision"]))
-    n, k, sigs, sc = best
-    pnl = simulate(sigs, candles)
+    best = max(results, key=lambda r: (r[4]["recall"], r[4]["precision"]))
+    n, k, mode, sigs, sc, pnl = best
 
     lines = [
         "# Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger",
@@ -238,16 +241,18 @@ def main():
         "",
         "## Parameter-Vergleich",
         "",
-        "| pivot_n | k_atr | Recall (Kaisers Trigger getroffen) | Praezision (Engine-Signale nahe Kaisers Terminen) | Signale |",
-        "|---|---|---|---|---|",
+        "(Flush-Modus = Einstieg bei GP-Durchschlag: off = keiner, t1 = kleine Tranche 25 %, core = Kernposition 75 %)",
+        "",
+        "| pivot_n | k_atr | Flush | Recall | Praezision | Rendite | Signale |",
+        "|---|---|---|---|---|---|---|",
     ]
-    for rn, rk, rsigs, rsc in results:
-        mark = " **<-- beste**" if (rn, rk) == (n, k) else ""
-        lines.append(f"| {rn} | {rk} | {rsc['recall']:.0%} | {rsc['precision']:.0%} | "
-                     f"{len(rsigs)}{mark} |")
+    for rn, rk, rm, rsigs, rsc, rp in results:
+        mark = " **<-- beste**" if (rn, rk, rm) == (n, k, mode) else ""
+        lines.append(f"| {rn} | {rk} | {rm} | {rsc['recall']:.0%} | {rsc['precision']:.0%} | "
+                     f"{rp['rendite_pct']:+.1f} % | {len(rsigs)}{mark} |")
     lines += [
         "",
-        f"## Beste Kombination: pivot_n={n}, k_atr={k}",
+        f"## Beste Kombination: pivot_n={n}, k_atr={k}, flush={mode}",
         "",
         f"- Kauf-Trigger getroffen: {len(sc['hit_k'])}/{len(KAUF_DATEN)} — "
         + ", ".join(d.strftime('%d.%m.%y') for d in sc["hit_k"]),
@@ -273,8 +278,9 @@ def main():
         "- Spot-CVD real (Binance Vision), Funding real (Kraken, sofern Historie reicht).",
         "- Kaisers Liste enthielt Duplikate (laut Kaiser evtl. Versehen) -> dedupliziert.",
         "",
-        f"Empfehlung: Engine-Standardwerte auf pivot_n={n}, k_atr={k} setzen, falls "
-        "abweichend von (5, 3.0).",
+        f"Empfehlung: Engine-Standardwerte auf pivot_n={n}, k_atr={k}, "
+        f"flush_entry='{mode}' setzen, falls abweichend (aktuelle Defaults in "
+        "strategy_core.evaluate pruefen).",
     ]
     (ROOT / "BACKTEST.md").write_text("\n".join(lines), encoding="utf-8")
 
@@ -282,7 +288,7 @@ def main():
     panel = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "zeitraum": "01.09.2025 - 30.04.2026",
-        "params": {"pivot_n": n, "k_atr": k},
+        "params": {"pivot_n": n, "k_atr": k, "flush_entry": mode},
         "recall_kauf": f"{len(sc['hit_k'])}/{len(KAUF_DATEN)}",
         "recall_verkauf": f"{len(sc['hit_v'])}/{len(VERKAUF_DATEN)}",
         "recall_pct": round(sc["recall"] * 100),

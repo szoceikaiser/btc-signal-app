@@ -179,16 +179,27 @@ def test_long_lebenszyklus_kauf1_kauf2_tp1_tp2():
     assert abs(k1.price - 105.0) < 0.01 and k1.tranche_pct == 25 and k1.stop_ref == 100
 
 
-def test_capitulation_einstieg_bei_gp_durchschlag():
-    # Flush-Kerze: Tief 101.5 durchschlaegt das GP (103.5-103.82),
-    # Schluss 104 liegt ueber der Invalidierung (100) -> KAUF 2 mit 75 %
+def test_capitulation_einstieg_default_t1():
+    # Flush-Kerze: Tief 101.5 durchschlaegt das GP (103.5-103.82), Schluss 104 ueber
+    # der Invalidierung (100) -> Default "t1": kleine erste Tranche (Ladder bleibt)
     base = zigzag_candles()
     path = base + [c(8, 105.5, 106.0, 101.5, 104.0)]
     pos = Position()
     sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2)
-    assert [s.type for s in sigs] == [SignalType.KAUF_2]
-    assert sigs[0].tranche_pct == 75 and "Capitulation" in sigs[0].reason
-    assert pos.state == PosState.CORE and pos.retrace_extreme == 101.5
+    assert [s.type for s in sigs] == [SignalType.KAUF_1]
+    assert sigs[0].tranche_pct == 25 and "Capitulation" in sigs[0].reason
+    assert pos.state == PosState.T1 and pos.retrace_extreme == 101.5
+
+
+def test_capitulation_einstieg_modus_core_und_off():
+    base = zigzag_candles()
+    path = base + [c(8, 105.5, 106.0, 101.5, 104.0)]
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, flush_entry="core")
+    assert [s.type for s in sigs] == [SignalType.KAUF_2] and sigs[0].tranche_pct == 75
+    pos2 = Position()
+    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2, flush_entry="off")
+    assert sigs2 == [] and pos2.state == PosState.FLAT
 
 
 def test_kein_capitulation_einstieg_bei_schluss_unter_invalidierung():
