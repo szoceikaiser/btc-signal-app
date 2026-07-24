@@ -1,0 +1,6 @@
+{
+ "generated_at": "2026-07-24T13:32:14Z",
+ "symbol": "BTCUSDT_PERP.A",
+ "interval": "4hour",
+ "error": "COINALYZE_API_KEY fehlt (Secret nicht gesetzt?)"
+}
