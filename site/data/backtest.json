@@ -1,25 +1,30 @@
 {
- "generated_at": "2026-07-24T09:35:33Z",
+ "generated_at": "2026-07-24T10:24:54Z",
  "zeitraum": "01.09.2025 - 30.04.2026",
+ "variante": "+Konfluenz 4h/1D",
  "params": {
-  "pivot_n": 6,
+  "bias_long": true,
+  "bias_short": false,
+  "pivot_n": 5,
   "k_atr": 2.0,
   "flush_entry": "off",
   "tp_ladder": true,
-  "richtung": "long"
+  "trend_filter": false,
+  "strict_confirm": false,
+  "confluence": true
  },
- "recall_kauf": "2/20",
- "recall_verkauf": "5/24",
- "recall_pct": 16,
- "precision_pct": 30,
+ "recall_kauf": "0/20",
+ "recall_verkauf": "3/24",
+ "recall_pct": 7,
+ "precision_pct": 33,
  "pnl": {
   "start": 10000.0,
-  "ende": 11629.37,
-  "rendite_pct": 16.29,
+  "ende": 10287.24,
+  "rendite_pct": 2.87,
   "buyhold_pct": -28.36,
-  "trades": 18,
-  "gewinn_trades": 14,
+  "trades": 11,
+  "gewinn_trades": 10,
   "fee_pct": 0.1,
-  "offene_position": 3593.57
+  "offene_position": 0.0
  }
 }
