@@ -398,3 +398,43 @@ def test_daily_fib_zone_liefert_zone():
     z = daily_fib_zone(cs, pivot_n=5)
     assert z is not None and z.impulse.up
     assert z.gp_lower < z.level_05                    # Zonen korrekt geordnet
+
+
+# ------------------------------------------- E9.3: bedingter Stop / Nachkauf
+
+def bearish_flow(n=4):
+    # Funding positiv, Spot-CVD faellt -> _confirm_long() ist False (Flow kippt)
+    return [FlowPoint(i, 100 - i, 100, 1000, 0.0002) for i in range(n)]
+
+
+def test_conditional_stop_nachkauf_wenn_flow_bullisch():
+    base = zigzag_candles()                           # Impuls 100->110, Invalidierung 100
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),    # KAUF 1
+                   c(9, 104, 104.5, 98.5, 99.0)]      # Schluss 99 < 100, aber Flow bullisch
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, conditional_stop=True)
+    types = [s.type for s in sigs]
+    assert SignalType.STOPLOSS not in types           # kein pauschaler Stop
+    assert SignalType.NACHKAUF in types and pos.dip_buys >= 1
+    assert pos.state != PosState.FLAT                 # Position bleibt offen
+    assert any("Bedingter Nachkauf" in s.reason for s in sigs)
+
+
+def test_conditional_stop_stoppt_bei_hartem_boden():
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),
+                   c(9, 104, 104.5, 93, 94)]          # Schluss 94 < 95 (harter Boden) -> Stop
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, conditional_stop=True)
+    assert [s.type for s in sigs] == [SignalType.KAUF_1, SignalType.STOPLOSS]
+    assert pos.state == PosState.FLAT
+
+
+def test_conditional_stop_stoppt_wenn_flow_kippt():
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),
+                   c(9, 104, 104.5, 98.5, 99.0)]      # Schluss 99, aber Flow baerisch -> Stop
+    pos = Position()
+    sigs = run_incremental(path, bearish_flow(), pos, pivot_n=2, conditional_stop=True)
+    assert [s.type for s in sigs] == [SignalType.KAUF_1, SignalType.STOPLOSS]
+    assert pos.state == PosState.FLAT

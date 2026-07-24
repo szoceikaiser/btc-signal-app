@@ -351,9 +351,18 @@ class Position:
     retrace_extreme: Optional[float] = None  # tiefster/hoechster Punkt der Korrektur
     last_signal_ts: int = -1                 # Dedupe: nur 1 Signal-Batch je Kerze
     tp_rungs: int = 0                        # Anzahl gefeuerter Leiter-Zwischenverkaeufe
+    dip_buys: int = 0                        # Anzahl bedingter Nachkaeufe unter Invalidierung (E9.3)
 
 
 TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
+
+# Bedingter Stop/Nachkauf (E9.3): statt pauschalem Stop bei Verlust nachkaufen, solange
+# der Order-Flow den Trend bestaetigt (Furkan: "bei Verlust nachgekauft, weil vom
+# Aufwaertstrend ueberzeugt"). MAX_DIP_BUYS begrenzt die Leiter; DIP_FLOOR_PCT ist der
+# harte Boden — bricht der Kurs so weit durch, wird trotz Flow gestoppt (echter Bruch).
+MAX_DIP_BUYS = 2
+DIP_FLOOR_PCT = 0.05
+DIP_TRANCHE = 20
 
 # Gestaffelte Teilgewinne (E8.2): Zwischenziele als Extension-Faktoren VOR dem
 # 1.0-Ziel — Furkan verkauft in Leitern in die Staerke (z. B. 08.-22.04.). Je Stufe
@@ -368,7 +377,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              pivot_n: int = 5, k_atr: float = 2.0,
              flush_entry: str = "off", tp_ladder: bool = True,
              trend_filter: bool = False, trend_ema: int = 50,
-             strict_confirm: bool = False, confluence: bool = False) -> list[Signal]:
+             strict_confirm: bool = False, confluence: bool = False,
+             conditional_stop: bool = False) -> list[Signal]:
     # Defaults kalibriert per Backtest 2026-07-23 (BACKTEST.md): n=5, k=2.0,
     # flush='off' — beste Kombination (Recall 45 %, Praezision 54 %, Rendite -6,0 %
     # vs. Buy&Hold -28,4 %). flush_entry ("off"/"t1"/"core") bleibt schaltbar:
@@ -503,12 +513,32 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         ext2 = z.ext_target(pos.retrace_extreme, 1.618)
 
         stop_hit = (cur.close < z.invalidation) if long_side else (cur.close > z.invalidation)
+        # Bedingter Stop (E9.3): bei Verlust nachkaufen statt stoppen, solange der
+        # Order-Flow den Trend weiter bestaetigt (Furkan) — aber nur bis zum harten
+        # Boden (DIP_FLOOR_PCT) und hoechstens MAX_DIP_BUYS mal.
+        if stop_hit and conditional_stop:
+            if long_side:
+                hard_break = cur.close < z.invalidation * (1 - DIP_FLOOR_PCT)
+                flow_ok = _confirm_long()
+            else:
+                hard_break = cur.close > z.invalidation * (1 + DIP_FLOOR_PCT)
+                flow_ok = _confirm_short()
+            if flow_ok and not hard_break and pos.dip_buys < MAX_DIP_BUYS:
+                nk = SignalType.NACHKAUF if long_side else SignalType.SHORT_NACHLEGEN
+                signals.append(Signal(cur.ts, nk, cur.close, DIP_TRANCHE,
+                                      f"Bedingter Nachkauf: Dip haelt, Order-Flow bestaetigt Trend ({pattern.name})",
+                                      stop_ref=z.invalidation))
+                pos.dip_buys += 1
+                stop_hit = False                             # kein Stop diese Kerze
         if stop_hit:
             st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
-            signals.append(Signal(cur.ts, st, cur.close, 100,
-                                  f"Kerzenschluss {'unter' if long_side else 'ueber'} Invalidierung {z.invalidation:.0f}"))
+            reason = ("Kerzenschluss {} Invalidierung {:.0f}".format(
+                'unter' if long_side else 'ueber', z.invalidation)
+                + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
+            signals.append(Signal(cur.ts, st, cur.close, 100, reason))
             pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
             pos.tp_rungs = 0
+            pos.dip_buys = 0
         else:
             # Upgrade T1 -> CORE: Kernposition im Golden Pocket (KAUF 2 / SHORT 2)
             if pos.state == PosState.T1:
@@ -574,6 +604,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           f"Gegen-Muster am Ziel: {pattern.name}"))
                     pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
                     pos.tp_rungs = 0
+                    pos.dip_buys = 0
             # Warnung waehrend offener Long-Position
             if long_side and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
                     and pattern == Pattern.DERIVATE_PUMP:

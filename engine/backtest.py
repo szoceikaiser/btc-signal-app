@@ -56,27 +56,31 @@ SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_R
 # Wirkung jedes Hebels sichtbar wird. Referenz: alte Long+Short-Variante und nur-Long-Basis.
 # Parameter, die evaluate() versteht (der Rest der Config sind nur Labels):
 EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
-             "tp_ladder", "trend_filter", "strict_confirm", "confluence")
+             "tp_ladder", "trend_filter", "strict_confirm", "confluence",
+             "conditional_stop")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
-             trend_filter=False, strict_confirm=False, confluence=False)
+             trend_filter=False, strict_confirm=False, confluence=False,
+             conditional_stop=False)
 
 
-def V(label, **kw):
+def V(label, panel=False, **kw):
     cfg = dict(_BASE)
     cfg.update(kw)
     cfg["label"] = label
+    cfg["panel"] = panel          # markiert die Variante, die das Chart-Panel zeigt (Live-Einstellung)
     return cfg
 
 
-# E9.2: Mit echtem OI (Coinalyze) wird Muster 4 (Kapitulation) aktiv -> testet, ob
-# flush_entry (Dip-in-die-Kapitulation kaufen) jetzt greift, das ohne OI "off" war.
+# E9.3: bedingter Stop (bei Verlust nachkaufen statt pauschal stoppen, solange der
+# Order-Flow den Trend bestaetigt) — allein und als Absicherung fuer den aggressiven
+# Flush. "nur Long (Basis)" ist die empfohlene Live-Einstellung und speist das Chart-Panel.
 GRID = [
-    V("nur Long (Basis)", bias_short=False),
-    V("+Flush t1", bias_short=False, flush_entry="t1"),
+    V("nur Long (Basis)", panel=True, bias_short=False),
     V("+Flush core", bias_short=False, flush_entry="core"),
-    V("+Strenge Bestaetigung", bias_short=False, strict_confirm=True),
-    V("+Flush t1 +Streng", bias_short=False, flush_entry="t1", strict_confirm=True),
+    V("+Bedingter Stop", bias_short=False, conditional_stop=True),
+    V("+Flush core +Bed.Stop", bias_short=False, flush_entry="core", conditional_stop=True),
+    V("+Bed.Stop +Streng", bias_short=False, conditional_stop=True, strict_confirm=True),
     V("Long+Short (Ref)"),
 ]
 
@@ -289,6 +293,11 @@ def main():
     best = max(results, key=lambda r: (r[3]["rendite_pct"], r[2]["recall"], r[2]["precision"]))
     best_cfg, sigs, sc, pnl = best
 
+    # Panel-Variante = die als panel=True markierte (Live-Einstellung), damit die
+    # Chart-Seite zeigt, was die Engine WIRKLICH tut — nicht die beste Fantasie-Variante.
+    panel_r = next((r for r in results if r[0].get("panel")), best)
+    panel_cfg, _psigs, panel_sc, panel_pnl = panel_r
+
     lines = [
         "# Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger",
         "",
@@ -357,23 +366,24 @@ def main():
     ]
     (ROOT / "BACKTEST.md").write_text("\n".join(lines), encoding="utf-8")
 
-    # JSON fuer das Panel auf der Chart-Webseite
+    # JSON fuer das Panel auf der Chart-Webseite — zeigt die LIVE-Einstellung
+    # (panel=True), nicht die beste Fantasie-Variante. Ehrlich zu den echten Signalen.
     panel = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "zeitraum": "01.09.2025 - 30.04.2026",
-        "variante": best_cfg["label"],
-        "params": {k: best_cfg[k] for k in EVAL_KEYS},
-        "recall_kauf": f"{len(sc['hit_k'])}/{len(KAUF_DATEN)}",
-        "recall_verkauf": f"{len(sc['hit_v'])}/{len(VERKAUF_DATEN)}",
-        "recall_pct": round(sc["recall"] * 100),
-        "precision_pct": round(sc["precision"] * 100),
-        "pnl": {kk: vv for kk, vv in pnl.items() if kk != "equity"},
+        "variante": panel_cfg["label"],
+        "params": {k: panel_cfg[k] for k in EVAL_KEYS},
+        "recall_kauf": f"{len(panel_sc['hit_k'])}/{len(KAUF_DATEN)}",
+        "recall_verkauf": f"{len(panel_sc['hit_v'])}/{len(VERKAUF_DATEN)}",
+        "recall_pct": round(panel_sc["recall"] * 100),
+        "precision_pct": round(panel_sc["precision"] * 100),
+        "pnl": {kk: vv for kk, vv in panel_pnl.items() if kk != "equity"},
     }
     (ROOT / "site" / "data" / "backtest.json").write_text(
         json.dumps(panel, indent=1), encoding="utf-8")
-    print(f"\nBericht geschrieben: BACKTEST.md + site/data/backtest.json — "
-          f"beste: {best_cfg['label']}, Recall {sc['recall']:.0%}, "
-          f"Rendite {pnl['rendite_pct']:+.1f} %")
+    print(f"\nBericht geschrieben: BACKTEST.md (beste: {best_cfg['label']}, "
+          f"Rendite {pnl['rendite_pct']:+.1f} %) + backtest.json "
+          f"(Panel-Variante: {panel_cfg['label']}, Rendite {panel_pnl['rendite_pct']:+.1f} %)")
 
 
 if __name__ == "__main__":

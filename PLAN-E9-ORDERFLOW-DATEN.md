@@ -67,17 +67,20 @@ liefert die Historie mit.
   WEIL OI fehlte.) NAECHSTER SCHRITT: Kaiser laesst Backtest laufen -> ich lese
   BACKTEST.md (inkl. OI-/Liq-Abdeckung) und werte aus: Rendite MIT anstaendigem Recall.
 
-### E9.3 — Bedingter Stop / Nachkauf-Leiter statt pauschalem Stop · Status: OFFEN
-- Furkans Kern (Kaiser): bei Verlust nachkaufen, wenn Order-Flow weiter bullisch; nur
-  stoppen, wenn Struktur bricht UND Flow kippt.
-- Neue Stop-Logik (schaltbar `conditional_stop`, Default aus bis gemessen): Schluss unter
-  Invalidierung → NICHT sofort raus, sondern prüfen, ob Aufwärts-Kriterien halten
-  (Spot-CVD hält, OI-Reset/Muster 4, Funding neutral/negativ, keine Long-Liq-Kaskade).
-  Wenn ja → tiefere Nachkauf-Tranche (Leiter in die Schwäche), Invalidierung ggf. nachziehen.
-  Wenn nein → Stop. Deckt zugleich Furkans Mehrtages-Kaufleitern (27.-30.10., 17.-21.11.,
-  29.-31.01.) ab → mehr seiner Einstiege getroffen.
-- Backtest: Rendite + Recall (ehrlich getrennt; Gefahr: mehr Nachkäufe = mehr Risiko,
-  daher zwingend an echte Order-Flow-Bestätigung gekoppelt, nicht blind).
+### E9.3 — Bedingter Stop / Nachkauf-Leiter statt pauschalem Stop · Status: MESSBEREIT
+- ERLEDIGT: schaltbarer `conditional_stop` in evaluate. Schluss jenseits der Invalidierung
+  -> NICHT sofort raus: wenn der Order-Flow den Trend weiter bestaetigt (_confirm_long/short,
+  inkl. Muster 4 via Liquidationen) UND der harte Boden (DIP_FLOOR_PCT=5 %) nicht gebrochen
+  ist UND hoechstens MAX_DIP_BUYS=2 mal -> Nachkauf-Tranche (DIP_TRANCHE=20 %) statt Stop.
+  Sonst (Flow kippt / harter Boden / max erreicht) -> Stop. Position.dip_buys zaehlt +
+  wird persistiert (main.py). Rueckwaertskompatibel (Default aus). 48/48 Tests gruen.
+- ERLEDIGT (Panel-Fix, "alles was dazugehoert"): Backtest-Grid-Eintraege haben ein
+  panel-Flag; das Chart-Panel (site/data/backtest.json) zeigt jetzt die LIVE-Einstellung
+  ("nur Long (Basis)"), NICHT mehr die beste Fantasie-Variante (vorher irrefuehrend +33 %).
+  index.html beschriftet es als "historische Simulation, keine Garantie, kein Live-Konto".
+- Backtest-Grid auf E9.3-Frage umgestellt: Basis vs. Flush core vs. bedingter Stop vs.
+  Flush+bedingter Stop. NAECHSTER SCHRITT: Kaiser laesst Backtest laufen -> ich werte aus,
+  ob der bedingte Stop den aggressiven Flush absichert (Rendite MIT Recall/Praezision).
 
 ### E9.4 — Liquidationen sichtbar für Kaiser · Status: OFFEN
 - Chart-Seite: Liquidations-Daten/-Cluster anzeigen; Link/Einbindung einer kostenlosen
