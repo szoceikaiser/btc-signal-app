@@ -101,6 +101,23 @@ liefert die Historie mit.
   getrennt; Erinnerung: die Jan-Leiter wurde von Furkan spaeter gestoppt -> mehr Treffer
   ist nicht automatisch mehr Gewinn).
 
+### E9.6 — Ehrliche Messung + Web-Auswertung (Kaisers Vorgaben) · Status: MESSBEREIT
+- ERLEDIGT: Backtest laeuft nur ueber das **Voll-Daten-Fenster** (ab der ersten OI-Kerze;
+  eff_start = max(START_MS, min(oi_map))). Vorher (OI fehlt) keine Trigger. score() zaehlt
+  nur Furkans Trigger IM Fenster (n_kauf/n_verkauf). Behebt Kaisers Sorge: frueher Teil war
+  mit schlechten Daten kontaminiert.
+- ERLEDIGT: P&L **getrennt nach Richtung** (long_profit/short_profit + Trades/Wins) in
+  simulate(), im Bericht (Long €/Short € Spalten) und im Chart-Panel.
+- ERLEDIGT: Panel/Chart-Variante = **Long+Short (Analyse)** (Kaiser: alle Longs UND Shorts
+  zeigen). Backtest schreibt `site/data/backtest_signals.json` mit allen Signalen des
+  Fensters; index.html laedt sie und zeichnet alle Marker (Long-Einstieg K1/K2 gruen,
+  Long-Ausstieg TV/V/SL orange/rot, Short-Einstieg S1/S2 rot, Short-Ausstieg STP/SC lila) —
+  plus Long/Short-P&L im Panel. 49/49 Tests.
+- OFFEN (Punkt 5, Zukunfts-Investition): OI/Liq bei jedem Lauf in eine committete Historie
+  mergen (Coinalyze loescht altes 4h-OI) -> kuenftige Backtests bekommen volle Abdeckung.
+- NAECHSTER SCHRITT: Kaiser laesst Backtest laufen -> saubere Messung nur auf Voll-Daten +
+  Long/Short getrennt sichtbar auf der Seite.
+
 ### E9.4 — Liquidationen sichtbar für Kaiser · Status: OFFEN
 - Chart-Seite: Liquidations-Daten/-Cluster anzeigen; Link/Einbindung einer kostenlosen
   Heatmap (Velo/Coinank/Coinglass). Optional Liquidations-Zonen als „Magnete" im Chart.

@@ -76,12 +76,14 @@ def V(label, panel=False, **kw):
 # Schwaeche nach). Testet, ob wir mehr von Furkans Kauf-Tagen treffen (Recall Kauf) —
 # und was es mit der Rendite macht. "nur Long (Basis)" = Live-Einstellung -> Chart-Panel.
 GRID = [
-    V("nur Long (Basis)", panel=True, bias_short=False),
+    V("nur Long (Basis)", bias_short=False),
     V("+Kaufleiter", bias_short=False, buy_ladder=True),
     V("+Flush core", bias_short=False, flush_entry="core"),
     V("+Flush core +Kaufleiter", bias_short=False, flush_entry="core", buy_ladder=True),
     V("+Kaufleiter +Bed.Stop", bias_short=False, buy_ladder=True, conditional_stop=True),
-    V("Long+Short (Ref)"),
+    # Long+Short = Analyse-/Chart-Variante (Kaiser: alle Longs UND Shorts zeigen, P&L
+    # getrennt) -> speist Panel + Chart-Signaldatei.
+    V("Long+Short (Analyse)", panel=True),
 ]
 
 
@@ -130,12 +132,13 @@ def build_series(raw: list, funding: list[tuple[int, float]],
     return candles, flow
 
 
-def run_backtest(candles, flow, cfg: dict) -> list[dict]:
+def run_backtest(candles, flow, cfg: dict, start_ms: int = START_MS) -> list[dict]:
+    """Signale ab `start_ms` (Voll-Daten-Fenster). Vorher nur Warmup (kein Signal)."""
     params = {k: cfg[k] for k in EVAL_KEYS if k in cfg}
     pos = Position()
     signals = []
     for i in range(len(candles)):
-        if candles[i].ts < START_MS:
+        if candles[i].ts < start_ms:
             pos.last_signal_ts = candles[i].ts                 # Warmup ohne Signale
             continue
         for s in evaluate(candles[:i + 1], flow[:i + 1], pos, **params):
@@ -147,9 +150,12 @@ def to_date(ts_ms: int) -> date:
     return datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc).date()
 
 
-def score(signals: list[dict], tol_days: int = 1) -> dict:
-    kauf = [date.fromisoformat(d) for d in KAUF_DATEN]
-    verkauf = [date.fromisoformat(d) for d in VERKAUF_DATEN]
+def score(signals: list[dict], tol_days: int = 1, start_ms: int = START_MS) -> dict:
+    # Nur Furkans Trigger IM Voll-Daten-Fenster bewerten (ab start_ms) — sonst zaehlten
+    # wir Tage, an denen die Engine mangels Daten gar nicht handeln konnte (E9.6).
+    start_d = to_date(start_ms)
+    kauf = [d for d in (date.fromisoformat(x) for x in KAUF_DATEN) if d >= start_d]
+    verkauf = [d for d in (date.fromisoformat(x) for x in VERKAUF_DATEN) if d >= start_d]
     buy_days = sorted({to_date(s["ts"]) for s in signals if s["type"] in BUY_TYPES})
     sell_days = sorted({to_date(s["ts"]) for s in signals if s["type"] in SELL_TYPES})
 
@@ -164,14 +170,15 @@ def score(signals: list[dict], tol_days: int = 1) -> dict:
     return {
         "hit_k": hit_k, "miss_k": [d for d in kauf if d not in hit_k],
         "hit_v": hit_v, "miss_v": [d for d in verkauf if d not in hit_v],
-        "recall": (len(hit_k) + len(hit_v)) / (len(kauf) + len(verkauf)),
+        "recall": (len(hit_k) + len(hit_v)) / (len(kauf) + len(verkauf)) if (kauf or verkauf) else 0.0,
         "precision": len(prec_days) / total_days if total_days else 0.0,
         "buy_days": buy_days, "sell_days": sell_days,
+        "n_kauf": len(kauf), "n_verkauf": len(verkauf),   # Trigger IM Fenster
     }
 
 
 def simulate(signals: list[dict], candles, fee: float = 0.001,
-             start_capital: float = 10000.0) -> dict:
+             start_capital: float = 10000.0, start_ms: int | None = None) -> dict:
     """Tranchen-genaue P&L-Simulation der Signale.
 
     Annahmen (dokumentiert): kein Hebel; Kauf-Tranchen als %-Anteil des beim
@@ -183,6 +190,8 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     s_units, s_peak, s_avg = 0.0, 0.0, 0.0            # Short-Seite
     alloc = 0.0
     trades_closed = wins = 0
+    long_profit = short_profit = 0.0                 # Gewinn/Verlust je Richtung (E9.6)
+    long_trades = long_wins = short_trades = short_wins = 0
     equity = []
 
     def equity_now(price):
@@ -211,6 +220,9 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                 pnl = proceeds - sell * l_avg
                 trades_closed += 1
                 wins += 1 if pnl > 0 else 0
+                long_profit += pnl
+                long_trades += 1
+                long_wins += 1 if pnl > 0 else 0
                 cash += proceeds
                 units -= sell
         elif t in ("SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"):
@@ -233,19 +245,25 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                 pnl = cover * (s_avg - p) - cover * p * fee
                 trades_closed += 1
                 wins += 1 if pnl > 0 else 0
+                short_profit += pnl
+                short_trades += 1
+                short_wins += 1 if pnl > 0 else 0
                 cash += pnl
                 s_units -= cover
         equity.append({"ts": s["ts"], "equity": round(equity_now(p), 2)})
 
     last_price = candles[-1].close
     end_equity = equity_now(last_price)
-    hold_start = next(c for c in candles if c.ts >= START_MS).close
+    hs = start_ms if start_ms is not None else START_MS
+    hold_start = next(c for c in candles if c.ts >= hs).close
     return {
         "start": start_capital,
         "ende": round(end_equity, 2),
         "rendite_pct": round((end_equity / start_capital - 1) * 100, 2),
         "buyhold_pct": round((last_price / hold_start - 1) * 100, 2),
         "trades": trades_closed, "gewinn_trades": wins,
+        "long_profit": round(long_profit, 2), "long_trades": long_trades, "long_wins": long_wins,
+        "short_profit": round(short_profit, 2), "short_trades": short_trades, "short_wins": short_wins,
         "fee_pct": fee * 100, "equity": equity,
         "offene_position": round(units * last_price + s_units * (s_avg - last_price), 2),
     }
@@ -278,15 +296,22 @@ def main():
 
     candles, flow = build_series(raw, funding, oi_map, liq_map)
 
+    # E9.6 (Kaisers Vorgabe): Backtest NUR ueber das Voll-Daten-Fenster — ab der ersten
+    # OI-Kerze. Vorher fehlt das OI -> dort keine Trigger (sonst schlechte Ausgangslage).
+    eff_start = max(START_MS, min(oi_map)) if oi_map else START_MS
+    print(f"Voll-Daten-Fenster ab {to_date(eff_start).strftime('%d.%m.%Y')} "
+          f"(OI vorhanden: {'ja' if oi_map else 'nein'}).")
+
     results = []
     for cfg in GRID:
         t0 = time.time()
-        sigs = run_backtest(candles, flow, cfg)
-        sc = score(sigs)
-        p = simulate(sigs, candles)
+        sigs = run_backtest(candles, flow, cfg, start_ms=eff_start)
+        sc = score(sigs, start_ms=eff_start)
+        p = simulate(sigs, candles, start_ms=eff_start)
         results.append((cfg, sigs, sc, p))
         print(f"{cfg['label']}: Recall {sc['recall']:.0%}, "
               f"Praezision {sc['precision']:.0%}, Rendite {p['rendite_pct']:+.1f} %, "
+              f"Long {p['long_profit']:+.0f}€/Short {p['short_profit']:+.0f}€, "
               f"{len(sigs)} Signale ({time.time()-t0:.0f}s)")
 
     # Auswahl: primaer Rendite (das Geld-Maß), dann Recall, dann Praezision
@@ -298,54 +323,53 @@ def main():
     panel_r = next((r for r in results if r[0].get("panel")), best)
     panel_cfg, _psigs, panel_sc, panel_pnl = panel_r
 
+    win = f"{to_date(eff_start).strftime('%d.%m.%Y')}-{to_date(END_MS).strftime('%d.%m.%Y')}"
     lines = [
-        "# Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger",
+        "# Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger",
         "",
-        f"Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, {len(candles)} Stueck) · "
+        f"**Voll-Daten-Fenster: {win}** (nur wo alle Order-Flow-Daten inkl. echtem OI "
+        f"vorliegen — E9.6, Kaisers Vorgabe) · {len(candles)} 4h-Kerzen geladen · "
         f"Stand: {time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())}",
         "",
         "Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; "
         "Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.",
         "",
-        "## Parameter-Vergleich (E8.5: bessere Long-Einstiege, alle n=5 nur-Long)",
+        "## Parameter-Vergleich",
         "",
-        "Drei Furkan-Filter, einzeln und kombiniert (Furkans Schritt 1 = Richtung aus Makro,"
-        " dann Konfluenz-Bestaetigung): **Trendfilter** = keine Longs gegen den 1D-Trend"
-        " (Preis vs. Tages-EMA). **Strenge Bestaetigung** = KAUF 2 nur wenn Spot-CVD dreht"
-        " UND Funding stimmt (statt eines von beiden). **Konfluenz 4h/1D** = Einstieg nur,"
-        " wenn die 4h-Zone in der 1D-Retracement-Zone liegt. Sortiert nach Rendite.",
+        "Alle n=5. Rendite = Gesamt-Simulation; Long €/Short € = realisierter Gewinn/Verlust "
+        "getrennt nach Richtung. Recall = Aehnlichkeit zu Furkans Terminen IM Fenster.",
         "",
-        "| Variante | Recall | Praezision | Rendite | Signale |",
-        "|---|---|---|---|---|",
+        "| Variante | Recall | Praez. | Rendite | Long € | Short € | Signale |",
+        "|---|---|---|---|---|---|---|",
     ]
     for rcfg, rsigs, rsc, rp in results:
         mark = " **<-- beste**" if rcfg is best_cfg else ""
         lines.append(f"| {rcfg['label']} | {rsc['recall']:.0%} | {rsc['precision']:.0%} | "
-                     f"{rp['rendite_pct']:+.1f} % | {len(rsigs)}{mark} |")
+                     f"{rp['rendite_pct']:+.1f} % | {rp['long_profit']:+,.0f} | "
+                     f"{rp['short_profit']:+,.0f} | {len(rsigs)}{mark} |")
     lines += [
         "",
-        f"## Beste Kombination (nach Rendite): {best_cfg['label']} "
-        f"(pivot_n={best_cfg['pivot_n']}, nur Long={not best_cfg['bias_short']}, "
-        f"Trendfilter={best_cfg['trend_filter']}, strenge Best.={best_cfg['strict_confirm']}, "
-        f"Konfluenz={best_cfg['confluence']})",
+        f"## Beste Kombination (nach Rendite): {best_cfg['label']}",
         "",
-        f"- Kauf-Trigger getroffen: {len(sc['hit_k'])}/{len(KAUF_DATEN)} — "
+        f"- Kauf-Trigger getroffen: {len(sc['hit_k'])}/{sc['n_kauf']} (im Fenster) — "
         + ", ".join(d.strftime('%d.%m.%y') for d in sc["hit_k"]),
         f"- Kauf verpasst: " + (", ".join(d.strftime('%d.%m.%y') for d in sc["miss_k"]) or "—"),
-        f"- Verkauf-Trigger getroffen: {len(sc['hit_v'])}/{len(VERKAUF_DATEN)} — "
+        f"- Verkauf-Trigger getroffen: {len(sc['hit_v'])}/{sc['n_verkauf']} (im Fenster) — "
         + ", ".join(d.strftime('%d.%m.%y') for d in sc["hit_v"]),
         f"- Verkauf verpasst: " + (", ".join(d.strftime('%d.%m.%y') for d in sc["miss_v"]) or "—"),
-        f"- Engine-Signal-Tage gesamt: {len(sc['buy_days'])} Kauf / {len(sc['sell_days'])} Verkauf",
         "",
-        "## P&L-Simulation (beste Kombination)",
+        "## P&L-Simulation (beste Kombination) — getrennt nach Richtung",
         "",
         f"Start 10.000 € -> **{pnl['ende']:,.0f} €** ({pnl['rendite_pct']:+.1f} %) · "
-        f"Buy&Hold im Zeitraum: {pnl['buyhold_pct']:+.1f} % · "
-        f"{pnl['trades']} Verkaufs-Vorgaenge, davon {pnl['gewinn_trades']} im Gewinn · "
-        f"Gebuehr {pnl['fee_pct']:.1f} % je Order, kein Hebel.",
+        f"Buy&Hold im Fenster: {pnl['buyhold_pct']:+.1f} % · Gebuehr {pnl['fee_pct']:.1f} %/Order, kein Hebel.",
+        "",
+        f"- **LONG-Trades:** {pnl['long_profit']:+,.0f} € · {pnl['long_trades']} Abschluesse, "
+        f"{pnl['long_wins']} im Gewinn",
+        f"- **SHORT-Trades:** {pnl['short_profit']:+,.0f} € · {pnl['short_trades']} Abschluesse, "
+        f"{pnl['short_wins']} im Gewinn",
         "",
         "WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, "
-        "KEIN Gewinn. Der Gewinn steht nur in dieser P&L-Zeile.",
+        "KEIN Gewinn. Der Gewinn steht nur in den P&L-Zeilen.",
         "",
         "## Einschraenkungen",
         "",
@@ -366,24 +390,30 @@ def main():
     ]
     (ROOT / "BACKTEST.md").write_text("\n".join(lines), encoding="utf-8")
 
-    # JSON fuer das Panel auf der Chart-Webseite — zeigt die LIVE-Einstellung
-    # (panel=True), nicht die beste Fantasie-Variante. Ehrlich zu den echten Signalen.
+    # JSON fuers Chart-Panel — Analyse-Variante (Long+Short), P&L getrennt nach Richtung.
     panel = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "zeitraum": "01.09.2025 - 30.04.2026",
+        "zeitraum": win,
         "variante": panel_cfg["label"],
         "params": {k: panel_cfg[k] for k in EVAL_KEYS},
-        "recall_kauf": f"{len(panel_sc['hit_k'])}/{len(KAUF_DATEN)}",
-        "recall_verkauf": f"{len(panel_sc['hit_v'])}/{len(VERKAUF_DATEN)}",
+        "recall_kauf": f"{len(panel_sc['hit_k'])}/{panel_sc['n_kauf']}",
+        "recall_verkauf": f"{len(panel_sc['hit_v'])}/{panel_sc['n_verkauf']}",
         "recall_pct": round(panel_sc["recall"] * 100),
         "precision_pct": round(panel_sc["precision"] * 100),
         "pnl": {kk: vv for kk, vv in panel_pnl.items() if kk != "equity"},
     }
     (ROOT / "site" / "data" / "backtest.json").write_text(
         json.dumps(panel, indent=1), encoding="utf-8")
-    print(f"\nBericht geschrieben: BACKTEST.md (beste: {best_cfg['label']}, "
-          f"Rendite {pnl['rendite_pct']:+.1f} %) + backtest.json "
-          f"(Panel-Variante: {panel_cfg['label']}, Rendite {panel_pnl['rendite_pct']:+.1f} %)")
+
+    # Alle Long- UND Short-Signale der Analyse-Variante fuer den Chart (E9.6, Kaiser:
+    # alle Einstiege/Ausstiege getrennt Long/Short zeichnen). Nur im Voll-Daten-Fenster.
+    (ROOT / "site" / "data" / "backtest_signals.json").write_text(
+        json.dumps({"generated_at": panel["generated_at"], "variante": panel_cfg["label"],
+                    "fenster": win, "signals": _psigs}, indent=1), encoding="utf-8")
+    print(f"\nGeschrieben: BACKTEST.md (beste {best_cfg['label']} {pnl['rendite_pct']:+.1f} %) "
+          f"+ backtest.json + backtest_signals.json ({len(_psigs)} Signale, "
+          f"{panel_cfg['label']}: Long {panel_pnl['long_profit']:+.0f}€ / "
+          f"Short {panel_pnl['short_profit']:+.0f}€)")
 
 
 if __name__ == "__main__":

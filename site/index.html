@@ -135,15 +135,21 @@ el.addEventListener("dblclick", () => chart.timeScale().fitContent());
     const p = bt.pnl;
     const cls = p.rendite_pct >= 0 ? "up" : "down";
     const clsBH = p.buyhold_pct >= 0 ? "up" : "down";
+    const eur = v => (v >= 0 ? "+" : "") + Math.round(v).toLocaleString("de-DE") + " €";
+    const clL = (p.long_profit || 0) >= 0 ? "up" : "down";
+    const clS = (p.short_profit || 0) >= 0 ? "up" : "down";
     document.getElementById("btpanel").innerHTML =
-      `<span><b>Backtest ${bt.zeitraum}</b> (Stand ${new Date(bt.generated_at)
+      `<span><b>Backtest ${bt.zeitraum}</b> (Voll-Daten-Fenster, Stand ${new Date(bt.generated_at)
         .toLocaleDateString("de-DE")})</span>` +
-      (bt.variante ? `<span>Einstellung der App: <b>${bt.variante}</b></span>` : "") +
+      (bt.variante ? `<span>Variante: <b>${bt.variante}</b></span>` : "") +
       `<span>Historische Simulation: 10.000 € → <b class="${cls}">${p.ende.toLocaleString("de-DE",
         { maximumFractionDigits: 0 })} € (${p.rendite_pct >= 0 ? "+" : ""}${p.rendite_pct} %)</b> ` +
       `<i>— Vergangenheit, keine Garantie, kein Live-Konto</i></span>` +
+      `<span>➜ <b>LONG-Trades:</b> <b class="${clL}">${eur(p.long_profit || 0)}</b> ` +
+      `(${p.long_trades || 0} Abschlüsse, ${p.long_wins || 0} im Gewinn)</span>` +
+      `<span>➜ <b>SHORT-Trades:</b> <b class="${clS}">${eur(p.short_profit || 0)}</b> ` +
+      `(${p.short_trades || 0} Abschlüsse, ${p.short_wins || 0} im Gewinn)</span>` +
       `<span>Buy&amp;Hold zum Vergleich: <b class="${clsBH}">${p.buyhold_pct >= 0 ? "+" : ""}${p.buyhold_pct} %</b></span>` +
-      `<span>${p.trades} Verkaufs-Vorgänge, ${p.gewinn_trades} im Gewinn · Gebühr ${p.fee_pct} %/Order · kein Hebel</span>` +
       `<span>Ähnlichkeit zu Furkans Terminen: Kauf ${bt.recall_kauf}, Verkauf ${bt.recall_verkauf} — ` +
       `<b>Ähnlichkeit ≠ Gewinn</b></span>`;
     document.getElementById("btpanel").hidden = false;
@@ -188,7 +194,7 @@ function snap(tsSec, candles) {  // Marker auf die passende Kerze legen
 async function load(tf) {
   document.getElementById("status").textContent = "Lade " + tf + "…";
   try {
-    const [candles, sig, state] = await Promise.all([
+    const [candles, sig, state, btsig] = await Promise.all([
       loadCandles(tf),
       fetchJson(RAW + "signals.json?t=" + Date.now())
         .catch(() => fetchJson("data/signals.json"))
@@ -196,13 +202,23 @@ async function load(tf) {
       fetchJson(RAW + "state.json?t=" + Date.now())
         .catch(() => fetchJson("data/state.json"))
         .catch(() => null),
+      fetchJson(RAW + "backtest_signals.json?t=" + Date.now())   // volle Long+Short-Historie
+        .catch(() => fetchJson("data/backtest_signals.json"))
+        .catch(() => ({ signals:[] })),
     ]);
     series.setData(candles);
     lastBar = candles[candles.length - 1] || null;
     showBar(lastBar);
     document.getElementById("demoBadge").hidden = !(sig.demo || (state && state.demo));
 
-    const markers = (sig.signals || []).map(s => {
+    // Backtest-Historie (alle Long+Short) + Live-Signale zusammen; Duplikate (ts+type) raus
+    const seen = new Set();
+    const allSig = [...(btsig.signals || []), ...(sig.signals || [])].filter(s => {
+      const k = s.ts + s.type;
+      if (seen.has(k)) return false;
+      seen.add(k); return true;
+    });
+    const markers = allSig.map(s => {
       const st = MARKER_STYLE[s.type] || { c:"#8b94a7", s:"circle", p:"aboveBar", t:"?" };
       const time = snap(s.ts / 1000, candles);
       return time === null ? null : {
