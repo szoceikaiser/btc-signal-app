@@ -1,6 +1,6 @@
 # Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger
 
-Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, 1585 Stueck) · Stand: 2026-07-24 13:59 UTC
+Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, 1585 Stueck) · Stand: 2026-07-24 14:39 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -11,10 +11,10 @@ Drei Furkan-Filter, einzeln und kombiniert (Furkans Schritt 1 = Richtung aus Mak
 | Variante | Recall | Praezision | Rendite | Signale |
 |---|---|---|---|---|
 | nur Long (Basis) | 43% | 42% | +12.3 % | 92 |
-| +Flush t1 | 45% | 30% | +24.2 % | 146 |
 | +Flush core | 45% | 31% | +33.5 % | 145 **<-- beste** |
-| +Strenge Bestaetigung | 43% | 40% | +4.6 % | 90 |
-| +Flush t1 +Streng | 45% | 34% | +11.6 % | 134 |
+| +Bedingter Stop | 43% | 41% | +9.2 % | 97 |
+| +Flush core +Bed.Stop | 45% | 30% | +33.1 % | 149 |
+| +Bed.Stop +Streng | 43% | 40% | +3.6 % | 91 |
 | Long+Short (Ref) | 45% | 49% | -2.6 % | 59 |
 
 ## Beste Kombination (nach Rendite): +Flush core (pivot_n=5, nur Long=True, Trendfilter=False, strenge Best.=False, Konfluenz=False)

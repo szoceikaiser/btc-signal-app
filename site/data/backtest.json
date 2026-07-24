@@ -1,30 +1,31 @@
 {
- "generated_at": "2026-07-24T13:59:22Z",
+ "generated_at": "2026-07-24T14:39:59Z",
  "zeitraum": "01.09.2025 - 30.04.2026",
- "variante": "+Flush core",
+ "variante": "nur Long (Basis)",
  "params": {
   "bias_long": true,
   "bias_short": false,
   "pivot_n": 5,
   "k_atr": 2.0,
-  "flush_entry": "core",
+  "flush_entry": "off",
   "tp_ladder": true,
   "trend_filter": false,
   "strict_confirm": false,
-  "confluence": false
+  "confluence": false,
+  "conditional_stop": false
  },
- "recall_kauf": "8/20",
- "recall_verkauf": "12/24",
- "recall_pct": 45,
- "precision_pct": 31,
+ "recall_kauf": "9/20",
+ "recall_verkauf": "10/24",
+ "recall_pct": 43,
+ "precision_pct": 42,
  "pnl": {
   "start": 10000.0,
-  "ende": 13348.41,
-  "rendite_pct": 33.48,
+  "ende": 11225.52,
+  "rendite_pct": 12.26,
   "buyhold_pct": -28.36,
-  "trades": 73,
-  "gewinn_trades": 58,
+  "trades": 43,
+  "gewinn_trades": 34,
   "fee_pct": 0.1,
-  "offene_position": 11348.22
+  "offene_position": 0.0
  }
 }
