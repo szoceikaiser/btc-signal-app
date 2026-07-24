@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 15.11.2025-01.05.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 1585 4h-Kerzen geladen · Stand: 2026-07-24 19:37 UTC
+**Voll-Daten-Fenster: 15.11.2025-01.05.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 1585 4h-Kerzen geladen · Stand: 2026-07-24 19:54 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -15,7 +15,7 @@ Alle n=5. Rendite = Gesamt-Simulation; Long €/Short € = realisierter Gewinn/
 | +Flush core | 55% | 30% | +30.5 % | +2,924 | +0 | 127 |
 | +Flush core +Kaufleiter | 55% | 30% | +38.9 % | +3,755 | +0 | 145 **<-- beste** |
 | +Kaufleiter +Bed.Stop | 52% | 41% | +14.6 % | +1,462 | +0 | 93 |
-| Long+Short (Analyse) | 45% | 58% | +2.8 % | +315 | +762 | 37 |
+| Live: L+S +Kaufleiter +Flush | 34% | 50% | -3.9 % | +570 | +120 | 46 |
 
 ## Beste Kombination (nach Rendite): +Flush core +Kaufleiter
 
