@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-24T13:54:22Z",
+ "generated_at": "2026-07-24T13:59:22Z",
  "zeitraum": "01.09.2025 - 30.04.2026",
  "variante": "+Flush core",
  "params": {
@@ -13,18 +13,18 @@
   "strict_confirm": false,
   "confluence": false
  },
- "recall_kauf": "5/20",
- "recall_verkauf": "7/24",
- "recall_pct": 27,
- "precision_pct": 41,
+ "recall_kauf": "8/20",
+ "recall_verkauf": "12/24",
+ "recall_pct": 45,
+ "precision_pct": 31,
  "pnl": {
   "start": 10000.0,
-  "ende": 10530.01,
-  "rendite_pct": 5.3,
+  "ende": 13348.41,
+  "rendite_pct": 33.48,
   "buyhold_pct": -28.36,
-  "trades": 27,
-  "gewinn_trades": 20,
+  "trades": 73,
+  "gewinn_trades": 58,
   "fee_pct": 0.1,
-  "offene_position": 0.0
+  "offene_position": 11348.22
  }
 }
