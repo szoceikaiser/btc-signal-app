@@ -125,6 +125,17 @@ liefert die Historie mit.
 - NAECHSTER SCHRITT: Kaiser laesst Backtest laufen -> saubere Messung nur auf Voll-Daten +
   Long/Short getrennt sichtbar auf der Seite.
 
+### E9.7 — Long+Short-Befund + Telegram-Neusendung · Status: TEILWEISE
+- BEFUND (Backtest Voll-Daten-Fenster): Long+Short VERLIERT. "Live: L+S +Kaufleiter +Flush"
+  = -3,9 % (Long +570 €/Short +120 €); "Long+Short (Analyse)" plain = +2,8 %. Long-only
+  +Kaufleiter = +18 %. Grund: mechanische Shorts sind mistimed (kein Makro-Bias, der die
+  Richtung waehlt). KONSEQUENZ: Panel/Chart = "+Kaufleiter" (nur Long, +18 %, robust).
+  Empfehlung an Kaiser: live nur Long (state.json bias_short=false). Shorts erst sinnvoll
+  mit Makro-/Richtungs-Bias (KI-Makro, pausiert) -> dann wieder aufnehmen.
+- ERLEDIGT (Kaiser-Wunsch): Telegram-Neusendung aller Trigger auf Knopfdruck.
+  main.py --resend-all (liest signals.json, sendet alle erneut, mit Kopf-Nachricht);
+  signal.yml workflow_dispatch-Input "resend_all". 50/50 Tests.
+
 ### E9.4 — Liquidationen sichtbar für Kaiser · Status: OFFEN
 - Chart-Seite: Liquidations-Daten/-Cluster anzeigen; Link/Einbindung einer kostenlosen
   Heatmap (Velo/Coinank/Coinglass). Optional Liquidations-Zonen als „Magnete" im Chart.

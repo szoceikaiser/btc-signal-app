@@ -76,15 +76,14 @@ def V(label, panel=False, **kw):
 # Schwaeche nach). Testet, ob wir mehr von Furkans Kauf-Tagen treffen (Recall Kauf) —
 # und was es mit der Rendite macht. "nur Long (Basis)" = Live-Einstellung -> Chart-Panel.
 GRID = [
+    # Panel/Chart = "nur Long + Kaufleiter" (robuste Standard-Strategie +18 %). Long+Short
+    # verliert (Shorts mechanisch mistimed, siehe unten) -> nicht als Live-/Panel-Variante.
     V("nur Long (Basis)", bias_short=False),
-    V("+Kaufleiter", bias_short=False, buy_ladder=True),
+    V("+Kaufleiter", panel=True, bias_short=False, buy_ladder=True),
     V("+Flush core", bias_short=False, flush_entry="core"),
     V("+Flush core +Kaufleiter", bias_short=False, flush_entry="core", buy_ladder=True),
     V("+Kaufleiter +Bed.Stop", bias_short=False, buy_ladder=True, conditional_stop=True),
-    # LIVE-Einstellung (Kaiser 2026-07-24): Long+Short + Kaufleiter + Flush core. Speist
-    # Panel + Chart-Signaldatei (alle Longs UND Shorts, P&L getrennt). Flush-Einstiege
-    # sind in Telegram als "deine Entscheidung" markiert.
-    V("Live: L+S +Kaufleiter +Flush", panel=True, buy_ladder=True, flush_entry="core"),
+    V("Long+Short (Ref)"),
 ]
 
 

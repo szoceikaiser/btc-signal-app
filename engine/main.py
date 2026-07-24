@@ -269,8 +269,29 @@ def send_testnachricht():
                    "reason": "Telegram-Verbindung funktioniert. Ab jetzt kommen echte Trigger."}])
 
 
+def resend_all_signals(data_dir: Path = DATA):
+    """Sendet ALLE gespeicherten Kauf-/Verkaufstrigger erneut an Telegram (auf Knopfdruck)."""
+    signals_path = data_dir / "signals.json"
+    if not signals_path.exists():
+        print("Keine signals.json vorhanden — nichts zu senden.")
+        return []
+    hist = json.loads(signals_path.read_text(encoding="utf-8"))
+    sigs = sorted(hist.get("signals", []), key=lambda s: s["ts"])
+    dry = not (os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"))
+    send_signals([{"ts": int(time.time() * 1000), "type": "WARNUNG",
+                   "label": f"NEUSENDUNG: {len(sigs)} Trigger (Historie, keine neuen Signale)",
+                   "price": 0.0, "tranche_pct": 0,
+                   "reason": "Ab hier folgen alle bisherigen Kauf-/Verkaufstrigger noch einmal."}],
+                  dry_run=dry)
+    send_signals(sigs, dry_run=dry)
+    print(f"{len(sigs)} Trigger erneut gesendet (dry_run={dry}).")
+    return sigs
+
+
 if __name__ == "__main__":
     if "--test-telegram" in sys.argv:
         send_testnachricht()
+    elif "--resend-all" in sys.argv:
+        resend_all_signals()
     else:
         run_engine(dry_run="--dry-run" in sys.argv or not os.environ.get("TELEGRAM_BOT_TOKEN"))

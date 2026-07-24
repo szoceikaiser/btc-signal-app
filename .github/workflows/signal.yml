@@ -9,6 +9,10 @@ on:
         description: "Nur Telegram-Testnachricht senden"
         type: boolean
         default: false
+      resend_all:
+        description: "Alle bisherigen Trigger erneut an Telegram senden"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -30,8 +34,15 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: cd engine && python3 main.py --test-telegram
 
+      - name: Alle Trigger erneut senden
+        if: ${{ inputs.resend_all }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: cd engine && python3 main.py --resend-all
+
       - name: Engine-Lauf
-        if: ${{ !inputs.test_telegram }}
+        if: ${{ !inputs.test_telegram && !inputs.resend_all }}
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -39,7 +50,7 @@ jobs:
         run: cd engine && python3 main.py
 
       - name: Zustand committen
-        if: ${{ !inputs.test_telegram }}
+        if: ${{ !inputs.test_telegram && !inputs.resend_all }}
         run: |
           git config user.name "signal-engine"
           git config user.email "actions@users.noreply.github.com"
