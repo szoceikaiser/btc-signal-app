@@ -1,6 +1,6 @@
 # Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger
 
-Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, 1585 Stueck) · Stand: 2026-07-24 14:39 UTC
+Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, 1585 Stueck) · Stand: 2026-07-24 19:19 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -11,23 +11,23 @@ Drei Furkan-Filter, einzeln und kombiniert (Furkans Schritt 1 = Richtung aus Mak
 | Variante | Recall | Praezision | Rendite | Signale |
 |---|---|---|---|---|
 | nur Long (Basis) | 43% | 42% | +12.3 % | 92 |
-| +Flush core | 45% | 31% | +33.5 % | 145 **<-- beste** |
-| +Bedingter Stop | 43% | 41% | +9.2 % | 97 |
-| +Flush core +Bed.Stop | 45% | 30% | +33.1 % | 149 |
-| +Bed.Stop +Streng | 43% | 40% | +3.6 % | 91 |
+| +Kaufleiter | 43% | 40% | +20.7 % | 106 |
+| +Flush core | 45% | 31% | +33.5 % | 145 |
+| +Flush core +Kaufleiter | 45% | 31% | +42.1 % | 163 **<-- beste** |
+| +Kaufleiter +Bed.Stop | 43% | 40% | +17.2 % | 111 |
 | Long+Short (Ref) | 45% | 49% | -2.6 % | 59 |
 
-## Beste Kombination (nach Rendite): +Flush core (pivot_n=5, nur Long=True, Trendfilter=False, strenge Best.=False, Konfluenz=False)
+## Beste Kombination (nach Rendite): +Flush core +Kaufleiter (pivot_n=5, nur Long=True, Trendfilter=False, strenge Best.=False, Konfluenz=False)
 
 - Kauf-Trigger getroffen: 8/20 — 21.10.25, 17.11.25, 20.11.25, 21.11.25, 06.01.26, 08.01.26, 28.02.26, 23.03.26
 - Kauf verpasst: 25.09.25, 10.10.25, 27.10.25, 28.10.25, 29.10.25, 30.10.25, 04.11.25, 20.01.26, 29.01.26, 30.01.26, 31.01.26, 27.03.26
 - Verkauf-Trigger getroffen: 12/24 — 16.10.25, 04.11.25, 12.11.25, 06.01.26, 14.01.26, 25.01.26, 23.02.26, 02.03.26, 17.03.26, 08.04.26, 14.04.26, 22.04.26
 - Verkauf verpasst: 25.09.25, 02.10.25, 03.10.25, 10.10.25, 23.11.25, 28.11.25, 02.12.25, 03.12.25, 17.12.25, 02.02.26, 28.02.26, 17.04.26
-- Engine-Signal-Tage gesamt: 31 Kauf / 41 Verkauf
+- Engine-Signal-Tage gesamt: 34 Kauf / 41 Verkauf
 
 ## P&L-Simulation (beste Kombination)
 
-Start 10.000 € -> **13,348 €** (+33.5 %) · Buy&Hold im Zeitraum: -28.4 % · 73 Verkaufs-Vorgaenge, davon 58 im Gewinn · Gebuehr 0.1 % je Order, kein Hebel.
+Start 10.000 € -> **14,207 €** (+42.1 %) · Buy&Hold im Zeitraum: -28.4 % · 73 Verkaufs-Vorgaenge, davon 57 im Gewinn · Gebuehr 0.1 % je Order, kein Hebel.
 
 WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, KEIN Gewinn. Der Gewinn steht nur in dieser P&L-Zeile.
 
@@ -38,4 +38,4 @@ WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, KEIN Ge
 - Spot-CVD real (Binance Vision), Funding real (Kraken, sofern Historie reicht).
 - Kaisers Liste enthielt Duplikate (laut Kaiser evtl. Versehen) -> dedupliziert.
 
-Empfehlung: Variante '+Flush core' schneidet nach Rendite am besten ab. ABER Vorsicht: eine Variante, die nur durch WENIGE Signale (niedriger Recall) hoch rentiert, ist fragil (Glueck, nicht Koennen) — auf Rendite MIT anstaendiger Treffer-Quote achten. Filter (trend_filter/strict_confirm/confluence) sind in strategy_core.evaluate schaltbar; Default erst nach Bestaetigung setzen.
+Empfehlung: Variante '+Flush core +Kaufleiter' schneidet nach Rendite am besten ab. ABER Vorsicht: eine Variante, die nur durch WENIGE Signale (niedriger Recall) hoch rentiert, ist fragil (Glueck, nicht Koennen) — auf Rendite MIT anstaendiger Treffer-Quote achten. Filter (trend_filter/strict_confirm/confluence) sind in strategy_core.evaluate schaltbar; Default erst nach Bestaetigung setzen.

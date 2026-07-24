@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-24T14:39:59Z",
+ "generated_at": "2026-07-24T19:19:49Z",
  "zeitraum": "01.09.2025 - 30.04.2026",
  "variante": "nur Long (Basis)",
  "params": {
@@ -12,7 +12,8 @@
   "trend_filter": false,
   "strict_confirm": false,
   "confluence": false,
-  "conditional_stop": false
+  "conditional_stop": false,
+  "buy_ladder": false
  },
  "recall_kauf": "9/20",
  "recall_verkauf": "10/24",
