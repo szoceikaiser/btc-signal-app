@@ -27,6 +27,7 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 
+import coinalyze
 from strategy_core import (Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate)
 from telegram_notify import send_signals
@@ -110,17 +111,36 @@ def fetch_market_data(oi_history: list[list] | None = None,
     spot_raw = _get_json(SPOT_URL)
     funding = fetch_funding_8h()
 
+    # E9.1: echtes OI + Liquidationen von Coinalyze (falls Secret gesetzt), sonst
+    # Kraken-OI-Snapshot als Fallback (Liquidationen dann 0 = Proxy in classify_pattern).
+    cz_oi, cz_liq = {}, {}
+    api_key = os.environ.get("COINALYZE_API_KEY", "")
+    if api_key:
+        try:
+            cz_oi = coinalyze.oi_by_ts(api_key, days=90)
+            cz_liq = coinalyze.liquidations_by_ts(api_key, days=90)
+            print(f"Coinalyze: {len(cz_oi)} OI-Punkte, {len(cz_liq)} Liq-Punkte.")
+        except Exception as exc:  # noqa: BLE001
+            print(f"Coinalyze nicht verfuegbar ({exc}) -> Kraken-OI-Fallback.")
+
     oi_history = list(oi_history or [])
-    ts, oi = fetch_oi_snapshot()
-    if not oi_history or ts - oi_history[-1][0] >= 30 * 60 * 1000:   # max. alle 30 Min
-        oi_history.append([ts, oi])
-    oi_history = oi_history[-2000:]
-    oi_pairs = [(int(t), float(v)) for t, v in oi_history]
+    if not cz_oi:                          # eigene Snapshot-Historie nur ohne Coinalyze
+        try:
+            ts, oi = fetch_oi_snapshot()
+            if not oi_history or ts - oi_history[-1][0] >= 30 * 60 * 1000:
+                oi_history.append([ts, oi])
+            oi_history = oi_history[-2000:]
+        except Exception as exc:  # noqa: BLE001
+            print(f"Kraken-OI nicht verfuegbar ({exc}).")
+
+    use_cz = bool(cz_oi)
+    oi_pairs = sorted((int(t), float(v)) for t, v
+                      in (cz_oi.items() if use_cz else oi_history))
+    first_oi = oi_pairs[0][1] if oi_pairs else 0.0
 
     candles: list[Candle] = []
     flow: list[FlowPoint] = []
     spot_cvd = 0.0
-    first_oi = oi_pairs[0][1] if oi_pairs else 0.0
     for k in spot_raw:
         if int(k[6]) > now_ms:                                       # nur geschlossene
             continue
@@ -128,9 +148,12 @@ def fetch_market_data(oi_history: list[list] | None = None,
         candles.append(Candle(c_ts, float(k[1]), float(k[2]), float(k[3]), float(k[4])))
         spot_cvd += 2.0 * float(k[10]) - float(k[7])                 # Taker-Delta in USD
         close_ts = c_ts + CANDLE_MS
-        flow.append(FlowPoint(c_ts, spot_cvd, 0.0,
-                              _latest_leq(oi_pairs, close_ts, default=first_oi),
-                              _latest_leq(funding, close_ts)))
+        # Coinalyze-OI ist je 4h-Kerze (ts = Open-Time) -> direkt per c_ts; Kraken-
+        # Snapshot-Historie wird wie bisher zum Kerzenschluss zugeordnet.
+        oi_val = _latest_leq(oi_pairs, c_ts if use_cz else close_ts, default=first_oi)
+        long_liq, short_liq = cz_liq.get(c_ts, (0.0, 0.0))
+        flow.append(FlowPoint(c_ts, spot_cvd, 0.0, oi_val,
+                              _latest_leq(funding, close_ts), long_liq, short_liq))
     return candles, flow, oi_history
 
 

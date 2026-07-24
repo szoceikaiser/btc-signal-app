@@ -367,6 +367,29 @@ def test_trend_filter_blockt_long_gegen_1d_trend():
     assert not any(s.type == SignalType.KAUF_2 for s in sig_on)
 
 
+def test_muster4_via_long_liq_kaskade_ohne_oi_wipeout():
+    # E9.1: echte Long-Liquidations-Kaskade belegt die Kapitulation direkt,
+    # auch wenn der OI-Wipeout-Schwellwert nicht erreicht ist.
+    n = 12
+    candles = trend_candles(n, 100000, 95000)          # -5 % (scharf runter)
+    flow = [FlowPoint(i, float(i), 0.0, 1000.0, 0.0,   # OI konstant, Spot-CVD dreht hoch
+                      long_liq=(1_000_000.0 if i == n - 1 else 1000.0))
+            for i in range(n)]
+    assert classify_pattern(candles, flow) == Pattern.CAPITULATION_RESET
+    # Ohne die Kaskade (gleichmaessige Liq) und ohne OI-Wipeout: kein Muster 4
+    flow_flat = [FlowPoint(i, float(i), 0.0, 1000.0, 0.0, long_liq=1000.0) for i in range(n)]
+    assert classify_pattern(candles, flow_flat) != Pattern.CAPITULATION_RESET
+
+
+def test_muster3_via_short_liq_kaskade():
+    n = 12
+    candles = trend_candles(n, 100000, 103000)         # +3 % (>= sharp/2)
+    flow = [FlowPoint(i, 0.0, 0.0, 1000.0, 0.0,
+                      short_liq=(1_000_000.0 if i == n - 1 else 1000.0))
+            for i in range(n)]
+    assert classify_pattern(candles, flow) == Pattern.SHORT_COVERING
+
+
 def test_daily_fib_zone_liefert_zone():
     # Genug Tage fuer 1D-Pivots (n=5): klarer Impuls 100->140 mit Ruecklauf
     daily_closes = [100, 100, 100, 100, 100, 100, 120, 140, 140, 140,

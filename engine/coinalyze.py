@@ -47,9 +47,13 @@ def get_json(endpoint: str, params: dict, api_key: str,
 
 
 def fetch_history(endpoint: str, api_key: str, symbol: str = SYMBOL,
-                  interval: str = INTERVAL, days: int = 7, **kw):
-    to = int(time.time())
-    frm = to - days * 86400
+                  interval: str = INTERVAL, days: int = 7,
+                  frm: int | None = None, to: int | None = None, **kw):
+    """Holt eine History (from/to in Unix-Sekunden). Ohne frm/to: letzte `days` Tage."""
+    if to is None:
+        to = int(time.time())
+    if frm is None:
+        frm = to - days * 86400
     params = {"symbols": symbol, "interval": interval,
               "from": frm, "to": to, "convert_to_usd": "true"}
     return get_json(endpoint, params, api_key, **kw)

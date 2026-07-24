@@ -50,19 +50,22 @@ liefert die Historie mit.
   = `{t, l, s}` mit l=Long-Liq (USD), s=Short-Liq (USD). OI real ~6,7-6,9 Mrd. USD.
   OFFEN: Funding-Skalierung pruefen (Coinalyze ~0,005-0,0076; Engine-Konvention
   Fraktion 0,0001=0,01 % — beim Wiring normalisieren; Vorzeichen stimmt).
-- OFFEN (naechster Schritt): `main.py` — Coinalyze OI + Liquidationen einbinden
-  (ersetzt Kraken-OI-Snapshot + Liquidations-Proxy; Kraken als Fallback). FlowPoint um
-  long_liq/short_liq erweitern (abwaertskompatibel, Default 0).
-- OFFEN: `backtest.py` — echtes historisches OI/Liq in `build_series` (statt OI konstant)
-  -> Muster 4 wird im Backtest aktiv.
-- OFFEN: `classify_pattern` echte Liquidationen nutzen (Long-Liq-Kaskade -> Muster 4,
-  Short-Liq -> Muster 3), abwaertskompatibel.
+- ERLEDIGT: `main.py` bindet Coinalyze OI + Liquidationen ein (Kraken-Snapshot nur noch
+  Fallback ohne Key); FlowPoint um long_liq/short_liq erweitert (abwaertskompatibel).
+- ERLEDIGT: `backtest.py` speist echtes historisches OI/Liq in `build_series` ein
+  (statt OI konstant) -> Muster 4 im Backtest aktiv. Bericht zeigt OI-/Liq-Abdeckung.
+- ERLEDIGT: `classify_pattern` nutzt echte Liquidationen (Long-Liq-Kaskade -> Muster 4
+  auch ohne OI-Wipeout; Short-Liq -> Muster 3), rueckwaertskompatibel (ohne Liq = alte
+  Logik). 45/45 Tests gruen + Smoke-Test: Muster 4 feuert mit echten Daten.
+- E9.1 damit FERTIG (Live-Anbindung), Coinalyze-Reachability auf Actions bestaetigt.
 
-### E9.2 — Muster 2/3/4 mit echten Daten schärfen + Retest · Status: OFFEN
-- `classify_pattern` mit echtem OI + Liquidationen (statt Proxy): oi_wipeout, Liq-Cluster.
-- Backtest neu mit echtem OI: E8.1/E8.1b-Retest — greift `flush_entry` (Capitulation-
-  Einstieg) jetzt, wo Muster 4 aktiv ist? (War „off", WEIL OI fehlte.)
-- Ziel: bessere Dip-Auswahl (welcher Dip hält). Schaltbar, per Rendite+Recall gemessen.
+### E9.2 — Muster 2/3/4 mit echten Daten schärfen + Retest · Status: MESSBEREIT
+- ERLEDIGT: classify_pattern nutzt echtes OI + Liquidationen (in E9.1 gebaut).
+- Backtest-Grid auf die Retest-Frage umgestellt: nur-Long-Basis vs. Flush t1/core vs.
+  strenge Bestaetigung (alle mit echtem OI/Muster 4). Ziel: Greift `flush_entry`
+  (Dip-in-die-Kapitulation kaufen) jetzt, wo Muster 4 aktiv ist? (War in E8.1b „off",
+  WEIL OI fehlte.) NAECHSTER SCHRITT: Kaiser laesst Backtest laufen -> ich lese
+  BACKTEST.md (inkl. OI-/Liq-Abdeckung) und werte aus: Rendite MIT anstaendigem Recall.
 
 ### E9.3 — Bedingter Stop / Nachkauf-Leiter statt pauschalem Stop · Status: OFFEN
 - Furkans Kern (Kaiser): bei Verlust nachkaufen, wenn Order-Flow weiter bullisch; nur

@@ -12,11 +12,13 @@ Detailauswertung der besten). Ausfuehren: python3 backtest.py
 from __future__ import annotations
 
 import json
+import os
 import time
 import urllib.request
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+import coinalyze
 from main import _get_json, fetch_funding_8h
 from strategy_core import Candle, FlowPoint, LADDER_TRANCHE, Position, evaluate
 
@@ -67,14 +69,15 @@ def V(label, **kw):
     return cfg
 
 
+# E9.2: Mit echtem OI (Coinalyze) wird Muster 4 (Kapitulation) aktiv -> testet, ob
+# flush_entry (Dip-in-die-Kapitulation kaufen) jetzt greift, das ohne OI "off" war.
 GRID = [
-    V("Long+Short (alt)"),
-    V("nur Long", bias_short=False),
-    V("+Trendfilter", bias_short=False, trend_filter=True),
+    V("nur Long (Basis)", bias_short=False),
+    V("+Flush t1", bias_short=False, flush_entry="t1"),
+    V("+Flush core", bias_short=False, flush_entry="core"),
     V("+Strenge Bestaetigung", bias_short=False, strict_confirm=True),
-    V("+Konfluenz 4h/1D", bias_short=False, confluence=True),
-    V("+alle drei", bias_short=False, trend_filter=True, strict_confirm=True,
-      confluence=True),
+    V("+Flush t1 +Streng", bias_short=False, flush_entry="t1", strict_confirm=True),
+    V("Long+Short (Ref)"),
 ]
 
 
@@ -95,11 +98,16 @@ def fetch_candles_range(start_ms: int, end_ms: int) -> list:
     return out
 
 
-def build_series(raw: list, funding: list[tuple[int, float]]):
+def build_series(raw: list, funding: list[tuple[int, float]],
+                 oi_map: dict | None = None, liq_map: dict | None = None):
+    """OI aus oi_map (Coinalyze, E9.1) je Kerze; ohne oi_map bleibt OI konstant (neutral).
+    liq_map liefert (long_liq, short_liq) je Kerzen-Open-ts."""
     candles, flow, spot_cvd = [], [], 0.0
+    oi_pairs = sorted(oi_map.items()) if oi_map else []
+    first_oi = oi_pairs[0][1] if oi_pairs else 1.0
 
-    def latest_leq(pairs, ts):
-        val = 0.0
+    def latest_leq(pairs, ts, default=0.0):
+        val = default
         for t, v in pairs:
             if t <= ts:
                 val = v
@@ -111,8 +119,10 @@ def build_series(raw: list, funding: list[tuple[int, float]]):
         ts = int(k[0])
         candles.append(Candle(ts, float(k[1]), float(k[2]), float(k[3]), float(k[4])))
         spot_cvd += 2.0 * float(k[10]) - float(k[7])
-        flow.append(FlowPoint(ts, spot_cvd, 0.0, 1.0,          # OI konstant (neutral)
-                              latest_leq(funding, ts + CANDLE_MS)))
+        oi_val = latest_leq(oi_pairs, ts, first_oi) if oi_pairs else 1.0
+        long_liq, short_liq = (liq_map.get(ts, (0.0, 0.0)) if liq_map else (0.0, 0.0))
+        flow.append(FlowPoint(ts, spot_cvd, 0.0, oi_val,
+                              latest_leq(funding, ts + CANDLE_MS), long_liq, short_liq))
     return candles, flow
 
 
@@ -247,7 +257,22 @@ def main():
     except Exception as exc:  # noqa: BLE001
         print(f"Funding nicht verfuegbar ({exc}) -> 0 (Bestaetigungen gelockert).")
         funding = []
-    candles, flow = build_series(raw, funding)
+
+    # E9.1: echtes historisches OI + Liquidationen (Coinalyze) fuer den Zeitraum ->
+    # Muster 4 (Kapitulation) wird im Backtest aktiv. Ohne Key: OI konstant (wie bisher).
+    oi_map, liq_map = {}, {}
+    api_key = os.environ.get("COINALYZE_API_KEY", "")
+    if api_key:
+        try:
+            oi_map = coinalyze.oi_by_ts(api_key, frm=WARMUP_MS // 1000, to=END_MS // 1000)
+            liq_map = coinalyze.liquidations_by_ts(api_key, frm=WARMUP_MS // 1000,
+                                                   to=END_MS // 1000)
+            print(f"Coinalyze: {len(oi_map)} OI-Punkte, {len(liq_map)} Liq-Punkte "
+                  f"(4h-Historie reicht ggf. nicht bis Sep'25 zurueck -> aeltere Kerzen OI neutral).")
+        except Exception as exc:  # noqa: BLE001
+            print(f"Coinalyze nicht verfuegbar ({exc}) -> OI konstant/neutral.")
+
+    candles, flow = build_series(raw, funding, oi_map, liq_map)
 
     results = []
     for cfg in GRID:
@@ -315,7 +340,12 @@ def main():
         "",
         "## Einschraenkungen",
         "",
-        "- Open Interest: keine kostenlose Historie fuer den Zeitraum -> OI-Muster neutral.",
+        (f"- Open Interest + Liquidationen: **echt von Coinalyze** — {len(oi_map)} OI-Punkte, "
+         f"{len(liq_map)} Liq-Punkte im Zeitraum. Muster 4 (Kapitulation) aktiv."
+         if oi_map else
+         "- Open Interest: keine Coinalyze-Daten (Key/Reichweite?) -> OI konstant/neutral, Muster 4 inaktiv."),
+        (f"  (4h-Reichweite von Coinalyze deckt evtl. nicht bis Sep'25 zurueck; "
+         f"aeltere Kerzen dann OI neutral.)" if oi_map else ""),
         "- Spot-CVD real (Binance Vision), Funding real (Kraken, sofern Historie reicht).",
         "- Kaisers Liste enthielt Duplikate (laut Kaiser evtl. Versehen) -> dedupliziert.",
         "",

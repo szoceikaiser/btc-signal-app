@@ -31,6 +31,8 @@ class FlowPoint:
     fut_cvd: float       # kumuliertes Futures-Delta (USD)
     oi: float            # Open Interest (USD)
     funding: float       # 8h-Funding-Rate, Durchschnitt (z. B. 0.0001 = 0.01 %)
+    long_liq: float = 0.0   # Long-Liquidationen dieser Kerze (USD), E9.1 (Coinalyze)
+    short_liq: float = 0.0  # Short-Liquidationen dieser Kerze (USD)
 
 
 class Pattern(Enum):
@@ -274,11 +276,15 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
                      window: int = 12,
                      oi_wipeout_pct: float = 0.05,
                      sharp_move_pct: float = 0.04,
-                     funding_hot: float = 0.0001) -> Pattern:
+                     funding_hot: float = 0.0001,
+                     liq_spike_mult: float = 3.0) -> Pattern:
     """Ordnet die juengste Marktphase einem der 4 Kompass-Muster zu.
 
-    `window` = Anzahl Kerzen (12 x 4h = 2 Tage). Schwellen sind Startwerte,
-    Kalibrierung in E4b. Liquidations-Proxy: OI-Abfall + scharfe Preisbewegung.
+    `window` = Anzahl Kerzen (12 x 4h = 2 Tage). Schwellen sind Startwerte.
+    E9.1: echte Liquidationen (Coinalyze) verstaerken Muster 3/4 — eine Long-Liq-
+    Kaskade belegt die Kapitulation direkt (Muster 4), eine Short-Liq-Kaskade das
+    Short-Covering (Muster 3). Rueckwaertskompatibel: ohne Liq-Daten (=0) gilt die
+    bisherige OI-Proxy-Logik.
     """
     if len(candles) < window or len(flow) < window:
         return Pattern.NEUTRAL
@@ -290,13 +296,21 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
     funding_now = f[-1].funding
     funding_rising = f[-1].funding > f[0].funding
 
-    # 4: Capitulation/Flush + Reset — Preis scharf runter, OI-Wipeout, Spot-CVD dreht
-    if (price_chg <= -sharp_move_pct and oi_chg <= -oi_wipeout_pct):
+    def _liq_spike(get) -> bool:
+        vals = [get(p) for p in f]
+        base = sum(vals[:-1]) / (len(vals) - 1) if len(vals) > 1 else 0.0
+        return base > 0 and vals[-1] >= liq_spike_mult * base
+    long_liq_spike = _liq_spike(lambda p: p.long_liq)
+    short_liq_spike = _liq_spike(lambda p: p.short_liq)
+
+    # 4: Capitulation/Flush + Reset — Preis scharf runter, Spot-CVD dreht,
+    #    dazu OI-Wipeout ODER echte Long-Liquidations-Kaskade
+    if price_chg <= -sharp_move_pct:
         spot_turning = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
-        if spot_turning:
+        if spot_turning and (oi_chg <= -oi_wipeout_pct or long_liq_spike):
             return Pattern.CAPITULATION_RESET
-    # 3: Short-Covering — Preis hoch, OI runter
-    if price_chg >= sharp_move_pct / 2 and oi_chg <= -0.02:
+    # 3: Short-Covering — Preis hoch, OI runter ODER echte Short-Liquidations-Kaskade
+    if price_chg >= sharp_move_pct / 2 and (oi_chg <= -0.02 or short_liq_spike):
         return Pattern.SHORT_COVERING
     # 2: Derivate-Pump — Futures-CVD stark hoch, Spot flach/runter, OI deutlich hoch, Funding zieht an
     has_fut = any(p.fut_cvd for p in f)
