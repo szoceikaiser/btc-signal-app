@@ -78,9 +78,15 @@ liefert die Historie mit.
   panel-Flag; das Chart-Panel (site/data/backtest.json) zeigt jetzt die LIVE-Einstellung
   ("nur Long (Basis)"), NICHT mehr die beste Fantasie-Variante (vorher irrefuehrend +33 %).
   index.html beschriftet es als "historische Simulation, keine Garantie, kein Live-Konto".
-- Backtest-Grid auf E9.3-Frage umgestellt: Basis vs. Flush core vs. bedingter Stop vs.
-  Flush+bedingter Stop. NAECHSTER SCHRITT: Kaiser laesst Backtest laufen -> ich werte aus,
-  ob der bedingte Stop den aggressiven Flush absichert (Rendite MIT Recall/Praezision).
+- MESSLAUF-ERGEBNIS (2026-07-24, echtes OI 998 Punkte): bedingter Stop hilft NICHT.
+  Allein +9,2 % (schlechter als Basis +12,3 %); mit Flush +33,1 % vs. Flush allein +33,5 %
+  (kein Unterschied -> sichert Flush nicht ab). Gruende: (1) Flush kauft ohnehin aggressiv
+  Dips -> conditional_stop redundant; (2) OI deckt nur die juengere Haelfte ab (~166 Tage),
+  Muster 4 im frueheren Teil blind -> Test handicapt. KONSEQUENZ: conditional_stop NICHT
+  als Default (bleibt aus/schaltbar). Datengrenze: Coinalyze loescht altes 4h-OI (~250 Tage)
+  -> Backtest bleibt fuer alte Zeit begrenzt; LIVE hat die Engine ab jetzt vollen Order-Flow.
+  EMPFEHLUNG: konsolidieren statt ueberoptimieren. Robuster Gewinn = "nur Long" + echte
+  Daten +12,3 % (schon live, Panel zeigt es). Flush/bedingter Stop bleiben aus.
 
 ### E9.4 — Liquidationen sichtbar für Kaiser · Status: OFFEN
 - Chart-Seite: Liquidations-Daten/-Cluster anzeigen; Link/Einbindung einer kostenlosen
