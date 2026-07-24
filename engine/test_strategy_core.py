@@ -170,7 +170,7 @@ def test_long_lebenszyklus_kauf1_kauf2_tp1_tp2():
         c(11, 113, 120.5, 113.0, 120.0),   # Extension 1.618 (119.78) -> TEILVERKAUF 2
     ]
     pos = Position()
-    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2)
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, tp_ladder=False)
     types = [s.type for s in sigs]
     assert types == [SignalType.KAUF_1, SignalType.KAUF_2,
                      SignalType.TEILVERKAUF_1, SignalType.TEILVERKAUF_2]
@@ -201,9 +201,9 @@ def test_tp_ladder_gestaffelte_teilgewinne():
     assert [round(s.price, 1) for s in ladder] == [111.6, 112.6]
     assert all(s.tranche_pct == 15 for s in ladder) and pos.tp_rungs == 2
 
-    # Ohne tp_ladder (Default): dieselben Kerzen erzeugen keine Leiter-Stufen
+    # Mit tp_ladder=False: dieselben Kerzen erzeugen keine Leiter-Stufen
     pos2 = Position()
-    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2)
+    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2, tp_ladder=False)
     assert [s.type for s in sigs2] == [
         SignalType.KAUF_1, SignalType.KAUF_2, SignalType.TEILVERKAUF_1]
 

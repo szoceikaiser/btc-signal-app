@@ -293,13 +293,15 @@ LADDER_TRANCHE = 15
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
              pivot_n: int = 5, k_atr: float = 2.0,
-             flush_entry: str = "off", tp_ladder: bool = False) -> list[Signal]:
+             flush_entry: str = "off", tp_ladder: bool = True) -> list[Signal]:
     # Defaults kalibriert per Backtest 2026-07-23 (BACKTEST.md): n=5, k=2.0,
     # flush='off' — beste Kombination (Recall 45 %, Praezision 54 %, Rendite -6,0 %
     # vs. Buy&Hold -28,4 %). flush_entry ("off"/"t1"/"core") bleibt schaltbar:
     # mit echter Live-OI-Historie (Muster 4 aktiv) in E8.3 erneut testen.
     # tp_ladder (E8.2): gestaffelte Zwischen-Teilgewinne an Ext 0.8/0.9 vor dem
-    # 1.0-Ziel — Default False bis per Backtest-Grid gemessen (Verkaufs-Recall).
+    # 1.0-Ziel. Default True seit Backtest 2026-07-24: bei n=5 Recall 45 % und
+    # Praezision 54 % unveraendert, Rendite -5,3 % statt -6,0 % (kein Nachteil,
+    # bildet Furkans gestaffelte Gewinnmitnahme ab). Recall != Gewinn.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).

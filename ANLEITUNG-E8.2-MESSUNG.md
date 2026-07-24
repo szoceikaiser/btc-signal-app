@@ -1,5 +1,13 @@
 # Anleitung: E8.2 messen — gestaffelte Teilgewinne (Verkaufs-Leiter)
 
+> **Ergebnis (gemessen 2026-07-24):** Die Leiter wurde eingeschaltet
+> (`tp_ladder=True`). Bei `pivot_n=5` blieben Recall (45 %) und Präzision (54 %)
+> gleich, die simulierte Rendite verbesserte sich leicht (−5,3 % statt −6,0 %) —
+> kein Nachteil, und sie bildet Furkans gestaffelte Gewinnmitnahme ab. Damit die
+> Umstellung live wird, ist **ein weiterer Push nötig** (siehe unten). Wer lieber
+> weniger Signale möchte, kann sie ausgeschaltet lassen — Rückfrage genügt.
+
+
 Was neu ist: Die Engine kann jetzt in **kleinen Stufen** in die Stärke verkaufen
 (Zwischenziele bei Extension **0.8** und **0.9**, je 15 %, VOR dem 1.0-Ziel) —
 statt nur einmal am 1.0-Ziel. Das bildet Furkans mehrtägige Verkaufs-Leitern nach
