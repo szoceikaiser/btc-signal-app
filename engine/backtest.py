@@ -81,9 +81,10 @@ GRID = [
     V("+Flush core", bias_short=False, flush_entry="core"),
     V("+Flush core +Kaufleiter", bias_short=False, flush_entry="core", buy_ladder=True),
     V("+Kaufleiter +Bed.Stop", bias_short=False, buy_ladder=True, conditional_stop=True),
-    # Long+Short = Analyse-/Chart-Variante (Kaiser: alle Longs UND Shorts zeigen, P&L
-    # getrennt) -> speist Panel + Chart-Signaldatei.
-    V("Long+Short (Analyse)", panel=True),
+    # LIVE-Einstellung (Kaiser 2026-07-24): Long+Short + Kaufleiter + Flush core. Speist
+    # Panel + Chart-Signaldatei (alle Longs UND Shorts, P&L getrennt). Flush-Einstiege
+    # sind in Telegram als "deine Entscheidung" markiert.
+    V("Live: L+S +Kaufleiter +Flush", panel=True, buy_ladder=True, flush_entry="core"),
 ]
 
 

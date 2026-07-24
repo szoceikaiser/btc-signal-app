@@ -174,7 +174,8 @@ def test_long_lebenszyklus_kauf1_kauf2_tp1_tp2():
         c(11, 113, 120.5, 113.0, 120.0),   # Extension 1.618 (119.78) -> TEILVERKAUF 2
     ]
     pos = Position()
-    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, tp_ladder=False)
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2,
+                           tp_ladder=False, buy_ladder=False, flush_entry="off")
     types = [s.type for s in sigs]
     assert types == [SignalType.KAUF_1, SignalType.KAUF_2,
                      SignalType.TEILVERKAUF_1, SignalType.TEILVERKAUF_2]
@@ -196,7 +197,8 @@ def test_tp_ladder_gestaffelte_teilgewinne():
         c(12, 113, 114.0, 112.5, 113.8),   # >=113.6 -> TEILVERKAUF 1
     ]
     pos = Position()
-    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, tp_ladder=True)
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2,
+                           tp_ladder=True, buy_ladder=False, flush_entry="off")
     assert [s.type for s in sigs] == [
         SignalType.KAUF_1, SignalType.KAUF_2,
         SignalType.TEILVERKAUF_LADDER, SignalType.TEILVERKAUF_LADDER,
@@ -207,7 +209,8 @@ def test_tp_ladder_gestaffelte_teilgewinne():
 
     # Mit tp_ladder=False: dieselben Kerzen erzeugen keine Leiter-Stufen
     pos2 = Position()
-    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2, tp_ladder=False)
+    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2,
+                            tp_ladder=False, buy_ladder=False, flush_entry="off")
     assert [s.type for s in sigs2] == [
         SignalType.KAUF_1, SignalType.KAUF_2, SignalType.TEILVERKAUF_1]
 
@@ -225,11 +228,11 @@ def test_capitulation_einstieg_modus_t1():
     assert pos.state == PosState.T1 and pos.retrace_extreme == 101.5
 
 
-def test_default_flush_off_kein_signal():
+def test_flush_off_kein_signal():
     base = zigzag_candles()
     path = base + [c(8, 105.5, 106.0, 101.5, 104.0)]
     pos = Position()
-    assert run_incremental(path, neg_funding_flow(), pos, pivot_n=2) == []
+    assert run_incremental(path, neg_funding_flow(), pos, pivot_n=2, flush_entry="off") == []
 
 
 def test_capitulation_einstieg_modus_core_und_off():
@@ -322,11 +325,12 @@ def test_strict_confirm_verlangt_beide_bestaetigungen():
     path = base + [c(8, 106, 106.5, 104.5, 105.5),    # 0.5 -> KAUF 1
                    c(9, 105, 105.5, 103.6, 104.5)]    # GP -> KAUF 2 (Upgrade)
     pos = Position()
-    loose = run_incremental(path, pos_funding_cvdup_flow(), pos, pivot_n=2)
+    loose = run_incremental(path, pos_funding_cvdup_flow(), pos, pivot_n=2,
+                            buy_ladder=False, flush_entry="off")
     assert [s.type for s in loose] == [SignalType.KAUF_1, SignalType.KAUF_2]
     pos2 = Position()
     strict = run_incremental(path, pos_funding_cvdup_flow(), pos2,
-                             pivot_n=2, strict_confirm=True)
+                             pivot_n=2, strict_confirm=True, buy_ladder=False, flush_entry="off")
     assert [s.type for s in strict] == [SignalType.KAUF_1]   # KAUF 2 blockiert
 
 
@@ -460,5 +464,5 @@ def test_buy_ladder_nachkauf_bei_neuen_tiefkerzen_in_zone():
     assert sigs[0].type == SignalType.KAUF_1
     # Ohne buy_ladder: keine Leiter-Nachkaeufe
     pos2 = Position()
-    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2)
+    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2, buy_ladder=False)
     assert not any("Mehrtages-Leiter" in s.reason for s in sigs2)

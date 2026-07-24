@@ -48,7 +48,11 @@ def _fmt_ts(ts_ms: int) -> str:
 def format_signal(sig: dict) -> str:
     """Erzeugt die Telegram-Nachricht fuer ein Signal-Dict (Signal.to_dict())."""
     emoji, _code = STYLE.get(sig["type"], ("\U0001F514", "?"))
-    lines = [f"{emoji} {sig['label']}"]
+    lines = []
+    if sig.get("tag") == "FLUSH":
+        lines.append("⚠️ AGGRESSIVER FLUSH-EINSTIEG (Kapitulation) — "
+                     "DEINE Entscheidung, kein Standard-Signal!")
+    lines.append(f"{emoji} {sig['label']}")
     lines.append(f"BTC {_fmt_usd(sig['price'])}")
     if sig.get("tranche_pct"):
         lines.append(f"Tranche: {sig['tranche_pct']} % der Position")

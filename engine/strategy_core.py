@@ -73,6 +73,7 @@ class Signal:
     tranche_pct: int          # Anteil der Gesamtposition in %
     reason: str               # Begruendung (Muster/Level) fuer die Telegram-Nachricht
     stop_ref: Optional[float] = None
+    tag: str = ""             # z. B. "FLUSH" = aggressiver Kapitulations-Einstieg (Kaiser entscheidet)
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -383,10 +384,10 @@ LADDER_TRANCHE = 15
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
              pivot_n: int = 5, k_atr: float = 2.0,
-             flush_entry: str = "off", tp_ladder: bool = True,
+             flush_entry: str = "core", tp_ladder: bool = True,
              trend_filter: bool = False, trend_ema: int = 50,
              strict_confirm: bool = False, confluence: bool = False,
-             conditional_stop: bool = False, buy_ladder: bool = False) -> list[Signal]:
+             conditional_stop: bool = False, buy_ladder: bool = True) -> list[Signal]:
     # Defaults kalibriert per Backtest 2026-07-23 (BACKTEST.md): n=5, k=2.0,
     # flush='off' — beste Kombination (Recall 45 %, Praezision 54 %, Rendite -6,0 %
     # vs. Buy&Hold -28,4 %). flush_entry ("off"/"t1"/"core") bleibt schaltbar:
@@ -476,7 +477,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     pos.retrace_extreme = cur.low
                     signals.append(Signal(cur.ts, sig_t, cur.close, tr,
                                           f"Capitulation: GP durchschlagen (Tief {cur.low:.0f}), Schluss ueber Invalidierung ({pattern.name})",
-                                          stop_ref=z.invalidation))
+                                          stop_ref=z.invalidation, tag="FLUSH"))
         elif (not imp.up) and bias_short and pattern != Pattern.CAPITULATION_RESET:
             if (cur.high >= z.level_05 and cur.high < z.gp_upper
                     and _trend_ok(False) and _confluence_ok(cur.high)):
@@ -506,7 +507,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     pos.retrace_extreme = cur.high
                     signals.append(Signal(cur.ts, sig_t, cur.close, tr,
                                           f"Squeeze: GP durchschlagen (Hoch {cur.high:.0f}), Schluss unter Invalidierung ({pattern.name})",
-                                          stop_ref=z.invalidation))
+                                          stop_ref=z.invalidation, tag="FLUSH"))
 
     # --- Positions-Management
     elif pos.state != PosState.FLAT and pos.zones is not None:

@@ -28,6 +28,15 @@ def test_format_stoploss():
     assert "Stop-Referenz" not in msg              # Stop hat keine Stop-Referenz
 
 
+def test_flush_signal_wird_markiert():
+    flush = dict(KAUF2)
+    flush["tag"] = "FLUSH"
+    msg = format_signal(flush)
+    assert "AGGRESSIVER FLUSH-EINSTIEG" in msg and "DEINE Entscheidung" in msg
+    # Normale Signale ohne tag bekommen die Warnung nicht
+    assert "AGGRESSIVER FLUSH" not in format_signal(KAUF2)
+
+
 def test_alle_signaltypen_haben_style():
     for st in SignalType:
         assert st.name in STYLE, f"STYLE fehlt fuer {st.name}"

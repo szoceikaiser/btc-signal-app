@@ -96,10 +96,17 @@ liefert die Historie mit.
   eine kleine Nachkauf-Tranche (BUY_LADDER_TRANCHE=15 %), hoechstens MAX_BUY_RUNGS=3.
   Position.buy_rungs zaehlt + wird persistiert. Rueckwaertskompatibel (Default aus).
   49/49 Tests. Grid testet Kaufleiter allein + mit Flush + mit bedingtem Stop.
-- NAECHSTER SCHRITT: Kaiser laesst Backtest laufen -> ich werte aus: treffen wir mehr
-  von Furkans Kauf-Tagen (Kauf-Recall hoch?) UND was macht es mit der Rendite (ehrlich
-  getrennt; Erinnerung: die Jan-Leiter wurde von Furkan spaeter gestoppt -> mehr Treffer
-  ist nicht automatisch mehr Gewinn).
+- MESSLAUF-ERGEBNIS (Voll-Daten-Fenster 15.11.-01.05.): Kaufleiter HILFT — verdoppelt fast
+  den Long-Gewinn (nur Long +9,8 %->+18,0 %, +977->+1.802 €) bei GLEICHER Treffer-/Praezision.
+  Erster "mehr kaufen"-Hebel mit echtem Nutzen (Furkans Methode). KONSEQUENZ: buy_ladder=True
+  als DEFAULT gesetzt.
+- ZUSATZ (Kaiser 2026-07-24): flush_entry='core' ebenfalls als DEFAULT — ABER Flush-Einstiege
+  tragen tag='FLUSH' und werden in Telegram als "AGGRESSIVER FLUSH-EINSTIEG — DEINE Entscheidung"
+  markiert (Kaiser entscheidet individuell, App sendet nur Signale). Panel/Chart-Variante auf
+  "Live: L+S +Kaufleiter +Flush" umgestellt (behebt Kaisers Verwirrung: Panel zeigte vorher die
+  +2,8 % der Long+Short-Analyse statt der echten Live-Einstellung). 50/50 Tests.
+  Long/Short-Split (Fenster): Short +762 € > Long +315 € — in diesem Zeitraum waren Shorts
+  sogar profitabel (haengt vom Zeitraum ab).
 
 ### E9.6 — Ehrliche Messung + Web-Auswertung (Kaisers Vorgaben) · Status: MESSBEREIT
 - ERLEDIGT: Backtest laeuft nur ueber das **Voll-Daten-Fenster** (ab der ersten OI-Kerze;
