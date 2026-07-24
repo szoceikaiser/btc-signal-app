@@ -13,6 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Backtest ausfuehren
+        env:
+          COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
         run: cd engine && python3 backtest.py
       - name: Bericht committen
         run: |
