@@ -14,20 +14,21 @@ Browser. Grundprinzip immer gleich: Datei öffnen → **Stift-Symbol** (oben rec
 
 ## 1. Long/Short an- oder abschalten
 
-Datei: [`site/data/state.json`](https://github.com/szoceikaiser/btc-signal-app/edit/main/site/data/state.json)
+Datei: [`site/data/config.json`](https://github.com/szoceikaiser/btc-signal-app/edit/main/site/data/config.json)
+(diese Datei wird von der Engine NIE überschrieben — hier gibt es keine Konflikte)
 
 1. Link öffnen (führt direkt in den Bearbeiten-Modus)
-2. Den Block `"config"` suchen:
+2. Die Werte findest du oben:
    ```json
-   "config": { "bias_long": true, "bias_short": true }
+   { "bias_long": true, "bias_short": false }
    ```
-3. Die Seite, die du NICHT handeln willst, auf `false` setzen.
-   Beispiel „nur Long": `"bias_short": false`
+3. Auf `true`/`false` setzen, welche Richtung die App handeln soll.
+   „nur Long": `"bias_short": false` · beide: beide `true`.
 4. **Commit changes**
 
 Wirkung: ab dem nächsten Engine-Lauf (max. 15 Min). Kontrolle: Datei neu öffnen —
-steht dein Wert noch drin? (Selten überschreibt ein zeitgleicher Engine-Lauf die
-Änderung — dann einfach wiederholen.)
+steht dein Wert noch drin? (Anders als früher überschreibt die Engine diese Datei
+nicht, also bleibt deine Änderung sicher stehen.)
 
 ## 2. Prüf-Takt der Engine ändern
 

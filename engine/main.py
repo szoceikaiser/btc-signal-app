@@ -227,7 +227,16 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         print("Keine Kerzen erhalten — Abbruch.")
         return []
 
+    # Einstellungen: bevorzugt aus config.json (wird von der Engine NIE ueberschrieben ->
+    # konfliktfrei aenderbar), sonst aus dem alten state, sonst Default.
     cfg = old_state.get("config", {"bias_long": True, "bias_short": True})
+    cfg_path = data_dir / "config.json"
+    if cfg_path.exists():
+        try:
+            loaded = json.loads(cfg_path.read_text(encoding="utf-8"))
+            cfg = {**cfg, **{k: v for k, v in loaded.items() if not k.startswith("_")}}
+        except Exception as exc:  # noqa: BLE001
+            print(f"config.json nicht lesbar ({exc}) -> alte Einstellungen.")
     new_signals: list[dict] = []
     # Nachholen: alle Kerzen, die neuer sind als der letzte verarbeitete Stand
     for i, c in enumerate(candles):
