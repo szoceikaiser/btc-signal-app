@@ -49,10 +49,15 @@ BUY_TYPES = {"KAUF_1", "KAUF_2", "NACHKAUF",
 SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS",
               "SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"}
 
-# Grid: k_atr=2.0 und flush='off' fix (per E8.1b als beste bestaetigt). E8.2 testet
-# die gestaffelten Zwischen-Teilgewinne (tp_ladder) als neue Dimension gegen den
-# Verkaufs-Recall.
-GRID = [(n, 2.0, "off", ladder) for n in (3, 4, 5, 6) for ladder in (False, True)]
+# Grid: k_atr=2.0 fix, flush='off' und tp_ladder=True (per E8.1b/E8.2 als beste
+# bestaetigt). Neue Dimension: Richtung. Furkan hat in diesem Zeitraum laut Kaisers
+# Ordern fast ausschliesslich LONG gehandelt (seine "Verkaeufe" waren Long-Schliessungen,
+# keine Shorts) — sein uebergeordneter Bias kam aus Makro (Transkript 16:03-19:41).
+# Darum vergleichen wir "ls" (Long+Short, bisher) gegen "long" (nur Long, bias_short=False),
+# um zu messen, ob die von Furkan nie gehandelten Shorts uns Rendite kosten.
+DIRECTIONS = {"ls": (True, True), "long": (True, False)}
+GRID = [(n, 2.0, "off", True, d)
+        for n in (3, 4, 5, 6) for d in ("ls", "long")]
 
 
 def fetch_candles_range(start_ms: int, end_ms: int) -> list:
@@ -94,7 +99,8 @@ def build_series(raw: list, funding: list[tuple[int, float]]):
 
 
 def run_backtest(candles, flow, pivot_n: int, k_atr: float,
-                 flush_entry: str = "off", tp_ladder: bool = False) -> list[dict]:
+                 flush_entry: str = "off", tp_ladder: bool = True,
+                 bias_long: bool = True, bias_short: bool = True) -> list[dict]:
     pos = Position()
     signals = []
     for i in range(len(candles)):
@@ -102,6 +108,7 @@ def run_backtest(candles, flow, pivot_n: int, k_atr: float,
             pos.last_signal_ts = candles[i].ts                 # Warmup ohne Signale
             continue
         for s in evaluate(candles[:i + 1], flow[:i + 1], pos,
+                          bias_long=bias_long, bias_short=bias_short,
                           pivot_n=pivot_n, k_atr=k_atr, flush_entry=flush_entry,
                           tp_ladder=tp_ladder):
             signals.append(s.to_dict())
@@ -229,18 +236,21 @@ def main():
     candles, flow = build_series(raw, funding)
 
     results = []
-    for n, k, mode, ladder in GRID:
+    for n, k, mode, ladder, direction in GRID:
         t0 = time.time()
-        sigs = run_backtest(candles, flow, n, k, flush_entry=mode, tp_ladder=ladder)
+        bl, bs = DIRECTIONS[direction]
+        sigs = run_backtest(candles, flow, n, k, flush_entry=mode, tp_ladder=ladder,
+                            bias_long=bl, bias_short=bs)
         sc = score(sigs)
         p = simulate(sigs, candles)
-        results.append((n, k, mode, ladder, sigs, sc, p))
-        print(f"n={n} k={k} flush={mode} ladder={ladder}: Recall {sc['recall']:.0%}, "
-              f"Praezision {sc['precision']:.0%}, Rendite {p['rendite_pct']:+.1f} %, "
-              f"{len(sigs)} Signale ({time.time()-t0:.0f}s)")
+        results.append((n, k, mode, ladder, direction, sigs, sc, p))
+        print(f"n={n} k={k} flush={mode} ladder={ladder} dir={direction}: "
+              f"Recall {sc['recall']:.0%}, Praezision {sc['precision']:.0%}, "
+              f"Rendite {p['rendite_pct']:+.1f} %, {len(sigs)} Signale ({time.time()-t0:.0f}s)")
 
-    best = max(results, key=lambda r: (r[5]["recall"], r[5]["precision"]))
-    n, k, mode, ladder, sigs, sc, pnl = best
+    # Auswahl: primaer Rendite (das Geld-Maß), dann Recall, dann Praezision
+    best = max(results, key=lambda r: (r[7]["rendite_pct"], r[6]["recall"], r[6]["precision"]))
+    n, k, mode, ladder, direction, sigs, sc, pnl = best
 
     lines = [
         "# Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger",
@@ -253,19 +263,21 @@ def main():
         "",
         "## Parameter-Vergleich",
         "",
-        "(Flush-Modus = Einstieg bei GP-Durchschlag; Leiter = gestaffelte Zwischen-"
-        "Teilgewinne an Ext 0.8/0.9 je 15 % vor dem 1.0-Ziel, E8.2)",
+        "(Leiter = gestaffelte Zwischen-Teilgewinne Ext 0.8/0.9, E8.2. Richtung: "
+        "ls = Long+Short wie bisher, long = nur Long/bias_short=false. Furkan handelte "
+        "in diesem Zeitraum fast nur Long. Sortiert nach Rendite = das Geld-Maß.)",
         "",
-        "| pivot_n | k_atr | Flush | Leiter | Recall | Praezision | Rendite | Signale |",
-        "|---|---|---|---|---|---|---|---|",
+        "| pivot_n | Richtung | Leiter | Recall | Praezision | Rendite | Signale |",
+        "|---|---|---|---|---|---|---|",
     ]
-    for rn, rk, rm, rl, rsigs, rsc, rp in results:
-        mark = " **<-- beste**" if (rn, rk, rm, rl) == (n, k, mode, ladder) else ""
-        lines.append(f"| {rn} | {rk} | {rm} | {'an' if rl else 'aus'} | {rsc['recall']:.0%} | "
+    for rn, rk, rm, rl, rd, rsigs, rsc, rp in results:
+        mark = " **<-- beste**" if (rn, rk, rm, rl, rd) == (n, k, mode, ladder, direction) else ""
+        lines.append(f"| {rn} | {rd} | {'an' if rl else 'aus'} | {rsc['recall']:.0%} | "
                      f"{rsc['precision']:.0%} | {rp['rendite_pct']:+.1f} % | {len(rsigs)}{mark} |")
     lines += [
         "",
-        f"## Beste Kombination: pivot_n={n}, k_atr={k}, flush={mode}, Leiter={'an' if ladder else 'aus'}",
+        f"## Beste Kombination (nach Rendite): pivot_n={n}, Richtung={direction}, "
+        f"Leiter={'an' if ladder else 'aus'}, flush={mode}, k_atr={k}",
         "",
         f"- Kauf-Trigger getroffen: {len(sc['hit_k'])}/{len(KAUF_DATEN)} — "
         + ", ".join(d.strftime('%d.%m.%y') for d in sc["hit_k"]),
@@ -291,9 +303,11 @@ def main():
         "- Spot-CVD real (Binance Vision), Funding real (Kraken, sofern Historie reicht).",
         "- Kaisers Liste enthielt Duplikate (laut Kaiser evtl. Versehen) -> dedupliziert.",
         "",
-        f"Empfehlung: Engine-Standardwerte auf pivot_n={n}, k_atr={k}, "
-        f"flush_entry='{mode}', tp_ladder={ladder} setzen, falls abweichend (aktuelle "
-        "Defaults in strategy_core.evaluate pruefen).",
+        f"Empfehlung: pivot_n={n}, k_atr={k}, flush_entry='{mode}', tp_ladder={ladder}. "
+        f"Richtung={direction}: 'long' heisst bias_short=false in site/data/state.json "
+        "(kein Code-Default — der Richtungs-Bias soll dynamisch aus Makro kommen, E8.5). "
+        "Schneidet 'long' hier klar besser ab, ist das die Bestaetigung von Furkans "
+        "Long-Bias in diesem Zeitraum.",
     ]
     (ROOT / "BACKTEST.md").write_text("\n".join(lines), encoding="utf-8")
 
@@ -301,7 +315,8 @@ def main():
     panel = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "zeitraum": "01.09.2025 - 30.04.2026",
-        "params": {"pivot_n": n, "k_atr": k, "flush_entry": mode, "tp_ladder": ladder},
+        "params": {"pivot_n": n, "k_atr": k, "flush_entry": mode, "tp_ladder": ladder,
+                   "richtung": direction},
         "recall_kauf": f"{len(sc['hit_k'])}/{len(KAUF_DATEN)}",
         "recall_verkauf": f"{len(sc['hit_v'])}/{len(VERKAUF_DATEN)}",
         "recall_pct": round(sc["recall"] * 100),
