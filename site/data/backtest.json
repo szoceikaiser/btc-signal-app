@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-07-24T19:19:49Z",
- "zeitraum": "01.09.2025 - 30.04.2026",
- "variante": "nur Long (Basis)",
+ "generated_at": "2026-07-24T19:37:40Z",
+ "zeitraum": "15.11.2025-01.05.2026",
+ "variante": "Long+Short (Analyse)",
  "params": {
   "bias_long": true,
-  "bias_short": false,
+  "bias_short": true,
   "pivot_n": 5,
   "k_atr": 2.0,
   "flush_entry": "off",
@@ -15,18 +15,24 @@
   "conditional_stop": false,
   "buy_ladder": false
  },
- "recall_kauf": "9/20",
- "recall_verkauf": "10/24",
- "recall_pct": 43,
- "precision_pct": 42,
+ "recall_kauf": "8/12",
+ "recall_verkauf": "5/17",
+ "recall_pct": 45,
+ "precision_pct": 58,
  "pnl": {
   "start": 10000.0,
-  "ende": 11225.52,
-  "rendite_pct": 12.26,
-  "buyhold_pct": -28.36,
-  "trades": 43,
-  "gewinn_trades": 34,
+  "ende": 10282.64,
+  "rendite_pct": 2.83,
+  "buyhold_pct": -19.32,
+  "trades": 20,
+  "gewinn_trades": 16,
+  "long_profit": 315.45,
+  "long_trades": 7,
+  "long_wins": 4,
+  "short_profit": 761.58,
+  "short_trades": 13,
+  "short_wins": 12,
   "fee_pct": 0.1,
-  "offene_position": 0.0
+  "offene_position": -762.81
  }
 }

@@ -1,35 +1,37 @@
-# Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger
+# Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-Zeitraum: 01.09.2025-30.04.2026 (4h-Kerzen, 1585 Stueck) · Stand: 2026-07-24 19:19 UTC
+**Voll-Daten-Fenster: 15.11.2025-01.05.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 1585 4h-Kerzen geladen · Stand: 2026-07-24 19:37 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
-## Parameter-Vergleich (E8.5: bessere Long-Einstiege, alle n=5 nur-Long)
+## Parameter-Vergleich
 
-Drei Furkan-Filter, einzeln und kombiniert (Furkans Schritt 1 = Richtung aus Makro, dann Konfluenz-Bestaetigung): **Trendfilter** = keine Longs gegen den 1D-Trend (Preis vs. Tages-EMA). **Strenge Bestaetigung** = KAUF 2 nur wenn Spot-CVD dreht UND Funding stimmt (statt eines von beiden). **Konfluenz 4h/1D** = Einstieg nur, wenn die 4h-Zone in der 1D-Retracement-Zone liegt. Sortiert nach Rendite.
+Alle n=5. Rendite = Gesamt-Simulation; Long €/Short € = realisierter Gewinn/Verlust getrennt nach Richtung. Recall = Aehnlichkeit zu Furkans Terminen IM Fenster.
 
-| Variante | Recall | Praezision | Rendite | Signale |
-|---|---|---|---|---|
-| nur Long (Basis) | 43% | 42% | +12.3 % | 92 |
-| +Kaufleiter | 43% | 40% | +20.7 % | 106 |
-| +Flush core | 45% | 31% | +33.5 % | 145 |
-| +Flush core +Kaufleiter | 45% | 31% | +42.1 % | 163 **<-- beste** |
-| +Kaufleiter +Bed.Stop | 43% | 40% | +17.2 % | 111 |
-| Long+Short (Ref) | 45% | 49% | -2.6 % | 59 |
+| Variante | Recall | Praez. | Rendite | Long € | Short € | Signale |
+|---|---|---|---|---|---|---|
+| nur Long (Basis) | 52% | 43% | +9.8 % | +977 | +0 | 74 |
+| +Kaufleiter | 52% | 41% | +18.0 % | +1,802 | +0 | 88 |
+| +Flush core | 55% | 30% | +30.5 % | +2,924 | +0 | 127 |
+| +Flush core +Kaufleiter | 55% | 30% | +38.9 % | +3,755 | +0 | 145 **<-- beste** |
+| +Kaufleiter +Bed.Stop | 52% | 41% | +14.6 % | +1,462 | +0 | 93 |
+| Long+Short (Analyse) | 45% | 58% | +2.8 % | +315 | +762 | 37 |
 
-## Beste Kombination (nach Rendite): +Flush core +Kaufleiter (pivot_n=5, nur Long=True, Trendfilter=False, strenge Best.=False, Konfluenz=False)
+## Beste Kombination (nach Rendite): +Flush core +Kaufleiter
 
-- Kauf-Trigger getroffen: 8/20 — 21.10.25, 17.11.25, 20.11.25, 21.11.25, 06.01.26, 08.01.26, 28.02.26, 23.03.26
-- Kauf verpasst: 25.09.25, 10.10.25, 27.10.25, 28.10.25, 29.10.25, 30.10.25, 04.11.25, 20.01.26, 29.01.26, 30.01.26, 31.01.26, 27.03.26
-- Verkauf-Trigger getroffen: 12/24 — 16.10.25, 04.11.25, 12.11.25, 06.01.26, 14.01.26, 25.01.26, 23.02.26, 02.03.26, 17.03.26, 08.04.26, 14.04.26, 22.04.26
-- Verkauf verpasst: 25.09.25, 02.10.25, 03.10.25, 10.10.25, 23.11.25, 28.11.25, 02.12.25, 03.12.25, 17.12.25, 02.02.26, 28.02.26, 17.04.26
-- Engine-Signal-Tage gesamt: 34 Kauf / 41 Verkauf
+- Kauf-Trigger getroffen: 7/12 (im Fenster) — 17.11.25, 20.11.25, 21.11.25, 06.01.26, 08.01.26, 28.02.26, 23.03.26
+- Kauf verpasst: 20.01.26, 29.01.26, 30.01.26, 31.01.26, 27.03.26
+- Verkauf-Trigger getroffen: 9/17 (im Fenster) — 06.01.26, 14.01.26, 25.01.26, 23.02.26, 02.03.26, 17.03.26, 08.04.26, 14.04.26, 22.04.26
+- Verkauf verpasst: 23.11.25, 28.11.25, 02.12.25, 03.12.25, 17.12.25, 02.02.26, 28.02.26, 17.04.26
 
-## P&L-Simulation (beste Kombination)
+## P&L-Simulation (beste Kombination) — getrennt nach Richtung
 
-Start 10.000 € -> **14,207 €** (+42.1 %) · Buy&Hold im Zeitraum: -28.4 % · 73 Verkaufs-Vorgaenge, davon 57 im Gewinn · Gebuehr 0.1 % je Order, kein Hebel.
+Start 10.000 € -> **13,892 €** (+38.9 %) · Buy&Hold im Fenster: -19.3 % · Gebuehr 0.1 %/Order, kein Hebel.
 
-WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, KEIN Gewinn. Der Gewinn steht nur in dieser P&L-Zeile.
+- **LONG-Trades:** +3,755 € · 61 Abschluesse, 47 im Gewinn
+- **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
+
+WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, KEIN Gewinn. Der Gewinn steht nur in den P&L-Zeilen.
 
 ## Einschraenkungen
 
