@@ -1,6 +1,17 @@
 {
- "generated_at": "2026-07-24T13:32:14Z",
+ "generated_at": "2026-07-24T13:36:04Z",
  "symbol": "BTCUSDT_PERP.A",
  "interval": "4hour",
- "error": "COINALYZE_API_KEY fehlt (Secret nicht gesetzt?)"
+ "open_interest": {
+  "http_error": 401,
+  "body": "{\"message\":\"Invalid/Missing API key\"}"
+ },
+ "funding": {
+  "http_error": 401,
+  "body": "{\"message\":\"Invalid/Missing API key\"}"
+ },
+ "liquidations": {
+  "http_error": 401,
+  "body": "{\"message\":\"Invalid/Missing API key\"}"
+ }
 }
