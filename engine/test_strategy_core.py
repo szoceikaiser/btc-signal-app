@@ -5,8 +5,12 @@ Gegencheck (docs/GEGENCHECK.md): reale Zahlen, keine Fantasiewerte.
 """
 
 from strategy_core import (Candle, FlowPoint, Pattern, Pivot, Impulse, PosState,
-                           Position, SignalType, classify_pattern, evaluate,
-                           fib_zones, find_pivots, last_significant_impulse)
+                           Position, SignalType, classify_pattern, daily_fib_zone,
+                           daily_trend, ema, evaluate, fib_zones, find_pivots,
+                           last_significant_impulse, resample_daily)
+
+DAY_MS = 86_400_000
+H4_MS = 4 * 3600 * 1000
 
 
 def c(ts, o, h, l, cl):
@@ -281,3 +285,93 @@ def test_dedupe_gleiche_kerze_keine_doppelsignale():
     first = run_incremental(path, neg_funding_flow(), pos, pivot_n=2)
     again = evaluate(path, neg_funding_flow(), pos, pivot_n=2)
     assert len(first) == 1 and again == []
+
+
+# ------------------------------------------- E8.5-Filter (bessere Einstiege)
+
+def test_resample_daily_und_ema():
+    cs = []
+    for d in range(2):
+        base = 100 + d * 10
+        for j in range(6):
+            cs.append(c(d * DAY_MS + j * H4_MS, base, base + 2, base - 2, base + 1))
+    daily = resample_daily(cs)
+    assert len(daily) == 2
+    assert daily[0].open == 100 and daily[0].high == 102 and daily[0].low == 98
+    assert daily[1].close == 111                      # letzter 4h-Schluss von Tag 1
+    assert round(ema([100, 110], 2), 2) == round(110 * 2 / 3 + 100 / 3, 2)
+
+
+def test_daily_trend_richtung():
+    rising = [c(d * DAY_MS, 80 + d, 81 + d, 79 + d, 80 + d) for d in range(12)]
+    close, e = daily_trend(rising, 50)
+    assert close > e                                  # Aufwaerts: Preis ueber EMA
+    falling = [c(d * DAY_MS, 100 - d, 101 - d, 99 - d, 100 - d) for d in range(12)]
+    close, e = daily_trend(falling, 50)
+    assert close < e                                  # Abwaerts: Preis unter EMA
+
+
+def pos_funding_cvdup_flow(n=4):
+    # Spot-CVD steigt (cvd_up), aber Funding positiv -> lockere Bestaetigung passt,
+    # strenge (cvd_up UND funding<=0) nicht.
+    return [FlowPoint(i, 100 + i, 100, 1000, 0.0002) for i in range(n)]
+
+
+def test_strict_confirm_verlangt_beide_bestaetigungen():
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),    # 0.5 -> KAUF 1
+                   c(9, 105, 105.5, 103.6, 104.5)]    # GP -> KAUF 2 (Upgrade)
+    pos = Position()
+    loose = run_incremental(path, pos_funding_cvdup_flow(), pos, pivot_n=2)
+    assert [s.type for s in loose] == [SignalType.KAUF_1, SignalType.KAUF_2]
+    pos2 = Position()
+    strict = run_incremental(path, pos_funding_cvdup_flow(), pos2,
+                             pivot_n=2, strict_confirm=True)
+    assert [s.type for s in strict] == [SignalType.KAUF_1]   # KAUF 2 blockiert
+
+
+def _downtrend_long_series():
+    """14 Tage seitwaerts auf hohem Niveau (100, kein signifikanter Impuls) -> danach
+    lokaler Aufwaerts-Impuls 88->96 mit Ruecklauf ins Golden Pocket (~90.9). Der
+    Tages-Schluss (~92) liegt klar UNTER der Tages-EMA (~100): 1D-Trend abwaerts."""
+    cs, ts = [], 0
+
+    def add(o, h, l, cl):
+        nonlocal ts
+        cs.append(c(ts, o, h, l, cl))
+        ts += H4_MS
+
+    for _ in range(14):
+        for j in range(6):
+            p = 100 + (0.3 if j % 2 else -0.3)        # winzige Wiggle, kein Impuls
+            add(p, p + 0.4, p - 0.4, p)
+    for _ in range(3):
+        add(90, 90.5, 88, 88)                         # lokales Tief 88
+    for _ in range(3):
+        add(90, 96, 90, 96)                           # lokales Hoch 96
+    add(94, 94.5, 90.9, 92)                           # Ruecklauf ins GP (88->96)
+    return cs
+
+
+def test_trend_filter_blockt_long_gegen_1d_trend():
+    down = _downtrend_long_series()
+    flow = [FlowPoint(i, 100 + i, 100, 1000, -0.0001) for i in range(len(down))]
+    # Ohne Trendfilter feuert der Long (GP-Ruecklauf + Bestaetigung)
+    pos = Position()
+    sig_off = run_incremental(down, flow, pos, pivot_n=2, bias_short=False)
+    assert any(s.type == SignalType.KAUF_2 for s in sig_off)
+    # Mit Trendfilter: Preis unter der Tages-EMA -> Long wird blockiert
+    pos2 = Position()
+    sig_on = run_incremental(down, flow, pos2, pivot_n=2, bias_short=False,
+                             trend_filter=True)
+    assert not any(s.type == SignalType.KAUF_2 for s in sig_on)
+
+
+def test_daily_fib_zone_liefert_zone():
+    # Genug Tage fuer 1D-Pivots (n=5): klarer Impuls 100->140 mit Ruecklauf
+    daily_closes = [100, 100, 100, 100, 100, 100, 120, 140, 140, 140,
+                    140, 140, 130, 125, 120]
+    cs = [c(d * DAY_MS, p, p + 1, p - 1, p) for d, p in enumerate(daily_closes)]
+    z = daily_fib_zone(cs, pivot_n=5)
+    assert z is not None and z.impulse.up
+    assert z.gp_lower < z.level_05                    # Zonen korrekt geordnet

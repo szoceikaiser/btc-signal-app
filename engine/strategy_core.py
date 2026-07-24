@@ -201,6 +201,65 @@ def fib_zones(imp: Impulse) -> FibZones:
     )
 
 
+# ---------------------------------- Uebergeordneter Kontext (1D-Ebene)
+# Furkans Entscheidungsprozess (Transkript 16:03-19:41): ZUERST der uebergeordnete
+# Bias/Trend, DANN Orderflow+Fib nur zum Timing des Einstiegs. Die folgenden Helfer
+# leiten die 1D-Ebene aus den vorhandenen 4h-Kerzen ab (Resampling), damit Live und
+# Backtest dieselbe Logik nutzen.
+
+
+def ema(values: list[float], period: int) -> Optional[float]:
+    """Exponentieller gleitender Durchschnitt; liefert den letzten Wert."""
+    if not values:
+        return None
+    k = 2.0 / (period + 1)
+    e = values[0]
+    for v in values[1:]:
+        e = v * k + e * (1 - k)
+    return e
+
+
+def resample_daily(candles: list[Candle]) -> list[Candle]:
+    """Fasst 4h-Kerzen zu Tageskerzen zusammen (UTC-Tag: Open zuerst, High/Low, Close zuletzt)."""
+    days: dict[int, list[float]] = {}
+    order: list[int] = []
+    for c in candles:
+        day = (c.ts // 86_400_000) * 86_400_000        # Mitternacht UTC in ms
+        if day not in days:
+            days[day] = [c.open, c.high, c.low, c.close]
+            order.append(day)
+        else:
+            d = days[day]
+            d[1] = max(d[1], c.high)
+            d[2] = min(d[2], c.low)
+            d[3] = c.close
+    return [Candle(day, days[day][0], days[day][1], days[day][2], days[day][3]) for day in order]
+
+
+def daily_trend(candles: list[Candle], period: int = 50):
+    """(letzter Tages-Schluss, Tages-EMA(period)) — Basis fuer den Trendfilter.
+
+    Live reichen ~66 Tage (400 4h-Kerzen); EMA200/1D braeuchte mehr Historie, daher
+    ist period=50 ein tragfaehiger Naeherungswert fuer den uebergeordneten Trend.
+    """
+    daily = resample_daily(candles)
+    if len(daily) < 2:
+        return None
+    closes = [c.close for c in daily]
+    return daily[-1].close, ema(closes, min(period, len(closes)))
+
+
+def daily_fib_zone(candles: list[Candle], pivot_n: int = 5,
+                   k_atr: float = 3.0) -> Optional[FibZones]:
+    """Fib-Zonen des letzten signifikanten 1D-Impulses (fuer die 4h+1D-Konfluenz)."""
+    daily = resample_daily(candles)
+    if len(daily) < 2 * pivot_n + 2:
+        return None
+    piv = find_pivots(daily, n=pivot_n)
+    imp = last_significant_impulse(daily, piv, k_atr=k_atr)
+    return fib_zones(imp) if imp is not None else None
+
+
 # --------------------------------------------------- Order-Flow-Kompass
 
 
@@ -293,7 +352,9 @@ LADDER_TRANCHE = 15
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
              pivot_n: int = 5, k_atr: float = 2.0,
-             flush_entry: str = "off", tp_ladder: bool = True) -> list[Signal]:
+             flush_entry: str = "off", tp_ladder: bool = True,
+             trend_filter: bool = False, trend_ema: int = 50,
+             strict_confirm: bool = False, confluence: bool = False) -> list[Signal]:
     # Defaults kalibriert per Backtest 2026-07-23 (BACKTEST.md): n=5, k=2.0,
     # flush='off' — beste Kombination (Recall 45 %, Praezision 54 %, Rendite -6,0 %
     # vs. Buy&Hold -28,4 %). flush_entry ("off"/"t1"/"core") bleibt schaltbar:
@@ -302,6 +363,11 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # 1.0-Ziel. Default True seit Backtest 2026-07-24: bei n=5 Recall 45 % und
     # Praezision 54 % unveraendert, Rendite -5,3 % statt -6,0 % (kein Nachteil,
     # bildet Furkans gestaffelte Gewinnmitnahme ab). Recall != Gewinn.
+    # E8.5-Filter fuer bessere Einstiege (alle Furkans Methode, schaltbar, Default aus
+    # bis per Backtest gemessen): trend_filter = nur Setups in Richtung des 1D-Trends
+    # (Furkans Schritt 1, Preis vs. Tages-EMA); strict_confirm = KAUF 2 nur mit
+    # Konfluenz (Spot-CVD dreht UND Funding stimmt, statt eines von beiden);
+    # confluence = Einstieg nur, wenn die 4h-Zone in der 1D-Retracement-Zone liegt.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -318,21 +384,47 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     pivots = find_pivots(candles, n=pivot_n)
     imp = last_significant_impulse(candles, pivots, k_atr=k_atr)
 
+    # --- E8.5-Kontext (nur berechnen, wenn ein Filter aktiv ist)
+    _trend = daily_trend(candles, trend_ema) if trend_filter else None
+    _dzone = daily_fib_zone(candles) if confluence else None
+
+    def _trend_ok(long_side: bool) -> bool:
+        if not trend_filter or _trend is None or _trend[1] is None:
+            return True                                  # unbekannt -> nicht blockieren
+        close, e = _trend
+        return close >= e if long_side else close <= e
+
+    def _confluence_ok(price: float) -> bool:
+        if not confluence or _dzone is None:
+            return True                                  # 1D-Zone unbekannt -> nicht blockieren
+        lo, hi = sorted((_dzone.level_05, _dzone.level_0786))
+        return lo <= price <= hi
+
+    def _confirm_long() -> bool:
+        strong = pattern == Pattern.CAPITULATION_RESET
+        cvd_up = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
+        fund_ok = bool(flow) and flow[-1].funding <= 0
+        return strong or (cvd_up and fund_ok) if strict_confirm else strong or fund_ok or cvd_up
+
+    def _confirm_short() -> bool:
+        strong = pattern == Pattern.DERIVATE_PUMP
+        cvd_dn = len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd
+        fund_hot = bool(flow) and flow[-1].funding > 0
+        return strong or (cvd_dn and fund_hot) if strict_confirm else strong or fund_hot or cvd_dn
+
     # --- Einstiegs-Logik (FLAT): Referenz-Impuls noetig
     if pos.state == PosState.FLAT and imp is not None:
         z = fib_zones(imp)
         if imp.up and bias_long and pattern != Pattern.DERIVATE_PUMP:
-            if cur.low <= z.level_05 and cur.low > z.gp_upper:
+            if (cur.low <= z.level_05 and cur.low > z.gp_upper
+                    and _trend_ok(True) and _confluence_ok(cur.low)):
                 pos.direction, pos.state, pos.zones = "LONG", PosState.T1, z
                 pos.retrace_extreme = cur.low
                 signals.append(Signal(cur.ts, SignalType.KAUF_1, z.level_05, TRANCHEN["T1"],
                                       f"0.5-Retracement des Impulses {imp.start.price:.0f}->{imp.end.price:.0f}",
                                       stop_ref=z.invalidation))
             elif z.gp_lower <= cur.low <= z.gp_upper:
-                ok = (pattern == Pattern.CAPITULATION_RESET
-                      or (flow and flow[-1].funding <= 0)
-                      or (len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd))
-                if ok:
+                if _confirm_long() and _trend_ok(True) and _confluence_ok(cur.low):
                     pos.direction, pos.state, pos.zones = "LONG", PosState.CORE, z
                     pos.retrace_extreme = cur.low
                     signals.append(Signal(cur.ts, SignalType.KAUF_2, z.gp_upper,
@@ -343,10 +435,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                   and cur.close > z.invalidation):
                 # Capitulation-Einstieg (E8.1): Kerze durchschlaegt das GP nach unten
                 # (Flush-Tage wie 10.10./04.11.), schliesst aber ueber der Invalidierung
-                ok = (pattern == Pattern.CAPITULATION_RESET
-                      or (flow and flow[-1].funding <= 0)
-                      or (len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd))
-                if ok:
+                if _confirm_long() and _trend_ok(True):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.KAUF_1 if small else SignalType.KAUF_2
@@ -357,17 +446,15 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           f"Capitulation: GP durchschlagen (Tief {cur.low:.0f}), Schluss ueber Invalidierung ({pattern.name})",
                                           stop_ref=z.invalidation))
         elif (not imp.up) and bias_short and pattern != Pattern.CAPITULATION_RESET:
-            if cur.high >= z.level_05 and cur.high < z.gp_upper:
+            if (cur.high >= z.level_05 and cur.high < z.gp_upper
+                    and _trend_ok(False) and _confluence_ok(cur.high)):
                 pos.direction, pos.state, pos.zones = "SHORT", PosState.T1, z
                 pos.retrace_extreme = cur.high
                 signals.append(Signal(cur.ts, SignalType.SHORT_1, z.level_05, TRANCHEN["T1"],
                                       f"0.5-Retracement des Abwaerts-Impulses {imp.start.price:.0f}->{imp.end.price:.0f}",
                                       stop_ref=z.invalidation))
             elif z.gp_upper <= cur.high <= z.gp_lower:  # Short: 0.65 liegt OBEN
-                ok = (pattern == Pattern.DERIVATE_PUMP
-                      or (flow and flow[-1].funding > 0)
-                      or (len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd))
-                if ok:
+                if _confirm_short() and _trend_ok(False) and _confluence_ok(cur.high):
                     pos.direction, pos.state, pos.zones = "SHORT", PosState.CORE, z
                     pos.retrace_extreme = cur.high
                     signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
@@ -378,10 +465,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                   and cur.close < z.invalidation):
                 # Squeeze-Einstieg (E8.1, Spiegelbild): Kerze durchschlaegt das GP nach
                 # oben, schliesst aber unter der Invalidierung
-                ok = (pattern == Pattern.DERIVATE_PUMP
-                      or (flow and flow[-1].funding > 0)
-                      or (len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd))
-                if ok:
+                if _confirm_short() and _trend_ok(False):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.SHORT_1 if small else SignalType.SHORT_2
@@ -418,20 +502,14 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     else (z.gp_upper <= cur.high <= z.gp_lower)
                 if in_gp:
                     if long_side:
-                        ok = (pattern == Pattern.CAPITULATION_RESET
-                              or (flow and flow[-1].funding <= 0)
-                              or (len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd))
-                        if ok:
+                        if _confirm_long():
                             signals.append(Signal(cur.ts, SignalType.KAUF_2, z.gp_upper,
                                                   TRANCHEN["CORE"],
                                                   f"Golden Pocket {z.gp_lower:.0f}-{z.gp_upper:.0f} + Bestaetigung ({pattern.name})",
                                                   stop_ref=z.invalidation))
                             pos.state = PosState.CORE
                     else:
-                        ok = (pattern == Pattern.DERIVATE_PUMP
-                              or (flow and flow[-1].funding > 0)
-                              or (len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd))
-                        if ok:
+                        if _confirm_short():
                             signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
                                                   TRANCHEN["CORE"],
                                                   f"Golden Pocket {z.gp_upper:.0f}-{z.gp_lower:.0f} + Bestaetigung ({pattern.name})",
