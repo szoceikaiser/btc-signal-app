@@ -1,0 +1,26 @@
+name: Coinalyze-Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Coinalyze-Probe holen
+        env:
+          COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
+        run: cd engine && python3 coinalyze.py
+
+      - name: Probe committen
+        run: |
+          git config user.name "coinalyze-test"
+          git config user.email "actions@users.noreply.github.com"
+          git add site/data/coinalyze_probe.json
+          git diff --cached --quiet || git commit -m "Coinalyze-Test: Probe aktualisiert"
+          git push
