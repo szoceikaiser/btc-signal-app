@@ -438,3 +438,27 @@ def test_conditional_stop_stoppt_wenn_flow_kippt():
     sigs = run_incremental(path, bearish_flow(), pos, pivot_n=2, conditional_stop=True)
     assert [s.type for s in sigs] == [SignalType.KAUF_1, SignalType.STOPLOSS]
     assert pos.state == PosState.FLAT
+
+
+# ------------------------------------------- E9.5: Mehrtages-Kaufleiter
+
+def test_buy_ladder_nachkauf_bei_neuen_tiefkerzen_in_zone():
+    # Impuls 100->110: Invalidierung 100, 0.5=105, GP-Oberkante ~103.82. Neue Tiefkerzen
+    # zwischen 103.82 und 105 (in der Zone, ueber Invalidierung) -> Leiter-Nachkaeufe.
+    base = zigzag_candles()
+    path = base + [
+        c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1 (0.5), Extrem 104.5
+        c(9, 105, 105.2, 104.0, 104.5),      # neues Tief 104.0 -> Leiter (Stufe 1)
+        c(10, 104.5, 104.8, 103.9, 104.2),   # neues Tief 103.9 -> Leiter (Stufe 2)
+        c(11, 104.2, 104.5, 103.85, 104.0),  # neues Tief 103.85 -> Leiter (Stufe 3)
+    ]
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, buy_ladder=True)
+    ladder = [s for s in sigs if "Mehrtages-Leiter" in s.reason]
+    assert len(ladder) == 3 and pos.buy_rungs == 3       # gedeckelt durch MAX_BUY_RUNGS
+    assert all(s.type == SignalType.NACHKAUF and s.tranche_pct == 15 for s in ladder)
+    assert sigs[0].type == SignalType.KAUF_1
+    # Ohne buy_ladder: keine Leiter-Nachkaeufe
+    pos2 = Position()
+    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2)
+    assert not any("Mehrtages-Leiter" in s.reason for s in sigs2)

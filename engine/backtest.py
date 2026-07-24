@@ -57,11 +57,11 @@ SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_R
 # Parameter, die evaluate() versteht (der Rest der Config sind nur Labels):
 EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "tp_ladder", "trend_filter", "strict_confirm", "confluence",
-             "conditional_stop")
+             "conditional_stop", "buy_ladder")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, strict_confirm=False, confluence=False,
-             conditional_stop=False)
+             conditional_stop=False, buy_ladder=False)
 
 
 def V(label, panel=False, **kw):
@@ -72,15 +72,15 @@ def V(label, panel=False, **kw):
     return cfg
 
 
-# E9.3: bedingter Stop (bei Verlust nachkaufen statt pauschal stoppen, solange der
-# Order-Flow den Trend bestaetigt) — allein und als Absicherung fuer den aggressiven
-# Flush. "nur Long (Basis)" ist die empfohlene Live-Einstellung und speist das Chart-Panel.
+# E9.5: Mehrtages-Kaufleiter (Furkan kauft in Tranchen ueber mehrere Tage in die
+# Schwaeche nach). Testet, ob wir mehr von Furkans Kauf-Tagen treffen (Recall Kauf) —
+# und was es mit der Rendite macht. "nur Long (Basis)" = Live-Einstellung -> Chart-Panel.
 GRID = [
     V("nur Long (Basis)", panel=True, bias_short=False),
+    V("+Kaufleiter", bias_short=False, buy_ladder=True),
     V("+Flush core", bias_short=False, flush_entry="core"),
-    V("+Bedingter Stop", bias_short=False, conditional_stop=True),
-    V("+Flush core +Bed.Stop", bias_short=False, flush_entry="core", conditional_stop=True),
-    V("+Bed.Stop +Streng", bias_short=False, conditional_stop=True, strict_confirm=True),
+    V("+Flush core +Kaufleiter", bias_short=False, flush_entry="core", buy_ladder=True),
+    V("+Kaufleiter +Bed.Stop", bias_short=False, buy_ladder=True, conditional_stop=True),
     V("Long+Short (Ref)"),
 ]
 

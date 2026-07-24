@@ -88,6 +88,19 @@ liefert die Historie mit.
   EMPFEHLUNG: konsolidieren statt ueberoptimieren. Robuster Gewinn = "nur Long" + echte
   Daten +12,3 % (schon live, Panel zeigt es). Flush/bedingter Stop bleiben aus.
 
+### E9.5 — Mehrtages-Kaufleiter (Furkans Tranchen-Nachkauf) · Status: MESSBEREIT
+- Kaiser-Wunsch: Furkan kauft in Tranchen ueber mehrere Tage in die Schwaeche nach
+  (nie all in; verpasste Cluster 27.-30.10., 29.-31.01. = 7 der 12 Kauf-Fehlstellen).
+- ERLEDIGT: schaltbarer `buy_ladder`. In einer offenen Position feuert jede NEUE Tiefkerze
+  (long) IN der Retracement-Zone (ueber Invalidierung, unter 0.5) mit Flow-Bestaetigung
+  eine kleine Nachkauf-Tranche (BUY_LADDER_TRANCHE=15 %), hoechstens MAX_BUY_RUNGS=3.
+  Position.buy_rungs zaehlt + wird persistiert. Rueckwaertskompatibel (Default aus).
+  49/49 Tests. Grid testet Kaufleiter allein + mit Flush + mit bedingtem Stop.
+- NAECHSTER SCHRITT: Kaiser laesst Backtest laufen -> ich werte aus: treffen wir mehr
+  von Furkans Kauf-Tagen (Kauf-Recall hoch?) UND was macht es mit der Rendite (ehrlich
+  getrennt; Erinnerung: die Jan-Leiter wurde von Furkan spaeter gestoppt -> mehr Treffer
+  ist nicht automatisch mehr Gewinn).
+
 ### E9.4 — Liquidationen sichtbar für Kaiser · Status: OFFEN
 - Chart-Seite: Liquidations-Daten/-Cluster anzeigen; Link/Einbindung einer kostenlosen
   Heatmap (Velo/Coinank/Coinglass). Optional Liquidations-Zonen als „Magnete" im Chart.

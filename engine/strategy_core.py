@@ -352,6 +352,7 @@ class Position:
     last_signal_ts: int = -1                 # Dedupe: nur 1 Signal-Batch je Kerze
     tp_rungs: int = 0                        # Anzahl gefeuerter Leiter-Zwischenverkaeufe
     dip_buys: int = 0                        # Anzahl bedingter Nachkaeufe unter Invalidierung (E9.3)
+    buy_rungs: int = 0                       # Anzahl Mehrtages-Kaufleiter-Tranchen (E9.5)
 
 
 TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
@@ -363,6 +364,13 @@ TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
 MAX_DIP_BUYS = 2
 DIP_FLOOR_PCT = 0.05
 DIP_TRANCHE = 20
+
+# Mehrtages-Kaufleiter (E9.5): Furkan kauft in Tranchen ueber mehrere Tage in die
+# Schwaeche nach, solange die Struktur intakt ist (nie all in; z. B. 27.-30.10.,
+# 29.-31.01.). Jede neue Tiefkerze IN der Retracement-Zone (ueber Invalidierung, unter
+# 0.5) mit Order-Flow-Bestaetigung = eine kleine Tranche, hoechstens MAX_BUY_RUNGS.
+MAX_BUY_RUNGS = 3
+BUY_LADDER_TRANCHE = 15
 
 # Gestaffelte Teilgewinne (E8.2): Zwischenziele als Extension-Faktoren VOR dem
 # 1.0-Ziel — Furkan verkauft in Leitern in die Staerke (z. B. 08.-22.04.). Je Stufe
@@ -378,7 +386,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              flush_entry: str = "off", tp_ladder: bool = True,
              trend_filter: bool = False, trend_ema: int = 50,
              strict_confirm: bool = False, confluence: bool = False,
-             conditional_stop: bool = False) -> list[Signal]:
+             conditional_stop: bool = False, buy_ladder: bool = False) -> list[Signal]:
     # Defaults kalibriert per Backtest 2026-07-23 (BACKTEST.md): n=5, k=2.0,
     # flush='off' — beste Kombination (Recall 45 %, Praezision 54 %, Rendite -6,0 %
     # vs. Buy&Hold -28,4 %). flush_entry ("off"/"t1"/"core") bleibt schaltbar:
@@ -504,11 +512,14 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     elif pos.state != PosState.FLAT and pos.zones is not None:
         z = pos.zones
         long_side = pos.direction == "LONG"
-        # Retracement-Extrem fortschreiben (fuer Extension-Ziele)
+        # Retracement-Extrem fortschreiben (fuer Extension-Ziele); neues Extrem merken
+        prev_extreme = pos.retrace_extreme
         if long_side:
             pos.retrace_extreme = min(pos.retrace_extreme or cur.low, cur.low)
+            made_new_extreme = prev_extreme is not None and cur.low < prev_extreme
         else:
             pos.retrace_extreme = max(pos.retrace_extreme or cur.high, cur.high)
+            made_new_extreme = prev_extreme is not None and cur.high > prev_extreme
         ext1 = z.ext_target(pos.retrace_extreme, 1.0)
         ext2 = z.ext_target(pos.retrace_extreme, 1.618)
 
@@ -539,7 +550,25 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
             pos.tp_rungs = 0
             pos.dip_buys = 0
+            pos.buy_rungs = 0
         else:
+            # Mehrtages-Kaufleiter (E9.5): neue Tiefkerze IN der Retracement-Zone (ueber
+            # Invalidierung, unter 0.5) mit Flow-Bestaetigung -> kleine Tranche nachlegen.
+            if buy_ladder and made_new_extreme and pos.buy_rungs < MAX_BUY_RUNGS \
+                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+                if long_side:
+                    in_zone = z.invalidation < cur.low <= z.level_05
+                    ladder_ok = _confirm_long()
+                    nk = SignalType.NACHKAUF
+                else:
+                    in_zone = z.level_05 <= cur.high < z.invalidation
+                    ladder_ok = _confirm_short()
+                    nk = SignalType.SHORT_NACHLEGEN
+                if in_zone and ladder_ok:
+                    signals.append(Signal(cur.ts, nk, cur.close, BUY_LADDER_TRANCHE,
+                                          f"Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt ({pattern.name})",
+                                          stop_ref=z.invalidation))
+                    pos.buy_rungs += 1
             # Upgrade T1 -> CORE: Kernposition im Golden Pocket (KAUF 2 / SHORT 2)
             if pos.state == PosState.T1:
                 in_gp = (z.gp_lower <= cur.low <= z.gp_upper) if long_side \
@@ -605,6 +634,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
                     pos.tp_rungs = 0
                     pos.dip_buys = 0
+                    pos.buy_rungs = 0
             # Warnung waehrend offener Long-Position
             if long_side and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
                     and pattern == Pattern.DERIVATE_PUMP:
