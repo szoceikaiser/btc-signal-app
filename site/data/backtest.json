@@ -1,10 +1,11 @@
 {
- "generated_at": "2026-07-23T19:37:37Z",
+ "generated_at": "2026-07-24T09:02:19Z",
  "zeitraum": "01.09.2025 - 30.04.2026",
  "params": {
   "pivot_n": 5,
   "k_atr": 2.0,
-  "flush_entry": "off"
+  "flush_entry": "off",
+  "tp_ladder": false
  },
  "recall_kauf": "13/20",
  "recall_verkauf": "7/24",
