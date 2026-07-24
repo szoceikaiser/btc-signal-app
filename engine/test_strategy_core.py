@@ -179,6 +179,35 @@ def test_long_lebenszyklus_kauf1_kauf2_tp1_tp2():
     assert abs(k1.price - 105.0) < 0.01 and k1.tranche_pct == 25 and k1.stop_ref == 100
 
 
+def test_tp_ladder_gestaffelte_teilgewinne():
+    # E8.2: Impuls 100->110, Einstieg 0.5/GP; retrace_extreme=103.6 ->
+    # Ext 0.8=111.6, 0.9=112.5, 1.0=113.6. Preis steigt gestaffelt: je Kerze eine
+    # Leiter-Stufe (15 %), dann das 1.0-Ziel. tp_ladder=True.
+    base = zigzag_candles()
+    path = base + [
+        c(8, 106, 106.5, 104.5, 105.5),    # 0.5 -> KAUF 1
+        c(9, 105, 105.5, 103.6, 104.5),    # GP -> KAUF 2
+        c(10, 111, 112.0, 110.5, 111.8),   # >=111.6 (<112.6) -> Leiter-Stufe 0.8
+        c(11, 112, 112.8, 111.5, 112.6),   # >=112.6 (<113.6) -> Leiter-Stufe 0.9
+        c(12, 113, 114.0, 112.5, 113.8),   # >=113.6 -> TEILVERKAUF 1
+    ]
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, tp_ladder=True)
+    assert [s.type for s in sigs] == [
+        SignalType.KAUF_1, SignalType.KAUF_2,
+        SignalType.TEILVERKAUF_LADDER, SignalType.TEILVERKAUF_LADDER,
+        SignalType.TEILVERKAUF_1]
+    ladder = [s for s in sigs if s.type == SignalType.TEILVERKAUF_LADDER]
+    assert [round(s.price, 1) for s in ladder] == [111.6, 112.6]
+    assert all(s.tranche_pct == 15 for s in ladder) and pos.tp_rungs == 2
+
+    # Ohne tp_ladder (Default): dieselben Kerzen erzeugen keine Leiter-Stufen
+    pos2 = Position()
+    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2)
+    assert [s.type for s in sigs2] == [
+        SignalType.KAUF_1, SignalType.KAUF_2, SignalType.TEILVERKAUF_1]
+
+
 def test_capitulation_einstieg_modus_t1():
     # Flush-Kerze: Tief 101.5 durchschlaegt das GP (103.5-103.82), Schluss 104 ueber
     # der Invalidierung (100) -> Modus "t1": kleine erste Tranche (Ladder bleibt).

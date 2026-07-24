@@ -139,7 +139,7 @@ def fetch_market_data(oi_history: list[list] | None = None,
 def pos_to_state(pos: Position) -> dict:
     d = {"direction": pos.direction, "pos_state": pos.state.value,
          "last_signal_ts": pos.last_signal_ts, "retrace_extreme": pos.retrace_extreme,
-         "zones": None}
+         "tp_rungs": pos.tp_rungs, "zones": None}
     if pos.zones:
         z = pos.zones
         d["zones"] = {
@@ -164,6 +164,7 @@ def pos_from_state(d: dict) -> Position:
     pos.state = PosState(d.get("pos_state", "FLAT"))
     pos.last_signal_ts = d.get("last_signal_ts", -1)
     pos.retrace_extreme = d.get("retrace_extreme")
+    pos.tp_rungs = d.get("tp_rungs", 0)
     z = d.get("zones")
     if z and "impuls_start" in z:
         imp = Impulse(

@@ -19,6 +19,7 @@ STYLE = {
     "KAUF_1":           ("\U0001F7E2", "K1"),   # gruener Kreis
     "KAUF_2":           ("\U0001F7E2", "K2"),
     "NACHKAUF":         ("➕", "NK"),        # plus
+    "TEILVERKAUF_LADDER": ("\U0001F7E1", "TVL"),  # gelber Kreis (Leiter-Zwischenstufe)
     "TEILVERKAUF_1":    ("\U0001F7E0", "TV1"),  # oranger Kreis
     "TEILVERKAUF_2":    ("\U0001F7E0", "TV2"),
     "VERKAUF_REST":     ("\U0001F534", "V"),    # roter Kreis
@@ -27,6 +28,7 @@ STYLE = {
     "SHORT_1":          ("\U0001F53B", "S1"),   # rotes Dreieck runter
     "SHORT_2":          ("\U0001F53B", "S2"),
     "SHORT_NACHLEGEN":  ("➖", "SNK"),
+    "SHORT_TP_LADDER":  ("\U0001F7E1", "STPL"), # gelber Kreis (Leiter-Zwischenstufe)
     "SHORT_TP_1":       ("\U0001F7E3", "STP1"), # lila Kreis
     "SHORT_TP_2":       ("\U0001F7E3", "STP2"),
     "SHORT_COVER_REST": ("\U0001F534", "SC"),

@@ -18,7 +18,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from main import _get_json, fetch_funding_8h
-from strategy_core import Candle, FlowPoint, Position, evaluate
+from strategy_core import Candle, FlowPoint, LADDER_TRANCHE, Position, evaluate
 
 ROOT = Path(__file__).resolve().parent.parent
 CANDLE_MS = 4 * 3600 * 1000
@@ -44,13 +44,15 @@ VERKAUF_DATEN = [
 
 # Kauf-Handlung = Long eroeffnen/aufstocken ODER Short zurueckkaufen
 BUY_TYPES = {"KAUF_1", "KAUF_2", "NACHKAUF",
-             "SHORT_TP_1", "SHORT_TP_2", "SHORT_COVER_REST", "SHORT_STOPLOSS"}
+             "SHORT_TP_LADDER", "SHORT_TP_1", "SHORT_TP_2", "SHORT_COVER_REST", "SHORT_STOPLOSS"}
 # Verkauf-Handlung = Long reduzieren/schliessen ODER Short eroeffnen/aufstocken
-SELL_TYPES = {"TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS",
+SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS",
               "SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"}
 
-# Grid: k_atr=2.0 fix (3.0 war durchgehend schlechter); Flush-Modus wird mitgetestet
-GRID = [(n, 2.0, mode) for n in (3, 4, 5, 6) for mode in ("off", "t1", "core")]
+# Grid: k_atr=2.0 und flush='off' fix (per E8.1b als beste bestaetigt). E8.2 testet
+# die gestaffelten Zwischen-Teilgewinne (tp_ladder) als neue Dimension gegen den
+# Verkaufs-Recall.
+GRID = [(n, 2.0, "off", ladder) for n in (3, 4, 5, 6) for ladder in (False, True)]
 
 
 def fetch_candles_range(start_ms: int, end_ms: int) -> list:
@@ -92,7 +94,7 @@ def build_series(raw: list, funding: list[tuple[int, float]]):
 
 
 def run_backtest(candles, flow, pivot_n: int, k_atr: float,
-                 flush_entry: str = "t1") -> list[dict]:
+                 flush_entry: str = "off", tp_ladder: bool = False) -> list[dict]:
     pos = Position()
     signals = []
     for i in range(len(candles)):
@@ -100,7 +102,8 @@ def run_backtest(candles, flow, pivot_n: int, k_atr: float,
             pos.last_signal_ts = candles[i].ts                 # Warmup ohne Signale
             continue
         for s in evaluate(candles[:i + 1], flow[:i + 1], pos,
-                          pivot_n=pivot_n, k_atr=k_atr, flush_entry=flush_entry):
+                          pivot_n=pivot_n, k_atr=k_atr, flush_entry=flush_entry,
+                          tp_ladder=tp_ladder):
             signals.append(s.to_dict())
     return signals
 
@@ -161,8 +164,13 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
             units += new_u
             peak_units = max(peak_units, units)
             cash -= spend
-        elif t in ("TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS"):
-            sell = units if t in ("VERKAUF_REST", "STOPLOSS") else min(units, 0.4 * peak_units)
+        elif t in ("TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS"):
+            if t in ("VERKAUF_REST", "STOPLOSS"):
+                sell = units
+            elif t == "TEILVERKAUF_LADDER":
+                sell = min(units, LADDER_TRANCHE / 100.0 * peak_units)
+            else:
+                sell = min(units, 0.4 * peak_units)
             if sell > 0:
                 proceeds = sell * p * (1 - fee)
                 pnl = proceeds - sell * l_avg
@@ -179,9 +187,13 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
             s_units += new_units
             s_peak = max(s_peak, s_units)
             cash -= nominal * fee                      # Eroeffnungsgebuehr
-        elif t in ("SHORT_TP_1", "SHORT_TP_2", "SHORT_COVER_REST", "SHORT_STOPLOSS"):
-            cover = s_units if t in ("SHORT_COVER_REST", "SHORT_STOPLOSS") \
-                else min(s_units, 0.4 * s_peak)
+        elif t in ("SHORT_TP_LADDER", "SHORT_TP_1", "SHORT_TP_2", "SHORT_COVER_REST", "SHORT_STOPLOSS"):
+            if t in ("SHORT_COVER_REST", "SHORT_STOPLOSS"):
+                cover = s_units
+            elif t == "SHORT_TP_LADDER":
+                cover = min(s_units, LADDER_TRANCHE / 100.0 * s_peak)
+            else:
+                cover = min(s_units, 0.4 * s_peak)
             if cover > 0:
                 pnl = cover * (s_avg - p) - cover * p * fee
                 trades_closed += 1
@@ -217,18 +229,18 @@ def main():
     candles, flow = build_series(raw, funding)
 
     results = []
-    for n, k, mode in GRID:
+    for n, k, mode, ladder in GRID:
         t0 = time.time()
-        sigs = run_backtest(candles, flow, n, k, flush_entry=mode)
+        sigs = run_backtest(candles, flow, n, k, flush_entry=mode, tp_ladder=ladder)
         sc = score(sigs)
         p = simulate(sigs, candles)
-        results.append((n, k, mode, sigs, sc, p))
-        print(f"n={n} k={k} flush={mode}: Recall {sc['recall']:.0%}, "
+        results.append((n, k, mode, ladder, sigs, sc, p))
+        print(f"n={n} k={k} flush={mode} ladder={ladder}: Recall {sc['recall']:.0%}, "
               f"Praezision {sc['precision']:.0%}, Rendite {p['rendite_pct']:+.1f} %, "
               f"{len(sigs)} Signale ({time.time()-t0:.0f}s)")
 
-    best = max(results, key=lambda r: (r[4]["recall"], r[4]["precision"]))
-    n, k, mode, sigs, sc, pnl = best
+    best = max(results, key=lambda r: (r[5]["recall"], r[5]["precision"]))
+    n, k, mode, ladder, sigs, sc, pnl = best
 
     lines = [
         "# Backtest-Bericht (E4b): Engine vs. Kaisers notierte Furkan-Trigger",
@@ -241,18 +253,19 @@ def main():
         "",
         "## Parameter-Vergleich",
         "",
-        "(Flush-Modus = Einstieg bei GP-Durchschlag: off = keiner, t1 = kleine Tranche 25 %, core = Kernposition 75 %)",
+        "(Flush-Modus = Einstieg bei GP-Durchschlag; Leiter = gestaffelte Zwischen-"
+        "Teilgewinne an Ext 0.8/0.9 je 15 % vor dem 1.0-Ziel, E8.2)",
         "",
-        "| pivot_n | k_atr | Flush | Recall | Praezision | Rendite | Signale |",
-        "|---|---|---|---|---|---|---|",
+        "| pivot_n | k_atr | Flush | Leiter | Recall | Praezision | Rendite | Signale |",
+        "|---|---|---|---|---|---|---|---|",
     ]
-    for rn, rk, rm, rsigs, rsc, rp in results:
-        mark = " **<-- beste**" if (rn, rk, rm) == (n, k, mode) else ""
-        lines.append(f"| {rn} | {rk} | {rm} | {rsc['recall']:.0%} | {rsc['precision']:.0%} | "
-                     f"{rp['rendite_pct']:+.1f} % | {len(rsigs)}{mark} |")
+    for rn, rk, rm, rl, rsigs, rsc, rp in results:
+        mark = " **<-- beste**" if (rn, rk, rm, rl) == (n, k, mode, ladder) else ""
+        lines.append(f"| {rn} | {rk} | {rm} | {'an' if rl else 'aus'} | {rsc['recall']:.0%} | "
+                     f"{rsc['precision']:.0%} | {rp['rendite_pct']:+.1f} % | {len(rsigs)}{mark} |")
     lines += [
         "",
-        f"## Beste Kombination: pivot_n={n}, k_atr={k}, flush={mode}",
+        f"## Beste Kombination: pivot_n={n}, k_atr={k}, flush={mode}, Leiter={'an' if ladder else 'aus'}",
         "",
         f"- Kauf-Trigger getroffen: {len(sc['hit_k'])}/{len(KAUF_DATEN)} — "
         + ", ".join(d.strftime('%d.%m.%y') for d in sc["hit_k"]),
@@ -279,8 +292,8 @@ def main():
         "- Kaisers Liste enthielt Duplikate (laut Kaiser evtl. Versehen) -> dedupliziert.",
         "",
         f"Empfehlung: Engine-Standardwerte auf pivot_n={n}, k_atr={k}, "
-        f"flush_entry='{mode}' setzen, falls abweichend (aktuelle Defaults in "
-        "strategy_core.evaluate pruefen).",
+        f"flush_entry='{mode}', tp_ladder={ladder} setzen, falls abweichend (aktuelle "
+        "Defaults in strategy_core.evaluate pruefen).",
     ]
     (ROOT / "BACKTEST.md").write_text("\n".join(lines), encoding="utf-8")
 
@@ -288,7 +301,7 @@ def main():
     panel = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "zeitraum": "01.09.2025 - 30.04.2026",
-        "params": {"pivot_n": n, "k_atr": k, "flush_entry": mode},
+        "params": {"pivot_n": n, "k_atr": k, "flush_entry": mode, "tp_ladder": ladder},
         "recall_kauf": f"{len(sc['hit_k'])}/{len(KAUF_DATEN)}",
         "recall_verkauf": f"{len(sc['hit_v'])}/{len(VERKAUF_DATEN)}",
         "recall_pct": round(sc["recall"] * 100),

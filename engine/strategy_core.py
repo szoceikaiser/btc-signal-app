@@ -46,6 +46,7 @@ class SignalType(Enum):
     KAUF_1 = "KAUF 1 (Teilposition am 0.5-Level)"
     KAUF_2 = "KAUF 2 (Kernposition im Golden Pocket)"
     NACHKAUF = "NACHKAUF (0.786-Zone)"
+    TEILVERKAUF_LADDER = "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
     TEILVERKAUF_1 = "TEILVERKAUF 1 (Extension 1.0)"
     TEILVERKAUF_2 = "TEILVERKAUF 2 (Extension 1.618)"
     VERKAUF_REST = "VERKAUF Rest (Muster/Divergenz am Ziel)"
@@ -55,6 +56,7 @@ class SignalType(Enum):
     SHORT_1 = "SHORT 1 (Teilposition am 0.5-Level)"
     SHORT_2 = "SHORT 2 (Kernposition im Golden Pocket)"
     SHORT_NACHLEGEN = "SHORT NACHLEGEN (0.786-Zone)"
+    SHORT_TP_LADDER = "SHORT TEILGEWINN Leiter (Zwischenziel vor 1.0)"
     SHORT_TP_1 = "SHORT TEILGEWINN 1 (Extension 1.0)"
     SHORT_TP_2 = "SHORT TEILGEWINN 2 (Extension 1.618)"
     SHORT_COVER_REST = "SHORT Rest schliessen"
@@ -275,19 +277,29 @@ class Position:
     zones: Optional[FibZones] = None
     retrace_extreme: Optional[float] = None  # tiefster/hoechster Punkt der Korrektur
     last_signal_ts: int = -1                 # Dedupe: nur 1 Signal-Batch je Kerze
+    tp_rungs: int = 0                        # Anzahl gefeuerter Leiter-Zwischenverkaeufe
 
 
 TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
+
+# Gestaffelte Teilgewinne (E8.2): Zwischenziele als Extension-Faktoren VOR dem
+# 1.0-Ziel — Furkan verkauft in Leitern in die Staerke (z. B. 08.-22.04.). Je Stufe
+# eine kleine Tranche; max. eine Stufe je Kerze, damit sich der Abbau ueber mehrere
+# Tage verteilt (nie all out). Schaltbar ueber tp_ladder, per Backtest kalibriert.
+LADDER_FACTORS = (0.8, 0.9)
+LADDER_TRANCHE = 15
 
 
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
              pivot_n: int = 5, k_atr: float = 2.0,
-             flush_entry: str = "off") -> list[Signal]:
+             flush_entry: str = "off", tp_ladder: bool = False) -> list[Signal]:
     # Defaults kalibriert per Backtest 2026-07-23 (BACKTEST.md): n=5, k=2.0,
     # flush='off' — beste Kombination (Recall 45 %, Praezision 54 %, Rendite -6,0 %
     # vs. Buy&Hold -28,4 %). flush_entry ("off"/"t1"/"core") bleibt schaltbar:
     # mit echter Live-OI-Historie (Muster 4 aktiv) in E8.3 erneut testen.
+    # tp_ladder (E8.2): gestaffelte Zwischen-Teilgewinne an Ext 0.8/0.9 vor dem
+    # 1.0-Ziel — Default False bis per Backtest-Grid gemessen (Verkaufs-Recall).
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -396,6 +408,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             signals.append(Signal(cur.ts, st, cur.close, 100,
                                   f"Kerzenschluss {'unter' if long_side else 'ueber'} Invalidierung {z.invalidation:.0f}"))
             pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
+            pos.tp_rungs = 0
         else:
             # Upgrade T1 -> CORE: Kernposition im Golden Pocket (KAUF 2 / SHORT 2)
             if pos.state == PosState.T1:
@@ -431,6 +444,17 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           "0.786-Zone erreicht, Struktur intakt",
                                           stop_ref=z.invalidation))
                     pos.state = PosState.FULL
+            # Gestaffelte Zwischen-Teilgewinne (E8.2): kleine Tranchen an 0.8/0.9-Ext
+            # VOR dem 1.0-Ziel, hoechstens eine Stufe je Kerze (Leiter ueber Tage)
+            if tp_ladder and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
+                    and pos.tp_rungs < len(LADDER_FACTORS):
+                rung_ext = z.ext_target(pos.retrace_extreme, LADDER_FACTORS[pos.tp_rungs])
+                rung_hit = (cur.high >= rung_ext) if long_side else (cur.low <= rung_ext)
+                if rung_hit:
+                    lt = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
+                    signals.append(Signal(cur.ts, lt, rung_ext, LADDER_TRANCHE,
+                                          f"Leiter-Teilgewinn an Extension {LADDER_FACTORS[pos.tp_rungs]:.1f} ({rung_ext:.0f})"))
+                    pos.tp_rungs += 1
             # Teilgewinne an Extensions
             if pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
                 hit1 = (cur.high >= ext1) if long_side else (cur.low <= ext1)
@@ -455,6 +479,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Gegen-Muster am Ziel: {pattern.name}"))
                     pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
+                    pos.tp_rungs = 0
             # Warnung waehrend offener Long-Position
             if long_side and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
                     and pattern == Pattern.DERIVATE_PUMP:
