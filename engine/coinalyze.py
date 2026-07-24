@@ -55,6 +55,45 @@ def fetch_history(endpoint: str, api_key: str, symbol: str = SYMBOL,
     return get_json(endpoint, params, api_key, **kw)
 
 
+# --------------------------------------------------- Parser (echtes Format)
+# Antwortformat (per Test-Lauf 2026-07-24 bestaetigt): Liste je Symbol mit
+#   {"symbol": "...", "history": [ {t, o, h, l, c}, ... ]}
+# t = Open-Time in Unix-SEKUNDEN. open-interest-history & funding-rate-history sind
+# OHLC (Close = Wert je Kerze). liquidation-history: {t, l, s} mit l=Long-Liq (USD),
+# s=Short-Liq (USD). convert_to_usd=true -> OI/Liq in USD.
+
+
+def _history_points(data, symbol: str = SYMBOL) -> list:
+    """Zieht das history-Array fuer das Symbol aus der Coinalyze-Antwort."""
+    for item in data or []:
+        if isinstance(item, dict) and item.get("symbol") == symbol \
+                and isinstance(item.get("history"), list):
+            return item["history"]
+    for item in data or []:                              # Fallback: erstes history-Array
+        if isinstance(item, dict) and isinstance(item.get("history"), list):
+            return item["history"]
+    return []
+
+
+def oi_by_ts(api_key: str, **kw) -> dict:
+    """{Open-Time_ms: OI_Close_USD} aus open-interest-history (OHLC -> Close)."""
+    pts = _history_points(fetch_history("open-interest-history", api_key, **kw))
+    return {int(p["t"]) * 1000: float(p["c"]) for p in pts if "t" in p and "c" in p}
+
+
+def funding_by_ts(api_key: str, **kw) -> dict:
+    """{Open-Time_ms: Funding_Close} aus funding-rate-history (Skalierung siehe Wiring)."""
+    pts = _history_points(fetch_history("funding-rate-history", api_key, **kw))
+    return {int(p["t"]) * 1000: float(p["c"]) for p in pts if "t" in p and "c" in p}
+
+
+def liquidations_by_ts(api_key: str, **kw) -> dict:
+    """{Open-Time_ms: (Long-Liq_USD, Short-Liq_USD)} aus liquidation-history (l, s)."""
+    pts = _history_points(fetch_history("liquidation-history", api_key, **kw))
+    return {int(p["t"]) * 1000: (float(p.get("l", 0.0)), float(p.get("s", 0.0)))
+            for p in pts if "t" in p}
+
+
 def _sample(data):
     """Behaelt nur die letzten 3 Punkte je Symbol (kleine Probe fuers Log/JSON)."""
     try:

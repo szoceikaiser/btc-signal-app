@@ -36,17 +36,27 @@ liefert die Historie mit.
 
 ## Etappen (jede einzeln lieferbar, Tests grün, per Backtest gemessen)
 
-### E9.1 — Coinalyze-Daten-Layer · Status: OFFEN
-- Kaiser holt kostenlosen Coinalyze-API-Key → GitHub-Secret `COINALYZE_API_KEY`
-  (Anleitung: signal-app/ANLEITUNG-COINALYZE.md, mit Kontrollpunkten).
-- `engine/coinalyze.py` (stdlib/urllib): Fetcher für OI-History, Funding-History,
-  Liquidation-History; Transport injizierbar (Fake für Offline-Tests).
-- `main.py`: Coinalyze als OI-/Funding-/Liquidations-Quelle einbinden (ersetzt
-  Kraken-OI-Snapshot + Liquidations-Proxy; Kraken als Fallback behalten). FlowPoint
-  ggf. um echte Liquidationen erweitern (long_liq/short_liq) — abwärtskompatibel.
-- `backtest.py`: echtes historisches OI/Liquidationen in `build_series` einspeisen
-  (statt OI konstant) → Muster 4 wird im Backtest aktiv.
-- Offline-Tests (Fake-Fetch). Reachability auf Actions verifizieren (Testlauf).
+### E9.1 — Coinalyze-Daten-Layer · Status: IN ARBEIT
+- ERLEDIGT: Kaiser-Key als Secret `COINALYZE_API_KEY` gesetzt; Test-Workflow
+  (.github/workflows/coinalyze-test.yml) am 2026-07-24 GRUEN — **Coinalyze von
+  GitHub-US-Runnern erreichbar (kein Geo-Block)**.
+- ERLEDIGT: `engine/coinalyze.py` (stdlib/urllib) mit build_url/get_json/fetch_history
+  + Parsern oi_by_ts / funding_by_ts / liquidations_by_ts; Transport injizierbar.
+  43/43 Tests gruen.
+- **BESTAETIGTES ANTWORTFORMAT (2026-07-24):** Liste je Symbol
+  `{"symbol","history":[...]}`. Symbol `BTCUSDT_PERP.A` (aggregiert), interval `4hour`,
+  Key im Header `api_key`, `convert_to_usd=true`. `t` = Open-Time in Unix-SEKUNDEN.
+  open-interest-history & funding-rate-history = OHLC (Close = Wert). liquidation-history
+  = `{t, l, s}` mit l=Long-Liq (USD), s=Short-Liq (USD). OI real ~6,7-6,9 Mrd. USD.
+  OFFEN: Funding-Skalierung pruefen (Coinalyze ~0,005-0,0076; Engine-Konvention
+  Fraktion 0,0001=0,01 % — beim Wiring normalisieren; Vorzeichen stimmt).
+- OFFEN (naechster Schritt): `main.py` — Coinalyze OI + Liquidationen einbinden
+  (ersetzt Kraken-OI-Snapshot + Liquidations-Proxy; Kraken als Fallback). FlowPoint um
+  long_liq/short_liq erweitern (abwaertskompatibel, Default 0).
+- OFFEN: `backtest.py` — echtes historisches OI/Liq in `build_series` (statt OI konstant)
+  -> Muster 4 wird im Backtest aktiv.
+- OFFEN: `classify_pattern` echte Liquidationen nutzen (Long-Liq-Kaskade -> Muster 4,
+  Short-Liq -> Muster 3), abwaertskompatibel.
 
 ### E9.2 — Muster 2/3/4 mit echten Daten schärfen + Retest · Status: OFFEN
 - `classify_pattern` mit echtem OI + Liquidationen (statt Proxy): oi_wipeout, Liq-Cluster.
