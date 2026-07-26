@@ -387,7 +387,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              flush_entry: str = "core", tp_ladder: bool = True,
              trend_filter: bool = False, trend_ema: int = 50,
              strict_confirm: bool = False, confluence: bool = False,
-             conditional_stop: bool = False, buy_ladder: bool = True) -> list[Signal]:
+             conditional_stop: bool = False, buy_ladder: bool = True,
+             release_stale_rest: bool = False) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -403,6 +404,12 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # (Furkans Schritt 1, Preis vs. Tages-EMA); strict_confirm = KAUF 2 nur mit
     # Konfluenz (Spot-CVD dreht UND Funding stimmt, statt eines von beiden);
     # confluence = Einstieg nur, wenn die 4h-Zone in der 1D-Retracement-Zone liegt.
+    # release_stale_rest (E9.9): gibt die Restposition in TP1/TP2 frei, sobald ein NEUER
+    # signifikanter Impuls bestaetigt ist — die eingefrorenen Fib-Zonen der Position sind
+    # dann veraltet. Behebt die Blockade, dass ein Rest von 20 % beliebig lange liegen
+    # bleibt (Stop weit weg, Gegen-Muster tritt nicht ein) und dabei JEDE neue Einstiegs-
+    # pruefung verhindert, weil der Einstiegs-Block nur bei state==FLAT laeuft.
+    # Deckt Grundregel 1 ab: Zonen sind dynamisch, nie starr.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -634,6 +641,20 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     ex = SignalType.VERKAUF_REST if long_side else SignalType.SHORT_COVER_REST
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Gegen-Muster am Ziel: {pattern.name}"))
+                    pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
+                    pos.tp_rungs = 0
+                    pos.dip_buys = 0
+                    pos.buy_rungs = 0
+            # Rest freigeben, wenn die Struktur veraltet ist (E9.9). Nur nach Teilgewinnen
+            # (TP1/TP2) — beim Positionsaufbau bleibt der Stop zustaendig.
+            if release_stale_rest and pos.state in (PosState.TP1, PosState.TP2) \
+                    and imp is not None and pos.zones is not None:
+                alt = (pos.zones.impulse.start.ts, pos.zones.impulse.end.ts)
+                if (imp.start.ts, imp.end.ts) != alt:
+                    ex = SignalType.VERKAUF_REST if long_side else SignalType.SHORT_COVER_REST
+                    signals.append(Signal(cur.ts, ex, cur.close, 20,
+                                          f"Struktur veraltet: neuer Impuls bestaetigt "
+                                          f"({imp.start.price:.0f}->{imp.end.price:.0f}) — Rest freigegeben"))
                     pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
                     pos.tp_rungs = 0
                     pos.dip_buys = 0

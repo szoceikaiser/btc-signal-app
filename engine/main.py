@@ -244,7 +244,8 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
             continue
         sigs = evaluate(candles[:i + 1], flow[:i + 1], pos,
                         bias_long=cfg.get("bias_long", True),
-                        bias_short=cfg.get("bias_short", True))
+                        bias_short=cfg.get("bias_short", True),
+                        release_stale_rest=cfg.get("release_stale_rest", False))
         new_signals += [s.to_dict() for s in sigs]
 
     # Historie fortschreiben

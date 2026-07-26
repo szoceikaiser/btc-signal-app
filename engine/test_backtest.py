@@ -88,3 +88,18 @@ def test_score_fehltreffer_druecken_praezision():
     ]
     sc = backtest.score(sigs)
     assert sc["precision"] == 0.5
+
+
+def test_score_ignoriert_signale_nach_dem_letzten_trigger():
+    """E9.9: Das Fenster laeuft jetzt bis heute, Kaisers Trigger enden aber im April.
+    Signale danach duerfen die Praezision nicht druecken — es gibt keinen Maszstab."""
+    from datetime import date, timedelta
+    sigs = [
+        {"ts": _ts("2026-01-08"), "type": "KAUF_2"},     # Treffer
+        {"ts": _ts("2026-06-15"), "type": "KAUF_1"},     # nach dem letzten Trigger
+        {"ts": _ts("2026-07-20"), "type": "STOPLOSS"},   # nach dem letzten Trigger
+    ]
+    sc = backtest.score(sigs)
+    assert sc["precision"] == 1.0                        # nur der Januar-Tag wird gewertet
+    assert sc["eval_end"] == date(2026, 4, 22) + timedelta(days=1)
+    assert all(d <= sc["eval_end"] for d in sc["buy_days"] + sc["sell_days"])

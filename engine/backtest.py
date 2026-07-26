@@ -15,7 +15,7 @@ import json
 import os
 import time
 import urllib.request
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import coinalyze
@@ -26,7 +26,12 @@ ROOT = Path(__file__).resolve().parent.parent
 CANDLE_MS = 4 * 3600 * 1000
 WARMUP_MS = int(datetime(2025, 8, 10, tzinfo=timezone.utc).timestamp() * 1000)
 START_MS = int(datetime(2025, 9, 1, tzinfo=timezone.utc).timestamp() * 1000)
-END_MS = int(datetime(2026, 5, 1, tzinfo=timezone.utc).timestamp() * 1000)
+# Ende = JETZT (E9.9). Vorher war hier 2026-05-01 hart verdrahtet — gesetzt, als das
+# Projekt startete, weil Kaisers Triggerliste im April endet. Folge: Mai/Juni/Juli 2026
+# wurden nie simuliert, genau der Zeitraum, in dem die Live-Engine in TP2 haengen blieb.
+# Die Recall-Bewertung endet weiter beim letzten notierten Trigger (siehe score()),
+# die P&L-Simulation laeuft ueber das ganze Fenster.
+END_MS = int(time.time() * 1000)
 
 # Kaisers notierte Trigger (Kauftrigger.md / Verkaufstrigger.md; Duplikate entfernt,
 # laut Kaiser evtl. Versehen -> tolerant gewertet)
@@ -57,11 +62,11 @@ SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_R
 # Parameter, die evaluate() versteht (der Rest der Config sind nur Labels):
 EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "tp_ladder", "trend_filter", "strict_confirm", "confluence",
-             "conditional_stop", "buy_ladder")
+             "conditional_stop", "buy_ladder", "release_stale_rest")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, strict_confirm=False, confluence=False,
-             conditional_stop=False, buy_ladder=False)
+             conditional_stop=False, buy_ladder=False, release_stale_rest=False)
 
 
 def V(label, panel=False, **kw):
@@ -89,6 +94,11 @@ GRID = [
     V("LIVE: nur Long +Kaufleiter +Flush core", panel=True,
       bias_short=False, flush_entry="core", buy_ladder=True),
     V("+Kaufleiter +Bed.Stop", bias_short=False, buy_ladder=True, conditional_stop=True),
+    # E9.9: dieselbe Live-Kombination, aber mit Rest-Freigabe bei veralteter Struktur.
+    # Frage an die Messung: kostet das Freigeben Rendite (Runner werden abgeschnitten)
+    # oder bringt es welche (Engine wird nicht mehr blockiert und nimmt neue Setups)?
+    V("LIVE +Rest-Freigabe", bias_short=False, flush_entry="core", buy_ladder=True,
+      release_stale_rest=True),
     V("Long+Short (Ref)"),
 ]
 
@@ -162,8 +172,16 @@ def score(signals: list[dict], tol_days: int = 1, start_ms: int = START_MS) -> d
     start_d = to_date(start_ms)
     kauf = [d for d in (date.fromisoformat(x) for x in KAUF_DATEN) if d >= start_d]
     verkauf = [d for d in (date.fromisoformat(x) for x in VERKAUF_DATEN) if d >= start_d]
-    buy_days = sorted({to_date(s["ts"]) for s in signals if s["type"] in BUY_TYPES})
-    sell_days = sorted({to_date(s["ts"]) for s in signals if s["type"] in SELL_TYPES})
+    # Recall/Praezision nur bis zum letzten notierten Trigger (+Toleranz) bewerten:
+    # danach gibt es keinen Maszstab mehr (Kaisers Notizen enden im April 2026), sonst
+    # zaehlte jedes spaetere Engine-Signal automatisch als Fehltreffer. Die P&L-
+    # Simulation laeuft trotzdem ueber das ganze Fenster (E9.9).
+    eval_end = (max(kauf + verkauf) + timedelta(days=tol_days)) if (kauf or verkauf) else None
+
+    def _days(types):
+        ds = {to_date(s["ts"]) for s in signals if s["type"] in types}
+        return sorted(d for d in ds if eval_end is None or d <= eval_end)
+    buy_days, sell_days = _days(BUY_TYPES), _days(SELL_TYPES)
 
     def near(d, days):
         return any(abs((d - x).days) <= tol_days for x in days)
@@ -180,6 +198,7 @@ def score(signals: list[dict], tol_days: int = 1, start_ms: int = START_MS) -> d
         "precision": len(prec_days) / total_days if total_days else 0.0,
         "buy_days": buy_days, "sell_days": sell_days,
         "n_kauf": len(kauf), "n_verkauf": len(verkauf),   # Trigger IM Fenster
+        "eval_end": eval_end,                            # Ende der Recall-Bewertung
     }
 
 
@@ -339,6 +358,12 @@ def main():
         "",
         "Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; "
         "Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.",
+        "",
+        (f"**Zwei verschiedene Zeitraeume, nicht verwechseln:** Recall/Praezision werden nur "
+         f"bis {sc['eval_end'].strftime('%d.%m.%Y')} bewertet (danach endet Kaisers "
+         f"Trigger-Liste, es gibt keinen Maszstab mehr). Die Rendite laeuft ueber das "
+         f"komplette Fenster bis {to_date(END_MS).strftime('%d.%m.%Y')}."
+         if sc.get("eval_end") else ""),
         "",
         "## Parameter-Vergleich",
         "",

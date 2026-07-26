@@ -466,3 +466,57 @@ def test_buy_ladder_nachkauf_bei_neuen_tiefkerzen_in_zone():
     pos2 = Position()
     sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2, buy_ladder=False)
     assert not any("Mehrtages-Leiter" in s.reason for s in sigs2)
+
+
+# ------------------------------- E9.9: Rest-Freigabe bei veralteter Struktur
+
+def _tp1_dann_neue_struktur():
+    """Impuls 100->110, Einstieg am 0.5 (105), Extension 1.0 bei 114.5 -> TP1.
+    Danach laeuft der Kurs weiter hoch; das Tief 104.5 (Kerze 8) wird mit n=2 als neues
+    Pivot bestaetigt -> der letzte signifikante Impuls ist dann 110->104.5, also ein
+    ANDERER als der, auf dem die Position sitzt."""
+    return zigzag_candles() + [
+        c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1 am 0.5, Extrem 104.5
+        c(9, 105, 115.0, 104.6, 114.8),      # >= 114.5 -> TEILVERKAUF 1, Zustand TP1
+        c(10, 114, 116.0, 113.0, 115.0),     # Pivot-Tief 104.5 jetzt bestaetigt
+        c(11, 115, 118.0, 114.0, 117.0),
+    ]
+
+
+def test_release_stale_rest_gibt_restposition_frei():
+    path = _tp1_dann_neue_struktur()
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           tp_ladder=False, buy_ladder=False, release_stale_rest=True)
+    types = [s.type for s in sigs]
+    assert types[:2] == [SignalType.KAUF_1, SignalType.TEILVERKAUF_1]
+    frei = [s for s in sigs if "Struktur veraltet" in s.reason]
+    assert len(frei) == 1 and frei[0].type == SignalType.VERKAUF_REST
+    assert frei[0].tranche_pct == 20
+    assert pos.state == PosState.FLAT and pos.direction == "NONE"   # Engine wieder frei
+
+
+def test_ohne_release_bleibt_rest_in_tp_haengen():
+    """Das alte Verhalten (Default): der Rest bleibt liegen und blockiert jeden neuen
+    Einstieg, weil der Einstiegs-Block nur bei state==FLAT laeuft."""
+    path = _tp1_dann_neue_struktur()
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           tp_ladder=False, buy_ladder=False, release_stale_rest=False)
+    assert not any("Struktur veraltet" in s.reason for s in sigs)
+    assert pos.state in (PosState.TP1, PosState.TP2)
+    assert pos.direction == "LONG"
+
+
+def test_release_stale_rest_greift_nicht_vor_teilgewinn():
+    """Beim Positionsaufbau (T1/CORE/FULL) darf die Freigabe NICHT feuern — dort ist
+    der Stop zustaendig, sonst wuerde jede neue Pivot-Bestaetigung die Position werfen."""
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1 -> T1
+                   c(9, 105, 105.5, 104.0, 104.8),
+                   c(10, 104.8, 105.0, 104.2, 104.6)]
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           tp_ladder=False, buy_ladder=False, release_stale_rest=True)
+    assert not any("Struktur veraltet" in s.reason for s in sigs)
+    assert pos.state == PosState.T1

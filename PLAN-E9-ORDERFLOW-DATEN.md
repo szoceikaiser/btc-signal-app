@@ -151,8 +151,61 @@ Drei Widersprueche zwischen Doku, Code und Live-Verhalten gefunden und behoben:
    Default und beste Kombination (Stand vor E9.1, ohne echtes OI). Auf den aktuellen,
    gemessenen Stand gebracht; die alte Aussage steht als HISTORIE dabei, mit dem Grund
    fuers Umkippen (Muster 4 war ohne Liquidationsdaten blind).
-50/50 Tests gruen. NAECHSTER SCHRITT: Kaiser pusht + laesst Backtest laufen -> Panel und
-Chart-Marker zeigen danach die echte Live-Einstellung. Ergebnis hier nachtragen.
+50/50 Tests gruen.
+MESSLAUF-ERGEBNIS (2026-07-26 20:49 UTC, Fenster 17.11.2025-01.05.2026, 986 echte
+OI-Punkte): Alle drei Korrekturen greifen. `backtest_signals.json` ist jetzt im Repo
+(143 Signale) -> Chart zeigt erstmals die volle Historie. Panel zeigt
+"LIVE: nur Long +Kaufleiter +Flush core": **+39,5 %** (10.000 -> 13.949 EUR),
+Buy&Hold -16,4 %, realisierter Long-Gewinn +3.811 EUR aus 60 Abschluessen (47 im Gewinn).
+Damit ist die Live-Einstellung im Grid auch die renditestaerkste (vorher zeigte das Panel
+faelschlich -3,9 % aus der Long+Short-Variante). Vergleich: nur Long 10,2 % / +Kaufleiter
+18,5 % / +Flush core 31,1 % / Long+Short-Referenz 3,2 %.
+ZWEI OFFENE BEFUNDE aus dem Lauf (nicht behoben, bewusst dokumentiert):
+(a) FENSTER WANDERT: eff_start war am 24.07. der 15.11., jetzt der 17.11. — Coinalyze
+    loescht altes 4h-OI laufend. Damit ist JEDER Backtest ein anderer Zeitraum und
+    Ergebnisse sind ueber die Zeit nicht vergleichbar (+38,9 % vom 24.07. vs. +39,5 %
+    heute sind KEIN Fortschritt, nur ein anderes Fenster). -> E9.6 Punkt 5 (OI/Liq bei
+    jedem Lauf in eine committete Historie mergen) wird damit vom "nice to have" zur
+    Voraussetzung fuer belastbare Messungen. Naechste Etappe.
+(b) FLUSH-CHURN + SIGNAL-MENGE: 143 Signale in 5,5 Monaten, Praezision nur 29 %
+    (nur Long ohne Flush: 43 %). In den Signalen stehen mehrfach Ketten aus
+    FLUSH-Einstieg -> Stop 4h spaeter -> naechster FLUSH-Einstieg (z. B. 28.-30.04.,
+    drei Zyklen um 76-77k). Unterm Strich rentabel, aber whipsaw-anfaellig und viele
+    Telegram-Nachrichten. Dazu Serien von WARNUNG-Nachrichten (Derivate-Pump), die
+    weder Kauf noch Verkauf sind. Vor einer Verschaerfung erst messen, nicht raten.
+
+### E9.9 — TP2-Blockade + Backtest-Zeitraum · Status: MESSBEREIT (2026-07-26)
+BEFUND (Kaisers Frage „warum kommen nach dem 03.07. keine Signale?"): Die Engine lief
+korrekt (letzte verarbeitete Kerze 26.07.2026 16:00), war aber **blockiert**. Am
+03.07.2026 20:00 kam TEILVERKAUF 2; danach steht die Position in Zustand TP2 mit 20 %
+Rest. In TP2 kann nur noch (a) der Stop bei Kerzenschluss unter der Invalidierung
+(58.900 USD — Kurs 64.700, weit weg) oder (b) „Rest schliessen" bei Gegen-Muster
+feuern. Beides trat 3 Wochen nicht ein. Und weil der Einstiegs-Block in `evaluate` nur
+bei `state == FLAT` laeuft, wurde damit JEDER neue Einstieg verhindert — nicht nur
+Stille, sondern Taubheit. Der Backtest konnte das nie zeigen, weil er am 01.05. endete.
+- ERLEDIGT: schaltbarer `release_stale_rest` in evaluate. In TP1/TP2 wird der Rest
+  freigegeben (VERKAUF_REST / SHORT_COVER_REST, 20 %), sobald der letzte signifikante
+  Impuls NICHT mehr der ist, auf dem die Position sitzt (Vergleich ueber die
+  Pivot-Zeitstempel, in state.json persistiert). Beim Positionsaufbau (T1/CORE/FULL)
+  greift es absichtlich NICHT — dort ist der Stop zustaendig. Begruendung deckt
+  Grundregel 1: Fib-Zonen sind dynamisch, nie starr; eine Position auf eingefrorenen
+  Zonen ist irgendwann gegenstandslos.
+- ERLEDIGT: live per `site/data/config.json` -> `release_stale_rest` umschaltbar (kein
+  Push noetig, Browser-Edit reicht). Default AUS, bis gemessen. main.py gibt den Wert
+  an evaluate weiter.
+- ERLEDIGT: `END_MS` im Backtest ist jetzt **jetzt** statt hart 2026-05-01. Damit werden
+  Mai/Juni/Juli 2026 mitsimuliert — genau der Zeitraum der Blockade.
+- ERLEDIGT (Ehrlichkeit, Regel 3): `score()` bewertet Recall/Praezision nur bis zum
+  letzten notierten Trigger + Toleranz (22.04.2026 + 1 Tag). Ohne das wuerde jedes
+  Signal aus Mai-Juli automatisch als Fehltreffer zaehlen und die Praezision faelschlich
+  einbrechen. Die P&L laeuft ueber das ganze Fenster. Der Bericht nennt beide Zeitraeume
+  getrennt.
+- Grid um `LIVE +Rest-Freigabe` erweitert (dieselbe Live-Kombination + Freigabe).
+  Messfrage: schneidet die Freigabe Runner ab (kostet Rendite) oder bringt sie welche,
+  weil die Engine nicht mehr blockiert ist? 54/54 Tests gruen.
+- NAECHSTER SCHRITT: Kaiser pusht + laesst Backtest laufen. Wenn `LIVE +Rest-Freigabe`
+  nicht schlechter ist: `release_stale_rest` in config.json auf true, Default in
+  strategy_core und das panel-Flag mitziehen. Ergebnis hier nachtragen.
 
 ### E9.4 — Liquidationen sichtbar für Kaiser · Status: OFFEN
 - Chart-Seite: Liquidations-Daten/-Cluster anzeigen; Link/Einbindung einer kostenlosen
