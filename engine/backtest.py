@@ -74,14 +74,20 @@ def V(label, panel=False, **kw):
 
 # E9.5: Mehrtages-Kaufleiter (Furkan kauft in Tranchen ueber mehrere Tage in die
 # Schwaeche nach). Testet, ob wir mehr von Furkans Kauf-Tagen treffen (Recall Kauf) —
-# und was es mit der Rendite macht. "nur Long (Basis)" = Live-Einstellung -> Chart-Panel.
+# und was es mit der Rendite macht.
+#
+# WICHTIG (Panel-Regel): panel=True markiert die Variante, die auf der Chart-Webseite
+# angezeigt wird. Sie MUSS der echten Live-Einstellung entsprechen, sonst zeigt das
+# Panel eine Rendite, die die Engine nie erzielt hat. Live = nur Long
+# (site/data/config.json: bias_short=false) + Kaufleiter + Flush core + tp_ladder
+# (Defaults in strategy_core.evaluate). Bei jeder Aenderung an config.json oder an den
+# evaluate-Defaults muss dieses Flag mitwandern.
 GRID = [
-    # Panel/Chart = "nur Long + Kaufleiter" (robuste Standard-Strategie +18 %). Long+Short
-    # verliert (Shorts mechanisch mistimed, siehe unten) -> nicht als Live-/Panel-Variante.
     V("nur Long (Basis)", bias_short=False),
-    V("+Kaufleiter", panel=True, bias_short=False, buy_ladder=True),
+    V("+Kaufleiter", bias_short=False, buy_ladder=True),
     V("+Flush core", bias_short=False, flush_entry="core"),
-    V("+Flush core +Kaufleiter", bias_short=False, flush_entry="core", buy_ladder=True),
+    V("LIVE: nur Long +Kaufleiter +Flush core", panel=True,
+      bias_short=False, flush_entry="core", buy_ladder=True),
     V("+Kaufleiter +Bed.Stop", bias_short=False, buy_ladder=True, conditional_stop=True),
     V("Long+Short (Ref)"),
 ]

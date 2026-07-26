@@ -388,14 +388,16 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              trend_filter: bool = False, trend_ema: int = 50,
              strict_confirm: bool = False, confluence: bool = False,
              conditional_stop: bool = False, buy_ladder: bool = True) -> list[Signal]:
-    # Defaults kalibriert per Backtest 2026-07-23 (BACKTEST.md): n=5, k=2.0,
-    # flush='off' — beste Kombination (Recall 45 %, Praezision 54 %, Rendite -6,0 %
-    # vs. Buy&Hold -28,4 %). flush_entry ("off"/"t1"/"core") bleibt schaltbar:
-    # mit echter Live-OI-Historie (Muster 4 aktiv) in E8.3 erneut testen.
-    # tp_ladder (E8.2): gestaffelte Zwischen-Teilgewinne an Ext 0.8/0.9 vor dem
-    # 1.0-Ziel. Default True seit Backtest 2026-07-24: bei n=5 Recall 45 % und
-    # Praezision 54 % unveraendert, Rendite -5,3 % statt -6,0 % (kein Nachteil,
-    # bildet Furkans gestaffelte Gewinnmitnahme ab). Recall != Gewinn.
+    # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
+    # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
+    # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
+    # Kaufleiter": Recall 55 %, Praezision 30 %, Rendite +38,9 % (Buy&Hold -19,3 %).
+    # Die RICHTUNG kommt nicht von hier, sondern aus site/data/config.json — live steht
+    # bias_short=false (nur Long), weil mechanische Shorts ohne Makro-Bias verlieren.
+    # HISTORIE (nicht mehr gueltig): vor E9.1 war flush_entry='off' der beste Wert —
+    # damals fehlte echtes OI, Muster 4 war blind. Mit echten Liquidationsdaten dreht
+    # sich das Ergebnis. tp_ladder (E8.2) bildet Furkans gestaffelte Gewinnmitnahme ab
+    # (Recall/Praezision unveraendert, Rendite leicht besser). Recall != Gewinn.
     # E8.5-Filter fuer bessere Einstiege (alle Furkans Methode, schaltbar, Default aus
     # bis per Backtest gemessen): trend_filter = nur Setups in Richtung des 1D-Trends
     # (Furkans Schritt 1, Preis vs. Tages-EMA); strict_confirm = KAUF 2 nur mit

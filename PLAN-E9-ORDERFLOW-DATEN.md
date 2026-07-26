@@ -136,6 +136,24 @@ liefert die Historie mit.
   main.py --resend-all (liest signals.json, sendet alle erneut, mit Kopf-Nachricht);
   signal.yml workflow_dispatch-Input "resend_all". 50/50 Tests.
 
+### E9.8 — Konsistenz-Korrekturen (Cowork-Durchsicht 2026-07-26) · Status: MESSBEREIT
+Drei Widersprueche zwischen Doku, Code und Live-Verhalten gefunden und behoben:
+1. `.github/workflows/backtest.yml` committete `site/data/backtest_signals.json` NICHT
+   (`git add` unvollstaendig). Die Chart-Seite laedt genau diese Datei fuer die volle
+   Long/Short-Marker-Historie -> sie kam nie im Repo an. Pfad ergaenzt.
+2. Das Chart-Panel (`panel=True` im backtest.py-GRID) stand auf "+Kaufleiter"
+   (flush off). Live laeuft aber nur Long + Kaufleiter + **Flush core** (config.json +
+   evaluate-Defaults). Das Panel zeigte damit eine Rendite, die die Engine nie erzielt hat.
+   Panel-Flag auf die Variante "LIVE: nur Long +Kaufleiter +Flush core" gesetzt; darueber
+   steht jetzt eine Panel-Regel als Kommentar (Flag muss bei jeder Aenderung an
+   config.json oder an den evaluate-Defaults mitwandern).
+3. Der Kommentarblock in `strategy_core.evaluate` behauptete weiterhin flush='off' sei
+   Default und beste Kombination (Stand vor E9.1, ohne echtes OI). Auf den aktuellen,
+   gemessenen Stand gebracht; die alte Aussage steht als HISTORIE dabei, mit dem Grund
+   fuers Umkippen (Muster 4 war ohne Liquidationsdaten blind).
+50/50 Tests gruen. NAECHSTER SCHRITT: Kaiser pusht + laesst Backtest laufen -> Panel und
+Chart-Marker zeigen danach die echte Live-Einstellung. Ergebnis hier nachtragen.
+
 ### E9.4 — Liquidationen sichtbar für Kaiser · Status: OFFEN
 - Chart-Seite: Liquidations-Daten/-Cluster anzeigen; Link/Einbindung einer kostenlosen
   Heatmap (Velo/Coinank/Coinglass). Optional Liquidations-Zonen als „Magnete" im Chart.
