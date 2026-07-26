@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "TP2",
- "last_signal_ts": 1785009600000,
+ "last_signal_ts": 1785024000000,
  "retrace_extreme": 59588.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -25,6 +25,6 @@
   "bias_long": true,
   "bias_short": false
  },
- "updated_at": "2026-07-26T01:09:51Z",
- "last_close": 64375.0
+ "updated_at": "2026-07-26T04:44:50Z",
+ "last_close": 64557.0
 }
