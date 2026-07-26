@@ -261,8 +261,27 @@ die Position bleibt am Leben (Runner), wird aber nicht mehr zum Verlust.
   Gegenprobe: hilft die Kombination oder stoppt sie sich gegenseitig aus?
   Risiko, das die Messung zeigen muss: ein zu enger Struktur-Stop stoppt zu frueh aus.
   57/57 Tests gruen. Default AUS, live per config.json (`trail_stop`) umschaltbar.
-- NAECHSTER SCHRITT: Kaiser pusht + laesst Backtest laufen; Ergebnis hier nachtragen,
-  dann Default + panel-Flag + config.json entscheiden.
+- MESSLAUF-ERGEBNIS (2026-07-26 21:28 UTC, Fenster 17.11.2025-26.07.2026):
+
+  | Variante | Recall | Praez. | Rendite | Signale |
+  |---|---|---|---|---|
+  | LIVE (blockiert, Ist-Zustand) | 52 % | 32 % | +32,9 % | 206 |
+  | LIVE +Rest-Freigabe (E9.9) | 55 % | 35 % | +28,5 % | 217 |
+  | **LIVE +Stop nachziehen (E9.10)** | **55 %** | **34 %** | **+29,8 %** | 208 |
+  | LIVE +Stop nachziehen +Rest-Freigabe | 55 % | 35 % | +27,5 % | 208 |
+
+  BEFUND: Der nachgezogene Stop ist die beste der drei Entblockungs-Varianten — gleicher
+  Recall-Gewinn wie die Rest-Freigabe (52->55 %), aber 1,3 Punkte mehr Rendite, weil
+  Runner am Leben bleiben statt zum Marktpreis verkauft zu werden. Kaisers Furkan-Zitat
+  war also die bessere Spezifikation. Die KOMBINATION ist die schlechteste Option
+  (+27,5 %): die beiden Mechanismen stoppen sich gegenseitig aus — nur EINEN nehmen.
+  Der Preis der Entblockung bleibt ~3 Punkte gegenueber dem blockierten Ist-Zustand.
+  Einordnung wie bei E9.9: Die 3 Punkte sind gemessener Durchschnitt, die Blockade ist
+  unbegrenzt. Kein Filter/Mechanismus schlaegt bisher die reine Live-Variante nach
+  Rendite — der Gewinn kommt aus RICHTUNG (nur Long) und Kaufleiter, nicht aus Gattern.
+- KONSEQUENZ (empfohlen): `trail_stop: true`, `release_stale_rest: false` in config.json.
+  Browser-Edit, kein Push. Panel-Flag im Grid auf `LIVE +Stop nachziehen` mitziehen,
+  sobald Kaiser umschaltet.
 
 ### E9.11 — Teilverkaeufe an Liquidationszonen statt nur an Fib-Extensions · Status: IDEE
 Kaisers Beobachtung (2026-07-26): *"Furkan faengt an zu verkaufen, wenn die Kurse die
@@ -284,8 +303,35 @@ Drei baubare Annaeherungen, aufsteigend im Aufwand:
 2. **Zonen-Gedaechtnis:** Preisniveaus vergangener grosser Liquidations-Spikes als
    Magnetzonen fuehren und Teilverkaeufe dort platzieren. Aus vorhandenen Daten
    berechenbar, aber schwaecher als eine echte Heatmap.
-3. **Echte Heatmap:** zusaetzliche Quelle pruefen (Coinank/Coinglass/Velo — Furkan nennt
-   Velo und Coinank als kostenlos). Erst Verfuegbarkeit/Reichweite/Key klaeren.
+3. **Echte Heatmap:** RECHERCHIERT 2026-07-26 (Kaiser: "ich moechte echte heatmaps").
+   ERGEBNIS: **Es gibt keine kostenlose Heatmap-API.** Konkret:
+   - **Coinglass**: hat genau die richtigen Endpoints
+     (`/api/futures/liquidation/heatmap/model1` und
+     `/api/futures/liquidation/aggregated-heatmap/model1`, Antwort = y_axis-Preisniveaus +
+     liquidation_leverage_data + Kerzen, range bis 1y). Verfuegbar aber **erst ab Plan
+     "Professional" = 699 USD/Monat** — Hobbyist (29), Startup (79) und Standard (299)
+     haben die Heatmap laut Plan-Tabelle NICHT. Damit praktisch ausgeschlossen.
+   - **Coinank**: `GET /api/liqMap/getLiqHeatMap` (+ getLiqMap/getAggLiqMap) existiert,
+     Base `https://open-api.coinank.com`, Header `apikey`. Aber **API-Level 4**, also die
+     hoechste Stufe -> Mitgliedschaft noetig, Preis nicht in der Doku. Alternativer Weg:
+     Bezahlung pro Aufruf via x402 / Agent Payments Protocol (OKX-Wallet) — technisch
+     moeglich, aber in einem GitHub-Action-Cron fragil und mit Wallet-Setup verbunden.
+     Nicht empfohlen. Preis der API4-Mitgliedschaft muesste Kaiser im Konto pruefen.
+   - **Velo**: API-Key kostet **199 USD/Monat** (monatlich = 3 Monate Historie, jaehrlich
+     = volle Historie). Ohne Key liefern /futures /options /spot nur die Produktlisten,
+     keine Werte.
+   WICHTIG zur Aufloesung des Widerspruchs: Furkan sagt im Video zu Recht, Velo und
+   Coinank seien kostenlos — das gilt fuer die **Weboberflaeche zum Anschauen**, nicht
+   fuer den Datenabruf per API. Er automatisiert die Heatmap auch nicht, sondern liest sie
+   und traegt die Zonen per Hand ein (Transkript 16:56: *"nehme ich mir hier die
+   Liquidierungszonen, trage die meistens dann in meinen Chart ein"*).
+4. **Manuelle Zonen (neu, empfohlen, kostenlos):** genau Furkans Weg nachbauen — Kaiser
+   liest die kostenlose Heatmap (Velo/Coinank) mit den Augen und traegt die Zonen als
+   Liste in `site/data/config.json` ein (z. B. `"liq_zones": [79000, 82500]`); die Engine
+   nutzt sie als Teilverkaufs-Magnete und macht das Timing. Kein Abo, keine fragile
+   Abhaengigkeit, und die Heatmap bleibt im Prozess — nur die Augen sind Kaisers.
+   Nachteil: manuelle Pflege, keine Backtest-Historie (Zonen der Vergangenheit fehlen)
+   -> messbar nur vorwaerts, wie beim KI-Makro-Bias.
 EHRLICH (Regel 3): ob das die Rendite erhoeht, ist OFFEN. Argument dafuer: die aktuellen
 Fib-Teilverkaeufe sind mechanisch und feuern oft frueh (TEILVERKAUF_1 trifft haeufig),
 Liquidations-Spikes verkaufen in die Staerke. Argument dagegen: Liquidations-Kaskaden
