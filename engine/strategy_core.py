@@ -356,6 +356,7 @@ class Position:
     buy_rungs: int = 0                       # Anzahl Mehrtages-Kaufleiter-Tranchen (E9.5)
     entry_ref: Optional[float] = None        # tranchengewichteter Durchschnitts-Einstand (E9.10)
     entry_pct: int = 0                       # Summe der eingestiegenen Tranchen-Prozente
+    liq_exits: int = 0                       # Anzahl Teilverkaeufe an Liquidationen (E9.11)
 
 
 def _reset_position(pos: "Position") -> None:
@@ -366,6 +367,7 @@ def _reset_position(pos: "Position") -> None:
     pos.buy_rungs = 0
     pos.entry_ref = None
     pos.entry_pct = 0
+    pos.liq_exits = 0
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
@@ -398,6 +400,71 @@ BUY_LADDER_TRANCHE = 15
 LADDER_FACTORS = (0.8, 0.9)
 LADDER_TRANCHE = 15
 
+# Teilverkaeufe an Liquidationen (E9.11). Furkan verkauft erst, wenn der Kurs die
+# Liquidationszonen erreicht — nicht schon vorher an einem rechnerischen Fib-Ziel.
+# Seine Heatmap (wo Liquiditaet JETZT liegt) haben wir nicht; aus Coinalyze kennen wir
+# aber, WIE VIEL je 4h-Kerze liquidiert wurde. Das Preisniveau liefert die Kerze selbst:
+# Shorts werden am Hoch gerissen, Longs am Tief. Daraus zwei testbare Varianten:
+#   "spike" = reaktiv, in die laufende Kaskade verkaufen (nur aktuelle Daten)
+#   "zone"  = Preisniveaus vergangener Kaskaden als Magnete, Kurs laeuft wieder hinein
+# WICHTIG (Kausalitaet): die Zonen werden ausschliesslich aus Kerzen VOR der aktuellen
+# gebildet — sonst wuesste der Backtest die Zukunft und das Ergebnis waere wertlos.
+MAX_LIQ_EXITS = 3          # hoechstens so viele Liquidations-Teilverkaeufe je Position
+LIQ_SPIKE_MULT = 3.0       # Kaskade = mindestens 3x der Durchschnitt des Fensters
+LIQ_LOOKBACK = 180         # Kerzen fuer die Zonen-Historie (180 x 4h = 30 Tage)
+LIQ_ZONE_TOL = 0.005       # 0,5 % Toleranz: so nah muss der Kurs an die Zone
+LIQ_ZONE_MIN_MULT = 3.0    # Zone = Kerze mit mindestens 3x der mittleren Liquidation
+
+
+def liq_cascade(flow: list[FlowPoint], side: str, window: int = 12,
+                mult: float = LIQ_SPIKE_MULT) -> bool:
+    """Laeuft in der JUENGSTEN Kerze eine Liquidations-Kaskade?
+
+    side="short" = Short-Liquidationen (Squeeze nach oben -> gut fuer Long-Teilgewinne),
+    side="long"  = Long-Liquidationen (Flush nach unten -> gut fuer Short-Teilgewinne).
+    """
+    if len(flow) < 3:
+        return False
+    f = flow[-window:]
+    vals = [(p.short_liq if side == "short" else p.long_liq) for p in f]
+    if len(vals) < 2:
+        return False
+    base = sum(vals[:-1]) / (len(vals) - 1)
+    return base > 0 and vals[-1] >= mult * base
+
+
+def liq_levels(candles: list[Candle], flow: list[FlowPoint], side: str,
+               lookback: int = LIQ_LOOKBACK,
+               min_mult: float = LIQ_ZONE_MIN_MULT) -> list[tuple[float, float]]:
+    """Preisniveaus, an denen historisch aussergewoehnlich viel liquidiert wurde.
+
+    Gibt [(Preis, Liquidationsmasse USD)] zurueck, absteigend nach Masse. Der Preis ist
+    das Kerzen-Hoch (side="short") bzw. -Tief (side="long") der Kaskaden-Kerze.
+    Erwartet bereits beschnittene Listen (nur Kerzen VOR der Entscheidung).
+    """
+    n = min(len(candles), len(flow), lookback)
+    if n < 10:
+        return []
+    cs, fs = candles[-n:], flow[-n:]
+    vals = [(p.short_liq if side == "short" else p.long_liq) for p in fs]
+    total = sum(vals)
+    if total <= 0:
+        return []
+    avg = total / len(vals)
+    out = [((c.high if side == "short" else c.low), v)
+           for c, v in zip(cs, vals) if v >= min_mult * avg]
+    out.sort(key=lambda x: x[1], reverse=True)
+    return out
+
+
+def in_liq_zone(price: float, levels: list[tuple[float, float]],
+                tol: float = LIQ_ZONE_TOL) -> Optional[float]:
+    """Liegt `price` innerhalb der Toleranz an einem der Niveaus? Gibt das Niveau zurueck."""
+    for lvl, _mass in levels:
+        if lvl > 0 and abs(price - lvl) / lvl <= tol:
+            return lvl
+    return None
+
 
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
@@ -406,7 +473,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              trend_filter: bool = False, trend_ema: int = 50,
              strict_confirm: bool = False, confluence: bool = False,
              conditional_stop: bool = False, buy_ladder: bool = True,
-             release_stale_rest: bool = False, trail_stop: bool = False) -> list[Signal]:
+             release_stale_rest: bool = False, trail_stop: bool = False,
+             liq_exit: str = "off") -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -433,6 +501,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # hoeher liegt. Furkan (laut Kaiser): "Stop ueber den Kauf gezogen, dann kann ich
     # nichts mehr verlieren", Motto Kapital schuetzen. Loest zugleich die TP2-Blockade,
     # ohne den Rest wie bei release_stale_rest zum Marktpreis wegzuwerfen.
+    # liq_exit (E9.11, Kaisers Beobachtung "Furkan faengt erst an zu verkaufen, wenn der
+    # Kurs die Liquidationszonen erreicht"): "off" | "spike" (in die laufende Kaskade
+    # verkaufen) | "zone" (Preisniveaus vergangener Kaskaden als Magnete) | "both".
+    # Ergaenzt die Fib-Teilgewinne, ersetzt sie nicht; hoechstens MAX_LIQ_EXITS je Position.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -631,6 +703,27 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           f"Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt ({pattern.name})",
                                           stop_ref=z.invalidation))
                     pos.buy_rungs += 1
+            # Teilverkauf an Liquidationen (E9.11): erst verkaufen, wenn der Kurs die
+            # Liquidationszone erreicht — nicht schon am rechnerischen Fib-Ziel.
+            if liq_exit != "off" and pos.liq_exits < MAX_LIQ_EXITS \
+                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+                # Long verkauft in Short-Liquidationen (Squeeze nach oben), Short in
+                # Long-Liquidationen (Flush nach unten).
+                seite = "short" if long_side else "long"
+                grund = None
+                if liq_exit in ("spike", "both") and liq_cascade(flow, seite):
+                    grund = f"Liquidations-Kaskade laeuft ({pattern.name})"
+                if grund is None and liq_exit in ("zone", "both"):
+                    # NUR Kerzen VOR der aktuellen -> keine Kenntnis der Zukunft
+                    lv = liq_levels(candles[:-1], flow[:-1], seite)
+                    treffer = in_liq_zone(cur.high if long_side else cur.low, lv)
+                    if treffer is not None:
+                        grund = f"Liquidationszone {treffer:.0f} erreicht (historische Kaskade)"
+                if grund is not None:
+                    lt = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
+                    signals.append(Signal(cur.ts, lt, cur.close, LADDER_TRANCHE,
+                                          f"Teilgewinn an Liquidationen: {grund}"))
+                    pos.liq_exits += 1
             # Upgrade T1 -> CORE: Kernposition im Golden Pocket (KAUF 2 / SHORT 2)
             if pos.state == PosState.T1:
                 in_gp = (z.gp_lower <= cur.low <= z.gp_upper) if long_side \

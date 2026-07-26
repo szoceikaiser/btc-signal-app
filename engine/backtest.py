@@ -62,12 +62,13 @@ SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_R
 # Parameter, die evaluate() versteht (der Rest der Config sind nur Labels):
 EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "tp_ladder", "trend_filter", "strict_confirm", "confluence",
-             "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop")
+             "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop",
+             "liq_exit")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, strict_confirm=False, confluence=False,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
-             trail_stop=False)
+             trail_stop=False, liq_exit="off")
 
 
 def V(label, panel=False, **kw):
@@ -92,7 +93,7 @@ GRID = [
     V("nur Long (Basis)", bias_short=False),
     V("+Kaufleiter", bias_short=False, buy_ladder=True),
     V("+Flush core", bias_short=False, flush_entry="core"),
-    V("LIVE: nur Long +Kaufleiter +Flush core", panel=True,
+    V("LIVE: nur Long +Kaufleiter +Flush core",
       bias_short=False, flush_entry="core", buy_ladder=True),
     V("+Kaufleiter +Bed.Stop", bias_short=False, buy_ladder=True, conditional_stop=True),
     # E9.9: dieselbe Live-Kombination, aber mit Rest-Freigabe bei veralteter Struktur.
@@ -104,10 +105,19 @@ GRID = [
     # nachgezogener Stop statt Rest-Verkauf. Messfrage: bringt das die Treffer-
     # Verbesserung der Rest-Freigabe OHNE deren Rendite-Verlust, weil Runner am Leben
     # bleiben? Und die Kombination aus beidem als Gegenprobe.
-    V("LIVE +Stop nachziehen", bias_short=False, flush_entry="core", buy_ladder=True,
-      trail_stop=True),
+    V("LIVE +Stop nachziehen", panel=True, bias_short=False, flush_entry="core",
+      buy_ladder=True, trail_stop=True),
     V("LIVE +Stop nachziehen +Rest-Freigabe", bias_short=False, flush_entry="core",
       buy_ladder=True, trail_stop=True, release_stale_rest=True),
+    # E9.11 (Kaisers Beobachtung): Teilverkaeufe an Liquidationszonen statt nur an
+    # Fib-Extensions. Basis ist die empfohlene Live-Einstellung inkl. Stop-Nachziehen,
+    # damit der Vergleich das echte Delta des Liquidations-Ausstiegs zeigt.
+    V("LIVE +Stop +Liq-Kaskade", bias_short=False, flush_entry="core", buy_ladder=True,
+      trail_stop=True, liq_exit="spike"),
+    V("LIVE +Stop +Liq-Zonen", bias_short=False, flush_entry="core", buy_ladder=True,
+      trail_stop=True, liq_exit="zone"),
+    V("LIVE +Stop +Liq beides", bias_short=False, flush_entry="core", buy_ladder=True,
+      trail_stop=True, liq_exit="both"),
     V("Long+Short (Ref)"),
 ]
 

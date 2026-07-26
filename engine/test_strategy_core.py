@@ -4,10 +4,11 @@ Die Fib-Testvektoren stammen 1:1 aus dem Video (Frame 17:55 und 18:55) und aus d
 Gegencheck (docs/GEGENCHECK.md): reale Zahlen, keine Fantasiewerte.
 """
 
-from strategy_core import (Candle, FlowPoint, Pattern, Pivot, Impulse, PosState,
-                           Position, SignalType, classify_pattern, daily_fib_zone,
-                           daily_trend, ema, evaluate, fib_zones, find_pivots,
-                           last_significant_impulse, resample_daily)
+from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Impulse,
+                           PosState, Position, SignalType, classify_pattern,
+                           daily_fib_zone, daily_trend, ema, evaluate, fib_zones,
+                           find_pivots, in_liq_zone, last_significant_impulse,
+                           liq_cascade, liq_levels, resample_daily)
 
 DAY_MS = 86_400_000
 H4_MS = 4 * 3600 * 1000
@@ -563,6 +564,63 @@ def test_einstand_ist_tranchengewichtet():
     erwartet = (105.0 * 25 + 103.82 * 50) / 75
     assert abs(pos.entry_ref - erwartet) < 0.05
     assert pos.entry_ref < 105.0                        # guenstiger als der erste Kauf
+
+
+def _liq_flow(n, short_liq_last=0.0, short_liq_base=1000.0):
+    """Flow mit ruhigen Short-Liquidationen und optionaler Kaskade in der letzten Kerze."""
+    return [FlowPoint(i, 100 + i, 100, 1000, -0.0001,
+                      short_liq=(short_liq_last if i == n - 1 else short_liq_base))
+            for i in range(n)]
+
+
+def test_liq_exit_spike_verkauft_in_die_kaskade():
+    """E9.11: Long-Position + Short-Liquidations-Kaskade -> Teilgewinn (15 %)."""
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),     # KAUF 1
+                   c(9, 105.5, 108.0, 105.0, 107.5)]   # Kaskade laeuft
+    pos = Position()
+    flow = _liq_flow(len(path), short_liq_last=5_000_000.0)
+    sigs = run_incremental(path, flow, pos, pivot_n=2, bias_short=False,
+                           tp_ladder=False, buy_ladder=False, liq_exit="spike")
+    liq = [s for s in sigs if "Teilgewinn an Liquidationen" in s.reason]
+    assert len(liq) == 1 and liq[0].type == SignalType.TEILVERKAUF_LADDER
+    assert liq[0].tranche_pct == LADDER_TRANCHE and pos.liq_exits == 1
+    assert "Kaskade" in liq[0].reason
+    # Default "off": dieselben Daten erzeugen keinen Liquidations-Teilverkauf
+    pos2 = Position()
+    sigs2 = run_incremental(path, flow, pos2, pivot_n=2, bias_short=False,
+                            tp_ladder=False, buy_ladder=False)
+    assert not any("Teilgewinn an Liquidationen" in s.reason for s in sigs2)
+
+
+def test_liq_levels_findet_nur_ausreisser():
+    cs = [c(i, 100, 100 + i, 99, 100) for i in range(20)]
+    fl = [FlowPoint(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 5 else 1000.0))
+          for i in range(20)]
+    lv = liq_levels(cs, fl, "short")
+    assert len(lv) == 1 and lv[0][0] == cs[5].high          # Kerzen-Hoch als Niveau
+    assert in_liq_zone(cs[5].high, lv) == cs[5].high
+    assert in_liq_zone(cs[5].high * 1.05, lv) is None       # 5 % weg -> keine Zone
+
+
+def test_liq_cascade_erkennt_nur_ausschlag():
+    ruhig = [FlowPoint(i, 0, 0, 1000, 0.0, short_liq=1000.0) for i in range(12)]
+    assert liq_cascade(ruhig, "short") is False
+    kaskade = ruhig[:-1] + [FlowPoint(11, 0, 0, 1000, 0.0, short_liq=50_000.0)]
+    assert liq_cascade(kaskade, "short") is True
+    assert liq_cascade(kaskade, "long") is False            # falsche Seite
+
+
+def test_liq_exit_zone_nutzt_keine_zukunft():
+    """Kausalitaet: die Kaskade der AKTUELLEN Kerze darf keine Zone fuer sich selbst
+    erzeugen — sonst wuesste der Backtest die Zukunft."""
+    cs = [c(i, 100, 101, 99, 100) for i in range(20)]
+    fl = [FlowPoint(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 19 else 1000.0))
+          for i in range(20)]
+    # Aus allen Kerzen ausser der letzten: kein Ausreisser -> keine Zone
+    assert liq_levels(cs[:-1], fl[:-1], "short") == []
+    # Erst wenn die Kaskaden-Kerze in der Historie liegt, entsteht ein Niveau
+    assert len(liq_levels(cs, fl, "short")) == 1
 
 
 def test_release_stale_rest_greift_nicht_vor_teilgewinn():

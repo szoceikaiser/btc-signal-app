@@ -283,7 +283,7 @@ die Position bleibt am Leben (Runner), wird aber nicht mehr zum Verlust.
   Browser-Edit, kein Push. Panel-Flag im Grid auf `LIVE +Stop nachziehen` mitziehen,
   sobald Kaiser umschaltet.
 
-### E9.11 — Teilverkaeufe an Liquidationszonen statt nur an Fib-Extensions · Status: IDEE
+### E9.11 — Teilverkaeufe an Liquidationszonen statt nur an Fib-Extensions · Status: MESSBEREIT
 Kaisers Beobachtung (2026-07-26): *"Furkan faengt an zu verkaufen, wenn die Kurse die
 Liquidationszonen erreichen und nicht schon vorher."* Deckt sich mit STRATEGIE.md §5:
 Liquidationszonen sind bei Furkan **Stufe 2** der Hierarchie (direkt nach dem Makro-Bias)
@@ -332,6 +332,31 @@ Drei baubare Annaeherungen, aufsteigend im Aufwand:
    Abhaengigkeit, und die Heatmap bleibt im Prozess — nur die Augen sind Kaisers.
    Nachteil: manuelle Pflege, keine Backtest-Historie (Zonen der Vergangenheit fehlen)
    -> messbar nur vorwaerts, wie beim KI-Makro-Bias.
+**GEBAUT 2026-07-26 (Kaisers Einwand: "koennen wir die vergangenen Liquidationszonen
+nicht als Teststrategie nutzen?" — berechtigt, meine Reihenfolge war falsch. Erst messen,
+dann entscheiden, ob eine bezahlte/manuelle Heatmap ihr Geld wert ist).**
+Schluessel-Einsicht: Coinalyze sagt WIE VIEL je 4h-Kerze liquidiert wurde, das
+PREISNIVEAU liefert die Kerze selbst — Shorts werden am Hoch gerissen, Longs am Tief.
+Damit sind Varianten 1 und 2 beide backtestbar, ohne bezahlte Heatmap.
+- ERLEDIGT: `liq_exit` in evaluate — "off" | "spike" | "zone" | "both". Long verkauft in
+  SHORT-Liquidationen (Squeeze nach oben), Short in LONG-Liquidationen (Flush nach unten).
+  Tranche = LADDER_TRANCHE (15 %, passend zur P&L-Simulation), hoechstens MAX_LIQ_EXITS=3
+  je Position, `Position.liq_exits` persistiert. Nutzt SignalType TEILVERKAUF_LADDER /
+  SHORT_TP_LADDER -> Chart-Marker (TVL/STPL) und P&L-Simulation stimmen ohne Umbau.
+- ERLEDIGT: Helfer `liq_cascade` (Kaskade = letzte Kerze >= 3x Fenster-Durchschnitt),
+  `liq_levels` (Preisniveaus vergangener Kaskaden, 30-Tage-Fenster, >= 3x Mittel) und
+  `in_liq_zone` (0,5 % Toleranz).
+- **KAUSALITAET (kritisch):** die Zonen werden aus `candles[:-1]` / `flow[:-1]` gebildet,
+  also ausschliesslich aus Kerzen VOR der Entscheidung. Ein eigener Test sichert ab, dass
+  die Kaskade der aktuellen Kerze keine Zone fuer sich selbst erzeugt — sonst wuesste der
+  Backtest die Zukunft und jedes Ergebnis waere wertlos.
+- Grid um `LIVE +Stop +Liq-Kaskade` / `+Liq-Zonen` / `+Liq beides` erweitert, jeweils auf
+  Basis der empfohlenen Live-Einstellung (inkl. Stop-Nachziehen), damit der Vergleich das
+  echte Delta zeigt. panel-Flag auf `LIVE +Stop nachziehen` gesetzt. 61/61 Tests gruen.
+- GRENZE, die im Ergebnis mitgelesen werden muss: eine 4h-Kerze spannt 1-2 % — die Zonen
+  sind also grob. Und es bleibt ein RUECKWAERTS-Mass (wo wurde liquidiert), nicht Furkans
+  Vorausschau (wo liegt Liquiditaet jetzt). Die beiden korrelieren (Cluster wiederholen
+  sich an runden Zahlen und alten Hochs/Tiefs), sind aber nicht dasselbe.
 EHRLICH (Regel 3): ob das die Rendite erhoeht, ist OFFEN. Argument dafuer: die aktuellen
 Fib-Teilverkaeufe sind mechanisch und feuern oft frueh (TEILVERKAUF_1 trifft haeufig),
 Liquidations-Spikes verkaufen in die Staerke. Argument dagegen: Liquidations-Kaskaden
