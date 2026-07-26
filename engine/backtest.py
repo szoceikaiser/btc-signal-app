@@ -62,11 +62,12 @@ SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_R
 # Parameter, die evaluate() versteht (der Rest der Config sind nur Labels):
 EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "tp_ladder", "trend_filter", "strict_confirm", "confluence",
-             "conditional_stop", "buy_ladder", "release_stale_rest")
+             "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, strict_confirm=False, confluence=False,
-             conditional_stop=False, buy_ladder=False, release_stale_rest=False)
+             conditional_stop=False, buy_ladder=False, release_stale_rest=False,
+             trail_stop=False)
 
 
 def V(label, panel=False, **kw):
@@ -99,6 +100,14 @@ GRID = [
     # oder bringt es welche (Engine wird nicht mehr blockiert und nimmt neue Setups)?
     V("LIVE +Rest-Freigabe", bias_short=False, flush_entry="core", buy_ladder=True,
       release_stale_rest=True),
+    # E9.10 (Kaisers Furkan-Zitat "Stop ueber den Kauf ziehen, Kapital schuetzen"):
+    # nachgezogener Stop statt Rest-Verkauf. Messfrage: bringt das die Treffer-
+    # Verbesserung der Rest-Freigabe OHNE deren Rendite-Verlust, weil Runner am Leben
+    # bleiben? Und die Kombination aus beidem als Gegenprobe.
+    V("LIVE +Stop nachziehen", bias_short=False, flush_entry="core", buy_ladder=True,
+      trail_stop=True),
+    V("LIVE +Stop nachziehen +Rest-Freigabe", bias_short=False, flush_entry="core",
+      buy_ladder=True, trail_stop=True, release_stale_rest=True),
     V("Long+Short (Ref)"),
 ]
 

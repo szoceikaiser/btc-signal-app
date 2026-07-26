@@ -163,7 +163,8 @@ def pos_to_state(pos: Position) -> dict:
     d = {"direction": pos.direction, "pos_state": pos.state.value,
          "last_signal_ts": pos.last_signal_ts, "retrace_extreme": pos.retrace_extreme,
          "tp_rungs": pos.tp_rungs, "dip_buys": pos.dip_buys,
-         "buy_rungs": pos.buy_rungs, "zones": None}
+         "buy_rungs": pos.buy_rungs, "entry_ref": pos.entry_ref,
+         "entry_pct": pos.entry_pct, "zones": None}
     if pos.zones:
         z = pos.zones
         d["zones"] = {
@@ -191,6 +192,8 @@ def pos_from_state(d: dict) -> Position:
     pos.tp_rungs = d.get("tp_rungs", 0)
     pos.dip_buys = d.get("dip_buys", 0)
     pos.buy_rungs = d.get("buy_rungs", 0)
+    pos.entry_ref = d.get("entry_ref")
+    pos.entry_pct = d.get("entry_pct", 0)
     z = d.get("zones")
     if z and "impuls_start" in z:
         imp = Impulse(
@@ -245,7 +248,8 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         sigs = evaluate(candles[:i + 1], flow[:i + 1], pos,
                         bias_long=cfg.get("bias_long", True),
                         bias_short=cfg.get("bias_short", True),
-                        release_stale_rest=cfg.get("release_stale_rest", False))
+                        release_stale_rest=cfg.get("release_stale_rest", False),
+                        trail_stop=cfg.get("trail_stop", False))
         new_signals += [s.to_dict() for s in sigs]
 
     # Historie fortschreiben

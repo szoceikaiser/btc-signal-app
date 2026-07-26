@@ -508,6 +508,63 @@ def test_ohne_release_bleibt_rest_in_tp_haengen():
     assert pos.direction == "LONG"
 
 
+def test_trail_stop_zieht_auf_einstand_und_sichert_gewinn():
+    """E9.10: Nach TEILVERKAUF 1 wandert der Stop auf Break-even/Struktur. Ein Ruecklauf,
+    der die alte Invalidierung (100) NICHT erreicht, stoppt jetzt trotzdem — mit Gewinn."""
+    base = zigzag_candles()                   # Impuls 100->110, Invalidierung 100
+    path = base + [
+        c(8, 106, 106.5, 104.5, 105.5),       # KAUF 1 am 0.5 (105) -> Einstand 105
+        c(9, 105, 115.0, 104.6, 114.8),       # Extension 1.0 (114.5) -> TEILVERKAUF 1
+        c(10, 114, 115.0, 103.0, 103.5),      # Schluss 103.5: ueber 100, aber unter 105
+    ]
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           tp_ladder=False, buy_ladder=False, trail_stop=True)
+    assert [s.type for s in sigs] == [SignalType.KAUF_1, SignalType.TEILVERKAUF_1,
+                                      SignalType.STOPLOSS]
+    stop = sigs[-1]
+    assert "Nachgezogener Stop" in stop.reason and "Gewinn gesichert" in stop.reason
+    assert pos.state == PosState.FLAT          # Engine wieder frei fuer neue Setups
+
+    # Ohne trail_stop bleibt dieselbe Kerze harmlos: Stop steht weiter bei 100
+    pos2 = Position()
+    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2, bias_short=False,
+                            tp_ladder=False, buy_ladder=False, trail_stop=False)
+    assert not any(s.type == SignalType.STOPLOSS for s in sigs2)
+    assert pos2.state == PosState.TP1          # genau die Blockade, um die es geht
+
+
+def test_trail_stop_lockert_den_stop_nie():
+    """Der nachgezogene Stop darf nie UNTER die Invalidierung rutschen (nur Ratchet)."""
+    base = zigzag_candles()
+    path = base + [
+        c(8, 106, 106.5, 104.5, 105.5),
+        c(9, 105, 115.0, 104.6, 114.8),       # TEILVERKAUF 1
+        c(10, 114, 115.0, 99.0, 99.5),        # Schluss unter der Invalidierung 100
+    ]
+    for trail in (True, False):
+        pos = Position()
+        sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                               tp_ladder=False, buy_ladder=False, trail_stop=trail)
+        assert any(s.type == SignalType.STOPLOSS for s in sigs), trail
+        assert pos.state == PosState.FLAT
+
+
+def test_einstand_ist_tranchengewichtet():
+    """Der Einstand ist der gewichtete Durchschnitt aller Tranchen, nicht der erste Kauf:
+    KAUF 1 (25 % @ 105) + KAUF 2 (50 % @ ~103.82) -> Einstand naeher an KAUF 2."""
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),     # KAUF 1, 25 % @ 105
+                   c(9, 105, 105.5, 103.6, 104.5)]     # KAUF 2, 50 % @ 103.82
+    pos = Position()
+    run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                    tp_ladder=False, buy_ladder=False)
+    assert pos.entry_pct == 75
+    erwartet = (105.0 * 25 + 103.82 * 50) / 75
+    assert abs(pos.entry_ref - erwartet) < 0.05
+    assert pos.entry_ref < 105.0                        # guenstiger als der erste Kauf
+
+
 def test_release_stale_rest_greift_nicht_vor_teilgewinn():
     """Beim Positionsaufbau (T1/CORE/FULL) darf die Freigabe NICHT feuern — dort ist
     der Stop zustaendig, sonst wuerde jede neue Pivot-Bestaetigung die Position werfen."""

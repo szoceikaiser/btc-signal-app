@@ -354,6 +354,24 @@ class Position:
     tp_rungs: int = 0                        # Anzahl gefeuerter Leiter-Zwischenverkaeufe
     dip_buys: int = 0                        # Anzahl bedingter Nachkaeufe unter Invalidierung (E9.3)
     buy_rungs: int = 0                       # Anzahl Mehrtages-Kaufleiter-Tranchen (E9.5)
+    entry_ref: Optional[float] = None        # tranchengewichteter Durchschnitts-Einstand (E9.10)
+    entry_pct: int = 0                       # Summe der eingestiegenen Tranchen-Prozente
+
+
+def _reset_position(pos: "Position") -> None:
+    """Position schliessen: Zustand und alle Zaehler zurueck auf FLAT."""
+    pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
+    pos.tp_rungs = 0
+    pos.dip_buys = 0
+    pos.buy_rungs = 0
+    pos.entry_ref = None
+    pos.entry_pct = 0
+
+
+# Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
+# (Basis fuer den nachgezogenen Break-even-Stop, E9.10).
+_ENTRY_TYPES = {SignalType.KAUF_1, SignalType.KAUF_2, SignalType.NACHKAUF,
+                SignalType.SHORT_1, SignalType.SHORT_2, SignalType.SHORT_NACHLEGEN}
 
 
 TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
@@ -388,7 +406,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              trend_filter: bool = False, trend_ema: int = 50,
              strict_confirm: bool = False, confluence: bool = False,
              conditional_stop: bool = False, buy_ladder: bool = True,
-             release_stale_rest: bool = False) -> list[Signal]:
+             release_stale_rest: bool = False, trail_stop: bool = False) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -410,6 +428,11 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # bleibt (Stop weit weg, Gegen-Muster tritt nicht ein) und dabei JEDE neue Einstiegs-
     # pruefung verhindert, weil der Einstiegs-Block nur bei state==FLAT laeuft.
     # Deckt Grundregel 1 ab: Zonen sind dynamisch, nie starr.
+    # trail_stop (E9.10): zieht den Stop nach, sobald Teilgewinne realisiert sind —
+    # auf Break-even (Durchschnitts-Einstand) bzw. hinter die Struktur, je nachdem was
+    # hoeher liegt. Furkan (laut Kaiser): "Stop ueber den Kauf gezogen, dann kann ich
+    # nichts mehr verlieren", Motto Kapital schuetzen. Loest zugleich die TP2-Blockade,
+    # ohne den Rest wie bei release_stale_rest zum Marktpreis wegzuwerfen.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -533,11 +556,35 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         ext1 = z.ext_target(pos.retrace_extreme, 1.0)
         ext2 = z.ext_target(pos.retrace_extreme, 1.618)
 
-        stop_hit = (cur.close < z.invalidation) if long_side else (cur.close > z.invalidation)
+        # Nachgezogener Stop (E9.10, Kaisers Furkan-Zitat: "Stop ueber den Kauf gezogen,
+        # dann kann ich nichts mehr verlieren" — Motto Kapital schuetzen). Sobald
+        # Teilgewinne realisiert sind (TP1/TP2 ODER eine Leiter-Stufe gefeuert), wandert
+        # der Stop auf den hoechsten der drei Bezugspunkte: urspruengliche Invalidierung,
+        # Durchschnitts-Einstand (Break-even) und letztes bestaetigtes Pivot-Tief unter
+        # dem Kurs (Struktur). Er kann dadurch NUR steigen, nie lockerer werden.
+        stop_level = z.invalidation
+        trail_note = ""
+        if trail_stop and (pos.state in (PosState.TP1, PosState.TP2) or pos.tp_rungs > 0):
+            cands = [(z.invalidation, "Invalidierung")]
+            if pos.entry_ref is not None:
+                cands.append((pos.entry_ref, "Einstand"))
+            if long_side:
+                lows = [p.price for p in pivots if p.kind == "L" and p.price < cur.close]
+                if lows:
+                    cands.append((max(lows), "Struktur-Tief"))
+                stop_level, trail_note = max(cands, key=lambda x: x[0])
+            else:
+                highs = [p.price for p in pivots if p.kind == "H" and p.price > cur.close]
+                if highs:
+                    cands.append((min(highs), "Struktur-Hoch"))
+                stop_level, trail_note = min(cands, key=lambda x: x[0])
+        stop_hit = (cur.close < stop_level) if long_side else (cur.close > stop_level)
         # Bedingter Stop (E9.3): bei Verlust nachkaufen statt stoppen, solange der
         # Order-Flow den Trend weiter bestaetigt (Furkan) — aber nur bis zum harten
         # Boden (DIP_FLOOR_PCT) und hoechstens MAX_DIP_BUYS mal.
-        if stop_hit and conditional_stop:
+        # Nur beim urspruenglichen Stop nachkaufen — einen nachgezogenen Gewinn-Stop
+        # darf der bedingte Nachkauf nicht aushebeln.
+        if stop_hit and conditional_stop and trail_note in ("", "Invalidierung"):
             if long_side:
                 hard_break = cur.close < z.invalidation * (1 - DIP_FLOOR_PCT)
                 flow_ok = _confirm_long()
@@ -553,9 +600,14 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 stop_hit = False                             # kein Stop diese Kerze
         if stop_hit:
             st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
-            reason = ("Kerzenschluss {} Invalidierung {:.0f}".format(
-                'unter' if long_side else 'ueber', z.invalidation)
-                + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
+            if trail_note and trail_note != "Invalidierung":
+                reason = ("Nachgezogener Stop ({}) {:.0f} — Kerzenschluss {}, "
+                          "Gewinn gesichert".format(trail_note, stop_level,
+                                                    'darunter' if long_side else 'darueber'))
+            else:
+                reason = ("Kerzenschluss {} Invalidierung {:.0f}".format(
+                    'unter' if long_side else 'ueber', z.invalidation)
+                    + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
             signals.append(Signal(cur.ts, st, cur.close, 100, reason))
             pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
             pos.tp_rungs = 0
@@ -641,10 +693,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     ex = SignalType.VERKAUF_REST if long_side else SignalType.SHORT_COVER_REST
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Gegen-Muster am Ziel: {pattern.name}"))
-                    pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
-                    pos.tp_rungs = 0
-                    pos.dip_buys = 0
-                    pos.buy_rungs = 0
+                    _reset_position(pos)
             # Rest freigeben, wenn die Struktur veraltet ist (E9.9). Nur nach Teilgewinnen
             # (TP1/TP2) — beim Positionsaufbau bleibt der Stop zustaendig.
             if release_stale_rest and pos.state in (PosState.TP1, PosState.TP2) \
@@ -655,15 +704,22 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Struktur veraltet: neuer Impuls bestaetigt "
                                           f"({imp.start.price:.0f}->{imp.end.price:.0f}) — Rest freigegeben"))
-                    pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
-                    pos.tp_rungs = 0
-                    pos.dip_buys = 0
-                    pos.buy_rungs = 0
+                    _reset_position(pos)
             # Warnung waehrend offener Long-Position
             if long_side and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
                     and pattern == Pattern.DERIVATE_PUMP:
                 signals.append(Signal(cur.ts, SignalType.WARNUNG, cur.close, 0,
                                       "Derivate-Pump: anfaellig fuer Long-Flush"))
+
+    # Durchschnitts-Einstand fortschreiben (E9.10): tranchengewichtet ueber alle
+    # Einstiegs-Signale dieser Kerze. Zentral hier, damit kein Einstiegspfad vergessen
+    # wird (0.5-Level, Golden Pocket, Flush, 0.786, Kauf-/Dip-Leiter).
+    for s in signals:
+        if s.type in _ENTRY_TYPES and s.tranche_pct > 0:
+            tot = pos.entry_pct + s.tranche_pct
+            base = pos.entry_ref if pos.entry_ref is not None else s.price
+            pos.entry_ref = (base * pos.entry_pct + s.price * s.tranche_pct) / tot
+            pos.entry_pct = tot
 
     pos.last_signal_ts = cur.ts
     return signals

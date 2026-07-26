@@ -203,9 +203,95 @@ Stille, sondern Taubheit. Der Backtest konnte das nie zeigen, weil er am 01.05. 
 - Grid um `LIVE +Rest-Freigabe` erweitert (dieselbe Live-Kombination + Freigabe).
   Messfrage: schneidet die Freigabe Runner ab (kostet Rendite) oder bringt sie welche,
   weil die Engine nicht mehr blockiert ist? 54/54 Tests gruen.
-- NAECHSTER SCHRITT: Kaiser pusht + laesst Backtest laufen. Wenn `LIVE +Rest-Freigabe`
-  nicht schlechter ist: `release_stale_rest` in config.json auf true, Default in
-  strategy_core und das panel-Flag mitziehen. Ergebnis hier nachtragen.
+- MESSLAUF-ERGEBNIS (2026-07-26 21:09 UTC, Fenster 17.11.2025-**26.07.2026**, 2106 Kerzen,
+  1507 echte OI-Punkte — erstmals inkl. Mai/Juni/Juli):
+
+  | Variante | Recall | Praez. | Rendite |
+  |---|---|---|---|
+  | nur Long (Basis) | 48 % | 43 % | +11,2 % |
+  | +Kaufleiter | 48 % | 41 % | +19,7 % |
+  | +Flush core | 52 % | 32 % | +24,6 % |
+  | LIVE: nur Long +Kaufleiter +Flush core | 52 % | 32 % | **+32,8 %** |
+  | +Kaufleiter +Bed.Stop | 48 % | 40 % | +17,7 % |
+  | LIVE +Rest-Freigabe | **55 %** | **35 %** | +28,3 % |
+  | Long+Short (Ref) | 41 % | 58 % | +0,9 % |
+
+  Buy&Hold im Fenster -29,9 %. Die Rest-Freigabe verbessert BEIDE Treffer-Masze
+  (Recall 52->55 %, Praezision 32->35 % — die zusaetzlichen Signale sind also gezielt,
+  nicht Rauschen) und kostet 4,5 Prozentpunkte Rendite (-411 EUR realisiert, 217 statt
+  206 Signale). Grund fuer die Kosten: das Freigeben schneidet Runner ab — die letzten
+  20 % werden verkauft, statt gelegentlich noch das 1.618-Ziel zu erreichen.
+  WICHTIG zur Einordnung: Die 4,5 Punkte sind der GEMESSENE Durchschnittspreis. Die
+  Blockade ohne Freigabe ist dagegen unbegrenzt — im Messfenster dauerte sie zufaellig
+  nur 3 Wochen und lag im Plus, sie koennte auch 3 Monate dauern. Das ist Glueck, kein
+  Design. Long+Short verliert jetzt auch auf der Short-Seite (-203 EUR) -> nur Long
+  bleibt bestaetigt.
+  Der "beste"-Marker im Bericht steht weiter auf der Variante ohne Freigabe, weil sein
+  Ranking nur nach Rendite sortiert — kein Widerspruch.
+- OFFEN (Entscheidung Kaiser): release_stale_rest live einschalten (config.json) oder
+  nicht. ALTERNATIVE fuer spaeter (E9.10-Idee): statt den Rest zu verkaufen, den Stop
+  fuer den Rest nachziehen (z. B. auf das Retracement-Extrem). Haelt Runner am Leben und
+  loest die Blockade trotzdem — koennte die Treffer-Verbesserung ohne den Rendite-Verlust
+  bringen. Noch nicht gebaut, noch nicht gemessen.
+
+### E9.10 — Nachgezogener Stop (Kapital schuetzen) · Status: MESSBEREIT (2026-07-26)
+Kaisers Vorgabe aus Furkans Videos: *"Wenn er im Plus ist und Gewinne mitgenommen hat,
+hat er den Stop ueber den Kauf gezogen und kann nichts mehr verlieren"* — Motto **Kapital
+schuetzen**. Das ist der bessere Weg aus der TP2-Blockade als der Rest-Verkauf (E9.9):
+die Position bleibt am Leben (Runner), wird aber nicht mehr zum Verlust.
+- ERLEDIGT: schaltbarer `trail_stop` in evaluate. Sobald Teilgewinne realisiert sind
+  (Zustand TP1/TP2 **oder** mindestens eine Leiter-Stufe gefeuert), wandert der Stop auf
+  den hoechsten von drei Bezugspunkten (Long; Short spiegelbildlich):
+  (1) urspruengliche Invalidierung, (2) **Durchschnitts-Einstand** = Break-even,
+  (3) letztes bestaetigtes **Pivot-Tief unter dem Kurs** = Struktur.
+  Ratchet-Eigenschaft: der Stop kann dadurch nur steigen, nie lockerer werden (Test).
+- ERLEDIGT: `Position.entry_ref` / `entry_pct` — tranchengewichteter Durchschnitts-
+  Einstand, zentral aus allen Einstiegs-Signalen gebildet (0.5, Golden Pocket, Flush,
+  0.786, Kauf- und Dip-Leiter), in state.json persistiert. Wichtig: gewichtet, nicht
+  "erster Kauf" — durch die Kaufleiter liegt der echte Einstand tiefer.
+- ERLEDIGT: greift NICHT beim Positionsaufbau (T1/CORE/FULL ohne Teilgewinn) und hebelt
+  den bedingten Nachkauf (E9.3) nicht aus — ein nachgezogener Gewinn-Stop wird nie in
+  einen Dip-Kauf umgedeutet.
+- ERLEDIGT: Telegram-/Chart-Text unterscheidet die Faelle ("Nachgezogener Stop
+  (Einstand/Struktur-Tief) 105 — Gewinn gesichert" statt "Kerzenschluss unter
+  Invalidierung"), damit ein SL im Gewinn nicht wie ein Verlust aussieht.
+- Grid um `LIVE +Stop nachziehen` und `LIVE +Stop nachziehen +Rest-Freigabe` erweitert.
+  Messfrage: bringt der nachgezogene Stop die Treffer-Verbesserung der Rest-Freigabe
+  (Recall 52->55 %, Praezision 32->35 %) OHNE deren Rendite-Verlust (-4,5 Punkte)?
+  Gegenprobe: hilft die Kombination oder stoppt sie sich gegenseitig aus?
+  Risiko, das die Messung zeigen muss: ein zu enger Struktur-Stop stoppt zu frueh aus.
+  57/57 Tests gruen. Default AUS, live per config.json (`trail_stop`) umschaltbar.
+- NAECHSTER SCHRITT: Kaiser pusht + laesst Backtest laufen; Ergebnis hier nachtragen,
+  dann Default + panel-Flag + config.json entscheiden.
+
+### E9.11 — Teilverkaeufe an Liquidationszonen statt nur an Fib-Extensions · Status: IDEE
+Kaisers Beobachtung (2026-07-26): *"Furkan faengt an zu verkaufen, wenn die Kurse die
+Liquidationszonen erreichen und nicht schon vorher."* Deckt sich mit STRATEGIE.md §5:
+Liquidationszonen sind bei Furkan **Stufe 2** der Hierarchie (direkt nach dem Makro-Bias)
+und liegen damit UEBER den Fib-Zonen. Unsere Engine hat davon bisher nichts: Teilgewinne
+kommen ausschliesslich aus Fib-Extensions (0.8/0.9-Leiter, 1.0, 1.618).
+**Datenlage — der entscheidende Unterschied:** Coinalyze liefert `liquidation-history`,
+also **Ist-Liquidationen** (was schon liquidiert WURDE, je 4h-Kerze in USD). Furkan
+schaut auf eine **Heatmap** (Hyblock/Coinank), also wo Liquiditaet oberhalb/unterhalb des
+Kurses noch LIEGT — eine Vorausschau, die wir nicht haben. Ohne Heatmap-Quelle ist
+"verkaufen, wenn der Kurs die Zone erreicht" nicht 1:1 baubar.
+Drei baubare Annaeherungen, aufsteigend im Aufwand:
+1. **Reaktiv (heute machbar, Daten liegen vor):** in Short-Liquidations-Kaskaden
+   verkaufen — Shorts werden zwangsgeschlossen, der Squeeze passiert JETZT, das ist oft
+   das lokale Hoch. `classify_pattern` erkennt das schon als Muster 3 (SHORT_COVERING,
+   ueber `short_liq`-Spike). Bisher schliesst das nur den REST nach TP1; als eigener
+   Teilverkaufs-Trigger ist es noch nicht genutzt. Kleinster Schritt, sofort messbar.
+2. **Zonen-Gedaechtnis:** Preisniveaus vergangener grosser Liquidations-Spikes als
+   Magnetzonen fuehren und Teilverkaeufe dort platzieren. Aus vorhandenen Daten
+   berechenbar, aber schwaecher als eine echte Heatmap.
+3. **Echte Heatmap:** zusaetzliche Quelle pruefen (Coinank/Coinglass/Velo — Furkan nennt
+   Velo und Coinank als kostenlos). Erst Verfuegbarkeit/Reichweite/Key klaeren.
+EHRLICH (Regel 3): ob das die Rendite erhoeht, ist OFFEN. Argument dafuer: die aktuellen
+Fib-Teilverkaeufe sind mechanisch und feuern oft frueh (TEILVERKAUF_1 trifft haeufig),
+Liquidations-Spikes verkaufen in die Staerke. Argument dagegen: Liquidations-Kaskaden
+treten auch mitten im Trend auf — dann verkauft man zu frueh. Nicht raten, messen: als
+eigener Schalter bauen, gegen die Live-Variante stellen. Sinnvolle Reihenfolge: erst
+E9.10 abschliessen, dann Variante 1, danach entscheiden.
 
 ### E9.4 — Liquidationen sichtbar für Kaiser · Status: OFFEN
 - Chart-Seite: Liquidations-Daten/-Cluster anzeigen; Link/Einbindung einer kostenlosen
