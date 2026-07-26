@@ -1,8 +1,10 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 17.11.2025-01.05.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 1585 4h-Kerzen geladen · Stand: 2026-07-26 20:49 UTC
+**Voll-Daten-Fenster: 17.11.2025-26.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2106 4h-Kerzen geladen · Stand: 2026-07-26 21:09 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
+
+**Zwei verschiedene Zeitraeume, nicht verwechseln:** Recall/Praezision werden nur bis 23.04.2026 bewertet (danach endet Kaisers Trigger-Liste, es gibt keinen Maszstab mehr). Die Rendite laeuft ueber das komplette Fenster bis 26.07.2026.
 
 ## Parameter-Vergleich
 
@@ -10,12 +12,13 @@ Alle n=5. Rendite = Gesamt-Simulation; Long €/Short € = realisierter Gewinn/
 
 | Variante | Recall | Praez. | Rendite | Long € | Short € | Signale |
 |---|---|---|---|---|---|---|
-| nur Long (Basis) | 48% | 43% | +10.2 % | +1,022 | +0 | 72 |
-| +Kaufleiter | 48% | 41% | +18.5 % | +1,850 | +0 | 86 |
-| +Flush core | 52% | 29% | +31.1 % | +2,976 | +0 | 125 |
-| LIVE: nur Long +Kaufleiter +Flush core | 52% | 29% | +39.5 % | +3,811 | +0 | 143 **<-- beste** |
-| +Kaufleiter +Bed.Stop | 48% | 40% | +15.1 % | +1,509 | +0 | 91 |
-| Long+Short (Ref) | 41% | 58% | +3.2 % | +358 | +765 | 35 |
+| nur Long (Basis) | 48% | 43% | +11.2 % | +1,084 | +0 | 114 |
+| +Kaufleiter | 48% | 41% | +19.7 % | +1,920 | +0 | 136 |
+| +Flush core | 52% | 32% | +24.6 % | +2,418 | +0 | 180 |
+| LIVE: nur Long +Kaufleiter +Flush core | 52% | 32% | +32.8 % | +3,229 | +0 | 206 **<-- beste** |
+| +Kaufleiter +Bed.Stop | 48% | 40% | +17.7 % | +1,721 | +0 | 145 |
+| LIVE +Rest-Freigabe | 55% | 35% | +28.3 % | +2,818 | +0 | 217 |
+| Long+Short (Ref) | 41% | 58% | +0.9 % | +325 | -203 | 87 |
 
 ## Beste Kombination (nach Rendite): LIVE: nur Long +Kaufleiter +Flush core
 
@@ -26,16 +29,16 @@ Alle n=5. Rendite = Gesamt-Simulation; Long €/Short € = realisierter Gewinn/
 
 ## P&L-Simulation (beste Kombination) — getrennt nach Richtung
 
-Start 10.000 € -> **13,949 €** (+39.5 %) · Buy&Hold im Fenster: -16.4 % · Gebuehr 0.1 %/Order, kein Hebel.
+Start 10.000 € -> **13,284 €** (+32.8 %) · Buy&Hold im Fenster: -29.9 % · Gebuehr 0.1 %/Order, kein Hebel.
 
-- **LONG-Trades:** +3,811 € · 60 Abschluesse, 47 im Gewinn
+- **LONG-Trades:** +3,229 € · 86 Abschluesse, 67 im Gewinn
 - **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
 
 WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, KEIN Gewinn. Der Gewinn steht nur in den P&L-Zeilen.
 
 ## Einschraenkungen
 
-- Open Interest + Liquidationen: **echt von Coinalyze** — 986 OI-Punkte, 987 Liq-Punkte im Zeitraum. Muster 4 (Kapitulation) aktiv.
+- Open Interest + Liquidationen: **echt von Coinalyze** — 1507 OI-Punkte, 1508 Liq-Punkte im Zeitraum. Muster 4 (Kapitulation) aktiv.
   (4h-Reichweite von Coinalyze deckt evtl. nicht bis Sep'25 zurueck; aeltere Kerzen dann OI neutral.)
 - Spot-CVD real (Binance Vision), Funding real (Kraken, sofern Historie reicht).
 - Kaisers Liste enthielt Duplikate (laut Kaiser evtl. Versehen) -> dedupliziert.
