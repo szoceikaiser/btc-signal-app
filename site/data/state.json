@@ -6,6 +6,8 @@
  "tp_rungs": 0,
  "dip_buys": 0,
  "buy_rungs": 0,
+ "entry_ref": null,
+ "entry_pct": 0,
  "zones": {
   "impuls_start": 58900.01,
   "impuls_start_ts": 1782691200000,
@@ -23,8 +25,10 @@
  },
  "config": {
   "bias_long": true,
-  "bias_short": false
+  "bias_short": false,
+  "release_stale_rest": false,
+  "trail_stop": false
  },
- "updated_at": "2026-07-26T20:39:31Z",
+ "updated_at": "2026-07-26T21:42:14Z",
  "last_close": 64695.52
 }
