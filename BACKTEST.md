@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 17.11.2025-26.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2106 4h-Kerzen geladen · Stand: 2026-07-26 21:09 UTC
+**Voll-Daten-Fenster: 17.11.2025-26.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2106 4h-Kerzen geladen · Stand: 2026-07-26 21:28 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -13,12 +13,14 @@ Alle n=5. Rendite = Gesamt-Simulation; Long €/Short € = realisierter Gewinn/
 | Variante | Recall | Praez. | Rendite | Long € | Short € | Signale |
 |---|---|---|---|---|---|---|
 | nur Long (Basis) | 48% | 43% | +11.2 % | +1,084 | +0 | 114 |
-| +Kaufleiter | 48% | 41% | +19.7 % | +1,920 | +0 | 136 |
+| +Kaufleiter | 48% | 41% | +19.8 % | +1,920 | +0 | 136 |
 | +Flush core | 52% | 32% | +24.6 % | +2,418 | +0 | 180 |
-| LIVE: nur Long +Kaufleiter +Flush core | 52% | 32% | +32.8 % | +3,229 | +0 | 206 **<-- beste** |
-| +Kaufleiter +Bed.Stop | 48% | 40% | +17.7 % | +1,721 | +0 | 145 |
-| LIVE +Rest-Freigabe | 55% | 35% | +28.3 % | +2,818 | +0 | 217 |
-| Long+Short (Ref) | 41% | 58% | +0.9 % | +325 | -203 | 87 |
+| LIVE: nur Long +Kaufleiter +Flush core | 52% | 32% | +32.9 % | +3,229 | +0 | 206 **<-- beste** |
+| +Kaufleiter +Bed.Stop | 48% | 40% | +17.8 % | +1,721 | +0 | 145 |
+| LIVE +Rest-Freigabe | 55% | 35% | +28.5 % | +2,818 | +0 | 217 |
+| LIVE +Stop nachziehen | 55% | 34% | +29.8 % | +2,953 | +0 | 208 |
+| LIVE +Stop nachziehen +Rest-Freigabe | 55% | 35% | +27.5 % | +2,725 | +0 | 208 |
+| Long+Short (Ref) | 41% | 58% | +1.0 % | +325 | -203 | 87 |
 
 ## Beste Kombination (nach Rendite): LIVE: nur Long +Kaufleiter +Flush core
 
@@ -29,7 +31,7 @@ Alle n=5. Rendite = Gesamt-Simulation; Long €/Short € = realisierter Gewinn/
 
 ## P&L-Simulation (beste Kombination) — getrennt nach Richtung
 
-Start 10.000 € -> **13,284 €** (+32.8 %) · Buy&Hold im Fenster: -29.9 % · Gebuehr 0.1 %/Order, kein Hebel.
+Start 10.000 € -> **13,291 €** (+32.9 %) · Buy&Hold im Fenster: -29.7 % · Gebuehr 0.1 %/Order, kein Hebel.
 
 - **LONG-Trades:** +3,229 € · 86 Abschluesse, 67 im Gewinn
 - **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
