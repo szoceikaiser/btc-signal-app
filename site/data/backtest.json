@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-07-26T21:28:01Z",
+ "generated_at": "2026-07-26T21:48:41Z",
  "zeitraum": "17.11.2025-26.07.2026",
- "variante": "LIVE: nur Long +Kaufleiter +Flush core",
+ "variante": "LIVE +Stop nachziehen",
  "params": {
   "bias_long": true,
   "bias_short": false,
@@ -15,26 +15,27 @@
   "conditional_stop": false,
   "buy_ladder": true,
   "release_stale_rest": false,
-  "trail_stop": false
+  "trail_stop": true,
+  "liq_exit": "off"
  },
- "recall_kauf": "6/12",
+ "recall_kauf": "7/12",
  "recall_verkauf": "9/17",
- "recall_pct": 52,
- "precision_pct": 32,
+ "recall_pct": 55,
+ "precision_pct": 34,
  "pnl": {
   "start": 10000.0,
-  "ende": 13291.41,
-  "rendite_pct": 32.91,
+  "ende": 12982.56,
+  "rendite_pct": 29.83,
   "buyhold_pct": -29.69,
-  "trades": 86,
-  "gewinn_trades": 67,
-  "long_profit": 3228.56,
-  "long_trades": 86,
-  "long_wins": 67,
+  "trades": 79,
+  "gewinn_trades": 61,
+  "long_profit": 2952.8,
+  "long_trades": 79,
+  "long_wins": 61,
   "short_profit": 0.0,
   "short_trades": 0,
   "short_wins": 0,
   "fee_pct": 0.1,
-  "offene_position": 2592.52
+  "offene_position": 6506.16
  }
 }
