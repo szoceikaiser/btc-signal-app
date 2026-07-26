@@ -8,6 +8,7 @@
  "buy_rungs": 0,
  "entry_ref": null,
  "entry_pct": 0,
+ "liq_exits": 0,
  "zones": {
   "impuls_start": 58900.01,
   "impuls_start_ts": 1782691200000,
@@ -27,8 +28,9 @@
   "bias_long": true,
   "bias_short": false,
   "release_stale_rest": false,
-  "trail_stop": false
+  "trail_stop": true,
+  "liq_exit": "off"
  },
- "updated_at": "2026-07-26T21:42:14Z",
+ "updated_at": "2026-07-26T22:43:16Z",
  "last_close": 64695.52
 }
