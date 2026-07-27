@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 18.11.2025-27.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2111 4h-Kerzen geladen · Stand: 2026-07-27 17:51 UTC
+**Voll-Daten-Fenster: 18.11.2025-27.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2111 4h-Kerzen geladen · Stand: 2026-07-27 18:25 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -10,6 +10,8 @@ Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verk
 
 Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch vom jeweiligen Hoch (Drawdown) — je naeher an 0, desto ruhiger der Verlauf. **Einsatz** = wie viel des Kapitals je Position hoechstens investiert wird (100 % = keine Reserve, 60 % = 40 % Pulver bleibt trocken; Furkan-Update Juli 2026). Recall = Aehnlichkeit zu Furkans Terminen IM Fenster, KEIN Gewinn.
 
+**Lesehilfe zu den Namen:** `LIVE` ist die Abkuerzung fuer *nur Long + Kaufleiter + Flush core* — der Flush steckt also drin. Jede Zeile, die mit `LIVE +…` beginnt, baut darauf auf. Die Zeile *+Kaufleiter* ist dagegen OHNE Flush.
+
 | Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale |
 |---|---|---|---|---|---|---|
 | nur Long (Basis) | 50% | 43% | +11.4 % | -5.5 % | 100 % | 115 |
@@ -17,15 +19,17 @@ Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch v
 | +Flush core | 54% | 32% | +24.8 % | -12.1 % | 100 % | 181 |
 | LIVE: nur Long +Kaufleiter +Flush core | 54% | 32% | +33.1 % | -12.7 % | 100 % | 207 **<-- beste** |
 | +Kaufleiter +Bed.Stop | 50% | 40% | +17.9 % | -7.0 % | 100 % | 146 |
-| LIVE +Rest-Freigabe | 57% | 35% | +28.6 % | -13.0 % | 100 % | 217 |
-| LIVE +Stop nachziehen | 57% | 34% | +30.0 % | -11.5 % | 100 % | 208 |
-| LIVE +Stop nachziehen +Rest-Freigabe | 57% | 35% | +27.7 % | -11.8 % | 100 % | 208 |
-| LIVE +Stop +Liq-Kaskade | 57% | 30% | +22.7 % | -11.1 % | 100 % | 237 |
-| LIVE +Stop +Liq-Zonen | 61% | 34% | +27.9 % | -10.8 % | 100 % | 238 |
-| LIVE +Stop +Liq beides | 61% | 34% | +27.9 % | -10.8 % | 100 % | 239 |
-| LIVE +Stop, 60 % Einsatz (40 % Reserve) | 57% | 34% | +17.9 % | -7.7 % | 60 % | 208 |
+| LIVE +Rest-Freigabe | 57% | 35% | +28.5 % | -13.0 % | 100 % | 217 |
+| LIVE +Stop nachziehen | 57% | 34% | +29.9 % | -11.5 % | 100 % | 208 |
+| LIVE +Stop nachziehen +Rest-Freigabe | 57% | 35% | +27.6 % | -11.8 % | 100 % | 208 |
+| LIVE +Stop +Liq-Kaskade | 57% | 30% | +22.6 % | -11.1 % | 100 % | 237 |
+| LIVE +Stop +Liq-Zonen | 61% | 34% | +27.8 % | -10.8 % | 100 % | 238 |
+| LIVE +Stop +Liq beides | 61% | 34% | +27.8 % | -10.8 % | 100 % | 239 |
+| LIVE +Stop +Verkauf am letzten Hoch | 61% | 34% | +27.1 % | -12.0 % | 100 % | 229 |
+| LIVE +Stop +Verkauf am schwachen Hoch | 61% | 33% | +27.3 % | -11.9 % | 100 % | 227 |
+| LIVE +Stop, 60 % Einsatz (40 % Reserve) | 57% | 34% | +17.8 % | -7.7 % | 60 % | 208 |
 | LIVE +Stop, 50 % Einsatz (50 % Reserve) | 57% | 34% | +14.8 % | -6.4 % | 50 % | 208 |
-| Long+Short (Ref) | 43% | 58% | +1.7 % | -11.9 % | 100 % | 90 |
+| Long+Short (Ref) | 43% | 58% | +1.8 % | -11.9 % | 100 % | 90 |
 
 ## Beste Kombination (nach Rendite): LIVE: nur Long +Kaufleiter +Flush core
 
@@ -36,7 +40,7 @@ Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch v
 
 ## P&L-Simulation (beste Kombination) — getrennt nach Richtung
 
-Start 10.000 € -> **13,311 €** (+33.1 %) · Buy&Hold im Fenster: -30.1 % · Gebuehr 0.1 %/Order, kein Hebel.
+Start 10.000 € -> **13,311 €** (+33.1 %) · Buy&Hold im Fenster: -30.2 % · Gebuehr 0.1 %/Order, kein Hebel.
 
 - **LONG-Trades:** +3,311 € · 87 Abschluesse, 68 im Gewinn
 - **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
