@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-27T18:53:16Z",
+ "generated_at": "2026-07-27T19:21:00Z",
  "zeitraum": "18.11.2025-27.07.2026",
  "variante": "LIVE +Stop nachziehen",
  "params": {
@@ -26,9 +26,9 @@
  "precision_pct": 34,
  "pnl": {
   "start": 10000.0,
-  "ende": 12976.33,
-  "rendite_pct": 29.76,
-  "buyhold_pct": -30.32,
+  "ende": 12996.44,
+  "rendite_pct": 29.96,
+  "buyhold_pct": -30.11,
   "trades": 79,
   "gewinn_trades": 61,
   "long_profit": 2952.8,
@@ -40,6 +40,62 @@
   "fee_pct": 0.1,
   "deploy_pct": 100,
   "max_drawdown_pct": -11.51,
-  "offene_position": 6499.93
+  "monate": [
+   {
+    "monat": "2025-11",
+    "ende": 9772.38,
+    "gewinn": -227.62,
+    "rendite_pct": -2.28
+   },
+   {
+    "monat": "2025-12",
+    "ende": 9811.66,
+    "gewinn": 39.28,
+    "rendite_pct": 0.4
+   },
+   {
+    "monat": "2026-01",
+    "ende": 11024.71,
+    "gewinn": 1213.04,
+    "rendite_pct": 12.36
+   },
+   {
+    "monat": "2026-02",
+    "ende": 10748.94,
+    "gewinn": -275.76,
+    "rendite_pct": -2.5
+   },
+   {
+    "monat": "2026-03",
+    "ende": 11770.42,
+    "gewinn": 1021.47,
+    "rendite_pct": 9.5
+   },
+   {
+    "monat": "2026-04",
+    "ende": 13457.02,
+    "gewinn": 1686.6,
+    "rendite_pct": 14.33
+   },
+   {
+    "monat": "2026-05",
+    "ende": 13043.41,
+    "gewinn": -413.61,
+    "rendite_pct": -3.07
+   },
+   {
+    "monat": "2026-06",
+    "ende": 12172.61,
+    "gewinn": -870.8,
+    "rendite_pct": -6.68
+   },
+   {
+    "monat": "2026-07",
+    "ende": 12996.44,
+    "gewinn": 823.83,
+    "rendite_pct": 6.77
+   }
+  ],
+  "offene_position": 6520.04
  }
 }
