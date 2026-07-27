@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1785153600000,
+ "last_signal_ts": 1785168000000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -9,14 +9,18 @@
  "entry_ref": null,
  "entry_pct": 0,
  "liq_exits": 0,
+ "high_exits": 0,
+ "liq_entries": 0,
  "zones": null,
  "config": {
   "bias_long": true,
   "bias_short": false,
   "release_stale_rest": false,
   "trail_stop": true,
-  "liq_exit": "off"
+  "liq_exit": "off",
+  "high_exit": "off",
+  "liq_entry": "off"
  },
- "updated_at": "2026-07-27T17:05:06Z",
- "last_close": 64554.01
+ "updated_at": "2026-07-27T21:10:50Z",
+ "last_close": 64984.0
 }
