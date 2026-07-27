@@ -357,6 +357,39 @@ Damit sind Varianten 1 und 2 beide backtestbar, ohne bezahlte Heatmap.
   sind also grob. Und es bleibt ein RUECKWAERTS-Mass (wo wurde liquidiert), nicht Furkans
   Vorausschau (wo liegt Liquiditaet jetzt). Die beiden korrelieren (Cluster wiederholen
   sich an runden Zahlen und alten Hochs/Tiefs), sind aber nicht dasselbe.
+**MESSLAUF-ERGEBNIS (2026-07-26 21:48 UTC, Fenster 17.11.2025-26.07.2026):**
+
+| Variante | Recall | Praez. | Rendite | Signale |
+|---|---|---|---|---|
+| LIVE +Stop nachziehen (Referenz) | 55 % | 34 % | +29,8 % | 208 |
+| LIVE +Stop +Liq-Kaskade | 55 % | 30 % | +22,6 % | 237 |
+| **LIVE +Stop +Liq-Zonen** | **59 %** | 34 % | +27,8 % | 238 |
+| LIVE +Stop +Liq beides | 59 % | 34 % | +27,8 % | 239 |
+
+BEFUND, zweigeteilt:
+1. **Kaskade (reaktiv) ist schaedlich:** -7,2 Punkte Rendite, Praezision 34->30 %, 29
+   zusaetzliche Signale ohne Recall-Gewinn. Genau das vorab benannte Risiko — Kaskaden
+   laufen auch mitten im Trend, dann verkauft man zu frueh. Klares Nein.
+2. **Zonen treffen Furkan am besten:** Recall 55 -> **59 %**, der HOECHSTE Wert im
+   gesamten Bericht ueber alle je gemessenen Varianten. Praezision unveraendert 34 %.
+   Das ist der erste harte Beleg, dass Kaisers Beobachtung stimmt: Furkan verkauft
+   tatsaechlich an Liquidationszonen, und wir kommen seinem VERHALTEN mit
+   Liquidationsdaten naeher als mit jedem Fib-Mechanismus. Kostet aber 2 Punkte Rendite.
+3. "beides" ist identisch mit "Zonen" (gleiche Rendite, 1 Signal Unterschied) — sind die
+   Zonen aktiv, kommt die Kaskade praktisch nie zuerst dran (MAX_LIQ_EXITS aufgebraucht).
+   Kaskade ist damit redundant.
+KONSEQUENZ: `liq_exit` bleibt live **"off"** (kostet Rendite). ABER: Der Recall-Sprung ist
+das beste Argument dafuer, dass eine ECHTE Heatmap etwas bringen wuerde — unser Proxy ist
+grobkoernig (4h-Kerze = 1-2 % Spanne) und rueckwaertsgerichtet. Mit Furkans Vorausschau
+(wo Liquiditaet JETZT liegt) koennte der Rendite-Verlust verschwinden. Damit ist die
+Reihenfolge geklaert: Variante 4 (manuelle Zonen, kostenlos) ist als naechstes dran, nicht
+mehr auf Verdacht, sondern mit Messbeleg im Rueckspiegel.
+UEBERGREIFENDES MUSTER (alle Messungen dieser Session): KEIN Zusatzmechanismus schlaegt die
+einfache Live-Variante nach Rendite. Der Gewinn kommt aus RICHTUNG (nur Long) und
+Kaufleiter. Jedes weitere Gatter kostet Rendite und kauft dafuer etwas anderes ein
+(Entblockung beim Stop-Nachziehen, Furkan-Naehe bei den Liq-Zonen). Das bewusst abwaegen,
+nicht sammeln.
+
 EHRLICH (Regel 3): ob das die Rendite erhoeht, ist OFFEN. Argument dafuer: die aktuellen
 Fib-Teilverkaeufe sind mechanisch und feuern oft frueh (TEILVERKAUF_1 trifft haeufig),
 Liquidations-Spikes verkaufen in die Staerke. Argument dagegen: Liquidations-Kaskaden

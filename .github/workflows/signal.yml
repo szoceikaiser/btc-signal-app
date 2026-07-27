@@ -2,7 +2,15 @@ name: Signal-Engine
 
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"   # alle 15 Min, versetzt zur vollen Stunde (weniger Verzoegerung)
+    # Gezielt statt haeufig (Befund 2026-07-27): Der 15-Minuten-Takt wurde von GitHub
+    # massiv verworfen — statt ~96 Laeufen am Tag kamen nur 6-7 an, im Abstand von 1 bis
+    # 3,5 Stunden, alle gruen (kein Fehler, GitHub laesst Schedules bei Last einfach aus).
+    # Die Strategie wertet ABGESCHLOSSENE 4h-Kerzen aus (Schluss 00/04/08/12/16/20 UTC),
+    # dazwischen gibt es nichts zu tun. Deshalb 4 Versuche in der Stunde NACH jedem
+    # Kerzenschluss statt rund um die Uhr: 24 Laeufe/Tag statt 96, konzentriert auf die
+    # Zeitpunkte, die zaehlen. Greift auch nur einer der vier, ist das Signal binnen einer
+    # Stunde nach Kerzenschluss draussen.
+    - cron: "3,18,33,48 0,4,8,12,16,20 * * *"
   workflow_dispatch:
     inputs:
       test_telegram:
@@ -56,4 +64,9 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add site/data
           git diff --cached --quiet || git commit -m "Engine-Lauf: Zustand aktualisiert"
+          # Erst ziehen, dann schieben: sonst scheitert der Push, sobald zwischen
+          # Checkout und Push etwas anderes committet hat (Backtest-Workflow, Kaisers
+          # Aenderung an config.json im Browser). Der Backtest-Workflow macht das
+          # laengst richtig, hier fehlte es.
+          git pull --no-rebase --no-edit
           git push
