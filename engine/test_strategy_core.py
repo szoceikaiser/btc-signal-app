@@ -762,3 +762,38 @@ def test_release_stale_rest_greift_nicht_vor_teilgewinn():
                            tp_ladder=False, buy_ladder=False, release_stale_rest=True)
     assert not any("Struktur veraltet" in s.reason for s in sigs)
     assert pos.state == PosState.T1
+
+
+def test_stoploss_setzt_alle_zaehler_zurueck():
+    """Regression: nach einem STOPLOSS muss die Position komplett FLAT sein.
+
+    Vor dem Fix vom 27.07.2026 blieben entry_ref/entry_pct und die Zaehler
+    liq_exits/high_exits/liq_entries stehen. entry_pct wuchs dadurch ueber alle
+    gestoppten Positionen hinweg, der Break-even des nachgezogenen Stops rechnete
+    mit dem Preis einer laengst geschlossenen Position, und die Liquidations-/
+    Hoch-Mechanismen schalteten sich nach wenigen Stops still ab.
+    """
+    ms = 4 * 3600 * 1000
+    werte = ([100, 101, 100, 102, 101, 103, 102, 104, 103, 105]
+             + [110, 115, 120, 125, 130, 132, 131, 133, 132, 134]
+             + [128, 122, 118, 116, 114, 112, 108, 104, 99, 95]
+             + [96, 97, 96, 98, 97, 99, 98, 100, 99, 101]
+             + [106, 111, 116, 121, 126, 128, 127, 129, 128, 130]
+             + [124, 118, 114, 112, 110, 108, 104, 100, 95, 92])
+    cs = [Candle(1_600_000_000_000 + i * ms, v, v * 1.005, v * 0.995, v)
+          for i, v in enumerate(werte)]
+    fl = [FlowPoint(c.ts, 1000.0 + i * 10, 0.0, 1e9, 0.0) for i, c in enumerate(cs)]
+
+    pos = Position()
+    gestoppt = False
+    for i in range(len(cs)):
+        for s in evaluate(cs[:i + 1], fl[:i + 1], pos, bias_short=False, trail_stop=True):
+            if s.type is SignalType.STOPLOSS:
+                gestoppt = True
+                assert pos.state is PosState.FLAT
+                assert pos.direction == "NONE"
+                assert pos.entry_ref is None, f"entry_ref nicht zurueckgesetzt: {pos.entry_ref}"
+                assert pos.entry_pct == 0, f"entry_pct nicht zurueckgesetzt: {pos.entry_pct}"
+                assert pos.liq_exits == 0 and pos.high_exits == 0 and pos.liq_entries == 0
+                assert pos.tp_rungs == 0 and pos.dip_buys == 0 and pos.buy_rungs == 0
+    assert gestoppt, "Testaufbau erzeugte keinen STOPLOSS"

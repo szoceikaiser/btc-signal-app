@@ -740,10 +740,15 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     'unter' if long_side else 'ueber', z.invalidation)
                     + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
             signals.append(Signal(cur.ts, st, cur.close, 100, reason))
-            pos.direction, pos.state, pos.zones, pos.retrace_extreme = "NONE", PosState.FLAT, None, None
-            pos.tp_rungs = 0
-            pos.dip_buys = 0
-            pos.buy_rungs = 0
+            # BUGFIX 2026-07-27: hier stand eine handgeschriebene Teil-Ruecksetzung, die
+            # entry_ref/entry_pct/liq_exits/high_exits/liq_entries VERGESSEN hat. Folge:
+            # (1) entry_pct wuchs ueber alle gestoppten Positionen hinweg immer weiter, der
+            # Durchschnitts-Einstand blieb am Preis einer laengst geschlossenen Position
+            # haengen -> der nachgezogene Stop (trail_stop) rechnete mit einem falschen
+            # Break-even. (2) Die Zaehler liq_exits/high_exits/liq_entries liefen gegen ihr
+            # Maximum und schalteten die zugehoerigen Mechanismen still ab, bis zufaellig
+            # einmal ueber VERKAUF_REST geschlossen wurde. Jetzt derselbe Reset wie ueberall.
+            _reset_position(pos)
         else:
             # Mehrtages-Kaufleiter (E9.5): neue Tiefkerze IN der Retracement-Zone (ueber
             # Invalidierung, unter 0.5) mit Flow-Bestaetigung -> kleine Tranche nachlegen.
