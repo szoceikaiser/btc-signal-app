@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-27T18:40:16Z",
+ "generated_at": "2026-07-27T18:53:16Z",
  "zeitraum": "18.11.2025-27.07.2026",
  "variante": "LIVE +Stop nachziehen",
  "params": {
@@ -26,9 +26,9 @@
  "precision_pct": 34,
  "pnl": {
   "start": 10000.0,
-  "ende": 12978.65,
-  "rendite_pct": 29.79,
-  "buyhold_pct": -30.3,
+  "ende": 12976.33,
+  "rendite_pct": 29.76,
+  "buyhold_pct": -30.32,
   "trades": 79,
   "gewinn_trades": 61,
   "long_profit": 2952.8,
@@ -40,6 +40,6 @@
   "fee_pct": 0.1,
   "deploy_pct": 100,
   "max_drawdown_pct": -11.51,
-  "offene_position": 6502.25
+  "offene_position": 6499.93
  }
 }

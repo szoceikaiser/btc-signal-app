@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 18.11.2025-27.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2111 4h-Kerzen geladen · Stand: 2026-07-27 18:40 UTC
+**Voll-Daten-Fenster: 18.11.2025-27.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2111 4h-Kerzen geladen · Stand: 2026-07-27 18:53 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -22,16 +22,16 @@ Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch v
 | LIVE +Rest-Freigabe | 57% | 35% | +28.4 % | -13.0 % | 100 % | 217 |
 | LIVE +Stop nachziehen | 57% | 34% | +29.8 % | -11.5 % | 100 % | 208 |
 | LIVE +Stop nachziehen +Rest-Freigabe | 57% | 35% | +27.5 % | -11.8 % | 100 % | 208 |
-| LIVE +Stop +Liq-Kaskade | 57% | 30% | +22.6 % | -11.1 % | 100 % | 237 |
-| LIVE +Stop +Liq-Zonen | 61% | 34% | +27.8 % | -10.8 % | 100 % | 238 |
-| LIVE +Stop +Liq beides | 61% | 34% | +27.8 % | -10.8 % | 100 % | 239 |
-| LIVE +Stop +Liq-Konfluenz aufstocken | 57% | 32% | +29.8 % | -11.8 % | 100 % | 227 |
-| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | 50% | 36% | +22.5 % | -12.2 % | 100 % | 178 |
+| LIVE +Stop +Liq-Kaskade | 57% | 30% | +22.5 % | -11.1 % | 100 % | 237 |
+| LIVE +Stop +Liq-Zonen | 61% | 34% | +27.7 % | -10.8 % | 100 % | 238 |
+| LIVE +Stop +Liq beides | 61% | 34% | +27.7 % | -10.8 % | 100 % | 239 |
+| LIVE +Stop +Liq-Konfluenz aufstocken | 57% | 32% | +29.7 % | -11.8 % | 100 % | 227 |
+| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | 50% | 36% | +22.4 % | -12.2 % | 100 % | 178 |
 | LIVE +Stop +Verkauf am letzten Hoch | 61% | 34% | +27.0 % | -12.0 % | 100 % | 229 |
 | LIVE +Stop +Verkauf am schwachen Hoch | 61% | 33% | +27.2 % | -11.9 % | 100 % | 227 |
 | LIVE +Stop, 60 % Einsatz (40 % Reserve) | 57% | 34% | +17.8 % | -7.7 % | 60 % | 208 |
 | LIVE +Stop, 50 % Einsatz (50 % Reserve) | 57% | 34% | +14.7 % | -6.4 % | 50 % | 208 |
-| Long+Short (Ref) | 43% | 58% | +1.9 % | -11.9 % | 100 % | 90 |
+| Long+Short (Ref) | 43% | 58% | +2.0 % | -11.9 % | 100 % | 90 |
 
 ## Beste Kombination (nach Rendite): LIVE: nur Long +Kaufleiter +Flush core
 
@@ -48,6 +48,37 @@ Start 10.000 € -> **13,311 €** (+33.1 %) · Buy&Hold im Fenster: -30.3 % · 
 - **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
 
 WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, KEIN Gewinn. Der Gewinn steht nur in den P&L-Zeilen.
+
+## Robustheitspruefung: Fenster halbiert
+
+Warum: Oben werden 18 Varianten gegen EIN Zeitfenster verglichen. Die beste von vielen sieht immer besser aus als sie ist — wie der Beste von 18 Muenzwerfern. Deshalb laeuft hier jede Variante noch einmal getrennt in zwei Haelften. **Liegt dieselbe Variante in beiden Haelften vorne, ist der Vorteil vermutlich echt. Kippt die Rangfolge, war es Zufall.**
+
+Haelfte 1: 18.11.2025–24.03.2026 · Haelfte 2: 24.03.2026–27.07.2026. Jede Haelfte ist nur halb so lang und damit fuer sich zappeliger — auf die Rangfolge schauen, nicht auf die einzelne Zahl.
+
+| Variante | Rendite H1 | Platz H1 | Rendite H2 | Platz H2 |
+|---|---|---|---|---|
+| nur Long (Basis) | +3.6 % | 18. | +7.5 % | 13. |
+| +Kaufleiter | +8.7 % | 15. | +10.3 % | 2. |
+| +Flush core | +15.3 % | 10. | +7.8 % | 11. |
+| LIVE: nur Long +Kaufleiter +Flush core | +21.1 % | 2. | +9.5 % | 3. |
+| +Kaufleiter +Bed.Stop | +6.4 % | 17. | +10.8 % | 1. |
+| LIVE +Rest-Freigabe | +17.4 % | 7. | +9.4 % | 4. |
+| LIVE +Stop nachziehen | +19.0 % | 3. | +9.4 % | 5. |
+| LIVE +Stop nachziehen +Rest-Freigabe | +17.4 % | 8. | +9.0 % | 7. |
+| LIVE +Stop +Liq-Kaskade | +14.1 % | 12. | +7.8 % | 12. |
+| LIVE +Stop +Liq-Zonen | +18.8 % | 4. | +8.7 % | 9. |
+| LIVE +Stop +Liq beides | +18.8 % | 5. | +8.7 % | 10. |
+| LIVE +Stop +Liq-Konfluenz aufstocken | +21.2 % | 1. | +7.0 % | 15. |
+| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | +15.1 % | 11. | +7.3 % | 14. |
+| LIVE +Stop +Verkauf am letzten Hoch | +17.6 % | 6. | +8.7 % | 8. |
+| LIVE +Stop +Verkauf am schwachen Hoch | +17.4 % | 9. | +9.2 % | 6. |
+| LIVE +Stop, 60 % Einsatz (40 % Reserve) | +10.3 % | 14. | +7.0 % | 16. |
+| LIVE +Stop, 50 % Einsatz (50 % Reserve) | +8.6 % | 16. | +5.8 % | 18. |
+| Long+Short (Ref) | +12.2 % | 13. | +6.4 % | 17. |
+
+**In BEIDEN Haelften unter den besten 5:** LIVE +Stop nachziehen, LIVE: nur Long +Kaufleiter +Flush core
+
+Bewertung: 2 von 5 Varianten halten sich in beiden Haelften oben. Die Varianten, die in beiden Haelften oben stehen, sind die einzigen, auf die man sich stuetzen sollte. Alles, was nur in einer Haelfte glaenzt, ist Zufall.
 
 ## Einschraenkungen
 
