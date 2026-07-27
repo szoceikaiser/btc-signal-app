@@ -90,6 +90,34 @@ def test_score_fehltreffer_druecken_praezision():
     assert sc["precision"] == 0.5
 
 
+def test_monatsuebersicht_zerlegt_das_ergebnis():
+    """Monatsuebersicht: Kontostand je Monatsende, Summe der Monatsgewinne muss dem
+    Gesamtergebnis entsprechen."""
+    from datetime import datetime, timezone
+    from strategy_core import Candle
+    H4 = 4 * 3600 * 1000
+    start = int(datetime(2026, 1, 1, tzinfo=timezone.utc).timestamp() * 1000)
+    # gut drei Monate Kerzen, Preis steigt von 100 auf 130
+    n = 550
+    candles = [Candle(start + i * H4, 100 + i * 30 / n, 100 + i * 30 / n,
+                      100 + i * 30 / n, 100 + i * 30 / n) for i in range(n)]
+    # Position bleibt bis zum Schluss OFFEN — so faellt auf, wenn der angeschnittene
+    # letzte Monat in der Uebersicht fehlt (Fehler beim ersten Bau).
+    sigs = [
+        {"ts": candles[10].ts, "type": "KAUF_1", "price": candles[10].close, "tranche_pct": 100},
+    ]
+    pnl = backtest.simulate(sigs, candles, fee=0.0, start_ms=start)
+    monate = pnl["monate"]
+    assert [m["monat"] for m in monate] == ["2026-01", "2026-02", "2026-03", "2026-04"]
+    # Die Monatsgewinne summieren sich auf das Gesamtergebnis — inklusive Restmonat
+    summe = sum(m["gewinn"] for m in monate)
+    assert abs(summe - (pnl["ende"] - pnl["start"])) < 1.0
+    # Bei steigendem Kurs und Long-Position ist kein Monat im Minus
+    assert all(m["gewinn"] >= -0.01 for m in monate)
+    # Der Kontostand des letzten Monats ist das Gesamtergebnis
+    assert abs(monate[-1]["ende"] - pnl["ende"]) < 0.01
+
+
 def test_run_half_schneidet_haelfte_1_hinten_ab():
     """E11: Mit end_ms werden nur Kerzen bis zu diesem Zeitpunkt ausgewertet."""
     from strategy_core import Candle

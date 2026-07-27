@@ -118,6 +118,10 @@ GRID = [
       trail_stop=True, liq_exit="zone"),
     V("LIVE +Stop +Liq beides", bias_short=False, flush_entry="core", buy_ladder=True,
       trail_stop=True, liq_exit="both"),
+    # Kaisers Vergleichsvariante: seine Live-Einstellung, aber OHNE den aggressiven
+    # Flush-Einstieg (der verdoppelt Rendite UND Rueckgang). Fuer die Monatsuebersicht.
+    V("MEINE Einstellung ohne Flush", bias_short=False, flush_entry="off",
+      buy_ladder=True, trail_stop=True),
     # E10.3 (Furkan-Update B, 18:27): Liquidationszonen auf der EINSTIEGS-Seite. Nach dem
     # Befund aus E10.2 (Verkaufsseite kostet durchgehend Rendite) ist das die Seite, auf
     # der noch etwas zu holen sein koennte. "boost" = zusaetzlich aufstocken bei Konfluenz,
@@ -290,6 +294,11 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     Dip-Nachkauf) leer ausgehen — genau die mit dem besten Preis. Mit Reserve landet
     mehr Kapital weiter unten. Deshalb zusaetzlich der maximale Rueckgang (Drawdown)
     im Bericht: eine Reserve kauft Sicherheit, das muss sichtbar sein.
+
+    Liefert zusaetzlich `monate`: den Kontostand am Ende jedes Kalendermonats, bewertet
+    zum jeweiligen Schlusskurs (offene Positionen also mitgerechnet). Daraus entsteht die
+    Monatsuebersicht im Bericht — Kaisers Frage "was haette ich Monat fuer Monat verdient
+    oder verloren?".
     """
     cash, units, peak_units, l_avg = start_capital, 0.0, 0.0, 0.0
     s_units, s_peak, s_avg = 0.0, 0.0, 0.0            # Short-Seite
@@ -302,7 +311,47 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     def equity_now(price):
         return cash + units * price + s_units * (s_avg - price)
 
+    # --- Monatsgrenzen vorbereiten (Monatsuebersicht) --------------------------------
+    hs0 = start_ms if start_ms is not None else START_MS
+    _closes = [(c.ts, c.close) for c in candles if c.ts >= hs0]
+    if not _closes:
+        _closes = [(candles[-1].ts, candles[-1].close)]
+
+    def _preis_bei(ts_ms: int) -> float:
+        p = _closes[0][1]
+        for t, cl in _closes:
+            if t <= ts_ms:
+                p = cl
+            else:
+                break
+        return p
+
+    _grenzen = []                      # (ts des Monatsendes, "YYYY-MM" des Monats)
+    _d = datetime.fromtimestamp(hs0 / 1000, tz=timezone.utc)
+    _m = datetime(_d.year, _d.month, 1, tzinfo=timezone.utc)
+    while True:
+        _next = (_m + timedelta(days=32)).replace(day=1)
+        _ts = int(_next.timestamp() * 1000) - 1
+        _grenzen.append((_ts, _m.strftime("%Y-%m")))
+        if _ts >= candles[-1].ts:
+            break
+        _m = _next
+    monate, _gi, _letztes_eq = [], 0, start_capital
+
+    def _snapshot_bis(ts_ms: int):
+        nonlocal _gi, _letztes_eq
+        while _gi < len(_grenzen) and _grenzen[_gi][0] <= ts_ms:
+            g_ts, g_name = _grenzen[_gi]
+            eq = equity_now(_preis_bei(g_ts))
+            monate.append({"monat": g_name, "ende": round(eq, 2),
+                           "gewinn": round(eq - _letztes_eq, 2),
+                           "rendite_pct": round((eq / _letztes_eq - 1) * 100, 2)
+                           if _letztes_eq else 0.0})
+            _letztes_eq = eq
+            _gi += 1
+
     for s in signals:
+        _snapshot_bis(s["ts"])
         p, t = s["price"], s["type"]
         if t in ("KAUF_1", "KAUF_2", "NACHKAUF"):
             if units == 0.0:
@@ -359,6 +408,15 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
 
     last_price = candles[-1].close
     end_equity = equity_now(last_price)
+    _snapshot_bis(candles[-1].ts)      # abgeschlossene Monate nachtragen
+    if _gi < len(_grenzen):
+        # Der laufende Monat ist angeschnitten (das Fenster endet mittendrin). Ohne
+        # diesen Eintrag fehlt er in der Uebersicht und die Monatssumme stimmt nicht
+        # mehr mit dem Gesamtergebnis ueberein.
+        monate.append({"monat": _grenzen[_gi][1], "ende": round(end_equity, 2),
+                       "gewinn": round(end_equity - _letztes_eq, 2),
+                       "rendite_pct": round((end_equity / _letztes_eq - 1) * 100, 2)
+                       if _letztes_eq else 0.0})
     # Maximaler Rueckgang vom jeweiligen Hoch (gemessen an den Signalzeitpunkten +
     # Endstand). Das ist die Kennzahl, auf die eine Kapital-Reserve einzahlt.
     peak_eq, max_dd = start_capital, 0.0
@@ -377,6 +435,7 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
         "short_profit": round(short_profit, 2), "short_trades": short_trades, "short_wins": short_wins,
         "fee_pct": fee * 100, "equity": equity,
         "deploy_pct": round(deploy_pct * 100), "max_drawdown_pct": round(max_dd * 100, 2),
+        "monate": monate,
         "offene_position": round(units * last_price + s_units * (s_avg - last_price), 2),
     }
 
@@ -450,6 +509,48 @@ def main():
     panel_r = next((r for r in results if r[0].get("panel")), best)
     panel_cfg, _psigs, panel_sc, panel_pnl = panel_r
 
+    # --- Monatsuebersicht: Live-Einstellung gegen "ohne Flush" (Kaisers Frage) -------
+    _of = next((r for r in results if r[0]["label"] == "MEINE Einstellung ohne Flush"), None)
+    m_live = {m["monat"]: m for m in panel_pnl.get("monate", [])}
+    m_ohne = {m["monat"]: m for m in (_of[3].get("monate", []) if _of else [])}
+    monats_zeilen = []
+    if m_live or m_ohne:
+        def _z(eintrag, feld):
+            if not eintrag:
+                return "—"
+            return (f"{eintrag[feld]:+,.0f} €" if feld == "gewinn"
+                    else f"{eintrag[feld]:+.1f} %")
+        monats_zeilen = [
+            "",
+            "## Monat fuer Monat",
+            "",
+            "Kontostand am Monatsende, Start 10.000 €, offene Positionen zum jeweiligen "
+            "Schlusskurs bewertet. Der erste und der letzte Monat sind angeschnitten "
+            "(das Fenster beginnt Mitte November und endet heute).",
+            "",
+            f"Links die Live-Einstellung (*{panel_cfg['label']}*), rechts dieselbe "
+            "Einstellung **ohne** den aggressiven Flush-Einstieg.",
+            "",
+            "| Monat | live € | live % | ohne Flush € | ohne Flush % |",
+            "|---|---|---|---|---|",
+        ]
+        for name in sorted(set(m_live) | set(m_ohne)):
+            a, b = m_live.get(name), m_ohne.get(name)
+            monats_zeilen.append(
+                f"| {name} | {_z(a, 'gewinn')} | {_z(a, 'rendite_pct')} | "
+                f"{_z(b, 'gewinn')} | {_z(b, 'rendite_pct')} |")
+        _pos = sum(1 for m in m_live.values() if m["gewinn"] > 0)
+        _pos_o = sum(1 for m in m_ohne.values() if m["gewinn"] > 0)
+        monats_zeilen += [
+            "",
+            f"Monate im Plus: **{_pos} von {len(m_live)}** (live) gegen "
+            f"**{_pos_o} von {len(m_ohne)}** (ohne Flush).",
+            "",
+            "Die Euro-Betraege wachsen mit dem Konto — Gewinne werden reinvestiert, ein "
+            "spaeterer Monat arbeitet also mit mehr Kapital als ein frueher. Zwei Monate "
+            "sind deshalb nur ueber die Prozentspalte fair vergleichbar.",
+        ]
+
     win = f"{to_date(eff_start).strftime('%d.%m.%Y')}-{to_date(END_MS).strftime('%d.%m.%Y')}"
     lines = [
         "# Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger",
@@ -510,6 +611,7 @@ def main():
         "",
         "WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, "
         "KEIN Gewinn. Der Gewinn steht nur in den P&L-Zeilen.",
+        *monats_zeilen,
         "",
         "## Robustheitspruefung: Fenster halbiert",
         "",
