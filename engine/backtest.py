@@ -207,6 +207,35 @@ def to_date(ts_ms: int) -> date:
     return datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc).date()
 
 
+def run_half(candles, flow, cfg: dict, start_ms: int, end_ms: int | None = None):
+    """Eine Variante ueber ein Teilfenster laufen lassen (E11, Robustheitspruefung).
+
+    Warum das noetig ist: Inzwischen werden ~18 Varianten gegen EIN Zeitfenster
+    verglichen. Bei so vielen Vergleichen sieht die beste zwangslaeufig besser aus, als
+    sie ist — wie der Beste von 18 Muenzwerfern. Laeuft dieselbe Variante in zwei
+    getrennten Haelften vorne, ist der Vorteil vermutlich echt; kippt die Rangfolge,
+    haben wir Rauschen optimiert.
+
+    `end_ms` schneidet die Kerzen hinten ab (Haelfte 1). Ohne `end_ms` laeuft es bis zum
+    Fensterende, wobei die Kerzen VOR `start_ms` als Warmup dienen (Haelfte 2) — die
+    Engine kennt die Vergangenheit, genau wie im Live-Betrieb.
+    """
+    cs, fl = candles, flow
+    if end_ms is not None:
+        cut = 0
+        for i, c in enumerate(candles):
+            if c.ts <= end_ms:
+                cut = i + 1
+            else:
+                break
+        cs, fl = candles[:cut], flow[:cut]
+    if not cs:
+        return [], None
+    sigs = run_backtest(cs, fl, cfg, start_ms=start_ms)
+    pnl = simulate(sigs, cs, start_ms=start_ms, deploy_pct=cfg.get("deploy_pct", 1.0))
+    return sigs, pnl
+
+
 def score(signals: list[dict], tol_days: int = 1, start_ms: int = START_MS) -> dict:
     # Nur Furkans Trigger IM Voll-Daten-Fenster bewerten (ab start_ms) — sonst zaehlten
     # wir Tage, an denen die Engine mangels Daten gar nicht handeln konnte (E9.6).
@@ -398,6 +427,20 @@ def main():
               f"Long {p['long_profit']:+.0f}€/Short {p['short_profit']:+.0f}€, "
               f"{len(sigs)} Signale ({time.time()-t0:.0f}s)")
 
+    # --- E11: Robustheitspruefung, Fenster halbiert ---------------------------------
+    mid_ms = eff_start + (END_MS - eff_start) // 2
+    print(f"\nRobustheitspruefung: Haelfte 1 bis {to_date(mid_ms).strftime('%d.%m.%Y')}, "
+          f"Haelfte 2 danach ...")
+    halves = []
+    for cfg in GRID:
+        _s1, p1 = run_half(candles, flow, cfg, eff_start, end_ms=mid_ms)
+        _s2, p2 = run_half(candles, flow, cfg, mid_ms)
+        if p1 is None or p2 is None:            # leeres Teilfenster -> ueberspringen
+            continue
+        halves.append((cfg, p1, p2))
+        print(f"  {cfg['label']}: H1 {p1['rendite_pct']:+.1f} % | "
+              f"H2 {p2['rendite_pct']:+.1f} %")
+
     # Auswahl: primaer Rendite (das Geld-Maß), dann Recall, dann Praezision
     best = max(results, key=lambda r: (r[3]["rendite_pct"], r[2]["recall"], r[2]["precision"]))
     best_cfg, sigs, sc, pnl = best
@@ -467,6 +510,51 @@ def main():
         "",
         "WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, "
         "KEIN Gewinn. Der Gewinn steht nur in den P&L-Zeilen.",
+        "",
+        "## Robustheitspruefung: Fenster halbiert",
+        "",
+        f"Warum: Oben werden {len(GRID)} Varianten gegen EIN Zeitfenster verglichen. Die "
+        "beste von vielen sieht immer besser aus als sie ist — wie der Beste von "
+        f"{len(GRID)} Muenzwerfern. Deshalb laeuft hier jede Variante noch einmal getrennt "
+        "in zwei Haelften. **Liegt dieselbe Variante in beiden Haelften vorne, ist der "
+        "Vorteil vermutlich echt. Kippt die Rangfolge, war es Zufall.**",
+        "",
+        f"Haelfte 1: {to_date(eff_start).strftime('%d.%m.%Y')}–"
+        f"{to_date(mid_ms).strftime('%d.%m.%Y')} · "
+        f"Haelfte 2: {to_date(mid_ms).strftime('%d.%m.%Y')}–"
+        f"{to_date(END_MS).strftime('%d.%m.%Y')}. "
+        "Jede Haelfte ist nur halb so lang und damit fuer sich zappeliger — auf die "
+        "Rangfolge schauen, nicht auf die einzelne Zahl.",
+        "",
+        "| Variante | Rendite H1 | Platz H1 | Rendite H2 | Platz H2 |",
+        "|---|---|---|---|---|",
+    ]
+    rang1 = {c["label"]: i + 1 for i, (c, _p1, _p2) in enumerate(
+        sorted(halves, key=lambda r: -r[1]["rendite_pct"]))}
+    rang2 = {c["label"]: i + 1 for i, (c, _p1, _p2) in enumerate(
+        sorted(halves, key=lambda r: -r[2]["rendite_pct"]))}
+    for hcfg, p1, p2 in halves:
+        lines.append(f"| {hcfg['label']} | {p1['rendite_pct']:+.1f} % | "
+                     f"{rang1[hcfg['label']]}. | {p2['rendite_pct']:+.1f} % | "
+                     f"{rang2[hcfg['label']]}. |")
+
+    top1 = {hcfg['label'] for hcfg, _p1, _p2 in
+            sorted(halves, key=lambda r: -r[1]["rendite_pct"])[:5]}
+    top2 = {hcfg['label'] for hcfg, _p1, _p2 in
+            sorted(halves, key=lambda r: -r[2]["rendite_pct"])[:5]}
+    stabil = sorted(top1 & top2)
+    lines += [
+        "",
+        f"**In BEIDEN Haelften unter den besten 5:** "
+        + (", ".join(stabil) if stabil else "keine einzige Variante"),
+        "",
+        (f"Bewertung: {len(stabil)} von 5 Varianten halten sich in beiden Haelften oben. "
+         + ("Je mehr, desto belastbarer die Rangfolge oben. Bei 0 bis 1 ist die Rangfolge "
+            "im Wesentlichen Zufall — dann nur den groebsten Hebeln trauen (Richtung, "
+            "Kaufleiter) und die Feinheiten weglassen."
+            if len(stabil) <= 1 else
+            "Die Varianten, die in beiden Haelften oben stehen, sind die einzigen, auf die "
+            "man sich stuetzen sollte. Alles, was nur in einer Haelfte glaenzt, ist Zufall.")),
         "",
         "## Einschraenkungen",
         "",

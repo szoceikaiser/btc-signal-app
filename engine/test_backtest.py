@@ -90,6 +90,27 @@ def test_score_fehltreffer_druecken_praezision():
     assert sc["precision"] == 0.5
 
 
+def test_run_half_schneidet_haelfte_1_hinten_ab():
+    """E11: Mit end_ms werden nur Kerzen bis zu diesem Zeitpunkt ausgewertet."""
+    from strategy_core import Candle
+    H4 = 4 * 3600 * 1000
+    candles = [Candle(backtest.START_MS + i * H4, 100, 101, 99, 100) for i in range(20)]
+    flow = []
+    from strategy_core import FlowPoint
+    flow = [FlowPoint(c.ts, 0.0, 0.0, 1000.0, 0.0) for c in candles]
+    mitte = candles[9].ts
+    cfg = dict(bias_long=True, bias_short=False, pivot_n=5, k_atr=2.0)
+    _s1, p1 = backtest.run_half(candles, flow, cfg, backtest.START_MS, end_ms=mitte)
+    _s2, p2 = backtest.run_half(candles, flow, cfg, mitte)
+    # Beide Haelften liefern ein Ergebnis, keine wirft
+    assert p1 is not None and p2 is not None
+    assert "rendite_pct" in p1 and "rendite_pct" in p2
+    # Leeres Fenster (end_ms vor der ersten Kerze) -> sauberer Rueckfall
+    leer_s, leer_p = backtest.run_half(candles, flow, cfg, backtest.START_MS,
+                                       end_ms=backtest.START_MS - 1)
+    assert leer_s == [] and leer_p is None
+
+
 def test_deploy_pct_haelt_reserve_zurueck():
     """Furkan-Update: 'Pulver behalten'. Mit 50 % Einsatz wird je Tranche nur die
     Haelfte investiert — und am Ende ist entsprechend Bargeld uebrig."""
