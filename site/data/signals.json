@@ -134,6 +134,16 @@
    "reason": "Extension 1.618 erreicht (62631)",
    "stop_ref": null,
    "label": "TEILVERKAUF 2 (Extension 1.618)"
+  },
+  {
+   "ts": 1785096000000,
+   "type": "VERKAUF_REST",
+   "price": 65399.99,
+   "tranche_pct": 20,
+   "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
+   "stop_ref": null,
+   "tag": "",
+   "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
   }
  ]
 }
