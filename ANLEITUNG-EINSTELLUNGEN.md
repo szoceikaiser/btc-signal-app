@@ -12,23 +12,34 @@ Browser. Grundprinzip immer gleich: Datei öffnen → **Stift-Symbol** (oben rec
 
 ---
 
-## 1. Long/Short an- oder abschalten
+## 1. Alle Schalter der Engine (`config.json`)
 
 Datei: [`site/data/config.json`](https://github.com/szoceikaiser/btc-signal-app/edit/main/site/data/config.json)
 (diese Datei wird von der Engine NIE überschrieben — hier gibt es keine Konflikte)
 
-1. Link öffnen (führt direkt in den Bearbeiten-Modus)
-2. Die Werte findest du oben:
-   ```json
-   { "bias_long": true, "bias_short": false }
-   ```
-3. Auf `true`/`false` setzen, welche Richtung die App handeln soll.
-   „nur Long": `"bias_short": false` · beide: beide `true`.
-4. **Commit changes**
+**So geht jede Änderung:** Link öffnen (führt direkt in den Bearbeiten-Modus) → **nur den
+Wert** ändern, also z. B. `false` durch `true` ersetzen → Anführungszeichen, Doppelpunkt
+und Komma stehen lassen → oben rechts **Commit changes…** → im Dialog nochmal **Commit
+changes**. Wirkung ab dem nächsten Engine-Lauf.
 
-Wirkung: ab dem nächsten Engine-Lauf (max. 15 Min). Kontrolle: Datei neu öffnen —
-steht dein Wert noch drin? (Anders als früher überschreibt die Engine diese Datei
-nicht, also bleibt deine Änderung sicher stehen.)
+**Kontrollpunkt:** Datei neu laden — steht dein Wert noch drin? Und in
+[`site/data/state.json`](https://github.com/szoceikaiser/btc-signal-app/blob/main/site/data/state.json)
+zeigt der Abschnitt `config` nach dem nächsten Lauf denselben Wert. Erst dann hat die
+Engine ihn wirklich gelesen.
+
+| Schalter | Werte | Bedeutung |
+|---|---|---|
+| `bias_long` | `true` / `false` | Long-Signale erlauben. Steht auf `true`. |
+| `bias_short` | `true` / `false` | Short-Signale erlauben. Steht auf **`false`** — Shorts haben in jeder Messung Geld verloren, weil der Engine der Richtungs-Bias fehlt. |
+| `trail_stop` | `true` / `false` | Stop nachziehen, sobald Teilgewinne realisiert sind: auf den Durchschnitts-Einstand (Break-even) bzw. hinter das letzte Struktur-Tief. Furkans „Kapital schützen". Steht auf **`true`**. |
+| `release_stale_rest` | `true` / `false` | Restposition freigeben, wenn ein neuer Impuls bestätigt ist. Löst dasselbe Problem wie `trail_stop`, aber schlechter (verkauft zum Marktpreis). Steht auf `false` — nur eines von beiden einschalten. |
+| `liq_exit` | `off` / `spike` / `zone` / `both` | Teilverkauf an Liquidationen. Gemessen: kostet Rendite. Steht auf `off`. |
+| `high_exit` | `off` / `on` / `weak` | Teilverkauf kurz unter dem letzten Hoch. Gemessen: kostet Rendite. Steht auf `off`. |
+| `liq_entry` | `off` / `boost` / `filter` | Liquidationszonen beim **Einstieg**: `boost` stockt zusätzlich auf, wenn Fib-Zone und Liquidationszone zusammenfallen (Furkans Konfluenz), `filter` lässt nur noch solche Einstiege zu. Noch nicht gemessen. |
+
+**Goldene Regel:** Immer nur EINEN Schalter auf einmal ändern und danach einen Backtest
+laufen lassen (Abschnitt 3). Sonst weißt du hinterher nicht, welche Änderung was bewirkt
+hat. Und: Was der Backtest nicht bestätigt hat, bleibt aus.
 
 ## 2. Prüf-Takt der Engine ändern
 
@@ -57,6 +68,8 @@ Datei: `engine/strategy_core.py`. Relevante Stellschrauben:
 |---|---|---|
 | `pivot_n=5` | `def evaluate(...)` | Kerzen zur Swing-Bestätigung. Kleiner = mehr, frühere Signale (mehr Rauschen) |
 | `k_atr=2.0` | `def evaluate(...)` | Mindestgröße eines Impulses in ATR. Kleiner = mehr Impulse zählen |
+| `flush_entry="core"` | `def evaluate(...)` | Einstieg in die Kapitulations-Kerze. Verdoppelt Rendite UND maximalen Rückgang. Die Signale sind in Telegram als „AGGRESSIVER FLUSH-EINSTIEG — DEINE Entscheidung" markiert, du entscheidest also ohnehin je Fall |
+| `buy_ladder=True` | `def evaluate(...)` | Mehrtages-Kaufleiter (Nachkauf in die Schwäche). Bester gemessener Renditehebel |
 | `TRANCHEN` | oberhalb von `evaluate` | Positionsgrößen je Signal (25/50/25 rein, 40/40/Rest raus) |
 | `oi_wipeout_pct`, `sharp_move_pct`, `funding_hot` | `def classify_pattern(...)` | Schwellen der 4 Kompass-Muster |
 

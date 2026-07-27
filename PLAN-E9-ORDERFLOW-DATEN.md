@@ -390,6 +390,11 @@ Kaufleiter. Jedes weitere Gatter kostet Rendite und kauft dafuer etwas anderes e
 (Entblockung beim Stop-Nachziehen, Furkan-Naehe bei den Liq-Zonen). Das bewusst abwaegen,
 nicht sammeln.
 
+NACHTRAG 2026-07-27: Die Verkaufsseite ist damit abgeschlossen — siehe E10.2 in
+docs/FURKAN-UPDATE-2026-07.md: fuenf Mechanismen gemessen, alle heben die Aehnlichkeit zu
+Furkan, alle kosten Rendite. Die Liquidationsdaten wandern deshalb auf die EINSTIEGS-Seite
+(E10.3, `liq_entry`), wo sie noch nie getestet wurden.
+
 EHRLICH (Regel 3): ob das die Rendite erhoeht, ist OFFEN. Argument dafuer: die aktuellen
 Fib-Teilverkaeufe sind mechanisch und feuern oft frueh (TEILVERKAUF_1 trifft haeufig),
 Liquidations-Spikes verkaufen in die Staerke. Argument dagegen: Liquidations-Kaskaden

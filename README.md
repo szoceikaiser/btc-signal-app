@@ -71,5 +71,8 @@ Ab jetzt läuft alles automatisch (alle 15 Min). Fertig.
   Order-Flow-Kompass, Zustandsmaschine). `engine/run_tests.py` führt alle Tests aus.
 - `engine/main.py` — Datenabruf (Binance, ohne API-Key), Auswertung, Telegram.
 - `site/` — Chart-Webseite (GitHub Pages).
-- Long/Short lassen sich in `site/data/state.json` unter `config` abschalten
-  (`bias_long` / `bias_short` auf `false`).
+- **Alle Schalter stehen in `site/data/config.json`** (Richtung, nachgezogener Stop,
+  Liquidations-Ein-/Ausstiege). Die Engine überschreibt diese Datei nie, sie lässt sich
+  also gefahrlos im Browser bearbeiten — die Tabelle aller Werte steht in
+  [ANLEITUNG-EINSTELLUNGEN.md](ANLEITUNG-EINSTELLUNGEN.md).
+  `site/data/state.json` zeigt unter `config` nur, was die Engine zuletzt gelesen hat.

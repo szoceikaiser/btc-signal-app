@@ -165,7 +165,7 @@ def pos_to_state(pos: Position) -> dict:
          "tp_rungs": pos.tp_rungs, "dip_buys": pos.dip_buys,
          "buy_rungs": pos.buy_rungs, "entry_ref": pos.entry_ref,
          "entry_pct": pos.entry_pct, "liq_exits": pos.liq_exits,
-         "high_exits": pos.high_exits, "zones": None}
+         "high_exits": pos.high_exits, "liq_entries": pos.liq_entries, "zones": None}
     if pos.zones:
         z = pos.zones
         d["zones"] = {
@@ -197,6 +197,7 @@ def pos_from_state(d: dict) -> Position:
     pos.entry_pct = d.get("entry_pct", 0)
     pos.liq_exits = d.get("liq_exits", 0)
     pos.high_exits = d.get("high_exits", 0)
+    pos.liq_entries = d.get("liq_entries", 0)
     z = d.get("zones")
     if z and "impuls_start" in z:
         imp = Impulse(
@@ -254,7 +255,8 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
                         release_stale_rest=cfg.get("release_stale_rest", False),
                         trail_stop=cfg.get("trail_stop", False),
                         liq_exit=cfg.get("liq_exit", "off"),
-                        high_exit=cfg.get("high_exit", "off"))
+                        high_exit=cfg.get("high_exit", "off"),
+                        liq_entry=cfg.get("liq_entry", "off"))
         new_signals += [s.to_dict() for s in sigs]
 
     # Historie fortschreiben

@@ -358,6 +358,7 @@ class Position:
     entry_pct: int = 0                       # Summe der eingestiegenen Tranchen-Prozente
     liq_exits: int = 0                       # Anzahl Teilverkaeufe an Liquidationen (E9.11)
     high_exits: int = 0                      # Anzahl Teilverkaeufe am letzten Hoch (E10.2)
+    liq_entries: int = 0                     # Anzahl Konfluenz-Nachkaeufe an Liq-Zonen (E10.3)
 
 
 def _reset_position(pos: "Position") -> None:
@@ -370,6 +371,7 @@ def _reset_position(pos: "Position") -> None:
     pos.entry_pct = 0
     pos.liq_exits = 0
     pos.high_exits = 0
+    pos.liq_entries = 0
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
@@ -424,6 +426,15 @@ LIQ_ZONE_MIN_MULT = 3.0    # Zone = Kerze mit mindestens 3x der mittleren Liquid
 # die bei plus/minus null aussteigen wollen — dort staut sich Angebot.
 MAX_HIGH_EXITS = 2         # hoechstens so viele Struktur-Teilverkaeufe je Position
 HIGH_EXIT_TOL = 0.005      # 0,5 % darunter reicht — vor der Masse raus
+
+# Liquidationszonen fuer den EINSTIEG (E10.3, Furkan-Update 18:27: "unter uns liegt
+# deutlich mehr, viele Long-Positionen ab 61.700 runter bis 60.500 — HIER liegt dann auch
+# aktuell das Golden Pocket, wo ich die Position wieder aufstocken wuerde").
+# Er kauft, wo Longs liquidiert werden, und sucht die Konfluenz mit dem Golden Pocket.
+# Bisher haben wir Liquidationsdaten nur fuer AUSSTIEGE getestet (E9.11) — dort kosteten
+# sie Rendite. Fuer Einstiege ist es ungemessen.
+MAX_LIQ_ENTRIES = 2        # hoechstens so viele Konfluenz-Nachkaeufe je Position
+LIQ_ENTRY_TRANCHE = 20     # Tranche je Konfluenz-Nachkauf in %
 
 
 def next_pivot_beyond(pivots: list[Pivot], price: float, long_side: bool) -> Optional[float]:
@@ -493,7 +504,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              strict_confirm: bool = False, confluence: bool = False,
              conditional_stop: bool = False, buy_ladder: bool = True,
              release_stale_rest: bool = False, trail_stop: bool = False,
-             liq_exit: str = "off", high_exit: str = "off") -> list[Signal]:
+             liq_exit: str = "off", high_exit: str = "off",
+             liq_entry: str = "off") -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -529,6 +541,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # Hoch OHNE Spot-Nachfrage passiert (Furkan 20:17: "bei Breakouts muesste man
     # spaetestens da Spot-Nachfrage sehen") — so wird aus einer blossen Warnung eine
     # Handlung, die man messen kann.
+    # liq_entry (E10.3): Liquidationszonen auf der EINSTIEGS-Seite. "off" | "boost" |
+    # "filter". "boost" = zusaetzliche Nachkauf-Tranche, wenn die Fib-Zone mit einem
+    # historischen Long-Liquidations-Cluster zusammenfaellt (Furkans Konfluenz).
+    # "filter" = Einstiege NUR bei dieser Konfluenz (restriktiv, Gegenprobe).
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -555,6 +571,21 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         close, e = _trend
         return close >= e if long_side else close <= e
 
+    # Liquidations-Niveaus je Seite nur einmal je Kerze berechnen (E10.3). Ausschliesslich
+    # aus Kerzen VOR der aktuellen — sonst wuesste der Backtest die Zukunft.
+    _liq_cache: dict = {}
+
+    def _liq_hit(price: float, side: str):
+        if side not in _liq_cache:
+            _liq_cache[side] = liq_levels(candles[:-1], flow[:-1], side)
+        return in_liq_zone(price, _liq_cache[side])
+
+    def _liq_entry_ok(price: float, long_side: bool) -> bool:
+        """Nur im Modus 'filter' eine Bedingung; sonst nie blockierend."""
+        if liq_entry != "filter":
+            return True
+        return _liq_hit(price, "long" if long_side else "short") is not None
+
     def _confluence_ok(price: float) -> bool:
         if not confluence or _dzone is None:
             return True                                  # 1D-Zone unbekannt -> nicht blockieren
@@ -578,14 +609,16 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         z = fib_zones(imp)
         if imp.up and bias_long and pattern != Pattern.DERIVATE_PUMP:
             if (cur.low <= z.level_05 and cur.low > z.gp_upper
-                    and _trend_ok(True) and _confluence_ok(cur.low)):
+                    and _trend_ok(True) and _confluence_ok(cur.low)
+                    and _liq_entry_ok(cur.low, True)):
                 pos.direction, pos.state, pos.zones = "LONG", PosState.T1, z
                 pos.retrace_extreme = cur.low
                 signals.append(Signal(cur.ts, SignalType.KAUF_1, z.level_05, TRANCHEN["T1"],
                                       f"0.5-Retracement des Impulses {imp.start.price:.0f}->{imp.end.price:.0f}",
                                       stop_ref=z.invalidation))
             elif z.gp_lower <= cur.low <= z.gp_upper:
-                if _confirm_long() and _trend_ok(True) and _confluence_ok(cur.low):
+                if (_confirm_long() and _trend_ok(True) and _confluence_ok(cur.low)
+                        and _liq_entry_ok(cur.low, True)):
                     pos.direction, pos.state, pos.zones = "LONG", PosState.CORE, z
                     pos.retrace_extreme = cur.low
                     signals.append(Signal(cur.ts, SignalType.KAUF_2, z.gp_upper,
@@ -596,7 +629,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                   and cur.close > z.invalidation):
                 # Capitulation-Einstieg (E8.1): Kerze durchschlaegt das GP nach unten
                 # (Flush-Tage wie 10.10./04.11.), schliesst aber ueber der Invalidierung
-                if _confirm_long() and _trend_ok(True):
+                if _confirm_long() and _trend_ok(True) and _liq_entry_ok(cur.low, True):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.KAUF_1 if small else SignalType.KAUF_2
@@ -608,14 +641,16 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           stop_ref=z.invalidation, tag="FLUSH"))
         elif (not imp.up) and bias_short and pattern != Pattern.CAPITULATION_RESET:
             if (cur.high >= z.level_05 and cur.high < z.gp_upper
-                    and _trend_ok(False) and _confluence_ok(cur.high)):
+                    and _trend_ok(False) and _confluence_ok(cur.high)
+                    and _liq_entry_ok(cur.high, False)):
                 pos.direction, pos.state, pos.zones = "SHORT", PosState.T1, z
                 pos.retrace_extreme = cur.high
                 signals.append(Signal(cur.ts, SignalType.SHORT_1, z.level_05, TRANCHEN["T1"],
                                       f"0.5-Retracement des Abwaerts-Impulses {imp.start.price:.0f}->{imp.end.price:.0f}",
                                       stop_ref=z.invalidation))
             elif z.gp_upper <= cur.high <= z.gp_lower:  # Short: 0.65 liegt OBEN
-                if _confirm_short() and _trend_ok(False) and _confluence_ok(cur.high):
+                if (_confirm_short() and _trend_ok(False) and _confluence_ok(cur.high)
+                        and _liq_entry_ok(cur.high, False)):
                     pos.direction, pos.state, pos.zones = "SHORT", PosState.CORE, z
                     pos.retrace_extreme = cur.high
                     signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
@@ -626,7 +661,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                   and cur.close < z.invalidation):
                 # Squeeze-Einstieg (E8.1, Spiegelbild): Kerze durchschlaegt das GP nach
                 # oben, schliesst aber unter der Invalidierung
-                if _confirm_short() and _trend_ok(False):
+                if _confirm_short() and _trend_ok(False) and _liq_entry_ok(cur.high, False):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.SHORT_1 if small else SignalType.SHORT_2
@@ -727,6 +762,28 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           f"Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt ({pattern.name})",
                                           stop_ref=z.invalidation))
                     pos.buy_rungs += 1
+            # Konfluenz-Nachkauf an der Liquidationszone (E10.3): Fib-Zone UND historisches
+            # Liquidations-Cluster fallen zusammen — Furkans "hier liegt auch das Golden
+            # Pocket, da wuerde ich aufstocken". Struktur muss intakt sein (ueber der
+            # Invalidierung, im Retracement-Bereich) und der Order-Flow bestaetigen.
+            if liq_entry == "boost" and pos.liq_entries < MAX_LIQ_ENTRIES \
+                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+                if long_side:
+                    treffer = _liq_hit(cur.low, "long")
+                    in_struct = z.invalidation < cur.low <= z.level_05
+                    flow_ok = _confirm_long()
+                    nk = SignalType.NACHKAUF
+                else:
+                    treffer = _liq_hit(cur.high, "short")
+                    in_struct = z.level_05 <= cur.high < z.invalidation
+                    flow_ok = _confirm_short()
+                    nk = SignalType.SHORT_NACHLEGEN
+                if treffer is not None and in_struct and flow_ok:
+                    signals.append(Signal(cur.ts, nk, cur.close, LIQ_ENTRY_TRANCHE,
+                                          f"Konfluenz: Fib-Zone + Liquidationszone {treffer:.0f} "
+                                          f"— aufstocken ({pattern.name})",
+                                          stop_ref=z.invalidation))
+                    pos.liq_entries += 1
             # Teilverkauf an Liquidationen (E9.11): erst verkaufen, wenn der Kurs die
             # Liquidationszone erreicht — nicht schon am rechnerischen Fib-Ziel.
             if liq_exit != "off" and pos.liq_exits < MAX_LIQ_EXITS \

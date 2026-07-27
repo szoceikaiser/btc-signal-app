@@ -623,6 +623,86 @@ def test_liq_exit_zone_nutzt_keine_zukunft():
     assert len(liq_levels(cs, fl, "short")) == 1
 
 
+def run_incremental_flow(all_candles, flow, pos, **kw):
+    """Wie run_incremental, schneidet den Flow aber PARALLEL zu den Kerzen mit — noetig,
+    sobald der Flow positionsabhaengig ist (Liquidations-Kaskade in einer bestimmten
+    Kerze). Genau so ruft die Produktion es auf: evaluate(candles[:i], flow[:i], ...)."""
+    collected = []
+    for i in range(1, len(all_candles) + 1):
+        collected += evaluate(all_candles[:i], flow[:i], pos, **kw)
+    return collected
+
+
+def _liq_entry_pfad():
+    """Impuls 100->110 (Tief der Kerze 2 = 100), danach ruhige Kerzen (damit genug
+    Historie fuer liq_levels da ist, ohne neue Pivots zu erzeugen), dann Einstieg am
+    0.5-Level und ein Ruecklauf auf 100,4 — also an das alte Liquidations-Tief."""
+    return zigzag_candles() + [
+        # Fuellkerzen: Hochs UND Tiefs leicht fallend, damit sie keine neuen Pivots
+        # bilden (sonst kippt der Referenz-Impuls auf 110->105,5 nach unten). Tiefs
+        # bleiben ueber dem 0.5-Level (105), also kein vorzeitiger Einstieg.
+        c(8, 106.5, 106.4, 105.20, 105.6),
+        c(9, 105.6, 106.3, 105.10, 105.4),
+        c(10, 105.4, 106.2, 105.05, 105.3),
+        c(11, 105.3, 106.5, 104.50, 105.5),   # KAUF 1 am 0.5-Level (105)
+        c(12, 104.0, 104.5, 100.40, 101.0),   # zurueck an das Liq-Niveau 100
+    ]
+
+
+def _liq_flow_long(n, tief_kerze: int, betrag: float = 9_000_000.0):
+    """Flow mit einer Long-Liquidations-Kaskade in Kerze `tief_kerze`."""
+    return [FlowPoint(i, 100 + i, 100, 1000, -0.0001,
+                      long_liq=(betrag if i == tief_kerze else 1000.0))
+            for i in range(n)]
+
+
+def test_liq_entry_boost_stockt_bei_konfluenz_auf():
+    """E10.3: Fib-Zone UND historisches Long-Liquidations-Cluster fallen zusammen ->
+    zusaetzliche Nachkauf-Tranche (Furkans 'hier liegt auch das Golden Pocket')."""
+    path = _liq_entry_pfad()
+    flow = _liq_flow_long(len(path), tief_kerze=2)      # Kaskade am Tief 100
+    pos = Position()
+    sigs = run_incremental_flow(path, flow, pos, pivot_n=2, bias_short=False,
+                                tp_ladder=False, buy_ladder=False, liq_entry="boost")
+    konf = [s for s in sigs if "Konfluenz" in s.reason]
+    assert len(konf) == 1 and konf[0].type == SignalType.NACHKAUF
+    assert konf[0].tranche_pct == 20 and pos.liq_entries == 1
+    assert "Liquidationszone 100" in konf[0].reason
+    # Ohne den Schalter: kein Konfluenz-Nachkauf
+    pos2 = Position()
+    sigs2 = run_incremental_flow(path, flow, pos2, pivot_n=2, bias_short=False,
+                                 tp_ladder=False, buy_ladder=False)
+    assert not any("Konfluenz" in s.reason for s in sigs2)
+
+
+def test_liq_entry_filter_blockt_einstieg_ohne_konfluenz():
+    """'filter' laesst nur noch Einstiege zu, die auf einem Liquidations-Cluster liegen."""
+    path = _liq_entry_pfad()[:-1]                       # ohne den Ruecklauf: nur das 0.5-Level
+    flow = _liq_flow_long(len(path), tief_kerze=2)      # Cluster liegt bei 100, nicht 104.5
+    pos = Position()
+    sigs = run_incremental_flow(path, flow, pos, pivot_n=2, bias_short=False,
+                                tp_ladder=False, buy_ladder=False, liq_entry="filter")
+    assert sigs == [] and pos.state == PosState.FLAT
+    # Ohne Filter feuert derselbe Einstieg normal
+    pos2 = Position()
+    sigs2 = run_incremental_flow(path, flow, pos2, pivot_n=2, bias_short=False,
+                                 tp_ladder=False, buy_ladder=False)
+    assert [s.type for s in sigs2] == [SignalType.KAUF_1]
+
+
+def test_liq_entry_nutzt_nur_vergangene_kerzen():
+    """Kausalitaet auch hier: die Liquidation der AKTUELLEN Kerze darf den Einstieg
+    nicht selbst rechtfertigen."""
+    path = _liq_entry_pfad()
+    # Kaskade liegt in der LETZTEN Kerze -> aus candles[:-1] ist sie nicht sichtbar,
+    # der Ruecklauf auf 100,4 rechtfertigt sich also nicht selbst.
+    flow = _liq_flow_long(len(path), tief_kerze=len(path) - 1)
+    pos = Position()
+    sigs = run_incremental_flow(path, flow, pos, pivot_n=2, bias_short=False,
+                                tp_ladder=False, buy_ladder=False, liq_entry="filter")
+    assert sigs == [] and pos.state == PosState.FLAT
+
+
 def test_next_pivot_beyond():
     piv = [Pivot(0, 0, 100.0, "L"), Pivot(1, 1, 110.0, "H"), Pivot(2, 2, 120.0, "H")]
     assert next_pivot_beyond(piv, 105.0, True) == 110.0     # naechstes Hoch darueber

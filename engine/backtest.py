@@ -63,12 +63,12 @@ SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_R
 EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "tp_ladder", "trend_filter", "strict_confirm", "confluence",
              "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop",
-             "liq_exit", "high_exit")
+             "liq_exit", "high_exit", "liq_entry")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, strict_confirm=False, confluence=False,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
-             trail_stop=False, liq_exit="off", high_exit="off")
+             trail_stop=False, liq_exit="off", high_exit="off", liq_entry="off")
 
 
 def V(label, panel=False, **kw):
@@ -118,6 +118,14 @@ GRID = [
       trail_stop=True, liq_exit="zone"),
     V("LIVE +Stop +Liq beides", bias_short=False, flush_entry="core", buy_ladder=True,
       trail_stop=True, liq_exit="both"),
+    # E10.3 (Furkan-Update B, 18:27): Liquidationszonen auf der EINSTIEGS-Seite. Nach dem
+    # Befund aus E10.2 (Verkaufsseite kostet durchgehend Rendite) ist das die Seite, auf
+    # der noch etwas zu holen sein koennte. "boost" = zusaetzlich aufstocken bei Konfluenz,
+    # "filter" = nur noch bei Konfluenz einsteigen (Gegenprobe, vermutlich zu restriktiv).
+    V("LIVE +Stop +Liq-Konfluenz aufstocken", bias_short=False, flush_entry="core",
+      buy_ladder=True, trail_stop=True, liq_entry="boost"),
+    V("LIVE +Stop +nur bei Liq-Konfluenz einsteigen", bias_short=False, flush_entry="core",
+      buy_ladder=True, trail_stop=True, liq_entry="filter"),
     # E10.2 (Furkan-Update 19:52): Teilverkauf kurz unter dem letzten Hoch statt nur am
     # Fib-Ziel. "weak" = nur wenn der Anlauf ohne Spot-Nachfrage passiert (macht aus der
     # Breakout-Warnung eine messbare Handlung statt einer weiteren Telegram-Nachricht).
