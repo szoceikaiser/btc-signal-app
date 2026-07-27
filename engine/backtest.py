@@ -118,6 +118,13 @@ GRID = [
       trail_stop=True, liq_exit="zone"),
     V("LIVE +Stop +Liq beides", bias_short=False, flush_entry="core", buy_ladder=True,
       trail_stop=True, liq_exit="both"),
+    # Kapital-Reserve (Furkan-Update Juli 2026: "Pulver haben zum Nachschiessen, klaren
+    # Plan haben, ab welchem Niveau man wie viel Prozent seines Kapitals reinschiesst").
+    # Gleiche Signale wie die Live-Variante — nur das Geld wird anders eingeteilt.
+    V("LIVE +Stop, 60 % Einsatz (40 % Reserve)", bias_short=False, flush_entry="core",
+      buy_ladder=True, trail_stop=True, deploy_pct=0.6),
+    V("LIVE +Stop, 50 % Einsatz (50 % Reserve)", bias_short=False, flush_entry="core",
+      buy_ladder=True, trail_stop=True, deploy_pct=0.5),
     V("Long+Short (Ref)"),
 ]
 
@@ -222,13 +229,23 @@ def score(signals: list[dict], tol_days: int = 1, start_ms: int = START_MS) -> d
 
 
 def simulate(signals: list[dict], candles, fee: float = 0.001,
-             start_capital: float = 10000.0, start_ms: int | None = None) -> dict:
+             start_capital: float = 10000.0, start_ms: int | None = None,
+             deploy_pct: float = 1.0) -> dict:
     """Tranchen-genaue P&L-Simulation der Signale.
 
     Annahmen (dokumentiert): kein Hebel; Kauf-Tranchen als %-Anteil des beim
     Ladder-Start verfuegbaren Kapitals (aus tranche_pct des Signals); Teilverkaeufe
     40 %/40 %/Rest der vollen Position; 0,1 % Gebuehr je Order; Shorts nominal
     ohne Funding-Kosten. Ergebnis inkl. Buy&Hold-Vergleich ueber denselben Zeitraum.
+
+    `deploy_pct` (Furkan-Update Juli 2026, "Pulver behalten"): Anteil des verfuegbaren
+    Kapitals, der je Position hoechstens eingesetzt wird. 1.0 = bisheriges Verhalten
+    (bis zu 100 % investiert, keine Reserve). 0.6 = 40 % bleiben liegen.
+    Der Effekt ist NICHT nur eine Verkleinerung: heute frisst die zuerst gefeuerte
+    Tranche das Kapital auf, sodass die SPAETEREN, tieferen Stufen (Kaufleiter, 0.786,
+    Dip-Nachkauf) leer ausgehen — genau die mit dem besten Preis. Mit Reserve landet
+    mehr Kapital weiter unten. Deshalb zusaetzlich der maximale Rueckgang (Drawdown)
+    im Bericht: eine Reserve kauft Sicherheit, das muss sichtbar sein.
     """
     cash, units, peak_units, l_avg = start_capital, 0.0, 0.0, 0.0
     s_units, s_peak, s_avg = 0.0, 0.0, 0.0            # Short-Seite
@@ -245,7 +262,7 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
         p, t = s["price"], s["type"]
         if t in ("KAUF_1", "KAUF_2", "NACHKAUF"):
             if units == 0.0:
-                alloc, peak_units, l_avg = cash, 0.0, 0.0
+                alloc, peak_units, l_avg = cash * deploy_pct, 0.0, 0.0
             spend = min(cash, alloc * s["tranche_pct"] / 100.0)
             new_u = spend * (1 - fee) / p
             l_avg = (l_avg * units + spend) / (units + new_u) if (units + new_u) else 0.0
@@ -271,7 +288,7 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                 units -= sell
         elif t in ("SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"):
             if s_units == 0.0:
-                alloc, s_peak, s_avg = cash, 0.0, 0.0
+                alloc, s_peak, s_avg = cash * deploy_pct, 0.0, 0.0
             nominal = min(cash, alloc * s["tranche_pct"] / 100.0)
             new_units = nominal / p
             s_avg = (s_avg * s_units + p * new_units) / (s_units + new_units)
@@ -298,6 +315,12 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
 
     last_price = candles[-1].close
     end_equity = equity_now(last_price)
+    # Maximaler Rueckgang vom jeweiligen Hoch (gemessen an den Signalzeitpunkten +
+    # Endstand). Das ist die Kennzahl, auf die eine Kapital-Reserve einzahlt.
+    peak_eq, max_dd = start_capital, 0.0
+    for e in [x["equity"] for x in equity] + [end_equity]:
+        peak_eq = max(peak_eq, e)
+        max_dd = min(max_dd, e / peak_eq - 1.0)
     hs = start_ms if start_ms is not None else START_MS
     hold_start = next(c for c in candles if c.ts >= hs).close
     return {
@@ -309,6 +332,7 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
         "long_profit": round(long_profit, 2), "long_trades": long_trades, "long_wins": long_wins,
         "short_profit": round(short_profit, 2), "short_trades": short_trades, "short_wins": short_wins,
         "fee_pct": fee * 100, "equity": equity,
+        "deploy_pct": round(deploy_pct * 100), "max_drawdown_pct": round(max_dd * 100, 2),
         "offene_position": round(units * last_price + s_units * (s_avg - last_price), 2),
     }
 
@@ -351,7 +375,8 @@ def main():
         t0 = time.time()
         sigs = run_backtest(candles, flow, cfg, start_ms=eff_start)
         sc = score(sigs, start_ms=eff_start)
-        p = simulate(sigs, candles, start_ms=eff_start)
+        p = simulate(sigs, candles, start_ms=eff_start,
+                     deploy_pct=cfg.get("deploy_pct", 1.0))
         results.append((cfg, sigs, sc, p))
         print(f"{cfg['label']}: Recall {sc['recall']:.0%}, "
               f"Praezision {sc['precision']:.0%}, Rendite {p['rendite_pct']:+.1f} %, "
@@ -386,17 +411,20 @@ def main():
         "",
         "## Parameter-Vergleich",
         "",
-        "Alle n=5. Rendite = Gesamt-Simulation; Long €/Short € = realisierter Gewinn/Verlust "
-        "getrennt nach Richtung. Recall = Aehnlichkeit zu Furkans Terminen IM Fenster.",
+        "Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch vom "
+        "jeweiligen Hoch (Drawdown) — je naeher an 0, desto ruhiger der Verlauf. "
+        "**Einsatz** = wie viel des Kapitals je Position hoechstens investiert wird "
+        "(100 % = keine Reserve, 60 % = 40 % Pulver bleibt trocken; Furkan-Update Juli 2026). "
+        "Recall = Aehnlichkeit zu Furkans Terminen IM Fenster, KEIN Gewinn.",
         "",
-        "| Variante | Recall | Praez. | Rendite | Long € | Short € | Signale |",
+        "| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale |",
         "|---|---|---|---|---|---|---|",
     ]
     for rcfg, rsigs, rsc, rp in results:
         mark = " **<-- beste**" if rcfg is best_cfg else ""
         lines.append(f"| {rcfg['label']} | {rsc['recall']:.0%} | {rsc['precision']:.0%} | "
-                     f"{rp['rendite_pct']:+.1f} % | {rp['long_profit']:+,.0f} | "
-                     f"{rp['short_profit']:+,.0f} | {len(rsigs)}{mark} |")
+                     f"{rp['rendite_pct']:+.1f} % | {rp['max_drawdown_pct']:.1f} % | "
+                     f"{rp['deploy_pct']} % | {len(rsigs)}{mark} |")
     lines += [
         "",
         f"## Beste Kombination (nach Rendite): {best_cfg['label']}",

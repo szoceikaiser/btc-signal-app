@@ -45,7 +45,15 @@ Kauf-Signale und Stops sind für diesen Test **nicht** interessant — die kanns
 1. **Möglichst zeitnah** (am besten innerhalb einer Stunde) den Heatmap-Link öffnen.
    Wichtig: Die Heatmap verändert sich laufend. Ein Screenshot von morgen früh ist für
    eine Nachricht von heute Abend wertlos.
-2. Ansicht **1 Woche** (`1w`) wählen — dann sieht man die Cluster über und unter dem Kurs.
+2. Ansicht **1 Woche** (`1w`) wählen. Das entspricht ungefähr der Haltedauer der App
+   (laut Backtest knapp ein Tag bis etwa eine Woche zwischen Einstieg und Teilverkauf).
+
+   **Wichtiger als die Zeitspanne:** Über dem aktuellen Kurs muss Platz sichtbar sein.
+   Unsere ganze Frage ist ja, ob ein Cluster OBERHALB des Verkaufspreises lag — wenn die
+   Preisachse knapp über dem Kurs endet, kann man das nicht sehen und das Bild ist
+   wertlos, ohne dass man es merkt. Faustregel: Die Achse sollte noch ein paar Prozent
+   über den Kurs hinausgehen. Tut sie das in der Wochenansicht nicht, **schalt auf
+   1 Monat** (`1m`) und mach das Bild damit.
 3. **Screenshot machen** (Windows: `Windows-Taste + Umschalt + S`, Bereich ziehen).
    Auf dem Bild müssen zu sehen sein:
    - die **Preisachse** (die Zahlen rechts oder links)

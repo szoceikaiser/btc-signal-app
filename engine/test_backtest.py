@@ -90,6 +90,55 @@ def test_score_fehltreffer_druecken_praezision():
     assert sc["precision"] == 0.5
 
 
+def test_deploy_pct_haelt_reserve_zurueck():
+    """Furkan-Update: 'Pulver behalten'. Mit 50 % Einsatz wird je Tranche nur die
+    Haelfte investiert — und am Ende ist entsprechend Bargeld uebrig."""
+    from strategy_core import Candle
+    sigs = [{"ts": 1, "type": "KAUF_1", "price": 100.0, "tranche_pct": 25}]
+    candles = [Candle(backtest.START_MS, 100, 100, 100, 100),
+               Candle(backtest.START_MS + 1, 100, 100, 100, 100)]
+    voll = backtest.simulate(sigs, candles, fee=0.0, deploy_pct=1.0)
+    halb = backtest.simulate(sigs, candles, fee=0.0, deploy_pct=0.5)
+    # 25 % von 10.000 = 2.500 investiert vs. 25 % von 5.000 = 1.250
+    assert abs(voll["offene_position"] - 2500.0) < 0.01
+    assert abs(halb["offene_position"] - 1250.0) < 0.01
+    assert halb["deploy_pct"] == 50
+
+
+def test_reserve_laesst_geld_fuer_die_tiefere_tranche():
+    """Der eigentliche Punkt: ohne Reserve fressen die ersten Tranchen das Kapital auf,
+    die spaetere (guenstigere) Stufe geht leer aus. Mit Reserve kauft sie noch."""
+    from strategy_core import Candle
+    sigs = [
+        {"ts": 1, "type": "KAUF_1", "price": 100.0, "tranche_pct": 25},
+        {"ts": 2, "type": "KAUF_2", "price": 95.0, "tranche_pct": 50},
+        {"ts": 3, "type": "NACHKAUF", "price": 90.0, "tranche_pct": 25},
+        {"ts": 4, "type": "NACHKAUF", "price": 80.0, "tranche_pct": 15},   # tiefste Stufe
+    ]
+    candles = [Candle(backtest.START_MS, 100, 100, 100, 100),
+               Candle(backtest.START_MS + 1, 80, 80, 80, 80)]
+    voll = backtest.simulate(sigs, candles, fee=0.0, deploy_pct=1.0)
+    reserve = backtest.simulate(sigs, candles, fee=0.0, deploy_pct=0.6)
+    # Ohne Reserve ist die Kasse leer, bevor die 80er-Tranche kommt
+    assert voll["ende"] < 10000.0
+    # Mit Reserve bleibt Bargeld uebrig UND es wurde bei 80 noch gekauft
+    assert reserve["offene_position"] > 0
+    assert reserve["ende"] > voll["ende"]
+
+
+def test_max_drawdown_wird_berechnet():
+    from strategy_core import Candle
+    sigs = [
+        {"ts": 1, "type": "KAUF_1", "price": 100.0, "tranche_pct": 100},
+        {"ts": 2, "type": "STOPLOSS", "price": 50.0, "tranche_pct": 100},
+    ]
+    candles = [Candle(backtest.START_MS, 100, 100, 100, 100),
+               Candle(backtest.START_MS + 1, 50, 50, 50, 50)]
+    pnl = backtest.simulate(sigs, candles, fee=0.0)
+    assert pnl["max_drawdown_pct"] <= -49.0        # halbes Kapital weg
+    assert pnl["max_drawdown_pct"] >= -51.0
+
+
 def test_score_ignoriert_signale_nach_dem_letzten_trigger():
     """E9.9: Das Fenster laeuft jetzt bis heute, Kaisers Trigger enden aber im April.
     Signale danach duerfen die Praezision nicht druecken — es gibt keinen Maszstab."""
