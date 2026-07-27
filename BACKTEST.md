@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 18.11.2025-27.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2111 4h-Kerzen geladen · Stand: 2026-07-27 17:29 UTC
+**Voll-Daten-Fenster: 18.11.2025-27.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2111 4h-Kerzen geladen · Stand: 2026-07-27 17:51 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -8,22 +8,24 @@ Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verk
 
 ## Parameter-Vergleich
 
-Alle n=5. Rendite = Gesamt-Simulation; Long €/Short € = realisierter Gewinn/Verlust getrennt nach Richtung. Recall = Aehnlichkeit zu Furkans Terminen IM Fenster.
+Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch vom jeweiligen Hoch (Drawdown) — je naeher an 0, desto ruhiger der Verlauf. **Einsatz** = wie viel des Kapitals je Position hoechstens investiert wird (100 % = keine Reserve, 60 % = 40 % Pulver bleibt trocken; Furkan-Update Juli 2026). Recall = Aehnlichkeit zu Furkans Terminen IM Fenster, KEIN Gewinn.
 
-| Variante | Recall | Praez. | Rendite | Long € | Short € | Signale |
+| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale |
 |---|---|---|---|---|---|---|
-| nur Long (Basis) | 50% | 43% | +11.4 % | +1,138 | +0 | 115 |
-| +Kaufleiter | 50% | 41% | +19.9 % | +1,994 | +0 | 137 |
-| +Flush core | 54% | 32% | +24.8 % | +2,479 | +0 | 181 |
-| LIVE: nur Long +Kaufleiter +Flush core | 54% | 32% | +33.1 % | +3,311 | +0 | 207 **<-- beste** |
-| +Kaufleiter +Bed.Stop | 50% | 40% | +17.9 % | +1,794 | +0 | 146 |
-| LIVE +Rest-Freigabe | 57% | 35% | +28.6 % | +2,818 | +0 | 217 |
-| LIVE +Stop nachziehen | 57% | 34% | +30.0 % | +2,953 | +0 | 208 |
-| LIVE +Stop nachziehen +Rest-Freigabe | 57% | 35% | +27.7 % | +2,725 | +0 | 208 |
-| LIVE +Stop +Liq-Kaskade | 57% | 30% | +22.8 % | +2,230 | +0 | 237 |
-| LIVE +Stop +Liq-Zonen | 61% | 34% | +28.0 % | +2,750 | +0 | 238 |
-| LIVE +Stop +Liq beides | 61% | 34% | +28.0 % | +2,750 | +0 | 239 |
-| Long+Short (Ref) | 43% | 58% | +1.7 % | +374 | -203 | 90 |
+| nur Long (Basis) | 50% | 43% | +11.4 % | -5.5 % | 100 % | 115 |
+| +Kaufleiter | 50% | 41% | +19.9 % | -6.3 % | 100 % | 137 |
+| +Flush core | 54% | 32% | +24.8 % | -12.1 % | 100 % | 181 |
+| LIVE: nur Long +Kaufleiter +Flush core | 54% | 32% | +33.1 % | -12.7 % | 100 % | 207 **<-- beste** |
+| +Kaufleiter +Bed.Stop | 50% | 40% | +17.9 % | -7.0 % | 100 % | 146 |
+| LIVE +Rest-Freigabe | 57% | 35% | +28.6 % | -13.0 % | 100 % | 217 |
+| LIVE +Stop nachziehen | 57% | 34% | +30.0 % | -11.5 % | 100 % | 208 |
+| LIVE +Stop nachziehen +Rest-Freigabe | 57% | 35% | +27.7 % | -11.8 % | 100 % | 208 |
+| LIVE +Stop +Liq-Kaskade | 57% | 30% | +22.7 % | -11.1 % | 100 % | 237 |
+| LIVE +Stop +Liq-Zonen | 61% | 34% | +27.9 % | -10.8 % | 100 % | 238 |
+| LIVE +Stop +Liq beides | 61% | 34% | +27.9 % | -10.8 % | 100 % | 239 |
+| LIVE +Stop, 60 % Einsatz (40 % Reserve) | 57% | 34% | +17.9 % | -7.7 % | 60 % | 208 |
+| LIVE +Stop, 50 % Einsatz (50 % Reserve) | 57% | 34% | +14.8 % | -6.4 % | 50 % | 208 |
+| Long+Short (Ref) | 43% | 58% | +1.7 % | -11.9 % | 100 % | 90 |
 
 ## Beste Kombination (nach Rendite): LIVE: nur Long +Kaufleiter +Flush core
 
