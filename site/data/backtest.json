@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-27T19:21:00Z",
+ "generated_at": "2026-07-27T19:56:36Z",
  "zeitraum": "18.11.2025-27.07.2026",
  "variante": "LIVE +Stop nachziehen",
  "params": {
@@ -26,20 +26,20 @@
  "precision_pct": 34,
  "pnl": {
   "start": 10000.0,
-  "ende": 12996.44,
-  "rendite_pct": 29.96,
-  "buyhold_pct": -30.11,
-  "trades": 79,
-  "gewinn_trades": 61,
-  "long_profit": 2952.8,
-  "long_trades": 79,
-  "long_wins": 61,
+  "ende": 13216.47,
+  "rendite_pct": 32.16,
+  "buyhold_pct": -30.12,
+  "trades": 88,
+  "gewinn_trades": 67,
+  "long_profit": 3216.47,
+  "long_trades": 88,
+  "long_wins": 67,
   "short_profit": 0.0,
   "short_trades": 0,
   "short_wins": 0,
   "fee_pct": 0.1,
   "deploy_pct": 100,
-  "max_drawdown_pct": -11.51,
+  "max_drawdown_pct": -12.3,
   "monate": [
    {
     "monat": "2025-11",
@@ -55,47 +55,47 @@
    },
    {
     "monat": "2026-01",
-    "ende": 11024.71,
-    "gewinn": 1213.04,
-    "rendite_pct": 12.36
+    "ende": 10909.51,
+    "gewinn": 1097.85,
+    "rendite_pct": 11.19
    },
    {
     "monat": "2026-02",
-    "ende": 10748.94,
-    "gewinn": -275.76,
-    "rendite_pct": -2.5
+    "ende": 11095.14,
+    "gewinn": 185.63,
+    "rendite_pct": 1.7
    },
    {
     "monat": "2026-03",
-    "ende": 11770.42,
-    "gewinn": 1021.47,
-    "rendite_pct": 9.5
+    "ende": 11936.73,
+    "gewinn": 841.59,
+    "rendite_pct": 7.59
    },
    {
     "monat": "2026-04",
-    "ende": 13457.02,
-    "gewinn": 1686.6,
+    "ende": 13647.16,
+    "gewinn": 1710.43,
     "rendite_pct": 14.33
    },
    {
     "monat": "2026-05",
-    "ende": 13043.41,
-    "gewinn": -413.61,
-    "rendite_pct": -3.07
+    "ende": 13119.27,
+    "gewinn": -527.9,
+    "rendite_pct": -3.87
    },
    {
     "monat": "2026-06",
-    "ende": 12172.61,
-    "gewinn": -870.8,
-    "rendite_pct": -6.68
+    "ende": 12234.58,
+    "gewinn": -884.69,
+    "rendite_pct": -6.74
    },
    {
     "monat": "2026-07",
-    "ende": 12996.44,
-    "gewinn": 823.83,
-    "rendite_pct": 6.77
+    "ende": 13216.47,
+    "gewinn": 981.9,
+    "rendite_pct": 8.03
    }
   ],
-  "offene_position": 6520.04
+  "offene_position": 0.0
  }
 }
