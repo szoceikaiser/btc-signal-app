@@ -357,6 +357,7 @@ class Position:
     entry_ref: Optional[float] = None        # tranchengewichteter Durchschnitts-Einstand (E9.10)
     entry_pct: int = 0                       # Summe der eingestiegenen Tranchen-Prozente
     liq_exits: int = 0                       # Anzahl Teilverkaeufe an Liquidationen (E9.11)
+    high_exits: int = 0                      # Anzahl Teilverkaeufe am letzten Hoch (E10.2)
 
 
 def _reset_position(pos: "Position") -> None:
@@ -368,6 +369,7 @@ def _reset_position(pos: "Position") -> None:
     pos.entry_ref = None
     pos.entry_pct = 0
     pos.liq_exits = 0
+    pos.high_exits = 0
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
@@ -414,6 +416,23 @@ LIQ_SPIKE_MULT = 3.0       # Kaskade = mindestens 3x der Durchschnitt des Fenste
 LIQ_LOOKBACK = 180         # Kerzen fuer die Zonen-Historie (180 x 4h = 30 Tage)
 LIQ_ZONE_TOL = 0.005       # 0,5 % Toleranz: so nah muss der Kurs an die Zone
 LIQ_ZONE_MIN_MULT = 3.0    # Zone = Kerze mit mindestens 3x der mittleren Liquidation
+
+
+# Teilverkauf am letzten Hoch (E10.2, Furkan-Update 19:52: "die weiteren Gewinne werde
+# ich bei ueber 66.600 HIER UNTER DIESEM HOCH rausnehmen"). Er verkauft am Struktur-
+# Niveau, nicht am rechnerischen Fib-Ziel: Am alten Hoch sitzen die Kaeufer von damals,
+# die bei plus/minus null aussteigen wollen — dort staut sich Angebot.
+MAX_HIGH_EXITS = 2         # hoechstens so viele Struktur-Teilverkaeufe je Position
+HIGH_EXIT_TOL = 0.005      # 0,5 % darunter reicht — vor der Masse raus
+
+
+def next_pivot_beyond(pivots: list[Pivot], price: float, long_side: bool) -> Optional[float]:
+    """Naechstes bestaetigtes Pivot-Hoch UEBER dem Preis (long) bzw. Pivot-Tief darunter."""
+    if long_side:
+        cands = [p.price for p in pivots if p.kind == "H" and p.price > price]
+        return min(cands) if cands else None
+    cands = [p.price for p in pivots if p.kind == "L" and p.price < price]
+    return max(cands) if cands else None
 
 
 def liq_cascade(flow: list[FlowPoint], side: str, window: int = 12,
@@ -474,7 +493,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              strict_confirm: bool = False, confluence: bool = False,
              conditional_stop: bool = False, buy_ladder: bool = True,
              release_stale_rest: bool = False, trail_stop: bool = False,
-             liq_exit: str = "off") -> list[Signal]:
+             liq_exit: str = "off", high_exit: str = "off") -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -505,6 +524,11 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # Kurs die Liquidationszonen erreicht"): "off" | "spike" (in die laufende Kaskade
     # verkaufen) | "zone" (Preisniveaus vergangener Kaskaden als Magnete) | "both".
     # Ergaenzt die Fib-Teilgewinne, ersetzt sie nicht; hoechstens MAX_LIQ_EXITS je Position.
+    # high_exit (E10.2): Teilverkauf kurz UNTER dem letzten bestaetigten Pivot-Hoch statt
+    # nur am Fib-Ziel. "off" | "on" | "weak". "weak" verkauft nur, wenn der Anlauf auf das
+    # Hoch OHNE Spot-Nachfrage passiert (Furkan 20:17: "bei Breakouts muesste man
+    # spaetestens da Spot-Nachfrage sehen") — so wird aus einer blossen Warnung eine
+    # Handlung, die man messen kann.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -724,6 +748,28 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     signals.append(Signal(cur.ts, lt, cur.close, LADDER_TRANCHE,
                                           f"Teilgewinn an Liquidationen: {grund}"))
                     pos.liq_exits += 1
+            # Teilverkauf am letzten Hoch (E10.2): Kurs laeuft an das letzte bestaetigte
+            # Pivot-Hoch heran -> dort sitzt das Angebot, ein Stueck davor raus.
+            if high_exit != "off" and pos.high_exits < MAX_HIGH_EXITS \
+                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+                ref = candles[-2].close if len(candles) >= 2 else cur.open
+                lvl = next_pivot_beyond(pivots, ref, long_side)
+                if lvl is not None:
+                    nah = (cur.high >= lvl * (1 - HIGH_EXIT_TOL)) if long_side \
+                        else (cur.low <= lvl * (1 + HIGH_EXIT_TOL))
+                    # "weak": nur verkaufen, wenn der Anlauf OHNE Spot-Nachfrage passiert
+                    if long_side:
+                        spot_traegt = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
+                    else:
+                        spot_traegt = len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd
+                    ok = nah and (high_exit == "on" or not spot_traegt)
+                    if ok:
+                        ht = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
+                        zusatz = "" if high_exit == "on" else ", Anlauf ohne Spot-Nachfrage"
+                        signals.append(Signal(cur.ts, ht, cur.close, LADDER_TRANCHE,
+                                              f"Teilgewinn am letzten {'Hoch' if long_side else 'Tief'} "
+                                              f"{lvl:.0f}{zusatz}"))
+                        pos.high_exits += 1
             # Upgrade T1 -> CORE: Kernposition im Golden Pocket (KAUF 2 / SHORT 2)
             if pos.state == PosState.T1:
                 in_gp = (z.gp_lower <= cur.low <= z.gp_upper) if long_side \

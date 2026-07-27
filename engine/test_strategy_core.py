@@ -8,7 +8,7 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            PosState, Position, SignalType, classify_pattern,
                            daily_fib_zone, daily_trend, ema, evaluate, fib_zones,
                            find_pivots, in_liq_zone, last_significant_impulse,
-                           liq_cascade, liq_levels, resample_daily)
+                           liq_cascade, liq_levels, next_pivot_beyond, resample_daily)
 
 DAY_MS = 86_400_000
 H4_MS = 4 * 3600 * 1000
@@ -621,6 +621,53 @@ def test_liq_exit_zone_nutzt_keine_zukunft():
     assert liq_levels(cs[:-1], fl[:-1], "short") == []
     # Erst wenn die Kaskaden-Kerze in der Historie liegt, entsteht ein Niveau
     assert len(liq_levels(cs, fl, "short")) == 1
+
+
+def test_next_pivot_beyond():
+    piv = [Pivot(0, 0, 100.0, "L"), Pivot(1, 1, 110.0, "H"), Pivot(2, 2, 120.0, "H")]
+    assert next_pivot_beyond(piv, 105.0, True) == 110.0     # naechstes Hoch darueber
+    assert next_pivot_beyond(piv, 115.0, True) == 120.0
+    assert next_pivot_beyond(piv, 130.0, True) is None      # kein Hoch mehr darueber
+    assert next_pivot_beyond(piv, 105.0, False) == 100.0    # Short: Tief darunter
+
+
+def test_high_exit_verkauft_kurz_unter_dem_letzten_hoch():
+    """E10.2: Impuls 100->110, Einstieg am 0.5. Das bestaetigte Pivot-Hoch liegt bei 110;
+    eine Kerze, die bis 109.6 laeuft (0,4 % darunter), loest den Teilgewinn aus."""
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1
+                   c(9, 105.5, 109.6, 105.0, 109.4)]    # Anlauf an das Hoch 110
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           tp_ladder=False, buy_ladder=False, high_exit="on")
+    hoch = [s for s in sigs if "Teilgewinn am letzten Hoch" in s.reason]
+    assert len(hoch) == 1 and hoch[0].type == SignalType.TEILVERKAUF_LADDER
+    assert hoch[0].tranche_pct == LADDER_TRANCHE and pos.high_exits == 1
+    # Default aus: dieselben Kerzen erzeugen keinen Struktur-Teilverkauf
+    pos2 = Position()
+    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2, bias_short=False,
+                            tp_ladder=False, buy_ladder=False)
+    assert not any("Teilgewinn am letzten Hoch" in s.reason for s in sigs2)
+
+
+def test_high_exit_weak_nur_ohne_spot_nachfrage():
+    """"weak" verkauft nur, wenn der Anlauf OHNE steigendes Spot-CVD passiert."""
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),
+                   c(9, 105.5, 109.6, 105.0, 109.4)]
+    # Spot-CVD steigt -> Ausbruch ist getragen -> "weak" verkauft NICHT
+    stark = [FlowPoint(i, 100 + i * 10, 100, 1000, -0.0001) for i in range(4)]
+    pos = Position()
+    sigs = run_incremental(path, stark, pos, pivot_n=2, bias_short=False,
+                           tp_ladder=False, buy_ladder=False, high_exit="weak")
+    assert not any("Teilgewinn am letzten Hoch" in s.reason for s in sigs)
+    # Spot-CVD faellt -> Anlauf ohne Nachfrage -> "weak" verkauft
+    schwach = [FlowPoint(i, 100 - i * 10, 100, 1000, -0.0001) for i in range(4)]
+    pos2 = Position()
+    sigs2 = run_incremental(path, schwach, pos2, pivot_n=2, bias_short=False,
+                            tp_ladder=False, buy_ladder=False, high_exit="weak")
+    treffer = [s for s in sigs2 if "Teilgewinn am letzten Hoch" in s.reason]
+    assert len(treffer) == 1 and "ohne Spot-Nachfrage" in treffer[0].reason
 
 
 def test_release_stale_rest_greift_nicht_vor_teilgewinn():

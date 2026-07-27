@@ -4,8 +4,10 @@
  "release_stale_rest": false,
  "trail_stop": true,
  "liq_exit": "off",
+ "high_exit": "off",
  "_hinweis": "Einstellungen der Engine. Wird NIE von der Engine ueberschrieben (konfliktfrei aenderbar). bias_short=false = nur Long (empfohlen, Shorts verlieren ohne Makro-Bias). Zum Aendern: Wert bearbeiten + committen; wirkt ab naechstem Lauf (max. 15 Min).",
  "_hinweis_release_stale_rest": "true = Restposition (letzte 20 %) wird freigegeben, sobald ein neuer signifikanter Impuls bestaetigt ist. Verhindert, dass ein Rest wochenlang liegen bleibt und dabei ALLE neuen Einstiege blockiert (Zustand TP1/TP2). Erst nach Backtest-Messung einschalten.",
  "_hinweis_liq_exit": "Teilverkaeufe an Liquidationen (Furkan verkauft erst, wenn der Kurs die Liquidationszone erreicht). Werte: off = aus | spike = in die laufende Liquidations-Kaskade verkaufen | zone = an Preisniveaus vergangener Kaskaden | both = beides. Erst nach Backtest-Messung einschalten.",
+ "_hinweis_high_exit": "Teilverkauf kurz unter dem letzten bestaetigten Hoch (Furkan: dort sitzt das Angebot der Kaeufer von damals). Werte: off = aus | on = immer, wenn der Kurs an das Hoch heranlaeuft | weak = nur, wenn der Anlauf OHNE Spot-Nachfrage passiert. Erst nach Backtest-Messung einschalten.",
  "_hinweis_trail_stop": "true = Stop wird nachgezogen, sobald Teilgewinne realisiert sind: auf Break-even (Durchschnitts-Einstand) bzw. hinter das letzte bestaetigte Struktur-Tief, je nachdem was hoeher liegt. Furkan: Stop ueber den Kauf ziehen, Kapital schuetzen. Der Stop kann dadurch nur steigen, nie lockerer werden."
 }

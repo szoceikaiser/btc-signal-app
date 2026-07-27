@@ -63,12 +63,12 @@ SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_R
 EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "tp_ladder", "trend_filter", "strict_confirm", "confluence",
              "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop",
-             "liq_exit")
+             "liq_exit", "high_exit")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, strict_confirm=False, confluence=False,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
-             trail_stop=False, liq_exit="off")
+             trail_stop=False, liq_exit="off", high_exit="off")
 
 
 def V(label, panel=False, **kw):
@@ -118,6 +118,13 @@ GRID = [
       trail_stop=True, liq_exit="zone"),
     V("LIVE +Stop +Liq beides", bias_short=False, flush_entry="core", buy_ladder=True,
       trail_stop=True, liq_exit="both"),
+    # E10.2 (Furkan-Update 19:52): Teilverkauf kurz unter dem letzten Hoch statt nur am
+    # Fib-Ziel. "weak" = nur wenn der Anlauf ohne Spot-Nachfrage passiert (macht aus der
+    # Breakout-Warnung eine messbare Handlung statt einer weiteren Telegram-Nachricht).
+    V("LIVE +Stop +Verkauf am letzten Hoch", bias_short=False, flush_entry="core",
+      buy_ladder=True, trail_stop=True, high_exit="on"),
+    V("LIVE +Stop +Verkauf am schwachen Hoch", bias_short=False, flush_entry="core",
+      buy_ladder=True, trail_stop=True, high_exit="weak"),
     # Kapital-Reserve (Furkan-Update Juli 2026: "Pulver haben zum Nachschiessen, klaren
     # Plan haben, ab welchem Niveau man wie viel Prozent seines Kapitals reinschiesst").
     # Gleiche Signale wie die Live-Variante — nur das Geld wird anders eingeteilt.
@@ -416,6 +423,10 @@ def main():
         "**Einsatz** = wie viel des Kapitals je Position hoechstens investiert wird "
         "(100 % = keine Reserve, 60 % = 40 % Pulver bleibt trocken; Furkan-Update Juli 2026). "
         "Recall = Aehnlichkeit zu Furkans Terminen IM Fenster, KEIN Gewinn.",
+        "",
+        "**Lesehilfe zu den Namen:** `LIVE` ist die Abkuerzung fuer *nur Long + Kaufleiter "
+        "+ Flush core* — der Flush steckt also drin. Jede Zeile, die mit `LIVE +…` beginnt, "
+        "baut darauf auf. Die Zeile *+Kaufleiter* ist dagegen OHNE Flush.",
         "",
         "| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale |",
         "|---|---|---|---|---|---|---|",
