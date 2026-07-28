@@ -680,58 +680,81 @@ def main():
     f_ende_d = max(date.fromisoformat(x) for x in KAUF_DATEN + VERKAUF_DATEN)
     f_ende_ms = int(datetime(f_ende_d.year, f_ende_d.month, f_ende_d.day, 23, 59,
                              tzinfo=timezone.utc).timestamp() * 1000)
+    f_start_d = min(date.fromisoformat(x) for x in KAUF_DATEN + VERKAUF_DATEN)
+    f_start_ms = int(datetime(f_start_d.year, f_start_d.month, f_start_d.day,
+                              tzinfo=timezone.utc).timestamp() * 1000)
+
+    def _spanne(von_ms):
+        """Furkans Termine ueber 12 Groessen-Annahmen; Verkauf 100 % = jeder Verkaufstag
+        ist ein voller Ausstieg (so verhalten sich seine Stops)."""
+        lf = [furkan_pnl(candles, KAUF_DATEN, VERKAUF_DATEN, kp, vp,
+                         start_ms=von_ms, end_ms=f_ende_ms)
+              for kp in (0.25, 0.33, 0.50) for vp in (0.25, 0.33, 0.50, 1.0)]
+        return [x for x in lf if x]
+
     furkan_zeilen = []
-    if f_ende_ms > eff_start:
-        laeufe = [furkan_pnl(candles, KAUF_DATEN, VERKAUF_DATEN, kp, vp,
-                             start_ms=eff_start, end_ms=f_ende_ms)
-                  for kp in (0.25, 0.33, 0.50) for vp in (0.25, 0.33, 0.50)]
-        laeufe = [x for x in laeufe if x]
-        _es, e_pnl = run_half(candles, flow, panel_cfg, eff_start, end_ms=f_ende_ms)
-        if laeufe and e_pnl:
-            rend = sorted(x["rendite_pct"] for x in laeufe)
-            mitte = next(x for x in laeufe if x["kauf_pct"] == 33 and x["verkauf_pct"] == 33)
-            f_win = (f"{to_date(eff_start).strftime('%d.%m.%Y')}–"
-                     f"{f_ende_d.strftime('%d.%m.%Y')}")
-            furkan_zeilen = [
-                "",
-                "## Furkans eigene Termine gegen die Engine",
-                "",
-                f"**Vergleichsfenster {f_win}** — es endet am letzten Trigger in Kaisers "
-                "Listen, danach gibt es keinen Massstab mehr. Beide Seiten starten mit "
-                f"10.000 €, zahlen {panel_pnl['fee_pct']:.1f} % je Order und werden am "
-                "Fensterende zum Schlusskurs bewertet.",
-                "",
-                "Kaisers Listen enthalten **Tage, keine Betraege** — wie gross Furkans "
-                "Tranchen waren, wissen wir nicht. Deshalb steht hier eine Spanne ueber "
-                "neun Annahmen (Kauf 25/33/50 % des freien Geldes, Verkauf 25/33/50 % der "
-                "Position) statt einer Scheingenauigkeit.",
-                "",
-                "| | Rendite | max. Rueckgang |",
-                "|---|---|---|",
-                f"| **Furkans Termine** (Spanne ueber 9 Annahmen) | "
-                f"**{rend[0]:+.1f} % bis {rend[-1]:+.1f} %** | — |",
-                f"| Furkans Termine, mittlere Annahme (33/33) | {mitte['rendite_pct']:+.1f} % | "
-                f"{mitte['max_drawdown_pct']:.1f} % |",
-                f"| **Unsere Engine** ({panel_cfg['label']}) | "
-                f"**{e_pnl['rendite_pct']:+.1f} %** | {e_pnl['max_drawdown_pct']:.1f} % |",
-                f"| Buy & Hold | {e_pnl['buyhold_pct']:+.1f} % | — |",
-                "",
-                f"Furkan handelte im Fenster an {mitte['kauftage']} Kauf- und "
-                f"{mitte['verkaufstage']} Verkaufstagen.",
-                "",
-                "**So ist das zu lesen:** Liegt die Engine deutlich unter Furkans Spanne, "
-                "gibt es echten Spielraum und es lohnt sich, seine Methode genauer "
-                "nachzubauen. Liegt sie darin, sind beide auf verschiedenen Wegen am "
-                "selben Ziel — weiteres Angleichen waere verschwendete Arbeit. Liegt sie "
-                "darueber, ist die Richtung „mehr wie Furkan werden\" die falsche und der "
-                "Recall als Zielgroesse irrefuehrend.",
-                "",
-                "**Grenzen, ehrlich:** Die Liste ist Kaisers Mitschrift dessen, was Furkan "
-                "in Videos gezeigt hat — kein geprueftes Konto. Menschen zeigen gute "
-                "Trades vollstaendiger als schlechte. Die Tranchengroessen sind geraten, "
-                "die Preise sind Tagesschlusskurse (er handelte innertaegig), und "
-                "Doppeleintraege wurden entfernt. Die Zahl ist ein Anhaltspunkt, kein Beweis.",
-            ]
+    kurz, lang = _spanne(eff_start), _spanne(max(f_start_ms, candles[0].ts))
+    _ks, e_kurz = run_half(candles, flow, panel_cfg, eff_start, end_ms=f_ende_ms)
+    _ls, e_lang = run_half(candles, flow, panel_cfg, max(f_start_ms, candles[0].ts),
+                           end_ms=f_ende_ms)
+    if kurz and lang and e_kurz and e_lang:
+        def _zeile(name, lf, eng, von_d):
+            r = sorted(x["rendite_pct"] for x in lf)
+            m = next(x for x in lf if x["kauf_pct"] == 33 and x["verkauf_pct"] == 33)
+            return (f"| {name}<br><sub>{von_d.strftime('%d.%m.%Y')}–"
+                    f"{f_ende_d.strftime('%d.%m.%Y')}</sub> | "
+                    f"**{r[0]:+.1f} % bis {r[-1]:+.1f} %** | {m['rendite_pct']:+.1f} % | "
+                    f"{m['max_drawdown_pct']:.1f} % | **{eng['rendite_pct']:+.1f} %** | "
+                    f"{eng['max_drawdown_pct']:.1f} % | {eng['buyhold_pct']:+.1f} % |")
+        m_lang = next(x for x in lang if x["kauf_pct"] == 33 and x["verkauf_pct"] == 33)
+        furkan_zeilen = [
+            "",
+            "## Furkans eigene Termine gegen die Engine",
+            "",
+            "Kaisers Trigger-Listen dienten bisher nur als Aehnlichkeits-Massstab (Recall). "
+            "Hier laufen sie erstmals durch dieselbe P&L-Rechnung wie die Engine — gleiche "
+            f"Kurse, gleiche Gebuehr ({panel_pnl['fee_pct']:.1f} %/Order), 10.000 € Start, "
+            "offene Position am Ende zum Schlusskurs bewertet.",
+            "",
+            "**Zwei Fenster, und der Unterschied ist wichtig.** Das kurze beginnt dort, wo "
+            "die Engine alle Daten hat (echtes Open Interest). Furkan hatte zu diesem "
+            "Zeitpunkt aber schon eine Position aus September/Oktober, die wir nicht "
+            "kennen — er verkauft im Fenster also etwas, das er vorher aufgebaut hat. "
+            "Das lange Fenster beginnt an seinem ERSTEN notierten Termin und bildet seine "
+            "Abfolge vollstaendig ab; dort fehlt dafuer der Engine vor Mitte November das "
+            "Open Interest (Muster 4 inaktiv, Nachteil fuer die Engine). **Erst beide "
+            "Fenster zusammen ergeben ein faires Bild.**",
+            "",
+            "Tranchengroessen sind unbekannt (die Listen enthalten Tage, keine Betraege) — "
+            "daher eine Spanne ueber 12 Annahmen: Kauf 25/33/50 % des freien Geldes, "
+            "Verkauf 25/33/50/100 % der Position. Die 100 %-Annahme bildet ab, dass ein "
+            "Teil seiner Verkaufstage Stops waren, also volle Ausstiege.",
+            "",
+            "| Fenster | Furkan (Spanne) | Furkan 33/33 | dessen Rueckgang | Engine | dessen Rueckgang | Buy & Hold |",
+            "|---|---|---|---|---|---|---|",
+            _zeile("**kurz** (Engine hat alle Daten)", kurz, e_kurz, to_date(eff_start)),
+            _zeile("**lang** (Furkans volle Abfolge)", lang, e_lang, f_start_d),
+            "",
+            f"Im langen Fenster handelte Furkan an {m_lang['kauftage']} Kauf- und "
+            f"{m_lang['verkaufstage']} Verkaufstagen.",
+            "",
+            "**So ist das zu lesen:** Liegt die Engine in BEIDEN Fenstern deutlich unter "
+            "Furkans Spanne, gibt es echten Spielraum und es lohnt sich, seine Methode "
+            "genauer nachzubauen. Liegt sie darin, sind beide auf verschiedenen Wegen am "
+            "selben Ziel — weiteres Angleichen waere verschwendete Arbeit. Liegt sie in "
+            "beiden darueber, ist die Richtung „mehr wie Furkan werden\" die falsche und "
+            "der Recall als Zielgroesse irrefuehrend. Widersprechen sich die Fenster, "
+            "entscheidet keines von beiden.",
+            "",
+            "**Grenzen, ehrlich — die Zahl ist ein Anhaltspunkt, kein Beweis:** Die Liste "
+            "ist Kaisers Mitschrift dessen, was Furkan in Videos gezeigt hat, kein "
+            "geprueftes Konto; Menschen zeigen gute Trades vollstaendiger als schlechte. "
+            "Die Tranchengroessen sind geraten. Gerechnet wird mit Tagesschlusskursen, er "
+            "handelte innertaegig. Welche Verkaufstage Teilgewinne und welche Stops waren, "
+            "steht in den Listen nicht — deshalb die breite Spanne. Und die Engine kennt "
+            "beim Nachrechnen den ganzen Zeitraum, waehrend Furkan ihn Tag fuer Tag "
+            "erlebt hat.",
+        ]
 
     win = f"{to_date(eff_start).strftime('%d.%m.%Y')}-{to_date(END_MS).strftime('%d.%m.%Y')}"
     lines = [
