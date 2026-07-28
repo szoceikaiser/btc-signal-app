@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-28T13:25:15Z",
+ "generated_at": "2026-07-28T13:51:42Z",
  "zeitraum": "19.11.2025-28.07.2026",
  "variante": "LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz",
  "params": {
@@ -32,7 +32,7 @@
   "start": 10000.0,
   "ende": 13914.43,
   "rendite_pct": 39.14,
-  "buyhold_pct": -30.76,
+  "buyhold_pct": -31.23,
   "trades": 58,
   "gewinn_trades": 47,
   "long_profit": 3914.43,
@@ -107,7 +107,7 @@
   "start": 10000.0,
   "ende": 12475.67,
   "rendite_pct": 24.76,
-  "buyhold_pct": -30.76,
+  "buyhold_pct": -31.23,
   "trades": 43,
   "gewinn_trades": 36,
   "long_profit": 2475.67,
