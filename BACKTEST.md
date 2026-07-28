@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 19.11.2025-28.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2116 4h-Kerzen geladen · Stand: 2026-07-28 14:27 UTC
+**Voll-Daten-Fenster: 19.11.2025-28.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2116 4h-Kerzen geladen · Stand: 2026-07-28 14:35 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -19,7 +19,7 @@ Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch v
 | +Flush core | 54% | 32% | +24.8 % | -12.1 % | 100 % | 181 |
 | LIVE: nur Long +Kaufleiter +Flush core | 54% | 32% | +33.1 % | -12.7 % | 100 % | 207 |
 | +Kaufleiter +Bed.Stop | 50% | 40% | +17.9 % | -7.0 % | 100 % | 146 |
-| LIVE +Rest-Freigabe | 57% | 35% | +26.9 % | -13.0 % | 100 % | 217 |
+| LIVE +Rest-Freigabe | 57% | 35% | +26.8 % | -13.0 % | 100 % | 217 |
 | LIVE +Stop nachziehen | 57% | 34% | +32.2 % | -12.3 % | 100 % | 212 |
 | LIVE +Stop nachziehen +Rest-Freigabe | 57% | 35% | +27.4 % | -12.6 % | 100 % | 219 |
 | LIVE +Stop +Liq-Kaskade | 61% | 32% | +22.4 % | -11.5 % | 100 % | 259 |
@@ -85,22 +85,22 @@ Die Euro-Betraege wachsen mit dem Konto — Gewinne werden reinvestiert, ein spa
 
 ## Furkans eigene Termine gegen die Engine
 
-**Vergleichsfenster 19.11.2025–22.04.2026** — es endet am letzten Trigger in Kaisers Listen, danach gibt es keinen Massstab mehr. Beide Seiten starten mit 10.000 €, zahlen 0.1 % je Order und werden am Fensterende zum Schlusskurs bewertet.
+Kaisers Trigger-Listen dienten bisher nur als Aehnlichkeits-Massstab (Recall). Hier laufen sie erstmals durch dieselbe P&L-Rechnung wie die Engine — gleiche Kurse, gleiche Gebuehr (0.1 %/Order), 10.000 € Start, offene Position am Ende zum Schlusskurs bewertet.
 
-Kaisers Listen enthalten **Tage, keine Betraege** — wie gross Furkans Tranchen waren, wissen wir nicht. Deshalb steht hier eine Spanne ueber neun Annahmen (Kauf 25/33/50 % des freien Geldes, Verkauf 25/33/50 % der Position) statt einer Scheingenauigkeit.
+**Zwei Fenster, und der Unterschied ist wichtig.** Das kurze beginnt dort, wo die Engine alle Daten hat (echtes Open Interest). Furkan hatte zu diesem Zeitpunkt aber schon eine Position aus September/Oktober, die wir nicht kennen — er verkauft im Fenster also etwas, das er vorher aufgebaut hat. Das lange Fenster beginnt an seinem ERSTEN notierten Termin und bildet seine Abfolge vollstaendig ab; dort fehlt dafuer der Engine vor Mitte November das Open Interest (Muster 4 inaktiv, Nachteil fuer die Engine). **Erst beide Fenster zusammen ergeben ein faires Bild.**
 
-| | Rendite | max. Rueckgang |
-|---|---|---|
-| **Furkans Termine** (Spanne ueber 9 Annahmen) | **-9.2 % bis -4.8 %** | — |
-| Furkans Termine, mittlere Annahme (33/33) | -7.3 % | -19.9 % |
-| **Unsere Engine** (NEU-LIVE +Verkauf unter dem letzten Hoch) | **+37.5 %** | -5.3 % |
-| Buy & Hold | -14.6 % | — |
+Tranchengroessen sind unbekannt (die Listen enthalten Tage, keine Betraege) — daher eine Spanne ueber 12 Annahmen: Kauf 25/33/50 % des freien Geldes, Verkauf 25/33/50/100 % der Position. Die 100 %-Annahme bildet ab, dass ein Teil seiner Verkaufstage Stops waren, also volle Ausstiege.
 
-Furkan handelte im Fenster an 11 Kauf- und 17 Verkaufstagen.
+| Fenster | Furkan (Spanne) | Furkan 33/33 | dessen Rueckgang | Engine | dessen Rueckgang | Buy & Hold |
+|---|---|---|---|---|---|---|
+| **kurz** (Engine hat alle Daten)<br><sub>19.11.2025–22.04.2026</sub> | **-9.2 % bis +0.5 %** | -7.3 % | -19.9 % | **+37.5 %** | -5.3 % | -14.6 % |
+| **lang** (Furkans volle Abfolge)<br><sub>25.09.2025–22.04.2026</sub> | **-23.7 % bis -6.1 %** | -19.7 % | -30.1 % | **+38.1 %** | -5.3 % | -30.5 % |
 
-**So ist das zu lesen:** Liegt die Engine deutlich unter Furkans Spanne, gibt es echten Spielraum und es lohnt sich, seine Methode genauer nachzubauen. Liegt sie darin, sind beide auf verschiedenen Wegen am selben Ziel — weiteres Angleichen waere verschwendete Arbeit. Liegt sie darueber, ist die Richtung „mehr wie Furkan werden" die falsche und der Recall als Zielgroesse irrefuehrend.
+Im langen Fenster handelte Furkan an 20 Kauf- und 23 Verkaufstagen.
 
-**Grenzen, ehrlich:** Die Liste ist Kaisers Mitschrift dessen, was Furkan in Videos gezeigt hat — kein geprueftes Konto. Menschen zeigen gute Trades vollstaendiger als schlechte. Die Tranchengroessen sind geraten, die Preise sind Tagesschlusskurse (er handelte innertaegig), und Doppeleintraege wurden entfernt. Die Zahl ist ein Anhaltspunkt, kein Beweis.
+**So ist das zu lesen:** Liegt die Engine in BEIDEN Fenstern deutlich unter Furkans Spanne, gibt es echten Spielraum und es lohnt sich, seine Methode genauer nachzubauen. Liegt sie darin, sind beide auf verschiedenen Wegen am selben Ziel — weiteres Angleichen waere verschwendete Arbeit. Liegt sie in beiden darueber, ist die Richtung „mehr wie Furkan werden" die falsche und der Recall als Zielgroesse irrefuehrend. Widersprechen sich die Fenster, entscheidet keines von beiden.
+
+**Grenzen, ehrlich — die Zahl ist ein Anhaltspunkt, kein Beweis:** Die Liste ist Kaisers Mitschrift dessen, was Furkan in Videos gezeigt hat, kein geprueftes Konto; Menschen zeigen gute Trades vollstaendiger als schlechte. Die Tranchengroessen sind geraten. Gerechnet wird mit Tagesschlusskursen, er handelte innertaegig. Welche Verkaufstage Teilgewinne und welche Stops waren, steht in den Listen nicht — deshalb die breite Spanne. Und die Engine kennt beim Nachrechnen den ganzen Zeitraum, waehrend Furkan ihn Tag fuer Tag erlebt hat.
 
 ## Robustheitspruefung: Fenster halbiert
 
