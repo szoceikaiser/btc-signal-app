@@ -169,6 +169,19 @@ GRID = [
     V("LIVE +Stop +alle vier neuen Hebel",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       block_unhealthy=True, confirm_t1=True, cooldown_h=48, min_stop_pct=0.02),
+    # E13, zweiter Lauf: Vertragen sich die beiden Kandidaten, die einzeln gut gemessen
+    # haben? Mindest-Stopabstand (gleiche Rendite bei fast halbem Rueckgang, in beiden
+    # Haelften auf Augenhoehe mit der Live-Einstellung) und liq_entry="boost" (die einzige
+    # Variante, die sich zweimal hintereinander in BEIDEN Haelften unter den besten 5
+    # gehalten hat). Beide greifen an derselben Stelle an — der Einstiegs-Auswahl —, also
+    # ist Ueberschneidung moeglich: "Sperre + Mindestabstand" war zusammen SCHLECHTER als
+    # jeder Hebel allein (+26,4 % gegen +33,9/+33,0 %). Genau das wird hier geprueft.
+    V("LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost"),
+    V("LIVE +Stop +Sperre 48 h +Liq-Konfluenz",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      cooldown_h=48, liq_entry="boost"),
     V("Long+Short (Ref)"),
 ]
 
@@ -714,6 +727,17 @@ def main():
         "precision_pct": round(panel_sc["precision"] * 100),
         "pnl": {kk: vv for kk, vv in panel_pnl.items() if kk != "equity"},
     }
+    # Zweite Spalte fuer die Webseite (Kaiser 2026-07-28): dieselbe Einstellung OHNE den
+    # aggressiven Flush-Einstieg. Grund: Flush-Signale sind in Telegram als solche
+    # markiert und Kaiser entscheidet bei jedem einzeln, ob er ihn mitgeht. Die
+    # Monatsuebersicht zeigt deshalb BEIDE Spalten — "ohne Flush" ist der Boden, den er
+    # sicher umsetzt, "mit Flush" die Obergrenze, wenn er jeden mitnimmt. Sein
+    # tatsaechliches Ergebnis liegt dazwischen. Die Signale selbst bleiben unveraendert:
+    # Der Flush wird weiter erzeugt, gesendet und im Chart gezeichnet — nur die
+    # SIMULATION zeigt zusaetzlich die konservative Rechnung.
+    if _of is not None:
+        panel["variante_ohne_flush"] = _of[0]["label"]
+        panel["pnl_ohne_flush"] = {kk: vv for kk, vv in _of[3].items() if kk != "equity"}
     (ROOT / "site" / "data" / "backtest.json").write_text(
         json.dumps(panel, indent=1), encoding="utf-8")
 

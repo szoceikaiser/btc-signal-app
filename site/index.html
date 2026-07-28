@@ -41,6 +41,8 @@
   #monate .bar { width:100%; min-width:70px; }
   #monate .bar i { display:block; height:9px; border-radius:2px; }
   #monate .note { color:var(--muted); font-size:12px; margin-top:10px; line-height:1.5; }
+  #monate .schwach { opacity:.62; }        /* Vergleichsspalte "mit Flush" zurueckgenommen */
+  #monate thead th[colspan] { text-align:center; }
   @media (max-width:560px) { #monate .hidemob { display:none; } #monate table { font-size:12.5px; } }
 </style>
 </head>
@@ -64,6 +66,7 @@
   <span><b>V/SL</b> Verkauf Rest / Stoploss</span>
   <span><b>S…</b> Short-Seite</span>
   <span><b>W</b> Warnung Derivate-Pump</span>
+  <span><b style="color:#a855f7">⚡</b> aggressiver Flush-Einstieg (Kapitulation)</span>
   <span>Linien: Fib-Zonen der aktuellen Struktur</span>
   <span>Bedienung: Mausrad/Pinch = Zoom · Ziehen = Verschieben · Doppelklick = Reset</span>
   <span><a href="https://github.com/szoceikaiser/btc-signal-app/blob/main/ANLEITUNG-EINSTELLUNGEN.md"
@@ -181,6 +184,13 @@ function renderMonate(bt) {
   const p = bt.pnl || {};
   const ms = p.monate || [];
   if (!ms.length) return;
+  // Zweite Spalte: dieselbe Einstellung OHNE den aggressiven Flush-Einstieg.
+  // Flush-Signale sind in Telegram und im Chart als solche markiert; ob sie mitgenommen
+  // werden, entscheidet der Nutzer bei jedem einzeln. Deshalb beide Rechnungen zeigen:
+  // "ohne Flush" = sicherer Boden, "mit Flush" = Obergrenze. Das echte Ergebnis liegt
+  // dazwischen. Die Signal-Erzeugung ist davon NICHT betroffen.
+  const po = bt.pnl_ohne_flush || null;
+  const mo = po ? Object.fromEntries((po.monate || []).map(m => [m.monat, m])) : null;
   const MON = ["Januar","Februar","März","April","Mai","Juni",
                "Juli","August","September","Oktober","November","Dezember"];
   const name = k => { const [y, m] = k.split("-"); return MON[+m - 1] + " " + y; };
@@ -189,45 +199,68 @@ function renderMonate(bt) {
   const konto = v => Math.round(v).toLocaleString("de-DE") + " €";
   const maxAbs = Math.max(...ms.map(m => Math.abs(m.rendite_pct)), 1);
 
+  const zelle = (m, stark) => {
+    if (!m) return `<td>—</td><td>—</td>`;
+    const cls = (m.gewinn >= 0 ? "up" : "down") + (stark ? "" : " schwach");
+    return `<td class="${cls}">${eur(m.gewinn)}</td><td class="${cls}">${pct(m.rendite_pct)}</td>`;
+  };
+
   const zeilen = ms.map(m => {
-    const pos = m.gewinn >= 0;
-    const cls = pos ? "up" : "down";
+    const basis = mo ? mo[m.monat] : m;              // ohne Flush = die sichere Rechnung
+    const pos = (basis ? basis.gewinn : m.gewinn) >= 0;
     const farbe = pos ? "#16a34a" : "#dc2626";
-    const br = Math.max(3, Math.abs(m.rendite_pct) / maxAbs * 100);
-    // Balken waechst bei Gewinn nach rechts, bei Verlust nach links (Nulllinie in der Mitte)
+    const wert = basis ? basis.rendite_pct : m.rendite_pct;
+    const br = Math.max(3, Math.abs(wert) / maxAbs * 100);
     const bar = `<span style="display:block;position:relative;height:9px">` +
       `<i style="position:absolute;${pos ? "left" : "right"}:50%;width:${br / 2}%;` +
       `background:${farbe}"></i></span>`;
     return `<tr><td>${name(m.monat)}</td>` +
-      `<td class="${cls}">${eur(m.gewinn)}</td>` +
-      `<td class="${cls}">${pct(m.rendite_pct)}</td>` +
-      `<td class="bar hidemob">${bar}</td>` +
-      `<td class="hidemob">${konto(m.ende)}</td></tr>`;
+      (mo ? zelle(basis, true) + zelle(m, false) : zelle(m, true)) +
+      `<td class="bar hidemob">${bar}</td></tr>`;
   }).join("");
 
-  const plus = ms.filter(m => m.gewinn > 0).length;
-  const best = ms.reduce((a, b) => (b.rendite_pct > a.rendite_pct ? b : a));
-  const schlecht = ms.reduce((a, b) => (b.rendite_pct < a.rendite_pct ? b : a));
-  const ges = p.rendite_pct || 0;
-  const clsG = ges >= 0 ? "up" : "down";
+  const gesZeile = (q) => {
+    if (!q) return `<td>—</td><td>—</td>`;
+    const c = (q.rendite_pct || 0) >= 0 ? "up" : "down";
+    return `<td class="${c}">${eur((q.ende || 10000) - 10000)}</td>` +
+           `<td class="${c}">${pct(q.rendite_pct || 0)}</td>`;
+  };
+
+  const basisReihe = mo ? Object.values(mo) : ms;
+  const plus = basisReihe.filter(m => m.gewinn > 0).length;
+  const best = basisReihe.reduce((a, b) => (b.rendite_pct > a.rendite_pct ? b : a));
+  const schlecht = basisReihe.reduce((a, b) => (b.rendite_pct < a.rendite_pct ? b : a));
 
   document.getElementById("monate").innerHTML =
     `<h2>Monat für Monat — was hätte das Konto gemacht?</h2>` +
     `<div class="sub">Simulation über ${bt.zeitraum} · Start 10.000 € · ` +
-    `Variante <b>${bt.variante || "—"}</b> · Gebühr ${(p.fee_pct ?? 0.1).toLocaleString("de-DE")} %/Order, ` +
-    `kein Hebel. ` +
-    `Erster und letzter Monat sind angeschnitten.</div>` +
-    `<table><thead><tr><th>Monat</th><th>Gewinn / Verlust</th><th>%</th>` +
-    `<th class="hidemob"></th><th class="hidemob">Kontostand</th></tr></thead>` +
+    `Gebühr ${(p.fee_pct ?? 0.1).toLocaleString("de-DE")} %/Order, kein Hebel · ` +
+    `erster und letzter Monat angeschnitten.` +
+    (mo ? `<br><b>Zwei Rechnungen:</b> <b>ohne Flush</b> = nur die ruhigen Einstiege, also ` +
+          `der Boden, den man sicher mitnimmt. <b>mit Flush</b> = zusätzlich jeder ` +
+          `aggressive Kapitulations-Einstieg (im Chart und in Telegram als ⚡ markiert). ` +
+          `Wer nur manche davon mitgeht, landet dazwischen.`
+        : `<br>Variante <b>${bt.variante || "—"}</b>.`) +
+    `</div>` +
+    `<table><thead><tr><th>Monat</th>` +
+    (mo ? `<th colspan="2">ohne Flush</th><th colspan="2" class="schwach">mit Flush</th>`
+        : `<th>Gewinn / Verlust</th><th>%</th>`) +
+    `<th class="hidemob"></th></tr></thead>` +
     `<tbody>${zeilen}</tbody>` +
     `<tfoot><tr><td>Gesamt</td>` +
-    `<td class="${clsG}">${eur((p.ende || 10000) - 10000)}</td>` +
-    `<td class="${clsG}">${pct(ges)}</td><td class="hidemob"></td>` +
-    `<td class="hidemob">${konto(p.ende || 10000)}</td></tr></tfoot></table>` +
-    `<div class="note">Monate im Plus: <b>${plus} von ${ms.length}</b> · bester Monat ` +
-    `<b class="up">${name(best.monat)} ${pct(best.rendite_pct)}</b> · schwächster ` +
-    `<b class="down">${name(schlecht.monat)} ${pct(schlecht.rendite_pct)}</b> · ` +
-    `größter Rückgang zwischendurch <b class="down">${pct(p.max_drawdown_pct || 0)}</b>.<br>` +
+    (mo ? gesZeile(po) + gesZeile(p) : gesZeile(p)) +
+    `<td class="hidemob"></td></tr>` +
+    `<tr><td>größter Rückgang</td>` +
+    (mo ? `<td colspan="2" class="down">${pct(po.max_drawdown_pct || 0)}</td>` +
+          `<td colspan="2" class="down schwach">${pct(p.max_drawdown_pct || 0)}</td>`
+        : `<td colspan="2" class="down">${pct(p.max_drawdown_pct || 0)}</td>`) +
+    `<td class="hidemob"></td></tr></tfoot></table>` +
+    `<div class="note">Monate im Plus${mo ? " (ohne Flush)" : ""}: ` +
+    `<b>${plus} von ${basisReihe.length}</b> · ` +
+    `bester <b class="up">${name(best.monat)} ${pct(best.rendite_pct)}</b> · schwächster ` +
+    `<b class="down">${name(schlecht.monat)} ${pct(schlecht.rendite_pct)}</b>.<br>` +
+    `„Größter Rückgang" ist der tiefste Einbruch unterwegs, gemessen vom jeweiligen ` +
+    `Höchststand des Kontos — nicht das Endergebnis. Je näher an null, desto ruhiger.<br>` +
     `Die Euro-Beträge wachsen mit dem Konto, weil Gewinne reinvestiert werden — ein später ` +
     `Monat arbeitet mit mehr Kapital als ein früher. Fair vergleichbar sind daher nur die ` +
     `Prozente.<br><b>Das ist eine Rückrechnung auf historischen Kursen, kein Live-Konto und ` +
@@ -301,9 +334,13 @@ async function load(tf) {
     const markers = allSig.map(s => {
       const st = MARKER_STYLE[s.type] || { c:"#8b94a7", s:"circle", p:"aboveBar", t:"?" };
       const time = snap(s.ts / 1000, candles);
+      // Aggressive Kapitulations-Einstiege sichtbar abheben (⚡ + eigene Farbe): In der
+      // Monatsuebersicht laufen sie in einer eigenen Spalte, in Telegram sind sie
+      // markiert — im Chart sahen sie bisher aus wie jeder andere Kauf.
+      const flush = s.tag === "FLUSH";
       return time === null ? null : {
-        time, position:st.p, shape:st.s, color:st.c,
-        text: st.t + " " + Math.round(s.price).toLocaleString("de-DE"),
+        time, position:st.p, shape:st.s, color: flush ? "#a855f7" : st.c,
+        text: (flush ? "⚡" : "") + st.t + " " + Math.round(s.price).toLocaleString("de-DE"),
       };
     }).filter(Boolean);
     markers.sort((a, b) => a.time - b.time);
