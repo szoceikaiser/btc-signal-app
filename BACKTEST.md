@@ -1,10 +1,10 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 18.11.2025-27.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2111 4h-Kerzen geladen · Stand: 2026-07-27 19:56 UTC
+**Voll-Daten-Fenster: 19.11.2025-28.07.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2115 4h-Kerzen geladen · Stand: 2026-07-28 08:08 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
-**Zwei verschiedene Zeitraeume, nicht verwechseln:** Recall/Praezision werden nur bis 23.04.2026 bewertet (danach endet Kaisers Trigger-Liste, es gibt keinen Maszstab mehr). Die Rendite laeuft ueber das komplette Fenster bis 27.07.2026.
+**Zwei verschiedene Zeitraeume, nicht verwechseln:** Recall/Praezision werden nur bis 23.04.2026 bewertet (danach endet Kaisers Trigger-Liste, es gibt keinen Maszstab mehr). Die Rendite laeuft ueber das komplette Fenster bis 28.07.2026.
 
 ## Parameter-Vergleich
 
@@ -19,9 +19,9 @@ Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch v
 | +Flush core | 54% | 32% | +24.8 % | -12.1 % | 100 % | 181 |
 | LIVE: nur Long +Kaufleiter +Flush core | 54% | 32% | +33.1 % | -12.7 % | 100 % | 207 |
 | +Kaufleiter +Bed.Stop | 50% | 40% | +17.9 % | -7.0 % | 100 % | 146 |
-| LIVE +Rest-Freigabe | 57% | 35% | +28.6 % | -13.0 % | 100 % | 217 |
+| LIVE +Rest-Freigabe | 57% | 35% | +27.2 % | -13.0 % | 100 % | 217 |
 | LIVE +Stop nachziehen | 57% | 34% | +32.2 % | -12.3 % | 100 % | 212 |
-| LIVE +Stop nachziehen +Rest-Freigabe | 57% | 35% | +29.2 % | -12.6 % | 100 % | 219 |
+| LIVE +Stop nachziehen +Rest-Freigabe | 57% | 35% | +27.8 % | -12.6 % | 100 % | 219 |
 | LIVE +Stop +Liq-Kaskade | 61% | 32% | +22.4 % | -11.5 % | 100 % | 259 |
 | LIVE +Stop +Liq-Zonen | 64% | 33% | +23.3 % | -11.3 % | 100 % | 288 |
 | LIVE +Stop +Liq beides | 64% | 33% | +23.0 % | -11.2 % | 100 % | 290 |
@@ -32,7 +32,7 @@ Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch v
 | LIVE +Stop +Verkauf am schwachen Hoch | 61% | 33% | +28.0 % | -11.7 % | 100 % | 256 |
 | LIVE +Stop, 60 % Einsatz (40 % Reserve) | 57% | 34% | +19.7 % | -8.2 % | 60 % | 212 |
 | LIVE +Stop, 50 % Einsatz (50 % Reserve) | 57% | 34% | +16.3 % | -6.8 % | 50 % | 212 |
-| Long+Short (Ref) | 43% | 58% | +1.7 % | -11.9 % | 100 % | 90 |
+| Long+Short (Ref) | 43% | 57% | -1.0 % | -11.9 % | 100 % | 88 |
 
 ## Beste Kombination (nach Rendite): LIVE +Stop +Liq-Konfluenz aufstocken
 
@@ -43,7 +43,7 @@ Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch v
 
 ## P&L-Simulation (beste Kombination) — getrennt nach Richtung
 
-Start 10.000 € -> **13,697 €** (+37.0 %) · Buy&Hold im Fenster: -30.1 % · Gebuehr 0.1 %/Order, kein Hebel.
+Start 10.000 € -> **13,697 €** (+37.0 %) · Buy&Hold im Fenster: -30.6 % · Gebuehr 0.1 %/Order, kein Hebel.
 
 - **LONG-Trades:** +3,697 € · 88 Abschluesse, 67 im Gewinn
 - **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
@@ -76,37 +76,37 @@ Die Euro-Betraege wachsen mit dem Konto — Gewinne werden reinvestiert, ein spa
 
 Warum: Oben werden 19 Varianten gegen EIN Zeitfenster verglichen. Die beste von vielen sieht immer besser aus als sie ist — wie der Beste von 19 Muenzwerfern. Deshalb laeuft hier jede Variante noch einmal getrennt in zwei Haelften. **Liegt dieselbe Variante in beiden Haelften vorne, ist der Vorteil vermutlich echt. Kippt die Rangfolge, war es Zufall.**
 
-Haelfte 1: 18.11.2025–24.03.2026 · Haelfte 2: 24.03.2026–27.07.2026. Jede Haelfte ist nur halb so lang und damit fuer sich zappeliger — auf die Rangfolge schauen, nicht auf die einzelne Zahl.
+Haelfte 1: 19.11.2025–25.03.2026 · Haelfte 2: 25.03.2026–28.07.2026. Jede Haelfte ist nur halb so lang und damit fuer sich zappeliger — auf die Rangfolge schauen, nicht auf die einzelne Zahl.
 
 | Variante | Rendite H1 | Platz H1 | Rendite H2 | Platz H2 |
 |---|---|---|---|---|
-| nur Long (Basis) | +3.6 % | 19. | +7.5 % | 12. |
-| +Kaufleiter | +8.7 % | 16. | +10.3 % | 2. |
-| +Flush core | +15.3 % | 11. | +7.8 % | 11. |
-| LIVE: nur Long +Kaufleiter +Flush core | +21.1 % | 2. | +9.5 % | 8. |
-| +Kaufleiter +Bed.Stop | +6.4 % | 18. | +10.8 % | 1. |
-| LIVE +Rest-Freigabe | +17.4 % | 8. | +9.6 % | 7. |
-| LIVE +Stop nachziehen | +21.0 % | 3. | +10.0 % | 6. |
-| LIVE +Stop nachziehen +Rest-Freigabe | +17.4 % | 9. | +10.1 % | 4. |
-| LIVE +Stop +Liq-Kaskade | +15.1 % | 12. | +7.1 % | 14. |
-| LIVE +Stop +Liq-Zonen | +17.5 % | 7. | +5.5 % | 19. |
-| LIVE +Stop +Liq beides | +17.1 % | 10. | +5.5 % | 18. |
-| MEINE Einstellung ohne Flush | +8.7 % | 17. | +10.3 % | 3. |
-| LIVE +Stop +Liq-Konfluenz aufstocken | +25.4 % | 1. | +10.0 % | 5. |
-| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | +19.5 % | 4. | +6.7 % | 15. |
-| LIVE +Stop +Verkauf am letzten Hoch | +18.1 % | 6. | +9.0 % | 9. |
-| LIVE +Stop +Verkauf am schwachen Hoch | +18.7 % | 5. | +8.5 % | 10. |
-| LIVE +Stop, 60 % Einsatz (40 % Reserve) | +11.9 % | 14. | +7.4 % | 13. |
-| LIVE +Stop, 50 % Einsatz (50 % Reserve) | +9.9 % | 15. | +6.2 % | 17. |
-| Long+Short (Ref) | +12.2 % | 13. | +6.2 % | 16. |
+| nur Long (Basis) | +4.0 % | 19. | +9.4 % | 13. |
+| +Kaufleiter | +9.1 % | 15. | +12.3 % | 3. |
+| +Flush core | +15.0 % | 11. | +9.7 % | 12. |
+| LIVE: nur Long +Kaufleiter +Flush core | +20.8 % | 2. | +11.4 % | 6. |
+| +Kaufleiter +Bed.Stop | +6.8 % | 18. | +13.7 % | 1. |
+| LIVE +Rest-Freigabe | +17.8 % | 7. | +10.2 % | 9. |
+| LIVE +Stop nachziehen | +20.6 % | 3. | +11.9 % | 5. |
+| LIVE +Stop nachziehen +Rest-Freigabe | +17.8 % | 8. | +10.8 % | 7. |
+| LIVE +Stop +Liq-Kaskade | +14.8 % | 12. | +8.9 % | 14. |
+| LIVE +Stop +Liq-Zonen | +17.4 % | 9. | +6.6 % | 19. |
+| LIVE +Stop +Liq beides | +17.0 % | 10. | +6.6 % | 18. |
+| MEINE Einstellung ohne Flush | +9.1 % | 16. | +12.3 % | 4. |
+| LIVE +Stop +Liq-Konfluenz aufstocken | +24.9 % | 1. | +13.4 % | 2. |
+| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | +18.6 % | 4. | +8.5 % | 15. |
+| LIVE +Stop +Verkauf am letzten Hoch | +18.0 % | 6. | +10.5 % | 8. |
+| LIVE +Stop +Verkauf am schwachen Hoch | +18.3 % | 5. | +10.0 % | 10. |
+| LIVE +Stop, 60 % Einsatz (40 % Reserve) | +11.7 % | 13. | +8.5 % | 16. |
+| LIVE +Stop, 50 % Einsatz (50 % Reserve) | +9.7 % | 14. | +7.1 % | 17. |
+| Long+Short (Ref) | +8.2 % | 17. | +9.9 % | 11. |
 
-**In BEIDEN Haelften unter den besten 5:** LIVE +Stop +Liq-Konfluenz aufstocken
+**In BEIDEN Haelften unter den besten 5:** LIVE +Stop +Liq-Konfluenz aufstocken, LIVE +Stop nachziehen
 
-Bewertung: 1 von 5 Varianten halten sich in beiden Haelften oben. Je mehr, desto belastbarer die Rangfolge oben. Bei 0 bis 1 ist die Rangfolge im Wesentlichen Zufall — dann nur den groebsten Hebeln trauen (Richtung, Kaufleiter) und die Feinheiten weglassen.
+Bewertung: 2 von 5 Varianten halten sich in beiden Haelften oben. Die Varianten, die in beiden Haelften oben stehen, sind die einzigen, auf die man sich stuetzen sollte. Alles, was nur in einer Haelfte glaenzt, ist Zufall.
 
 ## Einschraenkungen
 
-- Open Interest + Liquidationen: **echt von Coinalyze** — 1506 OI-Punkte, 1507 Liq-Punkte im Zeitraum. Muster 4 (Kapitulation) aktiv.
+- Open Interest + Liquidationen: **echt von Coinalyze** — 1504 OI-Punkte, 1504 Liq-Punkte im Zeitraum. Muster 4 (Kapitulation) aktiv.
   (4h-Reichweite von Coinalyze deckt evtl. nicht bis Sep'25 zurueck; aeltere Kerzen dann OI neutral.)
 - Spot-CVD real (Binance Vision), Funding real (Kraken, sofern Historie reicht).
 - Kaisers Liste enthielt Duplikate (laut Kaiser evtl. Versehen) -> dedupliziert.
