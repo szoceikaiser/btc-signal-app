@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-07-28T13:14:12Z",
- "variante": "LIVE +Stop nachziehen",
+ "generated_at": "2026-07-28T13:25:15Z",
+ "variante": "LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz",
  "fenster": "19.11.2025-28.07.2026",
  "signals": [
   {
@@ -44,11 +44,31 @@
    "label": "KAUF 1 (Teilposition am 0.5-Level)"
   },
   {
+   "ts": 1765051200000,
+   "type": "NACHKAUF",
+   "price": 89236.79,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 88631 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 83822.76,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
    "ts": 1765814400000,
    "type": "NACHKAUF",
    "price": 86032.78936,
    "tranche_pct": 25,
    "reason": "0.786-Zone erreicht, Struktur intakt",
+   "stop_ref": 83822.76,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1765857600000,
+   "type": "NACHKAUF",
+   "price": 86021.51,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 85147 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 83822.76,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -234,6 +254,26 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
+   "ts": 1767873600000,
+   "type": "NACHKAUF",
+   "price": 90781.57,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 89390 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 87250.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1767916800000,
+   "type": "NACHKAUF",
+   "price": 91220.23,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 91263 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 87250.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
    "ts": 1767988800000,
    "type": "KAUF_2",
    "price": 90129.92856,
@@ -284,26 +324,6 @@
    "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
   },
   {
-   "ts": 1768737600000,
-   "type": "KAUF_1",
-   "price": 94966.455,
-   "tranche_pct": 25,
-   "reason": "0.5-Retracement des Impulses 94293->95639",
-   "stop_ref": 94293.46,
-   "tag": "",
-   "label": "KAUF 1 (Teilposition am 0.5-Level)"
-  },
-  {
-   "ts": 1768766400000,
-   "type": "STOPLOSS",
-   "price": 93673.14,
-   "tranche_pct": 100,
-   "reason": "Kerzenschluss unter Invalidierung 94293",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
    "ts": 1769256000000,
    "type": "KAUF_1",
    "price": 89244.26000000001,
@@ -314,81 +334,21 @@
    "label": "KAUF 1 (Teilposition am 0.5-Level)"
   },
   {
-   "ts": 1769356800000,
-   "type": "STOPLOSS",
-   "price": 86495.16,
-   "tranche_pct": 100,
-   "reason": "Kerzenschluss unter Invalidierung 87264",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
-   "ts": 1769385600000,
-   "type": "KAUF_2",
-   "price": 87282.05,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 86510), Schluss ueber Invalidierung (UNGESUNDER_ABVERKAUF)",
-   "stop_ref": 87263.53,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1769400000000,
+   "ts": 1769342400000,
    "type": "NACHKAUF",
-   "price": 88111.28244,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
+   "price": 88446.5,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 88515 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 87263.53,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1769587200000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 89678.79800000001,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (89679)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1769587200000,
-   "type": "WARNUNG",
-   "price": 90080.0,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
-   "ts": 1769601600000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 90074.94400000002,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (90075)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1769601600000,
-   "type": "TEILVERKAUF_1",
-   "price": 90471.09000000001,
-   "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (90471)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF 1 (Extension 1.0)"
-  },
-  {
-   "ts": 1769688000000,
+   "ts": 1769356800000,
    "type": "STOPLOSS",
-   "price": 84934.02,
+   "price": 86495.16,
    "tranche_pct": 100,
-   "reason": "Nachgezogener Stop (Einstand) 87489 \u2014 Kerzenschluss darunter, Gewinn gesichert",
+   "reason": "Kerzenschluss unter Invalidierung 87264",
    "stop_ref": null,
    "tag": "",
    "label": "STOPLOSS"
@@ -402,6 +362,16 @@
    "stop_ref": 65756.0,
    "tag": "FLUSH",
    "label": "KAUF 2 (Kernposition im Golden Pocket)"
+  },
+  {
+   "ts": 1770984000000,
+   "type": "NACHKAUF",
+   "price": 68692.12,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 66720 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 65756.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   },
   {
    "ts": 1770984000000,
@@ -434,41 +404,11 @@
    "label": "TEILVERKAUF 2 (Extension 1.618)"
   },
   {
-   "ts": 1771430400000,
+   "ts": 1771329600000,
    "type": "STOPLOSS",
-   "price": 66177.14,
+   "price": 67392.05,
    "tranche_pct": 100,
-   "reason": "Nachgezogener Stop (Einstand) 67171 \u2014 Kerzenschluss darunter, Gewinn gesichert",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
-   "ts": 1771819200000,
-   "type": "KAUF_2",
-   "price": 65958.94,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 64686), Schluss ueber Invalidierung (NEUTRAL)",
-   "stop_ref": 65631.83,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1771833600000,
-   "type": "NACHKAUF",
-   "price": 66288.14018,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 65631.83,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1771862400000,
-   "type": "STOPLOSS",
-   "price": 64295.1,
-   "tranche_pct": 100,
-   "reason": "Kerzenschluss unter Invalidierung 65632",
+   "reason": "Nachgezogener Stop (Einstand) 67492 \u2014 Kerzenschluss darunter, Gewinn gesichert",
    "stop_ref": null,
    "tag": "",
    "label": "STOPLOSS"
@@ -494,6 +434,16 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
+   "ts": 1772208000000,
+   "type": "NACHKAUF",
+   "price": 65392.18,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 65200 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 62510.28,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
    "ts": 1772251200000,
    "type": "NACHKAUF",
    "price": 63826.0,
@@ -509,6 +459,16 @@
    "price": 64110.6897,
    "tranche_pct": 25,
    "reason": "0.786-Zone erreicht, Struktur intakt",
+   "stop_ref": 62510.28,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1772395200000,
+   "type": "NACHKAUF",
+   "price": 65776.47,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 65200 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 62510.28,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -604,6 +564,26 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
+   "ts": 1772841600000,
+   "type": "NACHKAUF",
+   "price": 68095.5,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 \u2014 aufstocken (CAPITULATION_RESET)",
+   "stop_ref": 66158.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1772884800000,
+   "type": "NACHKAUF",
+   "price": 67877.45,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 67300 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 66158.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
    "ts": 1772928000000,
    "type": "NACHKAUF",
    "price": 67000.26,
@@ -634,21 +614,41 @@
    "label": "STOPLOSS"
   },
   {
-   "ts": 1773014400000,
+   "ts": 1773028800000,
    "type": "KAUF_2",
-   "price": 67205.05,
+   "price": 67555.13,
    "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 65822), Schluss ueber Invalidierung (NEUTRAL)",
+   "reason": "Capitulation: GP durchschlagen (Tief 66853), Schluss ueber Invalidierung (NEUTRAL)",
    "stop_ref": 66158.0,
    "tag": "FLUSH",
    "label": "KAUF 2 (Kernposition im Golden Pocket)"
   },
   {
-   "ts": 1773028800000,
+   "ts": 1773043200000,
+   "type": "NACHKAUF",
+   "price": 67764.98,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 67077 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 66158.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1773043200000,
    "type": "NACHKAUF",
    "price": 67846.888,
    "tranche_pct": 25,
    "reason": "0.786-Zone erreicht, Struktur intakt",
+   "stop_ref": 66158.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1773072000000,
+   "type": "NACHKAUF",
+   "price": 68991.93,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 \u2014 aufstocken (GESUNDER_TREND)",
    "stop_ref": 66158.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -695,16 +695,6 @@
   },
   {
    "ts": 1773388800000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 72135.57,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (72136)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1773388800000,
    "type": "WARNUNG",
    "price": 72228.82,
    "tranche_pct": 0,
@@ -716,49 +706,59 @@
   {
    "ts": 1773403200000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 72924.77,
+   "price": 73167.08,
    "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (72925)",
+   "reason": "Leiter-Teilgewinn an Extension 0.8 (73167)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
    "ts": 1773403200000,
-   "type": "TEILVERKAUF_1",
-   "price": 73713.97,
-   "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (73714)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF 1 (Extension 1.0)"
-  },
-  {
-   "ts": 1773403200000,
-   "type": "VERKAUF_REST",
+   "type": "WARNUNG",
    "price": 71831.46,
-   "tranche_pct": 20,
-   "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP",
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
    "stop_ref": null,
    "tag": "",
-   "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+   "label": "WARNUNG (Derivate-Pump aktiv)"
   },
   {
-   "ts": 1773475200000,
-   "type": "KAUF_2",
-   "price": 70751.42,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 70389), Schluss ueber Invalidierung (NEUTRAL)",
-   "stop_ref": 68977.91,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
+   "ts": 1773417600000,
+   "type": "WARNUNG",
+   "price": 71189.95,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
   },
   {
-   "ts": 1773633600000,
+   "ts": 1773432000000,
+   "type": "WARNUNG",
+   "price": 70930.0,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1773446400000,
+   "type": "WARNUNG",
+   "price": 71081.3,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1773619200000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 74337.744,
+   "price": 73956.28,
    "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (74338)",
+   "reason": "Leiter-Teilgewinn an Extension 0.9 (73956)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
@@ -795,20 +795,10 @@
   },
   {
    "ts": 1773691200000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 74831.327,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (74831)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1773705600000,
    "type": "TEILVERKAUF_1",
-   "price": 75324.91,
+   "price": 74745.48,
    "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (75325)",
+   "reason": "Extension 1.0 erreicht (74745)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF 1 (Extension 1.0)"
@@ -864,77 +854,7 @@
    "label": "STOPLOSS"
   },
   {
-   "ts": 1773964800000,
-   "type": "KAUF_2",
-   "price": 70729.92,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 69837), Schluss ueber Invalidierung (CAPITULATION_RESET)",
-   "stop_ref": 70317.0,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1773979200000,
-   "type": "NACHKAUF",
-   "price": 71533.162,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 70317.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1774008000000,
-   "type": "STOPLOSS",
-   "price": 69860.09,
-   "tranche_pct": 100,
-   "reason": "Kerzenschluss unter Invalidierung 70317",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
-   "ts": 1774252800000,
-   "type": "KAUF_2",
-   "price": 70122.15,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 67916), Schluss ueber Invalidierung (NEUTRAL)",
-   "stop_ref": 68793.35,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1774267200000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 69975.06,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (69975)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1774267200000,
-   "type": "TEILVERKAUF_1",
-   "price": 70489.79,
-   "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (70490)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF 1 (Extension 1.0)"
-  },
-  {
    "ts": 1774353600000,
-   "type": "STOPLOSS",
-   "price": 69873.04,
-   "tranche_pct": 100,
-   "reason": "Nachgezogener Stop (Einstand) 70122 \u2014 Kerzenschluss darunter, Gewinn gesichert",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
-   "ts": 1774382400000,
    "type": "KAUF_1",
    "price": 69588.875,
    "tranche_pct": 25,
@@ -954,6 +874,26 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
+   "ts": 1774569600000,
+   "type": "NACHKAUF",
+   "price": 68767.51,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 68793 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 67360.66,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1774584000000,
+   "type": "NACHKAUF",
+   "price": 68540.48,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 67360.66,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
    "ts": 1774598400000,
    "type": "STOPLOSS",
    "price": 66702.78,
@@ -964,94 +904,44 @@
    "label": "STOPLOSS"
   },
   {
-   "ts": 1774771200000,
-   "type": "KAUF_1",
-   "price": 66418.595,
-   "tranche_pct": 25,
-   "reason": "0.5-Retracement des Impulses 65548->67289",
-   "stop_ref": 65548.25,
-   "tag": "",
-   "label": "KAUF 1 (Teilposition am 0.5-Level)"
-  },
-  {
-   "ts": 1774785600000,
-   "type": "NACHKAUF",
-   "price": 66523.0,
-   "tranche_pct": 15,
-   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (GESUNDER_TREND)",
-   "stop_ref": 65548.25,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1774800000000,
-   "type": "NACHKAUF",
-   "price": 66348.62,
-   "tranche_pct": 15,
-   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
-   "stop_ref": 65548.25,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1774800000000,
+   "ts": 1774828800000,
    "type": "KAUF_2",
-   "price": 66213.19358,
-   "tranche_pct": 50,
-   "reason": "Golden Pocket 66157-66213 + Bestaetigung (NEUTRAL)",
+   "price": 67173.8,
+   "tranche_pct": 75,
+   "reason": "Capitulation: GP durchschlagen (Tief 65801), Schluss ueber Invalidierung (NEUTRAL)",
    "stop_ref": 65548.25,
-   "tag": "",
+   "tag": "FLUSH",
    "label": "KAUF 2 (Kernposition im Golden Pocket)"
   },
   {
-   "ts": 1774814400000,
-   "type": "NACHKAUF",
-   "price": 65920.75766,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 65548.25,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1774814400000,
+   "ts": 1774843200000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 66392.552,
+   "price": 67193.14199999999,
    "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (66393)",
+   "reason": "Leiter-Teilgewinn an Extension 0.8 (67193)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1774814400000,
+   "ts": 1774843200000,
    "type": "TEILVERKAUF_1",
-   "price": 66740.69,
+   "price": 67541.28,
    "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (66741)",
+   "reason": "Extension 1.0 erreicht (67541)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF 1 (Extension 1.0)"
   },
   {
-   "ts": 1774857600000,
-   "type": "TEILVERKAUF_2",
-   "price": 67816.43642,
-   "tranche_pct": 40,
-   "reason": "Extension 1.618 erreicht (67816)",
+   "ts": 1774886400000,
+   "type": "STOPLOSS",
+   "price": 66550.05,
+   "tranche_pct": 100,
+   "reason": "Nachgezogener Stop (Einstand) 67174 \u2014 Kerzenschluss darunter, Gewinn gesichert",
    "stop_ref": null,
    "tag": "",
-   "label": "TEILVERKAUF 2 (Extension 1.618)"
-  },
-  {
-   "ts": 1774972800000,
-   "type": "VERKAUF_REST",
-   "price": 67838.8,
-   "tranche_pct": 20,
-   "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
-   "stop_ref": null,
-   "tag": "",
-   "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+   "label": "STOPLOSS"
   },
   {
    "ts": 1775088000000,
@@ -1074,6 +964,16 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
+   "ts": 1775102400000,
+   "type": "NACHKAUF",
+   "price": 66930.79,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 66500 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 65000.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
    "ts": 1775116800000,
    "type": "NACHKAUF",
    "price": 66220.28,
@@ -1089,6 +989,16 @@
    "price": 66852.91,
    "tranche_pct": 15,
    "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 65000.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1775131200000,
+   "type": "NACHKAUF",
+   "price": 66852.91,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 65618 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 65000.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -1194,76 +1104,6 @@
    "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
   },
   {
-   "ts": 1775995200000,
-   "type": "KAUF_2",
-   "price": 70892.03,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 70604), Schluss ueber Invalidierung (NEUTRAL)",
-   "stop_ref": 70466.0,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1776009600000,
-   "type": "NACHKAUF",
-   "price": 71177.336,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 70466.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1776024000000,
-   "type": "NACHKAUF",
-   "price": 70740.98,
-   "tranche_pct": 15,
-   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
-   "stop_ref": 70466.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1776096000000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 73165.08,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (73165)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1776110400000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 73497.48000000001,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (73497)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1776110400000,
-   "type": "TEILVERKAUF_1",
-   "price": 73829.88,
-   "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (73830)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF 1 (Extension 1.0)"
-  },
-  {
-   "ts": 1776110400000,
-   "type": "VERKAUF_REST",
-   "price": 74417.99,
-   "tranche_pct": 20,
-   "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
-   "stop_ref": null,
-   "tag": "",
-   "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
-  },
-  {
    "ts": 1776513600000,
    "type": "KAUF_1",
    "price": 75821.425,
@@ -1279,6 +1119,26 @@
    "price": 75649.85,
    "tranche_pct": 15,
    "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (GESUNDER_TREND)",
+   "stop_ref": 73309.85,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1776528000000,
+   "type": "NACHKAUF",
+   "price": 75649.85,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 75764 \u2014 aufstocken (GESUNDER_TREND)",
+   "stop_ref": 73309.85,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1776542400000,
+   "type": "NACHKAUF",
+   "price": 75691.76,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 75764 \u2014 aufstocken (GESUNDER_TREND)",
    "stop_ref": 73309.85,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -1384,116 +1244,6 @@
    "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
   },
   {
-   "ts": 1777320000000,
-   "type": "KAUF_2",
-   "price": 77371.32,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 76764), Schluss ueber Invalidierung (NEUTRAL)",
-   "stop_ref": 76960.0,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1777334400000,
-   "type": "STOPLOSS",
-   "price": 76815.18,
-   "tranche_pct": 100,
-   "reason": "Kerzenschluss unter Invalidierung 76960",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
-   "ts": 1777420800000,
-   "type": "KAUF_2",
-   "price": 76994.78,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 76188), Schluss ueber Invalidierung (NEUTRAL)",
-   "stop_ref": 76960.0,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1777435200000,
-   "type": "NACHKAUF",
-   "price": 77500.49124,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 76960.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1777464000000,
-   "type": "STOPLOSS",
-   "price": 75924.25,
-   "tranche_pct": 100,
-   "reason": "Kerzenschluss unter Invalidierung 76960",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
-   "ts": 1777521600000,
-   "type": "KAUF_2",
-   "price": 76161.67,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 75324), Schluss ueber Invalidierung (NEUTRAL)",
-   "stop_ref": 75666.6,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1777536000000,
-   "type": "NACHKAUF",
-   "price": 76145.60262,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 75666.6,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1777593600000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 77114.31399999998,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (77114)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1777622400000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 77338.14699999998,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (77338)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1777622400000,
-   "type": "TEILVERKAUF_1",
-   "price": 77561.97999999998,
-   "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (77562)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF 1 (Extension 1.0)"
-  },
-  {
-   "ts": 1777636800000,
-   "type": "VERKAUF_REST",
-   "price": 78445.89,
-   "tranche_pct": 20,
-   "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
-   "stop_ref": null,
-   "tag": "",
-   "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
-  },
-  {
    "ts": 1778155200000,
    "type": "KAUF_2",
    "price": 79890.63,
@@ -1502,6 +1252,26 @@
    "stop_ref": 78084.08,
    "tag": "FLUSH",
    "label": "KAUF 2 (Kernposition im Golden Pocket)"
+  },
+  {
+   "ts": 1778227200000,
+   "type": "NACHKAUF",
+   "price": 80231.22,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 79700 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 78084.08,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1778241600000,
+   "type": "NACHKAUF",
+   "price": 80142.14,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 79700 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 78084.08,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   },
   {
    "ts": 1778673600000,
@@ -1534,56 +1304,6 @@
    "label": "STOPLOSS"
   },
   {
-   "ts": 1779566400000,
-   "type": "KAUF_2",
-   "price": 76752.01,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 75954), Schluss ueber Invalidierung (NEUTRAL)",
-   "stop_ref": 76051.0,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1779624000000,
-   "type": "NACHKAUF",
-   "price": 76510.886,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 76051.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1779696000000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 77673.14,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (77673)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1779710400000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 77888.04000000001,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (77888)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1779753600000,
-   "type": "STOPLOSS",
-   "price": 76664.01,
-   "tranche_pct": 100,
-   "reason": "Nachgezogener Stop (Einstand) 76692 \u2014 Kerzenschluss darunter, Gewinn gesichert",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
    "ts": 1779811200000,
    "type": "KAUF_1",
    "price": 76097.56,
@@ -1599,6 +1319,16 @@
    "price": 75683.0,
    "tranche_pct": 15,
    "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 74289.6,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1779840000000,
+   "type": "NACHKAUF",
+   "price": 75683.0,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 75669 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 74289.6,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -1624,6 +1354,16 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
+   "ts": 1779854400000,
+   "type": "NACHKAUF",
+   "price": 75977.17,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 75669 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 74289.6,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
    "ts": 1779883200000,
    "type": "NACHKAUF",
    "price": 75063.40688000001,
@@ -1644,56 +1384,6 @@
    "label": "STOPLOSS"
   },
   {
-   "ts": 1780228800000,
-   "type": "KAUF_1",
-   "price": 73513.29500000001,
-   "tranche_pct": 25,
-   "reason": "0.5-Retracement des Impulses 72512->74514",
-   "stop_ref": 72512.49,
-   "tag": "",
-   "label": "KAUF 1 (Teilposition am 0.5-Level)"
-  },
-  {
-   "ts": 1780272000000,
-   "type": "NACHKAUF",
-   "price": 73769.06,
-   "tranche_pct": 15,
-   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (GESUNDER_TREND)",
-   "stop_ref": 72512.49,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1780272000000,
-   "type": "KAUF_2",
-   "price": 73277.10502,
-   "tranche_pct": 50,
-   "reason": "Golden Pocket 73213-73277 + Bestaetigung (GESUNDER_TREND)",
-   "stop_ref": 72512.49,
-   "tag": "",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1780286400000,
-   "type": "NACHKAUF",
-   "price": 72940.83454000001,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 72512.49,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1780300800000,
-   "type": "STOPLOSS",
-   "price": 72479.99,
-   "tranche_pct": 100,
-   "reason": "Kerzenschluss unter Invalidierung 72512",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
    "ts": 1781035200000,
    "type": "KAUF_1",
    "price": 61682.795,
@@ -1709,6 +1399,26 @@
    "price": 61549.64,
    "tranche_pct": 15,
    "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 59130.91,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1781049600000,
+   "type": "NACHKAUF",
+   "price": 61549.64,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 61384 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 59130.91,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1781107200000,
+   "type": "NACHKAUF",
+   "price": 61942.44,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 61384 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 59130.91,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -1804,6 +1514,16 @@
    "label": "KAUF 1 (Teilposition am 0.5-Level)"
   },
   {
+   "ts": 1781654400000,
+   "type": "NACHKAUF",
+   "price": 65851.99,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 65426 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 63678.83,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
    "ts": 1781683200000,
    "type": "NACHKAUF",
    "price": 64810.01,
@@ -1819,6 +1539,16 @@
    "price": 64301.85,
    "tranche_pct": 15,
    "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 63678.83,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1781712000000,
+   "type": "NACHKAUF",
+   "price": 64301.85,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 64092 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 63678.83,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -1844,36 +1574,6 @@
    "label": "STOPLOSS"
   },
   {
-   "ts": 1782201600000,
-   "type": "KAUF_2",
-   "price": 62507.06,
-   "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 61938), Schluss ueber Invalidierung (NEUTRAL)",
-   "stop_ref": 62272.07,
-   "tag": "FLUSH",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1782216000000,
-   "type": "NACHKAUF",
-   "price": 62989.13264,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 62272.07,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1782302400000,
-   "type": "STOPLOSS",
-   "price": 60250.0,
-   "tranche_pct": 100,
-   "reason": "Kerzenschluss unter Invalidierung 62272",
-   "stop_ref": null,
-   "tag": "",
-   "label": "STOPLOSS"
-  },
-  {
    "ts": 1782662400000,
    "type": "KAUF_1",
    "price": 59528.09,
@@ -1889,6 +1589,26 @@
    "price": 59577.01,
    "tranche_pct": 15,
    "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 58115.01,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1782676800000,
+   "type": "NACHKAUF",
+   "price": 59577.01,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 59103 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 58115.01,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1782734400000,
+   "type": "NACHKAUF",
+   "price": 59824.01,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 59103 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 58115.01,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -1944,14 +1664,14 @@
    "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
   },
   {
-   "ts": 1783900800000,
-   "type": "KAUF_2",
-   "price": 62747.19914,
-   "tranche_pct": 75,
-   "reason": "Golden Pocket 62646-62747 + Bestaetigung (NEUTRAL)",
+   "ts": 1783929600000,
+   "type": "KAUF_1",
+   "price": 63118.695,
+   "tranche_pct": 25,
+   "reason": "0.5-Retracement des Impulses 61545->64693",
    "stop_ref": 61544.56,
    "tag": "",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
+   "label": "KAUF 1 (Teilposition am 0.5-Level)"
   },
   {
    "ts": 1783944000000,
@@ -1959,6 +1679,26 @@
    "price": 62218.28978,
    "tranche_pct": 25,
    "reason": "0.786-Zone erreicht, Struktur intakt",
+   "stop_ref": 61544.56,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1783987200000,
+   "type": "NACHKAUF",
+   "price": 62572.89,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 62294 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 61544.56,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1784016000000,
+   "type": "NACHKAUF",
+   "price": 62844.99,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 62294 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 61544.56,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -2029,6 +1769,16 @@
    "price": 63298.01,
    "tranche_pct": 15,
    "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 61824.97,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1784275200000,
+   "type": "NACHKAUF",
+   "price": 63298.01,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 62741 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 61824.97,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
