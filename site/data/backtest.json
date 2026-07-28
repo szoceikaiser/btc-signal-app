@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-28T14:11:42Z",
+ "generated_at": "2026-07-28T14:27:41Z",
  "zeitraum": "19.11.2025-28.07.2026",
  "variante": "NEU-LIVE +Verkauf unter dem letzten Hoch",
  "params": {
@@ -32,7 +32,7 @@
   "start": 10000.0,
   "ende": 14034.12,
   "rendite_pct": 40.34,
-  "buyhold_pct": -30.96,
+  "buyhold_pct": -30.97,
   "trades": 94,
   "gewinn_trades": 67,
   "long_profit": 4034.12,
@@ -107,7 +107,7 @@
   "start": 10000.0,
   "ende": 12388.3,
   "rendite_pct": 23.88,
-  "buyhold_pct": -30.96,
+  "buyhold_pct": -30.97,
   "trades": 73,
   "gewinn_trades": 50,
   "long_profit": 2388.3,
