@@ -107,7 +107,7 @@ GRID = [
     # nachgezogener Stop statt Rest-Verkauf. Messfrage: bringt das die Treffer-
     # Verbesserung der Rest-Freigabe OHNE deren Rendite-Verlust, weil Runner am Leben
     # bleiben? Und die Kombination aus beidem als Gegenprobe.
-    V("LIVE +Stop nachziehen", panel=True, bias_short=False, flush_entry="core",
+    V("LIVE +Stop nachziehen", bias_short=False, flush_entry="core",
       buy_ladder=True, trail_stop=True),
     V("LIVE +Stop nachziehen +Rest-Freigabe", bias_short=False, flush_entry="core",
       buy_ladder=True, trail_stop=True, release_stale_rest=True),
@@ -122,8 +122,11 @@ GRID = [
       trail_stop=True, liq_exit="both"),
     # Kaisers Vergleichsvariante: seine Live-Einstellung, aber OHNE den aggressiven
     # Flush-Einstieg (der verdoppelt Rendite UND Rueckgang). Fuer die Monatsuebersicht.
+    # Vergleichsspalte der Monatsuebersicht. MUSS mit der panel-Zeile identisch sein bis
+    # auf flush_entry="off" — sonst vergleicht die Webseite zwei verschiedene Dinge und
+    # der Unterschied waere nicht mehr "der Flush", sondern ein Sammelsurium.
     V("MEINE Einstellung ohne Flush", bias_short=False, flush_entry="off",
-      buy_ladder=True, trail_stop=True),
+      buy_ladder=True, trail_stop=True, min_stop_pct=0.02, liq_entry="boost"),
     # E10.3 (Furkan-Update B, 18:27): Liquidationszonen auf der EINSTIEGS-Seite. Nach dem
     # Befund aus E10.2 (Verkaufsseite kostet durchgehend Rendite) ist das die Seite, auf
     # der noch etwas zu holen sein koennte. "boost" = zusaetzlich aufstocken bei Konfluenz,
@@ -176,7 +179,10 @@ GRID = [
     # gehalten hat). Beide greifen an derselben Stelle an — der Einstiegs-Auswahl —, also
     # ist Ueberschneidung moeglich: "Sperre + Mindestabstand" war zusammen SCHLECHTER als
     # jeder Hebel allein (+26,4 % gegen +33,9/+33,0 %). Genau das wird hier geprueft.
-    V("LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz",
+    # LIVE seit 2026-07-28: einzige Variante, die in BEIDEN Haelften unter den besten 5
+    # liegt (H1 1., H2 3.), beste Rendite je Rueckgangspunkt im Feld (5,7 gegen 2,6 der
+    # vorherigen Einstellung). Deshalb wandert panel=True hierher.
+    V("LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz", panel=True,
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost"),
     V("LIVE +Stop +Sperre 48 h +Liq-Konfluenz",
