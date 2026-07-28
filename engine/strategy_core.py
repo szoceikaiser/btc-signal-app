@@ -36,11 +36,20 @@ class FlowPoint:
 
 
 class Pattern(Enum):
-    """Der Order-Flow-Kompass (STRATEGIE.md Abschnitt 3)."""
+    """Der Order-Flow-Kompass (STRATEGIE.md Abschnitt 3).
+
+    Muster 1-4 stammen woertlich aus Furkans Notizen (Frame 14:50). Muster 5 ist eine
+    Ergaenzung aus E13: Furkans vier Muster beschreiben drei steigende Maerkte und EINEN
+    gesunden Absturz (Kapitulation). Fuer einen UNgesunden Absturz gab es keinen Begriff —
+    er landete auf NEUTRAL und war damit von einem ruhigen Seitwaertsmarkt nicht zu
+    unterscheiden. Genau in dieser Lage hat die Engine gekauft (16 von 34 Ersteinstiegen
+    bei NEUTRAL). Muster 5 gibt der Lage einen Namen, damit man sie sperren kann.
+    """
     GESUNDER_TREND = 1
     DERIVATE_PUMP = 2
     SHORT_COVERING = 3
     CAPITULATION_RESET = 4
+    UNGESUNDER_ABVERKAUF = 5
     NEUTRAL = 0
 
 
@@ -310,6 +319,17 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
         spot_turning = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
         if spot_turning and (oi_chg <= -oi_wipeout_pct or long_liq_spike):
             return Pattern.CAPITULATION_RESET
+    # 5: Ungesunder Abverkauf (E13) — das Spiegelbild von Muster 4. Der Kurs faellt, aber
+    #    der Markt ist NICHT ausgeraeumt: Spot-CVD faellt mit (der Dip wird nicht gekauft),
+    #    OI haelt oder steigt (die gehebelten Longs sind noch drin und laden nach),
+    #    Funding noch positiv (Long-Ueberhang unveraendert), keine Long-Liquidations-
+    #    Kaskade (die Zwangsverkaeufe stehen noch bevor). Alle vier zusammen = Furkans
+    #    Konfluenz-Prinzip, nur negativ: genau die Lage, in der er NICHT kauft.
+    #    Halbe Schwelle beim Preis, weil dieser Zustand typischerweise VOR dem scharfen
+    #    Einbruch vorliegt — er soll warnen, bevor der Flush kommt, nicht danach.
+    if (price_chg <= -sharp_move_pct / 2 and spot < 0 and oi_chg >= -0.01
+            and funding_now > 0 and not long_liq_spike):
+        return Pattern.UNGESUNDER_ABVERKAUF
     # 3: Short-Covering — Preis hoch, OI runter ODER echte Short-Liquidations-Kaskade
     if price_chg >= sharp_move_pct / 2 and (oi_chg <= -0.02 or short_liq_spike):
         return Pattern.SHORT_COVERING
@@ -359,6 +379,10 @@ class Position:
     liq_exits: int = 0                       # Anzahl Teilverkaeufe an Liquidationen (E9.11)
     high_exits: int = 0                      # Anzahl Teilverkaeufe am letzten Hoch (E10.2)
     liq_entries: int = 0                     # Anzahl Konfluenz-Nachkaeufe an Liq-Zonen (E10.3)
+    # Zeitpunkt des letzten Stops (E13, cooldown_h). Gehoert BEWUSST NICHT in
+    # _reset_position: Er ist die Erinnerung ZWISCHEN zwei Positionen und muss den
+    # Positions-Reset ueberleben, sonst wuesste die Sperre nach dem Stop nichts mehr.
+    last_stop_ts: int = -1
 
 
 def _reset_position(pos: "Position") -> None:
@@ -505,7 +529,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              conditional_stop: bool = False, buy_ladder: bool = True,
              release_stale_rest: bool = False, trail_stop: bool = False,
              liq_exit: str = "off", high_exit: str = "off",
-             liq_entry: str = "off") -> list[Signal]:
+             liq_entry: str = "off", block_unhealthy: bool = False,
+             confirm_t1: bool = False, cooldown_h: float = 0.0,
+             min_stop_pct: float = 0.0) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -545,6 +571,22 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # "filter". "boost" = zusaetzliche Nachkauf-Tranche, wenn die Fib-Zone mit einem
     # historischen Long-Liquidations-Cluster zusammenfaellt (Furkans Konfluenz).
     # "filter" = Einstiege NUR bei dieser Konfluenz (restriktiv, Gegenprobe).
+    # ---------------------------------------------------------------- E13 (alle Default aus)
+    # Vier Hebel gegen Einstiege in einen ungesunden Markt bzw. gegen zu viele Trades.
+    # Befund, der sie ausgeloest hat (docs/VERLUST-ANALYSE-2026-07-27.md, Abschnitt 6c):
+    # von 34 Ersteinstiegen hatten 16 GAR KEINE Flow-Pruefung (0.5-Level) und 16 das
+    # Muster NEUTRAL — 32 von 34 ohne ein einziges gesundes Signal.
+    # block_unhealthy: sperrt Einstiege UND Nachkaeufe, solange der Order-Flow gegen die
+    #   Richtung laeuft — Long bei Muster 5 (ungesunder Abverkauf), Short bei Muster 1
+    #   (gesunder Trend, also echte Spot-Nachfrage; in die shortet Furkan nicht).
+    # confirm_t1: verlangt auch fuer den 0.5-Level-Einstieg eine Order-Flow-Bestaetigung.
+    #   Dieser Zweig hatte bisher als einziger KEINE — er feuerte allein auf Preisberuehrung.
+    # cooldown_h: Sperrfrist in Stunden nach einem Stop (0 = aus). Gegen die Saegeblatt-
+    #   Serien: die laengste war 10 Stops in Folge, medianer Abstand zum Wiedereinstieg 68 h,
+    #   kuerzester Fall 4 h. Furkan wartet nach einem Stop auf eine neue Struktur.
+    # min_stop_pct: Mindestabstand Einstieg->Invalidierung als Anteil (0 = aus). 15 von 34
+    #   Positionen lagen unter 2 %, eine bei 0,02 % — solche Stops loest schon das normale
+    #   Rauschen aus. Furkans eigenes Video-Beispiel liegt bei 3,59 %.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -604,13 +646,41 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         fund_hot = bool(flow) and flow[-1].funding > 0
         return strong or (cvd_dn and fund_hot) if strict_confirm else strong or fund_hot or cvd_dn
 
+    # --- E13-Helfer -----------------------------------------------------------------
+    def _healthy(long_side: bool) -> bool:
+        """Warnlicht: laeuft der Order-Flow gerade GEGEN die geplante Richtung?"""
+        if not block_unhealthy:
+            return True
+        if long_side:
+            return pattern != Pattern.UNGESUNDER_ABVERKAUF
+        return pattern != Pattern.GESUNDER_TREND      # nicht in echte Spot-Nachfrage shorten
+
+    def _t1_ok(long_side: bool) -> bool:
+        """Order-Flow-Bestaetigung auch fuer den 0.5-Level-Einstieg (sonst ungeprueft)."""
+        if not confirm_t1:
+            return True
+        return _confirm_long() if long_side else _confirm_short()
+
+    def _cooldown_ok() -> bool:
+        """Sperrfrist nach einem Stop abgelaufen?"""
+        if cooldown_h <= 0 or pos.last_stop_ts <= 0:
+            return True
+        return (cur.ts - pos.last_stop_ts) >= cooldown_h * 3600 * 1000
+
+    def _stop_weit_genug(preis: float, zonen: FibZones) -> bool:
+        """Liegt die Invalidierung weit genug vom Einstieg entfernt?"""
+        if min_stop_pct <= 0 or preis <= 0:
+            return True
+        return abs(preis - zonen.invalidation) / preis >= min_stop_pct
+
     # --- Einstiegs-Logik (FLAT): Referenz-Impuls noetig
-    if pos.state == PosState.FLAT and imp is not None:
+    if pos.state == PosState.FLAT and imp is not None and _cooldown_ok():
         z = fib_zones(imp)
-        if imp.up and bias_long and pattern != Pattern.DERIVATE_PUMP:
+        if imp.up and bias_long and pattern != Pattern.DERIVATE_PUMP and _healthy(True):
             if (cur.low <= z.level_05 and cur.low > z.gp_upper
                     and _trend_ok(True) and _confluence_ok(cur.low)
-                    and _liq_entry_ok(cur.low, True)):
+                    and _liq_entry_ok(cur.low, True)
+                    and _t1_ok(True) and _stop_weit_genug(z.level_05, z)):
                 pos.direction, pos.state, pos.zones = "LONG", PosState.T1, z
                 pos.retrace_extreme = cur.low
                 signals.append(Signal(cur.ts, SignalType.KAUF_1, z.level_05, TRANCHEN["T1"],
@@ -618,7 +688,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                       stop_ref=z.invalidation))
             elif z.gp_lower <= cur.low <= z.gp_upper:
                 if (_confirm_long() and _trend_ok(True) and _confluence_ok(cur.low)
-                        and _liq_entry_ok(cur.low, True)):
+                        and _liq_entry_ok(cur.low, True)
+                        and _stop_weit_genug(z.gp_upper, z)):
                     pos.direction, pos.state, pos.zones = "LONG", PosState.CORE, z
                     pos.retrace_extreme = cur.low
                     signals.append(Signal(cur.ts, SignalType.KAUF_2, z.gp_upper,
@@ -629,7 +700,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                   and cur.close > z.invalidation):
                 # Capitulation-Einstieg (E8.1): Kerze durchschlaegt das GP nach unten
                 # (Flush-Tage wie 10.10./04.11.), schliesst aber ueber der Invalidierung
-                if _confirm_long() and _trend_ok(True) and _liq_entry_ok(cur.low, True):
+                if (_confirm_long() and _trend_ok(True) and _liq_entry_ok(cur.low, True)
+                        and _stop_weit_genug(cur.close, z)):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.KAUF_1 if small else SignalType.KAUF_2
@@ -639,10 +711,12 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     signals.append(Signal(cur.ts, sig_t, cur.close, tr,
                                           f"Capitulation: GP durchschlagen (Tief {cur.low:.0f}), Schluss ueber Invalidierung ({pattern.name})",
                                           stop_ref=z.invalidation, tag="FLUSH"))
-        elif (not imp.up) and bias_short and pattern != Pattern.CAPITULATION_RESET:
+        elif ((not imp.up) and bias_short and pattern != Pattern.CAPITULATION_RESET
+                and _healthy(False)):
             if (cur.high >= z.level_05 and cur.high < z.gp_upper
                     and _trend_ok(False) and _confluence_ok(cur.high)
-                    and _liq_entry_ok(cur.high, False)):
+                    and _liq_entry_ok(cur.high, False)
+                    and _t1_ok(False) and _stop_weit_genug(z.level_05, z)):
                 pos.direction, pos.state, pos.zones = "SHORT", PosState.T1, z
                 pos.retrace_extreme = cur.high
                 signals.append(Signal(cur.ts, SignalType.SHORT_1, z.level_05, TRANCHEN["T1"],
@@ -650,7 +724,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                       stop_ref=z.invalidation))
             elif z.gp_upper <= cur.high <= z.gp_lower:  # Short: 0.65 liegt OBEN
                 if (_confirm_short() and _trend_ok(False) and _confluence_ok(cur.high)
-                        and _liq_entry_ok(cur.high, False)):
+                        and _liq_entry_ok(cur.high, False)
+                        and _stop_weit_genug(z.gp_upper, z)):
                     pos.direction, pos.state, pos.zones = "SHORT", PosState.CORE, z
                     pos.retrace_extreme = cur.high
                     signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
@@ -661,7 +736,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                   and cur.close < z.invalidation):
                 # Squeeze-Einstieg (E8.1, Spiegelbild): Kerze durchschlaegt das GP nach
                 # oben, schliesst aber unter der Invalidierung
-                if _confirm_short() and _trend_ok(False) and _liq_entry_ok(cur.high, False):
+                if (_confirm_short() and _trend_ok(False) and _liq_entry_ok(cur.high, False)
+                        and _stop_weit_genug(cur.close, z)):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.SHORT_1 if small else SignalType.SHORT_2
@@ -749,6 +825,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             # Maximum und schalteten die zugehoerigen Mechanismen still ab, bis zufaellig
             # einmal ueber VERKAUF_REST geschlossen wurde. Jetzt derselbe Reset wie ueberall.
             _reset_position(pos)
+            pos.last_stop_ts = cur.ts        # E13: Merker fuer die Sperrfrist (cooldown_h)
         else:
             # Mehrtages-Kaufleiter (E9.5): neue Tiefkerze IN der Retracement-Zone (ueber
             # Invalidierung, unter 0.5) mit Flow-Bestaetigung -> kleine Tranche nachlegen.
@@ -762,7 +839,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     in_zone = z.level_05 <= cur.high < z.invalidation
                     ladder_ok = _confirm_short()
                     nk = SignalType.SHORT_NACHLEGEN
-                if in_zone and ladder_ok:
+                # E13: In einen ungesunden Abverkauf wird auch nicht NACHgekauft. Genau
+                # das war Kaisers Beispiel 16.06.: Ersteinstieg, dann drei Nachkaeufe in
+                # einen weiter fallenden Markt, dann Stop.
+                if in_zone and ladder_ok and _healthy(long_side):
                     signals.append(Signal(cur.ts, nk, cur.close, BUY_LADDER_TRANCHE,
                                           f"Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt ({pattern.name})",
                                           stop_ref=z.invalidation))

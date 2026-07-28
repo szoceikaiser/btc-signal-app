@@ -63,12 +63,14 @@ SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_R
 EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "tp_ladder", "trend_filter", "strict_confirm", "confluence",
              "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop",
-             "liq_exit", "high_exit", "liq_entry")
+             "liq_exit", "high_exit", "liq_entry",
+             "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, strict_confirm=False, confluence=False,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
-             trail_stop=False, liq_exit="off", high_exit="off", liq_entry="off")
+             trail_stop=False, liq_exit="off", high_exit="off", liq_entry="off",
+             block_unhealthy=False, confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0)
 
 
 def V(label, panel=False, **kw):
@@ -144,6 +146,29 @@ GRID = [
       buy_ladder=True, trail_stop=True, deploy_pct=0.6),
     V("LIVE +Stop, 50 % Einsatz (50 % Reserve)", bias_short=False, flush_entry="core",
       buy_ladder=True, trail_stop=True, deploy_pct=0.5),
+    # ---------------------------------------------------------------- E13 (Kaisers Frage:
+    # "Furkan steigt nur bei gesunden Indikatoren ein — warum kauft die App trotzdem?")
+    # Befund: von 34 Ersteinstiegen hatten 16 GAR KEINE Flow-Pruefung (0.5-Level) und
+    # 16 das Muster NEUTRAL. Vier Hebel, jeder EINZELN und alle ZUSAMMEN gegen die
+    # Live-Einstellung. Basis ist immer "LIVE +Stop", damit das Delta ablesbar ist.
+    V("LIVE +Stop +Warnlicht (kein Kauf in ungesunden Abverkauf)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      block_unhealthy=True),
+    V("LIVE +Stop +Flow-Pruefung am 0.5-Level",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      confirm_t1=True),
+    V("LIVE +Stop +Sperre 48 h nach Stop",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      cooldown_h=48),
+    V("LIVE +Stop +Mindest-Stopabstand 2 %",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02),
+    V("LIVE +Stop +Sperre 48 h +Mindestabstand 2 %",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      cooldown_h=48, min_stop_pct=0.02),
+    V("LIVE +Stop +alle vier neuen Hebel",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      block_unhealthy=True, confirm_t1=True, cooldown_h=48, min_stop_pct=0.02),
     V("Long+Short (Ref)"),
 ]
 

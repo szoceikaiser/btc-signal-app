@@ -9,7 +9,9 @@ permissions:
 jobs:
   backtest:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 25 Varianten x 3 Laeufe (Vollfenster + 2 Haelften). Reserve nach oben, weil das
+    # Gitter mit E13 gewachsen ist; oeffentliche Repos haben unbegrenzte Actions-Minuten.
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
       - name: Backtest ausfuehren

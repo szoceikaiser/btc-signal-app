@@ -797,3 +797,164 @@ def test_stoploss_setzt_alle_zaehler_zurueck():
                 assert pos.liq_exits == 0 and pos.high_exits == 0 and pos.liq_entries == 0
                 assert pos.tp_rungs == 0 and pos.dip_buys == 0 and pos.buy_rungs == 0
     assert gestoppt, "Testaufbau erzeugte keinen STOPLOSS"
+
+
+# ------------------------------------------------- E13: Warnlicht + drei Begrenzungen
+
+def test_kompass_muster5_ungesunder_abverkauf():
+    """Der Kurs faellt, aber der Markt ist NICHT ausgeraeumt — Furkans Nicht-Kauf-Lage.
+
+    Spiegelbild von Muster 4: Spot-CVD faellt mit (der Dip wird nicht gekauft), Open
+    Interest haelt (die gehebelten Longs sind noch drin), Funding weiter positiv
+    (Long-Ueberhang unveraendert), keine Long-Liquidations-Kaskade (die Zwangsverkaeufe
+    stehen noch bevor).
+    """
+    n = 12
+    candles = trend_candles(n, 100000, 97000)                      # -3 %
+    flow = flow_series(
+        spot=[100 - i * 4 for i in range(n)],                      # Spot-CVD faellt mit
+        fut=[0] * n,
+        oi=[1000 + i * 2 for i in range(n)],                       # OI steigt sogar
+        funding=[0.0002] * n)                                      # Funding positiv
+    assert classify_pattern(candles, flow) == Pattern.UNGESUNDER_ABVERKAUF
+
+
+def test_muster5_weicht_der_kapitulation():
+    """Ist der Markt ausgeraeumt, gewinnt Muster 4 — sonst wuerde das Warnlicht genau die
+    guten Dips sperren, die Furkan kauft."""
+    n = 12
+    candles = trend_candles(n, 100000, 93000)
+    flow = flow_series(
+        spot=[100] * 9 + [95, 100, 106],                           # Spot dreht hoch
+        fut=[0] * n,
+        oi=[1000 - i * 8 for i in range(n)],                       # OI-Wipeout
+        funding=[0.0002] * n)                                      # Funding trotzdem positiv
+    assert classify_pattern(candles, flow) == Pattern.CAPITULATION_RESET
+
+
+def e13_szenario(spot_faellt=True, oi_steigt=True, funding_positiv=True):
+    """Gemeinsamer Aufbau fuer die E13-Tests.
+
+    Klarer Impuls 97,6 -> 130,5 (Pivots mit n=2), danach ein 16 Kerzen langer, ruhiger
+    Rueckgang. Die letzte Kerze faellt in das 0.5-Retracement (114,06) — dort feuert
+    KAUF 1, der einzige Einstieg, der bisher gar keine Order-Flow-Pruefung hatte.
+    Ueber die drei Schalter laesst sich der Order-Flow gesund/ungesund stellen.
+    """
+    werte = [100, 99, 98, 99, 104, 110, 116, 122, 128, 130] + [130 - i for i in range(1, 17)]
+    cs = [Candle(1_600_000_000_000 + i * H4_MS, v, v * 1.004, v * 0.996, v)
+          for i, v in enumerate(werte)]
+    fl = [FlowPoint(c.ts,
+                    5000.0 - i * 30 if spot_faellt else 5000.0 + i * 30,
+                    0.0,
+                    1e9 + i * 1e6 if oi_steigt else 1e9 - i * 2e7,
+                    0.0002 if funding_positiv else -0.0002)
+          for i, c in enumerate(cs)]
+    return cs, fl
+
+
+def e13_lauf(cs, fl, **kw):
+    pos = Position()
+    raus = []
+    for i in range(len(cs)):
+        raus += [s.type for s in evaluate(cs[:i + 1], fl[:i + 1], pos,
+                                          bias_short=False, pivot_n=2, **kw)]
+    return raus
+
+
+def test_warnlicht_sperrt_long_im_ungesunden_abverkauf():
+    """Muster 5 aktiv -> kein Kauf. Das ist Kaisers Frage in Testform."""
+    cs, fl = e13_szenario()
+    assert classify_pattern(cs, fl) == Pattern.UNGESUNDER_ABVERKAUF
+    assert SignalType.KAUF_1 in e13_lauf(cs, fl), "ohne Warnlicht muesste gekauft werden"
+    assert e13_lauf(cs, fl, block_unhealthy=True) == [], "Warnlicht hat nicht gesperrt"
+
+
+def test_warnlicht_sperrt_NICHT_bei_bloss_neutralem_markt():
+    """Gegenprobe: Das Warnlicht darf nur Muster 5 sperren, nicht jeden ruhigen Markt.
+
+    Gleicher Chart, gleicher fallender Spot-CVD, gleiches positives Funding — nur das
+    Open Interest faellt jetzt (die gehebelten Longs sind raus). Damit ist die Lage nicht
+    mehr ungesund, und der Kauf muss durchgehen.
+    """
+    cs, fl = e13_szenario(oi_steigt=False)
+    assert classify_pattern(cs, fl) != Pattern.UNGESUNDER_ABVERKAUF
+    assert SignalType.KAUF_1 in e13_lauf(cs, fl, block_unhealthy=True)
+
+
+def test_confirm_t1_prueft_den_05_einstieg():
+    """Ohne confirm_t1 feuert KAUF 1 allein auf Preisberuehrung — mit muss der Flow passen."""
+    cs, fl = e13_szenario()                       # Flow gegen Long (Spot faellt, Funding +)
+    assert SignalType.KAUF_1 in e13_lauf(cs, fl)
+    assert e13_lauf(cs, fl, confirm_t1=True) == []
+    # Bei gesundem Flow (Spot steigt, Funding negativ) laesst confirm_t1 den Kauf durch
+    cs2, fl2 = e13_szenario(spot_faellt=False, funding_positiv=False)
+    assert SignalType.KAUF_1 in e13_lauf(cs2, fl2, confirm_t1=True)
+
+
+def test_min_stop_pct_verwirft_zu_enge_stops():
+    """Liegt die Invalidierung zu nah am Einstieg, kommt gar kein Signal."""
+    cs, fl = e13_szenario(spot_faellt=False, funding_positiv=False)
+    assert SignalType.KAUF_1 in e13_lauf(cs, fl)
+    # Einstieg 114,06 gegen Invalidierung 97,6 = gut 14 % Abstand
+    assert SignalType.KAUF_1 in e13_lauf(cs, fl, min_stop_pct=0.10)
+    assert e13_lauf(cs, fl, min_stop_pct=0.20) == []
+
+
+def test_cooldown_sperrt_wiedereinstieg_nach_stop():
+    """Nach einem Stop wird cooldown_h Stunden lang gar nicht eingestiegen.
+
+    Gleicher Aufbau wie die uebrigen E13-Tests, gesunder Flow (der Kauf waere also
+    faellig). Nur der Merker last_stop_ts steht kurz vor der Einstiegskerze.
+    """
+    cs, fl = e13_szenario(spot_faellt=False, funding_positiv=False)
+    einstieg_ts = cs[-1].ts
+
+    def lauf(stop_vor_h, **kw):
+        pos = Position()
+        pos.last_stop_ts = einstieg_ts - int(stop_vor_h * 3600 * 1000)
+        raus = []
+        for i in range(len(cs)):
+            raus += [s.type for s in evaluate(cs[:i + 1], fl[:i + 1], pos,
+                                              bias_short=False, pivot_n=2, **kw)]
+        return raus
+
+    # ohne Sperre: Kauf faellig
+    assert SignalType.KAUF_1 in lauf(4)
+    # Stop lag 4 h zurueck, Sperre 48 h -> nichts
+    assert lauf(4, cooldown_h=48) == []
+    # Stop lag 72 h zurueck, Sperre 48 h abgelaufen -> Kauf wieder erlaubt
+    assert SignalType.KAUF_1 in lauf(72, cooldown_h=48)
+
+
+def test_last_stop_ts_ueberlebt_den_positions_reset():
+    """Der Merker fuer die Sperrfrist darf beim Schliessen NICHT zurueckgesetzt werden —
+    sonst wuesste die Engine nach dem Stop nicht mehr, dass gerade einer war."""
+    pos = Position()
+    pos.last_stop_ts = 4711
+    pos.entry_pct = 90
+    from strategy_core import _reset_position
+    _reset_position(pos)
+    assert pos.entry_pct == 0, "Positionsdaten muessen zurueckgesetzt werden"
+    assert pos.last_stop_ts == 4711, "last_stop_ts darf den Reset nicht verlieren"
+
+
+def test_e13_hebel_sind_default_aus():
+    """Sicherung: ohne ausdrueckliches Einschalten aendert E13 nichts am Verhalten."""
+    ms = H4_MS
+    werte = ([100, 101, 100, 102, 101, 103, 102, 104, 103, 105]
+             + [110, 115, 120, 125, 130, 132, 131, 133, 132, 134]
+             + [128, 122, 118, 116, 114, 112, 110, 108, 106, 104])
+    cs = [Candle(1_600_000_000_000 + i * ms, v, v * 1.004, v * 0.996, v)
+          for i, v in enumerate(werte)]
+    fl = [FlowPoint(c.ts, 1000.0 + i * 10, 0.0, 1e9, -0.0001) for i, c in enumerate(cs)]
+
+    def lauf(**kw):
+        pos = Position()
+        raus = []
+        for i in range(len(cs)):
+            raus += [(s.ts, s.type) for s in
+                     evaluate(cs[:i + 1], fl[:i + 1], pos, bias_short=False, **kw)]
+        return raus
+
+    assert lauf() == lauf(block_unhealthy=False, confirm_t1=False,
+                          cooldown_h=0, min_stop_pct=0.0)
