@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 
 import backtest
+from strategy_core import Candle
 
 
 def _ts(iso: str) -> int:
@@ -201,3 +202,69 @@ def test_score_ignoriert_signale_nach_dem_letzten_trigger():
     assert sc["precision"] == 1.0                        # nur der Januar-Tag wird gewertet
     assert sc["eval_end"] == date(2026, 4, 22) + timedelta(days=1)
     assert all(d <= sc["eval_end"] for d in sc["buy_days"] + sc["sell_days"])
+
+
+# ------------------------------------------------- E15: Furkans Termine als P&L
+
+def _tageskerzen(preise, start_tag="2026-01-01"):
+    """Eine 4h-Kerze je Tag (reicht: furkan_pnl nimmt den letzten Schluss des Tages)."""
+    from datetime import datetime, timezone, timedelta
+    t0 = datetime.fromisoformat(start_tag).replace(tzinfo=timezone.utc)
+    return [Candle(int((t0 + timedelta(days=i)).timestamp() * 1000), p, p, p, p)
+            for i, p in enumerate(preise)]
+
+
+def test_furkan_pnl_rechnet_kauf_und_verkauf_korrekt():
+    """Ein Kauf bei 100, ein Verkauf bei 200 mit voller Position = Verdopplung minus Gebuehr."""
+    cs = _tageskerzen([100, 150, 200])
+    r = backtest.furkan_pnl(cs, ["2026-01-01"], ["2026-01-03"],
+                            kauf_pct=1.0, verkauf_pct=1.0, fee=0.0)
+    assert r["kauftage"] == 1 and r["verkaufstage"] == 1
+    assert abs(r["ende"] - 20000.0) < 1e-6, r
+    assert abs(r["rendite_pct"] - 100.0) < 1e-6
+
+
+def test_furkan_pnl_gebuehr_wird_abgezogen():
+    cs = _tageskerzen([100, 200])
+    ohne = backtest.furkan_pnl(cs, ["2026-01-01"], ["2026-01-02"], 1.0, 1.0, fee=0.0)
+    mit = backtest.furkan_pnl(cs, ["2026-01-01"], ["2026-01-02"], 1.0, 1.0, fee=0.01)
+    assert mit["ende"] < ohne["ende"]
+    # 1 % beim Kauf und 1 % beim Verkauf -> ca. 2 % weniger
+    assert abs(mit["ende"] - 20000 * 0.99 * 0.99) < 1.0, mit
+
+
+def test_furkan_pnl_verkauf_ohne_position_tut_nichts():
+    cs = _tageskerzen([100, 200])
+    r = backtest.furkan_pnl(cs, [], ["2026-01-01", "2026-01-02"], 0.5, 0.5, fee=0.0)
+    assert r["verkaufstage"] == 0 and abs(r["ende"] - 10000.0) < 1e-6
+
+
+def test_furkan_pnl_rotationstag_verkauft_erst_dann_kauft():
+    """Tag mit Kauf UND Verkauf: erst raus, dann rein (docs/GEGENCHECK.md).
+
+    Andernfalls wuerde am selben Tag die gerade gekaufte Tranche sofort mitverkauft und
+    das Ergebnis waere ein anderes — deshalb pruefen wir die Reihenfolge fest.
+    """
+    cs = _tageskerzen([100, 100])
+    r = backtest.furkan_pnl(cs, ["2026-01-01", "2026-01-02"], ["2026-01-02"],
+                            kauf_pct=1.0, verkauf_pct=1.0, fee=0.0)
+    # Tag 1: alles rein (100 Einheiten). Tag 2: erst alles raus (10.000 Cash),
+    # dann alles wieder rein -> am Ende wieder voll investiert, Wert unveraendert.
+    assert abs(r["ende"] - 10000.0) < 1e-6, r
+    assert r["kauftage"] == 2 and r["verkaufstage"] == 1
+
+
+def test_furkan_pnl_fenster_wird_beachtet():
+    cs = _tageskerzen([100, 100, 100, 500])
+    ganz = backtest.furkan_pnl(cs, ["2026-01-01"], ["2026-01-04"], 1.0, 1.0, fee=0.0)
+    # Fenster endet vor dem Verkaufstag -> Position bleibt offen, Bewertung zum Kurs
+    kurz = backtest.furkan_pnl(cs, ["2026-01-01"], ["2026-01-04"], 1.0, 1.0, fee=0.0,
+                               end_ms=cs[2].ts)
+    assert abs(ganz["ende"] - 50000.0) < 1e-6
+    assert abs(kurz["ende"] - 10000.0) < 1e-6, kurz
+
+
+def test_furkan_pnl_ohne_kerzen_im_fenster_liefert_leer():
+    cs = _tageskerzen([100, 100])
+    assert backtest.furkan_pnl(cs, ["2026-01-01"], [], 1.0, 1.0,
+                               start_ms=cs[-1].ts + 10**9) == {}

@@ -31,6 +31,23 @@ ENDPOINTS = {
     "liquidations": "liquidation-history",
 }
 
+# E15: Was bietet Coinalyze AUSSER dem, was wir schon nutzen? Zwei offene Luecken:
+#   (1) Futures-CVD fehlt komplett — fapi.binance.com sperrt US-Runner (HTTP 451).
+#       Wenn eine dieser Historien Taker-Kauf-/Verkaufsvolumen liefert, ist Muster 2
+#       (Derivate-Pump) erstmals mit echten Daten pruefbar statt ueber Hilfsmerkmale.
+#   (2) Long-Short-Verhaeltnis — bei Furkan Teil der Positionierungs-Einschaetzung.
+# Kein Blind-Parsen (Projektregel): erst die ROHE Antwort holen und ansehen, dann bauen.
+# Namen sind Kandidaten aus der Coinalyze-Doku; nicht existierende geben 404 und werden
+# als solche protokolliert — der Lauf scheitert daran nicht.
+KANDIDATEN = {
+    "ohlcv": "ohlcv-history",
+    "buy_sell_volume": "buy-sell-volume-history",
+    "long_short_ratio": "long-short-ratio-history",
+    "predicted_funding": "predicted-funding-rate-history",
+    "future_markets": "future-markets",
+    "exchanges": "exchanges",
+}
+
 
 def build_url(endpoint: str, params: dict) -> str:
     """Reine URL-Konstruktion (offline testbar)."""
@@ -126,14 +143,44 @@ def probe():
     if not api_key:
         out["error"] = "COINALYZE_API_KEY fehlt (Secret nicht gesetzt?)"
     else:
-        for name, ep in ENDPOINTS.items():
+        def _hole(ep, ohne_zeitraum=False):
+            if ohne_zeitraum:                      # Metadaten-Endpunkte kennen kein from/to
+                return _sample(get_json(ep, {}, api_key))
+            return _sample(fetch_history(ep, api_key))
+
+        def _versuch(ep, ohne_zeitraum=False):
             try:
-                out[name] = _sample(fetch_history(ep, api_key))
+                return _hole(ep, ohne_zeitraum), None
             except urllib.error.HTTPError as e:
-                body = e.read().decode(errors="replace")[:800]
-                out[name] = {"http_error": e.code, "body": body}
+                return {"http_error": e.code,
+                        "body": e.read().decode(errors="replace")[:400]}, e.code
             except Exception as e:  # noqa: BLE001
-                out[name] = {"error": f"{type(e).__name__}: {str(e)[:300]}"}
+                return {"error": f"{type(e).__name__}: {str(e)[:300]}"}, "exc"
+
+        for name, ep in ENDPOINTS.items():
+            out[name], _ = _versuch(ep)
+
+        # --- E15: Kandidaten-Endpunkte abklopfen (fuer Futures-CVD + Long-Short) -------
+        gefunden, fehlt = [], []
+        kand = {}
+        for name, ep in KANDIDATEN.items():
+            time.sleep(1.6)                        # Rate-Limit 40/Min respektieren
+            daten, fehler = _versuch(ep, ohne_zeitraum=name in ("future_markets", "exchanges"))
+            kand[name] = {"pfad": ep, "antwort": daten}
+            (fehlt if fehler else gefunden).append(f"{name} ({ep})")
+        out["kandidaten"] = kand
+        out["_ergebnis"] = {
+            "nutzbar": gefunden or ["— keiner"],
+            "nicht_vorhanden": fehlt or ["— keiner"],
+            "_lesehilfe": ("'nutzbar' = Endpunkt existiert und hat geantwortet; jetzt im "
+                           "Feld 'kandidaten' nachsehen, WELCHE Felder drin sind. Fuer "
+                           "Futures-CVD brauchen wir Taker-Kauf- und -Verkaufsvolumen "
+                           "getrennt (oft 'bv'/'sv' oder 'buy_volume'/'sell_volume'). "
+                           "Nur wenn beides da ist, laesst sich ein echtes Futures-CVD "
+                           "bilden."),
+        }
+        print("\nNUTZBAR:", ", ".join(gefunden) or "keiner")
+        print("NICHT VORHANDEN:", ", ".join(fehlt) or "keiner")
     path = ROOT / "site" / "data" / "coinalyze_probe.json"
     path.write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     print("Probe geschrieben:", path)

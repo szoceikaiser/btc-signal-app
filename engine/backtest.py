@@ -504,6 +504,63 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     }
 
 
+def furkan_pnl(candles, kauf_tage: list[str], verkauf_tage: list[str],
+               kauf_pct: float, verkauf_pct: float, fee: float = 0.001,
+               start_capital: float = 10000.0, start_ms: int | None = None,
+               end_ms: int | None = None) -> dict:
+    """Was haetten FURKANS eigene Termine verdient? (E15)
+
+    Bisher dienten Kaisers Trigger-Listen nur als Aehnlichkeits-Massstab (Recall) — was
+    sie an Geld gebracht haetten, wurde nie gerechnet. Diese Funktion schliesst die Luecke
+    und macht Kaisers Frage „ist seine Methode besser?" zu einer Zahl.
+
+    Annahmen (bewusst offengelegt, weil die Listen nur TAGE enthalten, keine Betraege):
+    - Preis = Schlusskurs der letzten 4h-Kerze des jeweiligen UTC-Tages.
+    - `kauf_pct` = Anteil des freien Geldes je Kauftag, `verkauf_pct` = Anteil der
+      Position je Verkaufstag. Beides ist UNBEKANNT — deshalb wird ausserhalb eine
+      Spanne ueber mehrere Annahmen gerechnet statt einer Scheingenauigkeit.
+    - Tage mit Kauf UND Verkauf: erst verkaufen, dann kaufen (Rotation, so liest es
+      docs/GEGENCHECK.md: Teilgewinn/Stop der Altposition + Neueinstieg).
+    - Gleiche Gebuehr, gleiches Startkapital, gleiches Fenster wie die Engine-Simulation.
+    - Offene Position wird am Fensterende zum Schlusskurs bewertet.
+    """
+    tage: dict[date, float] = {}
+    for c in candles:
+        if (start_ms is not None and c.ts < start_ms) or (end_ms is not None and c.ts > end_ms):
+            continue
+        tage[to_date(c.ts)] = c.close                    # letzter Schluss des Tages gewinnt
+    if not tage:
+        return {}
+    kauf = {date.fromisoformat(d) for d in kauf_tage}
+    verkauf = {date.fromisoformat(d) for d in verkauf_tage}
+
+    cash, units, invest, peak_eq = start_capital, 0.0, 0.0, start_capital
+    max_dd, n_kauf, n_verkauf = 0.0, 0, 0
+    for tag in sorted(tage):
+        preis = tage[tag]
+        if tag in verkauf and units > 0:                 # erst raus ...
+            weg = units * verkauf_pct
+            cash += weg * preis * (1 - fee)
+            units -= weg
+            n_verkauf += 1
+        if tag in kauf and cash > 0:                     # ... dann rein
+            rein = cash * kauf_pct
+            units += rein * (1 - fee) / preis
+            cash -= rein
+            invest += rein
+            n_kauf += 1
+        eq = cash + units * preis
+        peak_eq = max(peak_eq, eq)
+        max_dd = min(max_dd, eq / peak_eq - 1.0)
+    ende = cash + units * tage[max(tage)]
+    return {
+        "kauf_pct": round(kauf_pct * 100), "verkauf_pct": round(verkauf_pct * 100),
+        "ende": round(ende, 2), "rendite_pct": round((ende / start_capital - 1) * 100, 2),
+        "max_drawdown_pct": round(max_dd * 100, 2),
+        "kauftage": n_kauf, "verkaufstage": n_verkauf,
+    }
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -615,6 +672,67 @@ def main():
             "sind deshalb nur ueber die Prozentspalte fair vergleichbar.",
         ]
 
+    # --- E15: Was haetten FURKANS eigene Termine verdient? ---------------------------
+    # Kaisers Frage: "Wie testen wir, ob seine Methode besser ist?" Seine Trigger-Listen
+    # dienten bisher nur als Aehnlichkeits-Massstab. Hier laufen sie erstmals durch
+    # dieselbe P&L-Rechnung wie die Engine — gleiches Fenster, gleiche Gebuehr, gleiches
+    # Startkapital. Fair vergleichbar ist nur bis zum LETZTEN notierten Trigger.
+    f_ende_d = max(date.fromisoformat(x) for x in KAUF_DATEN + VERKAUF_DATEN)
+    f_ende_ms = int(datetime(f_ende_d.year, f_ende_d.month, f_ende_d.day, 23, 59,
+                             tzinfo=timezone.utc).timestamp() * 1000)
+    furkan_zeilen = []
+    if f_ende_ms > eff_start:
+        laeufe = [furkan_pnl(candles, KAUF_DATEN, VERKAUF_DATEN, kp, vp,
+                             start_ms=eff_start, end_ms=f_ende_ms)
+                  for kp in (0.25, 0.33, 0.50) for vp in (0.25, 0.33, 0.50)]
+        laeufe = [x for x in laeufe if x]
+        _es, e_pnl = run_half(candles, flow, panel_cfg, eff_start, end_ms=f_ende_ms)
+        if laeufe and e_pnl:
+            rend = sorted(x["rendite_pct"] for x in laeufe)
+            mitte = next(x for x in laeufe if x["kauf_pct"] == 33 and x["verkauf_pct"] == 33)
+            f_win = (f"{to_date(eff_start).strftime('%d.%m.%Y')}–"
+                     f"{f_ende_d.strftime('%d.%m.%Y')}")
+            furkan_zeilen = [
+                "",
+                "## Furkans eigene Termine gegen die Engine",
+                "",
+                f"**Vergleichsfenster {f_win}** — es endet am letzten Trigger in Kaisers "
+                "Listen, danach gibt es keinen Massstab mehr. Beide Seiten starten mit "
+                f"10.000 €, zahlen {panel_pnl['fee_pct']:.1f} % je Order und werden am "
+                "Fensterende zum Schlusskurs bewertet.",
+                "",
+                "Kaisers Listen enthalten **Tage, keine Betraege** — wie gross Furkans "
+                "Tranchen waren, wissen wir nicht. Deshalb steht hier eine Spanne ueber "
+                "neun Annahmen (Kauf 25/33/50 % des freien Geldes, Verkauf 25/33/50 % der "
+                "Position) statt einer Scheingenauigkeit.",
+                "",
+                "| | Rendite | max. Rueckgang |",
+                "|---|---|---|",
+                f"| **Furkans Termine** (Spanne ueber 9 Annahmen) | "
+                f"**{rend[0]:+.1f} % bis {rend[-1]:+.1f} %** | — |",
+                f"| Furkans Termine, mittlere Annahme (33/33) | {mitte['rendite_pct']:+.1f} % | "
+                f"{mitte['max_drawdown_pct']:.1f} % |",
+                f"| **Unsere Engine** ({panel_cfg['label']}) | "
+                f"**{e_pnl['rendite_pct']:+.1f} %** | {e_pnl['max_drawdown_pct']:.1f} % |",
+                f"| Buy & Hold | {e_pnl['buyhold_pct']:+.1f} % | — |",
+                "",
+                f"Furkan handelte im Fenster an {mitte['kauftage']} Kauf- und "
+                f"{mitte['verkaufstage']} Verkaufstagen.",
+                "",
+                "**So ist das zu lesen:** Liegt die Engine deutlich unter Furkans Spanne, "
+                "gibt es echten Spielraum und es lohnt sich, seine Methode genauer "
+                "nachzubauen. Liegt sie darin, sind beide auf verschiedenen Wegen am "
+                "selben Ziel — weiteres Angleichen waere verschwendete Arbeit. Liegt sie "
+                "darueber, ist die Richtung „mehr wie Furkan werden\" die falsche und der "
+                "Recall als Zielgroesse irrefuehrend.",
+                "",
+                "**Grenzen, ehrlich:** Die Liste ist Kaisers Mitschrift dessen, was Furkan "
+                "in Videos gezeigt hat — kein geprueftes Konto. Menschen zeigen gute "
+                "Trades vollstaendiger als schlechte. Die Tranchengroessen sind geraten, "
+                "die Preise sind Tagesschlusskurse (er handelte innertaegig), und "
+                "Doppeleintraege wurden entfernt. Die Zahl ist ein Anhaltspunkt, kein Beweis.",
+            ]
+
     win = f"{to_date(eff_start).strftime('%d.%m.%Y')}-{to_date(END_MS).strftime('%d.%m.%Y')}"
     lines = [
         "# Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger",
@@ -676,6 +794,7 @@ def main():
         "WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, "
         "KEIN Gewinn. Der Gewinn steht nur in den P&L-Zeilen.",
         *monats_zeilen,
+        *furkan_zeilen,
         "",
         "## Robustheitspruefung: Fenster halbiert",
         "",
