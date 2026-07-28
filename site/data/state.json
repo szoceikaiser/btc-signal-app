@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1785182400000,
+ "last_signal_ts": 1785196800000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -21,6 +21,6 @@
   "high_exit": "off",
   "liq_entry": "off"
  },
- "updated_at": "2026-07-28T02:33:15Z",
- "last_close": 63755.86
+ "updated_at": "2026-07-28T06:27:22Z",
+ "last_close": 63343.83
 }
