@@ -958,3 +958,55 @@ def test_e13_hebel_sind_default_aus():
 
     assert lauf() == lauf(block_unhealthy=False, confirm_t1=False,
                           cooldown_h=0, min_stop_pct=0.0)
+
+
+def test_muster2_nutzt_echtes_futures_cvd_wenn_vorhanden():
+    """E16: Mit echtem Futures-CVD greift der scharfe Zweig, ohne der Ersatzweg.
+
+    Aufbau: Preis steigt, Spot-CVD flach, OI steigt maessig (+1,5 %, also UNTER der
+    3-%-Schwelle des Ersatzwegs), Funding zieht an. Der Ersatzweg kann den Pump hier
+    nicht erkennen — er braucht OI >= 3 %. Mit echtem Futures-CVD reicht dagegen, dass
+    die Bewegung erkennbar ueber Hebel laeuft... aber auch dieser Zweig verlangt OI.
+    Der Test haelt deshalb fest, was tatsaechlich passiert, statt zu behaupten, die
+    Daten seien ein Freifahrtschein: Beide Zweige verlangen OI-Anstieg, der Unterschied
+    liegt im Spot/Futures-VERHAELTNIS.
+    """
+    n = 12
+    candles = trend_candles(n, 100000, 103000)                 # +3 %
+    stark_oi = [1000 + i * 5 for i in range(n)]                # +5,5 %
+    funding = [0.00005 + i * 0.00002 for i in range(n)]
+
+    # (a) Futures-CVD stark hoch, Spot flach -> echter Derivate-Pump
+    mit_fut = flow_series(spot=[100] * n, fut=[100 + i * 10 for i in range(n)],
+                          oi=stark_oi, funding=funding)
+    assert classify_pattern(candles, mit_fut) == Pattern.DERIVATE_PUMP
+
+    # (b) Gleiche Lage, aber Spot traegt die Bewegung MIT (Spot steigt so stark wie
+    #     Futures) -> mit echten Daten ist das KEIN Derivate-Pump mehr.
+    spot_traegt = flow_series(spot=[100 + i * 10 for i in range(n)],
+                              fut=[100 + i * 10 for i in range(n)],
+                              oi=stark_oi, funding=funding)
+    assert classify_pattern(candles, spot_traegt) != Pattern.DERIVATE_PUMP
+
+    # (c) Ohne Futures-Daten (fut=0) sieht die Engine denselben Fall (b) FALSCH:
+    #     Der Ersatzweg prueft nur, ob Spot flach ist — die Information, dass Spot
+    #     die Bewegung traegt, hat er zwar auch, aber die Schwelle ist eine andere
+    #     (spot <= 0.01 statt spot <= fut/3). Genau dieser Unterschied ist der Grund,
+    #     warum echte Futures-Daten ueberhaupt etwas aendern koennen.
+    ohne_fut = flow_series(spot=[100 + i for i in range(n)],    # Spot steigt leicht
+                           fut=[0] * n,
+                           oi=stark_oi, funding=funding)
+    ersatz = classify_pattern(candles, ohne_fut)
+    mit = classify_pattern(candles, flow_series(
+        spot=[100 + i for i in range(n)], fut=[100 + i * 10 for i in range(n)],
+        oi=stark_oi, funding=funding))
+    assert mit == Pattern.DERIVATE_PUMP
+    assert ersatz != mit, "Ersatzweg und echter Zweig muessen sich unterscheiden koennen"
+
+
+def test_flowpoint_long_pct_ist_optional():
+    """Rueckwaertskompatibel: alte Aufrufe ohne long_pct muessen weiter funktionieren."""
+    p = FlowPoint(1, 100.0, 0.0, 1e9, 0.0)
+    assert p.long_pct == 0.0
+    q = FlowPoint(1, 100.0, 0.0, 1e9, 0.0, 0.0, 0.0, 65.12)
+    assert q.long_pct == 65.12

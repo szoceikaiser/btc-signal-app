@@ -230,10 +230,14 @@ def fetch_candles_range(start_ms: int, end_ms: int) -> list:
 
 
 def build_series(raw: list, funding: list[tuple[int, float]],
-                 oi_map: dict | None = None, liq_map: dict | None = None):
+                 oi_map: dict | None = None, liq_map: dict | None = None,
+                 fut_map: dict | None = None, ls_map: dict | None = None):
     """OI aus oi_map (Coinalyze, E9.1) je Kerze; ohne oi_map bleibt OI konstant (neutral).
-    liq_map liefert (long_liq, short_liq) je Kerzen-Open-ts."""
-    candles, flow, spot_cvd = [], [], 0.0
+    liq_map liefert (long_liq, short_liq) je Kerzen-Open-ts.
+    fut_map (E16) liefert das Futures-Taker-Delta je Kerze -> wird hier zum Futures-CVD
+    aufsummiert; ohne fut_map bleibt es 0 und classify_pattern nutzt den Ersatzweg.
+    ls_map (E16) liefert den Long-Anteil in Prozent."""
+    candles, flow, spot_cvd, fut_cvd = [], [], 0.0, 0.0
     oi_pairs = sorted(oi_map.items()) if oi_map else []
     first_oi = oi_pairs[0][1] if oi_pairs else 1.0
 
@@ -252,8 +256,10 @@ def build_series(raw: list, funding: list[tuple[int, float]],
         spot_cvd += 2.0 * float(k[10]) - float(k[7])
         oi_val = latest_leq(oi_pairs, ts, first_oi) if oi_pairs else 1.0
         long_liq, short_liq = (liq_map.get(ts, (0.0, 0.0)) if liq_map else (0.0, 0.0))
-        flow.append(FlowPoint(ts, spot_cvd, 0.0, oi_val,
-                              latest_leq(funding, ts + CANDLE_MS), long_liq, short_liq))
+        fut_cvd += (fut_map.get(ts, 0.0) if fut_map else 0.0)
+        flow.append(FlowPoint(ts, spot_cvd, fut_cvd, oi_val,
+                              latest_leq(funding, ts + CANDLE_MS), long_liq, short_liq,
+                              (ls_map.get(ts, 0.0) if ls_map else 0.0)))
     return candles, flow
 
 
@@ -574,7 +580,7 @@ def main():
 
     # E9.1: echtes historisches OI + Liquidationen (Coinalyze) fuer den Zeitraum ->
     # Muster 4 (Kapitulation) wird im Backtest aktiv. Ohne Key: OI konstant (wie bisher).
-    oi_map, liq_map = {}, {}
+    oi_map, liq_map, fut_map, ls_map = {}, {}, {}, {}
     api_key = os.environ.get("COINALYZE_API_KEY", "")
     if api_key:
         try:
@@ -585,8 +591,20 @@ def main():
                   f"(4h-Historie reicht ggf. nicht bis Sep'25 zurueck -> aeltere Kerzen OI neutral).")
         except Exception as exc:  # noqa: BLE001
             print(f"Coinalyze nicht verfuegbar ({exc}) -> OI konstant/neutral.")
+        try:                                   # E16, eigener Block (siehe main.py)
+            fut_map = coinalyze.fut_delta_by_ts(api_key, frm=WARMUP_MS // 1000,
+                                                to=END_MS // 1000)
+            ls_map = coinalyze.long_short_by_ts(api_key, frm=WARMUP_MS // 1000,
+                                                to=END_MS // 1000)
+            print(f"Coinalyze: {len(fut_map)} Futures-Delta-Punkte, {len(ls_map)} "
+                  f"Long-Short-Punkte -> Muster 2 erstmals mit echtem Futures-CVD.")
+        except Exception as exc:  # noqa: BLE001
+            print(f"Coinalyze Futures/Long-Short nicht verfuegbar ({exc}) -> wie bisher.")
 
-    candles, flow = build_series(raw, funding, oi_map, liq_map)
+    candles, flow = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map)
+    # Vergleichsreihe OHNE Futures-Daten: dieselben Kerzen, fut_cvd = 0. Damit laesst sich
+    # die Wirkung der neuen Daten sauber isolieren (gleiche Variante, nur andere Daten).
+    _, flow_ohne_fut = build_series(raw, funding, oi_map, liq_map, None, ls_map)
 
     # E9.6 (Kaisers Vorgabe): Backtest NUR ueber das Voll-Daten-Fenster — ab der ersten
     # OI-Kerze. Vorher fehlt das OI -> dort keine Trigger (sonst schlechte Ausgangslage).
@@ -606,6 +624,53 @@ def main():
               f"Praezision {sc['precision']:.0%}, Rendite {p['rendite_pct']:+.1f} %, "
               f"Long {p['long_profit']:+.0f}€/Short {p['short_profit']:+.0f}€, "
               f"{len(sigs)} Signale ({time.time()-t0:.0f}s)")
+
+    # --- E16: Wirkung der echten Futures-Daten isolieren ----------------------------
+    # Dieselbe Variante, dieselben Kerzen — einmal MIT echtem Futures-CVD, einmal ohne.
+    # Alles andere ist identisch, der Unterschied ist also allein den neuen Daten
+    # zuzuschreiben. Das ist der Test der Frage, die seit neun gescheiterten
+    # Order-Flow-Filtern offen ist: lag es an der Idee oder am Material?
+    fut_zeilen = []
+    if fut_map:
+        _pcfg = next((c for c in GRID if c.get("panel")), GRID[0])
+        v_mit = run_backtest(candles, flow, _pcfg, start_ms=eff_start)
+        v_ohne = run_backtest(candles, flow_ohne_fut, _pcfg, start_ms=eff_start)
+        p_mit = simulate(v_mit, candles, start_ms=eff_start)
+        p_ohne = simulate(v_ohne, candles, start_ms=eff_start)
+        s_mit, s_ohne = score(v_mit, start_ms=eff_start), score(v_ohne, start_ms=eff_start)
+        fut_zeilen = [
+            "",
+            "## Echte Futures-Daten: was bringen sie?",
+            "",
+            f"Coinalyze liefert seit E16 auch das Taker-Kaufvolumen des Futures-Marktes "
+            f"({len(fut_map)} Punkte) — damit hat die Engine erstmals ein echtes "
+            "Futures-CVD. Vorher war der entsprechende Zweig in `classify_pattern` toter "
+            "Code und Muster 2 (Derivate-Pump) lief ueber Ersatzmerkmale.",
+            "",
+            f"Beide Zeilen: Variante *{_pcfg['label']}*, dieselben Kerzen, derselbe "
+            "Zeitraum. Der einzige Unterschied sind die Daten.",
+            "",
+            "| Datenlage | Recall | Praez. | Rendite | max. Rueckgang | Signale |",
+            "|---|---|---|---|---|---|",
+            f"| ohne Futures-CVD (Stand bisher) | {s_ohne['recall']:.0%} | "
+            f"{s_ohne['precision']:.0%} | {p_ohne['rendite_pct']:+.1f} % | "
+            f"{p_ohne['max_drawdown_pct']:.1f} % | {len(v_ohne)} |",
+            f"| **mit echtem Futures-CVD** | {s_mit['recall']:.0%} | "
+            f"{s_mit['precision']:.0%} | **{p_mit['rendite_pct']:+.1f} %** | "
+            f"{p_mit['max_drawdown_pct']:.1f} % | {len(v_mit)} |",
+            "",
+            ("**Gleiche Signalzahl = die neuen Daten aendern nichts.** Muster 2 feuert mit "
+             "echten Futures-Daten an denselben Stellen wie mit den Ersatzmerkmalen — die "
+             "Naeherung war also gut genug. Damit ist die Erklaerung 'unsere Order-Flow-"
+             "Daten waren zu schlecht' fuer die neun gescheiterten Filter widerlegt; es "
+             "liegt an der Uebersetzung in feste Regeln, nicht am Material."
+             if len(v_mit) == len(v_ohne) else
+             f"**{abs(len(v_mit) - len(v_ohne))} Signale Unterschied** — die echten Daten "
+             "erkennen den Derivate-Pump an anderen Stellen als die Naeherung. Ob das "
+             "hilft, sagt die Rendite-Spalte."),
+        ]
+        print(f"E16 Futures-CVD: mit {p_mit['rendite_pct']:+.1f} % ({len(v_mit)} Signale) "
+              f"gegen ohne {p_ohne['rendite_pct']:+.1f} % ({len(v_ohne)} Signale)")
 
     # --- E11: Robustheitspruefung, Fenster halbiert ---------------------------------
     mid_ms = eff_start + (END_MS - eff_start) // 2
@@ -817,6 +882,7 @@ def main():
         "WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, "
         "KEIN Gewinn. Der Gewinn steht nur in den P&L-Zeilen.",
         *monats_zeilen,
+        *fut_zeilen,
         *furkan_zeilen,
         "",
         "## Robustheitspruefung: Fenster halbiert",

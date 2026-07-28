@@ -33,6 +33,8 @@ class FlowPoint:
     funding: float       # 8h-Funding-Rate, Durchschnitt (z. B. 0.0001 = 0.01 %)
     long_liq: float = 0.0   # Long-Liquidationen dieser Kerze (USD), E9.1 (Coinalyze)
     short_liq: float = 0.0  # Short-Liquidationen dieser Kerze (USD)
+    long_pct: float = 0.0   # Anteil der Long-Positionierung in % (E16, Coinalyze);
+                            # 0.0 = keine Daten. >50 = mehrheitlich long.
 
 
 class Pattern(Enum):

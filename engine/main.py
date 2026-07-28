@@ -113,7 +113,7 @@ def fetch_market_data(oi_history: list[list] | None = None,
 
     # E9.1: echtes OI + Liquidationen von Coinalyze (falls Secret gesetzt), sonst
     # Kraken-OI-Snapshot als Fallback (Liquidationen dann 0 = Proxy in classify_pattern).
-    cz_oi, cz_liq = {}, {}
+    cz_oi, cz_liq, cz_fut, cz_ls = {}, {}, {}, {}
     api_key = os.environ.get("COINALYZE_API_KEY", "")
     if api_key:
         try:
@@ -122,6 +122,17 @@ def fetch_market_data(oi_history: list[list] | None = None,
             print(f"Coinalyze: {len(cz_oi)} OI-Punkte, {len(cz_liq)} Liq-Punkte.")
         except Exception as exc:  # noqa: BLE001
             print(f"Coinalyze nicht verfuegbar ({exc}) -> Kraken-OI-Fallback.")
+        # E16: Futures-Delta + Positionierung. Bewusst in einem EIGENEN try-Block —
+        # faellt nur das aus, laeuft die Engine unveraendert weiter wie vor E16
+        # (fut_cvd bleibt 0 -> classify_pattern nutzt automatisch den Ersatzweg).
+        try:
+            cz_fut = coinalyze.fut_delta_by_ts(api_key, days=90)
+            cz_ls = coinalyze.long_short_by_ts(api_key, days=90)
+            print(f"Coinalyze: {len(cz_fut)} Futures-Delta-Punkte, "
+                  f"{len(cz_ls)} Long-Short-Punkte.")
+        except Exception as exc:  # noqa: BLE001
+            print(f"Coinalyze Futures/Long-Short nicht verfuegbar ({exc}) "
+                  f"-> Muster 2 wie bisher ueber Ersatzmerkmale.")
 
     oi_history = list(oi_history or [])
     if not cz_oi:                          # eigene Snapshot-Historie nur ohne Coinalyze
@@ -141,6 +152,7 @@ def fetch_market_data(oi_history: list[list] | None = None,
     candles: list[Candle] = []
     flow: list[FlowPoint] = []
     spot_cvd = 0.0
+    fut_cvd = 0.0                      # E16: kumuliertes Futures-Taker-Delta
     for k in spot_raw:
         if int(k[6]) > now_ms:                                       # nur geschlossene
             continue
@@ -152,8 +164,10 @@ def fetch_market_data(oi_history: list[list] | None = None,
         # Snapshot-Historie wird wie bisher zum Kerzenschluss zugeordnet.
         oi_val = _latest_leq(oi_pairs, c_ts if use_cz else close_ts, default=first_oi)
         long_liq, short_liq = cz_liq.get(c_ts, (0.0, 0.0))
-        flow.append(FlowPoint(c_ts, spot_cvd, 0.0, oi_val,
-                              _latest_leq(funding, close_ts), long_liq, short_liq))
+        fut_cvd += cz_fut.get(c_ts, 0.0)               # ohne Daten bleibt es 0 = wie bisher
+        flow.append(FlowPoint(c_ts, spot_cvd, fut_cvd, oi_val,
+                              _latest_leq(funding, close_ts), long_liq, short_liq,
+                              cz_ls.get(c_ts, 0.0)))
     return candles, flow, oi_history
 
 

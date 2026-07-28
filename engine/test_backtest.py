@@ -268,3 +268,41 @@ def test_furkan_pnl_ohne_kerzen_im_fenster_liefert_leer():
     cs = _tageskerzen([100, 100])
     assert backtest.furkan_pnl(cs, ["2026-01-01"], [], 1.0, 1.0,
                                start_ms=cs[-1].ts + 10**9) == {}
+
+
+# ------------------------------------------------- E16: Futures-Daten im Backtest
+
+def _rohkerzen(n=3, start=1_700_000_000_000):
+    """Binance-Kerzenformat (nur die Felder, die build_series liest)."""
+    ms = 4 * 3600 * 1000
+    return [[start + i * ms, 100.0, 101.0, 99.0, 100.0, 10.0,
+             start + (i + 1) * ms, 1000.0, 50, 0, 600.0] for i in range(n)]
+
+
+def test_build_series_summiert_futures_delta_auf():
+    """fut_map liefert das Delta JE KERZE — daraus muss ein kumuliertes CVD werden.
+
+    Ohne die Aufsummierung waere fut_cvd eine zappelnde Einzelwert-Reihe statt einer
+    Linie, und `_slope()` in classify_pattern wuerde etwas voellig anderes messen.
+    """
+    raw = _rohkerzen(3)
+    ts = [int(k[0]) for k in raw]
+    fut = {ts[0]: 10.0, ts[1]: -4.0, ts[2]: 6.0}
+    _cs, flow = backtest.build_series(raw, [], {ts[0]: 1e9}, None, fut, None)
+    assert [f.fut_cvd for f in flow] == [10.0, 6.0, 12.0], [f.fut_cvd for f in flow]
+
+
+def test_build_series_ohne_futures_daten_bleibt_bei_null():
+    """Rueckwaertskompatibel: ohne fut_map verhaelt sich alles wie vor E16."""
+    raw = _rohkerzen(3)
+    _cs, flow = backtest.build_series(raw, [], {int(raw[0][0]): 1e9}, None, None, None)
+    assert all(f.fut_cvd == 0.0 for f in flow)
+    assert all(f.long_pct == 0.0 for f in flow)
+
+
+def test_build_series_uebernimmt_long_anteil():
+    raw = _rohkerzen(2)
+    ts = [int(k[0]) for k in raw]
+    _cs, flow = backtest.build_series(raw, [], {ts[0]: 1e9}, None, None,
+                                      {ts[0]: 65.12, ts[1]: 64.0})
+    assert [f.long_pct for f in flow] == [65.12, 64.0]

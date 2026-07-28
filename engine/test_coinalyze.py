@@ -72,3 +72,71 @@ def test_history_points_findet_symbol():
     resp = [{"symbol": "BTCUSDT_PERP.A", "history": [{"t": 1, "c": 9}]}]
     assert coinalyze._history_points(resp) == [{"t": 1, "c": 9}]
     assert coinalyze._history_points([]) == []
+
+
+# ------------------------------------------------- E16: Futures-Delta + Positionierung
+# Antwortformat 1:1 aus der echten Probe vom 28.07.2026 (site/data/coinalyze_probe.json).
+
+ECHTE_OHLCV_ANTWORT = [{
+    "symbol": "BTCUSDT_PERP.A",
+    "history": [
+        {"t": 1785211200, "o": 63310, "h": 63642.2, "l": 63187.2, "c": 63476.8,
+         "v": 17816.541000000874, "bv": 9394.95300000063, "tx": 108788, "btx": 57349},
+        {"t": 1785225600, "o": 63476.8, "h": 63569, "l": 63263.5, "c": 63430.8,
+         "v": 17703.739000000947, "bv": 8049.849000000347, "tx": 109117, "btx": 53442},
+    ],
+}]
+
+ECHTE_LS_ANTWORT = [{
+    "symbol": "BTCUSDT_PERP.A",
+    "history": [
+        {"t": 1785211200, "r": 1.867, "l": 65.12, "s": 34.88},
+        {"t": 1785225600, "r": 1.8868, "l": 65.36, "s": 34.64},
+    ],
+}]
+
+
+def _mit_antwort(monkey_wert):
+    """Ersetzt fetch_history durch eine feste Antwort (kein Netz im Test)."""
+    original = coinalyze.fetch_history
+    coinalyze.fetch_history = lambda *a, **k: monkey_wert
+    return original
+
+
+def test_fut_delta_rechnet_kaeufe_minus_verkaeufe():
+    """Delta = Kaeufe - Verkaeufe = bv - (v - bv) = 2*bv - v."""
+    orig = _mit_antwort(ECHTE_OHLCV_ANTWORT)
+    try:
+        d = coinalyze.fut_delta_by_ts("key")
+    finally:
+        coinalyze.fetch_history = orig
+    assert set(d) == {1785211200 * 1000, 1785225600 * 1000}
+    # Kerze 1: 2*9394.953 - 17816.541 = +973.365 (mehr Kaeufe als Verkaeufe)
+    assert abs(d[1785211200 * 1000] - 973.365) < 0.01, d
+    # Kerze 2: 2*8049.849 - 17703.739 = -1604.041 (mehr Verkaeufe)
+    assert abs(d[1785225600 * 1000] + 1604.041) < 0.01, d
+    assert d[1785211200 * 1000] > 0 > d[1785225600 * 1000], "Vorzeichen muss drehen"
+
+
+def test_long_short_liest_den_long_anteil():
+    orig = _mit_antwort(ECHTE_LS_ANTWORT)
+    try:
+        d = coinalyze.long_short_by_ts("key")
+    finally:
+        coinalyze.fetch_history = orig
+    assert d[1785211200 * 1000] == 65.12 and d[1785225600 * 1000] == 65.36
+
+
+def test_parser_ueberspringen_unvollstaendige_punkte():
+    """Fehlende Felder duerfen den Lauf nicht abbrechen — lieber weniger Punkte."""
+    kaputt = [{"symbol": "BTCUSDT_PERP.A", "history": [
+        {"t": 1, "v": 10.0},                    # bv fehlt
+        {"t": 2, "bv": 5.0},                    # v fehlt
+        {"t": 3, "v": 10.0, "bv": 7.0},         # vollstaendig
+    ]}]
+    orig = _mit_antwort(kaputt)
+    try:
+        d = coinalyze.fut_delta_by_ts("key")
+    finally:
+        coinalyze.fetch_history = orig
+    assert d == {3000: 4.0}, d

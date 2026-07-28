@@ -115,6 +115,47 @@ def liquidations_by_ts(api_key: str, **kw) -> dict:
             for p in pts if "t" in p}
 
 
+def fut_delta_by_ts(api_key: str, **kw) -> dict:
+    """{Open-Time_ms: Taker-Delta je Kerze} aus ohlcv-history des Futures-Marktes (E16).
+
+    Antwortformat per Probe 2026-07-28 bestaetigt: {t, o, h, l, c, v, bv, tx, btx} mit
+    v = Gesamtvolumen der Kerze, bv = davon Taker-KAEUFE. Daraus folgt
+        Delta = Kaeufe - Verkaeufe = bv - (v - bv) = 2*bv - v
+    — dieselbe Formel, die main.py fuer die Binance-Spotkerzen verwendet.
+
+    DAS SCHLIESST DIE GROESSTE DATENLUECKE DES PROJEKTS: Futures-CVD gab es bisher nicht
+    (fapi.binance.com sperrt US-Runner mit HTTP 451), deshalb war in classify_pattern der
+    Zweig `if has_fut:` seit dem ersten Tag toter Code und Muster 2 (Derivate-Pump) lief
+    nur ueber Ersatzmerkmale. Coinalyze liefert es aggregiert ueber Boersen, mit Historie.
+
+    EINHEIT: Die Werte sind Kontrakt-/Basiswert-Mengen (BTC), nicht USD — anders als das
+    Spot-Delta. Fuer classify_pattern ist das unerheblich: dort geht das kumulierte Delta
+    nur ueber `_slope()` ein, also als RELATIVE Veraenderung, und der Vergleich
+    `spot <= fut / 3` stellt zwei solche relativen Werte gegenueber. Die Einheit kuerzt
+    sich heraus. Wer die Reihe je absolut auswerten will, muss sie erst mit dem Preis
+    multiplizieren.
+    """
+    pts = _history_points(fetch_history("ohlcv-history", api_key, **kw))
+    out = {}
+    for p in pts:
+        if "t" in p and "v" in p and "bv" in p:
+            out[int(p["t"]) * 1000] = 2.0 * float(p["bv"]) - float(p["v"])
+    return out
+
+
+def long_short_by_ts(api_key: str, **kw) -> dict:
+    """{Open-Time_ms: Long-Anteil in Prozent} aus long-short-ratio-history (E16).
+
+    Format per Probe: {t, r, l, s} mit r = Verhaeltnis long/short, l/s = Anteile in
+    Prozent (Beispiel 2026-07-28: r=1.867, l=65.12, s=34.88). Wir speichern den
+    Long-Anteil `l`, weil er ohne Division auskommt und direkt lesbar ist:
+    ueber 50 = mehrheitlich long positioniert. Furkan nutzt diese Groesse zur
+    Einschaetzung der Positionierung ("Longueberhang").
+    """
+    pts = _history_points(fetch_history("long-short-ratio-history", api_key, **kw))
+    return {int(p["t"]) * 1000: float(p["l"]) for p in pts if "t" in p and "l" in p}
+
+
 def _sample(data):
     """Behaelt nur die letzten 3 Punkte je Symbol (kleine Probe fuers Log/JSON)."""
     try:
