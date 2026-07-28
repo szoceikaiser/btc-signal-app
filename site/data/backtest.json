@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-28T08:08:42Z",
+ "generated_at": "2026-07-28T12:54:52Z",
  "zeitraum": "19.11.2025-28.07.2026",
  "variante": "LIVE +Stop nachziehen",
  "params": {
@@ -18,7 +18,11 @@
   "trail_stop": true,
   "liq_exit": "off",
   "high_exit": "off",
-  "liq_entry": "off"
+  "liq_entry": "off",
+  "block_unhealthy": false,
+  "confirm_t1": false,
+  "cooldown_h": 0.0,
+  "min_stop_pct": 0.0
  },
  "recall_kauf": "7/11",
  "recall_verkauf": "9/17",

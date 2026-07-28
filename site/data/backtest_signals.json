@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-28T08:08:42Z",
+ "generated_at": "2026-07-28T12:54:52Z",
  "variante": "LIVE +Stop nachziehen",
  "fenster": "19.11.2025-28.07.2026",
  "signals": [
@@ -218,7 +218,7 @@
    "type": "NACHKAUF",
    "price": 90813.4,
    "tranche_pct": 15,
-   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (UNGESUNDER_ABVERKAUF)",
    "stop_ref": 87250.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -328,7 +328,7 @@
    "type": "KAUF_2",
    "price": 87282.05,
    "tranche_pct": 75,
-   "reason": "Capitulation: GP durchschlagen (Tief 86510), Schluss ueber Invalidierung (NEUTRAL)",
+   "reason": "Capitulation: GP durchschlagen (Tief 86510), Schluss ueber Invalidierung (UNGESUNDER_ABVERKAUF)",
    "stop_ref": 87263.53,
    "tag": "FLUSH",
    "label": "KAUF 2 (Kernposition im Golden Pocket)"
