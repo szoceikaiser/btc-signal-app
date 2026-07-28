@@ -126,7 +126,8 @@ GRID = [
     # auf flush_entry="off" — sonst vergleicht die Webseite zwei verschiedene Dinge und
     # der Unterschied waere nicht mehr "der Flush", sondern ein Sammelsurium.
     V("MEINE Einstellung ohne Flush", bias_short=False, flush_entry="off",
-      buy_ladder=True, trail_stop=True, min_stop_pct=0.02, liq_entry="boost"),
+      buy_ladder=True, trail_stop=True, min_stop_pct=0.02, liq_entry="boost",
+      high_exit="on"),
     # E10.3 (Furkan-Update B, 18:27): Liquidationszonen auf der EINSTIEGS-Seite. Nach dem
     # Befund aus E10.2 (Verkaufsseite kostet durchgehend Rendite) ist das die Seite, auf
     # der noch etwas zu holen sein koennte. "boost" = zusaetzlich aufstocken bei Konfluenz,
@@ -179,10 +180,7 @@ GRID = [
     # gehalten hat). Beide greifen an derselben Stelle an — der Einstiegs-Auswahl —, also
     # ist Ueberschneidung moeglich: "Sperre + Mindestabstand" war zusammen SCHLECHTER als
     # jeder Hebel allein (+26,4 % gegen +33,9/+33,0 %). Genau das wird hier geprueft.
-    # LIVE seit 2026-07-28: einzige Variante, die in BEIDEN Haelften unter den besten 5
-    # liegt (H1 1., H2 3.), beste Rendite je Rueckgangspunkt im Feld (5,7 gegen 2,6 der
-    # vorherigen Einstellung). Deshalb wandert panel=True hierher.
-    V("LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz", panel=True,
+    V("LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost"),
     V("LIVE +Stop +Sperre 48 h +Liq-Konfluenz",
@@ -196,7 +194,12 @@ GRID = [
     # ohne Liq-Konfluenz. Seit 2026-07-28 ist die Basis eine andere: deutlich weniger,
     # dafuer bessere Positionen. Die Frage ist also offen und wird hier neu gestellt.
     # Basis = die neue LIVE-Einstellung (panel-Zeile), damit das Delta sauber ablesbar ist.
-    V("NEU-LIVE +Verkauf unter dem letzten Hoch",
+    # LIVE seit 2026-07-28 (zweite Umstellung des Tages). Gegen die ALTE Basis hatte
+    # high_exit 3,9 Punkte gekostet (E10.2) — gegen die neue bringt es 1,2 und hebt den
+    # Recall von 50 auf 57 %. Der Befund "die Verkaufsseite ist auserzaehlt" galt also
+    # nur fuer die damalige Basis mit vielen aussichtslosen Einstiegen. Erstmals liegen
+    # ZWEI Varianten in beiden Haelften unter den besten 5 (Zufallserwartung 0,8).
+    V("NEU-LIVE +Verkauf unter dem letzten Hoch", panel=True,
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on"),
     V("NEU-LIVE +Verkauf an den Liquidations-Niveaus",

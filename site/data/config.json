@@ -4,7 +4,7 @@
  "release_stale_rest": false,
  "trail_stop": true,
  "liq_exit": "off",
- "high_exit": "off",
+ "high_exit": "on",
  "liq_entry": "boost",
  "block_unhealthy": false,
  "confirm_t1": false,
