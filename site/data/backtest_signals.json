@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-28T14:35:00Z",
+ "generated_at": "2026-07-28T15:01:24Z",
  "variante": "NEU-LIVE +Verkauf unter dem letzten Hoch",
  "fenster": "19.11.2025-28.07.2026",
  "signals": [
@@ -124,16 +124,6 @@
    "label": "WARNUNG (Derivate-Pump aktiv)"
   },
   {
-   "ts": 1766174400000,
-   "type": "WARNUNG",
-   "price": 88136.94,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
    "ts": 1766980800000,
    "type": "WARNUNG",
    "price": 89617.71,
@@ -154,36 +144,6 @@
    "label": "WARNUNG (Derivate-Pump aktiv)"
   },
   {
-   "ts": 1767470400000,
-   "type": "WARNUNG",
-   "price": 90628.01,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
-   "ts": 1767484800000,
-   "type": "WARNUNG",
-   "price": 91236.78,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
-   "ts": 1767513600000,
-   "type": "WARNUNG",
-   "price": 91300.0,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
    "ts": 1767571200000,
    "type": "TEILVERKAUF_LADDER",
    "price": 92711.802,
@@ -192,26 +152,6 @@
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1767585600000,
-   "type": "WARNUNG",
-   "price": 92520.63,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
-   "ts": 1767600000000,
-   "type": "WARNUNG",
-   "price": 93134.26,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
   },
   {
    "ts": 1767614400000,
@@ -924,6 +864,16 @@
    "label": "WARNUNG (Derivate-Pump aktiv)"
   },
   {
+   "ts": 1773676800000,
+   "type": "WARNUNG",
+   "price": 73963.0,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
    "ts": 1773691200000,
    "type": "TEILVERKAUF_1",
    "price": 74745.48,
@@ -934,9 +884,9 @@
    "label": "TEILVERKAUF 1 (Extension 1.0)"
   },
   {
-   "ts": 1773720000000,
+   "ts": 1773691200000,
    "type": "VERKAUF_REST",
-   "price": 74249.32,
+   "price": 74884.67,
    "tranche_pct": 20,
    "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP",
    "stop_ref": null,
@@ -1744,26 +1694,6 @@
    "label": "WARNUNG (Derivate-Pump aktiv)"
   },
   {
-   "ts": 1781438400000,
-   "type": "WARNUNG",
-   "price": 64025.07,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
-   "ts": 1781452800000,
-   "type": "WARNUNG",
-   "price": 63802.0,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
    "ts": 1781467200000,
    "type": "TEILVERKAUF_LADDER",
    "price": 64838.015999999996,
@@ -1994,11 +1924,11 @@
    "label": "TEILVERKAUF 1 (Extension 1.0)"
   },
   {
-   "ts": 1782964800000,
+   "ts": 1782993600000,
    "type": "VERKAUF_REST",
-   "price": 60149.99,
+   "price": 61612.93,
    "tranche_pct": 20,
-   "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP",
+   "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
    "stop_ref": null,
    "tag": "",
    "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
@@ -2084,16 +2014,6 @@
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1784044800000,
-   "type": "WARNUNG",
-   "price": 64569.59,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
    "ts": 1784059200000,
    "type": "TEILVERKAUF_1",
    "price": 64973.240000000005,
@@ -2172,26 +2092,6 @@
    "stop_ref": 61824.97,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1784448000000,
-   "type": "WARNUNG",
-   "price": 64467.64,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
-   "ts": 1784462400000,
-   "type": "WARNUNG",
-   "price": 64585.32,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
   },
   {
    "ts": 1784534400000,
