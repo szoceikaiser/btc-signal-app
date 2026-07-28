@@ -188,6 +188,23 @@ GRID = [
     V("LIVE +Stop +Sperre 48 h +Liq-Konfluenz",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       cooldown_h=48, liq_entry="boost"),
+    # ---------------------------------------------------------------- E14 (Kaiser 2026-07-28)
+    # Furkan nimmt auf dem Weg nach oben Teilgewinne kurz VOR dem Widerstand: "hier unter
+    # diesem Hoch rausnehmen" (Video A 19:52) und noch einmal knapp darueber, wo die
+    # Short-Liquidationen sitzen (Video B 19:14). Beides wurde in E9.11/E10.2 gemessen und
+    # hat Rendite gekostet — ABER gegen die DAMALIGE Basis, ohne Mindest-Stopabstand und
+    # ohne Liq-Konfluenz. Seit 2026-07-28 ist die Basis eine andere: deutlich weniger,
+    # dafuer bessere Positionen. Die Frage ist also offen und wird hier neu gestellt.
+    # Basis = die neue LIVE-Einstellung (panel-Zeile), damit das Delta sauber ablesbar ist.
+    V("NEU-LIVE +Verkauf unter dem letzten Hoch",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on"),
+    V("NEU-LIVE +Verkauf an den Liquidations-Niveaus",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", liq_exit="zone"),
+    V("NEU-LIVE +Verkauf unter dem Hoch +an den Liq-Niveaus",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", liq_exit="zone"),
     V("Long+Short (Ref)"),
 ]
 
@@ -694,13 +711,23 @@ def main():
         f"**In BEIDEN Haelften unter den besten 5:** "
         + (", ".join(stabil) if stabil else "keine einzige Variante"),
         "",
-        (f"Bewertung: {len(stabil)} von 5 Varianten halten sich in beiden Haelften oben. "
-         + ("Je mehr, desto belastbarer die Rangfolge oben. Bei 0 bis 1 ist die Rangfolge "
-            "im Wesentlichen Zufall — dann nur den groebsten Hebeln trauen (Richtung, "
-            "Kaufleiter) und die Feinheiten weglassen."
-            if len(stabil) <= 1 else
-            "Die Varianten, die in beiden Haelften oben stehen, sind die einzigen, auf die "
-            "man sich stuetzen sollte. Alles, was nur in einer Haelfte glaenzt, ist Zufall.")),
+        # Ohne diesen Massstab wird die Zahl regelmaessig ueberschaetzt: Bei vielen
+        # Varianten landet auch rein zufaellig hin und wieder eine zweimal oben.
+        # Erwartungswert bei rein zufaelliger Rangfolge = (5 x 5) / Anzahl Varianten.
+        (f"**Wie viel davon waere blosser Zufall?** Bei {len(halves)} Varianten und je 5 "
+         f"Plaetzen liegt der Erwartungswert bei reinem Zufall bei "
+         f"**{25 / len(halves):.1f}** Varianten. Gemessen: **{len(stabil)}**. "
+         + ("Das ist nicht mehr als der Zufall ohnehin liefert — die Rangfolge oben ist "
+            "damit KEIN Beleg. Dann nur den groben Hebeln trauen (Richtung, Kaufleiter, "
+            "Flush) und die Feinheiten weglassen."
+            if len(stabil) <= 25 / len(halves) + 0.5 else
+            "Das ist deutlich mehr als der Zufall liefert — die Rangfolge oben traegt.")
+         if len(halves) else ""),
+        "",
+        ("Unabhaengig davon belastbar ist der **maximale Rueckgang**: Er haengt an der Zahl "
+         "und der Qualitaet der Positionen, nicht daran, welche einzelnen Trades gut liefen. "
+         "Wo zwei Varianten aehnliche Rendite haben, ist die mit dem kleineren Rueckgang die "
+         "verlaesslichere Wahl — auch wenn ihre Platzierung schwankt."),
         "",
         "## Einschraenkungen",
         "",
