@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-28T12:54:52Z",
+ "generated_at": "2026-07-28T13:14:12Z",
  "zeitraum": "19.11.2025-28.07.2026",
  "variante": "LIVE +Stop nachziehen",
  "params": {
@@ -32,7 +32,7 @@
   "start": 10000.0,
   "ende": 13216.47,
   "rendite_pct": 32.16,
-  "buyhold_pct": -30.62,
+  "buyhold_pct": -30.65,
   "trades": 88,
   "gewinn_trades": 67,
   "long_profit": 3216.47,
@@ -97,6 +97,81 @@
     "monat": "2026-07",
     "ende": 13216.47,
     "gewinn": 981.9,
+    "rendite_pct": 8.03
+   }
+  ],
+  "offene_position": 0.0
+ },
+ "variante_ohne_flush": "MEINE Einstellung ohne Flush",
+ "pnl_ohne_flush": {
+  "start": 10000.0,
+  "ende": 11994.4,
+  "rendite_pct": 19.94,
+  "buyhold_pct": -30.65,
+  "trades": 49,
+  "gewinn_trades": 39,
+  "long_profit": 1994.4,
+  "long_trades": 49,
+  "long_wins": 39,
+  "short_profit": 0.0,
+  "short_trades": 0,
+  "short_wins": 0,
+  "fee_pct": 0.1,
+  "deploy_pct": 100,
+  "max_drawdown_pct": -6.31,
+  "monate": [
+   {
+    "monat": "2025-11",
+    "ende": 9772.38,
+    "gewinn": -227.62,
+    "rendite_pct": -2.28
+   },
+   {
+    "monat": "2025-12",
+    "ende": 9811.66,
+    "gewinn": 39.28,
+    "rendite_pct": 0.4
+   },
+   {
+    "monat": "2026-01",
+    "ende": 10790.29,
+    "gewinn": 978.63,
+    "rendite_pct": 9.97
+   },
+   {
+    "monat": "2026-02",
+    "ende": 10649.43,
+    "gewinn": -140.86,
+    "rendite_pct": -1.31
+   },
+   {
+    "monat": "2026-03",
+    "ende": 10796.79,
+    "gewinn": 147.36,
+    "rendite_pct": 1.38
+   },
+   {
+    "monat": "2026-04",
+    "ende": 11849.73,
+    "gewinn": 1052.94,
+    "rendite_pct": 9.75
+   },
+   {
+    "monat": "2026-05",
+    "ende": 11431.41,
+    "gewinn": -418.32,
+    "rendite_pct": -3.53
+   },
+   {
+    "monat": "2026-06",
+    "ende": 11103.3,
+    "gewinn": -328.11,
+    "rendite_pct": -2.87
+   },
+   {
+    "monat": "2026-07",
+    "ende": 11994.4,
+    "gewinn": 891.1,
     "rendite_pct": 8.03
    }
   ],
