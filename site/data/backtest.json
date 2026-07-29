@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-07-28T15:01:24Z",
- "zeitraum": "19.11.2025-28.07.2026",
+ "generated_at": "2026-07-29T16:08:09Z",
+ "zeitraum": "20.11.2025-29.07.2026",
  "variante": "NEU-LIVE +Verkauf unter dem letzten Hoch",
  "params": {
   "bias_long": true,
@@ -24,19 +24,19 @@
   "cooldown_h": 0.0,
   "min_stop_pct": 0.02
  },
- "recall_kauf": "7/11",
+ "recall_kauf": "5/11",
  "recall_verkauf": "9/17",
- "recall_pct": 57,
+ "recall_pct": 50,
  "precision_pct": 38,
  "pnl": {
   "start": 10000.0,
-  "ende": 14153.08,
-  "rendite_pct": 41.53,
-  "buyhold_pct": -30.72,
-  "trades": 94,
+  "ende": 14600.55,
+  "rendite_pct": 46.01,
+  "buyhold_pct": -26.21,
+  "trades": 93,
   "gewinn_trades": 67,
-  "long_profit": 4153.08,
-  "long_trades": 94,
+  "long_profit": 4600.55,
+  "long_trades": 93,
   "long_wins": 67,
   "short_profit": 0.0,
   "short_trades": 0,
@@ -47,56 +47,56 @@
   "monate": [
    {
     "monat": "2025-11",
-    "ende": 9772.38,
-    "gewinn": -227.62,
-    "rendite_pct": -2.28
+    "ende": 10000.0,
+    "gewinn": 0.0,
+    "rendite_pct": 0.0
    },
    {
     "monat": "2025-12",
-    "ende": 9850.62,
-    "gewinn": 78.23,
-    "rendite_pct": 0.8
+    "ende": 10120.9,
+    "gewinn": 120.9,
+    "rendite_pct": 1.21
    },
    {
     "monat": "2026-01",
-    "ende": 11004.4,
-    "gewinn": 1153.79,
-    "rendite_pct": 11.71
+    "ende": 11352.33,
+    "gewinn": 1231.43,
+    "rendite_pct": 12.17
    },
    {
     "monat": "2026-02",
-    "ende": 11577.22,
-    "gewinn": 572.82,
+    "ende": 11943.26,
+    "gewinn": 590.93,
     "rendite_pct": 5.21
    },
    {
     "monat": "2026-03",
-    "ende": 12283.07,
-    "gewinn": 705.85,
+    "ende": 12671.42,
+    "gewinn": 728.16,
     "rendite_pct": 6.1
    },
    {
     "monat": "2026-04",
-    "ende": 13789.43,
-    "gewinn": 1506.36,
+    "ende": 14225.41,
+    "gewinn": 1553.99,
     "rendite_pct": 12.26
    },
    {
     "monat": "2026-05",
-    "ende": 13119.23,
-    "gewinn": -670.2,
+    "ende": 13534.02,
+    "gewinn": -691.39,
     "rendite_pct": -4.86
    },
    {
     "monat": "2026-06",
-    "ende": 13088.82,
-    "gewinn": -30.41,
+    "ende": 13502.65,
+    "gewinn": -31.37,
     "rendite_pct": -0.23
    },
    {
     "monat": "2026-07",
-    "ende": 14153.08,
-    "gewinn": 1064.26,
+    "ende": 14600.55,
+    "gewinn": 1097.91,
     "rendite_pct": 8.13
    }
   ],
@@ -105,14 +105,14 @@
  "variante_ohne_flush": "MEINE Einstellung ohne Flush",
  "pnl_ohne_flush": {
   "start": 10000.0,
-  "ende": 12461.36,
-  "rendite_pct": 24.61,
-  "buyhold_pct": -30.72,
-  "trades": 73,
-  "gewinn_trades": 50,
-  "long_profit": 2461.36,
-  "long_trades": 73,
-  "long_wins": 50,
+  "ende": 12855.35,
+  "rendite_pct": 28.55,
+  "buyhold_pct": -26.21,
+  "trades": 71,
+  "gewinn_trades": 49,
+  "long_profit": 2855.35,
+  "long_trades": 71,
+  "long_wins": 49,
   "short_profit": 0.0,
   "short_trades": 0,
   "short_wins": 0,
@@ -122,56 +122,56 @@
   "monate": [
    {
     "monat": "2025-11",
-    "ende": 9772.38,
-    "gewinn": -227.62,
-    "rendite_pct": -2.28
+    "ende": 10000.0,
+    "gewinn": 0.0,
+    "rendite_pct": 0.0
    },
    {
     "monat": "2025-12",
-    "ende": 9850.62,
-    "gewinn": 78.23,
-    "rendite_pct": 0.8
+    "ende": 10120.9,
+    "gewinn": 120.9,
+    "rendite_pct": 1.21
    },
    {
     "monat": "2026-01",
-    "ende": 11004.4,
-    "gewinn": 1153.79,
-    "rendite_pct": 11.71
+    "ende": 11352.33,
+    "gewinn": 1231.43,
+    "rendite_pct": 12.17
    },
    {
     "monat": "2026-02",
-    "ende": 10913.36,
-    "gewinn": -91.05,
+    "ende": 11258.4,
+    "gewinn": -93.93,
     "rendite_pct": -0.83
    },
    {
     "monat": "2026-03",
-    "ende": 10969.54,
-    "gewinn": 56.18,
+    "ende": 11316.36,
+    "gewinn": 57.96,
     "rendite_pct": 0.51
    },
    {
     "monat": "2026-04",
-    "ende": 11956.67,
-    "gewinn": 987.14,
+    "ende": 12334.7,
+    "gewinn": 1018.35,
     "rendite_pct": 9.0
    },
    {
     "monat": "2026-05",
-    "ende": 11551.09,
-    "gewinn": -405.58,
+    "ende": 11916.3,
+    "gewinn": -418.41,
     "rendite_pct": -3.39
    },
    {
     "monat": "2026-06",
-    "ende": 11524.31,
-    "gewinn": -26.77,
+    "ende": 11888.67,
+    "gewinn": -27.62,
     "rendite_pct": -0.23
    },
    {
     "monat": "2026-07",
-    "ende": 12461.36,
-    "gewinn": 937.05,
+    "ende": 12855.35,
+    "gewinn": 966.67,
     "rendite_pct": 8.13
    }
   ],
