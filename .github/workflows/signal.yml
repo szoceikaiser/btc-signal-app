@@ -6,11 +6,26 @@ on:
     # massiv verworfen — statt ~96 Laeufen am Tag kamen nur 6-7 an, im Abstand von 1 bis
     # 3,5 Stunden, alle gruen (kein Fehler, GitHub laesst Schedules bei Last einfach aus).
     # Die Strategie wertet ABGESCHLOSSENE 4h-Kerzen aus (Schluss 00/04/08/12/16/20 UTC),
-    # dazwischen gibt es nichts zu tun. Deshalb 4 Versuche in der Stunde NACH jedem
-    # Kerzenschluss statt rund um die Uhr: 24 Laeufe/Tag statt 96, konzentriert auf die
-    # Zeitpunkte, die zaehlen. Greift auch nur einer der vier, ist das Signal binnen einer
-    # Stunde nach Kerzenschluss draussen.
-    - cron: "3,18,33,48 0,4,8,12,16,20 * * *"
+    # dazwischen gibt es nichts zu tun.
+    #
+    # NACHMESSUNG 2026-07-29 (Kaiser): Auch mit 4 Versuchen je Kerzenschluss kam nur etwa
+    # EINER an — gemessener Verzug 1:08 h, 1:27 h und 2:38 h nach Kerzenschluss. Die
+    # Trefferquote liegt also bei rund 1:4. Konsequenz: dieselbe Anzahl Kerzenschluesse,
+    # aber die Versuche enger nach vorn gelegt — 7 Versuche in der ERSTEN HALBEN STUNDE
+    # statt 4 ueber eine volle Stunde. Bei gleicher Verwurfsquote landet der erste
+    # Treffer damit statistisch deutlich frueher. 42 Laeufe/Tag (vorher 24, urspruenglich
+    # 96) — weit unter jeder Grenze, und Schedules werden nicht wegen Menge verworfen,
+    # sondern wegen Plattform-Last.
+    #
+    # WICHTIG, was das NICHT loest: GitHub gibt keine Zusage fuer Zeitplaene. Der Verzug
+    # kann trotzdem auftreten. Wer Puenktlichkeit braucht, muss die Engine von aussen
+    # anstossen (z. B. cron-job.org gegen workflow_dispatch) — solche Anstoesse laufen
+    # nicht ueber die Schedule-Warteschlange. Bewusst nicht gemacht: Dafuer muesste ein
+    # GitHub-Token bei einem Fremdanbieter liegen.
+    #
+    # Erst ab Minute 2, damit die 4h-Kerze sicher geschlossen ist (main.py verwirft
+    # offene Kerzen ohnehin, aber so gibt es keinen Leerlauf).
+    - cron: "2,7,12,17,22,27,32 0,4,8,12,16,20 * * *"
   workflow_dispatch:
     inputs:
       test_telegram:
