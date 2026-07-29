@@ -348,19 +348,35 @@ async function load(tf) {
 
     priceLines.forEach(l => series.removePriceLine(l));
     priceLines = [];
-    if (state && state.zones) {
+    // Zonen der laufenden Position; ohne Position die Vorschau aus der aktuellen
+    // Swing-Struktur. Letzteres ist der Fall, in dem man die Limit-Order VORBEREITET:
+    // Die meisten Kaufsignale nennen ein Level, das die Kerze nur beruehrt hat — wer
+    // erst nach der Telegram-Nachricht reagiert, findet den Preis oft nicht mehr.
+    const offen = state && state.zones;
+    const zonen = offen || (state && state.zonen_vorschau) || null;
+    if (zonen) {
       for (const [key, title, color] of FIB_LINES) {
-        const v = state.zones[key];
+        const v = zonen[key];
         if (typeof v === "number") priceLines.push(series.createPriceLine({
-          price:v, color, lineWidth:1, lineStyle:LightweightCharts.LineStyle.Dashed,
-          axisLabelVisible:true, title,
+          price:v, color, lineWidth:1,
+          lineStyle: offen ? LightweightCharts.LineStyle.Dashed
+                           : LightweightCharts.LineStyle.Dotted,
+          axisLabelVisible:true,
+          title: offen ? title : title + " (Vorschau)",
         }));
       }
     }
+    const zonenHinweis = offen
+      ? ""
+      : (zonen
+          ? ` · Zonen als VORSCHAU (keine Position offen) — Richtung ${zonen.richtung},`
+            + ` Impuls ${Math.round(zonen.impuls_start).toLocaleString("de-DE")}`
+            + `→${Math.round(zonen.impuls_ende).toLocaleString("de-DE")}`
+          : " · noch keine Zonen (kein signifikanter Impuls erkennbar)");
     const upd = state && state.updated_at ? new Date(state.updated_at).toLocaleString("de-DE") : "—";
     document.getElementById("status").textContent =
       tf + " · " + candles.length + " Kerzen · " + markers.length +
-      " Trigger im Zeitraum · Engine-Stand: " + upd;
+      " Trigger im Zeitraum · Engine-Stand: " + upd + zonenHinweis;
   } catch (e) {
     document.getElementById("status").textContent = "Fehler beim Laden: " + e.message;
   }

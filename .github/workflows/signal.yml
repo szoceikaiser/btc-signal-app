@@ -8,24 +8,26 @@ on:
     # Die Strategie wertet ABGESCHLOSSENE 4h-Kerzen aus (Schluss 00/04/08/12/16/20 UTC),
     # dazwischen gibt es nichts zu tun.
     #
-    # NACHMESSUNG 2026-07-29 (Kaiser): Auch mit 4 Versuchen je Kerzenschluss kam nur etwa
-    # EINER an — gemessener Verzug 1:08 h, 1:27 h und 2:38 h nach Kerzenschluss. Die
-    # Trefferquote liegt also bei rund 1:4. Konsequenz: dieselbe Anzahl Kerzenschluesse,
-    # aber die Versuche enger nach vorn gelegt — 7 Versuche in der ERSTEN HALBEN STUNDE
-    # statt 4 ueber eine volle Stunde. Bei gleicher Verwurfsquote landet der erste
-    # Treffer damit statistisch deutlich frueher. 42 Laeufe/Tag (vorher 24, urspruenglich
-    # 96) — weit unter jeder Grenze, und Schedules werden nicht wegen Menge verworfen,
-    # sondern wegen Plattform-Last.
+    # NACHMESSUNG 2026-07-29 (Kaiser): Der Versuch, das ueber die Anzahl zu loesen, ist
+    # GESCHEITERT und die Annahme dahinter war falsch. Von 4 Versuchen kam einer an; auf
+    # 7 Versuche erhoeht — es kam weiterhin GENAU EINER an (Verzug 2:26 h und 2:45 h),
+    # ein Kerzenschluss fiel ganz aus (8 h Luecke). In sechs beobachteten Fenstern gab es
+    # NIE zwei Laeufe. Bei echtem Zufall (p=0,25) haette man bei 7 Versuchen im Schnitt
+    # fast zwei erwartet. Das deutet auf eine Drosselung PRO REPOSITORY hin, nicht auf
+    # zufaelliges Verwerfen — mehr Cron-Eintraege helfen dagegen nicht.
     #
-    # WICHTIG, was das NICHT loest: GitHub gibt keine Zusage fuer Zeitplaene. Der Verzug
-    # kann trotzdem auftreten. Wer Puenktlichkeit braucht, muss die Engine von aussen
-    # anstossen (z. B. cron-job.org gegen workflow_dispatch) — solche Anstoesse laufen
-    # nicht ueber die Schedule-Warteschlange. Bewusst nicht gemacht: Dafuer muesste ein
-    # GitHub-Token bei einem Fremdanbieter liegen.
+    # KONSEQUENZ: Der Zeitplan ist nur noch das NETZ. Puenktlich angestossen wird die
+    # Engine von aussen ueber workflow_dispatch (cron-job.org, Einrichtung siehe
+    # ANLEITUNG-PUENKTLICHER-START.md). Solche Anstoesse laufen nicht ueber die
+    # Schedule-Warteschlange und starten binnen Sekunden.
     #
-    # Erst ab Minute 2, damit die 4h-Kerze sicher geschlossen ist (main.py verwirft
-    # offene Kerzen ohnehin, aber so gibt es keinen Leerlauf).
-    - cron: "2,7,12,17,22,27,32 0,4,8,12,16,20 * * *"
+    # Deshalb hier zurueck auf 2 Versuche je Kerzenschluss (12 Laeufe/Tag): Das reicht
+    # als Rueckfall, wenn der externe Dienst ausfaellt, und haelt die Actions-Liste
+    # uebersichtlich. Doppelte Nachrichten kann es nicht geben — die Engine merkt sich
+    # ueber pos.last_signal_ts, welche Kerze sie zuletzt ausgewertet hat.
+    #
+    # Erst ab Minute 2, damit die 4h-Kerze sicher geschlossen ist.
+    - cron: "2,32 0,4,8,12,16,20 * * *"
   workflow_dispatch:
     inputs:
       test_telegram:

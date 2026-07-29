@@ -29,7 +29,8 @@ from pathlib import Path
 
 import coinalyze
 from strategy_core import (Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
-                           Position, evaluate)
+                           Position, evaluate, fib_zones, find_pivots,
+                           last_significant_impulse)
 from telegram_notify import send_signals
 
 ROOT = Path(__file__).resolve().parent.parent          # Repo-Wurzel (signal-app/)
@@ -224,6 +225,44 @@ def pos_from_state(d: dict) -> Position:
     return pos
 
 
+def zonen_vorschau(candles: list[Candle], cfg: dict | None = None) -> dict | None:
+    """Die aktuell gueltigen Fib-Zonen — UNABHAENGIG davon, ob eine Position offen ist.
+
+    WARUM DAS NOETIG IST (Kaisers Befund 2026-07-29): Die meisten Kaufsignale nennen ein
+    LEVEL, das die Kerze nur BERUEHRT hat — das Tief kann in Stunde 2 einer 4h-Kerze
+    gelegen haben. Wer erst nach dem Kerzenschluss reagiert, findet den genannten Preis
+    oft nicht mehr am Markt. Der einzige Weg, diese Einstiege zuverlaessig zu bekommen,
+    ist eine Limit-Order, die VORHER dort liegt — genau so beschreibt Furkan es im Video
+    ("da koennte man dann schon erste Order platzieren").
+
+    Dafuer muessen die Levels sichtbar sein, BEVOR der Kurs sie erreicht. Bisher schrieb
+    `pos_to_state` die Zonen nur, wenn eine Position offen war (`pos.zones`); im Zustand
+    FLAT stand dort `null` — also genau dann nichts, wenn man den Einstieg vorbereitet.
+    Diese Funktion schliesst die Luecke: Sie rechnet die Zonen bei jedem Lauf neu aus der
+    Swing-Struktur und legt sie unter `zonen_vorschau` ab. Der Chart zeichnet sie, sobald
+    keine Position offen ist.
+
+    Bewusst ein EIGENES Feld statt `zones` zu fuellen: `pos_from_state` liest `zones`,
+    um die Zonen einer laufenden Position wiederherzustellen. Wuerde dort im Zustand FLAT
+    etwas stehen, haette die Position Zonen, die zu keiner Position gehoeren — verwirrend
+    und eine Fehlerquelle fuer spaeter.
+
+    Gibt None zurueck, wenn (noch) kein signifikanter Impuls erkennbar ist.
+    """
+    cfg = cfg or {}
+    piv = find_pivots(candles, n=int(cfg.get("pivot_n", 5)))
+    imp = last_significant_impulse(candles, piv, k_atr=float(cfg.get("k_atr", 2.0)))
+    if imp is None:
+        return None
+    z = fib_zones(imp)
+    return {
+        "richtung": "LONG" if imp.up else "SHORT",
+        "impuls_start": imp.start.price, "impuls_ende": imp.end.price,
+        "level_05": z.level_05, "gp_upper": z.gp_upper, "gp_lower": z.gp_lower,
+        "level_0786": z.level_0786, "invalidation": z.invalidation,
+    }
+
+
 # ------------------------------------------------------------ Orchestrierung
 
 def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
@@ -291,6 +330,7 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     state["config"] = cfg
     state["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     state["last_close"] = candles[-1].close
+    state["zonen_vorschau"] = zonen_vorschau(candles, cfg)
 
     state_path.write_text(json.dumps(state, indent=1), encoding="utf-8")
     signals_path.write_text(json.dumps(hist, indent=1), encoding="utf-8")

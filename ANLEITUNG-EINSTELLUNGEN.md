@@ -61,33 +61,54 @@ sich weiterhin nur im Flush unterscheidet.
 
 Datei: [`.github/workflows/signal.yml`](https://github.com/szoceikaiser/btc-signal-app/edit/main/.github/workflows/signal.yml)
 
-Aktuell: `- cron: "2,7,12,17,22,27,32 0,4,8,12,16,20 * * *"` — **sieben Versuche in der
-ersten halben Stunde nach jedem 4h-Kerzenschluss** (00/04/08/12/16/20 UTC), also 42 Läufe
-am Tag.
+**Pünktlich gestartet wird die Engine seit 29.07.2026 von außen** — siehe
+[ANLEITUNG-PUENKTLICHER-START.md](ANLEITUNG-PUENKTLICHER-START.md). Der GitHub-Zeitplan
+ist nur noch das Netz für den Fall, dass der externe Dienst ausfällt.
 
-**Warum nicht öfter?** Die Strategie wertet nur *abgeschlossene* 4h-Kerzen aus.
-Dazwischen gibt es nichts zu entscheiden — jeder Lauf zu einer anderen Zeit wäre Leerlauf.
+Zeile im Workflow: `- cron: "2,32 0,4,8,12,16,20 * * *"` — zwei Rückfall-Versuche je
+4h-Kerzenschluss (00/04/08/12/16/20 UTC), 12 Läufe am Tag.
 
-**Warum überhaupt mehrere Versuche?** GitHub gibt für zeitgesteuerte Abläufe **keine
-Zusage**. Sie landen in derselben Warteschlange wie alles andere auf der Plattform und
-werden bei Last ersatzlos verworfen — kein Fehler, sie kommen einfach nicht. Gemessen am
-29.07.2026: Von vier Versuchen kam etwa einer an, der Verzug lag bei 1:08 h, 1:27 h und
-2:38 h nach Kerzenschluss. Mit sieben eng gesetzten Versuchen sinkt der erwartete Verzug
-rechnerisch auf rund eine Viertelstunde, und die Wahrscheinlichkeit, dass ein
-Kerzenschluss komplett ausfällt, von 32 auf 13 %.
+**Warum nicht öfter?** Zwei Gründe. Erstens wertet die Strategie nur *abgeschlossene*
+4h-Kerzen aus — dazwischen gibt es nichts zu entscheiden. Zweitens hilft „öfter" bei
+GitHub nachweislich nicht:
 
-**Was dabei hilft, unabhängig vom Takt:** Drei von vier Signalen nennen einen **festen
-Preis** (0.5-Level, Golden Pocket, 0.786-Zone, Extension-Ziele). Diese Preise stehen
-vorher fest und sind auf der Chart-Webseite als gestrichelte Linien eingezeichnet, bevor
-der Kurs dort ankommt — du kannst also eine Limit-Order vorab platzieren, statt auf die
-Nachricht zu warten. Genau so beschreibt Furkan es im Video („da könnte man dann schon
-erste Order platzieren"). Nur Stoploss und Restverkauf laufen zum Marktpreis; dort wirkt
-sich der Verzug wirklich aus.
+| gemessen am 29.07.2026 | Versuche je Kerzenschluss | tatsächliche Läufe | Verzug |
+|---|---|---|---|
+| vorher | 4 | 1 | 1–2 h |
+| Versuch, es zu verbessern | 7 | **weiterhin 1** | 2,5–3 h |
 
-**Wenn Pünktlichkeit wichtig wird:** Ein externer Dienst (z. B. cron-job.org, kostenlos)
-kann die Engine über `workflow_dispatch` anstoßen. Solche Anstöße laufen **nicht** über
-die Schedule-Warteschlange und kommen pünktlich. Preis dafür: Ein GitHub-Zugangstoken
-müsste bei einem Fremdanbieter liegen. Bewusst noch nicht gemacht.
+In sechs beobachteten Zeitfenstern gab es **nie zwei Läufe**. Bei zufälligem Verwerfen
+hätte man bei sieben Versuchen fast zwei erwartet. GitHub drosselt offenbar pro
+Repository — dagegen helfen mehr Einträge nicht, nur ein anderer Startweg.
+
+## 2a. Warum Limit-Orders im Voraus wichtiger sind als der Takt
+
+Deine Signale zerfallen in zwei Gruppen, und sie verhalten sich völlig verschieden:
+
+| Signal | genannter Preis | hilft Pünktlichkeit? |
+|---|---|---|
+| Kauf am 0.5-Level, Golden Pocket, 0.786-Zone, Teilgewinn-Ziele | ein **Level** | **kaum** |
+| Stop, Restverkauf, Flush-Einstieg, Kaufleiter, Liq-Konfluenz | **Kerzenschluss** | **sehr** |
+
+Der Grund für die erste Zeile: Ein Kaufsignal am 0.5-Level entsteht, weil das **Tief** der
+Kerze das Level berührt hat. Dieses Tief kann in Stunde 2 einer 4-Stunden-Kerze gelegen
+haben. Zum Kerzenschluss steht der Kurs womöglich längst wieder darüber — der Preis aus
+der Nachricht ist dann nicht mehr am Markt, egal wie schnell du liest.
+
+**Die Lösung ist, die Order vorher hinzulegen.** Genau so beschreibt Furkan es im Video:
+„da könnte man dann schon erste Order platzieren." Er wartet nicht auf ein Signal, er
+lässt sich abholen.
+
+**Damit das geht, zeigt die Chart-Webseite die Zonen jetzt auch ohne offene Position**
+(ergänzt 29.07.2026). Vorher standen dort nur Linien, während eine Position lief — also
+genau dann nicht, wenn man den Einstieg vorbereitet. Erkennbar an der Beschriftung:
+
+- **gestrichelt**, ohne Zusatz = Zonen einer laufenden Position
+- **gepunktet**, mit „(Vorschau)" = aktuelle Struktur, noch keine Position offen
+
+Unter dem Chart steht dann zusätzlich, welche Richtung die Struktur hat und aus welchem
+Impuls sie stammt. Ist gar nichts eingezeichnet, hat die Engine gerade keinen
+signifikanten Impuls gefunden — dann gibt es auch nichts vorzubereiten.
 
 ## 3. Backtest starten
 

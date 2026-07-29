@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 from strategy_core import Candle, FlowPoint
+import main
 from main import pos_from_state, pos_to_state, run_engine
 
 TS0 = 1_700_000_000_000
@@ -85,3 +86,48 @@ def test_demo_state_wird_verworfen():
         hist = json.loads((data / "signals.json").read_text())
         assert [s["type"] for s in sigs] == ["KAUF_1"]
         assert len(hist["signals"]) == 1                    # Demo-Historie ersetzt
+
+
+# ------------------------------------------------- Zonen-Vorschau (Kaisers Befund 29.07.)
+
+def _vorschau_kerzen():
+    """Klarer Impuls 98 -> 130, danach Rueckgang: die Zonen muessen berechenbar sein."""
+    ms = 4 * 3600 * 1000
+    werte = [100, 99, 98, 99, 104, 110, 116, 122, 128, 130] + [130 - i for i in range(1, 12)]
+    return [Candle(1_600_000_000_000 + i * ms, v, v * 1.004, v * 0.996, v)
+            for i, v in enumerate(werte)]
+
+
+def test_zonen_vorschau_auch_ohne_position():
+    """Die Levels muessen sichtbar sein, BEVOR eine Position offen ist.
+
+    Sonst kann man die Limit-Order nicht vorab platzieren — und genau darauf sind die
+    meisten Kaufsignale angewiesen, weil sie ein Level nennen, das die Kerze nur
+    beruehrt hat (das Tief kann in Stunde 2 einer 4h-Kerze gelegen haben).
+    """
+    z = main.zonen_vorschau(_vorschau_kerzen(), {"pivot_n": 2})
+    assert z is not None, "keine Zonen berechnet"
+    assert z["richtung"] == "LONG"
+    # Impuls 97,6 -> 130,5; 0.5 dazwischen, Golden Pocket darunter, Invalidierung am Tief
+    assert z["invalidation"] < z["level_0786"] < z["gp_lower"] < z["gp_upper"] < z["level_05"]
+    assert abs(z["level_05"] - 114.06) < 0.5, z
+
+
+def test_zonen_vorschau_ohne_impuls_ist_none():
+    """Ohne erkennbaren Impuls lieber nichts anzeigen als etwas Erfundenes."""
+    ms = 4 * 3600 * 1000
+    flach = [Candle(1_600_000_000_000 + i * ms, 100, 100.1, 99.9, 100) for i in range(30)]
+    assert main.zonen_vorschau(flach, {"pivot_n": 2}) is None
+
+
+def test_state_enthaelt_vorschau_auch_im_zustand_flat():
+    """Ende-zu-Ende: nach einem Lauf ohne Position steht die Vorschau im state.json."""
+    cs = _vorschau_kerzen()
+    fl = [FlowPoint(c.ts, 1000.0 + i * 10, 0.0, 1e9, -0.0001) for i, c in enumerate(cs)]
+    with tempfile.TemporaryDirectory() as d:
+        ordner = Path(d)
+        (ordner / "config.json").write_text(json.dumps({"pivot_n": 2}), encoding="utf-8")
+        main.run_engine(fetch=lambda oi=None: (cs, fl, []), data_dir=ordner, dry_run=True)
+        state = json.loads((ordner / "state.json").read_text(encoding="utf-8"))
+    assert state["zonen_vorschau"] is not None, "Vorschau fehlt im state.json"
+    assert "level_05" in state["zonen_vorschau"] and "gp_upper" in state["zonen_vorschau"]
