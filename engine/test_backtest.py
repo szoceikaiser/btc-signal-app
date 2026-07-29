@@ -306,3 +306,59 @@ def test_build_series_uebernimmt_long_anteil():
     _cs, flow = backtest.build_series(raw, [], {ts[0]: 1e9}, None, None,
                                       {ts[0]: 65.12, ts[1]: 64.0})
     assert [f.long_pct for f in flow] == [65.12, 64.0]
+
+
+# ------------------------------------------------- E17: Wert der Vorab-Order
+
+def test_simulate_fill_close_nutzt_den_kerzenschluss():
+    """fill='close' muss den Schlusskurs der ausloesenden Kerze nehmen, nicht den Level.
+
+    Aufbau: Kauf zum Level 100, aber die Kerze schliesst bei 110. Wer vorab eine
+    Limit-Order bei 100 liegen hatte, kauft billiger als jemand, der erst nach der
+    Nachricht zum Schlusskurs kauft.
+    """
+    ms = 4 * 3600 * 1000
+    t0 = 1_700_000_000_000
+    cs = [Candle(t0, 100, 120, 95, 110), Candle(t0 + ms, 110, 130, 105, 120)]
+    sig = [{"ts": t0, "type": "KAUF_2", "price": 100.0, "tranche_pct": 100},
+           {"ts": t0 + ms, "type": "VERKAUF_REST", "price": 120.0, "tranche_pct": 100}]
+    billig = backtest.simulate(sig, cs, fee=0.0, start_ms=t0, fill="level")
+    teuer = backtest.simulate(sig, cs, fee=0.0, start_ms=t0, fill="close")
+    # Level: fuer 10.000 bei 100 gekauft = 100 Stueck -> bei 120 verkauft = 12.000
+    assert abs(billig["ende"] - 12000.0) < 1.0, billig
+    # Kerzenschluss: bei 110 gekauft = 90,9 Stueck -> bei 120 verkauft = 10.909
+    assert abs(teuer["ende"] - 10909.09) < 1.0, teuer
+    assert billig["rendite_pct"] > teuer["rendite_pct"]
+
+
+def test_simulate_fill_aendert_nichts_bei_kerzenschluss_signalen():
+    """Stops und Restverkaeufe feuern ohnehin zum Schlusskurs — dort darf kein
+    Unterschied entstehen, sonst misst der Vergleich das Falsche."""
+    ms = 4 * 3600 * 1000
+    t0 = 1_700_000_000_000
+    cs = [Candle(t0, 100, 120, 95, 110), Candle(t0 + ms, 110, 130, 105, 120)]
+    # beide Signale exakt zum jeweiligen Schlusskurs
+    sig = [{"ts": t0, "type": "KAUF_2", "price": 110.0, "tranche_pct": 100},
+           {"ts": t0 + ms, "type": "STOPLOSS", "price": 120.0, "tranche_pct": 100}]
+    a = backtest.simulate(sig, cs, fee=0.0, start_ms=t0, fill="level")
+    b = backtest.simulate(sig, cs, fee=0.0, start_ms=t0, fill="close")
+    assert abs(a["ende"] - b["ende"]) < 1e-6, (a["ende"], b["ende"])
+
+
+def test_simulate_fill_default_ist_level():
+    """Rueckwaertskompatibel: ohne Angabe muss sich nichts aendern."""
+    ms = 4 * 3600 * 1000
+    t0 = 1_700_000_000_000
+    cs = [Candle(t0, 100, 120, 95, 110), Candle(t0 + ms, 110, 130, 105, 120)]
+    sig = [{"ts": t0, "type": "KAUF_2", "price": 100.0, "tranche_pct": 100}]
+    assert backtest.simulate(sig, cs, fee=0.0, start_ms=t0)["ende"] == \
+           backtest.simulate(sig, cs, fee=0.0, start_ms=t0, fill="level")["ende"]
+
+
+def test_simulate_fill_close_faellt_auf_signalpreis_zurueck():
+    """Kennt die Kerzenliste den Zeitstempel nicht, darf nichts abstuerzen."""
+    t0 = 1_700_000_000_000
+    cs = [Candle(t0, 100, 120, 95, 110)]
+    sig = [{"ts": t0 + 999, "type": "KAUF_2", "price": 100.0, "tranche_pct": 100}]
+    r = backtest.simulate(sig, cs, fee=0.0, start_ms=t0, fill="close")
+    assert r["ende"] > 0

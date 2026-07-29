@@ -133,6 +133,7 @@ Diese Abschnitte stehen im Bericht:
 |---|---|
 | Parameter-Vergleich | alle Varianten nebeneinander |
 | Monat für Monat | was das Konto in jedem Kalendermonat gemacht hätte, mit und ohne Flush |
+| Was ist die Vorab-Information wert? | wie viel Rendite davon abhängt, dass die Limit-Order vorher dort liegt |
 | Echte Futures-Daten | ob bessere Daten etwas bringen (Antwort 07/2026: kaum) |
 | Furkans eigene Termine | ob seine Methode mehr Geld gebracht hätte |
 | Robustheitsprüfung | ob die Rangfolge trägt oder Zufall ist — **inklusive der Zahl, die der Zufall allein liefern würde** |

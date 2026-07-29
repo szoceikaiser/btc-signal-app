@@ -348,7 +348,7 @@ def score(signals: list[dict], tol_days: int = 1, start_ms: int = START_MS) -> d
 
 def simulate(signals: list[dict], candles, fee: float = 0.001,
              start_capital: float = 10000.0, start_ms: int | None = None,
-             deploy_pct: float = 1.0) -> dict:
+             deploy_pct: float = 1.0, fill: str = "level") -> dict:
     """Tranchen-genaue P&L-Simulation der Signale.
 
     Annahmen (dokumentiert): kein Hebel; Kauf-Tranchen als %-Anteil des beim
@@ -369,7 +369,32 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     zum jeweiligen Schlusskurs (offene Positionen also mitgerechnet). Daraus entsteht die
     Monatsuebersicht im Bericht — Kaisers Frage "was haette ich Monat fuer Monat verdient
     oder verloren?".
+
+    `fill` (E17, Kaisers Frage 2026-07-29 "was ist die Vorab-Info wert?"):
+    - "level"  = zum genannten Preis abgerechnet. Das sind bei Einstiegen am 0.5-Level,
+                 im Golden Pocket, an der 0.786-Zone und bei den Extension-Zielen
+                 FIB-LEVELS, die die Kerze nur BERUEHRT hat — moeglicherweise in Stunde 2
+                 einer 4h-Kerze. Diese Preise bekommt nur, wer die Limit-Order VORHER
+                 dort liegen hat.
+    - "close"  = alles zum SCHLUSSKURS der ausloesenden Kerze. Das bildet ab, dass man
+                 erst nach der Telegram-Nachricht reagiert, der Kurs sich also vom Level
+                 wieder wegbewegt haben kann.
+    Der Unterschied beider Laeufe IST der Wert der Vorab-Order. Signale, die ohnehin zum
+    Kerzenschluss feuern (Stop, Restverkauf, Flush, Kaufleiter), sind in beiden Faellen
+    identisch — der Effekt isoliert also genau die Level-Signale.
+
+    EINORDNUNG, damit die Zahl nicht ueberschaetzt wird: "close" ist noch freundlich
+    gerechnet. Es unterstellt, dass man GENAU zum Kerzenschluss handelt. Tatsaechlich
+    laeuft die Engine 1 bis 3 Stunden spaeter (GitHub-Verzoegerung, gemessen 29.07.2026),
+    der reale Preis liegt also noch einmal weiter weg. Die gemessene Luecke ist damit
+    eine UNTERGRENZE fuer den Wert der Vorab-Order.
     """
+    schluss_je_ts = {c.ts: c.close for c in candles}
+
+    def _preis(s: dict) -> float:
+        if fill == "level":
+            return s["price"]
+        return schluss_je_ts.get(s["ts"], s["price"])
     cash, units, peak_units, l_avg = start_capital, 0.0, 0.0, 0.0
     s_units, s_peak, s_avg = 0.0, 0.0, 0.0            # Short-Seite
     alloc = 0.0
@@ -422,7 +447,7 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
 
     for s in signals:
         _snapshot_bis(s["ts"])
-        p, t = s["price"], s["type"]
+        p, t = _preis(s), s["type"]
         if t in ("KAUF_1", "KAUF_2", "NACHKAUF"):
             if units == 0.0:
                 alloc, peak_units, l_avg = cash * deploy_pct, 0.0, 0.0
@@ -624,6 +649,58 @@ def main():
               f"Praezision {sc['precision']:.0%}, Rendite {p['rendite_pct']:+.1f} %, "
               f"Long {p['long_profit']:+.0f}€/Short {p['short_profit']:+.0f}€, "
               f"{len(sigs)} Signale ({time.time()-t0:.0f}s)")
+
+    # --- E17: Was ist die Vorab-Order wert? -----------------------------------------
+    # Kaisers Frage: Die meisten Kaufsignale nennen ein Level, das die Kerze nur BERUEHRT
+    # hat — moeglicherweise in Stunde 2. Wer erst nach der Nachricht reagiert, bekommt
+    # diesen Preis nicht. Zwei Laeufe derselben Signale, nur anders abgerechnet.
+    _pcfg2 = next((c for c in GRID if c.get("panel")), GRID[0])
+    _vsig = run_backtest(candles, flow, _pcfg2, start_ms=eff_start)
+    p_level = simulate(_vsig, candles, start_ms=eff_start, fill="level")
+    p_close = simulate(_vsig, candles, start_ms=eff_start, fill="close")
+    _schluss = {c.ts: c.close for c in candles}
+    _abw = [abs(s["price"] - _schluss[s["ts"]]) / _schluss[s["ts"]] * 100
+            for s in _vsig if s["ts"] in _schluss and _schluss[s["ts"]]
+            and abs(s["price"] - _schluss[s["ts"]]) / _schluss[s["ts"]] > 0.0005]
+    _abw.sort()
+    _median = _abw[len(_abw) // 2] if _abw else 0.0
+    vorab_zeilen = [
+        "",
+        "## Was ist die Vorab-Information wert?",
+        "",
+        "Die meisten Kauf- und Teilgewinn-Signale nennen ein **Fib-Level**, das die Kerze "
+        "nur BERUEHRT hat — das Tief kann in Stunde 2 einer 4h-Kerze gelegen haben. Wer "
+        "erst auf die Telegram-Nachricht reagiert, findet diesen Preis oft nicht mehr am "
+        "Markt. Beide Zeilen sind DIESELBEN Signale, nur anders abgerechnet.",
+        "",
+        "| Abrechnung | Rendite | max. Rueckgang |",
+        "|---|---|---|",
+        f"| **Limit-Order lag vorher dort** (zum genannten Level) | "
+        f"**{p_level['rendite_pct']:+.1f} %** | {p_level['max_drawdown_pct']:.1f} % |",
+        f"| **erst nach der Nachricht reagiert** (zum Kerzenschluss) | "
+        f"**{p_close['rendite_pct']:+.1f} %** | {p_close['max_drawdown_pct']:.1f} % |",
+        f"| Unterschied | **{p_level['rendite_pct'] - p_close['rendite_pct']:+.1f} Punkte** | |",
+        "",
+        f"Betroffen sind {len(_abw)} von {len(_vsig)} Signalen — bei den uebrigen ist der "
+        "genannte Preis ohnehin der Kerzenschluss (Stop, Restverkauf, Flush-Einstieg, "
+        f"Kaufleiter). Bei den betroffenen liegt der Kerzenschluss im Median "
+        f"**{_median:.2f} %** vom genannten Level entfernt.",
+        "",
+        "**So ist das zu lesen:** Der Unterschied ist der Wert der Vorbereitung — also "
+        "dessen, was die Vorschau-Nachricht und die Zonen-Linien im Chart ermoeglichen. "
+        "Ist er klein, kann man entspannt auf die Signale reagieren. Ist er gross, "
+        "entscheidet die vorab platzierte Order ueber einen erheblichen Teil des "
+        "Ergebnisses.",
+        "",
+        "**Die Zahl ist eine UNTERGRENZE.** Die Zeile 'erst nach der Nachricht' "
+        "unterstellt, dass man genau zum Kerzenschluss handelt. Tatsaechlich laeuft die "
+        "Engine 1 bis 3 Stunden spaeter (GitHub-Verzoegerung, gemessen 29.07.2026), der "
+        "reale Preis liegt also noch weiter weg. Ausserdem rechnet auch die obere Zeile "
+        "ohne Schlupf und ohne Teilausfuehrungen.",
+    ]
+    print(f"E17 Vorab-Order: Level {p_level['rendite_pct']:+.1f} % gegen Kerzenschluss "
+          f"{p_close['rendite_pct']:+.1f} % ({len(_abw)} betroffene Signale, "
+          f"Median-Abweichung {_median:.2f} %)")
 
     # --- E16: Wirkung der echten Futures-Daten isolieren ----------------------------
     # Dieselbe Variante, dieselben Kerzen — einmal MIT echtem Futures-CVD, einmal ohne.
@@ -882,6 +959,7 @@ def main():
         "WICHTIG: Die Recall-Prozente oben sind Aehnlichkeit zu Furkans Terminen, "
         "KEIN Gewinn. Der Gewinn steht nur in den P&L-Zeilen.",
         *monats_zeilen,
+        *vorab_zeilen,
         *fut_zeilen,
         *furkan_zeilen,
         "",
