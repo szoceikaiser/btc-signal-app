@@ -31,7 +31,7 @@ import coinalyze
 from strategy_core import (Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots,
                            last_significant_impulse)
-from telegram_notify import send_signals
+from telegram_notify import send_signals, send_vorschau
 
 ROOT = Path(__file__).resolve().parent.parent          # Repo-Wurzel (signal-app/)
 DATA = ROOT / "site" / "data"
@@ -255,11 +255,18 @@ def zonen_vorschau(candles: list[Candle], cfg: dict | None = None) -> dict | Non
     if imp is None:
         return None
     z = fib_zones(imp)
+    # Abstand vom Kern-Einstieg (Golden Pocket) zum Stop — dieselbe Groesse, die
+    # min_stop_pct prueft. So sieht man der Ankuendigung schon an, ob die Engine hier
+    # ueberhaupt einsteigen wuerde, statt eine Order fuer ein Setup zu legen, das die
+    # Engine spaeter verwirft.
+    abstand = (abs(z.gp_upper - z.invalidation) / z.gp_upper * 100) if z.gp_upper else None
     return {
         "richtung": "LONG" if imp.up else "SHORT",
         "impuls_start": imp.start.price, "impuls_ende": imp.end.price,
+        "impuls_start_ts": imp.start.ts, "impuls_ende_ts": imp.end.ts,
         "level_05": z.level_05, "gp_upper": z.gp_upper, "gp_lower": z.gp_lower,
         "level_0786": z.level_0786, "invalidation": z.invalidation,
+        "abstand_pct": round(abstand, 2) if abstand is not None else None,
     }
 
 
@@ -330,7 +337,23 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     state["config"] = cfg
     state["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     state["last_close"] = candles[-1].close
-    state["zonen_vorschau"] = zonen_vorschau(candles, cfg)
+    vorschau = zonen_vorschau(candles, cfg)
+    state["zonen_vorschau"] = vorschau
+
+    # --- Vorschau-Ankuendigung per Telegram (2026-07-29) -----------------------------
+    # Nur bei NEUER Struktur, nicht bei jedem Lauf — sonst kaeme sechsmal taeglich
+    # dieselbe Nachricht. Als "neu" gilt ein anderer Referenz-Impuls (andere Pivots).
+    # Erkennung ueber die Zeitstempel der Pivots, nicht ueber die Preise: Zwei Impulse
+    # koennen zufaellig aehnliche Preise haben, aber nie dieselben Zeitpunkte.
+    alt = (old_state or {}).get("zonen_vorschau") or {}
+    neue_struktur = vorschau is not None and (
+        alt.get("impuls_start_ts"), alt.get("impuls_ende_ts")
+    ) != (vorschau["impuls_start_ts"], vorschau["impuls_ende_ts"])
+    if neue_struktur and cfg.get("vorschau_telegram", True):
+        send_vorschau(vorschau, candles[-1].ts, dry_run=dry_run)
+        print(f"Vorschau gesendet: {vorschau['richtung']}, GP "
+              f"{vorschau['gp_lower']:.0f}-{vorschau['gp_upper']:.0f}, "
+              f"Stop-Abstand {vorschau['abstand_pct']} %")
 
     state_path.write_text(json.dumps(state, indent=1), encoding="utf-8")
     signals_path.write_text(json.dumps(hist, indent=1), encoding="utf-8")

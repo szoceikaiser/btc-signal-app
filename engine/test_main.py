@@ -131,3 +131,69 @@ def test_state_enthaelt_vorschau_auch_im_zustand_flat():
         state = json.loads((ordner / "state.json").read_text(encoding="utf-8"))
     assert state["zonen_vorschau"] is not None, "Vorschau fehlt im state.json"
     assert "level_05" in state["zonen_vorschau"] and "gp_upper" in state["zonen_vorschau"]
+
+
+def _lauf(ordner, cs, fl, cfg=None):
+    """Ein Engine-Lauf in einem Testordner; gibt den geschriebenen state zurueck."""
+    if cfg is not None:
+        (ordner / "config.json").write_text(json.dumps(cfg), encoding="utf-8")
+    main.run_engine(fetch=lambda oi=None: (cs, fl, []), data_dir=ordner, dry_run=True)
+    return json.loads((ordner / "state.json").read_text(encoding="utf-8"))
+
+
+def test_vorschau_wird_nur_bei_NEUER_struktur_gesendet(capsysless=None):
+    """Die Ankuendigung darf nicht bei jedem Lauf kommen — sonst 6 gleiche Nachrichten/Tag.
+
+    Zweiter Lauf mit denselben Kerzen = dieselbe Struktur = keine zweite Nachricht.
+    """
+    cs = _vorschau_kerzen()
+    fl = [FlowPoint(c.ts, 1000.0 + i * 10, 0.0, 1e9, -0.0001) for i, c in enumerate(cs)]
+    gesendet = []
+    echt = main.send_vorschau
+    main.send_vorschau = lambda z, ts, dry_run=False: gesendet.append(z) or ""
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            ordner = Path(d)
+            _lauf(ordner, cs, fl, {"pivot_n": 2})
+            assert len(gesendet) == 1, "erste Vorschau fehlt"
+            _lauf(ordner, cs, fl)                       # gleiche Kerzen, gleiche Struktur
+            assert len(gesendet) == 1, "Vorschau wurde erneut gesendet, obwohl nichts neu war"
+    finally:
+        main.send_vorschau = echt
+
+
+def test_vorschau_abschaltbar():
+    cs = _vorschau_kerzen()
+    fl = [FlowPoint(c.ts, 1000.0 + i * 10, 0.0, 1e9, -0.0001) for i, c in enumerate(cs)]
+    gesendet = []
+    echt = main.send_vorschau
+    main.send_vorschau = lambda z, ts, dry_run=False: gesendet.append(z) or ""
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            _lauf(Path(d), cs, fl, {"pivot_n": 2, "vorschau_telegram": False})
+            assert gesendet == [], "Vorschau trotz vorschau_telegram=false gesendet"
+    finally:
+        main.send_vorschau = echt
+
+
+def test_vorschau_nachricht_enthaelt_die_wichtigen_zahlen():
+    from telegram_notify import format_vorschau
+    z = main.zonen_vorschau(_vorschau_kerzen(), {"pivot_n": 2})
+    text = format_vorschau(z, 1_600_000_000_000)
+    for muss in ("VORSCHAU", "KEIN Trigger", "0.5-Level", "Golden Pocket",
+                 "0.786", "Ungueltig ab", "Limit-Order"):
+        assert muss in text, f"'{muss}' fehlt in der Nachricht:\n{text}"
+    # Die Zahlen selbst muessen drinstehen, nicht nur die Begriffe
+    assert f"{z['level_05']:,.0f}".replace(",", ".") in text
+
+
+def test_vorschau_warnt_bei_zu_engem_stop():
+    """Liegt der Stop naeher als 2 %, steigt die Engine nicht ein — das muss dranstehen,
+    sonst legt man eine Limit-Order fuer ein Setup, das nie genommen wird."""
+    from telegram_notify import format_vorschau
+    eng = {"richtung": "LONG", "impuls_start": 100, "impuls_ende": 101,
+           "level_05": 100.5, "gp_upper": 100.4, "gp_lower": 100.35,
+           "level_0786": 100.2, "invalidation": 100.0, "abstand_pct": 0.4}
+    weit = dict(eng, abstand_pct=3.6)
+    assert "steigt hier NICHT ein" in format_vorschau(eng, 1_600_000_000_000)
+    assert "steigt hier NICHT ein" not in format_vorschau(weit, 1_600_000_000_000)

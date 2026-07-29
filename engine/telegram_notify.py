@@ -33,7 +33,50 @@ STYLE = {
     "SHORT_TP_2":       ("\U0001F7E3", "STP2"),
     "SHORT_COVER_REST": ("\U0001F534", "SC"),
     "SHORT_STOPLOSS":   ("\U0001F6D1", "SSL"),
+    # Kein Signal, sondern eine Ankuendigung (2026-07-29, Kaisers Anforderung):
+    "VORSCHAU":         ("\U0001F4CD", "VOR"),  # Stecknadel
 }
+
+
+def format_vorschau(z: dict, ts_ms: int) -> str:
+    """Ankuendigungs-Nachricht: WO die naechsten Einstiege lauern — BEVOR es soweit ist.
+
+    WARUM (Kaisers Befund 2026-07-29): Ein Kaufsignal am 0.5-Level oder im Golden Pocket
+    entsteht, weil das TIEF einer 4h-Kerze das Level beruehrt hat. Dieses Tief kann in
+    Stunde 2 gelegen haben — zum Kerzenschluss steht der Kurs oft schon wieder darueber.
+    Wer erst auf die Signal-Nachricht reagiert, findet den genannten Preis dann nicht mehr
+    am Markt. Der einzige verlaessliche Weg ist eine Limit-Order, die vorher dort liegt
+    (Furkan im Video: "da koennte man dann schon erste Order platzieren").
+
+    Diese Nachricht liefert genau die Zahlen dafuer. Sie wird NICHT bei jedem Lauf
+    verschickt, sondern nur, wenn sich die Struktur aendert — sonst waere es Laerm.
+    """
+    lang = z.get("richtung") == "LONG"
+    emoji, _ = STYLE["VORSCHAU"]
+    lines = [
+        f"{emoji} VORSCHAU — noch KEIN Trigger, nur zur Vorbereitung",
+        "",
+        f"Neue Struktur erkannt: {'Aufwaerts' if lang else 'Abwaerts'}-Impuls "
+        f"{_fmt_usd(z['impuls_start'])} -> {_fmt_usd(z['impuls_ende'])}",
+        "",
+        f"Hier wuerde {'gekauft' if lang else 'geshortet'}:",
+        f"  0.5-Level        {_fmt_usd(z['level_05'])}   (erste Teilposition)",
+        f"  Golden Pocket    {_fmt_usd(z['gp_lower'])} - {_fmt_usd(z['gp_upper'])}   (Kern)",
+        f"  0.786-Zone       {_fmt_usd(z['level_0786'])}   (Nachkauf)",
+        "",
+        f"Ungueltig ab       {_fmt_usd(z['invalidation'])}   (dort liegt der Stop)",
+    ]
+    if z.get("abstand_pct") is not None:
+        a = z["abstand_pct"]
+        lines.append(f"Abstand Golden Pocket -> Stop: {a:.1f} %"
+                     + ("" if a >= 2 else "  ⚠️ unter 2 % — die Engine steigt hier NICHT ein"))
+    lines += [
+        "",
+        _fmt_ts(ts_ms),
+        "— Diese Preise kannst du JETZT als Limit-Order hinterlegen. Die Engine meldet "
+        "sich erst, wenn der Kurs sie beruehrt hat — dann ist der Preis oft schon weg.",
+    ]
+    return "\n".join(lines)
 
 
 def _fmt_usd(x: float) -> str:
@@ -91,3 +134,15 @@ def send_signals(signals: list[dict], dry_run: bool = False) -> list[str]:
     for m in messages:
         send_telegram(m, token, chat_id)
     return messages
+
+
+def send_vorschau(z: dict, ts_ms: int, dry_run: bool = False) -> str:
+    """Sendet die Vorschau-Ankuendigung (siehe format_vorschau)."""
+    text = format_vorschau(z, ts_ms)
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+    if dry_run or not token or not chat_id:
+        print("[DRY-RUN]\n" + text + "\n")
+    else:
+        send_telegram(text, token, chat_id)
+    return text
