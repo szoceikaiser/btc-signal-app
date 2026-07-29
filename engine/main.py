@@ -31,7 +31,8 @@ import coinalyze
 from strategy_core import (Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots,
                            last_significant_impulse)
-from telegram_notify import send_signals, send_vorschau
+from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
+                             send_signals, send_text, send_vorschau)
 
 ROOT = Path(__file__).resolve().parent.parent          # Repo-Wurzel (signal-app/)
 DATA = ROOT / "site" / "data"
@@ -270,6 +271,104 @@ def zonen_vorschau(candles: list[Candle], cfg: dict | None = None) -> dict | Non
     }
 
 
+def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
+                now_ms: int | None = None, kerzen_roh=None) -> dict | None:
+    """Leichter Zwischenlauf: Entwickelt sich in der LAUFENDEN Kerze gerade ein Flush?
+
+    Kaisers Anforderung (2026-07-29): Flushs sind schnelle Bewegungen, oft innerhalb
+    einer 4h-Kerze vorbei. Sie lassen sich — anders als die Kaeufe an den Fib-Levels —
+    NICHT als Limit-Order vorbereiten. Man muss hinschauen. Die Engine meldet sie aber
+    erst nach Kerzenschluss, plus GitHub-Verzoegerung.
+
+    Diese Funktion laeuft alle 15 Minuten und schaut nur nach. Sie erzeugt KEIN Signal,
+    fasst state.json NICHT an und taucht im Backtest NICHT auf — die Engine bleibt bei
+    ihrem Grundsatz "nur abgeschlossene Kerzen". Der Grund fuer diese Trennung: Die
+    Flush-Bedingung verlangt einen Schlusskurs ueber der Invalidierung. Bei einer
+    laufenden Kerze steht der nicht fest; ein Signal daraus koennte sich spaeter wieder
+    aufloesen. Ein Hinweis darf das, ein Signal nicht.
+
+    Warnt hoechstens EINMAL je Kerze (Merker in watch.json) — sonst kaeme sie bei einem
+    laengeren Flush 15-mal. Schreibt watch.json nur, wenn tatsaechlich gewarnt wird;
+    ohne Warnung bleibt das Repo unberuehrt.
+
+    Prueft dieselben Bedingungen wie die Engine, damit nicht vor etwas gewarnt wird,
+    das die Engine spaeter ohnehin verwirft: nur bei FLAT, nur Long, nur wenn
+    flush_entry aktiv ist und der Stop-Mindestabstand eingehalten waere.
+    """
+    now_ms = now_ms or int(time.time() * 1000)
+    raw = kerzen_roh if kerzen_roh is not None else _get_json(SPOT_URL)
+
+    def _c(k):
+        return Candle(int(k[0]), float(k[1]), float(k[2]), float(k[3]), float(k[4]))
+
+    fertig = [_c(k) for k in raw if int(k[6]) <= now_ms]
+    laufend = next((_c(k) for k in raw if int(k[6]) > now_ms), None)
+    if laufend is None or len(fertig) < 30:
+        return None
+
+    cfg = {}
+    cfg_path = data_dir / "config.json"
+    if cfg_path.exists():
+        try:
+            cfg = {k: v for k, v in json.loads(cfg_path.read_text(encoding="utf-8")).items()
+                   if not k.startswith("_")}
+        except Exception as exc:  # noqa: BLE001
+            print(f"config.json nicht lesbar ({exc}) -> Standardwerte.")
+    if cfg.get("flush_entry", "core") == "off" or not cfg.get("flush_wache", True):
+        return None
+
+    # Nur wenn KEINE Position offen ist — der Flush-Einstieg feuert nur aus FLAT.
+    state_path = data_dir / "state.json"
+    if state_path.exists():
+        try:
+            if json.loads(state_path.read_text(encoding="utf-8")).get("pos_state") != "FLAT":
+                return None
+        except Exception:  # noqa: BLE001
+            pass
+
+    z = zonen_vorschau(fertig, cfg)
+    if z is None or z["richtung"] != "LONG" or not cfg.get("bias_long", True):
+        return None
+
+    # Dieselbe Bedingung wie in strategy_core.evaluate, nur auf der laufenden Kerze:
+    # Tief durchschlaegt das Golden Pocket, Kurs noch ueber der Invalidierung.
+    if not (laufend.low < z["gp_lower"] and laufend.close > z["invalidation"]):
+        return None
+    # Mindest-Stopabstand wie die Engine pruefen (sonst Warnung vor einem Setup,
+    # das die Engine anschliessend verwirft).
+    mind = float(cfg.get("min_stop_pct", 0) or 0)
+    puffer = (laufend.close - z["invalidation"]) / laufend.close
+    if mind > 0 and puffer < mind:
+        return None
+
+    watch_path = data_dir / "watch.json"
+    alt = {}
+    if watch_path.exists():
+        try:
+            alt = json.loads(watch_path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            pass
+    if alt.get("gewarnt_ts") == laufend.ts:
+        return None                                      # fuer diese Kerze schon gewarnt
+
+    schluss_ms = laufend.ts + CANDLE_MS
+    w = {
+        "gewarnt_ts": laufend.ts,
+        "gewarnt_um": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "preis": laufend.close,
+        "gp_lower": z["gp_lower"],
+        "invalidation": z["invalidation"],
+        "puffer_pct": round(puffer * 100, 2),
+        "schluss_utc": datetime.utcfromtimestamp(schluss_ms / 1000).strftime("%H:%M UTC"),
+        "aufgeloest": False,
+    }
+    send_text(format_flush_warnung(w), dry_run=dry_run)
+    watch_path.write_text(json.dumps(w, indent=1), encoding="utf-8")
+    print(f"Flush-Warnung gesendet: Kurs {laufend.close:.0f}, GP {z['gp_lower']:.0f}, "
+          f"Puffer {w['puffer_pct']} %")
+    return w
+
+
 # ------------------------------------------------------------ Orchestrierung
 
 def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
@@ -359,6 +458,27 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     signals_path.write_text(json.dumps(hist, indent=1), encoding="utf-8")
     oi_path.write_text(json.dumps(oi_history), encoding="utf-8")
 
+    # --- Aufloesung einer offenen Flush-Warnung (Kaiser 2026-07-29) ------------------
+    # Ohne diese Rueckmeldung bliebe jede Warnung in der Luft haengen: Man wuesste nie,
+    # ob man etwas verpasst hat oder ob sich die Sache erledigt hat. Ausgeloest wird sie,
+    # sobald die gewarnte Kerze abgeschlossen ist.
+    watch_path = data_dir / "watch.json"
+    if watch_path.exists():
+        try:
+            w = json.loads(watch_path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            w = {}
+        offen = w and not w.get("aufgeloest") and w.get("gewarnt_ts") is not None
+        if offen and any(c.ts == w["gewarnt_ts"] for c in candles):
+            # Die gewarnte Kerze ist jetzt abgeschlossen -> Ergebnis feststellen.
+            bestaetigt = any(s["ts"] == w["gewarnt_ts"] and s.get("tag") == "FLUSH"
+                             for s in new_signals)
+            send_text(format_flush_aufloesung(w, bestaetigt), dry_run=dry_run)
+            w["aufgeloest"] = True
+            w["bestaetigt"] = bestaetigt
+            watch_path.write_text(json.dumps(w, indent=1), encoding="utf-8")
+            print(f"Flush-Warnung aufgeloest: {'bestaetigt' if bestaetigt else 'nicht bestaetigt'}")
+
     if new_signals:
         send_signals(new_signals, dry_run=dry_run)
     print(f"Lauf ok: {len(candles)} Kerzen, {len(new_signals)} neue Signale, "
@@ -395,6 +515,10 @@ def resend_all_signals(data_dir: Path = DATA):
 if __name__ == "__main__":
     if "--test-telegram" in sys.argv:
         send_testnachricht()
+    elif "--watch" in sys.argv:
+        # Leichter Zwischenlauf (alle 15 Min): nur nach sich entwickelnden Flushs
+        # schauen. Fasst state.json nicht an, erzeugt keine Signale.
+        watch_flush(dry_run="--dry-run" in sys.argv or not os.environ.get("TELEGRAM_BOT_TOKEN"))
     elif "--resend-all" in sys.argv:
         resend_all_signals()
     else:

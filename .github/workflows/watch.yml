@@ -1,0 +1,53 @@
+name: Flush-Wache
+
+# Leichter Zwischenlauf: schaut nur nach, ob sich in der LAUFENDEN 4h-Kerze gerade ein
+# Flush entwickelt, und schickt dann einen Hinweis (kein Signal!). Grund: Flushs sind
+# schnelle Bewegungen, oft innerhalb einer Kerze vorbei, und lassen sich - anders als die
+# Kaeufe an den Fib-Levels - nicht als Limit-Order vorbereiten. Man muss hinschauen.
+#
+# Bewusst ein EIGENER Workflow und nicht Teil der Signal-Engine:
+#  - er fasst state.json und signals.json NICHT an (kein Commit-Laerm bei 96 Laeufen/Tag)
+#  - die Engine bleibt beim Grundsatz "nur abgeschlossene Kerzen" auswerten
+#  - faellt dieser Workflow aus, aendert sich an den Signalen nichts
+#
+# Angestossen wird er am besten von aussen alle 15 Minuten (cron-job.org, siehe
+# ANLEITUNG-PUENKTLICHER-START.md) - GitHub-Zeitplaene werden bei Last verworfen.
+# Der Zeitplan unten ist nur ein Netz.
+
+on:
+  schedule:
+    - cron: "8,23,38,53 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: flush-wache
+  cancel-in-progress: false
+
+jobs:
+  wache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Nach sich entwickelndem Flush schauen
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: cd engine && python3 main.py --watch
+
+      - name: Merker committen (nur wenn wirklich gewarnt wurde)
+        run: |
+          git config user.name "flush-wache"
+          git config user.email "actions@users.noreply.github.com"
+          git add site/data/watch.json 2>/dev/null || true
+          # Ohne Warnung aendert sich nichts -> kein Commit, kein Laerm im Verlauf.
+          if git diff --cached --quiet; then
+            echo "Keine Warnung - nichts zu committen."
+          else
+            git commit -m "Flush-Wache: Warnung vermerkt"
+            git pull --no-rebase --no-edit
+            git push
+          fi

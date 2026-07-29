@@ -197,3 +197,114 @@ def test_vorschau_warnt_bei_zu_engem_stop():
     weit = dict(eng, abstand_pct=3.6)
     assert "steigt hier NICHT ein" in format_vorschau(eng, 1_600_000_000_000)
     assert "steigt hier NICHT ein" not in format_vorschau(weit, 1_600_000_000_000)
+
+
+# ------------------------------------------------- Flush-Fruehwarnung (Kaiser 29.07.)
+
+MS4H = 4 * 3600 * 1000
+
+
+def _rohkerze(ts, o, h, l, c):
+    """Binance-Rohformat: [open_ts, o, h, l, c, vol, close_ts, ...]"""
+    return [ts, str(o), str(h), str(l), str(c), "1", ts + MS4H, "1", 1, "0.5", "1"]
+
+
+def _wache_szenario(tief, schluss):
+    """Fertige Kerzen mit klarem Impuls 97,6 -> 130,5, plus eine LAUFENDE Kerze.
+
+    Golden Pocket liegt bei ~109-110, Invalidierung bei ~97,6. Ueber Tief und
+    Schlusskurs der laufenden Kerze steuern die Tests die Flush-Bedingung.
+    """
+    t0 = 1_600_000_000_000
+    werte = [100, 99, 98, 99, 104, 110, 116, 122, 128, 130] + [130 - i for i in range(1, 25)]
+    roh = [_rohkerze(t0 + i * MS4H, v, v * 1.004, v * 0.996, v) for i, v in enumerate(werte)]
+    lauf_ts = t0 + len(werte) * MS4H
+    roh.append(_rohkerze(lauf_ts, 106, 107, tief, schluss))
+    # now_ms muss INNERHALB der angehaengten Kerze liegen, sonst gilt die letzte
+    # werte-Kerze als "laufend" und der Test prueft etwas anderes als gedacht.
+    return roh, lauf_ts, lauf_ts + 1000                  # roh, ts der laufenden, now_ms
+
+
+def _wache(ordner, roh, now_ms, cfg=None):
+    (ordner / "config.json").write_text(json.dumps(cfg or {"pivot_n": 2}), encoding="utf-8")
+    gesendet = []
+    import telegram_notify
+    echt = main.send_text
+    main.send_text = lambda t, dry_run=False: gesendet.append(t) or t
+    try:
+        w = main.watch_flush(data_dir=ordner, dry_run=True, now_ms=now_ms, kerzen_roh=roh)
+    finally:
+        main.send_text = echt
+    return w, gesendet
+
+
+def test_flush_wache_warnt_wenn_kurs_durch_das_golden_pocket_faellt():
+    roh, _lts, now = _wache_szenario(tief=100.0, schluss=106.0)   # unter GP, ueber Inval.
+    with tempfile.TemporaryDirectory() as d:
+        w, gesendet = _wache(Path(d), roh, now)
+    assert w is not None, "keine Warnung, obwohl der Flush sich entwickelt"
+    assert len(gesendet) == 1
+    assert "FLUSH ENTWICKELT SICH" in gesendet[0]
+    assert "noch NICHT bestaetigt" in gesendet[0]
+
+
+def test_flush_wache_schweigt_ohne_durchbruch():
+    roh, _lts, now = _wache_szenario(tief=120.0, schluss=125.0)   # gar nicht im GP
+    with tempfile.TemporaryDirectory() as d:
+        w, gesendet = _wache(Path(d), roh, now)
+    assert w is None and gesendet == []
+
+
+def test_flush_wache_schweigt_unter_der_invalidierung():
+    """Faellt der Kurs unter die Ungueltig-Marke, gibt es keinen Einstieg — also
+    auch keine Warnung, sonst weckt man jemanden fuer nichts."""
+    roh, _lts, now = _wache_szenario(tief=90.0, schluss=95.0)     # unter Invalidierung
+    with tempfile.TemporaryDirectory() as d:
+        w, gesendet = _wache(Path(d), roh, now)
+    assert w is None and gesendet == []
+
+
+def test_flush_wache_warnt_nur_einmal_je_kerze():
+    """Sonst kaeme die Warnung bei einem laengeren Flush alle 15 Minuten erneut."""
+    roh, _lts, now = _wache_szenario(tief=100.0, schluss=106.0)
+    with tempfile.TemporaryDirectory() as d:
+        ordner = Path(d)
+        w1, g1 = _wache(ordner, roh, now)
+        w2, g2 = _wache(ordner, roh, now)
+    assert w1 is not None and len(g1) == 1
+    assert w2 is None and g2 == [], "zweite Warnung fuer dieselbe Kerze gesendet"
+
+
+def test_flush_wache_schweigt_bei_offener_position():
+    """Der Flush-Einstieg feuert nur aus FLAT — bei offener Position waere die
+    Warnung irrefuehrend."""
+    roh, _lts, now = _wache_szenario(tief=100.0, schluss=106.0)
+    with tempfile.TemporaryDirectory() as d:
+        ordner = Path(d)
+        (ordner / "state.json").write_text(json.dumps({"pos_state": "CORE"}), encoding="utf-8")
+        w, gesendet = _wache(ordner, roh, now)
+    assert w is None and gesendet == []
+
+
+def test_flush_wache_beachtet_mindest_stopabstand():
+    """Waere der Stop naeher als min_stop_pct, steigt die Engine nicht ein — dann
+    darf auch nicht gewarnt werden."""
+    roh, _lts, now = _wache_szenario(tief=100.0, schluss=106.0)
+    with tempfile.TemporaryDirectory() as d:
+        w, g = _wache(Path(d), roh, now, {"pivot_n": 2, "min_stop_pct": 0.99})
+    assert w is None and g == []
+
+
+def test_flush_wache_abschaltbar():
+    roh, _lts, now = _wache_szenario(tief=100.0, schluss=106.0)
+    with tempfile.TemporaryDirectory() as d:
+        w, g = _wache(Path(d), roh, now, {"pivot_n": 2, "flush_wache": False})
+    assert w is None and g == []
+
+
+def test_flush_aufloesung_meldet_nicht_bestaetigt():
+    """Nach Kerzenschluss ohne Flush-Signal muss die Entwarnung kommen."""
+    from telegram_notify import format_flush_aufloesung
+    w = {"preis": 106.0, "invalidation": 97.6}
+    assert "KEIN Flush-Einstieg" in format_flush_aufloesung(w, False)
+    assert "BESTAETIGT" in format_flush_aufloesung(w, True)

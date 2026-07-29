@@ -81,6 +81,40 @@ In sechs beobachteten Zeitfenstern gab es **nie zwei Läufe**. Bei zufälligem V
 hätte man bei sieben Versuchen fast zwei erwartet. GitHub drosselt offenbar pro
 Repository — dagegen helfen mehr Einträge nicht, nur ein anderer Startweg.
 
+## 2b. Die Flush-Wache (seit 29.07.2026)
+
+Flush-Einstiege sind das Gegenteil der Level-Käufe: schnelle Bewegungen, oft innerhalb
+einer Kerze vorbei, **nicht als Limit-Order vorbereitbar**. Dafür gibt es einen eigenen,
+leichten Zwischenlauf — Workflow **Flush-Wache**, alle 15 Minuten.
+
+Er schaut nur nach, ob der Kurs in der **laufenden** Kerze gerade durch das Golden Pocket
+fällt, und schickt dann:
+
+```
+⚡ FLUSH ENTWICKELT SICH — noch NICHT bestaetigt
+BTC gerade 63.400 $
+Golden Pocket 63.200 $ nach unten durchstossen
+Ungueltig ab  62.000 $ — noch 2.2 % Luft
+Die Kerze schliesst um 16:00 UTC.
+```
+
+**Warum kein Signal?** Die Flush-Bedingung verlangt, dass die Kerze **über** der
+Ungültig-Marke *schließt*. Bei einer laufenden Kerze steht das nicht fest — der Kurs kann
+noch weiter fallen. Ein Signal, das jetzt gilt und in zwei Stunden nicht mehr, wäre
+schlimmer als ein spätes. Deshalb ein Hinweis zum Hinschauen, keine Aufforderung.
+
+**Nach Kerzenschluss kommt automatisch die Auflösung** — bestätigt oder nicht. Damit
+bleibt keine Warnung offen.
+
+Höchstens eine Warnung je Kerze. Der Zwischenlauf fasst die Engine nicht an, erzeugt keine
+Signale und taucht im Backtest nicht auf. Fällt er aus, ändert sich an den Signalen nichts.
+Abschalten über `flush_wache` in der `config.json`.
+
+**Damit er wirklich alle 15 Minuten läuft, braucht er den externen Anstoß** (siehe
+[ANLEITUNG-PUENKTLICHER-START.md](ANLEITUNG-PUENKTLICHER-START.md)) — GitHub-Zeitpläne
+werden verworfen, das ist ja der Grund für die ganze Übung. Ein zweiter Auftrag bei
+cron-job.org, alle 15 Minuten, URL endet auf `watch.yml/dispatches`.
+
 ## 2a. Warum Limit-Orders im Voraus wichtiger sind als der Takt
 
 Deine Signale zerfallen in zwei Gruppen, und sie verhalten sich völlig verschieden:

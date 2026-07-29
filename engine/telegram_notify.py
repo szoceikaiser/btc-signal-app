@@ -35,6 +35,7 @@ STYLE = {
     "SHORT_STOPLOSS":   ("\U0001F6D1", "SSL"),
     # Kein Signal, sondern eine Ankuendigung (2026-07-29, Kaisers Anforderung):
     "VORSCHAU":         ("\U0001F4CD", "VOR"),  # Stecknadel
+    "FLUSH_WACHE":      ("⚡", "FW"),       # Blitz
 }
 
 
@@ -105,6 +106,77 @@ def format_signal(sig: dict) -> str:
     lines.append(_fmt_ts(sig["ts"]))
     lines.append("— Kein Trade-Auto-Pilot: Order selbst pruefen und platzieren.")
     return "\n".join(lines)
+
+
+def format_flush_warnung(w: dict) -> str:
+    """Fruehwarnung: In der LAUFENDEN Kerze entwickelt sich gerade ein Flush.
+
+    WARUM ES DIESE NACHRICHT GIBT (Kaiser 2026-07-29): Flush-Einstiege sind schnelle
+    Bewegungen, die innerhalb einer 4h-Kerze vorbei sein koennen. Anders als die
+    Kaufsignale an den Fib-Levels lassen sie sich NICHT als Limit-Order vorbereiten —
+    man muss hinschauen. Die Engine meldet sie aber erst nach Kerzenschluss.
+
+    WARUM ES TROTZDEM KEIN SIGNAL IST: Die Flush-Bedingung verlangt, dass die Kerze
+    UEBER der Invalidierung SCHLIESST. Bei einer laufenden Kerze steht das nicht fest —
+    der Kurs kann noch weiter fallen. Ein Signal, das jetzt gilt und in zwei Stunden
+    nicht mehr, waere schlimmer als ein spaetes. Deshalb: Hinweis, keine Aufforderung.
+    Nach Kerzenschluss kommt die Aufloesung (format_flush_aufloesung).
+    """
+    emoji, _ = STYLE["FLUSH_WACHE"]
+    return "\n".join([
+        f"{emoji} FLUSH ENTWICKELT SICH — noch NICHT bestaetigt",
+        "",
+        f"BTC gerade {_fmt_usd(w['preis'])}",
+        f"Golden Pocket {_fmt_usd(w['gp_lower'])} nach unten durchstossen",
+        f"Ungueltig ab  {_fmt_usd(w['invalidation'])} — noch {w['puffer_pct']:.1f} % Luft",
+        "",
+        f"Die Kerze schliesst um {w['schluss_utc']}.",
+        "Schliesst sie ueber der Ungueltig-Marke, meldet die Engine danach einen",
+        "Flush-Einstieg. Faellt der Kurs weiter darunter, kommt KEIN Einstieg.",
+        "",
+        "— Nur ein Hinweis zum Hinschauen. Kein Trigger, keine Empfehlung.",
+        "Die Aufloesung kommt nach Kerzenschluss.",
+    ])
+
+
+def format_flush_aufloesung(w: dict, bestaetigt: bool) -> str:
+    """Rueckmeldung nach Kerzenschluss: Wurde aus der Warnung ein Einstieg oder nicht?
+
+    Ohne diese Nachricht bliebe jede Warnung offen — man wuesste nie, ob man etwas
+    verpasst hat oder ob sich die Sache erledigt hat.
+    """
+    if bestaetigt:
+        return "\n".join([
+            "✅ AUFLOESUNG: Der Flush hat sich BESTAETIGT.",
+            "",
+            "Die Kerze ist ueber der Ungueltig-Marke geschlossen. Das zugehoerige",
+            "Einstiegs-Signal ist separat unterwegs (mit ⚡ markiert).",
+        ])
+    # Bewusst offen formuliert: Ein Flush kann aus mehreren Gruenden ausbleiben — die
+    # Kerze schliesst unter der Invalidierung, ODER die Order-Flow-Bestaetigung fehlt,
+    # ODER der Stop-Abstand ist zu klein. Welcher es war, wissen wir hier nicht sicher.
+    # Lieber ehrlich unbestimmt als eine Begruendung behaupten, die nicht stimmt.
+    return "\n".join([
+        "❌ AUFLOESUNG: Es kam KEIN Flush-Einstieg.",
+        "",
+        f"Warnung war bei {_fmt_usd(w['preis'])}, Ungueltig-Marke {_fmt_usd(w['invalidation'])}.",
+        "Die Kerze hat die Bedingungen am Ende nicht erfuellt — sie ist entweder unter",
+        "die Ungueltig-Marke gefallen, oder der Order-Flow hat nicht bestaetigt.",
+        "",
+        "Nichts zu tun. Die Warnung hat ihren Zweck erfuellt: hinschauen, abwarten,",
+        "kein Geld riskiert.",
+    ])
+
+
+def send_text(text: str, dry_run: bool = False) -> str:
+    """Sendet einen fertigen Text (fuer Nachrichten, die keine Signale sind)."""
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+    if dry_run or not token or not chat_id:
+        print("[DRY-RUN]\n" + text + "\n")
+    else:
+        send_telegram(text, token, chat_id)
+    return text
 
 
 def send_telegram(text: str, token: str, chat_id: str, timeout: int = 15) -> bool:
