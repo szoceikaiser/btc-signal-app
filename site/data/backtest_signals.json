@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-07-29T16:08:09Z",
+ "generated_at": "2026-08-03T17:11:59Z",
  "variante": "NEU-LIVE +Verkauf unter dem letzten Hoch",
- "fenster": "20.11.2025-29.07.2026",
+ "fenster": "25.11.2025-03.08.2026",
  "signals": [
   {
    "ts": 1764950400000,
@@ -58,7 +58,7 @@
    "type": "NACHKAUF",
    "price": 86618.34,
    "tranche_pct": 20,
-   "reason": "Konfluenz: Fib-Zone + Liquidationszone 86100 \u2014 aufstocken (NEUTRAL)",
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 86162 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 83822.76,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"

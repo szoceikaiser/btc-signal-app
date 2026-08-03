@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-07-29T16:08:09Z",
- "zeitraum": "20.11.2025-29.07.2026",
+ "generated_at": "2026-08-03T17:11:59Z",
+ "zeitraum": "25.11.2025-03.08.2026",
  "variante": "NEU-LIVE +Verkauf unter dem letzten Hoch",
  "params": {
   "bias_long": true,
@@ -24,15 +24,15 @@
   "cooldown_h": 0.0,
   "min_stop_pct": 0.02
  },
- "recall_kauf": "5/11",
- "recall_verkauf": "9/17",
- "recall_pct": 50,
+ "recall_kauf": "5/9",
+ "recall_verkauf": "9/16",
+ "recall_pct": 56,
  "precision_pct": 38,
  "pnl": {
   "start": 10000.0,
   "ende": 14600.55,
   "rendite_pct": 46.01,
-  "buyhold_pct": -26.21,
+  "buyhold_pct": -26.96,
   "trades": 93,
   "gewinn_trades": 67,
   "long_profit": 4600.55,
@@ -98,6 +98,12 @@
     "ende": 14600.55,
     "gewinn": 1097.91,
     "rendite_pct": 8.13
+   },
+   {
+    "monat": "2026-08",
+    "ende": 14600.55,
+    "gewinn": 0.0,
+    "rendite_pct": 0.0
    }
   ],
   "offene_position": 0.0
@@ -107,7 +113,7 @@
   "start": 10000.0,
   "ende": 12855.35,
   "rendite_pct": 28.55,
-  "buyhold_pct": -26.21,
+  "buyhold_pct": -26.96,
   "trades": 71,
   "gewinn_trades": 49,
   "long_profit": 2855.35,
@@ -173,6 +179,12 @@
     "ende": 12855.35,
     "gewinn": 966.67,
     "rendite_pct": 8.13
+   },
+   {
+    "monat": "2026-08",
+    "ende": 12855.35,
+    "gewinn": 0.0,
+    "rendite_pct": 0.0
    }
   ],
   "offene_position": 0.0
