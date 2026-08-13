@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-08-03T17:11:59Z",
+ "generated_at": "2026-08-13T20:15:03Z",
  "variante": "NEU-LIVE +Verkauf unter dem letzten Hoch",
- "fenster": "25.11.2025-03.08.2026",
+ "fenster": "05.12.2025-13.08.2026",
  "signals": [
   {
-   "ts": 1764950400000,
+   "ts": 1764964800000,
    "type": "KAUF_1",
    "price": 88986.38,
    "tranche_pct": 25,
@@ -12,6 +12,16 @@
    "stop_ref": 83822.76,
    "tag": "",
    "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1765051200000,
+   "type": "NACHKAUF",
+   "price": 89236.79,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 89218 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 83822.76,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   },
   {
    "ts": 1765108800000,
@@ -49,16 +59,6 @@
    "price": 86021.51,
    "tranche_pct": 20,
    "reason": "Konfluenz: Fib-Zone + Liquidationszone 85147 \u2014 aufstocken (NEUTRAL)",
-   "stop_ref": 83822.76,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1766016000000,
-   "type": "NACHKAUF",
-   "price": 86618.34,
-   "tranche_pct": 20,
-   "reason": "Konfluenz: Fib-Zone + Liquidationszone 86162 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 83822.76,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
