@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1787169600000,
+ "last_signal_ts": 1787184000000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -28,8 +28,8 @@
   "vorschau_telegram": true,
   "flush_wache": true
  },
- "updated_at": "2026-08-20T00:59:02Z",
- "last_close": 69334.79,
+ "updated_at": "2026-08-20T04:32:34Z",
+ "last_close": 69195.64,
  "zonen_vorschau": {
   "richtung": "LONG",
   "impuls_start": 62535.24,
