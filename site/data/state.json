@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1787515200000,
+ "last_signal_ts": 1787529600000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -28,19 +28,19 @@
   "vorschau_telegram": true,
   "flush_wache": true
  },
- "updated_at": "2026-08-24T01:01:59Z",
- "last_close": 77734.0,
+ "updated_at": "2026-08-24T04:39:59Z",
+ "last_close": 76933.02,
  "zonen_vorschau": {
-  "richtung": "LONG",
-  "impuls_start": 62535.24,
-  "impuls_ende": 79500.0,
-  "impuls_start_ts": 1786708800000,
-  "impuls_ende_ts": 1787299200000,
-  "level_05": 71017.62,
-  "gp_upper": 69015.77832,
-  "gp_lower": 68472.906,
-  "level_0786": 66165.69864,
-  "invalidation": 62535.24,
-  "abstand_pct": 9.39
+  "richtung": "SHORT",
+  "impuls_start": 79500.0,
+  "impuls_ende": 75545.67,
+  "impuls_start_ts": 1787299200000,
+  "impuls_ende_ts": 1787457600000,
+  "level_05": 77522.83499999999,
+  "gp_upper": 77989.44594,
+  "gp_lower": 78115.9845,
+  "level_0786": 78653.77338,
+  "invalidation": 79500.0,
+  "abstand_pct": 1.94
  }
 }
