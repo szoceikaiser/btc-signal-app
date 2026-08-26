@@ -1,8 +1,8 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1787731200000,
- "retrace_extreme": 77851.0,
+ "last_signal_ts": 1787745600000,
+ "retrace_extreme": 77632.58,
  "tp_rungs": 0,
  "dip_buys": 0,
  "buy_rungs": 0,
@@ -24,8 +24,8 @@
   "gp_lower": 77550.1025,
   "level_0786": 76771.2373,
   "invalidation": 75545.67,
-  "ext1": 83577.95,
-  "ext2": 87117.20509999999
+  "ext1": 83359.53,
+  "ext2": 86898.7851
  },
  "config": {
   "bias_long": true,
@@ -42,8 +42,8 @@
   "vorschau_telegram": true,
   "flush_wache": true
  },
- "updated_at": "2026-08-26T12:42:33Z",
- "last_close": 78487.26,
+ "updated_at": "2026-08-26T16:44:45Z",
+ "last_close": 78011.65,
  "zonen_vorschau": {
   "richtung": "LONG",
   "impuls_start": 75545.67,
