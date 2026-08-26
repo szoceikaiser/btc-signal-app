@@ -144,6 +144,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+  },
+  {
+   "ts": 1787688000000,
+   "type": "KAUF_1",
+   "price": 78409.14499999999,
+   "tranche_pct": 25,
+   "reason": "0.5-Retracement des Impulses 75546->81273",
+   "stop_ref": 75545.67,
+   "tag": "",
+   "label": "KAUF 1 (Teilposition am 0.5-Level)"
   }
  ]
 }
