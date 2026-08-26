@@ -154,6 +154,26 @@
    "stop_ref": 75545.67,
    "tag": "",
    "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1787702400000,
+   "type": "NACHKAUF",
+   "price": 79088.62,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 78121 \u2014 aufstocken (GESUNDER_TREND)",
+   "stop_ref": 75545.67,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1787702400000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 79088.62,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 79500",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   }
  ]
 }
