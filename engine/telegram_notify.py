@@ -110,7 +110,8 @@ def format_plan(p: dict) -> str:
                 marke = f"{_fmt_usd(a)} - {_fmt_usd(b)}"
             else:
                 marke = _fmt_usd(e["preis"])
-            zeilen.append(f"  {marke}   {e['was']} ({e['tranche']} %)")
+            anteil = f" ({e['tranche']} %)" if e.get("tranche") else ""
+            zeilen.append(f"  {marke}   {e['was']}{anteil}")
 
     _block("Nachkaufen:", p.get("nachkauf"))
     _block("Teilgewinne:", p.get("teilgewinn"))

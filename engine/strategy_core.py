@@ -641,7 +641,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              no_flip: bool = False, freeze_targets: bool = False,
              min_bein_pct: float = 0.0, bein_wahl: str = "juengstes",
              be_im_plus: bool = False, bein_richtung: str = "auto",
-             widerstand_exit: str = "off") -> list[Signal]:
+             widerstand_exit: str = "off",
+             rest_halten: bool = False,
+             neustart_mit_rest: bool = False) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -712,6 +714,21 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # ------------------------------------------- E19 (Furkan-Video 02.08.2026, Default aus)
     # min_bein_pct / bein_wahl: siehe last_significant_impulse — die Engine zeichnete Beine,
     #   die fuer ihren eigenen Mindest-Stopabstand zu klein sind (Median 4,0 %, noetig ~5,5 %).
+    # ---------------------------------------------- E21 (Kaisers Frage 2026-08-27, Default aus)
+    # Beobachtung: Furkan hat seit Anfang Juli EINE Position, stockt auf und nimmt
+    # Teilgewinne — er steigt nie ganz aus und hat den August-Anstieg deshalb voll
+    # mitgenommen. Unsere Engine fuehrt 22 Positionen in 8 Monaten und ist 55 % der Zeit
+    # GANZ draussen; 12 der 21 abgeschlossenen Positionen wurden nicht vom Stop beendet,
+    # sondern von der Regel "Gegen-Muster am Ziel", die den Rest zum Marktpreis abgibt.
+    # ALLE bisher gemessenen Verkaufs-Mechanismen (be_im_plus, widerstand_exit,
+    # freeze_targets, no_flip, liq_exit, high_exit) machen die Engine SCHNELLER draussen
+    # und kosteten jedes Mal Rendite. Die Gegenrichtung wurde nie geprueft.
+    # rest_halten: Der Rest wird bei Gegen-Muster NICHT mehr verkauft — er laeuft bis zum
+    #   Stop. Die Engine ist damit investiert, solange die Struktur haelt.
+    # neustart_mit_rest: Erlaubt einen neuen Einstieg, WAEHREND der Rest noch laeuft
+    #   (Zustand TP1/TP2). Ohne das waere rest_halten eine Blockade — die Engine steigt
+    #   sonst nur aus FLAT ein (das war der Befund von E9.9). Der alte Bestand bleibt im
+    #   Durchschnitts-Einstand erhalten, die Zaehler des neuen Zyklus starten bei null.
     # widerstand_exit (E20, Default aus): Teilgewinn am Golden Pocket des GEGEN-Beins —
     #   also an der Widerstandszone, die Furkan im zweiten Fib-Raster fuehrt. Ergaenzt
     #   high_exit (letztes Pivot-Hoch); die Widerstandszone liegt typischerweise DARUNTER
@@ -829,8 +846,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             return True
         return abs(preis - zonen.invalidation) / preis >= min_stop_pct
 
-    # --- Einstiegs-Logik (FLAT): Referenz-Impuls noetig
-    if pos.state == PosState.FLAT and imp is not None and _cooldown_ok():
+    # --- Einstiegs-Logik: Referenz-Impuls noetig
+    # Als Funktion, weil sie an ZWEI Stellen gebraucht wird: aus FLAT (Normalfall) und —
+    # wenn neustart_mit_rest an ist — bei laufendem Rest nach den Teilgewinnen (E21).
+    def _versuche_einstieg() -> None:
         z = fib_zones(imp)
         if imp.up and bias_long and pattern != Pattern.DERIVATE_PUMP and _healthy(True):
             if (cur.low <= z.level_05 and cur.low > z.gp_upper
@@ -903,6 +922,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     signals.append(Signal(cur.ts, sig_t, cur.close, tr,
                                           f"Squeeze: GP durchschlagen (Hoch {cur.high:.0f}), Schluss unter Invalidierung ({pattern.name})",
                                           stop_ref=z.invalidation, tag="FLUSH"))
+
+    if pos.state == PosState.FLAT and imp is not None and _cooldown_ok():
+        _versuche_einstieg()
 
     # --- Positions-Management
     elif pos.state != PosState.FLAT and pos.zones is not None:
@@ -1166,7 +1188,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if pos.state in (PosState.TP1, PosState.TP2):
                 exit_pat = (pattern in (Pattern.DERIVATE_PUMP, Pattern.SHORT_COVERING)) if long_side \
                     else (pattern in (Pattern.CAPITULATION_RESET, Pattern.GESUNDER_TREND))
-                if exit_pat:
+                if exit_pat and not rest_halten:
                     ex = SignalType.VERKAUF_REST if long_side else SignalType.SHORT_COVER_REST
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Gegen-Muster am Ziel: {pattern.name}"))
@@ -1187,6 +1209,23 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     and pattern == Pattern.DERIVATE_PUMP:
                 signals.append(Signal(cur.ts, SignalType.WARNUNG, cur.close, 0,
                                       "Derivate-Pump: anfaellig fuer Long-Flush"))
+
+    # E21: Neuer Einstieg, waehrend der Rest noch laeuft. Steht NACH dem
+    # Positions-Management (ein Stop in derselben Kerze hat Vorrang) und VOR der
+    # Einstands-Fortschreibung — sonst wuerde die neue Tranche gleich wieder
+    # ueberschrieben, wenn der alte Bestand zurueckgesetzt wird.
+    if (neustart_mit_rest and pos.state in (PosState.TP1, PosState.TP2)
+            and imp is not None and _cooldown_ok()):
+        _bestand = (pos.entry_ref, pos.entry_pct)
+        _vorher = pos.state
+        _versuche_einstieg()
+        if pos.state != _vorher:
+            # Einstieg hat stattgefunden: neuer Zyklus, aber der alte Bestand bleibt im
+            # Durchschnitts-Einstand — die neue Tranche wird gleich dazugerechnet.
+            pos.entry_ref, pos.entry_pct = _bestand
+            pos.tp_rungs = pos.buy_rungs = pos.dip_buys = 0
+            pos.liq_entries = pos.liq_exits = pos.high_exits = pos.widerstand_exits = 0
+            pos.ziel_extrem = None
 
     # Durchschnitts-Einstand fortschreiben (E9.10): tranchengewichtet ueber alle
     # Einstiegs-Signale dieser Kerze. Zentral hier, damit kein Einstiegspfad vergessen

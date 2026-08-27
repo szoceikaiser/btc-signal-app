@@ -201,6 +201,7 @@ EVAL_DEFAULTS = {
     "no_flip": False, "freeze_targets": False,
     "min_bein_pct": 0.0, "bein_wahl": "juengstes", "be_im_plus": False,
     "bein_richtung": "auto", "widerstand_exit": "off",
+    "rest_halten": False, "neustart_mit_rest": False,
 }
 
 
@@ -415,10 +416,18 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
     # --- wo Gewinne mitgenommen werden ---
     raus = []
     gz = gegen_zonen(candles, piv, lang, k_atr=par["k_atr"])
-    if gz is not None and par["widerstand_exit"] != "off":
+    if gz is not None:
+        # Die Widerstandszone steht IMMER im Plan — auch wenn `widerstand_exit` aus ist.
+        # Sie ist die Information, wo Angebot sitzt; ob die Engine dort selbst verkauft,
+        # ist eine zweite Frage. Kaiser entscheidet mit dieser Zahl selbst, ob er eine
+        # Order hinlegt. (Ohne diese Unterscheidung waere die wichtigste neue Marke im
+        # Normalbetrieb unsichtbar gewesen.)
         a, b = sorted((gz.gp_upper, gz.gp_lower))
-        raus.append({"zone": [a, b], "was": "Widerstand der Gegenbewegung",
-                     "tranche": LADDER_TRANCHE})
+        aktiv = par["widerstand_exit"] != "off"
+        raus.append({"zone": [a, b],
+                     "was": "Widerstand der Gegenbewegung" if aktiv
+                            else "Widerstand der Gegenbewegung — nur Hinweis, die Engine verkauft dort nicht",
+                     "tranche": LADDER_TRANCHE if aktiv else 0})
     if par["high_exit"] != "off":
         lvl = next_pivot_beyond(piv, cur.close, lang)
         if lvl is not None:
@@ -473,7 +482,11 @@ def plan_geaendert(alt: dict | None, neu: dict | None, toleranz: float = 0.0025)
         out.append(("stop", (p["stop"]["preis"],)))
         return out
     a, n = _marken(alt), _marken(neu)
-    if [x[0] for x in a] != [x[0] for x in n] or alt.get("anteil_pct") != neu.get("anteil_pct"):
+    # Bewusst NICHT verglichen: der investierte Anteil. Er aendert sich bei jedem Nachkauf
+    # und jedem Teilgewinn — das waeren 21 zusaetzliche Nachrichten im Monat, obwohl die
+    # MARKEN dieselben geblieben sind. Wie viel investiert ist, steht ohnehin in der
+    # Signal-Nachricht. Der Plan meldet sich nur, wenn sich Marken verschieben.
+    if [x[0] for x in a] != [x[0] for x in n]:
         return True
     for (_wa, va), (_wn, vn) in zip(a, n):
         for x, y in zip(va, vn):

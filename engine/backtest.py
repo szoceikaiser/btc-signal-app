@@ -66,7 +66,8 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "liq_exit", "high_exit", "liq_entry",
              "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct",
              "no_flip", "freeze_targets",
-             "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit")
+             "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
+             "rest_halten", "neustart_mit_rest")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, trend_ema=50, strict_confirm=False, confluence=False,
@@ -75,7 +76,8 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              block_unhealthy=False, confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0,
              no_flip=False, freeze_targets=False,
              min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
-             bein_richtung="auto", widerstand_exit="off")
+             bein_richtung="auto", widerstand_exit="off",
+             rest_halten=False, neustart_mit_rest=False)
 
 
 def V(label, panel=False, **kw):
@@ -285,6 +287,22 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="off", min_bein_pct=0.05,
       widerstand_exit="on"),
+    # E21 (Kaisers Beobachtung 27.08.2026): Furkan haelt EINE Position und steigt nie ganz
+    # aus; unsere Engine ist 55 % der Zeit draussen und beendet 12 von 21 Positionen mit
+    # "Gegen-Muster am Ziel" statt mit dem Stop. Alle bisher gemessenen Mechanismen machten
+    # die Engine SCHNELLER draussen — die Gegenrichtung wurde nie geprueft.
+    V("LIVE +Rest halten",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      rest_halten=True),
+    V("LIVE +Rest halten +Neustart mit Rest",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      rest_halten=True, neustart_mit_rest=True),
+    V("LIVE +Neustart mit Rest (ohne Halten)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      neustart_mit_rest=True),
     V("Long+Short (Ref)"),
 ]
 

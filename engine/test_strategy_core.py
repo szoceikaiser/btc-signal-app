@@ -1336,3 +1336,88 @@ def test_widerstand_exit_feuert_nicht_wenn_die_zone_schon_hinter_uns_liegt():
                     widerstand_exit="on")
     assert not any("Widerstandszone" in s.reason for s in sigs)
     assert pos.widerstand_exits == 0
+
+
+# ================== E21: Rest halten statt verkaufen (Kaiser 27.08.2026) ==================
+# Furkan haelt EINE Position und steigt nie ganz aus. Unsere Engine beendet 12 von 21
+# Positionen mit "Gegen-Muster am Ziel" — sie gibt den Rest zum Marktpreis ab und ist
+# danach ganz draussen. Zwei Schalter, beide Default aus.
+
+def _e21_pfad_bis_tp1():
+    """Long-Zyklus bis TEILVERKAUF 1, danach eine Kerze mit Gegen-Muster."""
+    base = zigzag_candles()
+    return base + [
+        c(8, 106, 106.5, 104.5, 105.5),    # KAUF 1 am 0.5-Level
+        c(9, 105, 105.5, 103.6, 104.5),    # KAUF 2 im Golden Pocket
+        c(10, 104, 114.0, 104.0, 113.5),   # Extension 1.0 -> TEILVERKAUF 1
+    ]
+
+
+def _gegenmuster_flow(n):
+    """Flow, der am Ende SHORT_COVERING zeigt (Preis hoch, OI runter) — das Gegen-Muster,
+    das den Rest-Verkauf ausloest."""
+    return [FlowPoint(i, 100 + i, 0, 1000 - i * 30, -0.0001) for i in range(n)]
+
+
+def test_ohne_rest_halten_wird_der_rest_beim_gegenmuster_verkauft():
+    """Ist-Zustand: nach dem Teilgewinn beendet ein Gegen-Muster die ganze Position."""
+    pfad = _e21_pfad_bis_tp1() + [c(11, 113, 118.0, 112.0, 117.0)]
+    pos = Position()
+    sigs = run_incremental(pfad, _gegenmuster_flow(len(pfad)), pos, pivot_n=2,
+                           bias_short=False, tp_ladder=False, buy_ladder=False,
+                           flush_entry="off", high_exit="off")
+    assert any(s.type == SignalType.VERKAUF_REST for s in sigs)
+    assert pos.state == PosState.FLAT          # ganz draussen
+
+
+def test_rest_halten_laesst_die_position_weiterlaufen():
+    pfad = _e21_pfad_bis_tp1() + [c(11, 113, 118.0, 112.0, 117.0)]
+    pos = Position()
+    sigs = run_incremental(pfad, _gegenmuster_flow(len(pfad)), pos, pivot_n=2,
+                           bias_short=False, tp_ladder=False, buy_ladder=False,
+                           flush_entry="off", high_exit="off", rest_halten=True)
+    assert not any(s.type == SignalType.VERKAUF_REST for s in sigs)
+    assert pos.state == PosState.TP1           # Rest laeuft weiter
+    assert pos.direction == "LONG"
+
+
+def test_rest_halten_haelt_den_stop_trotzdem_scharf():
+    """Der Rest laeuft bis zum Stop — nicht ewig."""
+    pfad = _e21_pfad_bis_tp1() + [c(11, 113, 114.0, 99.0, 99.5)]   # Schluss unter 100
+    pos = Position()
+    sigs = run_incremental(pfad, _gegenmuster_flow(len(pfad)), pos, pivot_n=2,
+                           bias_short=False, tp_ladder=False, buy_ladder=False,
+                           flush_entry="off", high_exit="off", rest_halten=True)
+    assert any(s.type == SignalType.STOPLOSS for s in sigs)
+    assert pos.state == PosState.FLAT
+
+
+def test_neustart_mit_rest_erlaubt_einen_einstieg_waehrend_der_rest_laeuft():
+    """Ohne den Schalter blockiert der liegende Rest jeden neuen Einstieg (Befund E9.9)."""
+    from strategy_core import FibZones, Impulse, Pivot
+    cs = zigzag_candles() + [c(8, 106, 106.5, 104.5, 105.5)]
+    # Position kuenstlich in TP1 mit den Zonen des alten Impulses
+    z = FibZones(Impulse(Pivot(2, 2, 100.0, "L"), Pivot(5, 5, 110.0, "H")),
+                 level_05=105.0, gp_upper=103.82, gp_lower=103.5,
+                 level_0786=102.14, invalidation=100.0)
+
+    def _pos():
+        return Position(direction="LONG", state=PosState.TP1, zones=z,
+                        retrace_extreme=104.5, last_signal_ts=7,
+                        entry_ref=105.0, entry_pct=75, tp_rungs=2, high_exits=2)
+    flow = neg_funding_flow()
+    ohne = _pos()
+    evaluate(cs, flow, ohne, pivot_n=2, bias_short=False, flush_entry="off",
+             tp_ladder=False, buy_ladder=False)
+    assert ohne.state == PosState.TP1 and ohne.entry_pct == 75      # kein Einstieg
+
+    mit = _pos()
+    sigs = evaluate(cs, flow, mit, pivot_n=2, bias_short=False, flush_entry="off",
+                    tp_ladder=False, buy_ladder=False, neustart_mit_rest=True)
+    assert any(s.type in (SignalType.KAUF_1, SignalType.KAUF_2) for s in sigs)
+    assert mit.state in (PosState.T1, PosState.CORE)
+    # Exakt 75 (alter Bestand) + 25 (neue Tranche). Der genaue Wert ist wichtig: Bei
+    # ">" wuerde nicht auffallen, wenn der alte Bestand beim Neustart verlorenginge.
+    assert mit.entry_pct == 100
+    assert mit.entry_ref is not None and 100 < mit.entry_ref < 110
+    assert mit.tp_rungs == 0 and mit.high_exits == 0   # neuer Zyklus faengt bei null an

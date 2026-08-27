@@ -466,13 +466,20 @@ def test_plan_nachricht_wird_nur_bei_aenderung_gesendet():
     assert main.plan_geaendert(None, p1) is True          # erster Plan -> senden
     assert main.plan_geaendert(p1, p1) is False           # unveraendert -> schweigen
     import copy
+    # erste Marke MIT Einzelpreis heranziehen (die Widerstandszone ist eine Spanne)
+    idx = next(i for i, e in enumerate(p1["teilgewinn"]) if e.get("preis"))
     p2 = copy.deepcopy(p1)
-    p2["teilgewinn"][0]["preis"] = p2["teilgewinn"][0].get("preis", 100) * 1.02
+    p2["teilgewinn"][idx]["preis"] *= 1.02
     assert main.plan_geaendert(p1, p2) is True            # 2 % verschoben -> senden
     p3 = copy.deepcopy(p1)
-    if p3["teilgewinn"][0].get("preis"):
-        p3["teilgewinn"][0]["preis"] *= 1.0005            # 0,05 % -> Rauschen
-        assert main.plan_geaendert(p1, p3) is False
+    p3["teilgewinn"][idx]["preis"] *= 1.0005              # 0,05 % -> Rauschen
+    assert main.plan_geaendert(p1, p3) is False
+    # Ein Nachkauf allein (mehr investiert, gleiche Marken) ist KEINE Planaenderung —
+    # sonst kaeme zu jedem Signal eine zweite Nachricht.
+    p4 = copy.deepcopy(p1)
+    p4["anteil_pct"] = p1["anteil_pct"] + 20
+    p4["einstand"] = (p1["einstand"] or 100) * 0.99
+    assert main.plan_geaendert(p1, p4) is False
 
 
 def test_plan_nachricht_ist_lesbar():
@@ -481,3 +488,41 @@ def test_plan_nachricht_ist_lesbar():
     text = format_plan(main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0}, pos))
     assert "PLAN" in text and "Nachkaufen:" in text and "Teilgewinne:" in text
     assert "Stop" in text and "Limit-Order" in text
+
+
+def test_plan_zeigt_die_widerstandszone_auch_ohne_aktiven_schalter():
+    """E20: Die Zone ist die wichtigste neue Information — sie darf nicht davon abhaengen,
+    ob die Engine dort automatisch verkauft."""
+    cs, fl, pos = _plan_szenario()
+    p_aus = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0}, pos)
+    eintrag = [e for e in p_aus["teilgewinn"] if "Widerstand" in e["was"]]
+    assert len(eintrag) == 1 and eintrag[0]["tranche"] == 0
+    assert "nur Hinweis" in eintrag[0]["was"]
+    p_an = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0,
+                                        "widerstand_exit": "on"}, pos)
+    eintrag_an = [e for e in p_an["teilgewinn"] if "Widerstand" in e["was"]]
+    assert eintrag_an[0]["tranche"] > 0 and "nur Hinweis" not in eintrag_an[0]["was"]
+
+
+def test_plan_meldet_verschobene_marken_weiterhin():
+    """Gegenprobe zu der Vereinfachung von vorhin: Nur der ANTEIL zaehlt nicht mehr als
+    Aenderung. Verschiebt sich eine Marke — Widerstandszone, Fib-Level, Ziel oder Stop —
+    muss die Nachricht kommen."""
+    import copy
+    cs, fl, pos = _plan_szenario()
+    p1 = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0}, pos)
+    for wo, feld in [("teilgewinn", "Widerstand"), ("teilgewinn", "Ziel 1.0"),
+                     ("nachkauf", "0.786-Zone")]:
+        p2 = copy.deepcopy(p1)
+        treffer = [e for e in p2[wo] if feld in e["was"]]
+        if not treffer:
+            continue
+        e = treffer[0]
+        if e.get("zone"):
+            e["zone"] = [e["zone"][0] * 1.01, e["zone"][1] * 1.01]
+        else:
+            e["preis"] *= 1.01
+        assert main.plan_geaendert(p1, p2) is True, f"{feld} verschoben, aber keine Meldung"
+    p3 = copy.deepcopy(p1)
+    p3["stop"]["preis"] *= 1.01
+    assert main.plan_geaendert(p1, p3) is True, "Stop verschoben, aber keine Meldung"
