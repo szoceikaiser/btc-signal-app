@@ -176,23 +176,79 @@ def find_pivots(candles: list[Candle], n: int = 5) -> list[Pivot]:
     return cleaned
 
 
+# E19 (Befund 2026-08-27, Furkan-Video vom 02.08.): Die Wahl des Referenz-Beins war der
+# blinde Fleck des Projekts. Am 02.08.2026 zeichnete die Engine ein Zwei-Tage-Bein von
+# 4,8 % (65.409->62.275, Richtung SHORT und damit bei bias_short=false unhandelbar),
+# waehrend Furkan zur selben Stunde ueber drei Wochen und 15,8 % mass (57.800->66.956).
+# Seine Zonen und unsere Formel stimmen exakt ueberein — nur das Bein nicht.
+#
+# Warum das blockiert: Der Abstand vom Golden Pocket zur Invalidierung betraegt immer rund
+# 35-38 % der Beinlaenge. `min_stop_pct` = 2 % verlangt damit implizit ein Bein von etwa
+# 5,5 % — die Auswahl liefert im Median aber 4,0 %. Gemessen an 30 Tagen (27.07.-27.08.):
+# 17 Tage Richtung SHORT (gesperrt), 9 Tage LONG mit Stop-Abstand unter 2 % (verworfen),
+# nur 4 Tage handelbar. Die Engine zeichnete Beine, die fuer ihre eigene Mindest-
+# anforderung zu klein sind.
+#
+# Zwei Schalter, beide Default aus:
+#   min_bein_pct  — harte Untergrenze fuer die Beinlaenge; kleinere Beine kommen als
+#                   Referenz gar nicht in Frage, die Suche geht zum naechstgroesseren.
+#   bein_wahl     — "juengstes" (bisher) oder "groesstes": unter den letzten
+#                   `bein_pivots` Pivots das groesste signifikante Bein.
+BEIN_PIVOTS = 12          # Fenster fuer bein_wahl="groesstes" (Struktur statt Uhrzeit)
+
+
 def last_significant_impulse(candles: list[Candle], pivots: list[Pivot],
-                             k_atr: float = 3.0, min_pct: float = 0.03) -> Optional[Impulse]:
-    """Juengster abgeschlossener Impuls (Pivot->Pivot), der signifikant ist.
+                             k_atr: float = 3.0, min_pct: float = 0.03,
+                             min_bein_pct: float = 0.0,
+                             bein_wahl: str = "juengstes",
+                             bein_pivots: int = BEIN_PIVOTS,
+                             nur_auf: Optional[bool] = None) -> Optional[Impulse]:
+    """Referenz-Impuls (Pivot->Pivot) fuer die Fib-Zonen.
 
     Signifikant = Spanne >= k_atr * ATR(14) ODER >= min_pct des Startpreises.
-    Der Zeitabschnitt ergibt sich damit aus der Swing-Struktur selbst
-    (kein starres Lookback-Fenster).
+    Zusaetzlich (E19) muss die Spanne >= min_bein_pct des Startpreises sein, wenn gesetzt.
+    Der Zeitabschnitt ergibt sich aus der Swing-Struktur selbst (kein starres Fenster).
+
+    bein_wahl="juengstes": das juengste Bein, das alle Bedingungen erfuellt (bisheriges
+    Verhalten). "groesstes": unter den Beinen der letzten `bein_pivots` Pivots das mit der
+    groessten Spanne — bei Gleichstand das juengere.
+
+    nur_auf: True = nur Aufwaerts-Beine (Long-Setups), False = nur Abwaerts-Beine,
+    None = beide (bisheriges Verhalten). Grundlage ist Frame 16:12/16:45 des Videos vom
+    02.08.2026: Furkan fuehrt ZWEI Fib-Raster gleichzeitig — das grosse Aufwaerts-Bein
+    57.802,4 -> 66.939,7 fuer seine Long-Nachkaeufe und das kleine Abwaerts-Bein von
+    demselben Hoch als Widerstandszone. Unsere Engine kennt nur eins und nahm an jenem
+    Tag das kleine, abwaertsgerichtete — das sie bei bias_short=false nicht handeln darf.
     """
     if len(pivots) < 2:
         return None
     a = atr(candles)
+
+    def _taugt(start: Pivot, end: Pivot) -> bool:
+        if start.kind == end.kind:
+            return False
+        if nur_auf is not None and (end.price > start.price) != nur_auf:
+            return False
+        rng = abs(end.price - start.price)
+        if min_bein_pct > 0 and start.price > 0 and rng < min_bein_pct * start.price:
+            return False
+        return rng >= k_atr * a or rng >= min_pct * start.price
+
+    if bein_wahl == "groesstes":
+        fenster = pivots[-bein_pivots:] if bein_pivots > 0 else pivots
+        bester, beste_spanne = None, -1.0
+        for i in range(len(fenster) - 1, 0, -1):
+            start, end = fenster[i - 1], fenster[i]
+            if not _taugt(start, end):
+                continue
+            spanne = abs(end.price - start.price)
+            if spanne > beste_spanne:          # ">" statt ">=" -> bei Gleichstand das juengere
+                bester, beste_spanne = Impulse(start, end), spanne
+        return bester
+
     for i in range(len(pivots) - 1, 0, -1):
         start, end = pivots[i - 1], pivots[i]
-        if start.kind == end.kind:
-            continue
-        rng = abs(end.price - start.price)
-        if rng >= k_atr * a or rng >= min_pct * start.price:
+        if _taugt(start, end):
             return Impulse(start, end)
     return None
 
@@ -264,13 +320,15 @@ def daily_trend(candles: list[Candle], period: int = 50):
 
 
 def daily_fib_zone(candles: list[Candle], pivot_n: int = 5,
-                   k_atr: float = 3.0) -> Optional[FibZones]:
+                   k_atr: float = 3.0, min_bein_pct: float = 0.0,
+                   bein_wahl: str = "juengstes") -> Optional[FibZones]:
     """Fib-Zonen des letzten signifikanten 1D-Impulses (fuer die 4h+1D-Konfluenz)."""
     daily = resample_daily(candles)
     if len(daily) < 2 * pivot_n + 2:
         return None
     piv = find_pivots(daily, n=pivot_n)
-    imp = last_significant_impulse(daily, piv, k_atr=k_atr)
+    imp = last_significant_impulse(daily, piv, k_atr=k_atr, min_bein_pct=min_bein_pct,
+                                   bein_wahl=bein_wahl)
     return fib_zones(imp) if imp is not None else None
 
 
@@ -382,6 +440,7 @@ class Position:
     high_exits: int = 0                      # Anzahl Teilverkaeufe am letzten Hoch (E10.2)
     liq_entries: int = 0                     # Anzahl Konfluenz-Nachkaeufe an Liq-Zonen (E10.3)
     ziel_extrem: Optional[float] = None      # eingefrorene Zielreferenz nach dem 1. Teilgewinn (E18.3)
+    be_aktiv: bool = False                   # Break-even-Stop scharf, seit die Position im Plus war (E19.3)
     # Zeitpunkt des letzten Stops (E13, cooldown_h). Gehoert BEWUSST NICHT in
     # _reset_position: Er ist die Erinnerung ZWISCHEN zwei Positionen und muss den
     # Positions-Reset ueberleben, sonst wuesste die Sperre nach dem Stop nichts mehr.
@@ -400,6 +459,7 @@ def _reset_position(pos: "Position") -> None:
     pos.high_exits = 0
     pos.liq_entries = 0
     pos.ziel_extrem = None
+    pos.be_aktiv = False
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
@@ -547,7 +607,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              liq_entry: str = "off", block_unhealthy: bool = False,
              confirm_t1: bool = False, cooldown_h: float = 0.0,
              min_stop_pct: float = 0.0,
-             no_flip: bool = False, freeze_targets: bool = False) -> list[Signal]:
+             no_flip: bool = False, freeze_targets: bool = False,
+             min_bein_pct: float = 0.0, bein_wahl: str = "juengstes",
+             be_im_plus: bool = False, bein_richtung: str = "auto") -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -615,6 +677,21 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     #   Tief machte, ohne den Stop auszuloesen — ext1/ext2 sanken mit. Nachgestellt: Ziel
     #   1.618 von 301,8 auf 257,8, also unter das urspruengliche 1.0-Ziel. Passt zum Befund,
     #   dass TEILVERKAUF_2 im ganzen Messfenster genau einmal vorkam.
+    # ------------------------------------------- E19 (Furkan-Video 02.08.2026, Default aus)
+    # min_bein_pct / bein_wahl: siehe last_significant_impulse — die Engine zeichnete Beine,
+    #   die fuer ihren eigenen Mindest-Stopabstand zu klein sind (Median 4,0 %, noetig ~5,5 %).
+    # bein_richtung="bias": Es wird nur ein Bein in der HANDELBAREN Richtung gesucht. Steht
+    #   bias_short=false (live), sucht die Engine also ein Aufwaerts-Bein und ignoriert das
+    #   juengere Abwaerts-Bein, das sie ohnehin nicht handeln duerfte. An 17 von 30 Tagen
+    #   (27.07.-27.08.2026) war genau das der Grund fuer Stillstand. Wirkt nur, wenn
+    #   genau eine Richtung erlaubt ist; bei Long UND Short aendert sich nichts.
+    # be_im_plus: zieht den Stop auf Break-even, sobald die Position im Plus steht — nicht
+    #   erst nach einem Teilgewinn. Furkan am 02.08. (16:07-16:25): "wenn ich die Order
+    #   gefuellt bekomme, wuerde ich meinen Stop hochsetzen auf das neue Entry. Mit der
+    #   Position moechte ich nicht mehr in Verlust gehen." Deckt zugleich den nie gebauten
+    #   Punkt 2 aus docs/VERLUST-ANALYSE-2026-07-27.md ab (44 % der Verlustsumme). Wirkt nur
+    #   zusammen mit trail_stop und nur, wenn der Einstand UNTER dem Kurs liegt — sonst
+    #   waere der Stop im selben Moment ausgeloest.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -638,11 +715,17 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
 
     pattern = classify_pattern(candles, flow) if flow else Pattern.NEUTRAL
     pivots = find_pivots(candles, n=pivot_n)
-    imp = last_significant_impulse(candles, pivots, k_atr=k_atr)
+    _nur_auf = None
+    if bein_richtung == "bias" and bias_long != bias_short:
+        _nur_auf = bias_long                     # genau eine Richtung erlaubt -> nur deren Beine
+    imp = last_significant_impulse(candles, pivots, k_atr=k_atr,
+                                   min_bein_pct=min_bein_pct, bein_wahl=bein_wahl,
+                                   nur_auf=_nur_auf)
 
     # --- E8.5-Kontext (nur berechnen, wenn ein Filter aktiv ist)
     _trend = daily_trend(candles, trend_ema) if trend_filter else None
-    _dzone = daily_fib_zone(candles) if confluence else None
+    _dzone = daily_fib_zone(candles, min_bein_pct=min_bein_pct,
+                            bein_wahl=bein_wahl) if confluence else None
 
     def _trend_ok(long_side: bool) -> bool:
         if not trend_filter or _trend is None or _trend[1] is None:
@@ -813,7 +896,16 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         # dem Kurs (Struktur). Er kann dadurch NUR steigen, nie lockerer werden.
         stop_level = z.invalidation
         trail_note = ""
-        if trail_stop and (pos.state in (PosState.TP1, PosState.TP2) or pos.tp_rungs > 0):
+        # E19.3: Break-even schon, sobald die Position EINMAL im Plus stand (nicht erst nach
+        # einem Teilgewinn). Der Merker ist noetig, weil die Bedingung genau in der Kerze,
+        # in der der Stop greifen soll, nicht mehr erfuellt waere — der Kurs ist dann ja
+        # zurueck unter dem Einstand. Er wird gesetzt, solange der Kurs darueber steht.
+        if be_im_plus and pos.entry_ref is not None and not pos.be_aktiv:
+            if (cur.close > pos.entry_ref) if long_side else (cur.close < pos.entry_ref):
+                pos.be_aktiv = True
+        _im_plus = be_im_plus and pos.be_aktiv and pos.entry_ref is not None
+        if trail_stop and (pos.state in (PosState.TP1, PosState.TP2)
+                           or pos.tp_rungs > 0 or _im_plus):
             cands = [(z.invalidation, "Invalidierung")]
             if pos.entry_ref is not None:
                 cands.append((pos.entry_ref, "Einstand"))

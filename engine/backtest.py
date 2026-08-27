@@ -65,14 +65,17 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop",
              "liq_exit", "high_exit", "liq_entry",
              "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct",
-             "no_flip", "freeze_targets")
+             "no_flip", "freeze_targets",
+             "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, strict_confirm=False, confluence=False,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
              trail_stop=False, liq_exit="off", high_exit="off", liq_entry="off",
              block_unhealthy=False, confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0,
-             no_flip=False, freeze_targets=False)
+             no_flip=False, freeze_targets=False,
+             min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
+             bein_richtung="auto")
 
 
 def V(label, panel=False, **kw):
@@ -231,6 +234,41 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on",
       no_flip=True, freeze_targets=True),
+    # E19 (Furkan-Video 02.08.2026): die Wahl des Referenz-Beins. Befund: Der Abstand vom
+    # Golden Pocket zur Invalidierung ist immer rund 35-38 % der Beinlaenge; min_stop_pct=2 %
+    # verlangt damit implizit ein Bein von ~5,5 %, die Auswahl liefert im Median 4,0 %.
+    # An 30 Tagen (27.07.-27.08.2026) war deshalb nur an 4 Tagen ueberhaupt ein Einstieg
+    # moeglich — die Engine stand einen ganzen Aufwaertsmonat flach.
+    # Erwartung: mehr Einstiege, groessere Stop-Abstaende, dafuer traegere Reaktion.
+    V("NEU-LIVE +Mindest-Bein 5 %",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05),
+    V("NEU-LIVE +groesstes Bein",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", bein_wahl="groesstes"),
+    V("NEU-LIVE +Mindest-Bein 5 % +groesstes Bein",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on",
+      min_bein_pct=0.05, bein_wahl="groesstes"),
+    # Break-even-Stop schon im Plus statt erst nach einem Teilgewinn (Furkan 16:07 und
+    # VERLUST-ANALYSE Punkt 2 — dort mit 44 % der Verlustsumme veranschlagt, nie gebaut).
+    # Frame 16:12/16:45 des Videos: Furkan fuehrt ZWEI Raster gleichzeitig (grosses
+    # Aufwaerts-Bein fuer seine Longs, kleines Abwaerts-Bein als Widerstand). Unsere Engine
+    # nahm an jenem Tag das kleine, abwaertsgerichtete — und durfte es nicht handeln.
+    V("NEU-LIVE +Bein in Handelsrichtung",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", bein_richtung="bias"),
+    V("NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 %",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on",
+      bein_richtung="bias", min_bein_pct=0.05),
+    V("NEU-LIVE +Break-even im Plus",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", be_im_plus=True),
+    V("NEU-LIVE +Bein-Wahl +Break-even im Plus",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on",
+      min_bein_pct=0.05, bein_wahl="groesstes", be_im_plus=True),
     V("Long+Short (Ref)"),
 ]
 

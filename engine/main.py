@@ -198,6 +198,8 @@ EVAL_DEFAULTS = {
     "block_unhealthy": False, "confirm_t1": False,
     "cooldown_h": 0.0, "min_stop_pct": 0.0,
     "no_flip": False, "freeze_targets": False,
+    "min_bein_pct": 0.0, "bein_wahl": "juengstes", "be_im_plus": False,
+    "bein_richtung": "auto",
 }
 
 
@@ -237,6 +239,7 @@ def pos_to_state(pos: Position) -> dict:
          "entry_pct": pos.entry_pct, "liq_exits": pos.liq_exits,
          "high_exits": pos.high_exits, "liq_entries": pos.liq_entries,
          "last_stop_ts": pos.last_stop_ts, "ziel_extrem": pos.ziel_extrem,
+         "be_aktiv": pos.be_aktiv,
          "zones": None}
     if pos.zones:
         z = pos.zones
@@ -275,6 +278,7 @@ def pos_from_state(d: dict) -> Position:
     pos.liq_entries = d.get("liq_entries", 0)
     pos.last_stop_ts = d.get("last_stop_ts", -1)
     pos.ziel_extrem = d.get("ziel_extrem")
+    pos.be_aktiv = bool(d.get("be_aktiv", False))
     z = d.get("zones")
     if z and "impuls_start" in z:
         imp = Impulse(
@@ -309,9 +313,16 @@ def zonen_vorschau(candles: list[Candle], cfg: dict | None = None) -> dict | Non
 
     Gibt None zurueck, wenn (noch) kein signifikanter Impuls erkennbar ist.
     """
-    cfg = cfg or {}
-    piv = find_pivots(candles, n=int(cfg.get("pivot_n", 5)))
-    imp = last_significant_impulse(candles, piv, k_atr=float(cfg.get("k_atr", 2.0)))
+    # E19: dieselbe Parameter-Aufbereitung wie die Engine — sonst kuendigt die Vorschau
+    # Zonen an, die die Engine gar nicht handelt (genau der Fehler aus E18.1).
+    par = eval_params(cfg or {})
+    piv = find_pivots(candles, n=par["pivot_n"])
+    _nur_auf = None
+    if par["bein_richtung"] == "bias" and par["bias_long"] != par["bias_short"]:
+        _nur_auf = par["bias_long"]
+    imp = last_significant_impulse(candles, piv, k_atr=par["k_atr"],
+                                   min_bein_pct=par["min_bein_pct"],
+                                   bein_wahl=par["bein_wahl"], nur_auf=_nur_auf)
     if imp is None:
         return None
     z = fib_zones(imp)

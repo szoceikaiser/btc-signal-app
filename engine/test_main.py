@@ -370,3 +370,14 @@ def test_ziel_extrem_ueberlebt_den_neustart():
     assert d["ziel_extrem"] == 103.6
     assert pos_from_state(d).ziel_extrem == 103.6
     assert pos_from_state({}).ziel_extrem is None          # Altbestand ohne das Feld
+
+
+def test_be_aktiv_ueberlebt_den_neustart():
+    """E19.3: Ohne Persistenz haette die Engine bei jedem Lauf vergessen, dass der
+    Break-even-Stop schon scharf ist — und die Position waere wieder ungeschuetzt."""
+    from strategy_core import Position, PosState
+    pos = Position(direction="LONG", state=PosState.CORE, entry_ref=140.0, be_aktiv=True)
+    d = pos_to_state(pos)
+    assert d["be_aktiv"] is True
+    assert pos_from_state(d).be_aktiv is True
+    assert pos_from_state({}).be_aktiv is False           # Altbestand ohne das Feld

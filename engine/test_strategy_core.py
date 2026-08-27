@@ -1137,3 +1137,119 @@ def test_freeze_targets_wird_beim_positionsende_zurueckgesetzt():
                     tp_ladder=False, buy_ladder=False, flush_entry="off",
                     freeze_targets=True)
     assert pos.state == PosState.FLAT and pos.ziel_extrem is None
+
+
+# ====================== E19 (Furkan-Video 02.08.2026, Bein-Wahl) ======================
+# Lage wie am 02.08.2026: ein grosses Aufwaerts-Bein, danach ein kleines Abwaerts-Bein.
+# Die Engine nahm das kleine (Richtung SHORT, bei bias_short=false unhandelbar) und stand
+# still; Furkan mass ueber das grosse und kaufte in dessen Golden Pocket nach.
+
+def _e19_zwei_beine():
+    """Aufwaerts 100->130 (30 %), danach abwaerts 130->122 (6 %). Pivots mit n=2."""
+    rows = [(0, 100, 101, 99, 100), (1, 100, 101, 99, 100), (2, 100, 101, 98, 99),
+            (3, 100, 104, 99, 103), (4, 104, 110, 103, 109), (5, 109, 118, 108, 117),
+            (6, 117, 126, 116, 125), (7, 125, 130, 124, 129), (8, 129, 130, 127, 128),
+            (9, 128, 129, 126, 127), (10, 127, 128, 124, 125), (11, 125, 126, 122, 123),
+            (12, 123, 124, 122, 123), (13, 123, 125, 122, 124), (14, 124, 126, 123, 125),
+            (15, 125, 127, 124, 126)]
+    return [c(*r) for r in rows]
+
+
+def test_ohne_schalter_gewinnt_das_juengste_kleine_bein():
+    """Ist-Zustand, dokumentiert: das 6-%-Bein schlaegt das 30-%-Bein, weil es juenger ist."""
+    cs = _e19_zwei_beine()
+    imp = last_significant_impulse(cs, find_pivots(cs, n=2), k_atr=2.0)
+    assert imp is not None and not imp.up            # Abwaerts-Bein
+    assert imp.start.price == 130 and imp.end.price == 122
+
+
+def test_min_bein_pct_ueberspringt_das_kleine_bein():
+    cs = _e19_zwei_beine()
+    imp = last_significant_impulse(cs, find_pivots(cs, n=2), k_atr=2.0, min_bein_pct=0.10)
+    assert imp is not None and imp.up
+    assert imp.start.price == 98 and imp.end.price == 130
+
+
+def test_bein_wahl_groesstes_nimmt_die_groesste_spanne():
+    cs = _e19_zwei_beine()
+    imp = last_significant_impulse(cs, find_pivots(cs, n=2), k_atr=2.0,
+                                   bein_wahl="groesstes")
+    assert imp is not None and imp.up and imp.end.price == 130
+
+
+def test_bein_richtung_ueberspringt_gegenlaeufiges_bein():
+    cs = _e19_zwei_beine()
+    auf = last_significant_impulse(cs, find_pivots(cs, n=2), k_atr=2.0, nur_auf=True)
+    ab = last_significant_impulse(cs, find_pivots(cs, n=2), k_atr=2.0, nur_auf=False)
+    assert auf is not None and auf.up and auf.end.price == 130
+    assert ab is not None and not ab.up and ab.start.price == 130
+
+
+def test_evaluate_bein_richtung_bias_macht_die_engine_wieder_handlungsfaehig():
+    """Der Kern des 02.08.: nur Long erlaubt, juengstes Bein zeigt nach unten.
+
+    Ohne den Schalter zeichnet die Engine das Short-Setup und tut nichts. Mit ihm nimmt
+    sie das Aufwaerts-Bein — und dessen Zonen liegen dort, wo auch Furkan gekauft hat.
+    """
+    cs = _e19_zwei_beine()
+    flow = neg_funding_flow()
+    pos_ohne = Position()
+    evaluate(cs, flow, pos_ohne, pivot_n=2, k_atr=2.0, bias_short=False)
+    assert pos_ohne.state == PosState.FLAT           # steht still
+
+    # Mit Richtungswahl: Zonen des Aufwaerts-Beins 98->130
+    from strategy_core import fib_zones
+    imp = last_significant_impulse(cs, find_pivots(cs, n=2), k_atr=2.0, nur_auf=True)
+    z = fib_zones(imp)
+    assert z.invalidation == 98 and 108 < z.gp_upper < 112   # GP bei rund 110
+    # eine Kerze, die das Golden Pocket beruehrt -> Kauf statt Stillstand
+    mitte_gp = (z.gp_lower + z.gp_upper) / 2
+    pfad = cs + [c(16, 118, 119, mitte_gp, 118)]
+    pos = Position()
+    sigs = run_incremental(pfad, flow, pos, pivot_n=2, k_atr=2.0, bias_short=False,
+                           bein_richtung="bias", flush_entry="off", buy_ladder=False)
+    assert any(s.type == SignalType.KAUF_2 for s in sigs)
+    assert pos.direction == "LONG"
+
+
+def test_be_im_plus_zieht_den_stop_auf_den_einstand():
+    """E19.3: Break-even, sobald die Position im Plus steht — nicht erst nach Teilgewinn."""
+    from strategy_core import FibZones, Impulse, Pivot
+    z = FibZones(Impulse(Pivot(0, 0, 100.0, "L"), Pivot(10, 10, 200.0, "H")),
+                 150.0, 138.2, 135.0, 121.4, 100.0)
+    cs = [c(i, 150, 155, 145, 150) for i in range(21)]   # Kurs 150 = im Plus (Einstand 140)
+    cs.append(c(21, 150, 152, 138, 139))          # Schluss unter dem Einstand 140
+    flow = neg_funding_flow()
+
+    def _pos():
+        # last_signal_ts vor der vorletzten Kerze, damit beide Kerzen ausgewertet werden
+        return Position(direction="LONG", state=PosState.CORE, zones=z,
+                        retrace_extreme=140.0, last_signal_ts=19,
+                        entry_ref=140.0, entry_pct=75)
+    # ohne den Schalter: Stop steht auf der Invalidierung (100) -> kein Stop
+    p1 = _pos()
+    s1 = evaluate(cs, flow, p1, trail_stop=True)
+    assert not any(x.type == SignalType.STOPLOSS for x in s1)
+    # mit dem Schalter: Break-even greift, weil die vorige Kerze im Plus schloss
+    p2 = _pos()
+    # erst eine Kerze im Plus (schaltet den Break-even scharf), dann der Rueckfall
+    evaluate(cs[:-1], flow, p2, trail_stop=True, be_im_plus=True)
+    assert p2.be_aktiv is True
+    s2 = evaluate(cs, flow, p2, trail_stop=True, be_im_plus=True)
+    stops = [x for x in s2 if x.type == SignalType.STOPLOSS]
+    assert len(stops) == 1 and "Einstand" in stops[0].reason
+    assert p2.state == PosState.FLAT
+
+
+def test_be_im_plus_zieht_NICHT_wenn_die_position_im_minus_steht():
+    """Sonst wuerde der Stop im selben Moment ausloesen, in dem er gesetzt wird."""
+    from strategy_core import FibZones, Impulse, Pivot
+    z = FibZones(Impulse(Pivot(0, 0, 100.0, "L"), Pivot(10, 10, 200.0, "H")),
+                 150.0, 138.2, 135.0, 121.4, 100.0)
+    cs = [c(i, 150, 155, 145, 150) for i in range(21)]
+    cs.append(c(21, 135, 136, 128, 130))          # Kurs unter dem Einstand 140
+    pos = Position(direction="LONG", state=PosState.CORE, zones=z, retrace_extreme=140.0,
+                   last_signal_ts=20, entry_ref=140.0, entry_pct=75)
+    sigs = evaluate(cs, neg_funding_flow(), pos, trail_stop=True, be_im_plus=True)
+    assert not any(x.type == SignalType.STOPLOSS for x in sigs)
+    assert pos.state == PosState.CORE
