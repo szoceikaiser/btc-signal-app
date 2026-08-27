@@ -61,7 +61,7 @@ SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_R
 # Wirkung jedes Hebels sichtbar wird. Referenz: alte Long+Short-Variante und nur-Long-Basis.
 # Parameter, die evaluate() versteht (der Rest der Config sind nur Labels):
 EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
-             "tp_ladder", "trend_filter", "strict_confirm", "confluence",
+             "tp_ladder", "trend_filter", "trend_ema", "strict_confirm", "confluence",
              "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop",
              "liq_exit", "high_exit", "liq_entry",
              "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct",
@@ -69,7 +69,7 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
-             trend_filter=False, strict_confirm=False, confluence=False,
+             trend_filter=False, trend_ema=50, strict_confirm=False, confluence=False,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
              trail_stop=False, liq_exit="off", high_exit="off", liq_entry="off",
              block_unhealthy=False, confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0,
@@ -132,7 +132,7 @@ GRID = [
     # der Unterschied waere nicht mehr "der Flush", sondern ein Sammelsurium.
     V("MEINE Einstellung ohne Flush", bias_short=False, flush_entry="off",
       buy_ladder=True, trail_stop=True, min_stop_pct=0.02, liq_entry="boost",
-      high_exit="on"),
+      high_exit="on", min_bein_pct=0.05),
     # E10.3 (Furkan-Update B, 18:27): Liquidationszonen auf der EINSTIEGS-Seite. Nach dem
     # Befund aus E10.2 (Verkaufsseite kostet durchgehend Rendite) ist das die Seite, auf
     # der noch etwas zu holen sein koennte. "boost" = zusaetzlich aufstocken bei Konfluenz,
@@ -204,7 +204,7 @@ GRID = [
     # Recall von 50 auf 57 %. Der Befund "die Verkaufsseite ist auserzaehlt" galt also
     # nur fuer die damalige Basis mit vielen aussichtslosen Einstiegen. Erstmals liegen
     # ZWEI Varianten in beiden Haelften unter den besten 5 (Zufallserwartung 0,8).
-    V("NEU-LIVE +Verkauf unter dem letzten Hoch", panel=True,
+    V("NEU-LIVE +Verkauf unter dem letzten Hoch",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on"),
     V("NEU-LIVE +Verkauf an den Liquidations-Niveaus",
@@ -240,7 +240,13 @@ GRID = [
     # An 30 Tagen (27.07.-27.08.2026) war deshalb nur an 4 Tagen ueberhaupt ein Einstieg
     # moeglich — die Engine stand einen ganzen Aufwaertsmonat flach.
     # Erwartung: mehr Einstiege, groessere Stop-Abstaende, dafuer traegere Reaktion.
-    V("NEU-LIVE +Mindest-Bein 5 %",
+    # LIVE seit 27.08.2026 (Kaiser): einzige Variante, die die vorherige Live-Einstellung
+    # in Rendite (+37,4 gegen +35,4), Rueckgang (-6,9 gegen -7,5) UND Recall (71 gegen 62 %)
+    # gleichzeitig schlaegt — und die den gemessenen Stillstand aufloest (241 statt 202
+    # Signale). Tragendes Argument ist aber die Mechanik, nicht die Tabelle: Der Abstand
+    # Golden Pocket -> Stop betraegt konstruktiv 35-38 % der Beinlaenge, min_stop_pct=2 %
+    # verlangt also ein Bein von rund 5,5 %.
+    V("NEU-LIVE +Mindest-Bein 5 %", panel=True,
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05),
     V("NEU-LIVE +groesstes Bein",

@@ -362,3 +362,29 @@ def test_simulate_fill_close_faellt_auf_signalpreis_zurueck():
     sig = [{"ts": t0 + 999, "type": "KAUF_2", "price": 100.0, "tranche_pct": 100}]
     r = backtest.simulate(sig, cs, fee=0.0, start_ms=t0, fill="close")
     assert r["ende"] > 0
+
+
+def test_panel_variante_entspricht_der_live_einstellung():
+    """Das Chart-Panel muss zeigen, was die Engine WIRKLICH tut.
+
+    Der Fehler, den dieser Test verhindert: Wird eine Einstellung in config.json live
+    geschaltet, aber panel=True bleibt auf der alten Gitterzeile stehen, zeigt die
+    Webseite eine Rendite, die die Engine nie erzielt hat. Bisher war das eine
+    Merk-Regel im Kommentar (E9.5) — jetzt ist es geprueft.
+    """
+    import json
+    from pathlib import Path
+    import backtest
+    import main
+    cfg_datei = Path(__file__).resolve().parent.parent / "site" / "data" / "config.json"
+    if not cfg_datei.exists():                     # ohne Repo-Daten nichts zu pruefen
+        return
+    cfg = {k: v for k, v in json.loads(cfg_datei.read_text(encoding="utf-8")).items()
+           if not k.startswith("_")}
+    live = main.eval_params(cfg)
+    panel = [v for v in backtest.GRID if v.get("panel")]
+    assert len(panel) == 1, f"genau eine Gitterzeile muss panel=True tragen, nicht {len(panel)}"
+    im_panel = {k: panel[0][k] for k in backtest.EVAL_KEYS if k in panel[0]}
+    abweichend = {k: (im_panel.get(k), live.get(k))
+                  for k in set(im_panel) | set(live) if im_panel.get(k) != live.get(k)}
+    assert not abweichend, f"Panel-Zeile weicht von config.json ab: {abweichend}"

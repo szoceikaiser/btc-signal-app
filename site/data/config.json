@@ -10,7 +10,7 @@
  "no_flip": false,
  "freeze_targets": false,
  "bein_richtung": "auto",
- "min_bein_pct": 0.0,
+ "min_bein_pct": 0.05,
  "bein_wahl": "juengstes",
  "be_im_plus": false,
  "release_stale_rest": false,
