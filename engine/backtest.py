@@ -64,13 +64,15 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "tp_ladder", "trend_filter", "strict_confirm", "confluence",
              "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop",
              "liq_exit", "high_exit", "liq_entry",
-             "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct")
+             "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct",
+             "no_flip", "freeze_targets")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, strict_confirm=False, confluence=False,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
              trail_stop=False, liq_exit="off", high_exit="off", liq_entry="off",
-             block_unhealthy=False, confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0)
+             block_unhealthy=False, confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0,
+             no_flip=False, freeze_targets=False)
 
 
 def V(label, panel=False, **kw):
@@ -208,6 +210,27 @@ GRID = [
     V("NEU-LIVE +Verkauf unter dem Hoch +an den Liq-Niveaus",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", liq_exit="zone"),
+    # E18 (Durchsicht 27.08.2026): zwei Mechanik-Korrekturen gegen die aktuelle
+    # Live-Einstellung gemessen — einzeln und zusammen.
+    #   no_flip:        in einer Kerze wird nur in EINE Richtung gehandelt. Betroffen
+    #                   waren 16 der 214 Live-Signale (aufstocken UND teilverkaufen,
+    #                   meist zum selben Preis). Erwartung: minimal weniger Signale,
+    #                   etwas weniger Gebuehren; die Rendite zeigt, ob dabei auch
+    #                   gute Nachkaeufe verloren gehen.
+    #   freeze_targets: das 1.618-Ziel wandert nicht mehr mit einem spaeteren Tief
+    #                   nach unten. Erwartung: WENIGER TEILVERKAUF_2 (im letzten Lauf
+    #                   gab es genau einen) — die Frage ist, ob die Position dadurch
+    #                   laenger laeuft und mehr bringt oder unverkauft zurueckfaellt.
+    V("NEU-LIVE +kein Gegengeschaeft je Kerze",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", no_flip=True),
+    V("NEU-LIVE +Ziele festhalten",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", freeze_targets=True),
+    V("NEU-LIVE +kein Gegengeschaeft +Ziele festhalten",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on",
+      no_flip=True, freeze_targets=True),
     V("Long+Short (Ref)"),
 ]
 

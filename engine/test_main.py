@@ -308,3 +308,65 @@ def test_flush_aufloesung_meldet_nicht_bestaetigt():
     w = {"preis": 106.0, "invalidation": 97.6}
     assert "KEIN Flush-Einstieg" in format_flush_aufloesung(w, False)
     assert "BESTAETIGT" in format_flush_aufloesung(w, True)
+
+
+# --------------------------------------------------------------- E18.1 (27.08.2026)
+
+def test_alle_evaluate_parameter_werden_durchgereicht():
+    """Jeder Schalter, den evaluate kennt, muss aus config.json ankommen.
+
+    Der Fehler, den dieser Test verhindert (Durchsicht 27.08.2026): run_engine reichte
+    nur 11 von 20 Parametern durch. Die uebrigen liessen sich in config.json aendern,
+    ohne dass es irgendeine Wirkung hatte — und ohne Fehlermeldung. Kommt spaeter ein
+    Parameter zu evaluate dazu und wird hier vergessen, wird dieser Test rot.
+    """
+    import inspect
+    from strategy_core import evaluate
+    sig = inspect.signature(evaluate)
+    erwartet = {n: p.default for n, p in sig.parameters.items()
+                if p.default is not inspect.Parameter.empty}
+    fehlen = set(erwartet) - set(main.EVAL_DEFAULTS)
+    assert not fehlen, f"nicht durchgereichte evaluate-Parameter: {sorted(fehlen)}"
+    zuviel = set(main.EVAL_DEFAULTS) - set(erwartet)
+    assert not zuviel, f"unbekannte Parameter in EVAL_DEFAULTS: {sorted(zuviel)}"
+    # ... und mit denselben Vorgabewerten, sonst aendert das Durchreichen das Verhalten
+    abweichend = {k: (main.EVAL_DEFAULTS[k], erwartet[k])
+                  for k in erwartet if main.EVAL_DEFAULTS[k] != erwartet[k]}
+    assert not abweichend, f"Vorgabewerte weichen von evaluate ab: {abweichend}"
+
+
+def test_eval_params_uebernimmt_config_und_ignoriert_hinweise():
+    p = main.eval_params({"flush_entry": "off", "pivot_n": 4, "k_atr": 3,
+                          "_hinweis": "Text", "flush_wache": True})
+    assert p["flush_entry"] == "off"          # war vorher wirkungslos
+    assert p["pivot_n"] == 4 and isinstance(p["pivot_n"], int)
+    assert p["k_atr"] == 3.0 and isinstance(p["k_atr"], float)
+    assert "_hinweis" not in p and "flush_wache" not in p
+    assert p["trail_stop"] is False           # nicht gesetzt -> Vorgabewert
+
+
+def test_eval_params_faengt_unbrauchbare_werte_ab():
+    """Ein Tippfehler in config.json darf den Lauf nicht abbrechen."""
+    p = main.eval_params({"k_atr": "zwei", "cooldown_h": None})
+    assert p["k_atr"] == 2.0 and p["cooldown_h"] == 0.0
+
+
+def test_leere_config_ergibt_bisheriges_verhalten():
+    """Ohne config.json muss exakt das herauskommen, was evaluate ohnehin tut."""
+    import inspect
+    from strategy_core import evaluate
+    sig = inspect.signature(evaluate)
+    for name, wert in main.eval_params({}).items():
+        assert sig.parameters[name].default == wert, name
+
+
+def test_ziel_extrem_ueberlebt_den_neustart():
+    """E18.3: Die eingefrorene Zielreferenz muss in state.json stehen — sonst rechnet
+    die Engine nach dem naechsten Lauf wieder mit dem gewanderten Extrem."""
+    from strategy_core import Position, PosState
+    pos = Position(direction="LONG", state=PosState.TP1, retrace_extreme=101.0,
+                   ziel_extrem=103.6)
+    d = pos_to_state(pos)
+    assert d["ziel_extrem"] == 103.6
+    assert pos_from_state(d).ziel_extrem == 103.6
+    assert pos_from_state({}).ziel_extrem is None          # Altbestand ohne das Feld

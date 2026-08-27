@@ -173,6 +173,60 @@ def fetch_market_data(oi_history: list[list] | None = None,
     return candles, flow, oi_history
 
 
+# ------------------------------------------------------- Einstellungen (E18.1)
+
+# Vorgabewerte fuer JEDEN Schalter, den strategy_core.evaluate kennt. Sie sind mit den
+# Defaults dort identisch — wer nichts aendert, bekommt exakt das bisherige Verhalten.
+#
+# WARUM ES DIESE TABELLE GIBT (Durchsicht 27.08.2026, Befund B1): Vorher reichte
+# run_engine nur 11 der Schalter durch. Wer die uebrigen — flush_entry, tp_ladder,
+# buy_ladder, conditional_stop, pivot_n, k_atr — in config.json aenderte, bewirkte
+# NICHTS, ohne eine Fehlermeldung zu bekommen. Gleichzeitig lasen watch_flush() und
+# zonen_vorschau() dieselben Werte sehr wohl aus der Datei: Die Flush-Wache haette
+# geschwiegen, waehrend die Engine weiter Flush-Signale erzeugt. Der Test
+# test_alle_evaluate_parameter_werden_durchgereicht haelt die Tabelle ab jetzt
+# vollstaendig und im Gleichklang mit evaluate.
+EVAL_DEFAULTS = {
+    "bias_long": True, "bias_short": True,
+    "pivot_n": 5, "k_atr": 2.0,
+    "flush_entry": "core", "tp_ladder": True,
+    "trend_filter": False, "trend_ema": 50,
+    "strict_confirm": False, "confluence": False,
+    "conditional_stop": False, "buy_ladder": True,
+    "release_stale_rest": False, "trail_stop": False,
+    "liq_exit": "off", "high_exit": "off", "liq_entry": "off",
+    "block_unhealthy": False, "confirm_t1": False,
+    "cooldown_h": 0.0, "min_stop_pct": 0.0,
+    "no_flip": False, "freeze_targets": False,
+}
+
+
+def eval_params(cfg: dict) -> dict:
+    """Baut aus config.json die vollstaendigen Parameter fuer evaluate().
+
+    Unbekannte Schluessel in config.json werden ignoriert (dort stehen auch die
+    _hinweis-Texte und Schalter, die nur andere Programmteile betreffen). Ein Wert
+    mit falschem Typ faellt auf den Vorgabewert zurueck und wird protokolliert,
+    statt den ganzen Lauf abzubrechen — Kaiser bearbeitet die Datei von Hand.
+    """
+    out = {}
+    for name, default in EVAL_DEFAULTS.items():
+        wert = cfg.get(name, default)
+        try:
+            if isinstance(default, bool):
+                wert = bool(wert)
+            elif isinstance(default, int):
+                wert = int(wert)
+            elif isinstance(default, float):
+                wert = float(wert)
+        except (TypeError, ValueError):
+            print(f"config.json: '{name}' = {wert!r} ist unbrauchbar "
+                  f"-> Vorgabewert {default!r}.")
+            wert = default
+        out[name] = wert
+    return out
+
+
 # --------------------------------------------------------- State-Persistenz
 
 def pos_to_state(pos: Position) -> dict:
@@ -182,7 +236,8 @@ def pos_to_state(pos: Position) -> dict:
          "buy_rungs": pos.buy_rungs, "entry_ref": pos.entry_ref,
          "entry_pct": pos.entry_pct, "liq_exits": pos.liq_exits,
          "high_exits": pos.high_exits, "liq_entries": pos.liq_entries,
-         "last_stop_ts": pos.last_stop_ts, "zones": None}
+         "last_stop_ts": pos.last_stop_ts, "ziel_extrem": pos.ziel_extrem,
+         "zones": None}
     if pos.zones:
         z = pos.zones
         d["zones"] = {
@@ -193,9 +248,12 @@ def pos_to_state(pos: Position) -> dict:
             "level_05": z.level_05, "gp_upper": z.gp_upper, "gp_lower": z.gp_lower,
             "level_0786": z.level_0786, "invalidation": z.invalidation,
         }
-        if pos.retrace_extreme is not None:
-            d["zones"]["ext1"] = z.ext_target(pos.retrace_extreme, 1.0)
-            d["zones"]["ext2"] = z.ext_target(pos.retrace_extreme, 1.618)
+        # E18.3: Steht eine eingefrorene Zielreferenz, zeigt der Chart deren Ziele —
+        # sonst zeichnete er andere Linien, als die Engine handelt.
+        ref = pos.ziel_extrem if pos.ziel_extrem is not None else pos.retrace_extreme
+        if ref is not None:
+            d["zones"]["ext1"] = z.ext_target(ref, 1.0)
+            d["zones"]["ext2"] = z.ext_target(ref, 1.618)
     return d
 
 
@@ -216,6 +274,7 @@ def pos_from_state(d: dict) -> Position:
     pos.high_exits = d.get("high_exits", 0)
     pos.liq_entries = d.get("liq_entries", 0)
     pos.last_stop_ts = d.get("last_stop_ts", -1)
+    pos.ziel_extrem = d.get("ziel_extrem")
     z = d.get("zones")
     if z and "impuls_start" in z:
         imp = Impulse(
@@ -406,22 +465,12 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         except Exception as exc:  # noqa: BLE001
             print(f"config.json nicht lesbar ({exc}) -> alte Einstellungen.")
     new_signals: list[dict] = []
+    params = eval_params(cfg)
     # Nachholen: alle Kerzen, die neuer sind als der letzte verarbeitete Stand
     for i, c in enumerate(candles):
         if c.ts <= pos.last_signal_ts:
             continue
-        sigs = evaluate(candles[:i + 1], flow[:i + 1], pos,
-                        bias_long=cfg.get("bias_long", True),
-                        bias_short=cfg.get("bias_short", True),
-                        release_stale_rest=cfg.get("release_stale_rest", False),
-                        trail_stop=cfg.get("trail_stop", False),
-                        liq_exit=cfg.get("liq_exit", "off"),
-                        high_exit=cfg.get("high_exit", "off"),
-                        liq_entry=cfg.get("liq_entry", "off"),
-                        block_unhealthy=cfg.get("block_unhealthy", False),
-                        confirm_t1=cfg.get("confirm_t1", False),
-                        cooldown_h=cfg.get("cooldown_h", 0),
-                        min_stop_pct=cfg.get("min_stop_pct", 0))
+        sigs = evaluate(candles[:i + 1], flow[:i + 1], pos, **params)
         new_signals += [s.to_dict() for s in sigs]
 
     # Historie fortschreiben

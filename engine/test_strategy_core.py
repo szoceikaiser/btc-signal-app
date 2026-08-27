@@ -1010,3 +1010,130 @@ def test_flowpoint_long_pct_ist_optional():
     assert p.long_pct == 0.0
     q = FlowPoint(1, 100.0, 0.0, 1e9, 0.0, 0.0, 0.0, 65.12)
     assert q.long_pct == 65.12
+
+
+# =========================== E18 (Durchsicht 27.08.2026) ===========================
+# Zwei Mechanik-Fehler, beide schaltbar behoben, Default aus. Jeder Test prueft
+# zusaetzlich, dass OHNE den Schalter alles bleibt wie bisher.
+
+def _e18_pfad_nachkauf_und_teilgewinn():
+    """Eine Kerze, die BEIDES ausloest: 0.786-Nachkauf (Tief) und Leiter-Teilgewinn (Hoch).
+
+    Impuls 100->110 aus zigzag_candles: 0.5 = 105, 0.786 = 102.14, Invalidierung 100.
+    Kerze 9 faellt auf 102.0 (Nachkauf-Zone) und laeuft auf 110.5 (Leiter-Ziel 0.8 = 110).
+    Genau dieses Muster stand 16-mal im Signal-Datensatz der Live-Variante.
+    """
+    return zigzag_candles() + [
+        c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1 am 0.5-Level
+        c(9, 105, 110.5, 102.0, 109.0),      # Tief in der Nachkaufzone, Hoch am Leiter-Ziel
+    ]
+
+
+def test_ohne_no_flip_kauft_und_verkauft_die_engine_in_derselben_kerze():
+    """Dokumentiert den Ist-Zustand: ohne Schalter passiert genau das Gemeldete."""
+    path = _e18_pfad_nachkauf_und_teilgewinn()
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           buy_ladder=False, flush_entry="off")
+    letzte = [s.type for s in sigs if s.ts == path[-1].ts]
+    assert SignalType.NACHKAUF in letzte and SignalType.TEILVERKAUF_LADDER in letzte
+
+
+def test_no_flip_sperrt_teilverkauf_nach_nachkauf_in_derselben_kerze():
+    path = _e18_pfad_nachkauf_und_teilgewinn()
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           buy_ladder=False, flush_entry="off", no_flip=True)
+    letzte = [s.type for s in sigs if s.ts == path[-1].ts]
+    assert letzte == [SignalType.NACHKAUF]           # der Teilgewinn faellt weg
+    assert pos.tp_rungs == 0                          # und die Leiter ist nicht verbraucht
+
+
+def test_no_flip_sperrt_nachkauf_nach_teilverkauf_in_derselben_kerze():
+    """Gegenrichtung: kommt der Teilgewinn zuerst (Liquidations-Kaskade), faellt der
+    Nachkauf weg — nicht umgekehrt."""
+    path = _e18_pfad_nachkauf_und_teilgewinn()
+    flow = _liq_flow(len(path), short_liq_last=5_000_000.0)
+    pos = Position()
+    sigs = run_incremental(path, flow, pos, pivot_n=2, bias_short=False, tp_ladder=False,
+                           buy_ladder=False, flush_entry="off", liq_exit="spike",
+                           no_flip=True)
+    letzte = [s.type for s in sigs if s.ts == path[-1].ts]
+    assert letzte == [SignalType.TEILVERKAUF_LADDER]
+    assert pos.state == PosState.T1                   # kein Aufstieg auf FULL
+    # Gegenprobe ohne Schalter: da kommen beide
+    pos2 = Position()
+    sigs2 = run_incremental(path, flow, pos2, pivot_n=2, bias_short=False, tp_ladder=False,
+                            buy_ladder=False, flush_entry="off", liq_exit="spike")
+    letzte2 = [s.type for s in sigs2 if s.ts == path[-1].ts]
+    assert SignalType.NACHKAUF in letzte2 and SignalType.TEILVERKAUF_LADDER in letzte2
+
+
+def test_no_flip_laesst_den_stop_immer_durch():
+    """Ein vollstaendiger Ausstieg darf nie unterdrueckt werden."""
+    path = zigzag_candles() + [
+        c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1
+        c(9, 105, 105.5, 98.0, 99.0),        # Schluss unter Invalidierung 100
+    ]
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           buy_ladder=False, flush_entry="off", no_flip=True)
+    assert sigs[-1].type == SignalType.STOPLOSS and pos.state == PosState.FLAT
+
+
+def test_no_flip_kennt_nur_aufbau_und_teilverkauf():
+    """Stop und Rest-Verkauf stehen bewusst in keiner der beiden Gruppen."""
+    from strategy_core import _AUFBAU_TYPES, _TEILVERKAUF_TYPES
+    tabu = {SignalType.STOPLOSS, SignalType.SHORT_STOPLOSS,
+            SignalType.VERKAUF_REST, SignalType.SHORT_COVER_REST}
+    assert not (tabu & (_AUFBAU_TYPES | _TEILVERKAUF_TYPES))
+    assert not (_AUFBAU_TYPES & _TEILVERKAUF_TYPES)
+
+
+def _e18_pfad_ziel_wandert():
+    """Nach TEILVERKAUF 1 macht der Kurs ein neues Tief — das 1.618-Ziel wandert mit.
+
+    Impuls 100->110. Nach KAUF 2 liegt das Retracement-Tief bei 103.6:
+    Ziel 1.0 = 113.6 (Kerze 10 trifft es), Ziel 1.618 = 119.78.
+    Kerze 11 faellt auf 101.0 (kein Stop, Schluss 112) -> Ziel 1.618 sinkt auf 117.18.
+    Kerze 12 laeuft auf 118.0: unter dem urspruenglichen Ziel, ueber dem gewanderten.
+    """
+    return zigzag_candles() + [
+        c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1
+        c(9, 105, 105.5, 103.6, 104.5),      # KAUF 2 im Golden Pocket
+        c(10, 104, 114.0, 104.0, 113.5),     # TEILVERKAUF 1 (Ziel 1.0)
+        c(11, 113, 113.5, 101.0, 112.0),     # neues Tief, aber kein Stop
+        c(12, 112, 118.0, 111.0, 117.5),     # erreicht nur das GEWANDERTE Ziel
+    ]
+
+
+def test_ohne_freeze_targets_wandert_das_zweite_ziel_nach_unten():
+    """Ist-Zustand: das 1.618-Ziel rutscht unter sein urspruengliches Niveau."""
+    path = _e18_pfad_ziel_wandert()
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           tp_ladder=False, buy_ladder=False, flush_entry="off")
+    tv2 = [s for s in sigs if s.type == SignalType.TEILVERKAUF_2]
+    assert len(tv2) == 1
+    assert tv2[0].price < 119.0            # urspruenglich waeren es 119.78 gewesen
+
+
+def test_freeze_targets_haelt_das_ziel_fest():
+    path = _e18_pfad_ziel_wandert()
+    pos = Position()
+    sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                           tp_ladder=False, buy_ladder=False, flush_entry="off",
+                           freeze_targets=True)
+    assert not any(s.type == SignalType.TEILVERKAUF_2 for s in sigs)
+    assert pos.ziel_extrem == 103.6        # Referenz des ersten Teilgewinns
+    assert pos.retrace_extreme == 101.0    # das laufende Extrem bleibt unberuehrt
+    assert pos.state == PosState.TP1
+
+
+def test_freeze_targets_wird_beim_positionsende_zurueckgesetzt():
+    path = _e18_pfad_ziel_wandert() + [c(13, 117, 117.5, 95.0, 96.0)]   # Stop
+    pos = Position()
+    run_incremental(path, neg_funding_flow(), pos, pivot_n=2, bias_short=False,
+                    tp_ladder=False, buy_ladder=False, flush_entry="off",
+                    freeze_targets=True)
+    assert pos.state == PosState.FLAT and pos.ziel_extrem is None

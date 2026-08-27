@@ -51,12 +51,27 @@ Ab jetzt läuft alles automatisch (alle 15 Min). Fertig.
 |---|---|---|
 | K1 / S1 | Einstieg am 0.5-Retracement | 25 % |
 | K2 / S2 | Kernposition im Golden Pocket (0.618–0.65) | 50 % |
-| NK / SNK | Nachkauf an der 0.786-Zone | 25 % |
+| NK / SNK | Nachkauf: 0.786-Zone, Mehrtages-Kaufleiter oder Liquidations-Konfluenz | 15–25 % |
+| TVL / STPL | Leiter-Teilgewinn (Zwischenziel bzw. unter dem letzten Hoch) | 15 % |
 | TV1 / STP1 | Teilgewinn am Extension-1.0-Ziel | 40 % |
 | TV2 / STP2 | Teilgewinn am Extension-1.618-Ziel | 40 % |
 | V / SC | Rest schließen (Gegen-Muster am Ziel) | Rest |
 | SL / SSL | Stoploss (Kerzenschluss hinter Invalidierung) | 100 % |
-| W | Warnung: Derivate-Pump aktiv | — |
+| W | Warnung: Derivate-Pump aktiv — reine Information, keine Handlung | — |
+| ⚡ | Zusatz-Markierung: aggressiver Flush-Einstieg in die Kapitulation, **deine Entscheidung** | — |
+
+Etwa 26 Nachrichten im Monat, davon rund jede sechste eine reine Warnung.
+
+## Was die Simulation sagt — und was nicht
+
+Rückrechnung über 19.11.2025–28.07.2026: **+41,5 % bei −7,5 % maximalem Rückgang**,
+während Bitcoin 30,7 % verlor. Die Webseite zeigt das Monat für Monat, links ohne und
+rechts mit den Flush-Einstiegen.
+
+**So ist das zu lesen:** Es ist eine Rückrechnung auf vergangenen Kursen — die beste von
+30 verglichenen Einstellungen, ohne Schlupf, ohne Verzögerung, in einem einzigen
+Bärenmarkt. Real wird weniger daraus. Belastbar ist nicht die Zahl, sondern die Richtung:
+weniger Trades, halber Rückgang. Keine Zusage für die Zukunft.
 
 ## Weiterführende Anleitungen
 
@@ -69,10 +84,18 @@ Ab jetzt läuft alles automatisch (alle 15 Min). Fertig.
 
 - `engine/strategy_core.py` — Strategie-Regeln (Swings, dynamische Fib-Zonen,
   Order-Flow-Kompass, Zustandsmaschine). `engine/run_tests.py` führt alle Tests aus.
-- `engine/main.py` — Datenabruf (Binance, ohne API-Key), Auswertung, Telegram.
+- `engine/main.py` — Datenabruf, Auswertung, Telegram. Kerzen und Spot-Nachfrage von
+  Binance Vision (ohne Key); Open Interest, Leihgebühr, Zwangsverkäufe, **Futures-Nachfrage
+  und Long-Short-Verhältnis** von Coinalyze (kostenloser Key als Secret
+  `COINALYZE_API_KEY`). Fällt Coinalyze aus, läuft die Engine mit Ersatzmerkmalen weiter.
+- `engine/coinalyze.py` — Anbindung der Coinalyze-Daten inkl. Prüf-Funktion
+  (Workflow „Coinalyze-Test") zum Abklopfen der verfügbaren Endpunkte.
 - `site/` — Chart-Webseite (GitHub Pages).
 - **Alle Schalter stehen in `site/data/config.json`** (Richtung, nachgezogener Stop,
-  Liquidations-Ein-/Ausstiege). Die Engine überschreibt diese Datei nie, sie lässt sich
+  Liquidations-Ein-/Ausstiege). Seit dem 27.08.2026 wirkt dort **jeder** Schalter: bis
+  dahin las die Engine sechs davon gar nicht — u. a. `flush_entry` und `pivot_n` standen
+  fest im Code, eine Änderung in der Datei blieb wirkungslos.
+  Die Engine überschreibt diese Datei nie, sie lässt sich
   also gefahrlos im Browser bearbeiten — die Tabelle aller Werte steht in
   [ANLEITUNG-EINSTELLUNGEN.md](ANLEITUNG-EINSTELLUNGEN.md).
   `site/data/state.json` zeigt unter `config` nur, was die Engine zuletzt gelesen hat.

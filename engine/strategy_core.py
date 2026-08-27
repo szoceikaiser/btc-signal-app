@@ -381,6 +381,7 @@ class Position:
     liq_exits: int = 0                       # Anzahl Teilverkaeufe an Liquidationen (E9.11)
     high_exits: int = 0                      # Anzahl Teilverkaeufe am letzten Hoch (E10.2)
     liq_entries: int = 0                     # Anzahl Konfluenz-Nachkaeufe an Liq-Zonen (E10.3)
+    ziel_extrem: Optional[float] = None      # eingefrorene Zielreferenz nach dem 1. Teilgewinn (E18.3)
     # Zeitpunkt des letzten Stops (E13, cooldown_h). Gehoert BEWUSST NICHT in
     # _reset_position: Er ist die Erinnerung ZWISCHEN zwei Positionen und muss den
     # Positions-Reset ueberleben, sonst wuesste die Sperre nach dem Stop nichts mehr.
@@ -398,12 +399,24 @@ def _reset_position(pos: "Position") -> None:
     pos.liq_exits = 0
     pos.high_exits = 0
     pos.liq_entries = 0
+    pos.ziel_extrem = None
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
 # (Basis fuer den nachgezogenen Break-even-Stop, E9.10).
 _ENTRY_TYPES = {SignalType.KAUF_1, SignalType.KAUF_2, SignalType.NACHKAUF,
                 SignalType.SHORT_1, SignalType.SHORT_2, SignalType.SHORT_NACHLEGEN}
+
+# E18.2: Signale, die eine bestehende Position VERGROESSERN bzw. VERKLEINERN. Nur diese
+# beiden Gruppen schliessen sich bei no_flip innerhalb einer Kerze gegenseitig aus.
+# Bewusst NICHT dabei: STOPLOSS, VERKAUF_REST und ihre Short-Gegenstuecke — ein
+# vollstaendiger Ausstieg darf nie unterdrueckt werden, egal was vorher in der Kerze
+# passiert ist. Ersteinstiege aus FLAT sind ebenfalls nicht betroffen (anderer Zweig).
+_AUFBAU_TYPES = {SignalType.NACHKAUF, SignalType.SHORT_NACHLEGEN,
+                 SignalType.KAUF_2, SignalType.SHORT_2}
+_TEILVERKAUF_TYPES = {SignalType.TEILVERKAUF_LADDER, SignalType.TEILVERKAUF_1,
+                      SignalType.TEILVERKAUF_2, SignalType.SHORT_TP_LADDER,
+                      SignalType.SHORT_TP_1, SignalType.SHORT_TP_2}
 
 
 TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
@@ -533,7 +546,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              liq_exit: str = "off", high_exit: str = "off",
              liq_entry: str = "off", block_unhealthy: bool = False,
              confirm_t1: bool = False, cooldown_h: float = 0.0,
-             min_stop_pct: float = 0.0) -> list[Signal]:
+             min_stop_pct: float = 0.0,
+             no_flip: bool = False, freeze_targets: bool = False) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -589,6 +603,18 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # min_stop_pct: Mindestabstand Einstieg->Invalidierung als Anteil (0 = aus). 15 von 34
     #   Positionen lagen unter 2 %, eine bei 0,02 % — solche Stops loest schon das normale
     #   Rauschen aus. Furkans eigenes Video-Beispiel liegt bei 3,59 %.
+    # ------------------------------------------------- E18 (Durchsicht 27.08.2026, Default aus)
+    # no_flip: In einer Kerze wird nur in EINE Richtung gehandelt. Befund: 16 von 214
+    #   Signalen der Live-Variante fielen auf Kerzen, in denen gleichzeitig aufgestockt
+    #   UND teilverkauft wurde — meist zum selben Preis, weil der Nachkauf das TIEF der
+    #   Kerze prueft und der Teilgewinn am letzten Hoch ihr HOCH. Zwei Gebuehren fuer ein
+    #   Geschaeft, das sich selbst aufhebt, dazu zwei widersprechende Telegram-Nachrichten.
+    #   Es entscheidet, was zuerst kommt; vollstaendige Ausstiege sind nie betroffen.
+    # freeze_targets: Haelt die Zielreferenz fest, sobald der erste Teilgewinn realisiert
+    #   ist. Bisher wanderte pos.retrace_extreme weiter, wenn der Kurs danach ein tieferes
+    #   Tief machte, ohne den Stop auszuloesen — ext1/ext2 sanken mit. Nachgestellt: Ziel
+    #   1.618 von 301,8 auf 257,8, also unter das urspruengliche 1.0-Ziel. Passt zum Befund,
+    #   dass TEILVERKAUF_2 im ganzen Messfenster genau einmal vorkam.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -601,6 +627,15 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         return []
 
     signals: list[Signal] = []
+
+    def _darf_aufstocken() -> bool:
+        """E18.2: Nach einem Teilgewinn in derselben Kerze wird nicht nachgelegt."""
+        return not (no_flip and any(x.type in _TEILVERKAUF_TYPES for x in signals))
+
+    def _darf_teilverkaufen() -> bool:
+        """E18.2: Nach einem Nachkauf in derselben Kerze wird nicht teilverkauft."""
+        return not (no_flip and any(x.type in _AUFBAU_TYPES for x in signals))
+
     pattern = classify_pattern(candles, flow) if flow else Pattern.NEUTRAL
     pivots = find_pivots(candles, n=pivot_n)
     imp = last_significant_impulse(candles, pivots, k_atr=k_atr)
@@ -762,8 +797,13 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         else:
             pos.retrace_extreme = max(pos.retrace_extreme or cur.high, cur.high)
             made_new_extreme = prev_extreme is not None and cur.high > prev_extreme
-        ext1 = z.ext_target(pos.retrace_extreme, 1.0)
-        ext2 = z.ext_target(pos.retrace_extreme, 1.618)
+        # E18.3: Nach dem ersten Teilgewinn zaehlt die eingefrorene Referenz — sonst
+        # wandern die Ziele mit jedem neuen Tief nach unten. pos.retrace_extreme laeuft
+        # unveraendert weiter, damit die Mehrtages-Kaufleiter davon unberuehrt bleibt.
+        ziel_ref = pos.ziel_extrem if (freeze_targets and pos.ziel_extrem is not None) \
+            else pos.retrace_extreme
+        ext1 = z.ext_target(ziel_ref, 1.0)
+        ext2 = z.ext_target(ziel_ref, 1.618)
 
         # Nachgezogener Stop (E9.10, Kaisers Furkan-Zitat: "Stop ueber den Kauf gezogen,
         # dann kann ich nichts mehr verlieren" — Motto Kapital schuetzen). Sobald
@@ -832,7 +872,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             # Mehrtages-Kaufleiter (E9.5): neue Tiefkerze IN der Retracement-Zone (ueber
             # Invalidierung, unter 0.5) mit Flow-Bestaetigung -> kleine Tranche nachlegen.
             if buy_ladder and made_new_extreme and pos.buy_rungs < MAX_BUY_RUNGS \
-                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
+                    and _darf_aufstocken():
                 if long_side:
                     in_zone = z.invalidation < cur.low <= z.level_05
                     ladder_ok = _confirm_long()
@@ -854,7 +895,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             # Pocket, da wuerde ich aufstocken". Struktur muss intakt sein (ueber der
             # Invalidierung, im Retracement-Bereich) und der Order-Flow bestaetigen.
             if liq_entry == "boost" and pos.liq_entries < MAX_LIQ_ENTRIES \
-                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
+                    and _darf_aufstocken():
                 if long_side:
                     treffer = _liq_hit(cur.low, "long")
                     in_struct = z.invalidation < cur.low <= z.level_05
@@ -874,7 +916,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             # Teilverkauf an Liquidationen (E9.11): erst verkaufen, wenn der Kurs die
             # Liquidationszone erreicht — nicht schon am rechnerischen Fib-Ziel.
             if liq_exit != "off" and pos.liq_exits < MAX_LIQ_EXITS \
-                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
+                    and _darf_teilverkaufen():
                 # Long verkauft in Short-Liquidationen (Squeeze nach oben), Short in
                 # Long-Liquidationen (Flush nach unten).
                 seite = "short" if long_side else "long"
@@ -895,7 +938,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             # Teilverkauf am letzten Hoch (E10.2): Kurs laeuft an das letzte bestaetigte
             # Pivot-Hoch heran -> dort sitzt das Angebot, ein Stueck davor raus.
             if high_exit != "off" and pos.high_exits < MAX_HIGH_EXITS \
-                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
+                    and _darf_teilverkaufen():
                 ref = candles[-2].close if len(candles) >= 2 else cur.open
                 lvl = next_pivot_beyond(pivots, ref, long_side)
                 if lvl is not None:
@@ -915,7 +959,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                               f"{lvl:.0f}{zusatz}"))
                         pos.high_exits += 1
             # Upgrade T1 -> CORE: Kernposition im Golden Pocket (KAUF 2 / SHORT 2)
-            if pos.state == PosState.T1:
+            if pos.state == PosState.T1 and _darf_aufstocken():
                 in_gp = (z.gp_lower <= cur.low <= z.gp_upper) if long_side \
                     else (z.gp_upper <= cur.high <= z.gp_lower)
                 if in_gp:
@@ -934,7 +978,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                                   stop_ref=z.invalidation))
                             pos.state = PosState.CORE
             # Nachkauf am 0.786
-            if pos.state in (PosState.T1, PosState.CORE):
+            if pos.state in (PosState.T1, PosState.CORE) and _darf_aufstocken():
                 touch = (cur.low <= z.level_0786) if long_side else (cur.high >= z.level_0786)
                 if touch:
                     nk = SignalType.NACHKAUF if long_side else SignalType.SHORT_NACHLEGEN
@@ -945,7 +989,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             # Gestaffelte Zwischen-Teilgewinne (E8.2): kleine Tranchen an 0.8/0.9-Ext
             # VOR dem 1.0-Ziel, hoechstens eine Stufe je Kerze (Leiter ueber Tage)
             if tp_ladder and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
-                    and pos.tp_rungs < len(LADDER_FACTORS):
+                    and pos.tp_rungs < len(LADDER_FACTORS) and _darf_teilverkaufen():
                 rung_ext = z.ext_target(pos.retrace_extreme, LADDER_FACTORS[pos.tp_rungs])
                 rung_hit = (cur.high >= rung_ext) if long_side else (cur.low <= rung_ext)
                 if rung_hit:
@@ -954,14 +998,15 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           f"Leiter-Teilgewinn an Extension {LADDER_FACTORS[pos.tp_rungs]:.1f} ({rung_ext:.0f})"))
                     pos.tp_rungs += 1
             # Teilgewinne an Extensions
-            if pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+            if pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
+                    and _darf_teilverkaufen():
                 hit1 = (cur.high >= ext1) if long_side else (cur.low <= ext1)
                 if hit1:
                     tp = SignalType.TEILVERKAUF_1 if long_side else SignalType.SHORT_TP_1
                     signals.append(Signal(cur.ts, tp, ext1, TRANCHEN["TP1"],
                                           f"Extension 1.0 erreicht ({ext1:.0f})"))
                     pos.state = PosState.TP1
-            if pos.state == PosState.TP1:
+            if pos.state == PosState.TP1 and _darf_teilverkaufen():
                 hit2 = (cur.high >= ext2) if long_side else (cur.low <= ext2)
                 if hit2:
                     tp = SignalType.TEILVERKAUF_2 if long_side else SignalType.SHORT_TP_2
@@ -1003,6 +1048,11 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             base = pos.entry_ref if pos.entry_ref is not None else s.price
             pos.entry_ref = (base * pos.entry_pct + s.price * s.tranche_pct) / tot
             pos.entry_pct = tot
+
+    # E18.3: Mit dem ERSTEN realisierten Teilgewinn wird die Zielreferenz festgehalten.
+    if freeze_targets and pos.ziel_extrem is None and pos.retrace_extreme is not None \
+            and any(s.type in _TEILVERKAUF_TYPES for s in signals):
+        pos.ziel_extrem = pos.retrace_extreme
 
     pos.last_signal_ts = cur.ts
     return signals
