@@ -29,6 +29,78 @@
   "ext1": 83359.53,
   "ext2": 86898.7851
  },
+ "widerstand": {
+  "richtung": "LONG",
+  "bein_start": 81272.62,
+  "bein_ende": 77632.58,
+  "level_05": 79452.6,
+  "gp_von": 79882.12471999999,
+  "gp_bis": 79998.606,
+  "level_0786": 80493.65144,
+  "ausbruch": 81272.62
+ },
+ "plan": {
+  "richtung": "LONG",
+  "anteil_pct": 65,
+  "einstand": 78807.32346153846,
+  "kurs": 79477.67,
+  "nachkauf": [
+   {
+    "preis": 79369.17,
+    "was": "Liquidationszone",
+    "tranche": 20
+   },
+   {
+    "preis": 78468.61,
+    "was": "Liquidationszone",
+    "tranche": 20
+   },
+   {
+    "zone": [
+     75545.67,
+     78409.14499999999
+    ],
+    "was": "Kaufleiter: neue Tiefkerze in dieser Zone",
+    "tranche": 15
+   },
+   {
+    "preis": 76771.2373,
+    "was": "0.786-Zone",
+    "tranche": 25
+   }
+  ],
+  "teilgewinn": [
+   {
+    "preis": 79102.5,
+    "was": "kurz unter dem letzten Hoch 79.500",
+    "tranche": 15
+   },
+   {
+    "preis": 82214.14,
+    "was": "Zwischenziel (Extension 0.8)",
+    "tranche": 15
+   },
+   {
+    "preis": 82786.83499999999,
+    "was": "Zwischenziel (Extension 0.9)",
+    "tranche": 15
+   },
+   {
+    "preis": 83359.53,
+    "was": "Ziel 1.0",
+    "tranche": 40
+   },
+   {
+    "preis": 86898.7851,
+    "was": "Ziel 1.618",
+    "tranche": 40
+   }
+  ],
+  "stop": {
+   "preis": 75545.67,
+   "grund": "Invalidierung"
+  }
+ },
  "config": {
   "bias_long": true,
   "bias_short": false,
@@ -54,9 +126,11 @@
   "bein_richtung": "auto",
   "min_bein_pct": 0.05,
   "bein_wahl": "juengstes",
-  "be_im_plus": false
+  "be_im_plus": false,
+  "widerstand_exit": "off",
+  "plan_telegram": true
  },
- "updated_at": "2026-08-27T13:27:53Z",
+ "updated_at": "2026-08-27T14:25:08Z",
  "last_close": 79477.67,
  "zonen_vorschau": {
   "richtung": "LONG",
