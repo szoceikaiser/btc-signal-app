@@ -184,6 +184,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1787774400000,
+   "type": "NACHKAUF",
+   "price": 79023.75,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 77851 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 75545.67,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   }
  ]
 }
