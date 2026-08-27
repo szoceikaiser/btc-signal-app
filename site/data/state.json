@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1787788800000,
+ "last_signal_ts": 1787817600000,
  "retrace_extreme": 77632.58,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -12,6 +12,8 @@
  "high_exits": 2,
  "liq_entries": 2,
  "last_stop_ts": -1,
+ "ziel_extrem": null,
+ "be_aktiv": false,
  "zones": {
   "impuls_start": 75545.67,
   "impuls_start_ts": 1787457600000,
@@ -40,10 +42,22 @@
   "cooldown_h": 0,
   "min_stop_pct": 0.02,
   "vorschau_telegram": true,
-  "flush_wache": true
+  "flush_wache": true,
+  "flush_entry": "core",
+  "tp_ladder": true,
+  "buy_ladder": true,
+  "conditional_stop": false,
+  "pivot_n": 5,
+  "k_atr": 2.0,
+  "no_flip": false,
+  "freeze_targets": false,
+  "bein_richtung": "auto",
+  "min_bein_pct": 0.05,
+  "bein_wahl": "juengstes",
+  "be_im_plus": false
  },
- "updated_at": "2026-08-27T06:59:54Z",
- "last_close": 78830.68,
+ "updated_at": "2026-08-27T13:27:53Z",
+ "last_close": 79477.67,
  "zonen_vorschau": {
   "richtung": "LONG",
   "impuls_start": 75545.67,
