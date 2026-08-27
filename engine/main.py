@@ -28,11 +28,12 @@ from datetime import datetime
 from pathlib import Path
 
 import coinalyze
-from strategy_core import (Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
-                           Position, evaluate, fib_zones, find_pivots,
-                           last_significant_impulse)
+from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
+                           Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
+                           Position, evaluate, fib_zones, find_pivots, gegen_zonen,
+                           last_significant_impulse, liq_levels, next_pivot_beyond)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
-                             send_signals, send_text, send_vorschau)
+                             send_plan, send_signals, send_text, send_vorschau)
 
 ROOT = Path(__file__).resolve().parent.parent          # Repo-Wurzel (signal-app/)
 DATA = ROOT / "site" / "data"
@@ -199,7 +200,7 @@ EVAL_DEFAULTS = {
     "cooldown_h": 0.0, "min_stop_pct": 0.0,
     "no_flip": False, "freeze_targets": False,
     "min_bein_pct": 0.0, "bein_wahl": "juengstes", "be_im_plus": False,
-    "bein_richtung": "auto",
+    "bein_richtung": "auto", "widerstand_exit": "off",
 }
 
 
@@ -339,6 +340,146 @@ def zonen_vorschau(candles: list[Candle], cfg: dict | None = None) -> dict | Non
         "level_0786": z.level_0786, "invalidation": z.invalidation,
         "abstand_pct": round(abstand, 2) if abstand is not None else None,
     }
+
+
+def widerstand_marken(candles: list[Candle], cfg: dict, pos: Position) -> dict | None:
+    """Die Widerstandsmarken aus dem Gegen-Bein — das zweite Fib-Raster (E20).
+
+    WARUM (Kaiser 2026-08-27, belegt durch Furkans Video vom 03.08.): Unser Plan nennt
+    bisher nur Marken UNTER dem Kurs (Kaufzonen) und die rechnerischen Extension-Ziele
+    weit darueber. Was fehlt, sind die Widerstaende dazwischen — die Zone, an der die
+    laufende Gegenbewegung als erstes anlaeuft. Genau die nennt Furkan zuerst, wenn er
+    ueber Teilgewinne spricht.
+
+    Richtung: bei offener Position deren Richtung, sonst die der Vorschau (bias_long).
+    Gibt None zurueck, wenn kein signifikantes Gegen-Bein erkennbar ist.
+    """
+    par = eval_params(cfg or {})
+    long_side = (pos.direction != "SHORT") if pos.direction != "NONE" else par["bias_long"]
+    piv = find_pivots(candles, n=par["pivot_n"])
+    gz = gegen_zonen(candles, piv, long_side, k_atr=par["k_atr"])
+    if gz is None:
+        return None
+    lo, hi = sorted((gz.gp_upper, gz.gp_lower))
+    return {
+        "richtung": "LONG" if long_side else "SHORT",
+        "bein_start": gz.impulse.start.price, "bein_ende": gz.impulse.end.price,
+        "level_05": gz.level_05,
+        "gp_von": lo, "gp_bis": hi,
+        "level_0786": gz.level_0786,
+        "ausbruch": gz.invalidation,      # darueber (Long) ist der Widerstand weg
+    }
+
+
+def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
+                   pos: Position) -> dict | None:
+    """Alle Marken der laufenden Position auf einen Blick — die Grundlage der Plan-Nachricht.
+
+    WARUM (Kaiser 2026-08-27): Die Signale kommen nach Kerzenschluss und nennen einen Preis,
+    den es dann oft nicht mehr gibt (E17: 61 von 214 Signalen betroffen). Fuer die EINSTIEGE
+    loest das die Vorschau. Fuer die AUSSTIEGE gab es nichts Vergleichbares — obwohl Furkan
+    genau so arbeitet: "Plan ist es, falls wir runterfallen sollten zwischen 61.300 und
+    61.000, da werde ich die Position noch mal aufstocken. Wenn wir weiter nach oben gehen
+    sollten, werde ich weitere Gewinne realisieren, vor allem unter der 67.000er-Marke."
+    (03.08.2026). Mit diesen Zahlen lassen sich Limit-Orders vorlegen.
+
+    ACHTUNG bei Aenderungen: Die Marken hier muessen zu dem passen, was strategy_core
+    tatsaechlich ausloest. Der Test `test_plan_marken_stimmen_mit_der_engine_ueberein`
+    prueft das an der Extension-1.0-Marke.
+    """
+    if pos.state == PosState.FLAT or pos.zones is None or not candles:
+        return None
+    par = eval_params(cfg or {})
+    z, cur = pos.zones, candles[-1]
+    lang = pos.direction == "LONG"
+    piv = find_pivots(candles, n=par["pivot_n"])
+
+    plan: dict = {"richtung": pos.direction, "anteil_pct": pos.entry_pct,
+                  "einstand": pos.entry_ref, "kurs": cur.close}
+
+    # --- wo nachgekauft wird ---
+    nach = []
+    if pos.state in (PosState.T1, PosState.CORE):
+        nach.append({"preis": z.level_0786, "was": "0.786-Zone", "tranche": TRANCHEN["FULL"]})
+    if par["buy_ladder"]:
+        lo, hi = sorted((z.invalidation, z.level_05))
+        nach.append({"zone": [lo, hi], "was": "Kaufleiter: neue Tiefkerze in dieser Zone",
+                     "tranche": 15})
+    if par["liq_entry"] == "boost" and flow:
+        seite = "long" if lang else "short"
+        lv = [preis for preis, _m in liq_levels(candles[:-1], flow[:-1], seite)
+              if (preis < cur.close if lang else preis > cur.close)]
+        for preis in sorted(lv, reverse=lang)[:2]:
+            nach.append({"preis": preis, "was": "Liquidationszone", "tranche": 20})
+
+    # --- wo Gewinne mitgenommen werden ---
+    raus = []
+    gz = gegen_zonen(candles, piv, lang, k_atr=par["k_atr"])
+    if gz is not None and par["widerstand_exit"] != "off":
+        a, b = sorted((gz.gp_upper, gz.gp_lower))
+        raus.append({"zone": [a, b], "was": "Widerstand der Gegenbewegung",
+                     "tranche": LADDER_TRANCHE})
+    if par["high_exit"] != "off":
+        lvl = next_pivot_beyond(piv, cur.close, lang)
+        if lvl is not None:
+            ziel = lvl * (1 - HIGH_EXIT_TOL) if lang else lvl * (1 + HIGH_EXIT_TOL)
+            raus.append({"preis": ziel, "was": f"kurz unter dem letzten {'Hoch' if lang else 'Tief'} "
+                                               f"{lvl:,.0f}".replace(",", "."),
+                         "tranche": LADDER_TRANCHE})
+    ref = pos.ziel_extrem if pos.ziel_extrem is not None else pos.retrace_extreme
+    if ref is not None:
+        if par["tp_ladder"]:
+            for f in LADDER_FACTORS[pos.tp_rungs:]:
+                raus.append({"preis": z.ext_target(ref, f), "was": f"Zwischenziel (Extension {f})",
+                             "tranche": LADDER_TRANCHE})
+        if pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
+            raus.append({"preis": z.ext_target(ref, 1.0), "was": "Ziel 1.0",
+                         "tranche": TRANCHEN["TP1"]})
+        if pos.state in (PosState.T1, PosState.CORE, PosState.FULL, PosState.TP1):
+            raus.append({"preis": z.ext_target(ref, 1.618), "was": "Ziel 1.618",
+                         "tranche": TRANCHEN["TP2"]})
+
+    # --- Stop ---
+    stop, grund = z.invalidation, "Invalidierung"
+    if par["trail_stop"] and (pos.state in (PosState.TP1, PosState.TP2)
+                              or pos.tp_rungs > 0 or (par["be_im_plus"] and pos.be_aktiv)):
+        if pos.entry_ref is not None:
+            besser = pos.entry_ref > stop if lang else pos.entry_ref < stop
+            if besser:
+                stop, grund = pos.entry_ref, "Einstand (nachgezogen)"
+
+    plan["nachkauf"] = sorted(nach, key=lambda x: -(x.get("preis") or x["zone"][1]) if lang
+                              else (x.get("preis") or x["zone"][0]))
+    plan["teilgewinn"] = sorted(raus, key=lambda x: (x.get("preis") or x["zone"][0]) * (1 if lang else -1))
+    plan["stop"] = {"preis": stop, "grund": grund}
+    return plan
+
+
+def plan_geaendert(alt: dict | None, neu: dict | None, toleranz: float = 0.0025) -> bool:
+    """Hat sich am Plan etwas geaendert, das eine neue Nachricht rechtfertigt?
+
+    Nur Preise vergleichen, und die mit Toleranz — die Extension-Ziele wandern mit jedem
+    neuen Tief ein Stueck, daraus soll nicht sechsmal am Tag eine Nachricht werden.
+    """
+    if (alt is None) != (neu is None):
+        return neu is not None
+    if neu is None:
+        return False
+
+    def _marken(p):
+        out = []
+        for eintrag in p.get("nachkauf", []) + p.get("teilgewinn", []):
+            out.append((eintrag["was"], tuple(eintrag.get("zone") or [eintrag["preis"]])))
+        out.append(("stop", (p["stop"]["preis"],)))
+        return out
+    a, n = _marken(alt), _marken(neu)
+    if [x[0] for x in a] != [x[0] for x in n] or alt.get("anteil_pct") != neu.get("anteil_pct"):
+        return True
+    for (_wa, va), (_wn, vn) in zip(a, n):
+        for x, y in zip(va, vn):
+            if x and abs(y - x) / abs(x) > toleranz:
+                return True
+    return False
 
 
 def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
@@ -493,6 +634,15 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     hist["signals"] = (hist.get("signals", []) + new_signals)[-500:]
 
     state = pos_to_state(pos)
+    state["widerstand"] = widerstand_marken(candles, cfg, pos)
+    # Plan zur laufenden Position (E20). Wird nur gesendet, wenn sich eine Marke aendert —
+    # sonst kaeme sechsmal taeglich dieselbe Liste.
+    plan = positions_plan(candles, flow, cfg, pos)
+    state["plan"] = plan
+    if cfg.get("plan_telegram", True) and plan_geaendert((old_state or {}).get("plan"), plan):
+        send_plan(plan, dry_run=dry_run)
+        print(f"Plan gesendet: {len(plan.get('nachkauf', []))} Nachkauf-, "
+              f"{len(plan.get('teilgewinn', []))} Teilgewinn-Marken.")
     state["config"] = cfg
     state["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     state["last_close"] = candles[-1].close

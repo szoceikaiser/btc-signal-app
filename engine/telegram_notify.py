@@ -35,6 +35,7 @@ STYLE = {
     "SHORT_STOPLOSS":   ("\U0001F6D1", "SSL"),
     # Kein Signal, sondern eine Ankuendigung (2026-07-29, Kaisers Anforderung):
     "VORSCHAU":         ("\U0001F4CD", "VOR"),  # Stecknadel
+    "PLAN":             ("\U0001F4CB", "PLAN"), # Klemmbrett
     "FLUSH_WACHE":      ("⚡", "FW"),       # Blitz
 }
 
@@ -78,6 +79,59 @@ def format_vorschau(z: dict, ts_ms: int) -> str:
         "sich erst, wenn der Kurs sie beruehrt hat — dann ist der Preis oft schon weg.",
     ]
     return "\n".join(lines)
+
+
+def format_plan(p: dict) -> str:
+    """Der Plan zur laufenden Position: alle Marken auf einmal, als Limit-Order legbar.
+
+    WARUM (Kaiser 2026-08-27): Die Einzelsignale kommen nach Kerzenschluss und nennen einen
+    Preis, den es dann oft nicht mehr gibt. Furkan arbeitet umgekehrt — er legt die Marken
+    vorher fest und arbeitet sie ab ("Plan ist es, falls wir runterfallen sollten zwischen
+    61.300 und 61.000, da werde ich die Position noch mal aufstocken", 03.08.2026).
+    Diese Nachricht kommt nur, wenn sich eine Marke aendert, nicht bei jedem Lauf.
+    """
+    emoji, _ = STYLE["PLAN"]
+    lang = p.get("richtung") == "LONG"
+    zeilen = [f"{emoji} PLAN — {'Long' if lang else 'Short'}-Position, "
+              f"{p.get('anteil_pct', 0)} % investiert"]
+    if p.get("einstand"):
+        zeilen.append(f"Einstand {_fmt_usd(p['einstand'])} · Kurs {_fmt_usd(p['kurs'])}")
+    else:
+        zeilen.append(f"Kurs {_fmt_usd(p['kurs'])}")
+
+    def _block(titel, eintraege):
+        if not eintraege:
+            return
+        zeilen.append("")
+        zeilen.append(titel)
+        for e in eintraege:
+            if e.get("zone"):
+                a, b = e["zone"]
+                marke = f"{_fmt_usd(a)} - {_fmt_usd(b)}"
+            else:
+                marke = _fmt_usd(e["preis"])
+            zeilen.append(f"  {marke}   {e['was']} ({e['tranche']} %)")
+
+    _block("Nachkaufen:", p.get("nachkauf"))
+    _block("Teilgewinne:", p.get("teilgewinn"))
+    zeilen.append("")
+    zeilen.append(f"Stop {_fmt_usd(p['stop']['preis'])} — {p['stop']['grund']}, "
+                  f"bei Kerzenschluss {'darunter' if lang else 'darueber'}")
+    zeilen.append("")
+    zeilen.append("— Diese Preise kannst du als Limit-Order hinterlegen. Neue Nachricht "
+                  "gibt es erst, wenn sich eine Marke aendert.")
+    return "\n".join(zeilen)
+
+
+def send_plan(plan: dict, dry_run: bool = False) -> str:
+    text = format_plan(plan)
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+    if dry_run or not token or not chat_id:
+        print("[DRY-RUN]\n" + text + "\n")
+    else:
+        send_telegram(text, token, chat_id)
+    return text
 
 
 def _fmt_usd(x: float) -> str:

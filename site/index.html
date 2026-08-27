@@ -366,6 +366,20 @@ async function load(tf) {
         }));
       }
     }
+    // E20: die Widerstandsmarken aus dem Gegen-Bein — Furkans zweites Fib-Raster.
+    // Andere Farbe und gepunktet, damit sie nicht mit den Kaufzonen verwechselt werden.
+    const wid = state && state.widerstand;
+    if (wid) {
+      for (const [key, title] of [["gp_von", "Widerstand 0.618"], ["gp_bis", "Widerstand 0.65"],
+                                  ["ausbruch", "Ausbruch (altes Hoch)"]]) {
+        const v = wid[key];
+        if (typeof v === "number") priceLines.push(series.createPriceLine({
+          price: v, color: "#f59e0b", lineWidth: 1,
+          lineStyle: LightweightCharts.LineStyle.SparseDotted,
+          axisLabelVisible: true, title,
+        }));
+      }
+    }
     const zonenHinweis = offen
       ? ""
       : (zonen

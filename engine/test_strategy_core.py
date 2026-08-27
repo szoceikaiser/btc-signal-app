@@ -1253,3 +1253,86 @@ def test_be_im_plus_zieht_NICHT_wenn_die_position_im_minus_steht():
     sigs = evaluate(cs, neg_funding_flow(), pos, trail_stop=True, be_im_plus=True)
     assert not any(x.type == SignalType.STOPLOSS for x in sigs)
     assert pos.state == PosState.CORE
+
+
+# ============ E20: das zweite Fib-Raster (Widerstand aus dem Gegen-Bein) ============
+# Furkan fuehrt zwei Raster: eines in Handelsrichtung fuer die Kaufzonen, eines gegen die
+# Richtung fuer die Widerstaende. Video 03.08.2026: "Die ersten wichtigen Bereiche in
+# dieser Gegenbewegung wird natuerlich das Golden Pocket sein. 64.200 bis 64.300."
+
+def _e20_pfad():
+    """Aufwaerts 98->130, Ruecksetzer auf 120 (das Gegen-Bein), dann Erholung."""
+    rows = [(0, 100, 101, 99, 100), (1, 100, 101, 99, 100), (2, 100, 101, 98, 99),
+            (3, 99, 100, 98, 99), (4, 99, 104, 98, 103), (5, 103, 112, 102, 111),
+            (6, 111, 121, 110, 120), (7, 120, 128, 119, 127), (8, 127, 130, 126, 129),
+            (9, 129, 130, 127, 128), (10, 128, 129, 124, 125), (11, 125, 126, 121, 122),
+            (12, 122, 123, 120, 121), (13, 121, 122, 120, 121), (14, 121, 124, 120, 123),
+            (15, 123, 125, 122, 124)]
+    return [c(*r) for r in rows]
+
+
+def _e20_pfad_mit_neuem_hoch():
+    """Wie _e20_pfad, aber danach steigt der Kurs auf ein neues bestaetigtes Hoch.
+
+    Damit ist das JUENGSTE Bein aufwaerts (120->129) und das Gegen-Bein (130->120) liegt
+    dahinter. Nur mit Richtungsfilter findet man das richtige — ohne ihn nimmt die Suche
+    das juengere Aufwaerts-Bein und die Widerstandsmarken lägen unter dem Kurs.
+    """
+    return _e20_pfad() + [c(16, 124, 128, 123, 127), c(17, 127, 129, 126, 128),
+                          c(18, 128, 129, 127, 128), c(19, 128, 129, 126, 127)]
+
+
+def test_gegen_zonen_nimmt_das_bein_entgegen_der_richtung():
+    from strategy_core import gegen_zonen
+    cs = _e20_pfad_mit_neuem_hoch()
+    piv = find_pivots(cs, n=2)
+    # ohne Richtungsfilter waere das juengste Bein aufwaerts — genau das darf hier nicht
+    # als Widerstandsquelle dienen
+    juengstes = last_significant_impulse(cs, piv, k_atr=2.0)
+    assert juengstes is not None and juengstes.up
+    gz = gegen_zonen(cs, piv, long_side=True, k_atr=2.0)
+    assert gz is not None and not gz.impulse.up          # fuer einen Long: das Abwaerts-Bein
+    assert gz.impulse.start.price == 130 and gz.impulse.end.price == 120
+    lo, hi = sorted((gz.gp_upper, gz.gp_lower))
+    assert 126.0 < lo < hi < 126.6                       # Golden Pocket der Gegenbewegung
+    assert gz.invalidation == 130                        # darueber ist der Widerstand weg
+    # Das Bein IN Handelsrichtung ist ein anderes — beide existieren nebeneinander
+    auf = last_significant_impulse(cs, piv, k_atr=2.0, nur_auf=True)
+    assert auf is not None and auf.up and auf.end.price == 129
+    assert (auf.start.price, auf.end.price) != (gz.impulse.start.price, gz.impulse.end.price)
+
+
+def _e20_position(cs):
+    from strategy_core import fib_zones
+    imp = last_significant_impulse(cs, find_pivots(cs, n=2), k_atr=2.0, nur_auf=True)
+    return Position(direction="LONG", state=PosState.CORE, zones=fib_zones(imp),
+                    retrace_extreme=120.0, last_signal_ts=15, entry_ref=121.0, entry_pct=75)
+
+
+def test_widerstand_exit_nimmt_teilgewinn_am_golden_pocket_der_gegenbewegung():
+    cs = _e20_pfad() + [c(16, 124, 127.0, 123, 126.5)]   # laeuft in die Zone 126.2-126.5
+    pos = _e20_position(cs)
+    sigs = evaluate(cs, neg_funding_flow(), pos, pivot_n=2, k_atr=2.0, bias_short=False,
+                    tp_ladder=False, buy_ladder=False, high_exit="off",
+                    widerstand_exit="on")
+    treffer = [s for s in sigs if "Widerstandszone" in s.reason]
+    assert len(treffer) == 1
+    assert treffer[0].type == SignalType.TEILVERKAUF_LADDER
+    assert treffer[0].tranche_pct == LADDER_TRANCHE and pos.widerstand_exits == 1
+    assert 126.0 < treffer[0].price < 126.6              # gemeldet wird die Zonen-Untergrenze
+    # ohne den Schalter passiert an derselben Kerze nichts
+    pos2 = _e20_position(cs)
+    sigs2 = evaluate(cs, neg_funding_flow(), pos2, pivot_n=2, k_atr=2.0, bias_short=False,
+                     tp_ladder=False, buy_ladder=False, high_exit="off")
+    assert not any("Widerstandszone" in s.reason for s in sigs2)
+
+
+def test_widerstand_exit_feuert_nicht_wenn_die_zone_schon_hinter_uns_liegt():
+    """Eroeffnet der Kurs bereits ueber der Zone, ist sie kein Widerstand mehr."""
+    cs = _e20_pfad() + [c(16, 128, 129.0, 127, 128.5)]
+    pos = _e20_position(cs)
+    sigs = evaluate(cs, neg_funding_flow(), pos, pivot_n=2, k_atr=2.0, bias_short=False,
+                    tp_ladder=False, buy_ladder=False, high_exit="off",
+                    widerstand_exit="on")
+    assert not any("Widerstandszone" in s.reason for s in sigs)
+    assert pos.widerstand_exits == 0

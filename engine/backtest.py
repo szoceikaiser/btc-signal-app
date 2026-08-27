@@ -66,7 +66,7 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "liq_exit", "high_exit", "liq_entry",
              "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct",
              "no_flip", "freeze_targets",
-             "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung")
+             "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, trend_ema=50, strict_confirm=False, confluence=False,
@@ -75,7 +75,7 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              block_unhealthy=False, confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0,
              no_flip=False, freeze_targets=False,
              min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
-             bein_richtung="auto")
+             bein_richtung="auto", widerstand_exit="off")
 
 
 def V(label, panel=False, **kw):
@@ -275,6 +275,16 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on",
       min_bein_pct=0.05, bein_wahl="groesstes", be_im_plus=True),
+    # E20: Teilgewinn an der Widerstandszone des Gegen-Beins (Furkans zweites Fib-Raster).
+    # Sie liegt unter dem letzten Hoch und wird damit frueher erreicht als high_exit.
+    V("LIVE +Widerstand des Gegen-Beins",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      widerstand_exit="on"),
+    V("LIVE +Widerstand statt Verkauf am letzten Hoch",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="off", min_bein_pct=0.05,
+      widerstand_exit="on"),
     V("Long+Short (Ref)"),
 ]
 

@@ -13,6 +13,7 @@
  "min_bein_pct": 0.05,
  "bein_wahl": "juengstes",
  "be_im_plus": false,
+ "widerstand_exit": "off",
  "release_stale_rest": false,
  "trail_stop": true,
  "liq_exit": "off",
@@ -23,6 +24,7 @@
  "cooldown_h": 0,
  "min_stop_pct": 0.02,
  "vorschau_telegram": true,
+ "plan_telegram": true,
  "flush_wache": true,
  "_hinweis": "Einstellungen der Engine. Wird NIE von der Engine ueberschrieben (konfliktfrei aenderbar). bias_short=false = nur Long (empfohlen, Shorts verlieren ohne Makro-Bias). Zum Aendern: Wert bearbeiten + committen; wirkt ab naechstem Lauf (max. 15 Min).",
  "_hinweis_release_stale_rest": "true = Restposition (letzte 20 %) wird freigegeben, sobald ein neuer signifikanter Impuls bestaetigt ist. Verhindert, dass ein Rest wochenlang liegen bleibt und dabei ALLE neuen Einstiege blockiert (Zustand TP1/TP2). Erst nach Backtest-Messung einschalten.",
@@ -47,5 +49,7 @@
  "_hinweis_bein_richtung": "E19 (Video 02.08.2026). Werte: auto = wie bisher (das juengste signifikante Bein, egal in welche Richtung) | bias = nur Beine in der Richtung, die ueberhaupt gehandelt werden darf. Grund: Steht bias_short auf false und zeigt das juengste Bein nach unten, zeichnet die Engine ein Short-Setup, das sie nie handelt - und steht still. An 17 von 30 Tagen (27.07.-27.08.2026) war genau das der Fall. Furkan fuehrt im Chart beide Raster gleichzeitig und nimmt fuer seinen Long das Aufwaerts-Bein. Erst nach Backtest-Messung einschalten.",
  "_hinweis_min_bein_pct": "E19. Mindestlaenge eines Beins, damit es ueberhaupt als Referenz taugt (0 = aus, 0.05 = 5 Prozent). Rechnung dahinter: Der Abstand vom Golden Pocket zum Stop betraegt immer rund 35-38 Prozent der Beinlaenge - min_stop_pct von 2 Prozent verlangt also implizit ein Bein von etwa 5,5 Prozent. Die Auswahl lieferte im Median 4,0 Prozent, also zu kleine Beine fuer die eigene Mindestanforderung. Erst nach Backtest-Messung einschalten.",
  "_hinweis_bein_wahl": "E19. Werte: juengstes = wie bisher | groesstes = unter den letzten 12 Hoch-/Tiefpunkten das Bein mit der groessten Spanne. Furkan mass am 02.08.2026 ueber drei Wochen und 15,8 Prozent, die Engine ueber zwei Tage und 4,8 Prozent. Erst nach Backtest-Messung einschalten.",
- "_hinweis_be_im_plus": "E19. true = der Stop wandert auf den Einstand, sobald die Position einmal im Plus stand - nicht erst nach einem Teilgewinn (dafuer muss trail_stop an sein). Furkan am 02.08.2026: 'wenn ich die Order gefuellt bekomme, wuerde ich meinen Stop hochsetzen auf das neue Entry. Mit der Position moechte ich nicht mehr in Verlust gehen.' Steht auch als Punkt 2 in der Verlust-Analyse vom 27.07. (44 Prozent der Verlustsumme), wurde aber nie gebaut. Erst nach Backtest-Messung einschalten."
+ "_hinweis_be_im_plus": "E19. true = der Stop wandert auf den Einstand, sobald die Position einmal im Plus stand - nicht erst nach einem Teilgewinn (dafuer muss trail_stop an sein). Furkan am 02.08.2026: 'wenn ich die Order gefuellt bekomme, wuerde ich meinen Stop hochsetzen auf das neue Entry. Mit der Position moechte ich nicht mehr in Verlust gehen.' Steht auch als Punkt 2 in der Verlust-Analyse vom 27.07. (44 Prozent der Verlustsumme), wurde aber nie gebaut. Erst nach Backtest-Messung einschalten.",
+ "_hinweis_widerstand_exit": "E20 (Videos 02./03.08.2026). Werte: off = aus | on = Teilgewinn, sobald der Kurs die Widerstandszone der laufenden Gegenbewegung erreicht. Das ist Furkans zweites Fib-Raster: Neben dem Bein, aus dem die Kaufzonen kommen, fuehrt er ein zweites GEGEN die Richtung - dessen Golden Pocket ist der erste Widerstand auf dem Weg nach oben ('Die ersten wichtigen Bereiche in dieser Gegenbewegung wird natuerlich das Golden Pocket sein, 64.200 bis 64.300, da koennte Widerstand vorherrschen'). Diese Marke liegt unter dem letzten Hoch und wird deshalb frueher erreicht als high_exit. Hoechstens 2 Teilgewinne je Position. Erst nach Backtest-Messung einschalten - die Marken werden aber ab sofort im Chart und in state.json angezeigt.",
+ "_hinweis_plan_telegram": "true = Telegram schickt bei OFFENER Position den kompletten Plan: wo nachgekauft wird, wo Teilgewinne liegen, wo der Stop steht - alles auf einmal und als Limit-Order hinterlegbar. Die Nachricht kommt nur, wenn sich eine Marke aendert (Toleranz 0,25 Prozent), nicht bei jedem Lauf. Grund: Die Einzelsignale kommen nach Kerzenschluss und nennen einen Preis, den es dann oft nicht mehr gibt. Furkan arbeitet umgekehrt - er legt die Marken vorher fest und arbeitet sie ab. Gegenstueck zur Vorschau, die dasselbe fuer den Einstieg tut."
 }

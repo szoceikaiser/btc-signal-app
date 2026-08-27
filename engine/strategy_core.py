@@ -332,6 +332,34 @@ def daily_fib_zone(candles: list[Candle], pivot_n: int = 5,
     return fib_zones(imp) if imp is not None else None
 
 
+def gegen_zonen(candles: list[Candle], pivots: list[Pivot], long_side: bool,
+                k_atr: float = 2.0, min_pct: float = 0.03) -> Optional[FibZones]:
+    """Das ZWEITE Fib-Raster: das juengste signifikante Bein GEGEN die Handelsrichtung.
+
+    E20 (Furkan-Videos 02./03.08.2026, in den Frames sichtbar): Er fuehrt zwei Raster
+    gleichzeitig. Das Bein in Handelsrichtung liefert die Kaufzonen UNTER dem Kurs; das
+    Gegen-Bein — bei einem Long also die letzte Abwaertsbewegung — liefert die
+    Widerstandsmarken UEBER dem Kurs, an denen er Teilgewinne nimmt:
+
+        "Die ersten wichtigen Bereiche in dieser Gegenbewegung wird natuerlich das Golden
+         Pocket sein. 64.200 bis 64.300. Da koennte Widerstand vorherrschen. Idealerweise
+         kommen wir hier drueber und nehmen das raus." (03.08.2026, 3:00-3:16)
+
+    Unsere Engine hatte am Vorabend fuer dasselbe Bein 64.212-64.312 gerechnet — zwoelf
+    Dollar daneben. Sie sah die Zone also, benutzte sie nur nicht.
+
+    Die zurueckgegebenen Levels lesen sich fuer einen Long von unten nach oben:
+    level_05 < gp_upper (0.618) < gp_lower (0.65) < level_0786 < invalidation (= altes
+    Hoch, darueber ist der Widerstand weg). Bei einem Short spiegelbildlich.
+
+    Bewusst OHNE min_bein_pct: Diese Mindestlaenge gehoert zur Einstiegs-Seite (Abstand
+    zum Stop). Ein Gegen-Bein ist naturgemaess kleiner und dient nur der Orientierung.
+    """
+    imp = last_significant_impulse(candles, pivots, k_atr=k_atr, min_pct=min_pct,
+                                   nur_auf=not long_side)
+    return fib_zones(imp) if imp is not None else None
+
+
 # --------------------------------------------------- Order-Flow-Kompass
 
 
@@ -441,6 +469,7 @@ class Position:
     liq_entries: int = 0                     # Anzahl Konfluenz-Nachkaeufe an Liq-Zonen (E10.3)
     ziel_extrem: Optional[float] = None      # eingefrorene Zielreferenz nach dem 1. Teilgewinn (E18.3)
     be_aktiv: bool = False                   # Break-even-Stop scharf, seit die Position im Plus war (E19.3)
+    widerstand_exits: int = 0                # Anzahl Teilverkaeufe an Widerstaenden des Gegen-Beins (E20)
     # Zeitpunkt des letzten Stops (E13, cooldown_h). Gehoert BEWUSST NICHT in
     # _reset_position: Er ist die Erinnerung ZWISCHEN zwei Positionen und muss den
     # Positions-Reset ueberleben, sonst wuesste die Sperre nach dem Stop nichts mehr.
@@ -460,6 +489,7 @@ def _reset_position(pos: "Position") -> None:
     pos.liq_entries = 0
     pos.ziel_extrem = None
     pos.be_aktiv = False
+    pos.widerstand_exits = 0
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
@@ -523,6 +553,7 @@ LIQ_ZONE_MIN_MULT = 3.0    # Zone = Kerze mit mindestens 3x der mittleren Liquid
 # ich bei ueber 66.600 HIER UNTER DIESEM HOCH rausnehmen"). Er verkauft am Struktur-
 # Niveau, nicht am rechnerischen Fib-Ziel: Am alten Hoch sitzen die Kaeufer von damals,
 # die bei plus/minus null aussteigen wollen — dort staut sich Angebot.
+MAX_WIDERSTAND_EXITS = 2   # hoechstens so viele Teilverkaeufe am Gegen-Bein je Position (E20)
 MAX_HIGH_EXITS = 2         # hoechstens so viele Struktur-Teilverkaeufe je Position
 HIGH_EXIT_TOL = 0.005      # 0,5 % darunter reicht — vor der Masse raus
 
@@ -609,7 +640,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              min_stop_pct: float = 0.0,
              no_flip: bool = False, freeze_targets: bool = False,
              min_bein_pct: float = 0.0, bein_wahl: str = "juengstes",
-             be_im_plus: bool = False, bein_richtung: str = "auto") -> list[Signal]:
+             be_im_plus: bool = False, bein_richtung: str = "auto",
+             widerstand_exit: str = "off") -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -680,6 +712,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # ------------------------------------------- E19 (Furkan-Video 02.08.2026, Default aus)
     # min_bein_pct / bein_wahl: siehe last_significant_impulse — die Engine zeichnete Beine,
     #   die fuer ihren eigenen Mindest-Stopabstand zu klein sind (Median 4,0 %, noetig ~5,5 %).
+    # widerstand_exit (E20, Default aus): Teilgewinn am Golden Pocket des GEGEN-Beins —
+    #   also an der Widerstandszone, die Furkan im zweiten Fib-Raster fuehrt. Ergaenzt
+    #   high_exit (letztes Pivot-Hoch); die Widerstandszone liegt typischerweise DARUNTER
+    #   und wird damit frueher erreicht. Hoechstens MAX_WIDERSTAND_EXITS je Position.
     # bein_richtung="bias": Es wird nur ein Bein in der HANDELBAREN Richtung gesucht. Steht
     #   bias_short=false (live), sucht die Engine also ein Aufwaerts-Bein und ignoriert das
     #   juengere Abwaerts-Bein, das sie ohnehin nicht handeln duerfte. An 17 von 30 Tagen
@@ -1027,6 +1063,27 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     signals.append(Signal(cur.ts, lt, cur.close, LADDER_TRANCHE,
                                           f"Teilgewinn an Liquidationen: {grund}"))
                     pos.liq_exits += 1
+            # Teilverkauf an der Widerstandszone des Gegen-Beins (E20). Das ist die Marke,
+            # die Furkan als erste nennt, wenn eine Position im Plus laeuft — sie liegt
+            # unter dem alten Hoch und wird deshalb frueher erreicht als high_exit.
+            if widerstand_exit != "off" and pos.widerstand_exits < MAX_WIDERSTAND_EXITS \
+                    and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
+                    and _darf_teilverkaufen():
+                gz = gegen_zonen(candles, pivots, long_side, k_atr=k_atr)
+                if gz is not None:
+                    # Golden Pocket des Gegen-Beins; bei Long liegt gp_upper (0.618)
+                    # unter gp_lower (0.65) — die Zone selbst ist die Marke.
+                    lo, hi = sorted((gz.gp_upper, gz.gp_lower))
+                    erreicht = (cur.high >= lo) if long_side else (cur.low <= hi)
+                    # nur sinnvoll, wenn die Zone ueberhaupt vor uns liegt
+                    davor = (lo > cur.open) if long_side else (hi < cur.open)
+                    if erreicht and davor:
+                        wt = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
+                        signals.append(Signal(cur.ts, wt, lo if long_side else hi,
+                                              LADDER_TRANCHE,
+                                              f"Teilgewinn an der Widerstandszone {lo:.0f}-{hi:.0f} "
+                                              f"(Golden Pocket der Gegenbewegung)"))
+                        pos.widerstand_exits += 1
             # Teilverkauf am letzten Hoch (E10.2): Kurs laeuft an das letzte bestaetigte
             # Pivot-Hoch heran -> dort sitzt das Angebot, ein Stueck davor raus.
             if high_exit != "off" and pos.high_exits < MAX_HIGH_EXITS \

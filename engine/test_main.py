@@ -54,6 +54,9 @@ def test_run_engine_erzeugt_signal_und_dateien():
         assert abs(state["zones"]["invalidation"] - 100.0) < 0.01
         assert "ext1" in state["zones"]
         assert len(hist["signals"]) == 1
+        # E20: die Widerstandsmarken muessen im State stehen (Schluessel vorhanden, auch
+        # wenn im kleinen Testszenario kein Gegen-Bein erkennbar ist)
+        assert "widerstand" in state
 
 
 def test_zweiter_lauf_ist_idempotent():
@@ -381,3 +384,100 @@ def test_be_aktiv_ueberlebt_den_neustart():
     assert d["be_aktiv"] is True
     assert pos_from_state(d).be_aktiv is True
     assert pos_from_state({}).be_aktiv is False           # Altbestand ohne das Feld
+
+
+def test_widerstand_marken_liefert_die_zweite_zonenreihe():
+    """E20: Die Widerstandsmarken muessen im state landen, sonst kann weder der Chart
+    noch die Telegram-Nachricht sie zeigen."""
+    from strategy_core import Position
+    import test_strategy_core as tsc
+    cs = tsc._e20_pfad()
+    w = main.widerstand_marken(cs, {"pivot_n": 2, "k_atr": 2.0}, Position())
+    assert w is not None and w["richtung"] == "LONG"
+    assert w["bein_start"] == 130 and w["bein_ende"] == 120
+    assert w["gp_von"] < w["gp_bis"] < w["level_0786"] < w["ausbruch"] == 130
+    # ohne erkennbares Gegen-Bein: None statt Absturz
+    flach = [tsc.c(i, 100, 100.5, 99.5, 100) for i in range(20)]
+    assert main.widerstand_marken(flach, {"pivot_n": 2}, Position()) is None
+
+
+# ------------------------------------------- E20.2: Plan zur laufenden Position
+
+def _plan_szenario():
+    """Long-Position im Zustand CORE mit vollstaendigen Zonen."""
+    from strategy_core import FibZones, Impulse, Pivot, PosState, Position
+    import test_strategy_core as tsc
+    cs = tsc._e20_pfad_mit_neuem_hoch()
+    imp = Impulse(Pivot(4, 4, 98.0, "L"), Pivot(9, 9, 130.0, "H"))
+    z = FibZones(imp, level_05=114.0, gp_upper=110.2, gp_lower=109.2,
+                 level_0786=104.9, invalidation=98.0)
+    pos = Position(direction="LONG", state=PosState.CORE, zones=z, retrace_extreme=120.0,
+                   last_signal_ts=19, entry_ref=115.0, entry_pct=75)
+    fl = [FlowPoint(c.ts, 1000 + i, 0, 1e9, -0.0001) for i, c in enumerate(cs)]
+    return cs, fl, pos
+
+
+def test_plan_nennt_nachkauf_teilgewinn_und_stop():
+    cs, fl, pos = _plan_szenario()
+    p = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0}, pos)
+    assert p is not None and p["richtung"] == "LONG" and p["anteil_pct"] == 75
+    assert p["nachkauf"] and p["teilgewinn"] and p["stop"]["preis"] == 98.0
+    arten = [e["was"] for e in p["teilgewinn"]]
+    assert any("Ziel 1.0" in a for a in arten) and any("Ziel 1.618" in a for a in arten)
+    # bei geschlossener Position gibt es keinen Plan
+    from strategy_core import Position
+    assert main.positions_plan(cs, fl, {}, Position()) is None
+
+
+def test_plan_marken_stimmen_mit_der_engine_ueberein():
+    """Die wichtigste Prüfung: Was der Plan als Ziel 1.0 nennt, muss die Engine dort auch
+    ausloesen. Sonst legt Kaiser eine Order an einen Preis, den die App nie meldet."""
+    from strategy_core import SignalType, evaluate
+    import test_strategy_core as tsc
+    cs, fl, pos = _plan_szenario()
+    p = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0}, pos)
+    ziel = next(e["preis"] for e in p["teilgewinn"] if e["was"] == "Ziel 1.0")
+
+    # (a) Eine Kerze, die knapp UNTER der Marke bleibt, darf nichts ausloesen —
+    #     sonst haette der Plan zu hoch angesetzt.
+    import copy
+    zu_frueh = evaluate(cs + [tsc.c(20, 128, ziel * 0.995, 127, ziel * 0.994)],
+                        fl + [fl[-1]], copy.deepcopy(pos), pivot_n=2, k_atr=2.0,
+                        bias_short=False, tp_ladder=False, buy_ladder=False, high_exit="off")
+    assert not any(s.type == SignalType.TEILVERKAUF_1 for s in zu_frueh), \
+        "Engine verkauft schon unter der Marke, die der Plan nennt"
+
+    # (b) Eine Kerze, die die Marke erreicht, loest aus — UND zwar zu genau diesem Preis.
+    #     Der Preisvergleich ist der eigentliche Test: er faellt auch auf, wenn der Plan
+    #     zu hoch angesetzt haette.
+    sigs = evaluate(cs + [tsc.c(20, 128, ziel + 0.5, 127, ziel)], fl + [fl[-1]], pos,
+                    pivot_n=2, k_atr=2.0, bias_short=False, tp_ladder=False,
+                    buy_ladder=False, high_exit="off")
+    treffer = [s for s in sigs if s.type == SignalType.TEILVERKAUF_1]
+    assert treffer, "Plan nennt ein Ziel, das die Engine nicht ausloest"
+    assert abs(treffer[0].price - ziel) < 0.01, \
+        f"Plan nennt {ziel:.2f}, die Engine handelt {treffer[0].price:.2f}"
+
+
+def test_plan_nachricht_wird_nur_bei_aenderung_gesendet():
+    cs, fl, pos = _plan_szenario()
+    cfg = {"pivot_n": 2, "k_atr": 2.0}
+    p1 = main.positions_plan(cs, fl, cfg, pos)
+    assert main.plan_geaendert(None, p1) is True          # erster Plan -> senden
+    assert main.plan_geaendert(p1, p1) is False           # unveraendert -> schweigen
+    import copy
+    p2 = copy.deepcopy(p1)
+    p2["teilgewinn"][0]["preis"] = p2["teilgewinn"][0].get("preis", 100) * 1.02
+    assert main.plan_geaendert(p1, p2) is True            # 2 % verschoben -> senden
+    p3 = copy.deepcopy(p1)
+    if p3["teilgewinn"][0].get("preis"):
+        p3["teilgewinn"][0]["preis"] *= 1.0005            # 0,05 % -> Rauschen
+        assert main.plan_geaendert(p1, p3) is False
+
+
+def test_plan_nachricht_ist_lesbar():
+    from telegram_notify import format_plan
+    cs, fl, pos = _plan_szenario()
+    text = format_plan(main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0}, pos))
+    assert "PLAN" in text and "Nachkaufen:" in text and "Teilgewinne:" in text
+    assert "Stop" in text and "Limit-Order" in text
