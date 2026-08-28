@@ -1,9 +1,20 @@
 # Anleitung: Kostenlosen Coinalyze-API-Key holen und hinterlegen
 
-Coinalyze liefert uns **historisches Open Interest, Funding und echte Liquidationen**
-(aggregiert über die großen Börsen) — kostenlos. Damit sieht die Engine endlich, was
-Furkan sieht: welcher Dip hält und wann er kippt. Du machst das **einmal** im Browser,
-danach nutzt die Engine die Daten automatisch.
+Coinalyze liefert uns **historisches Open Interest, echte Liquidationen, die
+Futures-Nachfrage und das Long-Short-Verhältnis** (aggregiert über die großen Börsen) —
+kostenlos. Du machst das **einmal** im Browser, danach nutzt die Engine die Daten
+automatisch.
+
+> **Stand 28.07.2026:** Der Key ist eingerichtet und läuft. Die Futures-Nachfrage kam
+> als Letztes dazu (Endpunkt `ohlcv-history`, Felder `v` und `bv`) und schloss die letzte
+> Datenlücke des Projekts. Ehrliches Fazit der Messung: Die besseren Daten haben rund
+> 8–10 % der Signale entfernt und etwa einen Punkt Rendite gebracht — spürbar, aber klein.
+> Der große Nutzen von Coinalyze liegt woanders, nämlich bei den **Liquidationszonen für
+> den Einstieg** (`liq_entry="boost"`, live).
+>
+> Was die Datenquelle sonst noch hergibt, klopft der Workflow **Coinalyze-Test**
+> jederzeit neu ab (Actions → Coinalyze-Test → Run workflow). Ergebnis landet in
+> `site/data/coinalyze_probe.json`.
 
 **Goldene Regeln (aus Erfahrung):**
 - Den Key **kopieren, nicht abtippen** — ein Tippfehler und nichts funktioniert.

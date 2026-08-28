@@ -1,6 +1,21 @@
 # Etappenplan E9: Echte Order-Flow-Daten (Coinalyze) + intelligentes Dip-/Stop-Management
 
-Stand: 2026-07-24 · Status: **GEPLANT, Umsetzung beginnt** · Repo-getrackt (auch in Cowork verfügbar)
+Stand: 2026-07-24 · Repo-getrackt (auch in Cowork verfügbar)
+
+> **STATUS 28.07.2026: ABGESCHLOSSEN — und die Leitfrage ist beantwortet, aber anders als
+> erwartet.** Alle Datenlücken sind geschlossen: echtes OI und echte Liquidationen
+> (E9.1), seit E16 auch **Futures-CVD und Long-Short-Verhältnis** aus Coinalyze
+> (`ohlcv-history`, Felder `v`/`bv`). Die Engine ist nicht mehr blind.
+>
+> **Die These dieses Plans — „die Filter brachten nichts, weil die Daten fehlten" — hat
+> sich NICHT bestätigt.** Mit echten Futures-Daten gemessen: 8–10 % weniger Signale und
+> +0,4 bis +1,2 Punkte Rendite über das ganze Gitter. Ein kleiner, breiter Effekt, aber
+> keiner, der einen der neun gescheiterten Order-Flow-Filter rettet. Es lag an der
+> Übersetzung in feste Schwellenwerte, nicht am Material.
+>
+> Was aus den Daten tatsächlich Geld gemacht hat, ist die **Liquidations-Konfluenz beim
+> Einstieg** (`liq_entry="boost"`, live) — nicht die Muster-Erkennung.
+> Aktueller Gesamtstand und alle Messwerte: `docs/ETAPPENPLAN.md`, Abschnitte E12–E16.
 
 ## Warum (die Erkenntnisse aus der Diskussion mit Kaiser)
 

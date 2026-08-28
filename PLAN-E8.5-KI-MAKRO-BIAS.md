@@ -2,6 +2,19 @@
 
 Stand: 2026-07-24 · Status: **NUR ERKUNDET, NOCH NICHT GEBAUT** (kein Code angelegt).
 Kaiser hat die Umsetzung pausiert, um zuerst an etwas anderem weiterzuarbeiten.
+
+> **EINORDNUNG 28.07.2026: Das ist weiterhin die größte offene Lücke — inzwischen die
+> einzige große.** Furkans Ablauf hat vier Schritte; Schritt 1 (Makro-Richtung) ist der
+> einzige, den die Engine gar nicht hat. Bei uns ist er ein fester Schalter
+> (`bias_short=false`). Nach allen Messungen dieses Projekts ist die RICHTUNG der mit
+> Abstand größte Hebel: nur Long +41,5 % gegen Long+Short −0,9 %.
+>
+> Was inzwischen gegen eine schnelle Umsetzung spricht: Alles, was seither gemessen wurde,
+> deutet darauf hin, dass sich diskretionäre Einschätzung schlecht in feste Regeln
+> übersetzen lässt (neun gescheiterte Order-Flow-Filter, auch mit echten Daten). Ein
+> KI-Makro-Bias hätte dasselbe Problem — **und ließe sich nicht rückwirkend prüfen.**
+> Die in FURKAN-UPDATE-2026-07.md notierte Alternative (MVRV-Z als Richtungsgeber) wäre
+> backtestbar und deshalb der ehrlichere erste Versuch.
 Diese Datei hält den kompletten Denkstand fest, damit die Umsetzung später (auch in
 einer anderen Umgebung wie Cowork) ohne Neu-Recherche fortgesetzt werden kann.
 
