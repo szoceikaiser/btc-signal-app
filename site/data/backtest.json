@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-08-27T19:52:50Z",
- "zeitraum": "19.12.2025-27.08.2026",
+ "generated_at": "2026-08-28T05:34:55Z",
+ "zeitraum": "20.12.2025-28.08.2026",
  "variante": "NEU-LIVE +Mindest-Bein 5 %",
  "params": {
   "bias_long": true,
@@ -40,9 +40,9 @@
  "precision_pct": 38,
  "pnl": {
   "start": 10000.0,
-  "ende": 13791.75,
-  "rendite_pct": 37.92,
-  "buyhold_pct": -9.22,
+  "ende": 13765.43,
+  "rendite_pct": 37.65,
+  "buyhold_pct": -9.79,
   "trades": 98,
   "gewinn_trades": 68,
   "long_profit": 3693.74,
@@ -59,65 +59,74 @@
     "monat": "2025-12",
     "ende": 10091.58,
     "gewinn": 91.58,
-    "rendite_pct": 0.92
+    "rendite_pct": 0.92,
+    "btc_pct": -0.81
    },
    {
     "monat": "2026-01",
     "ende": 10686.81,
     "gewinn": 595.23,
-    "rendite_pct": 5.9
+    "rendite_pct": 5.9,
+    "btc_pct": -10.16
    },
    {
     "monat": "2026-02",
     "ende": 10598.39,
     "gewinn": -88.42,
-    "rendite_pct": -0.83
+    "rendite_pct": -0.83,
+    "btc_pct": -14.94
    },
    {
     "monat": "2026-03",
     "ende": 11257.63,
     "gewinn": 659.24,
-    "rendite_pct": 6.22
+    "rendite_pct": 6.22,
+    "btc_pct": 1.96
    },
    {
     "monat": "2026-04",
     "ende": 12589.38,
     "gewinn": 1331.75,
-    "rendite_pct": 11.83
+    "rendite_pct": 11.83,
+    "btc_pct": 11.81
    },
    {
     "monat": "2026-05",
     "ende": 12989.39,
     "gewinn": 400.01,
-    "rendite_pct": 3.18
+    "rendite_pct": 3.18,
+    "btc_pct": -3.5
    },
    {
     "monat": "2026-06",
     "ende": 13077.41,
     "gewinn": 88.01,
-    "rendite_pct": 0.68
+    "rendite_pct": 0.68,
+    "btc_pct": -20.43
    },
    {
     "monat": "2026-07",
     "ende": 13388.04,
     "gewinn": 310.63,
-    "rendite_pct": 2.38
+    "rendite_pct": 2.38,
+    "btc_pct": 7.27
    },
    {
     "monat": "2026-08",
-    "ende": 13791.75,
-    "gewinn": 403.71,
-    "rendite_pct": 3.02
+    "ende": 13765.43,
+    "gewinn": 377.4,
+    "rendite_pct": 2.82,
+    "btc_pct": 26.75
    }
   ],
-  "offene_position": 7148.59
+  "offene_position": 7122.28
  },
  "variante_ohne_flush": "MEINE Einstellung ohne Flush",
  "pnl_ohne_flush": {
   "start": 10000.0,
-  "ende": 12817.6,
-  "rendite_pct": 28.18,
-  "buyhold_pct": -9.22,
+  "ende": 12793.15,
+  "rendite_pct": 27.93,
+  "buyhold_pct": -9.79,
   "trades": 90,
   "gewinn_trades": 60,
   "long_profit": 2726.52,
@@ -134,57 +143,66 @@
     "monat": "2025-12",
     "ende": 10091.58,
     "gewinn": 91.58,
-    "rendite_pct": 0.92
+    "rendite_pct": 0.92,
+    "btc_pct": -0.81
    },
    {
     "monat": "2026-01",
     "ende": 10686.81,
     "gewinn": 595.23,
-    "rendite_pct": 5.9
+    "rendite_pct": 5.9,
+    "btc_pct": -10.16
    },
    {
     "monat": "2026-02",
     "ende": 10598.39,
     "gewinn": -88.42,
-    "rendite_pct": -0.83
+    "rendite_pct": -0.83,
+    "btc_pct": -14.94
    },
    {
     "monat": "2026-03",
     "ende": 11070.73,
     "gewinn": 472.33,
-    "rendite_pct": 4.46
+    "rendite_pct": 4.46,
+    "btc_pct": 1.96
    },
    {
     "monat": "2026-04",
     "ende": 12020.32,
     "gewinn": 949.59,
-    "rendite_pct": 8.58
+    "rendite_pct": 8.58,
+    "btc_pct": 11.81
    },
    {
     "monat": "2026-05",
     "ende": 12220.71,
     "gewinn": 200.39,
-    "rendite_pct": 1.67
+    "rendite_pct": 1.67,
+    "btc_pct": -3.5
    },
    {
     "monat": "2026-06",
     "ende": 12303.51,
     "gewinn": 82.81,
-    "rendite_pct": 0.68
+    "rendite_pct": 0.68,
+    "btc_pct": -20.43
    },
    {
     "monat": "2026-07",
     "ende": 12595.76,
     "gewinn": 292.25,
-    "rendite_pct": 2.38
+    "rendite_pct": 2.38,
+    "btc_pct": 7.27
    },
    {
     "monat": "2026-08",
-    "ende": 12817.6,
-    "gewinn": 221.84,
-    "rendite_pct": 1.76
+    "ende": 12793.15,
+    "gewinn": 197.39,
+    "rendite_pct": 1.57,
+    "btc_pct": 26.75
    }
   ],
-  "offene_position": 6643.67
+  "offene_position": 6619.22
  }
 }
