@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-08-28T11:32:15Z",
- "variante": "NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft",
+ "generated_at": "2026-08-28T11:56:07Z",
+ "variante": "LIVE-heute +Neustart mit Rest",
  "fenster": "20.12.2025-28.08.2026",
  "signals": [
   {
@@ -2064,17 +2064,7 @@
    "label": "TEILVERKAUF 1 (Extension 1.0)"
   },
   {
-   "ts": 1785096000000,
-   "type": "VERKAUF_REST",
-   "price": 65399.99,
-   "tranche_pct": 20,
-   "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
-   "stop_ref": null,
-   "tag": "",
-   "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
-  },
-  {
-   "ts": 1785110400000,
+   "ts": 1784808000000,
    "type": "KAUF_1",
    "price": 65028.075,
    "tranche_pct": 25,
@@ -2084,47 +2074,27 @@
    "label": "KAUF 1 (Teilposition am 0.5-Level)"
   },
   {
-   "ts": 1785124800000,
+   "ts": 1784822400000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 65221.99,
+   "price": 64846.94,
    "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 65600",
+   "reason": "Teilgewinn am letzten Hoch 64967",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1785139200000,
+   "ts": 1784836800000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 65100.79,
+   "price": 65098.97,
    "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 65600",
+   "reason": "Teilgewinn am letzten Hoch 64967",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1785168000000,
-   "type": "NACHKAUF",
-   "price": 64984.0,
-   "tranche_pct": 20,
-   "reason": "Konfluenz: Fib-Zone + Liquidationszone 64418 \u2014 aufstocken (NEUTRAL)",
-   "stop_ref": 63100.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1785168000000,
-   "type": "KAUF_2",
-   "price": 64573.0493,
-   "tranche_pct": 50,
-   "reason": "Golden Pocket 64450-64573 + Bestaetigung (NEUTRAL)",
-   "stop_ref": 63100.0,
-   "tag": "",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1785182400000,
+   "ts": 1784894400000,
    "type": "NACHKAUF",
    "price": 63925.2161,
    "tranche_pct": 25,
@@ -2134,11 +2104,21 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1785211200000,
+   "ts": 1784937600000,
    "type": "NACHKAUF",
-   "price": 63505.99,
+   "price": 64085.36,
    "tranche_pct": 20,
-   "reason": "Konfluenz: Fib-Zone + Liquidationszone 63059 \u2014 aufstocken (NEUTRAL)",
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 63740 \u2014 aufstocken (UNGESUNDER_ABVERKAUF)",
+   "stop_ref": 63100.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1784952000000,
+   "type": "NACHKAUF",
+   "price": 64003.2,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 63740 \u2014 aufstocken (NEUTRAL)",
    "stop_ref": 63100.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
@@ -2406,7 +2386,7 @@
   {
    "ts": 1787904000000,
    "type": "WARNUNG",
-   "price": 79714.33,
+   "price": 79569.86,
    "tranche_pct": 0,
    "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
    "stop_ref": null,
