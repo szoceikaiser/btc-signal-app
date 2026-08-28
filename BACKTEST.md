@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 20.12.2025-28.08.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2300 4h-Kerzen geladen · Stand: 2026-08-28 07:50 UTC
+**Voll-Daten-Fenster: 20.12.2025-28.08.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2301 4h-Kerzen geladen · Stand: 2026-08-28 10:46 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -12,55 +12,60 @@ Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch v
 
 **Lesehilfe zu den Namen:** `LIVE` ist die Abkuerzung fuer *nur Long + Kaufleiter + Flush core* — der Flush steckt also drin. Jede Zeile, die mit `LIVE +…` beginnt, baut darauf auf. Die Zeile *+Kaufleiter* ist dagegen OHNE Flush.
 
-| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale |
-|---|---|---|---|---|---|---|
-| nur Long (Basis) | 52% | 41% | +10.9 % | -5.5 % | 100 % | 100 |
-| +Kaufleiter | 52% | 40% | +17.9 % | -6.3 % | 100 % | 122 |
-| +Flush core | 57% | 31% | +22.1 % | -12.1 % | 100 % | 178 |
-| LIVE: nur Long +Kaufleiter +Flush core | 57% | 31% | +28.5 % | -12.7 % | 100 % | 204 |
-| +Kaufleiter +Bed.Stop | 52% | 39% | +16.0 % | -7.0 % | 100 % | 133 |
-| LIVE +Rest-Freigabe | 62% | 34% | +22.1 % | -13.0 % | 100 % | 210 |
-| LIVE +Stop nachziehen | 62% | 33% | +28.3 % | -12.3 % | 100 % | 209 |
-| LIVE +Stop nachziehen +Rest-Freigabe | 62% | 34% | +22.6 % | -12.6 % | 100 % | 212 |
-| LIVE +Stop +Liq-Kaskade | 67% | 32% | +19.1 % | -11.5 % | 100 % | 257 |
-| LIVE +Stop +Liq-Zonen | 76% | 33% | +19.2 % | -11.3 % | 100 % | 292 |
-| LIVE +Stop +Liq beides | 76% | 33% | +18.8 % | -11.2 % | 100 % | 294 |
-| MEINE Einstellung ohne Flush | 71% | 43% | +27.9 % | -7.5 % | 100 % | 219 |
-| LIVE +Stop +Liq-Konfluenz aufstocken | 62% | 33% | +31.2 % | -12.3 % | 100 % | 258 |
-| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | 57% | 38% | +27.4 % | -13.0 % | 100 % | 186 |
-| LIVE +Stop +Verkauf am letzten Hoch | 71% | 33% | +24.8 % | -11.9 % | 100 % | 269 |
-| LIVE +Stop +Verkauf am schwachen Hoch | 67% | 32% | +24.5 % | -11.7 % | 100 % | 256 |
-| LIVE +Stop, 60 % Einsatz (40 % Reserve) | 62% | 33% | +17.6 % | -8.2 % | 60 % | 209 |
-| LIVE +Stop, 50 % Einsatz (50 % Reserve) | 62% | 33% | +14.5 % | -6.8 % | 50 % | 209 |
-| LIVE +Stop +Warnlicht (kein Kauf in ungesunden Abverkauf) | 62% | 33% | +26.3 % | -12.3 % | 100 % | 206 |
-| LIVE +Stop +Flow-Pruefung am 0.5-Level | 57% | 33% | +31.0 % | -12.1 % | 100 % | 198 |
-| LIVE +Stop +Sperre 48 h nach Stop | 57% | 34% | +31.4 % | -8.5 % | 100 % | 180 |
-| LIVE +Stop +Mindest-Stopabstand 2 % | 52% | 40% | +30.9 % | -7.0 % | 100 % | 133 |
-| LIVE +Stop +Sperre 48 h +Mindestabstand 2 % | 52% | 43% | +24.2 % | -7.0 % | 100 % | 124 |
-| LIVE +Stop +alle vier neuen Hebel | 43% | 39% | +18.1 % | -6.9 % | 100 % | 112 |
-| LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz | 52% | 41% | +34.7 % | -6.9 % | 100 % | 164 |
-| LIVE +Stop +Sperre 48 h +Liq-Konfluenz | 57% | 33% | +35.8 % | -9.3 % | 100 % | 221 |
-| NEU-LIVE +Verkauf unter dem letzten Hoch | 62% | 41% | +35.6 % | -7.5 % | 100 % | 202 |
-| NEU-LIVE +Verkauf an den Liquidations-Niveaus | 67% | 40% | +28.5 % | -7.8 % | 100 % | 214 |
-| NEU-LIVE +Verkauf unter dem Hoch +an den Liq-Niveaus | 67% | 41% | +25.6 % | -7.9 % | 100 % | 252 |
-| NEU-LIVE +kein Gegengeschaeft je Kerze | 57% | 37% | +31.5 % | -7.5 % | 100 % | 200 |
-| NEU-LIVE +Ziele festhalten | 62% | 41% | +29.9 % | -7.5 % | 100 % | 209 |
-| NEU-LIVE +kein Gegengeschaeft +Ziele festhalten | 57% | 37% | +34.1 % | -7.5 % | 100 % | 208 |
-| NEU-LIVE +Mindest-Bein 5 % | 71% | 38% | +37.6 % | -6.9 % | 100 % | 241 |
-| NEU-LIVE +groesstes Bein | 43% | 61% | +17.6 % | -7.3 % | 100 % | 103 |
-| NEU-LIVE +Mindest-Bein 5 % +groesstes Bein | 43% | 61% | +17.6 % | -7.3 % | 100 % | 103 |
-| NEU-LIVE +Bein in Handelsrichtung | 62% | 35% | +32.8 % | -8.9 % | 100 % | 238 |
-| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | 52% | 33% | +38.1 % | -8.2 % | 100 % | 227 |
-| NEU-LIVE +Break-even im Plus | 52% | 31% | +16.0 % | -5.3 % | 100 % | 214 |
-| NEU-LIVE +Bein-Wahl +Break-even im Plus | 33% | 57% | +7.0 % | -8.1 % | 100 % | 144 |
-| LIVE +Widerstand des Gegen-Beins | 71% | 37% | +30.1 % | -6.2 % | 100 % | 271 |
-| LIVE +Widerstand statt Verkauf am letzten Hoch | 67% | 37% | +32.7 % | -6.8 % | 100 % | 227 |
-| LIVE +Rest halten | 33% | 45% | +18.8 % | -6.9 % | 100 % | 84 |
-| LIVE +Rest halten +Neustart mit Rest | 71% | 38% | +39.0 % | -8.2 % | 100 % | 235 **<-- beste** |
-| LIVE +Neustart mit Rest (ohne Halten) | 71% | 38% | +38.6 % | -6.9 % | 100 % | 239 |
-| NEU-LIVE +1D-Ebene als zweiter Zonensatz | 52% | 28% | +23.1 % | -17.6 % | 100 % | 255 |
-| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | 52% | 31% | +26.2 % | -17.0 % | 100 % | 231 |
-| Long+Short (Ref) | 38% | 39% | -2.3 % | -11.9 % | 100 % | 96 |
+**Gegengeschaefte** (E25, Kaiser 28.08.2026) = Anzahl der 4h-Kerzen, in denen gleichzeitig aufgestockt UND teilverkauft wurde, meist zum selben Preis. An der Rendite ist das kaum abzulesen — der Backtest handelt beide Seiten zum exakten Signalpreis, netto bleibt die Tranchen-Differenz minus zwei Gebuehren. In der Praxis ist so ein Paar aber nicht ausfuehrbar: zwei Limit-Orders zum selben Preis heben sich auf, und die Telegram-Nachrichten widersprechen sich. Die Spalte misst also Umsetzbarkeit, nicht Gewinn. Der Schalter dagegen heisst `no_flip`.
+
+| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale | Gegen-
+geschaefte |
+|---|---|---|---|---|---|---|---|
+| nur Long (Basis) | 52% | 41% | +10.8 % | -5.5 % | 100 % | 100 | 2 |
+| +Kaufleiter | 52% | 40% | +17.8 % | -6.3 % | 100 % | 122 | 2 |
+| +Flush core | 57% | 31% | +22.0 % | -12.1 % | 100 % | 178 | 2 |
+| LIVE: nur Long +Kaufleiter +Flush core | 57% | 31% | +28.4 % | -12.7 % | 100 % | 204 | 2 |
+| +Kaufleiter +Bed.Stop | 52% | 39% | +15.9 % | -7.0 % | 100 % | 133 | 2 |
+| LIVE +Rest-Freigabe | 62% | 34% | +21.9 % | -13.0 % | 100 % | 210 | 2 |
+| LIVE +Stop nachziehen | 62% | 33% | +28.2 % | -12.3 % | 100 % | 209 | 2 |
+| LIVE +Stop nachziehen +Rest-Freigabe | 62% | 34% | +22.5 % | -12.6 % | 100 % | 212 | 2 |
+| LIVE +Stop +Liq-Kaskade | 67% | 32% | +19.1 % | -11.5 % | 100 % | 257 | 8 |
+| LIVE +Stop +Liq-Zonen | 76% | 33% | +19.1 % | -11.3 % | 100 % | 292 | 24 |
+| LIVE +Stop +Liq beides | 76% | 33% | +18.8 % | -11.2 % | 100 % | 294 | 26 |
+| MEINE Einstellung ohne Flush | 71% | 43% | +27.6 % | -7.5 % | 100 % | 219 | 14 |
+| LIVE +Stop +Liq-Konfluenz aufstocken | 62% | 33% | +30.9 % | -12.3 % | 100 % | 258 | 4 |
+| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | 57% | 38% | +27.3 % | -13.0 % | 100 % | 186 | 1 |
+| LIVE +Stop +Verkauf am letzten Hoch | 71% | 33% | +24.7 % | -11.9 % | 100 % | 269 | 18 |
+| LIVE +Stop +Verkauf am schwachen Hoch | 67% | 32% | +24.4 % | -11.7 % | 100 % | 256 | 8 |
+| LIVE +Stop, 60 % Einsatz (40 % Reserve) | 62% | 33% | +17.5 % | -8.2 % | 60 % | 209 | 2 |
+| LIVE +Stop, 50 % Einsatz (50 % Reserve) | 62% | 33% | +14.5 % | -6.8 % | 50 % | 209 | 2 |
+| LIVE +Stop +Warnlicht (kein Kauf in ungesunden Abverkauf) | 62% | 33% | +26.1 % | -12.3 % | 100 % | 206 | 2 |
+| LIVE +Stop +Flow-Pruefung am 0.5-Level | 57% | 33% | +30.9 % | -12.1 % | 100 % | 198 | 1 |
+| LIVE +Stop +Sperre 48 h nach Stop | 57% | 34% | +31.3 % | -8.5 % | 100 % | 180 | 2 |
+| LIVE +Stop +Mindest-Stopabstand 2 % | 52% | 40% | +30.8 % | -7.0 % | 100 % | 133 | 0 |
+| LIVE +Stop +Sperre 48 h +Mindestabstand 2 % | 52% | 43% | +24.1 % | -7.0 % | 100 % | 124 | 0 |
+| LIVE +Stop +alle vier neuen Hebel | 43% | 39% | +17.9 % | -6.9 % | 100 % | 112 | 0 |
+| LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz | 52% | 41% | +34.4 % | -6.9 % | 100 % | 164 | 1 |
+| LIVE +Stop +Sperre 48 h +Liq-Konfluenz | 57% | 33% | +35.5 % | -9.3 % | 100 % | 221 | 4 |
+| NEU-LIVE +Verkauf unter dem letzten Hoch | 62% | 41% | +35.4 % | -7.5 % | 100 % | 202 | 17 |
+| NEU-LIVE +Verkauf an den Liquidations-Niveaus | 67% | 40% | +28.3 % | -7.8 % | 100 % | 214 | 18 |
+| NEU-LIVE +Verkauf unter dem Hoch +an den Liq-Niveaus | 67% | 41% | +25.4 % | -7.9 % | 100 % | 252 | 25 |
+| NEU-LIVE +kein Gegengeschaeft je Kerze | 57% | 37% | +31.3 % | -7.5 % | 100 % | 200 | 0 |
+| NEU-LIVE +Ziele festhalten | 62% | 41% | +29.7 % | -7.5 % | 100 % | 209 | 17 |
+| NEU-LIVE +kein Gegengeschaeft +Ziele festhalten | 57% | 37% | +33.8 % | -7.5 % | 100 % | 208 | 0 |
+| NEU-LIVE +Mindest-Bein 5 % | 71% | 38% | +37.3 % | -6.9 % | 100 % | 241 | 16 |
+| NEU-LIVE +groesstes Bein | 43% | 61% | +17.6 % | -7.3 % | 100 % | 103 | 3 |
+| NEU-LIVE +Mindest-Bein 5 % +groesstes Bein | 43% | 61% | +17.6 % | -7.3 % | 100 % | 103 | 3 |
+| NEU-LIVE +Bein in Handelsrichtung | 62% | 35% | +32.5 % | -8.9 % | 100 % | 238 | 17 |
+| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | 52% | 33% | +37.9 % | -8.2 % | 100 % | 227 | 14 |
+| NEU-LIVE +Break-even im Plus | 52% | 31% | +15.8 % | -5.3 % | 100 % | 214 | 26 |
+| NEU-LIVE +Bein-Wahl +Break-even im Plus | 33% | 57% | +7.0 % | -8.1 % | 100 % | 144 | 15 |
+| LIVE +Widerstand des Gegen-Beins | 71% | 37% | +30.0 % | -6.2 % | 100 % | 271 | 16 |
+| LIVE +Widerstand statt Verkauf am letzten Hoch | 67% | 37% | +32.5 % | -6.8 % | 100 % | 227 | 3 |
+| LIVE +Rest halten | 33% | 45% | +18.8 % | -6.9 % | 100 % | 84 | 4 |
+| LIVE +Rest halten +Neustart mit Rest | 71% | 38% | +38.8 % | -8.2 % | 100 % | 235 | 17 **<-- beste** |
+| LIVE +Neustart mit Rest (ohne Halten) | 71% | 38% | +38.4 % | -6.9 % | 100 % | 239 | 16 |
+| NEU-LIVE +1D-Ebene als zweiter Zonensatz | 52% | 28% | +22.9 % | -17.6 % | 100 % | 255 | 15 |
+| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | 52% | 31% | +26.0 % | -17.0 % | 100 % | 231 | 15 |
+| NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft | 67% | 34% | +34.2 % | -7.1 % | 100 % | 240 | 0 |
+| NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft +Ziele festhalten | 67% | 34% | +27.7 % | -7.1 % | 100 % | 221 | 0 |
+| Long+Short (Ref) | 38% | 39% | -2.4 % | -11.9 % | 100 % | 96 | 0 |
 
 ## Beste Kombination (nach Rendite): LIVE +Rest halten +Neustart mit Rest
 
@@ -71,7 +76,7 @@ Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch v
 
 ## P&L-Simulation (beste Kombination) — getrennt nach Richtung
 
-Start 10.000 € -> **13,901 €** (+39.0 %) · Buy&Hold im Fenster: -9.9 % · Gebuehr 0.1 %/Order, kein Hebel.
+Start 10.000 € -> **13,875 €** (+38.8 %) · Buy&Hold im Fenster: -10.2 % · Gebuehr 0.1 %/Order, kein Hebel.
 
 - **LONG-Trades:** +3,836 € · 92 Abschluesse, 70 im Gewinn
 - **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
@@ -94,7 +99,7 @@ Links die Live-Einstellung (*NEU-LIVE +Mindest-Bein 5 %*), rechts dieselbe Einst
 | 2026-05 | +400 € | +3.2 % | +200 € | +1.7 % |
 | 2026-06 | +88 € | +0.7 % | +83 € | +0.7 % |
 | 2026-07 | +311 € | +2.4 % | +292 € | +2.4 % |
-| 2026-08 | +369 € | +2.8 % | +190 € | +1.5 % |
+| 2026-08 | +344 € | +2.6 % | +167 € | +1.3 % |
 
 Monate im Plus: **8 von 9** (live) gegen **8 von 9** (ohne Flush).
 
@@ -114,9 +119,9 @@ Dieselben Monate, jetzt neben der Bitcoin-Bewegung. **Aufwaerts-Beteiligung** = 
 | 2026-05 | -3.5 % | +3.2 % | — |
 | 2026-06 | -20.4 % | +0.7 % | — |
 | 2026-07 | +7.3 % | +2.4 % | 33 % |
-| 2026-08 | +26.6 % | +2.8 % | 10 % |
+| 2026-08 | +26.2 % | +2.6 % | 10 % |
 
-**Aufwaerts-Beteiligung: 49 %** — in den 4 steigenden Monaten legte Bitcoin zusammen +47.6 % zu, die Engine +23.2 %.
+**Aufwaerts-Beteiligung: 49 %** — in den 4 steigenden Monaten legte Bitcoin zusammen +47.2 % zu, die Engine +23.0 %.
 
 **Abwaerts-Beteiligung: -20 %** — in den 5 fallenden Monaten verlor Bitcoin zusammen -49.8 %, die Engine +9.9 %.
 
@@ -130,8 +135,8 @@ Die meisten Kauf- und Teilgewinn-Signale nennen ein **Fib-Level**, das die Kerze
 
 | Abrechnung | Rendite | max. Rueckgang |
 |---|---|---|
-| **Limit-Order lag vorher dort** (zum genannten Level) | **+37.6 %** | -6.9 % |
-| **erst nach der Nachricht reagiert** (zum Kerzenschluss) | **+36.1 %** | -6.9 % |
+| **Limit-Order lag vorher dort** (zum genannten Level) | **+37.3 %** | -6.9 % |
+| **erst nach der Nachricht reagiert** (zum Kerzenschluss) | **+35.8 %** | -6.9 % |
 | Unterschied | **+1.5 Punkte** | |
 
 Betroffen sind 66 von 241 Signalen — bei den uebrigen ist der genannte Preis ohnehin der Kerzenschluss (Stop, Restverkauf, Flush-Einstieg, Kaufleiter). Bei den betroffenen liegt der Kerzenschluss im Median **0.42 %** vom genannten Level entfernt.
@@ -142,14 +147,14 @@ Betroffen sind 66 von 241 Signalen — bei den uebrigen ist der genannte Preis o
 
 ## Echte Futures-Daten: was bringen sie?
 
-Coinalyze liefert seit E16 auch das Taker-Kaufvolumen des Futures-Marktes (2002 Punkte) — damit hat die Engine erstmals ein echtes Futures-CVD. Vorher war der entsprechende Zweig in `classify_pattern` toter Code und Muster 2 (Derivate-Pump) lief ueber Ersatzmerkmale.
+Coinalyze liefert seit E16 auch das Taker-Kaufvolumen des Futures-Marktes (2003 Punkte) — damit hat die Engine erstmals ein echtes Futures-CVD. Vorher war der entsprechende Zweig in `classify_pattern` toter Code und Muster 2 (Derivate-Pump) lief ueber Ersatzmerkmale.
 
 Beide Zeilen: Variante *NEU-LIVE +Mindest-Bein 5 %*, dieselben Kerzen, derselbe Zeitraum. Der einzige Unterschied sind die Daten.
 
 | Datenlage | Recall | Praez. | Rendite | max. Rueckgang | Signale |
 |---|---|---|---|---|---|
-| ohne Futures-CVD (Stand bisher) | 67% | 38% | +37.2 % | -6.9 % | 247 |
-| **mit echtem Futures-CVD** | 71% | 38% | **+37.6 %** | -6.9 % | 241 |
+| ohne Futures-CVD (Stand bisher) | 67% | 38% | +37.0 % | -6.9 % | 247 |
+| **mit echtem Futures-CVD** | 71% | 38% | **+37.3 %** | -6.9 % | 241 |
 
 **6 Signale Unterschied** — die echten Daten erkennen den Derivate-Pump an anderen Stellen als die Naeherung. Ob das hilft, sagt die Rendite-Spalte.
 
@@ -174,69 +179,71 @@ Im langen Fenster handelte Furkan an 20 Kauf- und 23 Verkaufstagen.
 
 ## Robustheitspruefung: Fenster halbiert
 
-Warum: Oben werden 47 Varianten gegen EIN Zeitfenster verglichen. Die beste von vielen sieht immer besser aus als sie ist — wie der Beste von 47 Muenzwerfern. Deshalb laeuft hier jede Variante noch einmal getrennt in zwei Haelften. **Liegt dieselbe Variante in beiden Haelften vorne, ist der Vorteil vermutlich echt. Kippt die Rangfolge, war es Zufall.**
+Warum: Oben werden 49 Varianten gegen EIN Zeitfenster verglichen. Die beste von vielen sieht immer besser aus als sie ist — wie der Beste von 49 Muenzwerfern. Deshalb laeuft hier jede Variante noch einmal getrennt in zwei Haelften. **Liegt dieselbe Variante in beiden Haelften vorne, ist der Vorteil vermutlich echt. Kippt die Rangfolge, war es Zufall.**
 
 Haelfte 1: 20.12.2025–25.04.2026 · Haelfte 2: 25.04.2026–28.08.2026. Jede Haelfte ist nur halb so lang und damit fuer sich zappeliger — auf die Rangfolge schauen, nicht auf die einzelne Zahl.
 
 | Variante | Rendite H1 | Platz H1 | Rendite H2 | Platz H2 |
 |---|---|---|---|---|
-| nur Long (Basis) | +9.4 % | 45. | +1.4 % | 18. |
-| +Kaufleiter | +16.0 % | 41. | +1.6 % | 17. |
-| +Flush core | +32.9 % | 12. | -8.1 % | 45. |
-| LIVE: nur Long +Kaufleiter +Flush core | +39.5 % | 1. | -7.9 % | 42. |
-| +Kaufleiter +Bed.Stop | +12.6 % | 43. | +3.0 % | 14. |
-| LIVE +Rest-Freigabe | +34.7 % | 7. | -9.4 % | 47. |
-| LIVE +Stop nachziehen | +38.1 % | 4. | -7.1 % | 39. |
-| LIVE +Stop nachziehen +Rest-Freigabe | +34.7 % | 8. | -9.0 % | 46. |
-| LIVE +Stop +Liq-Kaskade | +28.3 % | 22. | -7.2 % | 41. |
-| LIVE +Stop +Liq-Zonen | +29.6 % | 18. | -8.1 % | 44. |
-| LIVE +Stop +Liq beides | +29.2 % | 19. | -8.1 % | 43. |
-| MEINE Einstellung ohne Flush | +20.7 % | 38. | +6.0 % | 8. |
-| LIVE +Stop +Liq-Konfluenz aufstocken | +38.4 % | 3. | -5.2 % | 33. |
-| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | +36.2 % | 5. | -6.4 % | 36. |
-| LIVE +Stop +Verkauf am letzten Hoch | +33.8 % | 10. | -6.8 % | 38. |
-| LIVE +Stop +Verkauf am schwachen Hoch | +33.5 % | 11. | -6.7 % | 37. |
-| LIVE +Stop, 60 % Einsatz (40 % Reserve) | +23.6 % | 32. | -4.9 % | 31. |
-| LIVE +Stop, 50 % Einsatz (50 % Reserve) | +19.4 % | 40. | -4.1 % | 30. |
-| LIVE +Stop +Warnlicht (kein Kauf in ungesunden Abverkauf) | +35.9 % | 6. | -7.1 % | 40. |
-| LIVE +Stop +Flow-Pruefung am 0.5-Level | +38.6 % | 2. | -5.5 % | 34. |
-| LIVE +Stop +Sperre 48 h nach Stop | +32.5 % | 14. | -0.8 % | 25. |
-| LIVE +Stop +Mindest-Stopabstand 2 % | +31.5 % | 15. | -0.5 % | 22. |
-| LIVE +Stop +Sperre 48 h +Mindestabstand 2 % | +24.8 % | 31. | -0.5 % | 23. |
-| LIVE +Stop +alle vier neuen Hebel | +25.4 % | 30. | -5.9 % | 35. |
-| LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz | +30.4 % | 17. | +3.3 % | 11. |
-| LIVE +Stop +Sperre 48 h +Liq-Konfluenz | +34.4 % | 9. | +1.1 % | 19. |
-| NEU-LIVE +Verkauf unter dem letzten Hoch | +31.5 % | 16. | +3.1 % | 13. |
-| NEU-LIVE +Verkauf an den Liquidations-Niveaus | +28.9 % | 20. | -0.3 % | 21. |
-| NEU-LIVE +Verkauf unter dem Hoch +an den Liq-Niveaus | +25.9 % | 29. | -0.3 % | 20. |
-| NEU-LIVE +kein Gegengeschaeft je Kerze | +28.4 % | 21. | +2.5 % | 15. |
-| NEU-LIVE +Ziele festhalten | +21.2 % | 37. | +3.9 % | 10. |
-| NEU-LIVE +kein Gegengeschaeft +Ziele festhalten | +27.5 % | 23. | +3.2 % | 12. |
-| NEU-LIVE +Mindest-Bein 5 % | +26.4 % | 27. | +8.9 % | 6. |
-| NEU-LIVE +groesstes Bein | +21.4 % | 35. | -3.2 % | 27. |
-| NEU-LIVE +Mindest-Bein 5 % +groesstes Bein | +21.4 % | 36. | -3.2 % | 28. |
-| NEU-LIVE +Bein in Handelsrichtung | +26.6 % | 26. | +4.9 % | 9. |
-| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | +26.9 % | 25. | +8.9 % | 7. |
-| NEU-LIVE +Break-even im Plus | +13.3 % | 42. | +2.4 % | 16. |
-| NEU-LIVE +Bein-Wahl +Break-even im Plus | +11.4 % | 44. | -3.9 % | 29. |
-| LIVE +Widerstand des Gegen-Beins | +19.5 % | 39. | +8.9 % | 5. |
-| LIVE +Widerstand statt Verkauf am letzten Hoch | +21.5 % | 34. | +9.2 % | 4. |
-| LIVE +Rest halten | +7.4 % | 46. | +14.1 % | 2. |
-| LIVE +Rest halten +Neustart mit Rest | +22.2 % | 33. | +14.4 % | 1. |
-| LIVE +Neustart mit Rest (ohne Halten) | +26.4 % | 28. | +9.7 % | 3. |
-| NEU-LIVE +1D-Ebene als zweiter Zonensatz | +27.0 % | 24. | -3.0 % | 26. |
-| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | +32.8 % | 13. | -4.9 % | 32. |
-| Long+Short (Ref) | +1.8 % | 47. | -0.7 % | 24. |
+| nur Long (Basis) | +9.4 % | 47. | +1.3 % | 20. |
+| +Kaufleiter | +16.0 % | 43. | +1.5 % | 19. |
+| +Flush core | +32.9 % | 12. | -8.2 % | 47. |
+| LIVE: nur Long +Kaufleiter +Flush core | +39.5 % | 1. | -8.0 % | 44. |
+| +Kaufleiter +Bed.Stop | +12.6 % | 45. | +2.9 % | 16. |
+| LIVE +Rest-Freigabe | +34.7 % | 7. | -9.5 % | 49. |
+| LIVE +Stop nachziehen | +38.1 % | 4. | -7.2 % | 41. |
+| LIVE +Stop nachziehen +Rest-Freigabe | +34.7 % | 8. | -9.1 % | 48. |
+| LIVE +Stop +Liq-Kaskade | +28.3 % | 22. | -7.2 % | 43. |
+| LIVE +Stop +Liq-Zonen | +29.6 % | 18. | -8.1 % | 46. |
+| LIVE +Stop +Liq beides | +29.2 % | 19. | -8.1 % | 45. |
+| MEINE Einstellung ohne Flush | +20.7 % | 40. | +5.8 % | 10. |
+| LIVE +Stop +Liq-Konfluenz aufstocken | +38.4 % | 3. | -5.4 % | 35. |
+| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | +36.2 % | 5. | -6.5 % | 38. |
+| LIVE +Stop +Verkauf am letzten Hoch | +33.8 % | 10. | -6.8 % | 40. |
+| LIVE +Stop +Verkauf am schwachen Hoch | +33.5 % | 11. | -6.8 % | 39. |
+| LIVE +Stop, 60 % Einsatz (40 % Reserve) | +23.6 % | 32. | -5.0 % | 33. |
+| LIVE +Stop, 50 % Einsatz (50 % Reserve) | +19.4 % | 42. | -4.1 % | 32. |
+| LIVE +Stop +Warnlicht (kein Kauf in ungesunden Abverkauf) | +35.9 % | 6. | -7.2 % | 42. |
+| LIVE +Stop +Flow-Pruefung am 0.5-Level | +38.6 % | 2. | -5.6 % | 36. |
+| LIVE +Stop +Sperre 48 h nach Stop | +32.5 % | 14. | -0.9 % | 27. |
+| LIVE +Stop +Mindest-Stopabstand 2 % | +31.5 % | 15. | -0.5 % | 24. |
+| LIVE +Stop +Sperre 48 h +Mindestabstand 2 % | +24.8 % | 31. | -0.5 % | 25. |
+| LIVE +Stop +alle vier neuen Hebel | +25.4 % | 30. | -6.0 % | 37. |
+| LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz | +30.4 % | 17. | +3.0 % | 13. |
+| LIVE +Stop +Sperre 48 h +Liq-Konfluenz | +34.4 % | 9. | +0.9 % | 21. |
+| NEU-LIVE +Verkauf unter dem letzten Hoch | +31.5 % | 16. | +3.0 % | 15. |
+| NEU-LIVE +Verkauf an den Liquidations-Niveaus | +28.9 % | 20. | -0.5 % | 23. |
+| NEU-LIVE +Verkauf unter dem Hoch +an den Liq-Niveaus | +25.9 % | 29. | -0.4 % | 22. |
+| NEU-LIVE +kein Gegengeschaeft je Kerze | +28.4 % | 21. | +2.3 % | 17. |
+| NEU-LIVE +Ziele festhalten | +21.2 % | 39. | +3.7 % | 12. |
+| NEU-LIVE +kein Gegengeschaeft +Ziele festhalten | +27.5 % | 23. | +3.0 % | 14. |
+| NEU-LIVE +Mindest-Bein 5 % | +26.4 % | 27. | +8.7 % | 7. |
+| NEU-LIVE +groesstes Bein | +21.4 % | 37. | -3.2 % | 28. |
+| NEU-LIVE +Mindest-Bein 5 % +groesstes Bein | +21.4 % | 38. | -3.2 % | 29. |
+| NEU-LIVE +Bein in Handelsrichtung | +26.6 % | 26. | +4.7 % | 11. |
+| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | +26.9 % | 25. | +8.7 % | 8. |
+| NEU-LIVE +Break-even im Plus | +13.3 % | 44. | +2.3 % | 18. |
+| NEU-LIVE +Bein-Wahl +Break-even im Plus | +11.4 % | 46. | -3.9 % | 31. |
+| LIVE +Widerstand des Gegen-Beins | +19.5 % | 41. | +8.8 % | 6. |
+| LIVE +Widerstand statt Verkauf am letzten Hoch | +21.5 % | 36. | +9.0 % | 5. |
+| LIVE +Rest halten | +7.4 % | 48. | +14.1 % | 2. |
+| LIVE +Rest halten +Neustart mit Rest | +22.2 % | 35. | +14.2 % | 1. |
+| LIVE +Neustart mit Rest (ohne Halten) | +26.4 % | 28. | +9.5 % | 3. |
+| NEU-LIVE +1D-Ebene als zweiter Zonensatz | +27.0 % | 24. | -3.2 % | 30. |
+| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | +32.8 % | 13. | -5.1 % | 34. |
+| NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft | +23.1 % | 33. | +9.0 % | 4. |
+| NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft +Ziele festhalten | +22.3 % | 34. | +8.0 % | 9. |
+| Long+Short (Ref) | +1.8 % | 49. | -0.8 % | 26. |
 
 **In BEIDEN Haelften unter den besten 5:** keine einzige Variante
 
-**Wie viel davon waere blosser Zufall?** Bei 47 Varianten und je 5 Plaetzen liegt der Erwartungswert bei reinem Zufall bei **0.5** Varianten. Gemessen: **0**. Das ist nicht mehr als der Zufall ohnehin liefert — die Rangfolge oben ist damit KEIN Beleg. Dann nur den groben Hebeln trauen (Richtung, Kaufleiter, Flush) und die Feinheiten weglassen.
+**Wie viel davon waere blosser Zufall?** Bei 49 Varianten und je 5 Plaetzen liegt der Erwartungswert bei reinem Zufall bei **0.5** Varianten. Gemessen: **0**. Das ist nicht mehr als der Zufall ohnehin liefert — die Rangfolge oben ist damit KEIN Beleg. Dann nur den groben Hebeln trauen (Richtung, Kaufleiter, Flush) und die Feinheiten weglassen.
 
 Unabhaengig davon belastbar ist der **maximale Rueckgang**: Er haengt an der Zahl und der Qualitaet der Positionen, nicht daran, welche einzelnen Trades gut liefen. Wo zwei Varianten aehnliche Rendite haben, ist die mit dem kleineren Rueckgang die verlaesslichere Wahl — auch wenn ihre Platzierung schwankt.
 
 ## Einschraenkungen
 
-- Open Interest + Liquidationen: **echt von Coinalyze** — 1503 OI-Punkte, 1504 Liq-Punkte im Zeitraum. Muster 4 (Kapitulation) aktiv.
+- Open Interest + Liquidationen: **echt von Coinalyze** — 1504 OI-Punkte, 1505 Liq-Punkte im Zeitraum. Muster 4 (Kapitulation) aktiv.
   (4h-Reichweite von Coinalyze deckt evtl. nicht bis Sep'25 zurueck; aeltere Kerzen dann OI neutral.)
 - Spot-CVD real (Binance Vision), Funding real (Kraken, sofern Historie reicht).
 - Kaisers Liste enthielt Duplikate (laut Kaiser evtl. Versehen) -> dedupliziert.
