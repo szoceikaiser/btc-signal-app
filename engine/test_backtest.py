@@ -565,3 +565,58 @@ def test_tabellenkopf_und_trennlinie_haben_gleich_viele_spalten():
         f"Kopfzeile hat {n_kopf} Spalten, Trennlinie {n_trenn} — die Tabelle bricht.")
     for pflicht in ("Auf-", "Ab-", "Gegen-", "Rendite", "max. Rueckgang"):
         assert pflicht in kopf, f"Spalte '{pflicht}' fehlt in der Kopfzeile"
+
+
+# --------------------------- E27: Rueckgang lueckenlos, nicht nur an Signalen
+
+def test_rueckgang_zwischen_den_signalen_wird_mitgemessen():
+    """Der Fehler, der bis 28.08.2026 in jeder Rueckgangszahl steckte.
+
+    Szenario: einmal gekauft, danach faellt der Kurs um 40 % und erholt sich wieder —
+    ohne dass in dieser Zeit ein einziges Signal faellt. Die alte Rechnung wertete nur
+    Signalzeitpunkte aus und meldete deshalb 0 % Rueckgang, obwohl das Konto zeitweise
+    30 % im Minus stand (75 % investiert x 40 % Kursverlust).
+    """
+    from strategy_core import Candle
+    H4 = 4 * 3600 * 1000
+    start = 1_767_225_600_000
+    cs = [Candle(start, 100, 100, 100, 100),
+          Candle(start + H4, 100, 100, 100, 100),
+          Candle(start + 2 * H4, 100, 100, 60, 100),      # tiefe Kerze OHNE Signal
+          Candle(start + 3 * H4, 100, 100, 100, 100)]
+    sigs = [{"ts": cs[0].ts, "type": "KAUF_2", "price": 100.0, "tranche_pct": 75}]
+    p = backtest.simulate(sigs, cs, start_ms=start, fee=0.0)
+    assert p["max_drawdown_pct"] < -25, (
+        f"Rueckgang zwischen den Signalen fehlt: {p['max_drawdown_pct']} %")
+    assert abs(p["max_drawdown_pct"] - (-30.0)) < 0.5
+    assert abs(p["ende"] - 10000.0) < 0.01, "der Endstand darf sich nicht geaendert haben"
+
+
+def test_rueckgang_nutzt_das_kerzentief_nicht_den_schluss():
+    """Gegenprobe zur Gegenprobe: ein Docht nach unten zaehlt, auch wenn die Kerze
+    freundlich schliesst. Genau das sieht man auf dem Konto — der Schlusskurs ist die
+    geschoente Zahl."""
+    from strategy_core import Candle
+    H4 = 4 * 3600 * 1000
+    start = 1_767_225_600_000
+    cs = [Candle(start, 100, 100, 100, 100),
+          Candle(start + H4, 100, 101, 80, 100),          # Docht auf 80, Schluss 100
+          Candle(start + 2 * H4, 100, 100, 100, 100)]
+    sigs = [{"ts": cs[0].ts, "type": "KAUF_2", "price": 100.0, "tranche_pct": 100}]
+    p = backtest.simulate(sigs, cs, start_ms=start, fee=0.0)
+    assert abs(p["max_drawdown_pct"] - (-20.0)) < 0.5, (
+        f"Kerzentief nicht beruecksichtigt: {p['max_drawdown_pct']} %")
+
+
+def test_rueckgang_short_nutzt_das_kerzenhoch():
+    """Spiegelbild: bei einer Short-Position ist das Kerzenhoch der schlimmste Moment."""
+    from strategy_core import Candle
+    H4 = 4 * 3600 * 1000
+    start = 1_767_225_600_000
+    cs = [Candle(start, 100, 100, 100, 100),
+          Candle(start + H4, 100, 120, 99, 100),          # Docht nach OBEN
+          Candle(start + 2 * H4, 100, 100, 100, 100)]
+    sigs = [{"ts": cs[0].ts, "type": "SHORT_2", "price": 100.0, "tranche_pct": 100}]
+    p = backtest.simulate(sigs, cs, start_ms=start, fee=0.0)
+    assert p["max_drawdown_pct"] < -15, (
+        f"Kerzenhoch bei Short nicht beruecksichtigt: {p['max_drawdown_pct']} %")

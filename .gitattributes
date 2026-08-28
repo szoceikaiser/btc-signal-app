@@ -1,0 +1,18 @@
+# Zeilenenden festnageln (2026-08-28).
+#
+# Das Problem, das diese Datei loest: Der GitHub-Workflow schreibt BACKTEST.md und die
+# JSON-Dateien mit LF, Kaisers Windows-Checkout wandelte sie in CRLF. Git sah danach
+# jede Zeile als geaendert — ein Pull war nur nach "git checkout -- <alle Datendateien>"
+# moeglich, und der Diff einer Ein-Zeilen-Aenderung umfasste 446 Zeilen.
+#
+# * text=auto normalisiert im Repository auf LF; die zweite Zeile sorgt dafuer, dass
+# auch die Arbeitskopie LF behaelt, statt beim Auschecken auf CRLF umgestellt zu werden.
+* text=auto eol=lf
+
+# Binaerdateien nie anfassen.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.mp4 binary
+*.ico binary

@@ -544,6 +544,7 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     long_profit = short_profit = 0.0                 # Gewinn/Verlust je Richtung (E9.6)
     long_trades = long_wins = short_trades = short_wins = 0
     equity = []
+    stand = [(None, start_capital, 0.0, 0.0, 0.0)]     # E27, siehe max_rueckgang()
 
     def equity_now(price):
         return cash + units * price + s_units * (s_avg - price)
@@ -650,6 +651,9 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                 cash += pnl
                 s_units -= cover
         equity.append({"ts": s["ts"], "equity": round(equity_now(p), 2)})
+        # E27: Positionsstand nach diesem Signal merken. Damit laesst sich der Kontostand
+        # spaeter zu JEDEM Kerzenzeitpunkt rekonstruieren, nicht nur an Signalzeitpunkten.
+        stand.append((s["ts"], cash, units, s_units, s_avg))
 
     last_price = candles[-1].close
     end_equity = equity_now(last_price)
@@ -664,12 +668,34 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                        if _letztes_eq else 0.0,
                        "btc_pct": round((last_price / _letzter_preis - 1) * 100, 2)
                        if _letzter_preis else 0.0})
-    # Maximaler Rueckgang vom jeweiligen Hoch (gemessen an den Signalzeitpunkten +
-    # Endstand). Das ist die Kennzahl, auf die eine Kapital-Reserve einzahlt.
+    # --- Maximaler Rueckgang, lueckenlos (E27) --------------------------------------
+    # BIS 28.08.2026 FALSCH GEMESSEN: Der Rueckgang wurde nur an den Signalzeitpunkten
+    # ausgewertet. Zwischen zwei Signalen koennen Wochen liegen — was das Konto in dieser
+    # Zeit an Buchverlust erlebt, tauchte nirgends auf. Jede Rueckgangszahl im Bericht war
+    # dadurch zu freundlich, und mehrere Entscheidungen (zuletzt gegen `rest_halten`)
+    # stuetzten sich genau darauf.
+    #
+    # Jetzt wird jede Kerze ausgewertet, und zwar an ihrem UNGUENSTIGSTEN Punkt: bei einer
+    # Long-Position das Tief, bei einer Short-Position das Hoch. Das ist der Stand, den
+    # man auf dem Konto tatsaechlich gesehen haette — nicht der geschoente Schlusskurs.
     peak_eq, max_dd = start_capital, 0.0
-    for e in [x["equity"] for x in equity] + [end_equity]:
-        peak_eq = max(peak_eq, e)
-        max_dd = min(max_dd, e / peak_eq - 1.0)
+    _si = 0
+    _cash, _u, _su, _sa = stand[0][1], stand[0][2], stand[0][3], stand[0][4]
+    for c in candles:
+        if c.ts < hs0:
+            continue
+        while _si + 1 < len(stand) and stand[_si + 1][0] is not None \
+                and stand[_si + 1][0] <= c.ts:
+            _si += 1
+            _cash, _u, _su, _sa = stand[_si][1], stand[_si][2], stand[_si][3], stand[_si][4]
+        # beide Extreme der Kerze pruefen; der schlechtere zaehlt
+        for _p in (c.low, c.high):
+            e = _cash + _u * _p + _su * (_sa - _p)
+            peak_eq = max(peak_eq, e)
+            max_dd = min(max_dd, e / peak_eq - 1.0)
+    # Endstand nicht vergessen (letzte Kerze zum Schluss bewertet)
+    peak_eq = max(peak_eq, end_equity)
+    max_dd = min(max_dd, end_equity / peak_eq - 1.0)
     hs = start_ms if start_ms is not None else START_MS
     hold_start = next(c for c in candles if c.ts >= hs).close
     return {
@@ -1199,6 +1225,11 @@ def main():
         "",
         "Alle n=5. Rendite = Gesamt-Simulation. **max. Rueckgang** = groesster Einbruch vom "
         "jeweiligen Hoch (Drawdown) — je naeher an 0, desto ruhiger der Verlauf. "
+        "**Seit 28.08.2026 (E27) lueckenlos gemessen:** an jeder Kerze und an ihrem "
+        "unguenstigsten Punkt (Tief bei Long, Hoch bei Short). Vorher zaehlten nur die "
+        "Signalzeitpunkte — was das Konto zwischen zwei Signalen an Buchverlust erlebte, "
+        "fehlte. **Alle Rueckgangszahlen aus Berichten vor diesem Datum sind deshalb zu "
+        "freundlich und nicht mit den heutigen vergleichbar.** "
         "**Einsatz** = wie viel des Kapitals je Position hoechstens investiert wird "
         "(100 % = keine Reserve, 60 % = 40 % Pulver bleibt trocken; Furkan-Update Juli 2026). "
         "Recall = Aehnlichkeit zu Furkans Terminen IM Fenster, KEIN Gewinn.",
