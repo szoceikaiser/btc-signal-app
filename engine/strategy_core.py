@@ -332,6 +332,20 @@ def daily_fib_zone(candles: list[Candle], pivot_n: int = 5,
     return fib_zones(imp) if imp is not None else None
 
 
+def gleiches_bein(a: Optional[Impulse], b: Optional[Impulse]) -> bool:
+    """Zeichnen zwei Ebenen dasselbe Bein? (E23)
+
+    Wenn die 1D-Ebene denselben Impuls liefert wie die 4h-Ebene, waere ein zweiter
+    Einstiegsversuch reine Doppelarbeit — die Zonen waeren identisch. Verglichen werden
+    die Preise, nicht die Zeitstempel: dieselbe Struktur hat auf 4h und 1D verschiedene
+    Kerzen-ts, aber dieselben Hoch-/Tiefpunkte.
+    """
+    if a is None or b is None:
+        return False
+    return (abs(a.start.price - b.start.price) < 0.01
+            and abs(a.end.price - b.end.price) < 0.01)
+
+
 def gegen_zonen(candles: list[Candle], pivots: list[Pivot], long_side: bool,
                 k_atr: float = 2.0, min_pct: float = 0.03) -> Optional[FibZones]:
     """Das ZWEITE Fib-Raster: das juengste signifikante Bein GEGEN die Handelsrichtung.
@@ -643,7 +657,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              be_im_plus: bool = False, bein_richtung: str = "auto",
              widerstand_exit: str = "off",
              rest_halten: bool = False,
-             neustart_mit_rest: bool = False) -> list[Signal]:
+             neustart_mit_rest: bool = False,
+             zonen_1d: bool = False) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -780,6 +795,20 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     _dzone = daily_fib_zone(candles, min_bein_pct=min_bein_pct,
                             bein_wahl=bein_wahl) if confluence else None
 
+    # E23: die 1D-Ebene als EIGENER Zonensatz (STRATEGIE.md 4.1 Punkt 4: "beide Ebenen
+    # ueberwachen"). Der _dzone-Aufruf darueber bleibt bewusst unveraendert — er gehoert
+    # zu confluence (1D als FILTER auf 4h-Setups) und ist bereits gemessen.
+    # Hier werden pivot_n und k_atr aus den Live-Werten durchgereicht, damit beide Ebenen
+    # dieselbe Signifikanz-Schwelle benutzen. 66 Tage Kontext (400 4h-Kerzen, main.py)
+    # reichen: nachgerechnet ueber 394 Tage ist das 1D-Bein aus 66 Tagen in 100 % der
+    # Faelle identisch mit dem aus voller Historie (docs/PRUEFUNG-1D-EBENE.md).
+    _imp_1d = None
+    if zonen_1d:
+        _z1d = daily_fib_zone(candles, pivot_n=pivot_n, k_atr=k_atr,
+                              min_bein_pct=min_bein_pct, bein_wahl=bein_wahl)
+        if _z1d is not None:
+            _imp_1d = _z1d.impulse
+
     def _trend_ok(long_side: bool) -> bool:
         if not trend_filter or _trend is None or _trend[1] is None:
             return True                                  # unbekannt -> nicht blockieren
@@ -849,9 +878,15 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # --- Einstiegs-Logik: Referenz-Impuls noetig
     # Als Funktion, weil sie an ZWEI Stellen gebraucht wird: aus FLAT (Normalfall) und —
     # wenn neustart_mit_rest an ist — bei laufendem Rest nach den Teilgewinnen (E21).
-    def _versuche_einstieg() -> None:
-        z = fib_zones(imp)
-        if imp.up and bias_long and pattern != Pattern.DERIVATE_PUMP and _healthy(True):
+    def _versuche_einstieg(imp_arg: Optional[Impulse] = None) -> None:
+        # imp_arg=None -> der 4h-Referenz-Impuls (Normalfall, Verhalten wie bisher).
+        # Mit Impuls -> der zweite Durchlauf fuer die 1D-Ebene (E23); die Signal-Gruende
+        # bekommen dann " [1D]" angehaengt, damit im Bericht und in Telegram sichtbar
+        # ist, welche Ebene den Einstieg gestellt hat.
+        _imp = imp if imp_arg is None else imp_arg
+        _mark = "" if imp_arg is None else " [1D]"
+        z = fib_zones(_imp)
+        if _imp.up and bias_long and pattern != Pattern.DERIVATE_PUMP and _healthy(True):
             if (cur.low <= z.level_05 and cur.low > z.gp_upper
                     and _trend_ok(True) and _confluence_ok(cur.low)
                     and _liq_entry_ok(cur.low, True)
@@ -859,7 +894,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 pos.direction, pos.state, pos.zones = "LONG", PosState.T1, z
                 pos.retrace_extreme = cur.low
                 signals.append(Signal(cur.ts, SignalType.KAUF_1, z.level_05, TRANCHEN["T1"],
-                                      f"0.5-Retracement des Impulses {imp.start.price:.0f}->{imp.end.price:.0f}",
+                                      f"0.5-Retracement des Impulses {_imp.start.price:.0f}->{_imp.end.price:.0f}{_mark}",
                                       stop_ref=z.invalidation))
             elif z.gp_lower <= cur.low <= z.gp_upper:
                 if (_confirm_long() and _trend_ok(True) and _confluence_ok(cur.low)
@@ -869,7 +904,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     pos.retrace_extreme = cur.low
                     signals.append(Signal(cur.ts, SignalType.KAUF_2, z.gp_upper,
                                           TRANCHEN["T1"] + TRANCHEN["CORE"],
-                                          f"Golden Pocket {z.gp_lower:.0f}-{z.gp_upper:.0f} + Bestaetigung ({pattern.name})",
+                                          f"Golden Pocket {z.gp_lower:.0f}-{z.gp_upper:.0f} + Bestaetigung ({pattern.name}){_mark}",
                                           stop_ref=z.invalidation))
             elif (flush_entry != "off" and cur.low < z.gp_lower
                   and cur.close > z.invalidation):
@@ -884,9 +919,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     pos.direction, pos.state, pos.zones = "LONG", st, z
                     pos.retrace_extreme = cur.low
                     signals.append(Signal(cur.ts, sig_t, cur.close, tr,
-                                          f"Capitulation: GP durchschlagen (Tief {cur.low:.0f}), Schluss ueber Invalidierung ({pattern.name})",
+                                          f"Capitulation: GP durchschlagen (Tief {cur.low:.0f}), Schluss ueber Invalidierung ({pattern.name}){_mark}",
                                           stop_ref=z.invalidation, tag="FLUSH"))
-        elif ((not imp.up) and bias_short and pattern != Pattern.CAPITULATION_RESET
+        elif ((not _imp.up) and bias_short and pattern != Pattern.CAPITULATION_RESET
                 and _healthy(False)):
             if (cur.high >= z.level_05 and cur.high < z.gp_upper
                     and _trend_ok(False) and _confluence_ok(cur.high)
@@ -895,7 +930,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 pos.direction, pos.state, pos.zones = "SHORT", PosState.T1, z
                 pos.retrace_extreme = cur.high
                 signals.append(Signal(cur.ts, SignalType.SHORT_1, z.level_05, TRANCHEN["T1"],
-                                      f"0.5-Retracement des Abwaerts-Impulses {imp.start.price:.0f}->{imp.end.price:.0f}",
+                                      f"0.5-Retracement des Abwaerts-Impulses {_imp.start.price:.0f}->{_imp.end.price:.0f}{_mark}",
                                       stop_ref=z.invalidation))
             elif z.gp_upper <= cur.high <= z.gp_lower:  # Short: 0.65 liegt OBEN
                 if (_confirm_short() and _trend_ok(False) and _confluence_ok(cur.high)
@@ -905,7 +940,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     pos.retrace_extreme = cur.high
                     signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
                                           TRANCHEN["T1"] + TRANCHEN["CORE"],
-                                          f"Golden Pocket {z.gp_upper:.0f}-{z.gp_lower:.0f} + Bestaetigung ({pattern.name})",
+                                          f"Golden Pocket {z.gp_upper:.0f}-{z.gp_lower:.0f} + Bestaetigung ({pattern.name}){_mark}",
                                           stop_ref=z.invalidation))
             elif (flush_entry != "off" and cur.high > z.gp_lower
                   and cur.close < z.invalidation):
@@ -920,11 +955,20 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     pos.direction, pos.state, pos.zones = "SHORT", st, z
                     pos.retrace_extreme = cur.high
                     signals.append(Signal(cur.ts, sig_t, cur.close, tr,
-                                          f"Squeeze: GP durchschlagen (Hoch {cur.high:.0f}), Schluss unter Invalidierung ({pattern.name})",
+                                          f"Squeeze: GP durchschlagen (Hoch {cur.high:.0f}), Schluss unter Invalidierung ({pattern.name}){_mark}",
                                           stop_ref=z.invalidation, tag="FLUSH"))
 
-    if pos.state == PosState.FLAT and imp is not None and _cooldown_ok():
-        _versuche_einstieg()
+    # Bei zonen_1d=False ist _imp_1d immer None — die Bedingung ist dann Wort fuer Wort
+    # die alte, das Verhalten bitgleich.
+    if pos.state == PosState.FLAT and (imp is not None or _imp_1d is not None) \
+            and _cooldown_ok():
+        if imp is not None:
+            _versuche_einstieg()
+        # E23: erst wenn die 4h-Ebene nichts hergibt, bekommt die 1D-Ebene ihren Versuch.
+        # 4h behaelt also den Vorrang; 1D ergaenzt, ersetzt nicht.
+        if (pos.state == PosState.FLAT and _imp_1d is not None
+                and not gleiches_bein(imp, _imp_1d)):
+            _versuche_einstieg(_imp_1d)
 
     # --- Positions-Management
     elif pos.state != PosState.FLAT and pos.zones is not None:
@@ -1215,10 +1259,14 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # Einstands-Fortschreibung — sonst wuerde die neue Tranche gleich wieder
     # ueberschrieben, wenn der alte Bestand zurueckgesetzt wird.
     if (neustart_mit_rest and pos.state in (PosState.TP1, PosState.TP2)
-            and imp is not None and _cooldown_ok()):
+            and (imp is not None or _imp_1d is not None) and _cooldown_ok()):
         _bestand = (pos.entry_ref, pos.entry_pct)
         _vorher = pos.state
-        _versuche_einstieg()
+        if imp is not None:
+            _versuche_einstieg()
+        if (pos.state == _vorher and _imp_1d is not None
+                and not gleiches_bein(imp, _imp_1d)):
+            _versuche_einstieg(_imp_1d)          # E23, auch hier 4h zuerst
         if pos.state != _vorher:
             # Einstieg hat stattgefunden: neuer Zyklus, aber der alte Bestand bleibt im
             # Durchschnitts-Einstand — die neue Tranche wird gleich dazugerechnet.

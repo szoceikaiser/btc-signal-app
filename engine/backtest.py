@@ -67,7 +67,7 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct",
              "no_flip", "freeze_targets",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
-             "rest_halten", "neustart_mit_rest")
+             "rest_halten", "neustart_mit_rest", "zonen_1d")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, trend_ema=50, strict_confirm=False, confluence=False,
@@ -77,7 +77,7 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              no_flip=False, freeze_targets=False,
              min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
              bein_richtung="auto", widerstand_exit="off",
-             rest_halten=False, neustart_mit_rest=False)
+             rest_halten=False, neustart_mit_rest=False, zonen_1d=False)
 
 
 def V(label, panel=False, **kw):
@@ -303,6 +303,19 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       neustart_mit_rest=True),
+    # E23: die 1D-Ebene als zweiter Zonensatz (STRATEGIE.md 4.1 Punkt 4). Die erste Zeile
+    # ist die Frage, die Kaiser gestellt hat: bringt die uebergeordnete Ebene zusaetzlich
+    # etwas, wenn sie NEBEN der 4h-Ebene laeuft? Die zweite ist die Gegenprobe — dieselbe
+    # Einstellung ohne das Mindest-Bein, damit man sieht, ob ein Effekt von der 1D-Ebene
+    # kommt oder nur davon, dass die 4h-Ebene durch das 5-%-Sieb kaum noch Beine liefert.
+    V("NEU-LIVE +1D-Ebene als zweiter Zonensatz",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      zonen_1d=True),
+    V("NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on",
+      zonen_1d=True),
     V("Long+Short (Ref)"),
 ]
 

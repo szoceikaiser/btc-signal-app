@@ -202,6 +202,7 @@ EVAL_DEFAULTS = {
     "min_bein_pct": 0.0, "bein_wahl": "juengstes", "be_im_plus": False,
     "bein_richtung": "auto", "widerstand_exit": "off",
     "rest_halten": False, "neustart_mit_rest": False,
+    "zonen_1d": False,
 }
 
 

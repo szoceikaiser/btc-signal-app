@@ -8,7 +8,8 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            PosState, Position, SignalType, classify_pattern,
                            daily_fib_zone, daily_trend, ema, evaluate, fib_zones,
                            find_pivots, in_liq_zone, last_significant_impulse,
-                           liq_cascade, liq_levels, next_pivot_beyond, resample_daily)
+                           gleiches_bein, liq_cascade, liq_levels, next_pivot_beyond,
+                           resample_daily)
 
 DAY_MS = 86_400_000
 H4_MS = 4 * 3600 * 1000
@@ -1421,3 +1422,115 @@ def test_neustart_mit_rest_erlaubt_einen_einstieg_waehrend_der_rest_laeuft():
     assert mit.entry_pct == 100
     assert mit.entry_ref is not None and 100 < mit.entry_ref < 110
     assert mit.tp_rungs == 0 and mit.high_exits == 0   # neuer Zyklus faengt bei null an
+
+
+# ---------------------------------------- E23: die 1D-Ebene als zweiter Zonensatz
+
+def _zwei_ebenen_serie():
+    """Die beiden Ebenen zeichnen VERSCHIEDENE Beine — der Fall, um den es geht.
+
+    Grosses Bein 100->140 liegt zurueck; danach ein Ruecklauf auf 120 und eine kurze
+    Erholung auf 128. Auf 4h ist das Pivot-Tief bei 120 nach 5 Kerzen (20 h) bestaetigt,
+    das juengste 4h-Bein ist also 120->128. Auf 1D braucht dasselbe Tief 5 TAGE — die
+    1D-Ebene fuehrt deshalb noch das grosse Bein 100->140. Genau diese Traegheit ist der
+    Grund, warum Furkan beide Ebenen im Chart hat (STRATEGIE.md 4.1 Punkt 4).
+
+    Die letzte Kerze faellt mit einem Docht auf 119: das trifft das 1D-0.5-Level (120,04),
+    liegt aber unter allen 4h-Zonen (0.5=124,01 / GP 123,01-122,73) und schliesst unter
+    deren Invalidierung — auf der 4h-Ebene passiert also nichts.
+    """
+    tage = ([100] * 6 + [112, 126, 140] + [140] * 6 + [134, 128, 122, 120] + [124, 128] + [123])
+    cs, ts = [], 0
+    for i, p in enumerate(tage):
+        vor = tage[i - 1] if i else p
+        for k in range(6):                                   # 6 4h-Kerzen je Tag
+            x = vor + (p - vor) * (k + 1) / 6
+            cs.append(c(ts, x, x * 1.002, x * 0.998, x))
+            ts += H4_MS
+    l = cs[-1]
+    cs[-1] = c(l.ts, l.open, l.high, 119.0, 119.5)
+    flow = [FlowPoint(x.ts, 100 + i, 100, 1000, -0.0001) for i, x in enumerate(cs)]
+    return cs, flow
+
+
+def test_zonen_1d_die_ebenen_zeichnen_wirklich_verschiedene_beine():
+    """Bestandssicherung fuer das Szenario selbst.
+
+    Ohne diese Pruefung koennte der Test unten gruen bleiben, obwohl beide Ebenen
+    dasselbe Bein sehen — dann waere gar nicht gemessen, was er zu messen vorgibt.
+    """
+    cs, _ = _zwei_ebenen_serie()
+    imp4 = last_significant_impulse(cs, find_pivots(cs, n=5), k_atr=2.0)
+    z1d = daily_fib_zone(cs, pivot_n=5, k_atr=2.0)
+    assert imp4 is not None and z1d is not None
+    assert not gleiches_bein(imp4, z1d.impulse), "Szenario taugt nicht: beide Ebenen gleich"
+    assert abs(imp4.start.price - 120) < 1 and abs(imp4.end.price - 128) < 1
+    assert abs(z1d.impulse.start.price - 100) < 1 and abs(z1d.impulse.end.price - 140) < 1
+
+
+def test_zonen_1d_liefert_einstieg_den_die_4h_ebene_verpasst():
+    cs, flow = _zwei_ebenen_serie()
+
+    pos_aus = Position()
+    assert evaluate(cs, flow, pos_aus, bias_short=False, zonen_1d=False) == [], \
+        "ohne Schalter darf hier nichts passieren (Verhalten wie bisher)"
+    assert pos_aus.state == PosState.FLAT
+
+    pos_an = Position()
+    sig = evaluate(cs, flow, pos_an, bias_short=False, zonen_1d=True)
+    assert len(sig) == 1 and sig[0].type == SignalType.KAUF_1
+    assert abs(sig[0].price - 120.04) < 0.05, f"0.5-Level der 1D-Ebene erwartet, kam {sig[0].price}"
+    assert "[1D]" in sig[0].reason, "Signal muss als 1D-Einstieg erkennbar sein"
+    # Die Position uebernimmt die 1D-Zonen — sonst saesse der Stop auf der falschen Ebene
+    assert pos_an.zones is not None and abs(pos_an.zones.invalidation - 99.8) < 0.5
+    assert abs(sig[0].stop_ref - 99.8) < 0.5
+
+
+def test_zonen_1d_gilt_nicht_als_umgehung_der_sicherungen():
+    """Gegenprobe: der 1D-Einstieg durchlaeuft dieselben Pruefungen wie ein 4h-Einstieg.
+
+    Der Stop-Abstand betraegt hier (120,04-99,80)/120,04 = 16,9 %. Mit einem
+    Mindestabstand von 20 % muss der Einstieg unterbleiben — sonst waere die neue Ebene
+    ein Schleichweg an min_stop_pct vorbei.
+    """
+    cs, flow = _zwei_ebenen_serie()
+    pos = Position()
+    assert evaluate(cs, flow, pos, bias_short=False, zonen_1d=True, min_stop_pct=0.20) == []
+    assert pos.state == PosState.FLAT
+    # Gegenprobe zur Gegenprobe: knapp unter dem echten Abstand greift er wieder
+    pos2 = Position()
+    assert evaluate(cs, flow, pos2, bias_short=False, zonen_1d=True, min_stop_pct=0.15) != []
+
+
+def test_zonen_1d_kein_doppelsignal_wenn_beide_ebenen_dasselbe_bein_sehen():
+    """Zeichnen 4h und 1D denselben Impuls, darf der Schalter nichts aendern."""
+    tage = [100] * 6 + [112, 126, 140] + [140] * 6 + [136, 130, 124, 119]
+    cs, ts = [], 0
+    for i, p in enumerate(tage):
+        vor = tage[i - 1] if i else p
+        for k in range(6):
+            x = vor + (p - vor) * (k + 1) / 6
+            cs.append(c(ts, x, x * 1.002, x * 0.998, x))
+            ts += H4_MS
+    l = cs[-1]
+    cs[-1] = c(l.ts, l.open, l.high, 119.0, 119.5)
+    flow = [FlowPoint(x.ts, 100 + i, 100, 1000, -0.0001) for i, x in enumerate(cs)]
+
+    imp4 = last_significant_impulse(cs, find_pivots(cs, n=5), k_atr=2.0)
+    z1d = daily_fib_zone(cs, pivot_n=5, k_atr=2.0)
+    assert gleiches_bein(imp4, z1d.impulse), "Szenario taugt nicht: die Ebenen sind verschieden"
+
+    ohne = evaluate(cs, flow, Position(), bias_short=False, zonen_1d=False)
+    mit = evaluate(cs, flow, Position(), bias_short=False, zonen_1d=True)
+    assert len(ohne) == 1 and len(mit) == 1, f"Doppelsignal: {len(ohne)} vs {len(mit)}"
+    assert [s.reason for s in mit] == [s.reason for s in ohne]
+    assert "[1D]" not in mit[0].reason
+
+
+def test_gleiches_bein_vergleicht_preise_nicht_zeitstempel():
+    a = Impulse(Pivot(0, 0, 100.0, "L"), Pivot(10, 10, 140.0, "H"))
+    b = Impulse(Pivot(99, 99, 100.0, "L"), Pivot(120, 120, 140.0, "H"))   # andere ts
+    c_ = Impulse(Pivot(0, 0, 100.0, "L"), Pivot(10, 10, 141.0, "H"))
+    assert gleiches_bein(a, b)
+    assert not gleiches_bein(a, c_)
+    assert not gleiches_bein(a, None) and not gleiches_bein(None, None)
