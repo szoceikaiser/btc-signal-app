@@ -649,6 +649,11 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
         "fee_pct": fee * 100, "equity": equity,
         "deploy_pct": round(deploy_pct * 100), "max_drawdown_pct": round(max_dd * 100, 2),
         "monate": monate,
+        # E24.1: Die Beteiligung wird HIER gerechnet und wandert damit auch in
+        # site/data/backtest.json. Bericht und Webseite lesen denselben Wert — die
+        # Kennzahl darf nicht an zwei Stellen entstehen (das war der Fehler bei den
+        # Plan-Marken im Chart, siehe docs/PLAN-E24-CHART-UND-PLAN.md).
+        "beteiligung": beteiligung(monate),
         "offene_position": round(units * last_price + s_units * (s_avg - last_price), 2),
     }
 
@@ -970,7 +975,11 @@ def main():
             "sind deshalb nur ueber die Prozentspalte fair vergleichbar.",
         ]
         # --- E22: Was faengt die Engine von der Marktbewegung ein? -------------------
-        _bet = beteiligung(list(m_live.values()))
+        # E24.1: aus dem pnl-Dict lesen statt neu rechnen. Die Kennzahl entsteht in
+        # simulate() und steht damit auch in site/data/backtest.json — Bericht und
+        # Webseite zeigen zwingend dieselbe Zahl. Der Rueckfall auf die eigene Rechnung
+        # bleibt fuer aeltere Laeufe, deren pnl-Dict das Feld noch nicht hat.
+        _bet = panel_pnl.get("beteiligung") or beteiligung(list(m_live.values()))
         if _bet:
             monats_zeilen += [
                 "",

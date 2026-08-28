@@ -27,6 +27,11 @@
   .legend { display:flex; flex-wrap:wrap; gap:10px 16px; font-size:13px; color:var(--muted);
     background:var(--panel); border-radius:10px; padding:10px 12px; margin-top:10px; }
   .legend b { color:var(--text); font-weight:600; }
+  /* --- E24.3: Umschalter fuer die Plan-Marken --- */
+  #planSchalter { display:inline-flex; align-items:center; gap:6px; margin-left:14px;
+                  color:var(--muted); font-size:12.5px; cursor:pointer; user-select:none; }
+  #planSchalter input { accent-color:#2962ff; cursor:pointer; }
+
   /* --- Monatsuebersicht (unten) --- */
   #monate { background:var(--panel); border-radius:10px; padding:12px; margin-top:10px; }
   #monate h2 { font-size:15px; margin-bottom:4px; }
@@ -35,7 +40,8 @@
   #monate th { text-align:right; color:var(--muted); font-weight:600; font-size:12px;
     padding:4px 6px; border-bottom:1px solid #2a3242; }
   #monate th:first-child, #monate td:first-child { text-align:left; }
-  #monate td { text-align:right; padding:5px 6px; border-bottom:1px solid #1c2330; }
+  #monate td { text-align:right; padding:5px 6px; border-bottom:1px solid #1c2330;
+               white-space:nowrap; }
   #monate tr:last-child td { border-bottom:none; }
   #monate tfoot td { border-top:1px solid #2a3242; font-weight:600; color:var(--text); padding-top:8px; }
   #monate .bar { width:100%; min-width:70px; }
@@ -43,7 +49,8 @@
   #monate .note { color:var(--muted); font-size:12px; margin-top:10px; line-height:1.5; }
   #monate .schwach { opacity:.62; }        /* Vergleichsspalte "mit Flush" zurueckgenommen */
   #monate thead th[colspan] { text-align:center; }
-  @media (max-width:560px) { #monate .hidemob { display:none; } #monate table { font-size:12.5px; } }
+  @media (max-width:560px) { #monate .hidemob, #monate .engmob { display:none; }
+                             #monate table { font-size:12.5px; } }
 </style>
 </head>
 <body>
@@ -51,6 +58,9 @@
   <h1>BTC — Order-Flow-Strategie (nach Furkan Yildirim)</h1>
   <span id="demoBadge" class="badge" hidden>DEMO-DATEN</span>
   <nav class="tfs" id="tfs"></nav>
+  <label id="planSchalter" title="Zeigt im Chart genau die Marken, die auch in der Telegram-Plan-Nachricht stehen">
+    <input type="checkbox" id="planAn"> Plan-Marken
+  </label>
 </header>
 <div id="wrap">
   <div id="chart"></div>
@@ -68,6 +78,10 @@
   <span><b>W</b> Warnung Derivate-Pump</span>
   <span><b style="color:#a855f7">⚡</b> aggressiver Flush-Einstieg (Kapitulation)</span>
   <span>Linien: Fib-Zonen der aktuellen Struktur</span>
+  <span><b>Plan-Marken</b> (Schalter oben): genau die Preise aus der Telegram-Plan-Nachricht —
+    <b style="color:#16a34a">grün</b> nachkaufen, <b style="color:#dc2626">rot</b> Teilgewinn
+    und Stop, <b style="color:#f59e0b">orange</b> Widerstand, <b style="color:#e2e8f0">hell</b>
+    dein Einstand. Ausschalten zeigt wieder nur die Fib-Zonen.</span>
   <span>Bedienung: Mausrad/Pinch = Zoom · Ziehen = Verschieben · Doppelklick = Reset</span>
   <span><a href="https://github.com/szoceikaiser/btc-signal-app/blob/main/ANLEITUNG-EINSTELLUNGEN.md"
     style="color:#2962ff" target="_blank">⚙ Einstellungen ändern (Anleitung)</a></span>
@@ -205,6 +219,18 @@ function renderMonate(bt) {
     return `<td class="${cls}">${eur(m.gewinn)}</td><td class="${cls}">${pct(m.rendite_pct)}</td>`;
   };
 
+  // E24.2: Was von der Bitcoin-Bewegung kommt bei uns an? (Kaisers Frage 28.08.2026 —
+  // die Kennzahl stand bisher nur im Backtest-Bericht, nicht auf der Seite.)
+  // "davon eingefangen" nur in STEIGENDEN Monaten: in fallenden Monaten ist ein Anteil
+  // am Rueckgang keine sinnvolle Groesse — dafuer steht unten die Abwaerts-Beteiligung.
+  const hatBtc = ms.some(m => typeof m.btc_pct === "number");
+  const eingefangen = (m, basis) => {
+    if (!hatBtc || typeof m.btc_pct !== "number" || m.btc_pct <= 0)
+      return `<td class="engmob">—</td>`;
+    const r = basis ? basis.rendite_pct : m.rendite_pct;
+    return `<td class="engmob">${Math.round(r / m.btc_pct * 100)} %</td>`;
+  };
+
   const zeilen = ms.map(m => {
     const basis = mo ? mo[m.monat] : m;              // ohne Flush = die sichere Rechnung
     const pos = (basis ? basis.gewinn : m.gewinn) >= 0;
@@ -214,8 +240,12 @@ function renderMonate(bt) {
     const bar = `<span style="display:block;position:relative;height:9px">` +
       `<i style="position:absolute;${pos ? "left" : "right"}:50%;width:${br / 2}%;` +
       `background:${farbe}"></i></span>`;
-    return `<tr><td>${name(m.monat)}</td>` +
+    const btc = hatBtc
+      ? `<td class="${(m.btc_pct || 0) >= 0 ? "up" : "down"}">${pct(m.btc_pct || 0)}</td>`
+      : "";
+    return `<tr><td>${name(m.monat)}</td>${btc}` +
       (mo ? zelle(basis, true) + zelle(m, false) : zelle(m, true)) +
+      (hatBtc ? eingefangen(m, basis) : "") +
       `<td class="bar hidemob">${bar}</td></tr>`;
   }).join("");
 
@@ -226,6 +256,11 @@ function renderMonate(bt) {
            `<td class="${c}">${pct(q.rendite_pct || 0)}</td>`;
   };
 
+  // Beteiligung: beide Rechnungen, so wie die Tabelle daueber auch beide zeigt. Sonst
+  // stuende auf der Seite eine andere Zahl als im Backtest-Bericht (der rechnet mit der
+  // Live-Variante, also MIT Flush) und man haelt eine davon fuer falsch.
+  const bet = (po && po.beteiligung) || p.beteiligung || null;
+  const betMit = po && po.beteiligung && p.beteiligung ? p.beteiligung : null;
   const basisReihe = mo ? Object.values(mo) : ms;
   const plus = basisReihe.filter(m => m.gewinn > 0).length;
   const best = basisReihe.reduce((a, b) => (b.rendite_pct > a.rendite_pct ? b : a));
@@ -243,22 +278,47 @@ function renderMonate(bt) {
         : `<br>Variante <b>${bt.variante || "—"}</b>.`) +
     `</div>` +
     `<table><thead><tr><th>Monat</th>` +
+    (hatBtc ? `<th>Bitcoin</th>` : ``) +
     (mo ? `<th colspan="2">ohne Flush</th><th colspan="2" class="schwach">mit Flush</th>`
         : `<th>Gewinn / Verlust</th><th>%</th>`) +
+    (hatBtc ? `<th class="engmob">davon<br>eingefangen</th>` : ``) +
     `<th class="hidemob"></th></tr></thead>` +
     `<tbody>${zeilen}</tbody>` +
-    `<tfoot><tr><td>Gesamt</td>` +
+    `<tfoot><tr><td>Gesamt</td>` + (hatBtc ? `<td>—</td>` : ``) +
     (mo ? gesZeile(po) + gesZeile(p) : gesZeile(p)) +
+    (hatBtc ? `<td class="engmob">—</td>` : ``) +
     `<td class="hidemob"></td></tr>` +
-    `<tr><td>größter Rückgang</td>` +
+    `<tr><td>größter Rückgang</td>` + (hatBtc ? `<td>—</td>` : ``) +
     (mo ? `<td colspan="2" class="down">${pct(po.max_drawdown_pct || 0)}</td>` +
           `<td colspan="2" class="down schwach">${pct(p.max_drawdown_pct || 0)}</td>`
         : `<td colspan="2" class="down">${pct(p.max_drawdown_pct || 0)}</td>`) +
+    (hatBtc ? `<td class="engmob">—</td>` : ``) +
     `<td class="hidemob"></td></tr></tfoot></table>` +
+    // E24.2: die beiden Kennzahlen aus E22, hier auf der Seite statt nur im Bericht.
+    // Sie kommen fertig aus backtest.json (dort in simulate() gerechnet) — bewusst NICHT
+    // hier noch einmal, sonst koennten Bericht und Seite verschiedene Zahlen zeigen.
+    (bet
+      ? `<div class="note" style="border-left:2px solid #2a3242;padding-left:10px">` +
+        `<b>Was fangen wir von der Marktbewegung ein?</b><br>` +
+        `<b>Aufwärts ${bet.auf_pct} %</b>${betMit ? ` (mit Flush ${betMit.auf_pct} %)` : ``} — ` +
+        `in den ${bet.auf_monate} steigenden Monaten legte Bitcoin zusammen ` +
+        `${pct(bet.auf_btc)} zu, die Engine ${pct(bet.auf_engine)}.<br>` +
+        `<b>Abwärts ${bet.ab_pct} %</b>${betMit ? ` (mit Flush ${betMit.ab_pct} %)` : ``} — ` +
+        `in den ${bet.ab_monate} fallenden Monaten verlor Bitcoin ${pct(bet.ab_btc)}, ` +
+        `die Engine ${pct(bet.ab_engine)}.<br>` +
+        `<span style="color:var(--muted)">Aufwärts ist hoch gut, abwärts ist niedrig oder ` +
+        `negativ gut. 100 % aufwärts hieße: genau wie der Markt. Ein System, das in ` +
+        `Schwäche kauft und gestaffelt Gewinne mitnimmt, liegt naturgemäß darunter — die ` +
+        `Frage ist, wie weit. Näherung: Monatsrenditen addiert statt verkettet.</span>` +
+        `</div>`
+      : ``) +
     `<div class="note">Monate im Plus${mo ? " (ohne Flush)" : ""}: ` +
     `<b>${plus} von ${basisReihe.length}</b> · ` +
     `bester <b class="up">${name(best.monat)} ${pct(best.rendite_pct)}</b> · schwächster ` +
     `<b class="down">${name(schlecht.monat)} ${pct(schlecht.rendite_pct)}</b>.<br>` +
+    (hatBtc ? `<b>„davon eingefangen"</b> ist der Anteil${mo ? " der Spalte <b>ohne Flush</b>" : ""} ` +
+              `an der Bitcoin-Bewegung des Monats — nur in steigenden Monaten, weil ein ` +
+              `Anteil am Rückgang keine sinnvolle Größe wäre.<br>` : ``) +
     `„Größter Rückgang" ist der tiefste Einbruch unterwegs, gemessen vom jeweiligen ` +
     `Höchststand des Kontos — nicht das Endergebnis. Je näher an null, desto ruhiger.<br>` +
     `Die Euro-Beträge wachsen mit dem Konto, weil Gewinne reinvestiert werden — ein später ` +
@@ -354,10 +414,60 @@ async function load(tf) {
     // erst nach der Telegram-Nachricht reagiert, findet den Preis oft nicht mehr.
     const offen = state && state.zones;
     const zonen = offen || (state && state.zonen_vorschau) || null;
+
+    // E24.3 (Kaiser 28.08.2026): Der Chart zeigt genau die Marken, die auch in der
+    // Telegram-Plan-Nachricht stehen — aus DEMSELBEN Objekt (state.plan), das die
+    // Engine dafuer baut. Vorher zog der Chart seine Linien aus einer zweiten
+    // Rechnung; fuenf Plan-Marken fehlten dadurch (zwei Liquidationszonen, das letzte
+    // Hoch, die beiden Zwischenziele). Zwei Rechnungen fuer dieselbe Sache laufen
+    // zwangsläufig auseinander — deshalb hier nur noch eine Quelle.
+    const planAn = document.getElementById("planAn").checked;
+    const plan = planAn && state && state.plan ? state.plan : null;
+    const planPreise = [];               // damit Fib-Linien nicht doppelt gezeichnet werden
+
+    if (plan) {
+      const linie = (preis, farbe, titel) => {
+        if (typeof preis !== "number") return;
+        // Nie zwei Linien auf denselben Preis: die Untergrenze der Kaufleiter IST die
+        // Invalidierung, und die 0.786-Zone taucht als Nachkauf und als Fib-Level auf.
+        if (planPreise.some(p => Math.abs(p - preis) / preis < 0.0005)) return;
+        planPreise.push(preis);
+        priceLines.push(series.createPriceLine({
+          price: preis, color: farbe, lineWidth: 1,
+          lineStyle: LightweightCharts.LineStyle.Dashed,
+          axisLabelVisible: true, title: titel,
+        }));
+      };
+      const tr = t => (t ? ` ${Math.round(t)} %` : "");
+      // Reihenfolge mit Absicht: Stop und Einstand ZUERST. Beide teilen sich einen Preis
+      // mit einer anderen Marke (der Stop mit der Untergrenze der Kaufleiter), und wer
+      // zuerst gezeichnet ist, gewinnt — der Stop ist die wichtigere Auskunft.
+      if (plan.stop) linie(plan.stop.preis, "#dc2626", "Stop — " + plan.stop.grund);
+      linie(plan.einstand, "#e2e8f0", `Einstand (${plan.anteil_pct} % drin)`);
+      for (const n of plan.nachkauf || []) {
+        if (n.zone) {                         // Kaufleiter: die Zone als zwei Raender
+          linie(n.zone[0], "#15803d", "Kaufleiter unten" + tr(n.tranche));
+          linie(n.zone[1], "#15803d", "Kaufleiter oben" + tr(n.tranche));
+        } else linie(n.preis, "#16a34a", "Nachkauf" + tr(n.tranche) + " — " + n.was);
+      }
+      for (const t of plan.teilgewinn || []) {
+        if (t.zone) {
+          linie(t.zone[0], "#f59e0b", "Widerstand von");
+          linie(t.zone[1], "#f59e0b", "Widerstand bis");
+        } else linie(t.preis, "#dc2626", "Teilgewinn" + tr(t.tranche) + " — " + t.was);
+      }
+    }
+
+    // Struktur-Linien: bei aktivem Plan nur die, die er nicht ohnehin nennt (0.5, das
+    // Golden Pocket). Sonst laege an denselben Preisen eine zweite Linie — genau die
+    // Linienflut, die Kaiser vermeiden wollte.
+    const schonImPlan = v => planPreise.some(p => Math.abs(p - v) / v < 0.0005);
     if (zonen) {
       for (const [key, title, color] of FIB_LINES) {
         const v = zonen[key];
-        if (typeof v === "number") priceLines.push(series.createPriceLine({
+        if (typeof v !== "number") continue;
+        if (plan && schonImPlan(v)) continue;
+        priceLines.push(series.createPriceLine({
           price:v, color, lineWidth:1,
           lineStyle: offen ? LightweightCharts.LineStyle.Dashed
                            : LightweightCharts.LineStyle.Dotted,
@@ -368,7 +478,7 @@ async function load(tf) {
     }
     // E20: die Widerstandsmarken aus dem Gegen-Bein — Furkans zweites Fib-Raster.
     // Andere Farbe und gepunktet, damit sie nicht mit den Kaufzonen verwechselt werden.
-    const wid = state && state.widerstand;
+    const wid = plan ? null : (state && state.widerstand);
     if (wid) {
       for (const [key, title] of [["gp_von", "Widerstand 0.618"], ["gp_bis", "Widerstand 0.65"],
                                   ["ausbruch", "Ausbruch (altes Hoch)"]]) {
@@ -396,13 +506,26 @@ async function load(tf) {
   }
 }
 
+// E24.3: Der Schalter merkt sich seinen Zustand im Browser — Kaisers Rueckfahrkarte.
+// Ein Klick genuegt, kein Commit und kein Warten auf den naechsten Engine-Lauf. Der
+// Zustand gilt nur fuer dieses Geraet. Default: an.
+const planBox = document.getElementById("planAn");
+let aktiverTf = "4h";
+try {
+  planBox.checked = localStorage.getItem("planMarken") !== "aus";
+} catch (e) { planBox.checked = true; }        // privates Fenster o. ae.: einfach an
+planBox.onchange = () => {
+  try { localStorage.setItem("planMarken", planBox.checked ? "an" : "aus"); } catch (e) {}
+  load(aktiverTf);
+};
+
 const nav = document.getElementById("tfs");
 Object.keys(TFS).forEach((tf, i) => {
   const b = document.createElement("button");
   b.textContent = tf;
   if (i === 1) b.classList.add("active");            // Default: 4h (primaerer Takt)
   b.onclick = () => { nav.querySelectorAll("button").forEach(x => x.classList.remove("active"));
-                      b.classList.add("active"); load(tf); };
+                      b.classList.add("active"); aktiverTf = tf; load(tf); };
   nav.appendChild(b);
 });
 load("4h");
