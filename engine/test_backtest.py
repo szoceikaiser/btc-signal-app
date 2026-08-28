@@ -486,3 +486,54 @@ def test_no_flip_variante_gegen_die_live_einstellung_existiert():
     unterschiede = {k for k in backtest.EVAL_KEYS if live.get(k) != mit.get(k)}
     assert unterschiede == {"no_flip"}, f"genau ein Unterschied erwartet, gefunden {unterschiede}"
     assert mit["no_flip"] is True and live["no_flip"] is False
+
+
+# ------------------------- E26: laenger investiert bleiben, sauber vergleichbar
+
+def test_neustart_varianten_unterscheiden_sich_nur_im_gemeinten_punkt():
+    """Der Fehler, den dieser Test verhindert (zum zweiten Mal, siehe E25).
+
+    Die aelteren Zeilen "LIVE +Neustart mit Rest" laufen ohne no_flip, das seit
+    28.08.2026 live ist. Sie gegen die Live-Zeile zu halten misst zwei Aenderungen auf
+    einmal — genau der Grund, warum die no_flip-Messung monatelang wertlos war.
+    """
+    live = next(v for v in backtest.GRID if v.get("panel"))
+    faelle = {
+        "LIVE-heute +Neustart mit Rest": {"neustart_mit_rest"},
+        "LIVE-heute +Rest halten +Neustart mit Rest": {"neustart_mit_rest", "rest_halten"},
+    }
+    for label, erwartet in faelle.items():
+        v = next(x for x in backtest.GRID if x["label"] == label)
+        gefunden = {k for k in backtest.EVAL_KEYS if live.get(k) != v.get(k)}
+        assert gefunden == erwartet, f"{label}: erwartet {erwartet}, gefunden {gefunden}"
+
+
+def test_beteiligung_steht_im_pnl_dict_fuer_die_tabellenspalte():
+    """Die Spalte 'Aufwaerts' liest aus simulate() — nicht aus einer zweiten Rechnung.
+
+    Geprueft wird bewusst der Weg DURCH simulate(): ein Test, der nur beteiligung()
+    aufruft, bleibt gruen, wenn das Feld aus dem pnl-Dict faellt — dann zeigte die
+    Tabelle stumm ueberall '—' und niemandem faellt es auf. (Genau das ist mir beim
+    ersten Anlauf passiert; die Sabotage-Probe hat es aufgedeckt.)
+    """
+    from strategy_core import Candle
+    H4 = 4 * 3600 * 1000
+    start = 1_767_225_600_000                                   # 01.01.2026
+    # ueber 600 4h-Kerzen (100 Tage) steigende Kurse -> mehrere Monate mit btc_pct
+    cs = [Candle(start + i * H4, 100 + i, 101 + i, 99 + i, 100 + i) for i in range(600)]
+    sigs = [{"ts": cs[10].ts, "type": "KAUF_1", "price": 110.0, "tranche_pct": 25}]
+    p = backtest.simulate(sigs, cs, start_ms=start)
+    assert "beteiligung" in p, "simulate() muss die Kennzahl mitliefern"
+    assert p["beteiligung"] is not None, "sonst zeigt die Tabellenspalte ueberall '—'"
+    assert p["beteiligung"]["auf_pct"] is not None
+    assert p["beteiligung"]["auf_monate"] >= 2
+
+    # und die Rechnung selbst: 5 + 4 von 10 + 20 = 30 %
+    monate = [
+        {"monat": "2026-01", "ende": 10500, "gewinn": 500, "rendite_pct": 5.0, "btc_pct": 10.0},
+        {"monat": "2026-02", "ende": 10800, "gewinn": 300, "rendite_pct": 3.0, "btc_pct": -8.0},
+        {"monat": "2026-03", "ende": 11200, "gewinn": 400, "rendite_pct": 4.0, "btc_pct": 20.0},
+    ]
+    b = backtest.beteiligung(monate)
+    assert b["auf_pct"] == 30 and b["ab_pct"] == -38
+    assert b["auf_monate"] == 2 and b["ab_monate"] == 1

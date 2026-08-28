@@ -334,6 +334,22 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, freeze_targets=True),
+    # E26 (Kaiser 28.08.2026: "wie gehen wir das offene an?" — die niedrige
+    # Aufwaerts-Beteiligung). Diagnose: die Engine ist im Mittel nur mit 29 % des
+    # Kapitals investiert, an 58 % der Tage gar nicht. Die 36 % Aufwaerts-Beteiligung
+    # sind damit keine Fehlfunktion, sondern Arithmetik. Der Hebel ist, laenger
+    # investiert zu bleiben. "Neustart mit Rest" und "Rest halten" lagen in der zweiten
+    # Fensterhaelfte auf Platz 1 und 3 — aber beide Zeilen laufen ohne no_flip, das seit
+    # 28.08. live ist. Diese beiden hier unterscheiden sich von der Live-Zeile in genau
+    # einem bzw. zwei benannten Punkten; Tests halten das fest.
+    V("LIVE-heute +Neustart mit Rest",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True),
+    V("LIVE-heute +Rest halten +Neustart mit Rest",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, rest_halten=True, neustart_mit_rest=True),
     V("Long+Short (Ref)"),
 ]
 
@@ -1199,15 +1215,25 @@ def main():
         "heben sich auf, und die Telegram-Nachrichten widersprechen sich. Die Spalte misst "
         "also Umsetzbarkeit, nicht Gewinn. Der Schalter dagegen heisst `no_flip`.",
         "",
-        "| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale | Gegen-\ngeschaefte |",
-        "|---|---|---|---|---|---|---|---|",
+        "**Aufwaerts** (E26) = Aufwaerts-Beteiligung: wie viel des Anstiegs die Variante in "
+        "steigenden Monaten mitnimmt (Einzelheiten im Abschnitt weiter unten). Hoch ist gut. "
+        "Die Rendite allein verraet das nicht — eine Variante kann glaenzend aussehen, weil "
+        "sie in fallenden Monaten gewinnt, und in einer Rally trotzdem kaum mitkommen. Wer "
+        "wissen will, ob ein Schalter grosse Anstiege besser einfaengt, schaut hier hin und "
+        "nicht auf die Rendite.",
+        "",
+        "| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale | "
+        "Gegen-\ngeschaefte | Auf-\nwaerts |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     for rcfg, rsigs, rsc, rp in results:
         mark = " **<-- beste**" if rcfg is best_cfg else ""
         _gg = gegengeschaefte(rsigs)                                   # E25
+        _bt = (rp.get("beteiligung") or {}).get("auf_pct")             # E26
+        _auf = f"{_bt} %" if _bt is not None else "—"
         lines.append(f"| {rcfg['label']} | {rsc['recall']:.0%} | {rsc['precision']:.0%} | "
                      f"{rp['rendite_pct']:+.1f} % | {rp['max_drawdown_pct']:.1f} % | "
-                     f"{rp['deploy_pct']} % | {len(rsigs)} | {_gg['kerzen']}{mark} |")
+                     f"{rp['deploy_pct']} % | {len(rsigs)} | {_gg['kerzen']} | {_auf}{mark} |")
     lines += [
         "",
         f"## Beste Kombination (nach Rendite): {best_cfg['label']}",
