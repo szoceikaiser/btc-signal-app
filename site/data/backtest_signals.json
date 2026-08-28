@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-08-28T11:56:07Z",
+ "generated_at": "2026-08-28T18:17:49Z",
  "variante": "LIVE-heute +Neustart mit Rest",
  "fenster": "20.12.2025-28.08.2026",
  "signals": [
@@ -2386,7 +2386,7 @@
   {
    "ts": 1787904000000,
    "type": "WARNUNG",
-   "price": 79569.86,
+   "price": 79604.13,
    "tranche_pct": 0,
    "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
    "stop_ref": null,

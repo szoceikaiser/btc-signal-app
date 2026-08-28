@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-08-28T11:56:07Z",
+ "generated_at": "2026-08-28T18:17:49Z",
  "zeitraum": "20.12.2025-28.08.2026",
  "variante": "LIVE-heute +Neustart mit Rest",
  "params": {
@@ -41,9 +41,9 @@
  "precision_pct": 34,
  "pnl": {
   "start": 10000.0,
-  "ende": 13648.67,
-  "rendite_pct": 36.49,
-  "buyhold_pct": -9.95,
+  "ende": 13488.65,
+  "rendite_pct": 34.89,
+  "buyhold_pct": -11.99,
   "trades": 95,
   "gewinn_trades": 66,
   "long_profit": 3590.15,
@@ -54,7 +54,7 @@
   "short_wins": 0,
   "fee_pct": 0.1,
   "deploy_pct": 100,
-  "max_drawdown_pct": -7.12,
+  "max_drawdown_pct": -9.4,
   "monate": [
    {
     "monat": "2025-12",
@@ -114,30 +114,30 @@
    },
    {
     "monat": "2026-08",
-    "ende": 13648.67,
-    "gewinn": 345.95,
-    "rendite_pct": 2.6,
-    "btc_pct": 26.53
+    "ende": 13488.65,
+    "gewinn": 185.92,
+    "rendite_pct": 1.4,
+    "btc_pct": 23.66
    }
   ],
   "beteiligung": {
    "auf_monate": 4,
    "ab_monate": 5,
-   "auf_btc": 47.6,
-   "auf_engine": 21.0,
+   "auf_btc": 44.7,
+   "auf_engine": 19.8,
    "ab_btc": -49.8,
    "ab_engine": 11.1,
    "auf_pct": 44,
    "ab_pct": -22
   },
-  "offene_position": 7059.38
+  "offene_position": 6899.35
  },
  "variante_ohne_flush": "MEINE Einstellung ohne Flush",
  "pnl_ohne_flush": {
   "start": 10000.0,
-  "ende": 12781.29,
-  "rendite_pct": 27.81,
-  "buyhold_pct": -9.95,
+  "ende": 12631.52,
+  "rendite_pct": 26.32,
+  "buyhold_pct": -11.99,
   "trades": 90,
   "gewinn_trades": 60,
   "long_profit": 2726.52,
@@ -148,7 +148,7 @@
   "short_wins": 0,
   "fee_pct": 0.1,
   "deploy_pct": 100,
-  "max_drawdown_pct": -7.52,
+  "max_drawdown_pct": -9.39,
   "monate": [
    {
     "monat": "2025-12",
@@ -208,22 +208,22 @@
    },
    {
     "monat": "2026-08",
-    "ende": 12781.29,
-    "gewinn": 185.53,
-    "rendite_pct": 1.47,
-    "btc_pct": 26.53
+    "ende": 12631.52,
+    "gewinn": 35.75,
+    "rendite_pct": 0.28,
+    "btc_pct": 23.66
    }
   ],
   "beteiligung": {
    "auf_monate": 4,
    "ab_monate": 5,
-   "auf_btc": 47.6,
-   "auf_engine": 16.9,
+   "auf_btc": 44.7,
+   "auf_engine": 15.7,
    "ab_btc": -49.8,
    "ab_engine": 8.3,
-   "auf_pct": 36,
+   "auf_pct": 35,
    "ab_pct": -17
   },
-  "offene_position": 6607.36
+  "offene_position": 6457.58
  }
 }
