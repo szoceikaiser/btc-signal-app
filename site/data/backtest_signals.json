@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-08-28T11:02:57Z",
+ "generated_at": "2026-08-28T11:32:15Z",
  "variante": "NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft",
  "fenster": "20.12.2025-28.08.2026",
  "signals": [
@@ -2402,6 +2402,16 @@
    "stop_ref": 75545.67,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1787904000000,
+   "type": "WARNUNG",
+   "price": 79714.33,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
   }
  ]
 }
