@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-08-28T05:34:55Z",
+ "generated_at": "2026-08-28T07:03:09Z",
  "zeitraum": "20.12.2025-28.08.2026",
  "variante": "NEU-LIVE +Mindest-Bein 5 %",
  "params": {
@@ -32,7 +32,8 @@
   "bein_richtung": "auto",
   "widerstand_exit": "off",
   "rest_halten": false,
-  "neustart_mit_rest": false
+  "neustart_mit_rest": false,
+  "zonen_1d": false
  },
  "recall_kauf": "6/9",
  "recall_verkauf": "9/12",
@@ -40,9 +41,9 @@
  "precision_pct": 38,
  "pnl": {
   "start": 10000.0,
-  "ende": 13765.43,
-  "rendite_pct": 37.65,
-  "buyhold_pct": -9.79,
+  "ende": 13785.16,
+  "rendite_pct": 37.85,
+  "buyhold_pct": -9.54,
   "trades": 98,
   "gewinn_trades": 68,
   "long_profit": 3693.74,
@@ -113,20 +114,20 @@
    },
    {
     "monat": "2026-08",
-    "ende": 13765.43,
-    "gewinn": 377.4,
-    "rendite_pct": 2.82,
-    "btc_pct": 26.75
+    "ende": 13785.16,
+    "gewinn": 397.12,
+    "rendite_pct": 2.97,
+    "btc_pct": 27.1
    }
   ],
-  "offene_position": 7122.28
+  "offene_position": 7142.0
  },
  "variante_ohne_flush": "MEINE Einstellung ohne Flush",
  "pnl_ohne_flush": {
   "start": 10000.0,
-  "ende": 12793.15,
-  "rendite_pct": 27.93,
-  "buyhold_pct": -9.79,
+  "ende": 12811.48,
+  "rendite_pct": 28.11,
+  "buyhold_pct": -9.54,
   "trades": 90,
   "gewinn_trades": 60,
   "long_profit": 2726.52,
@@ -197,12 +198,12 @@
    },
    {
     "monat": "2026-08",
-    "ende": 12793.15,
-    "gewinn": 197.39,
-    "rendite_pct": 1.57,
-    "btc_pct": 26.75
+    "ende": 12811.48,
+    "gewinn": 215.72,
+    "rendite_pct": 1.71,
+    "btc_pct": 27.1
    }
   ],
-  "offene_position": 6619.22
+  "offene_position": 6637.55
  }
 }
