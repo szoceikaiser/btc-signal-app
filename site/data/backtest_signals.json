@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-08-28T10:46:09Z",
- "variante": "NEU-LIVE +Mindest-Bein 5 %",
+ "generated_at": "2026-08-28T11:02:57Z",
+ "variante": "NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft",
  "fenster": "20.12.2025-28.08.2026",
  "signals": [
   {
@@ -144,16 +144,6 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1767830400000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 90813.4,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 92000",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
    "ts": 1767859200000,
    "type": "TEILVERKAUF_LADDER",
    "price": 90226.77,
@@ -182,6 +172,16 @@
    "stop_ref": 87250.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1767916800000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 91220.23,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 92000",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
    "ts": 1767988800000,
@@ -304,9 +304,9 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1771257600000,
+   "ts": 1771272000000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 67913.43,
+   "price": 68892.43,
    "tranche_pct": 15,
    "reason": "Teilgewinn am letzten Hoch 68411",
    "stop_ref": null,
@@ -314,9 +314,9 @@
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1771272000000,
+   "ts": 1771315200000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 68892.43,
+   "price": 67854.6,
    "tranche_pct": 15,
    "reason": "Teilgewinn am letzten Hoch 68411",
    "stop_ref": null,
@@ -535,16 +535,6 @@
   },
   {
    "ts": 1772812800000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 68131.79,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 68699",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1772812800000,
    "type": "NACHKAUF",
    "price": 67846.888,
    "tranche_pct": 25,
@@ -572,6 +562,16 @@
    "stop_ref": 66158.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1772856000000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 67842.67,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 68200",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
    "ts": 1772884800000,
@@ -635,16 +635,6 @@
   },
   {
    "ts": 1773043200000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 67764.98,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 68200",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1773043200000,
    "type": "NACHKAUF",
    "price": 67846.888,
    "tranche_pct": 25,
@@ -672,6 +662,16 @@
    "stop_ref": 66158.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1773100800000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 69429.85,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 68476",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
    "ts": 1773244800000,
@@ -884,9 +884,9 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1773864000000,
+   "ts": 1773878400000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 71246.54,
+   "price": 71215.39,
    "tranche_pct": 15,
    "reason": "Teilgewinn am letzten Hoch 71777",
    "stop_ref": null,
@@ -1004,16 +1004,6 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1775102400000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 66930.79,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 67289",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
    "ts": 1775116800000,
    "type": "NACHKAUF",
    "price": 66220.28,
@@ -1045,16 +1035,6 @@
   },
   {
    "ts": 1775131200000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 66852.91,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 67289",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1775131200000,
    "type": "NACHKAUF",
    "price": 65922.34,
    "tranche_pct": 25,
@@ -1062,6 +1042,26 @@
    "stop_ref": 65000.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1775145600000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 66975.99,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 67289",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1775160000000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 66901.99,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 67289",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
    "ts": 1775433600000,
@@ -1214,16 +1214,6 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1776542400000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 75691.76,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 76000",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
    "ts": 1776556800000,
    "type": "NACHKAUF",
    "price": 75515.77,
@@ -1232,16 +1222,6 @@
    "stop_ref": 73309.85,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1776556800000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 75515.77,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 76000",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
    "ts": 1776571200000,
@@ -1252,6 +1232,26 @@
    "stop_ref": 73309.85,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1776585600000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 75604.11,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 75425",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1776600000000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 75846.63,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 76000",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
    "ts": 1776628800000,
@@ -1404,16 +1404,6 @@
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1777478400000,
-   "type": "NACHKAUF",
-   "price": 74954.49114,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 73724.31,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
    "ts": 1777492800000,
    "type": "TEILVERKAUF_LADDER",
    "price": 75780.0,
@@ -1422,6 +1412,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1777536000000,
+   "type": "KAUF_2",
+   "price": 75920.24082,
+   "tranche_pct": 50,
+   "reason": "Golden Pocket 75736-75920 + Bestaetigung (NEUTRAL)",
+   "stop_ref": 73724.31,
+   "tag": "",
+   "label": "KAUF 2 (Kernposition im Golden Pocket)"
   },
   {
    "ts": 1777708800000,
@@ -1824,16 +1824,6 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1783598400000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 62868.05,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 63239",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
    "ts": 1783612800000,
    "type": "NACHKAUF",
    "price": 63248.1,
@@ -1845,16 +1835,6 @@
   },
   {
    "ts": 1783612800000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 63248.1,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 63239",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1783612800000,
    "type": "KAUF_2",
    "price": 62603.02712,
    "tranche_pct": 50,
@@ -1862,6 +1842,26 @@
    "stop_ref": 61306.84,
    "tag": "",
    "label": "KAUF 2 (Kernposition im Golden Pocket)"
+  },
+  {
+   "ts": 1783627200000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 63230.0,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 63462",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1783641600000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 63947.2,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 63239",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
    "ts": 1783641600000,
@@ -1994,16 +1994,6 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1784275200000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 63298.01,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 63239",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
    "ts": 1784289600000,
    "type": "TEILVERKAUF_LADDER",
    "price": 63452.0,
@@ -2014,14 +2004,14 @@
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1784289600000,
-   "type": "NACHKAUF",
-   "price": 62632.82642,
-   "tranche_pct": 25,
-   "reason": "0.786-Zone erreicht, Struktur intakt",
-   "stop_ref": 61824.97,
+   "ts": 1784304000000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 64160.8,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 63462",
+   "stop_ref": null,
    "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
    "ts": 1784534400000,
@@ -2194,21 +2184,21 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1785945600000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 64840.28,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 64693",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
    "ts": 1785960000000,
    "type": "TEILVERKAUF_LADDER",
    "price": 64665.23,
    "tranche_pct": 15,
    "reason": "Teilgewinn am letzten Hoch 64967",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1785974400000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 64531.03,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 64693",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
@@ -2384,19 +2374,19 @@
    "label": "NACHKAUF (0.786-Zone)"
   },
   {
-   "ts": 1787702400000,
+   "ts": 1787716800000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 79088.62,
+   "price": 78925.56,
    "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 78600",
+   "reason": "Teilgewinn am letzten Hoch 79199",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1787716800000,
+   "ts": 1787731200000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 78925.56,
+   "price": 78487.26,
    "tranche_pct": 15,
    "reason": "Teilgewinn am letzten Hoch 79199",
    "stop_ref": null,
