@@ -248,7 +248,7 @@ GRID = [
     # Signale). Tragendes Argument ist aber die Mechanik, nicht die Tabelle: Der Abstand
     # Golden Pocket -> Stop betraegt konstruktiv 35-38 % der Beinlaenge, min_stop_pct=2 %
     # verlangt also ein Bein von rund 5,5 %.
-    V("NEU-LIVE +Mindest-Bein 5 %", panel=True,
+    V("NEU-LIVE +Mindest-Bein 5 %",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05),
     V("NEU-LIVE +groesstes Bein",
@@ -322,7 +322,7 @@ GRID = [
     # 27.08. live ist — dort unterscheiden sich zwei Dinge gleichzeitig, der Vergleich
     # taugt nicht. Gegenprobe ist die Zeile "NEU-LIVE +Mindest-Bein 5 %" selbst:
     # identische Einstellung, ein einziger Unterschied.
-    V("NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft",
+    V("NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft", panel=True,   # LIVE seit 28.08.2026
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True),
