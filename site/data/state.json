@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1787889600000,
+ "last_signal_ts": 1787904000000,
  "retrace_extreme": 77632.58,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -43,7 +43,7 @@
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 78807.32346153846,
-  "kurs": 79660.0,
+  "kurs": 79604.13,
   "nachkauf": [
    {
     "preis": 79369.17,
@@ -129,7 +129,7 @@
   "conditional_stop": false,
   "pivot_n": 5,
   "k_atr": 2.0,
-  "no_flip": false,
+  "no_flip": true,
   "freeze_targets": false,
   "bein_richtung": "auto",
   "min_bein_pct": 0.05,
@@ -138,11 +138,11 @@
   "widerstand_exit": "off",
   "plan_telegram": true,
   "rest_halten": false,
-  "neustart_mit_rest": false,
+  "neustart_mit_rest": true,
   "zonen_1d": false
  },
- "updated_at": "2026-08-28T10:40:41Z",
- "last_close": 79660.0,
+ "updated_at": "2026-08-28T12:00:44Z",
+ "last_close": 79604.13,
  "zonen_vorschau": {
   "richtung": "LONG",
   "impuls_start": 75545.67,
