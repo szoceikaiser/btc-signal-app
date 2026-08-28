@@ -322,7 +322,7 @@ GRID = [
     # 27.08. live ist — dort unterscheiden sich zwei Dinge gleichzeitig, der Vergleich
     # taugt nicht. Gegenprobe ist die Zeile "NEU-LIVE +Mindest-Bein 5 %" selbst:
     # identische Einstellung, ein einziger Unterschied.
-    V("NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft", panel=True,   # LIVE seit 28.08.2026
+    V("NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True),
@@ -342,7 +342,7 @@ GRID = [
     # Fensterhaelfte auf Platz 1 und 3 — aber beide Zeilen laufen ohne no_flip, das seit
     # 28.08. live ist. Diese beiden hier unterscheiden sich von der Live-Zeile in genau
     # einem bzw. zwei benannten Punkten; Tests halten das fest.
-    V("LIVE-heute +Neustart mit Rest",
+    V("LIVE-heute +Neustart mit Rest", panel=True,          # LIVE seit 28.08.2026 (E26)
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True),
@@ -1220,20 +1220,26 @@ def main():
         "Die Rendite allein verraet das nicht — eine Variante kann glaenzend aussehen, weil "
         "sie in fallenden Monaten gewinnt, und in einer Rally trotzdem kaum mitkommen. Wer "
         "wissen will, ob ein Schalter grosse Anstiege besser einfaengt, schaut hier hin und "
-        "nicht auf die Rendite.",
+        "nicht auf die Rendite. **Abwaerts** ist das Gegenstueck fuer fallende Monate — "
+        "niedrig oder negativ ist gut. Die beiden gehoeren zusammen gelesen: Wer mehr vom "
+        "Anstieg mitnimmt, ist laenger und groesser investiert und macht deshalb in aller "
+        "Regel auch mehr vom Rueckgang mit. Steigt Aufwaerts, ohne dass Abwaerts mitsteigt, "
+        "ist wirklich etwas gewonnen; steigen beide, wurde nur das Risiko erhoeht.",
         "",
         "| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale | "
-        "Gegen-\ngeschaefte | Auf-\nwaerts |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "Gegen-\ngeschaefte | Auf-\nwaerts | Ab-\nwaerts |",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for rcfg, rsigs, rsc, rp in results:
         mark = " **<-- beste**" if rcfg is best_cfg else ""
         _gg = gegengeschaefte(rsigs)                                   # E25
-        _bt = (rp.get("beteiligung") or {}).get("auf_pct")             # E26
-        _auf = f"{_bt} %" if _bt is not None else "—"
+        _b = rp.get("beteiligung") or {}                               # E26
+        _auf = f"{_b['auf_pct']} %" if _b.get("auf_pct") is not None else "—"
+        _ab = f"{_b['ab_pct']} %" if _b.get("ab_pct") is not None else "—"
         lines.append(f"| {rcfg['label']} | {rsc['recall']:.0%} | {rsc['precision']:.0%} | "
                      f"{rp['rendite_pct']:+.1f} % | {rp['max_drawdown_pct']:.1f} % | "
-                     f"{rp['deploy_pct']} % | {len(rsigs)} | {_gg['kerzen']} | {_auf}{mark} |")
+                     f"{rp['deploy_pct']} % | {len(rsigs)} | {_gg['kerzen']} | {_auf} | "
+                     f"{_ab}{mark} |")
     lines += [
         "",
         f"## Beste Kombination (nach Rendite): {best_cfg['label']}",

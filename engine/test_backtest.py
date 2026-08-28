@@ -497,14 +497,18 @@ def test_neustart_varianten_unterscheiden_sich_nur_im_gemeinten_punkt():
     28.08.2026 live ist. Sie gegen die Live-Zeile zu halten misst zwei Aenderungen auf
     einmal — genau der Grund, warum die no_flip-Messung monatelang wertlos war.
     """
-    live = next(v for v in backtest.GRID if v.get("panel"))
+    # Bezug ist die Zeile OHNE die Neustart-Schalter, nicht die Panel-Zeile: Sobald eine
+    # der Varianten live geht, wandert panel=True auf sie, und der Vergleich mit sich
+    # selbst waere leer. Die Basis-Zeile bleibt dagegen stehen.
+    basis = next(v for v in backtest.GRID
+                 if v["label"] == "NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft")
     faelle = {
         "LIVE-heute +Neustart mit Rest": {"neustart_mit_rest"},
         "LIVE-heute +Rest halten +Neustart mit Rest": {"neustart_mit_rest", "rest_halten"},
     }
     for label, erwartet in faelle.items():
         v = next(x for x in backtest.GRID if x["label"] == label)
-        gefunden = {k for k in backtest.EVAL_KEYS if live.get(k) != v.get(k)}
+        gefunden = {k for k in backtest.EVAL_KEYS if basis.get(k) != v.get(k)}
         assert gefunden == erwartet, f"{label}: erwartet {erwartet}, gefunden {gefunden}"
 
 
@@ -537,3 +541,27 @@ def test_beteiligung_steht_im_pnl_dict_fuer_die_tabellenspalte():
     b = backtest.beteiligung(monate)
     assert b["auf_pct"] == 30 and b["ab_pct"] == -38
     assert b["auf_monate"] == 2 and b["ab_monate"] == 1
+
+
+def test_tabellenkopf_und_trennlinie_haben_gleich_viele_spalten():
+    """Billiger Test gegen einen Fehler, der sonst niemandem auffaellt.
+
+    Wird eine Spalte ergaenzt und die Markdown-Trennlinie darunter vergessen, rendert
+    GitHub die Tabelle gar nicht mehr oder verschiebt alle Werte um eine Spalte — die
+    Zahlen stehen dann unter den falschen Ueberschriften und man liest wochenlang
+    Unsinn. Die Kopfzeile entsteht als Text im Code, deshalb wird sie hier als Text
+    geprueft.
+    """
+    from pathlib import Path
+    quelle = (Path(__file__).resolve().parent / "backtest.py").read_text(encoding="utf-8")
+    i = quelle.index('"| Variante | Recall |')
+    block = quelle[i:i + 600]
+    kopf = block[:block.index('",')]
+    trenn = block[block.index('"|---|'):]
+    trenn = trenn[:trenn.index('",')]
+    n_kopf = kopf.count("|") - 1                    # fuehrendes und schliessendes |
+    n_trenn = trenn.count("|") - 1
+    assert n_kopf == n_trenn, (
+        f"Kopfzeile hat {n_kopf} Spalten, Trennlinie {n_trenn} — die Tabelle bricht.")
+    for pflicht in ("Auf-", "Ab-", "Gegen-", "Rendite", "max. Rueckgang"):
+        assert pflicht in kopf, f"Spalte '{pflicht}' fehlt in der Kopfzeile"
