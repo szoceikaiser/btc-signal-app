@@ -388,3 +388,50 @@ def test_panel_variante_entspricht_der_live_einstellung():
     abweichend = {k: (im_panel.get(k), live.get(k))
                   for k in set(im_panel) | set(live) if im_panel.get(k) != live.get(k)}
     assert not abweichend, f"Panel-Zeile weicht von config.json ab: {abweichend}"
+
+
+# ---------------------------------------- E22: Beteiligung an der Marktbewegung
+
+def test_beteiligung_rechnet_auf_und_abwaerts_getrennt():
+    from backtest import beteiligung
+    monate = [
+        {"monat": "2026-01", "rendite_pct": +5.0, "btc_pct": +10.0},   # steigend
+        {"monat": "2026-02", "rendite_pct": +1.0, "btc_pct": +10.0},   # steigend
+        {"monat": "2026-03", "rendite_pct": -2.0, "btc_pct": -20.0},   # fallend
+    ]
+    b = beteiligung(monate)
+    assert b["auf_monate"] == 2 and b["ab_monate"] == 1
+    assert b["auf_btc"] == 20.0 and b["auf_engine"] == 6.0
+    assert b["auf_pct"] == 30            # 6 von 20
+    assert b["ab_pct"] == 10             # -2 von -20 -> 10 %
+    # zu wenige Monate -> lieber nichts als eine Scheingenauigkeit
+    assert beteiligung(monate[:2]) is None
+    assert beteiligung([{"monat": "x", "rendite_pct": 1.0}] * 5) is None
+
+
+def test_beteiligung_erkennt_das_muster_grosser_anstiege():
+    """Der Fall, der die Kennzahl ausgeloest hat: kleine Anstiege gut mitgenommen,
+    grosse kaum. Die Gesamtrendite verdeckt das, die Aufwaerts-Beteiligung nicht."""
+    from backtest import beteiligung
+    monate = [
+        {"monat": "2026-03", "rendite_pct": +6.2, "btc_pct": +2.0},    # 310 %
+        {"monat": "2026-08", "rendite_pct": +3.0, "btc_pct": +27.2},   # 11 %
+        {"monat": "2026-06", "rendite_pct": +0.7, "btc_pct": -20.4},
+    ]
+    b = beteiligung(monate)
+    assert b["auf_pct"] == 32            # 9,2 von 29,2 — trotz zweier "guter" Monate
+    assert b["ab_pct"] < 0               # in fallenden Monaten im Plus
+
+
+def test_simulate_schreibt_die_btc_rendite_je_monat_mit():
+    """Ohne btc_pct in den Monatsdaten kann der Bericht die Kennzahl nicht bilden."""
+    from strategy_core import Candle
+    from backtest import simulate
+    H4 = 4 * 3600 * 1000
+    start = 1_767_225_600_000                      # 01.01.2026
+    cs = [Candle(start + i * H4, 100 + i, 101 + i, 99 + i, 100 + i) for i in range(600)]
+    sigs = [{"ts": cs[10].ts, "type": "KAUF_1", "price": 110.0, "tranche_pct": 25}]
+    p = simulate(sigs, cs, start_ms=start)
+    assert p["monate"], "keine Monatsdaten"
+    assert all("btc_pct" in m for m in p["monate"]), "btc_pct fehlt in mindestens einem Monat"
+    assert p["monate"][1]["btc_pct"] > 0            # der Testkurs steigt durchgehend

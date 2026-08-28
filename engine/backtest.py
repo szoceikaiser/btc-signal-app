@@ -526,18 +526,26 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
         if _ts >= candles[-1].ts:
             break
         _m = _next
+    # E22: je Monat auch die BITCOIN-Rendite mitschreiben. Grundlage der beiden
+    # Beteiligungs-Kennzahlen (siehe beteiligung()). Bewusst aus DENSELBEN Kursen und
+    # Zeitpunkten wie die Equity — sonst vergleicht man Monatsgrenzen von Binance mit
+    # dem angeschnittenen ersten/letzten Monat unseres Fensters.
     monate, _gi, _letztes_eq = [], 0, start_capital
+    _letzter_preis = _closes[0][1]
 
     def _snapshot_bis(ts_ms: int):
-        nonlocal _gi, _letztes_eq
+        nonlocal _gi, _letztes_eq, _letzter_preis
         while _gi < len(_grenzen) and _grenzen[_gi][0] <= ts_ms:
             g_ts, g_name = _grenzen[_gi]
-            eq = equity_now(_preis_bei(g_ts))
+            preis = _preis_bei(g_ts)
+            eq = equity_now(preis)
             monate.append({"monat": g_name, "ende": round(eq, 2),
                            "gewinn": round(eq - _letztes_eq, 2),
                            "rendite_pct": round((eq / _letztes_eq - 1) * 100, 2)
-                           if _letztes_eq else 0.0})
-            _letztes_eq = eq
+                           if _letztes_eq else 0.0,
+                           "btc_pct": round((preis / _letzter_preis - 1) * 100, 2)
+                           if _letzter_preis else 0.0})
+            _letztes_eq, _letzter_preis = eq, preis
             _gi += 1
 
     for s in signals:
@@ -606,7 +614,9 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
         monate.append({"monat": _grenzen[_gi][1], "ende": round(end_equity, 2),
                        "gewinn": round(end_equity - _letztes_eq, 2),
                        "rendite_pct": round((end_equity / _letztes_eq - 1) * 100, 2)
-                       if _letztes_eq else 0.0})
+                       if _letztes_eq else 0.0,
+                       "btc_pct": round((last_price / _letzter_preis - 1) * 100, 2)
+                       if _letzter_preis else 0.0})
     # Maximaler Rueckgang vom jeweiligen Hoch (gemessen an den Signalzeitpunkten +
     # Endstand). Das ist die Kennzahl, auf die eine Kapital-Reserve einzahlt.
     peak_eq, max_dd = start_capital, 0.0
@@ -627,6 +637,44 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
         "deploy_pct": round(deploy_pct * 100), "max_drawdown_pct": round(max_dd * 100, 2),
         "monate": monate,
         "offene_position": round(units * last_price + s_units * (s_avg - last_price), 2),
+    }
+
+
+def beteiligung(monate: list[dict]) -> dict | None:
+    """Wie viel der Marktbewegung faengt die Engine ein? (E22, Kaisers Frage 27.08.2026)
+
+    Zwei Kennzahlen, getrennt nach steigenden und fallenden Monaten:
+      Aufwaerts-Beteiligung = Summe der Engine-Monate / Summe der BTC-Monate, wenn BTC stieg
+      Abwaerts-Beteiligung  = dasselbe fuer die Monate, in denen BTC fiel
+
+    Lesehilfe: aufwaerts HOCH ist gut (Anstiege werden mitgenommen), abwaerts NIEDRIG oder
+    negativ ist gut (Rueckgaenge werden nicht mitgemacht). 100 % aufwaerts hiesse: genau wie
+    der Markt. Ein Dip-Kauf-System mit gestaffelter Gewinnmitnahme liegt naturgemaess
+    darunter — die Frage ist, wie weit.
+
+    ANLASS: Im August 2026 stieg BTC um 27 %, die Engine um 3 %. Der Verdacht, dass sie
+    grosse Anstiege nur zu einem kleinen Teil einfaengt, liess sich an der Gesamtrendite
+    nicht ablesen — sie versteckt sich hinter dem guten Abschneiden in fallenden Monaten.
+
+    NAEHERUNG (bewusst): Monatsrenditen werden addiert, nicht verkettet. Das ist in der
+    Fondsbranche fuer diese Kennzahl ueblich und hier ausreichend; bei stark schwankenden
+    Monaten weicht es leicht von der verketteten Rechnung ab.
+    """
+    mit_btc = [m for m in monate if "btc_pct" in m]
+    if len(mit_btc) < 3:
+        return None
+    auf = [m for m in mit_btc if m["btc_pct"] > 0]
+    ab = [m for m in mit_btc if m["btc_pct"] <= 0]
+    auf_b = sum(m["btc_pct"] for m in auf)
+    auf_e = sum(m["rendite_pct"] for m in auf)
+    ab_b = sum(m["btc_pct"] for m in ab)
+    ab_e = sum(m["rendite_pct"] for m in ab)
+    return {
+        "auf_monate": len(auf), "ab_monate": len(ab),
+        "auf_btc": round(auf_b, 1), "auf_engine": round(auf_e, 1),
+        "ab_btc": round(ab_b, 1), "ab_engine": round(ab_e, 1),
+        "auf_pct": round(auf_e / auf_b * 100) if auf_b else None,
+        "ab_pct": round(ab_e / ab_b * 100) if ab_b else None,
     }
 
 
@@ -908,6 +956,47 @@ def main():
             "spaeterer Monat arbeitet also mit mehr Kapital als ein frueher. Zwei Monate "
             "sind deshalb nur ueber die Prozentspalte fair vergleichbar.",
         ]
+        # --- E22: Was faengt die Engine von der Marktbewegung ein? -------------------
+        _bet = beteiligung(list(m_live.values()))
+        if _bet:
+            monats_zeilen += [
+                "",
+                "## Was faengt die Engine von der Marktbewegung ein?",
+                "",
+                "Dieselben Monate, jetzt neben der Bitcoin-Bewegung. **Aufwaerts-Beteiligung** "
+                "= wie viel des Anstiegs die Engine in steigenden Monaten mitnimmt (hoch ist "
+                "gut). **Abwaerts-Beteiligung** = wie viel des Rueckgangs sie in fallenden "
+                "Monaten mitmacht (niedrig oder negativ ist gut).",
+                "",
+                "| Monat | Bitcoin | Engine | davon eingefangen |",
+                "|---|---|---|---|",
+            ]
+            for name in sorted(m_live):
+                m = m_live[name]
+                b, e = m.get("btc_pct"), m["rendite_pct"]
+                anteil = f"{e / b * 100:.0f} %" if b and b > 0 else "—"
+                monats_zeilen.append(f"| {name} | {b:+.1f} % | {e:+.1f} % | {anteil} |")
+            monats_zeilen += [
+                "",
+                f"**Aufwaerts-Beteiligung: {_bet['auf_pct']} %** — in den {_bet['auf_monate']} "
+                f"steigenden Monaten legte Bitcoin zusammen {_bet['auf_btc']:+.1f} % zu, die "
+                f"Engine {_bet['auf_engine']:+.1f} %.",
+                "",
+                f"**Abwaerts-Beteiligung: {_bet['ab_pct']} %** — in den {_bet['ab_monate']} "
+                f"fallenden Monaten verlor Bitcoin zusammen {_bet['ab_btc']:+.1f} %, die "
+                f"Engine {_bet['ab_engine']:+.1f} %.",
+                "",
+                "**So ist das zu lesen:** Die Gesamtrendite verrraet nicht, WO sie herkommt. "
+                "Eine Strategie kann glaenzend aussehen, weil sie in fallenden Maerkten "
+                "gewinnt, und trotzdem in einer Rally kaum mitkommen. Die Spalte 'davon "
+                "eingefangen' zeigt das je Monat: Faellt sie mit steigender Bitcoin-Bewegung "
+                "systematisch ab, nimmt die gestaffelte Gewinnmitnahme der Engine genau in "
+                "den grossen Bewegungen die Position weg. Das ist Bauart, kein Fehler — aber "
+                "es entscheidet, wofuer dieses Werkzeug taugt und wofuer nicht.",
+                "",
+                "Naeherung: Monatsrenditen addiert statt verkettet (fuer diese Kennzahl "
+                "ueblich). Wenige Monate — die Richtung ist belastbarer als die Prozentzahl.",
+            ]
 
     # --- E15: Was haetten FURKANS eigene Termine verdient? ---------------------------
     # Kaisers Frage: "Wie testen wir, ob seine Methode besser ist?" Seine Trigger-Listen
