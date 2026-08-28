@@ -316,6 +316,24 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on",
       zonen_1d=True),
+    # E25 (Kaiser 28.08.2026: "ich moechte kein gegengeschaeft sehen"). Die Zeile, die
+    # bisher fehlte: no_flip gegen die HEUTIGE Live-Einstellung. Die aeltere Zeile
+    # "NEU-LIVE +kein Gegengeschaeft je Kerze" laeuft ohne das 5-%-Mindest-Bein, das seit
+    # 27.08. live ist — dort unterscheiden sich zwei Dinge gleichzeitig, der Vergleich
+    # taugt nicht. Gegenprobe ist die Zeile "NEU-LIVE +Mindest-Bein 5 %" selbst:
+    # identische Einstellung, ein einziger Unterschied.
+    V("NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True),
+    # Zweite Zeile, weil die beiden Schalter frueher zusammen besser abschnitten als
+    # einzeln (+34,4 % gegen +31,8 %): festgehaltene Ziele verhindern, dass eine
+    # Teilverkaufs-Marke nach unten wandert und dadurch ueberhaupt erst mit einem
+    # Nachkauf in derselben Kerze zusammentrifft.
+    V("NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft +Ziele festhalten",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, freeze_targets=True),
     V("Long+Short (Ref)"),
 ]
 
@@ -694,6 +712,46 @@ def beteiligung(monate: list[dict]) -> dict | None:
         "auf_pct": round(auf_e / auf_b * 100) if auf_b else None,
         "ab_pct": round(ab_e / ab_b * 100) if ab_b else None,
     }
+
+
+def gegengeschaefte(sigs: list) -> dict:
+    """Wie oft wird in DERSELBEN Kerze gekauft und verkauft? (E25)
+
+    ANLASS (Kaiser, dreimal): "ich sehe im chart schon wieder kauf und verkauf am 26.08
+    bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+
+    Warum das eine eigene Kennzahl braucht: An der Gesamtrendite ist es nicht abzulesen.
+    Der Backtest handelt beide Seiten zum exakten Signalpreis; netto bleibt nur die
+    Differenz der Tranchen minus zwei Gebuehren, das faellt kaum auf. In der Praxis ist
+    so ein Paar aber gar nicht ausfuehrbar — zwei Limit-Orders zum selben Preis heben
+    sich auf. Die Zahl misst also nicht Rendite, sondern Umsetzbarkeit.
+
+    Gezaehlt wird auf Kerzenebene, nicht auf Signalebene: Drei Signale in einer Kerze
+    sind EIN Widerspruch, nicht drei. Vollstaendige Ausstiege (Stop, Rest schliessen)
+    bleiben aussen vor — die duerfen immer feuern, auch nach einem Nachkauf.
+    """
+    aufbau = {"KAUF_1", "KAUF_2", "NACHKAUF", "SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"}
+    teilab = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2",
+              "SHORT_TP_LADDER", "SHORT_TP_1", "SHORT_TP_2"}
+    kerzen: dict = {}
+    for s in sigs:
+        ts = s["ts"] if isinstance(s, dict) else s.ts
+        kerzen.setdefault(ts, []).append(s)
+    paare, gleicher_preis, betroffen = 0, 0, 0
+    for v in kerzen.values():
+        typ = lambda x: (x["type"] if isinstance(x, dict) else x.type.name)
+        pr = lambda x: (x["price"] if isinstance(x, dict) else x.price)
+        auf = [x for x in v if typ(x) in aufbau]
+        ab = [x for x in v if typ(x) in teilab]
+        if not (auf and ab):
+            continue
+        paare += 1
+        betroffen += len(auf) + len(ab)
+        if any(abs(pr(a) - pr(b)) < 0.01 for a in auf for b in ab):
+            gleicher_preis += 1
+    return {"kerzen": paare, "gleicher_preis": gleicher_preis,
+            "signale": betroffen, "signale_gesamt": len(sigs),
+            "signal_kerzen": len(kerzen)}
 
 
 def furkan_pnl(candles, kauf_tage: list[str], verkauf_tage: list[str],
@@ -1133,14 +1191,23 @@ def main():
         "+ Flush core* — der Flush steckt also drin. Jede Zeile, die mit `LIVE +…` beginnt, "
         "baut darauf auf. Die Zeile *+Kaufleiter* ist dagegen OHNE Flush.",
         "",
-        "| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale |",
-        "|---|---|---|---|---|---|---|",
+        "**Gegengeschaefte** (E25, Kaiser 28.08.2026) = Anzahl der 4h-Kerzen, in denen "
+        "gleichzeitig aufgestockt UND teilverkauft wurde, meist zum selben Preis. An der "
+        "Rendite ist das kaum abzulesen — der Backtest handelt beide Seiten zum exakten "
+        "Signalpreis, netto bleibt die Tranchen-Differenz minus zwei Gebuehren. In der "
+        "Praxis ist so ein Paar aber nicht ausfuehrbar: zwei Limit-Orders zum selben Preis "
+        "heben sich auf, und die Telegram-Nachrichten widersprechen sich. Die Spalte misst "
+        "also Umsetzbarkeit, nicht Gewinn. Der Schalter dagegen heisst `no_flip`.",
+        "",
+        "| Variante | Recall | Praez. | Rendite | max. Rueckgang | Einsatz | Signale | Gegen-\ngeschaefte |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for rcfg, rsigs, rsc, rp in results:
         mark = " **<-- beste**" if rcfg is best_cfg else ""
+        _gg = gegengeschaefte(rsigs)                                   # E25
         lines.append(f"| {rcfg['label']} | {rsc['recall']:.0%} | {rsc['precision']:.0%} | "
                      f"{rp['rendite_pct']:+.1f} % | {rp['max_drawdown_pct']:.1f} % | "
-                     f"{rp['deploy_pct']} % | {len(rsigs)}{mark} |")
+                     f"{rp['deploy_pct']} % | {len(rsigs)} | {_gg['kerzen']}{mark} |")
     lines += [
         "",
         f"## Beste Kombination (nach Rendite): {best_cfg['label']}",

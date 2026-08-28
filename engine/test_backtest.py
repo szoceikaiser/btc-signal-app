@@ -435,3 +435,54 @@ def test_simulate_schreibt_die_btc_rendite_je_monat_mit():
     assert p["monate"], "keine Monatsdaten"
     assert all("btc_pct" in m for m in p["monate"]), "btc_pct fehlt in mindestens einem Monat"
     assert p["monate"][1]["btc_pct"] > 0            # der Testkurs steigt durchgehend
+
+
+# ------------------------------------------------- E25: Gegengeschaefte zaehlen
+
+def _sig(ts, typ, preis):
+    return {"ts": ts, "type": typ, "price": preis}
+
+
+def test_gegengeschaeft_wird_je_kerze_gezaehlt_nicht_je_signal():
+    """Drei Signale in einer Kerze sind EIN Widerspruch, nicht drei.
+
+    Der Fall stammt aus dem Live-Betrieb (09.07. und 17.07.2026): zweimal nachgekauft
+    und einmal teilverkauft, alles in derselben Kerze zum selben Preis.
+    """
+    sigs = [_sig(1, "NACHKAUF", 100.0), _sig(1, "NACHKAUF", 100.0),
+            _sig(1, "TEILVERKAUF_LADDER", 100.0),
+            _sig(2, "KAUF_1", 90.0)]
+    g = backtest.gegengeschaefte(sigs)
+    assert g["kerzen"] == 1, f"eine Kerze erwartet, gezaehlt {g['kerzen']}"
+    assert g["gleicher_preis"] == 1
+    assert g["signale"] == 3 and g["signale_gesamt"] == 4
+
+
+def test_vollstaendiger_ausstieg_ist_kein_gegengeschaeft():
+    """Gegenprobe: Stop und Rest-Verkauf duerfen immer feuern, auch nach einem Nachkauf.
+
+    Wuerden sie mitgezaehlt, sperrte die Kennzahl genau die Ausstiege, die nie
+    unterdrueckt werden duerfen — und no_flip saehe schlechter aus, als es ist.
+    """
+    for typ in ("STOPLOSS", "VERKAUF_REST"):
+        g = backtest.gegengeschaefte([_sig(1, "NACHKAUF", 100.0), _sig(1, typ, 95.0)])
+        assert g["kerzen"] == 0, f"{typ} darf nicht als Gegengeschaeft zaehlen"
+    # ... ein echter Teilverkauf in derselben Kerze aber schon
+    g = backtest.gegengeschaefte([_sig(1, "NACHKAUF", 100.0), _sig(1, "TEILVERKAUF_1", 105.0)])
+    assert g["kerzen"] == 1 and g["gleicher_preis"] == 0
+
+
+def test_no_flip_variante_gegen_die_live_einstellung_existiert():
+    """Die Zeile, die bisher fehlte (Kaiser 28.08.2026).
+
+    Die aeltere no_flip-Zeile laeuft ohne min_bein_pct; ein Vergleich mit der
+    Live-Einstellung misst dort zwei Unterschiede auf einmal. Dieser Test haelt fest,
+    dass es eine Zeile gibt, die sich von der Live-Zeile in GENAU einem Punkt
+    unterscheidet — sonst ist die Messung wieder wertlos.
+    """
+    live = next(v for v in backtest.GRID if v["label"] == "NEU-LIVE +Mindest-Bein 5 %")
+    mit = next(v for v in backtest.GRID
+               if v["label"] == "NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft")
+    unterschiede = {k for k in backtest.EVAL_KEYS if live.get(k) != mit.get(k)}
+    assert unterschiede == {"no_flip"}, f"genau ein Unterschied erwartet, gefunden {unterschiede}"
+    assert mit["no_flip"] is True and live["no_flip"] is False
