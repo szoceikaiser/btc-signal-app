@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1788105600000,
+ "last_signal_ts": 1788120000000,
  "retrace_extreme": 76888.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -43,13 +43,8 @@
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 78807.32346153846,
-  "kurs": 78856.39,
+  "kurs": 77682.0,
   "nachkauf": [
-   {
-    "preis": 78468.61,
-    "was": "Liquidationszone",
-    "tranche": 20
-   },
    {
     "zone": [
      75545.67,
@@ -59,7 +54,7 @@
     "tranche": 15
    },
    {
-    "preis": 78312.64,
+    "preis": 76888.0,
     "was": "Liquidationszone",
     "tranche": 20
    },
@@ -67,6 +62,11 @@
     "preis": 76771.2373,
     "was": "0.786-Zone",
     "tranche": 25
+   },
+   {
+    "preis": 76533.87,
+    "was": "Liquidationszone",
+    "tranche": 20
    }
   ],
   "teilgewinn": [
@@ -141,8 +141,8 @@
   "neustart_mit_rest": true,
   "zonen_1d": false
  },
- "updated_at": "2026-08-30T22:20:16Z",
- "last_close": 78856.39,
+ "updated_at": "2026-08-31T03:16:22Z",
+ "last_close": 77682.0,
  "zonen_vorschau": {
   "richtung": "SHORT",
   "impuls_start": 81478.87,
