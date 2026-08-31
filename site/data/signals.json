@@ -204,6 +204,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1788177600000,
+   "type": "KAUF_2",
+   "price": 77733.3649,
+   "tranche_pct": 50,
+   "reason": "Golden Pocket 77550-77733 + Bestaetigung (NEUTRAL)",
+   "stop_ref": 75545.67,
+   "tag": "",
+   "label": "KAUF 2 (Kernposition im Golden Pocket)"
   }
  ]
 }
