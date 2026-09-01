@@ -214,6 +214,16 @@
    "stop_ref": 75545.67,
    "tag": "",
    "label": "KAUF 2 (Kernposition im Golden Pocket)"
+  },
+  {
+   "ts": 1788278400000,
+   "type": "NACHKAUF",
+   "price": 76771.2373,
+   "tranche_pct": 25,
+   "reason": "0.786-Zone erreicht, Struktur intakt",
+   "stop_ref": 75545.67,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   }
  ]
 }

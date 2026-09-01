@@ -1,13 +1,13 @@
 {
  "direction": "LONG",
- "pos_state": "CORE",
- "last_signal_ts": 1788264000000,
- "retrace_extreme": 76888.0,
+ "pos_state": "FULL",
+ "last_signal_ts": 1788278400000,
+ "retrace_extreme": 76420.0,
  "tp_rungs": 0,
  "dip_buys": 0,
  "buy_rungs": 0,
- "entry_ref": 78340.38495652174,
- "entry_pct": 115,
+ "entry_ref": 78060.18001785713,
+ "entry_pct": 140,
  "liq_exits": 0,
  "high_exits": 2,
  "liq_entries": 2,
@@ -26,8 +26,8 @@
   "gp_lower": 77550.1025,
   "level_0786": 76771.2373,
   "invalidation": 75545.67,
-  "ext1": 82614.95,
-  "ext2": 86154.20509999999
+  "ext1": 82146.95,
+  "ext2": 85686.20509999999
  },
  "widerstand": {
   "richtung": "LONG",
@@ -41,9 +41,9 @@
  },
  "plan": {
   "richtung": "LONG",
-  "anteil_pct": 115,
-  "einstand": 78340.38495652174,
-  "kurs": 77919.06,
+  "anteil_pct": 140,
+  "einstand": 78060.18001785713,
+  "kurs": 77312.0,
   "nachkauf": [
    {
     "zone": [
@@ -54,19 +54,14 @@
     "tranche": 15
    },
    {
-    "preis": 77851.9,
+    "preis": 77000.0,
     "was": "Liquidationszone",
     "tranche": 20
    },
    {
-    "preis": 77851.0,
+    "preis": 76888.0,
     "was": "Liquidationszone",
     "tranche": 20
-   },
-   {
-    "preis": 76771.2373,
-    "was": "0.786-Zone",
-    "tranche": 25
    }
   ],
   "teilgewinn": [
@@ -84,22 +79,22 @@
     "tranche": 15
    },
    {
-    "preis": 81469.56,
+    "preis": 81001.56,
     "was": "Zwischenziel (Extension 0.8)",
     "tranche": 15
    },
    {
-    "preis": 82042.255,
+    "preis": 81574.255,
     "was": "Zwischenziel (Extension 0.9)",
     "tranche": 15
    },
    {
-    "preis": 82614.95,
+    "preis": 82146.95,
     "was": "Ziel 1.0",
     "tranche": 40
    },
    {
-    "preis": 86154.20509999999,
+    "preis": 85686.20509999999,
     "was": "Ziel 1.618",
     "tranche": 40
    }
@@ -141,8 +136,8 @@
   "neustart_mit_rest": true,
   "zonen_1d": false
  },
- "updated_at": "2026-09-01T19:14:56Z",
- "last_close": 77919.06,
+ "updated_at": "2026-09-01T22:20:18Z",
+ "last_close": 77312.0,
  "zonen_vorschau": {
   "richtung": "SHORT",
   "impuls_start": 81478.87,
