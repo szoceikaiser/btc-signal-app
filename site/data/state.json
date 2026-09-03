@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "FULL",
- "last_signal_ts": 1788379200000,
+ "last_signal_ts": 1788408000000,
  "retrace_extreme": 76264.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -31,19 +31,19 @@
  },
  "widerstand": {
   "richtung": "LONG",
-  "bein_start": 79400.0,
-  "bein_ende": 77000.0,
-  "level_05": 78200.0,
-  "gp_von": 78483.2,
-  "gp_bis": 78560.0,
-  "level_0786": 78886.4,
-  "ausbruch": 79400.0
+  "bein_start": 79250.0,
+  "bein_ende": 76264.0,
+  "level_05": 77757.0,
+  "gp_von": 78109.348,
+  "gp_bis": 78204.9,
+  "level_0786": 78610.996,
+  "ausbruch": 79250.0
  },
  "plan": {
   "richtung": "LONG",
   "anteil_pct": 155,
   "einstand": 77941.01033870968,
-  "kurs": 77340.01,
+  "kurs": 77663.15,
   "nachkauf": [
    {
     "zone": [
@@ -67,8 +67,8 @@
   "teilgewinn": [
    {
     "zone": [
-     78483.2,
-     78560.0
+     78109.348,
+     78204.9
     ],
     "was": "Widerstand der Gegenbewegung \u2014 nur Hinweis, die Engine verkauft dort nicht",
     "tranche": 0
@@ -136,8 +136,8 @@
   "neustart_mit_rest": true,
   "zonen_1d": false
  },
- "updated_at": "2026-09-03T02:43:37Z",
- "last_close": 77340.01,
+ "updated_at": "2026-09-03T08:29:55Z",
+ "last_close": 77663.15,
  "zonen_vorschau": {
   "richtung": "SHORT",
   "impuls_start": 81478.87,
