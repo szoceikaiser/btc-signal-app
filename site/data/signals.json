@@ -244,6 +244,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1788451200000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 81418.255,
+   "tranche_pct": 15,
+   "reason": "Leiter-Teilgewinn an Extension 0.9 (81418)",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   }
  ]
 }
