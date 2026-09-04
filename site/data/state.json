@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "TP1",
- "last_signal_ts": 1788523200000,
+ "last_signal_ts": 1788537600000,
  "retrace_extreme": 76264.0,
  "tp_rungs": 2,
  "dip_buys": 0,
@@ -43,7 +43,7 @@
   "richtung": "LONG",
   "anteil_pct": 155,
   "einstand": 77941.01033870968,
-  "kurs": 79429.33,
+  "kurs": 79793.34,
   "nachkauf": [
    {
     "preis": 79369.17,
@@ -51,7 +51,7 @@
     "tranche": 20
    },
    {
-    "preis": 78468.61,
+    "preis": 78660.0,
     "was": "Liquidationszone",
     "tranche": 20
    },
@@ -74,8 +74,8 @@
     "tranche": 0
    },
    {
-    "preis": 79102.5,
-    "was": "kurz unter dem letzten Hoch 79.500",
+    "preis": 80866.2569,
+    "was": "kurz unter dem letzten Hoch 81.273",
     "tranche": 15
    },
    {
@@ -121,19 +121,19 @@
   "neustart_mit_rest": true,
   "zonen_1d": false
  },
- "updated_at": "2026-09-04T18:46:46Z",
- "last_close": 79429.33,
+ "updated_at": "2026-09-04T22:03:16Z",
+ "last_close": 79793.34,
  "zonen_vorschau": {
-  "richtung": "SHORT",
-  "impuls_start": 81478.87,
-  "impuls_ende": 76888.0,
-  "impuls_start_ts": 1787875200000,
-  "impuls_ende_ts": 1787932800000,
-  "level_05": 79183.435,
-  "gp_upper": 79725.15766,
-  "gp_lower": 79872.0655,
-  "level_0786": 80496.42382,
-  "invalidation": 81478.87,
-  "abstand_pct": 2.2
+  "richtung": "LONG",
+  "impuls_start": 76264.0,
+  "impuls_ende": 82300.0,
+  "impuls_start_ts": 1788336000000,
+  "impuls_ende_ts": 1788465600000,
+  "level_05": 79282.0,
+  "gp_upper": 78569.752,
+  "gp_lower": 78376.6,
+  "level_0786": 77555.704,
+  "invalidation": 76264.0,
+  "abstand_pct": 2.93
  }
 }
