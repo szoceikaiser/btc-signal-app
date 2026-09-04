@@ -254,6 +254,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1788465600000,
+   "type": "TEILVERKAUF_1",
+   "price": 81990.95,
+   "tranche_pct": 40,
+   "reason": "Extension 1.0 erreicht (81991)",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF 1 (Extension 1.0)"
   }
  ]
 }
