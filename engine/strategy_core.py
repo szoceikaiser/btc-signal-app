@@ -1286,8 +1286,16 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # Positions-Management (ein Stop in derselben Kerze hat Vorrang) und VOR der
     # Einstands-Fortschreibung — sonst wuerde die neue Tranche gleich wieder
     # ueberschrieben, wenn der alte Bestand zurueckgesetzt wird.
+    # E30.2b (05.09.2026): _darf_aufstocken() gilt auch hier. Der Neustart laeuft NACH
+    # dem Positions-Management im selben Aufruf und konnte deshalb in dieselbe Kerze
+    # fallen wie ein Teilverkauf — ein Gegengeschaeft, das no_flip bis dahin nicht sah,
+    # weil es nur die Nachkauf-Pfade absicherte. Betrifft die Live-Einstellung
+    # unabhaengig von zonen_nachziehen; im gemessenen Fenster war es bisher Zufall,
+    # dass die Live-Zeile 0 Gegengeschaefte zeigte. Der Neustart wird dadurch nur um
+    # eine Kerze verschoben, nicht verhindert.
     if (neustart_mit_rest and pos.state in (PosState.TP1, PosState.TP2)
-            and (imp is not None or _imp_1d is not None) and _cooldown_ok()):
+            and (imp is not None or _imp_1d is not None) and _cooldown_ok()
+            and _darf_aufstocken()):
         _bestand = (pos.entry_ref, pos.entry_pct)
         _vorher = pos.state
         if imp is not None:

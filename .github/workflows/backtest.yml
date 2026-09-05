@@ -22,7 +22,11 @@ jobs:
         run: |
           git config user.name "backtest"
           git config user.email "actions@users.noreply.github.com"
+          # Kopie in site/, damit der volle Bericht ueber GitHub Pages lesbar ist.
+          # Pages veroeffentlicht ausschliesslich den Ordner site/ - ohne diese Kopie
+          # ist die Varianten-Tabelle nur nach lokalem "stand-holen.bat" einsehbar.
+          cp BACKTEST.md site/BACKTEST.md
           git pull --no-rebase
-          git add BACKTEST.md site/data/backtest.json site/data/backtest_signals.json
+          git add BACKTEST.md site/BACKTEST.md site/data/backtest.json site/data/backtest_signals.json
           git diff --cached --quiet || git commit -m "Backtest-Bericht aktualisiert"
           git push

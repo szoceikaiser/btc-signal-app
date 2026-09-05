@@ -1639,3 +1639,47 @@ def test_zonen_nachziehen_erzeugt_kein_gegengeschaeft():
         for ts, typen in proc.items():
             assert not (typen & aufbau and typen & abbau), \
                 f"Kauf und Verkauf in derselben Kerze bei ts={ts}: {typen}"
+
+
+# --------- E30.2b: no_flip-Luecke beim Neustart mit Rest (05.09.2026)
+
+def _teilverkauf_und_neustart_in_einer_kerze():
+    """Kerze 9 loest gleichzeitig Teilgewinne (Leiter + Extension 1.0) UND — ueber
+    neustart_mit_rest — einen neuen KAUF 1 aus. Genau das Muster, das im Backtest
+    vom 05.09.2026 als Gegengeschaeft auftauchte."""
+    return zigzag_candles() + [
+        c(8, 106, 106.5, 104.5, 105.5),
+        c(9, 105, 116, 104.6, 115),
+        c(10, 115, 120, 113, 119),
+        c(11, 119, 121, 112, 113),
+        c(12, 113, 118, 111, 117),
+        c(13, 117, 119, 110, 111),
+        c(14, 111, 116, 109, 115),
+        c(15, 115, 118, 108, 109),
+    ]
+
+
+def test_no_flip_deckt_auch_den_neustart_mit_rest_ab():
+    """no_flip schuetzte bisher nur Nachkaeufe (_darf_aufstocken), nicht den
+    Neu-Einstieg aus neustart_mit_rest — der laeuft NACH dem Positions-Management
+    im selben evaluate()-Aufruf und konnte deshalb in dieselbe Kerze fallen wie ein
+    Teilverkauf. Betrifft die Live-Einstellung, unabhaengig von zonen_nachziehen."""
+    aufbau = {SignalType.KAUF_1, SignalType.KAUF_2, SignalType.NACHKAUF}
+    abbau = {SignalType.TEILVERKAUF_LADDER, SignalType.TEILVERKAUF_1,
+             SignalType.TEILVERKAUF_2}
+    pfad = _teilverkauf_und_neustart_in_einer_kerze()
+    for nachziehen in (False, True):
+        pos = Position()
+        sigs = run_incremental(pfad, neg_funding_flow(), pos,
+                               pivot_n=2, bias_short=False, buy_ladder=True,
+                               tp_ladder=True, high_exit="on", trail_stop=True,
+                               min_stop_pct=0.02, flush_entry="core",
+                               min_bein_pct=0.05, no_flip=True,
+                               neustart_mit_rest=True, liq_entry="boost",
+                               zonen_nachziehen=nachziehen)
+        proc = {}
+        for x in sigs:
+            proc.setdefault(x.ts, set()).add(x.type)
+        for ts, typen in proc.items():
+            assert not (typen & aufbau and typen & abbau), \
+                f"Gegengeschaeft bei ts={ts} (zonen_nachziehen={nachziehen}): {typen}"
