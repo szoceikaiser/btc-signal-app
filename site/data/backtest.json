@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-05T15:40:26Z",
+ "generated_at": "2026-09-05T21:50:53Z",
  "zeitraum": "28.12.2025-05.09.2026",
  "variante": "LIVE-heute +Neustart mit Rest",
  "params": {
@@ -42,9 +42,9 @@
  "precision_pct": 37,
  "pnl": {
   "start": 10000.0,
-  "ende": 13621.48,
-  "rendite_pct": 36.21,
-  "buyhold_pct": -9.37,
+  "ende": 13629.39,
+  "rendite_pct": 36.29,
+  "buyhold_pct": -9.19,
   "trades": 100,
   "gewinn_trades": 71,
   "long_profit": 3553.75,
@@ -122,30 +122,30 @@
    },
    {
     "monat": "2026-09",
-    "ende": 13621.48,
-    "gewinn": 405.7,
-    "rendite_pct": 3.07,
-    "btc_pct": 1.44
+    "ende": 13629.39,
+    "gewinn": 413.61,
+    "rendite_pct": 3.13,
+    "btc_pct": 1.64
    }
   ],
   "beteiligung": {
    "auf_monate": 5,
    "ab_monate": 5,
-   "auf_btc": 47.4,
-   "auf_engine": 23.4,
+   "auf_btc": 47.6,
+   "auf_engine": 23.5,
    "ab_btc": -49.4,
    "ab_engine": 8.3,
    "auf_pct": 49,
    "ab_pct": -17
   },
-  "offene_position": 4021.98
+  "offene_position": 4029.89
  },
  "variante_ohne_flush": "MEINE Einstellung ohne Flush",
  "pnl_ohne_flush": {
   "start": 10000.0,
-  "ende": 12792.89,
-  "rendite_pct": 27.93,
-  "buyhold_pct": -9.37,
+  "ende": 12800.32,
+  "rendite_pct": 28.0,
+  "buyhold_pct": -9.19,
   "trades": 93,
   "gewinn_trades": 63,
   "long_profit": 2729.26,
@@ -223,22 +223,22 @@
    },
    {
     "monat": "2026-09",
-    "ende": 12792.89,
-    "gewinn": 381.02,
-    "rendite_pct": 3.07,
-    "btc_pct": 1.44
+    "ende": 12800.32,
+    "gewinn": 388.45,
+    "rendite_pct": 3.13,
+    "btc_pct": 1.64
    }
   ],
   "beteiligung": {
    "auf_monate": 5,
    "ab_monate": 5,
-   "auf_btc": 47.4,
-   "auf_engine": 19.8,
+   "auf_btc": 47.6,
+   "auf_engine": 19.9,
    "ab_btc": -49.4,
    "ab_engine": 5.5,
    "auf_pct": 42,
    "ab_pct": -11
   },
-  "offene_position": 3777.32
+  "offene_position": 3784.75
  }
 }
