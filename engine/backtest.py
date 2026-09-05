@@ -344,7 +344,7 @@ GRID = [
     # Fensterhaelfte auf Platz 1 und 3 — aber beide Zeilen laufen ohne no_flip, das seit
     # 28.08. live ist. Diese beiden hier unterscheiden sich von der Live-Zeile in genau
     # einem bzw. zwei benannten Punkten; Tests halten das fest.
-    V("LIVE-heute +Neustart mit Rest", panel=True,          # LIVE seit 28.08.2026 (E26)
+    V("LIVE-heute +Neustart mit Rest",                      # war LIVE 28.08.-05.09.2026
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True),
@@ -352,7 +352,7 @@ GRID = [
     # intakt ist (hoeheres Tief UND hoeheres Hoch). Genau EIN Unterschied zur Live-Zeile.
     # Anlass: Kaiser "wenn sich eine neue Struktur ergibt, dann duerften diese nicht
     # festgefahren bleiben". Siehe docs/PLAN-E30-ZONEN-NACHZIEHEN.md.
-    V("LIVE-heute +Zonen nachziehen",
+    V("LIVE-heute +Zonen nachziehen", panel=True,           # LIVE seit 05.09.2026 (E30)
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True),
