@@ -9,6 +9,7 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            daily_fib_zone, daily_trend, ema, evaluate, fib_zones,
                            find_pivots, in_liq_zone, last_significant_impulse,
                            gleiches_bein, liq_cascade, liq_levels, next_pivot_beyond,
+                           trend_intakt,
                            resample_daily)
 
 DAY_MS = 86_400_000
@@ -1534,3 +1535,107 @@ def test_gleiches_bein_vergleicht_preise_nicht_zeitstempel():
     assert gleiches_bein(a, b)
     assert not gleiches_bein(a, c_)
     assert not gleiches_bein(a, None) and not gleiches_bein(None, None)
+
+
+# ------------------------- E30: Zonen einer laufenden Position nachziehen
+
+def test_trend_intakt_erkennt_fortsetzung_und_bruch():
+    """Reiner Regel-Test der Bedingung, ohne Engine drumherum."""
+    alt_auf = Impulse(Pivot(0, 0, 100.0, "L"), Pivot(1, 1, 110.0, "H"))
+    # hoeheres Tief UND hoeheres Hoch -> intakt
+    assert trend_intakt(alt_auf, Impulse(Pivot(2, 2, 104.5, "L"), Pivot(3, 3, 113.0, "H")))
+    # hoeheres Tief, aber TIEFERES Hoch -> gebrochen
+    assert not trend_intakt(alt_auf, Impulse(Pivot(2, 2, 104.5, "L"), Pivot(3, 3, 108.0, "H")))
+    # tieferes Tief, hoeheres Hoch -> gebrochen
+    assert not trend_intakt(alt_auf, Impulse(Pivot(2, 2, 98.0, "L"), Pivot(3, 3, 113.0, "H")))
+    # Richtungswechsel zaehlt nie als intakt
+    assert not trend_intakt(alt_auf, Impulse(Pivot(2, 2, 113.0, "H"), Pivot(3, 3, 104.5, "L")))
+    # Short spiegelbildlich: tieferes Hoch UND tieferes Tief
+    alt_ab = Impulse(Pivot(0, 0, 110.0, "H"), Pivot(1, 1, 100.0, "L"))
+    assert trend_intakt(alt_ab, Impulse(Pivot(2, 2, 108.0, "H"), Pivot(3, 3, 96.0, "L")))
+    assert not trend_intakt(alt_ab, Impulse(Pivot(2, 2, 108.0, "H"), Pivot(3, 3, 102.0, "L")))
+    assert not trend_intakt(None, alt_auf) and not trend_intakt(alt_auf, None)
+
+
+def _intakter_trend_pfad():
+    """Impuls 100->110, Einstieg am 0.5 (105). Danach bildet sich ein neues Bein
+    104,5 -> 113: hoeheres Tief UND hoeheres Hoch. Das Hoch bleibt unter dem
+    Extension-Ziel 114,5, damit kein Teilverkauf den Zustand verwischt."""
+    return zigzag_candles() + [
+        c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1 am 0.5, Tief 104.5
+        c(9, 105, 107, 104.6, 106.5),
+        c(10, 107, 110, 106.5, 109.5),       # Pivot-Tief 104.5 bestaetigt
+        c(11, 109.5, 113, 109, 112.5),       # neues Hoch 113
+        c(12, 112, 112.5, 111, 111.5),
+        c(13, 111, 111.5, 110, 110.5),       # Pivot-Hoch 113 bestaetigt
+    ]
+
+
+def _gebrochener_trend_pfad():
+    """Gleicher Einstieg, aber das neue Bein 104,5 -> 108 bleibt UNTER dem alten
+    Hoch 110: hoeheres Tief, aber tieferes Hoch = kein intakter Trend."""
+    return zigzag_candles() + [
+        c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1 am 0.5, Tief 104.5
+        c(9, 105, 107, 104.6, 106.5),
+        c(10, 107, 108, 106.5, 107.5),       # Hoch nur 108
+        c(11, 107, 107.5, 105.5, 106),
+        c(12, 106, 106.5, 105, 105.5),       # Pivot-Hoch 108 bestaetigt
+    ]
+
+
+def _lauf(path, **kw):
+    pos = Position()
+    kw.setdefault("pivot_n", 2)
+    kw.setdefault("bias_short", False)
+    kw.setdefault("tp_ladder", False)
+    kw.setdefault("buy_ladder", False)
+    sigs = run_incremental(path, neg_funding_flow(), pos, **kw)
+    return pos, sigs
+
+
+def test_zonen_nachziehen_bei_intaktem_trend():
+    """Der Schalter an: die Zonen der laufenden Position wandern auf das neue Bein."""
+    pos, _ = _lauf(_intakter_trend_pfad(), zonen_nachziehen=True)
+    assert pos.state != PosState.FLAT, "Position muss fuer den Test offen bleiben"
+    assert pos.zones is not None
+    assert pos.zones.impulse.start.price == 104.5      # neues Bein
+    assert pos.zones.impulse.end.price == 113
+    assert pos.zones.invalidation == 104.5             # Stop-Bezug ist mitgewandert
+    # ... und er ist dabei nur GESTIEGEN, nie lockerer geworden
+    assert pos.zones.invalidation > 100
+
+
+def test_ohne_schalter_bleiben_die_zonen_eingefroren():
+    """Default aus = bisheriges Verhalten, unveraendert."""
+    pos, _ = _lauf(_intakter_trend_pfad(), zonen_nachziehen=False)
+    assert pos.state != PosState.FLAT
+    assert pos.zones.impulse.start.price == 100        # altes Bein
+    assert pos.zones.invalidation == 100
+
+
+def test_zonen_nachziehen_nicht_bei_gebrochener_struktur():
+    """Gegenprobe: haelt das neue Bein den Trend NICHT, bleiben die alten Zonen stehen —
+    sonst wuerde die Engine einer kaputten Struktur nachkaufen."""
+    pfad = _gebrochener_trend_pfad()
+    pos_an, _ = _lauf(pfad, zonen_nachziehen=True)
+    pos_aus, _ = _lauf(pfad, zonen_nachziehen=False)
+    assert pos_an.state != PosState.FLAT
+    # Mit und ohne Schalter identisch: der Schalter darf hier NICHTS tun
+    assert pos_an.zones.invalidation == pos_aus.zones.invalidation == 100
+    assert pos_an.zones.impulse.end.price == pos_aus.zones.impulse.end.price == 110
+
+
+def test_zonen_nachziehen_erzeugt_kein_gegengeschaeft():
+    """Karussell-Gegenprobe (Lehre aus E28): das Nachziehen darf nicht dazu fuehren,
+    dass in derselben Kerze gekauft UND verkauft wird."""
+    aufbau = {SignalType.KAUF_1, SignalType.KAUF_2, SignalType.NACHKAUF}
+    abbau = {SignalType.TEILVERKAUF_LADDER, SignalType.TEILVERKAUF_1,
+             SignalType.TEILVERKAUF_2}
+    for pfad in (_intakter_trend_pfad(), _gebrochener_trend_pfad()):
+        _, sigs = _lauf(pfad, zonen_nachziehen=True, buy_ladder=True, tp_ladder=True)
+        proc = {}
+        for s in sigs:
+            proc.setdefault(s.ts, set()).add(s.type)
+        for ts, typen in proc.items():
+            assert not (typen & aufbau and typen & abbau), \
+                f"Kauf und Verkauf in derselben Kerze bei ts={ts}: {typen}"

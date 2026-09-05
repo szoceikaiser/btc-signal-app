@@ -67,7 +67,8 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct",
              "no_flip", "freeze_targets",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
-             "rest_halten", "neustart_mit_rest", "zonen_1d")
+             "rest_halten", "neustart_mit_rest", "zonen_1d",
+             "zonen_nachziehen")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, trend_ema=50, strict_confirm=False, confluence=False,
@@ -77,7 +78,8 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              no_flip=False, freeze_targets=False,
              min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
              bein_richtung="auto", widerstand_exit="off",
-             rest_halten=False, neustart_mit_rest=False, zonen_1d=False)
+             rest_halten=False, neustart_mit_rest=False, zonen_1d=False,
+             zonen_nachziehen=False)
 
 
 def V(label, panel=False, **kw):
@@ -346,6 +348,14 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True),
+    # E30 (05.09.2026): Zonen einer laufenden Position nachziehen, solange der Trend
+    # intakt ist (hoeheres Tief UND hoeheres Hoch). Genau EIN Unterschied zur Live-Zeile.
+    # Anlass: Kaiser "wenn sich eine neue Struktur ergibt, dann duerften diese nicht
+    # festgefahren bleiben". Siehe docs/PLAN-E30-ZONEN-NACHZIEHEN.md.
+    V("LIVE-heute +Zonen nachziehen",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True),
     V("LIVE-heute +Rest halten +Neustart mit Rest",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,

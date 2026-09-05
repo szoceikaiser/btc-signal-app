@@ -346,6 +346,20 @@ def gleiches_bein(a: Optional[Impulse], b: Optional[Impulse]) -> bool:
             and abs(a.end.price - b.end.price) < 0.01)
 
 
+def trend_intakt(alt: Impulse, neu: Impulse) -> bool:
+    """Setzt `neu` den Trend von `alt` intakt fort? (E30)
+
+    Long-Bein (start=Tief, end=Hoch): hoeheres Tief UND hoeheres Hoch.
+    Short-Bein (start=Hoch, end=Tief): tieferes Hoch UND tieferes Tief.
+    Richtungswechsel gilt nie als intakt.
+    """
+    if alt is None or neu is None or alt.up != neu.up:
+        return False
+    if alt.up:
+        return neu.start.price > alt.start.price and neu.end.price > alt.end.price
+    return neu.start.price < alt.start.price and neu.end.price < alt.end.price
+
+
 def gegen_zonen(candles: list[Candle], pivots: list[Pivot], long_side: bool,
                 k_atr: float = 2.0, min_pct: float = 0.03) -> Optional[FibZones]:
     """Das ZWEITE Fib-Raster: das juengste signifikante Bein GEGEN die Handelsrichtung.
@@ -658,7 +672,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              widerstand_exit: str = "off",
              rest_halten: bool = False,
              neustart_mit_rest: bool = False,
-             zonen_1d: bool = False) -> list[Signal]:
+             zonen_1d: bool = False,
+             zonen_nachziehen: bool = False) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -972,6 +987,19 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
 
     # --- Positions-Management
     elif pos.state != PosState.FLAT and pos.zones is not None:
+        # E30: Zonen nachziehen, solange der Trend intakt ist. Bis hierher waren die
+        # Zonen einer laufenden Position hart eingefroren — im Widerspruch zu
+        # Grundregel 1 ("Zonen sind dynamisch, nie starr") und in sich asymmetrisch:
+        # Ziele (retrace_extreme) und Stop (trail_stop) wanderten laengst mit, nur die
+        # Kaufbereiche nicht. Nachgezogen wird NUR bei intaktem Trend (hoeheres Tief
+        # UND hoeheres Hoch, bei Short spiegelbildlich) — bricht die Struktur, bleiben
+        # die alten Zonen stehen, damit die Engine keiner kaputten Struktur nachkauft.
+        # Der Stop kann dadurch nur steigen: invalidation == impuls.start.
+        if zonen_nachziehen and imp is not None:
+            _alt = pos.zones.impulse
+            if (imp.start.ts, imp.end.ts) != (_alt.start.ts, _alt.end.ts) \
+                    and trend_intakt(_alt, imp):
+                pos.zones = fib_zones(imp)
         z = pos.zones
         long_side = pos.direction == "LONG"
         # Retracement-Extrem fortschreiben (fuer Extension-Ziele); neues Extrem merken
