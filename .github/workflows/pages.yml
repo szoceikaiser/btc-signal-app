@@ -4,6 +4,15 @@ on:
   push:
     branches: [main]
     paths: ["site/**"]
+  # GitHub loest bei einem Push, den ein Workflow mit dem Standard-GITHUB_TOKEN
+  # macht, KEINE weiteren Workflows aus (Schutz vor Endlosschleifen). Die Commits
+  # von "Signal-Engine" und "Backtest" aendern site/data, konnten die Webseite aber
+  # trotzdem nicht neu bauen: die veroeffentlichte Seite blieb auf dem Stand des
+  # letzten Pushes von Hand stehen (05.09.2026 aufgefallen - Backtest-Zahlen der
+  # Webseite waren 8 Tage alt). workflow_run schliesst diese Luecke.
+  workflow_run:
+    workflows: ["Signal-Engine", "Backtest"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +25,10 @@ concurrency:
 
 jobs:
   deploy:
+    # Bei workflow_run nur bauen, wenn der ausloesende Lauf erfolgreich war.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
