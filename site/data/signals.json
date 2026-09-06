@@ -274,6 +274,16 @@
    "stop_ref": 76264.0,
    "tag": "",
    "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1788710400000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 79829.99,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 80200",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   }
  ]
 }
