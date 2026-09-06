@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-06T13:11:10Z",
+ "generated_at": "2026-09-06T19:00:23Z",
  "zeitraum": "29.12.2025-06.09.2026",
  "variante": "LIVE-heute +Zonen nachziehen",
  "params": {
@@ -42,14 +42,14 @@
  "precision_pct": 37,
  "pnl": {
   "start": 10000.0,
-  "ende": 13588.27,
-  "rendite_pct": 35.88,
-  "buyhold_pct": -8.37,
-  "trades": 103,
-  "gewinn_trades": 74,
-  "long_profit": 3509.89,
-  "long_trades": 103,
-  "long_wins": 74,
+  "ende": 13608.82,
+  "rendite_pct": 36.09,
+  "buyhold_pct": -8.39,
+  "trades": 104,
+  "gewinn_trades": 75,
+  "long_profit": 3535.57,
+  "long_trades": 104,
+  "long_wins": 75,
   "short_profit": 0.0,
   "short_trades": 0,
   "short_wins": 0,
@@ -122,41 +122,41 @@
    },
    {
     "monat": "2026-09",
-    "ende": 13588.27,
-    "gewinn": 415.25,
-    "rendite_pct": 3.15,
-    "btc_pct": 1.72
+    "ende": 13608.82,
+    "gewinn": 435.81,
+    "rendite_pct": 3.31,
+    "btc_pct": 1.7
    }
   ],
   "beteiligung": {
    "auf_monate": 6,
    "ab_monate": 4,
    "auf_btc": 48.2,
-   "auf_engine": 24.7,
+   "auf_engine": 24.9,
    "ab_btc": -49.0,
    "ab_engine": 6.9,
-   "auf_pct": 51,
+   "auf_pct": 52,
    "ab_pct": -14
   },
-  "offene_position": 4019.83
+  "offene_position": 5318.22
  },
  "variante_ohne_flush": "MEINE Einstellung ohne Flush",
  "pnl_ohne_flush": {
   "start": 10000.0,
-  "ende": 12804.12,
-  "rendite_pct": 28.04,
-  "buyhold_pct": -8.37,
-  "trades": 93,
-  "gewinn_trades": 63,
-  "long_profit": 2730.26,
-  "long_trades": 93,
-  "long_wins": 63,
+  "ende": 12807.56,
+  "rendite_pct": 28.08,
+  "buyhold_pct": -8.39,
+  "trades": 96,
+  "gewinn_trades": 69,
+  "long_profit": 2738.62,
+  "long_trades": 96,
+  "long_wins": 69,
   "short_profit": 0.0,
   "short_trades": 0,
   "short_wins": 0,
   "fee_pct": 0.1,
   "deploy_pct": 100,
-  "max_drawdown_pct": -9.78,
+  "max_drawdown_pct": -9.68,
   "monate": [
    {
     "monat": "2025-12",
@@ -167,78 +167,78 @@
    },
    {
     "monat": "2026-01",
-    "ende": 10395.8,
-    "gewinn": 369.9,
-    "rendite_pct": 3.69,
+    "ende": 10417.22,
+    "gewinn": 391.32,
+    "rendite_pct": 3.9,
     "btc_pct": -10.16
    },
    {
     "monat": "2026-02",
-    "ende": 10309.79,
-    "gewinn": -86.01,
-    "rendite_pct": -0.83,
+    "ende": 10329.75,
+    "gewinn": -87.47,
+    "rendite_pct": -0.84,
     "btc_pct": -14.94
    },
    {
     "monat": "2026-03",
-    "ende": 10769.26,
-    "gewinn": 459.47,
-    "rendite_pct": 4.46,
+    "ende": 10883.74,
+    "gewinn": 553.99,
+    "rendite_pct": 5.36,
     "btc_pct": 1.96
    },
    {
     "monat": "2026-04",
-    "ende": 11692.99,
-    "gewinn": 923.73,
-    "rendite_pct": 8.58,
+    "ende": 11640.87,
+    "gewinn": 757.13,
+    "rendite_pct": 6.96,
     "btc_pct": 11.81
    },
    {
     "monat": "2026-05",
-    "ende": 11887.93,
-    "gewinn": 194.94,
-    "rendite_pct": 1.67,
+    "ende": 11969.14,
+    "gewinn": 328.27,
+    "rendite_pct": 2.82,
     "btc_pct": -3.5
    },
    {
     "monat": "2026-06",
-    "ende": 11968.48,
-    "gewinn": 80.55,
-    "rendite_pct": 0.68,
+    "ende": 11906.54,
+    "gewinn": -62.6,
+    "rendite_pct": -0.52,
     "btc_pct": -20.43
    },
    {
     "monat": "2026-07",
-    "ende": 12252.77,
-    "gewinn": 284.29,
-    "rendite_pct": 2.38,
+    "ende": 12253.97,
+    "gewinn": 347.43,
+    "rendite_pct": 2.92,
     "btc_pct": 7.27
    },
    {
     "monat": "2026-08",
-    "ende": 12412.83,
-    "gewinn": 160.07,
-    "rendite_pct": 1.31,
+    "ende": 12397.41,
+    "gewinn": 143.44,
+    "rendite_pct": 1.17,
     "btc_pct": 24.95
    },
    {
     "monat": "2026-09",
-    "ende": 12804.12,
-    "gewinn": 391.29,
-    "rendite_pct": 3.15,
-    "btc_pct": 1.72
+    "ende": 12807.56,
+    "gewinn": 410.15,
+    "rendite_pct": 3.31,
+    "btc_pct": 1.7
    }
   ],
   "beteiligung": {
    "auf_monate": 6,
    "ab_monate": 4,
    "auf_btc": 48.2,
-   "auf_engine": 20.1,
+   "auf_engine": 20.0,
    "ab_btc": -49.0,
-   "ab_engine": 5.2,
-   "auf_pct": 42,
+   "ab_engine": 5.4,
+   "auf_pct": 41,
    "ab_pct": -11
   },
-  "offene_position": 3787.86
+  "offene_position": 5005.1
  }
 }

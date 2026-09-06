@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-06T13:11:10Z",
+ "generated_at": "2026-09-06T19:00:23Z",
  "variante": "LIVE-heute +Zonen nachziehen",
  "fenster": "29.12.2025-06.09.2026",
  "signals": [
@@ -2492,6 +2492,26 @@
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF 1 (Extension 1.0)"
+  },
+  {
+   "ts": 1788696000000,
+   "type": "KAUF_1",
+   "price": 79282.0,
+   "tranche_pct": 25,
+   "reason": "0.5-Retracement des Impulses 76264->82300",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1788710400000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 79920.44,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 80200",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   }
  ]
 }
