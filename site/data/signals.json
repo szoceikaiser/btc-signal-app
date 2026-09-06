@@ -264,6 +264,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF 1 (Extension 1.0)"
+  },
+  {
+   "ts": 1788696000000,
+   "type": "KAUF_1",
+   "price": 79282.0,
+   "tranche_pct": 25,
+   "reason": "0.5-Retracement des Impulses 76264->82300",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "KAUF 1 (Teilposition am 0.5-Level)"
   }
  ]
 }
