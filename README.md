@@ -75,6 +75,12 @@ weniger Trades, halber Rückgang. Keine Zusage für die Zukunft.
 
 ## Weiterführende Anleitungen
 
+**Für den Einstieg ins Gesamtprojekt:** Die Hintergründe — Strategie, Chronik aller
+Etappen, was schon gemessen und verworfen wurde, die Arbeitsregeln — liegen nicht in
+diesem Repo, sondern im privaten Projektordner `BTC-Trading` unter
+`wissens-layer/START-HIER.md`. Wer nur dieses Repo hat, findet die dort genannten
+Dateien nicht; einige Kommentare im Quelltext verweisen auf sie.
+
 - [ANLEITUNG-EINSTELLUNGEN.md](ANLEITUNG-EINSTELLUNGEN.md) — Long/Short schalten,
   Takt ändern, Backtest starten, Parameter, git-Updates (inkl. bekannter Fehler)
 - [ANLEITUNG-TELEGRAM.md](ANLEITUNG-TELEGRAM.md) — Telegram von Null einrichten,
@@ -96,6 +102,7 @@ weniger Trades, halber Rückgang. Keine Zusage für die Zukunft.
   dahin las die Engine sechs davon gar nicht — u. a. `flush_entry` und `pivot_n` standen
   fest im Code, eine Änderung in der Datei blieb wirkungslos.
   Die Engine überschreibt diese Datei nie, sie lässt sich
-  also gefahrlos im Browser bearbeiten — die Tabelle aller Werte steht in
-  [ANLEITUNG-EINSTELLUNGEN.md](ANLEITUNG-EINSTELLUNGEN.md).
+  also gefahrlos im Browser bearbeiten. **Was jeder Schalter tut und warum er an oder
+  aus ist, steht in der Datei selbst** — im Feld `_hinweis_<name>` neben dem Schalter.
+  [ANLEITUNG-EINSTELLUNGEN.md](ANLEITUNG-EINSTELLUNGEN.md) erklärt das Vorgehen.
   `site/data/state.json` zeigt unter `config` nur, was die Engine zuletzt gelesen hat.

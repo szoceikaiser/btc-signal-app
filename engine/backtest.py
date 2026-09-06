@@ -134,9 +134,17 @@ GRID = [
     # Vergleichsspalte der Monatsuebersicht. MUSS mit der panel-Zeile identisch sein bis
     # auf flush_entry="off" — sonst vergleicht die Webseite zwei verschiedene Dinge und
     # der Unterschied waere nicht mehr "der Flush", sondern ein Sammelsurium.
+    # WICHTIG: Diese Zeile muss bei JEDER Live-Umstellung mitwandern. Sie darf sich von
+    # der panel=True-Zeile in GENAU EINEM Punkt unterscheiden: flush_entry. Sonst
+    # vergleicht die Monatsuebersicht auf der Webseite nicht "mit gegen ohne Flush",
+    # sondern ein Sammelsurium. Am 05.09.2026 war genau das der Fall: no_flip,
+    # neustart_mit_rest (beide live seit 28.08.) und zonen_nachziehen (seit 05.09.)
+    # fehlten hier - vier Unterschiede statt einem. Der Test
+    # test_ohne_flush_zeile_unterscheidet_sich_nur_im_flush haelt das jetzt fest.
     V("MEINE Einstellung ohne Flush", bias_short=False, flush_entry="off",
       buy_ladder=True, trail_stop=True, min_stop_pct=0.02, liq_entry="boost",
-      high_exit="on", min_bein_pct=0.05),
+      high_exit="on", min_bein_pct=0.05, no_flip=True, neustart_mit_rest=True,
+      zonen_nachziehen=True),
     # E10.3 (Furkan-Update B, 18:27): Liquidationszonen auf der EINSTIEGS-Seite. Nach dem
     # Befund aus E10.2 (Verkaufsseite kostet durchgehend Rendite) ist das die Seite, auf
     # der noch etwas zu holen sein koennte. "boost" = zusaetzlich aufstocken bei Konfluenz,

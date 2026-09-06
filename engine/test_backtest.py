@@ -620,3 +620,23 @@ def test_rueckgang_short_nutzt_das_kerzenhoch():
     p = backtest.simulate(sigs, cs, start_ms=start, fee=0.0)
     assert p["max_drawdown_pct"] < -15, (
         f"Kerzenhoch bei Short nicht beruecksichtigt: {p['max_drawdown_pct']} %")
+
+
+def test_ohne_flush_zeile_unterscheidet_sich_nur_im_flush():
+    """Die Monatsuebersicht der Webseite stellt die Live-Einstellung der Zeile
+    "MEINE Einstellung ohne Flush" gegenueber. Diese Gegenueberstellung ist nur dann
+    aussagekraeftig, wenn sich die beiden Zeilen in GENAU EINEM Punkt unterscheiden:
+    flush_entry. Am 05.09.2026 waren es vier Punkte - no_flip, neustart_mit_rest und
+    zonen_nachziehen waren live geschaltet worden, ohne dass diese Zeile mitwanderte.
+    """
+    panel = [v for v in backtest.GRID if v.get("panel")]
+    assert len(panel) == 1, "genau eine Gitterzeile muss panel=True tragen"
+    ohne = [v for v in backtest.GRID if v["label"] == "MEINE Einstellung ohne Flush"]
+    assert len(ohne) == 1, "die Zeile 'MEINE Einstellung ohne Flush' fehlt"
+    a = {k: panel[0][k] for k in backtest.EVAL_KEYS if k in panel[0]}
+    b = {k: ohne[0][k] for k in backtest.EVAL_KEYS if k in ohne[0]}
+    abweichend = {k: (a.get(k), b.get(k))
+                  for k in set(a) | set(b) if a.get(k) != b.get(k)}
+    assert set(abweichend) == {"flush_entry"}, (
+        "Die Zeile darf sich nur in flush_entry unterscheiden, weicht aber ab in: "
+        f"{abweichend}")

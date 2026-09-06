@@ -27,21 +27,21 @@ changes**. Wirkung ab dem nächsten Engine-Lauf.
 zeigt der Abschnitt `config` nach dem nächsten Lauf denselben Wert. Erst dann hat die
 Engine ihn wirklich gelesen.
 
-**Stand 28.07.2026.** Die Spalte „jetzt" zeigt, was live eingestellt ist.
+### Welcher Schalter macht was?
 
-| Schalter | Werte | jetzt | Bedeutung und Messstand |
-|---|---|---|---|
-| `bias_long` | `true` / `false` | **`true`** | Long-Signale erlauben. |
-| `bias_short` | `true` / `false` | **`false`** | Short-Signale erlauben. Aus: Shorts haben in jeder Messung Geld verloren (+41 % nur Long gegen −1 % mit Shorts), weil der Engine der Richtungs-Bias fehlt. |
-| `trail_stop` | `true` / `false` | **`true`** | Stop nachziehen, sobald Teilgewinne realisiert sind: auf den Durchschnitts-Einstand (Break-even) bzw. hinter das letzte Struktur-Tief. Furkans „Kapital schützen". |
-| `min_stop_pct` | Zahl, `0` = aus | **`0.02`** | **Mindestabstand zwischen Einstieg und Stop (2 %).** Ist der Stop näher, wird gar nicht erst gekauft — solche Stops löst schon das normale Rauschen aus. Verschiebt den Stop NICHT und blockiert KEINE Nachkäufe; er gilt nur beim Eröffnen. Gemessen: gleiche Rendite bei fast halbem Rückgang, ein Viertel weniger Nachrichten. |
-| `liq_entry` | `off` / `boost` / `filter` | **`boost`** | Liquidationszonen beim **Einstieg**. `boost` = zusätzliche Nachkauf-Tranche, wenn Fib-Zone und Liquidationszone zusammenfallen (Furkans Konfluenz), höchstens 2× je Position; verbietet nie etwas. `filter` = nur noch bei Konfluenz einsteigen — gemessen, schlechter. |
-| `high_exit` | `off` / `on` / `weak` | **`on`** | Teilverkauf, sobald der Kurs bis auf 0,5 % an das letzte bestätigte Hoch heranläuft (Furkan: „hier unter diesem Hoch rausnehmen"). `weak` = nur ohne Spot-Nachfrage. **Achtung:** Gegen die alte Basis kostete das 3,9 Punkte, gegen die heutige bringt es 1,2 — ein Befund gilt immer nur für die Basis, gegen die er gemessen wurde. |
-| `release_stale_rest` | `true` / `false` | `false` | Restposition freigeben, wenn ein neuer Impuls bestätigt ist. Löst dasselbe Problem wie `trail_stop`, aber schlechter (verkauft zum Marktpreis). Nur eines von beiden einschalten. |
-| `liq_exit` | `off` / `spike` / `zone` / `both` | `off` | Teilverkauf an Liquidationen. Zweimal gemessen, kostet beide Male Rendite. |
-| `block_unhealthy` | `true` / `false` | `false` | „Warnlicht": kein Kauf und kein Nachkauf, solange Muster 5 aktiv ist (Kurs fällt, Spot-CVD fällt mit, OI hält, Funding positiv, noch keine Zwangsverkaufs-Welle = der Absturz ist noch nicht durch). Gemessen 07/2026: hat 3 von 212 Signalen verhindert, −2,2 Punkte. Bleibt aus. |
-| `confirm_t1` | `true` / `false` | `false` | Order-Flow-Prüfung auch für den 0.5-Level-Einstieg — der einzige Einstieg ohne jede Prüfung. Gemessen: −4,6 Punkte. Bleibt aus. |
-| `cooldown_h` | Stunden, `0` = aus | `0` | Sperrfrist nach einem Stop. Gemessen: wirkt (Rückgang −12,3 → −8,5 %), kippt aber zwischen den Zeit-Hälften stark (Platz 22 / Platz 2) — deshalb nicht gewählt. `min_stop_pct` erreicht dasselbe stabiler. |
+**Die Erklärungen stehen in der `config.json` selbst.** Zu jedem Schalter gehört dort
+ein Feld `_hinweis_<name>` — es sagt, was er tut, was gemessen wurde und warum er an
+oder aus ist. Wenn du die Datei zum Ändern öffnest, hast du die Begründung also direkt
+vor Augen.
+
+Das ist bewusst so: Eine zweite Liste hier in der Anleitung ist irgendwann veraltet,
+ohne dass es jemand merkt. Genau das war bis zum 05.09.2026 der Fall — hier standen 14
+Schalter beschrieben, während die `config.json` 29 kannte. Alles, was hier stand und
+dort fehlte, ist inzwischen dorthin übertragen worden.
+
+**Welche Schalter es gibt und wie sie jetzt stehen,** zeigt dir die `config.json`
+selbst — oder, als Übersicht mit Messergebnis und Entscheidung, die Tabelle in
+`BTC-Trading\wissens-layer\02_status\GEMESSEN-UND-ENTSCHIEDEN.md`.
 
 **Goldene Regel:** Immer nur EINEN Schalter auf einmal ändern und danach einen Backtest
 laufen lassen (Abschnitt 3). Sonst weißt du hinterher nicht, welche Änderung was bewirkt
@@ -174,16 +174,16 @@ Diese Abschnitte stehen im Bericht:
 
 ## 4. Strategie-Parameter (für Fortgeschrittene)
 
-Datei: `engine/strategy_core.py`. Relevante Stellschrauben:
+**Achtung, das war lange falsch beschrieben:** `pivot_n`, `k_atr`, `flush_entry` und
+`buy_ladder` stehen **nicht mehr** im Quelltext, sondern in der `config.json` wie jeder
+andere Schalter auch. Sie werden dort geändert, nicht in `engine/strategy_core.py`.
+
+Wirklich nur im Quelltext stehen noch:
 
 | Was | Wo | Bedeutung |
 |---|---|---|
-| `pivot_n=5` | `def evaluate(...)` | Kerzen zur Swing-Bestätigung. Kleiner = mehr, frühere Signale (mehr Rauschen) |
-| `k_atr=2.0` | `def evaluate(...)` | Mindestgröße eines Impulses in ATR. Kleiner = mehr Impulse zählen |
-| `flush_entry="core"` | `def evaluate(...)` | Einstieg in die Kapitulations-Kerze. Verdoppelt Rendite UND maximalen Rückgang. Die Signale sind in Telegram als „AGGRESSIVER FLUSH-EINSTIEG — DEINE Entscheidung" markiert, du entscheidest also ohnehin je Fall |
-| `buy_ladder=True` | `def evaluate(...)` | Mehrtages-Kaufleiter (Nachkauf in die Schwäche). Bester gemessener Renditehebel |
-| `TRANCHEN` | oberhalb von `evaluate` | Positionsgrößen je Signal (25/50/25 rein, 40/40/Rest raus) |
-| `oi_wipeout_pct`, `sharp_move_pct`, `funding_hot` | `def classify_pattern(...)` | Schwellen der **5** Kompass-Muster (Furkans vier plus „ungesunder Abverkauf", ergänzt 07/2026) |
+| `TRANCHEN` | `engine/strategy_core.py`, oberhalb von `evaluate` | Positionsgrößen je Signal (25/50/25 rein, 40/40/Rest raus) |
+| `oi_wipeout_pct`, `sharp_move_pct`, `funding_hot` | `engine/strategy_core.py`, in `classify_pattern(...)` | Schwellen der **5** Kompass-Muster (Furkans vier plus „ungesunder Abverkauf", ergänzt 07/2026) |
 
 Nach jeder Änderung laufen die Tests automatisch (Actions → Tests). **Wird der Lauf
 rot: Änderung rückgängig machen** (im Commit-Verlauf „Revert") oder Claude fragen.
@@ -200,15 +200,22 @@ Mausrad bzw. zwei Finger = Zoom · Ziehen = Verschieben · **Doppelklick = Ansic
 zurücksetzen** · Überfahren einer Kerze = OHLC-Overlay oben links (Open, High, Low,
 Close, Veränderung) · Knöpfe oben rechts = Zeitebene (1h–1M).
 
-## 7. Änderungen vom lokalen Ordner hochschieben (mit Claude erarbeitet)
+## 7. Änderungen vom lokalen Ordner hochladen
 
-Wenn Claude Dateien in `C:\Users\oeztu\BTC-Trading\signal-app` geändert hat:
+**Seit 05.09.2026 genügt ein Doppelklick auf `HOCHLADEN.cmd`** im Ordner
+`C:\Users\oeztu\BTC-Trading`. Das Skript zeigt die geänderten Dateien, fragt nach
+einer kurzen Beschreibung (Enter setzt das Datum ein), lädt den Code zu GitHub hoch und
+sichert danach die Unterlagen ins private Backup-Repo. Die hängende `index.lock` räumt
+es selbst weg.
+
+Falls du es doch von Hand machen willst:
 
 ```
-cd C:\Users\oeztu\BTC-Trading\signal-app
-git pull --no-rebase
+cd /d C:\Users\oeztu\BTC-Trading\signal-app
+del .git\index.lock
 git add -A
 git commit -m "Kurze Beschreibung der Aenderung"
+git pull --rebase
 git push
 ```
 
@@ -216,6 +223,10 @@ Bekannte Fehler und Lösungen:
 
 | Fehlermeldung | Ursache | Lösung |
 |---|---|---|
-| `rejected … non-fast-forward` | Engine hat inzwischen selbst committet | erst `git pull --no-rebase`, dann `git push` |
-| `index.lock: File exists` | abgebrochener git-Prozess | `del C:\Users\oeztu\BTC-Trading\signal-app\.git\index.lock`, dann Befehle wiederholen |
-| Editor-Fenster mit „Merge branch…" | normaler Merge-Hinweis | Fenster einfach schließen |
+| `rejected … non-fast-forward` | Die Automatik hat inzwischen selbst committet | `git pull --rebase`, dann `git push` |
+| `index.lock: File exists` | abgebrochener git-Prozess | `del .git\index.lock`, dann Befehle wiederholen |
+| `CONFLICT` beim Rebase | dieselbe Datei an beiden Orten geändert | `git rebase --abort`, dann Claude fragen |
+
+**Warum `--rebase` und nicht nur `git pull`:** Ohne das öffnet git mitunter einen
+Texteditor in der Konsole und will eine Zusammenführungs-Nachricht — daraus kommt man
+ohne vim-Kenntnisse schlecht wieder heraus.
