@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-09-05T21:50:53Z",
- "variante": "LIVE-heute +Neustart mit Rest",
- "fenster": "28.12.2025-05.09.2026",
+ "generated_at": "2026-09-06T13:11:10Z",
+ "variante": "LIVE-heute +Zonen nachziehen",
+ "fenster": "29.12.2025-06.09.2026",
  "signals": [
   {
-   "ts": 1767009600000,
+   "ts": 1767052800000,
    "type": "KAUF_1",
    "price": 86924.98999999999,
    "tranche_pct": 25,
@@ -36,9 +36,9 @@
   {
    "ts": 1767369600000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 90766.46800000001,
+   "price": 90805.62800000001,
    "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (90766)",
+   "reason": "Leiter-Teilgewinn an Extension 0.8 (90806)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
@@ -46,9 +46,9 @@
   {
    "ts": 1767484800000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 91261.464,
+   "price": 91300.62400000001,
    "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (91261)",
+   "reason": "Leiter-Teilgewinn an Extension 0.9 (91301)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
@@ -56,9 +56,9 @@
   {
    "ts": 1767499200000,
    "type": "TEILVERKAUF_1",
-   "price": 91756.46,
+   "price": 91795.62000000001,
    "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (91756)",
+   "reason": "Extension 1.0 erreicht (91796)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF 1 (Extension 1.0)"
@@ -474,19 +474,99 @@
    "label": "WARNUNG (Derivate-Pump aktiv)"
   },
   {
-   "ts": 1772611200000,
+   "ts": 1772553600000,
    "type": "TEILVERKAUF_1",
-   "price": 70508.55,
+   "price": 68070.0,
    "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (70509)",
+   "reason": "Extension 1.0 erreicht (68070)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF 1 (Extension 1.0)"
   },
   {
+   "ts": 1772582400000,
+   "type": "KAUF_1",
+   "price": 67576.0,
+   "tranche_pct": 25,
+   "reason": "0.5-Retracement des Impulses 65056->70096",
+   "stop_ref": 65056.0,
+   "tag": "",
+   "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1772596800000,
+   "type": "NACHKAUF",
+   "price": 69493.13,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 67300 \u2014 aufstocken (GESUNDER_TREND)",
+   "stop_ref": 65056.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
    "ts": 1772611200000,
-   "type": "VERKAUF_REST",
+   "type": "TEILVERKAUF_LADDER",
    "price": 71111.4,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 69989",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1772611200000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 71432.0,
+   "tranche_pct": 15,
+   "reason": "Leiter-Teilgewinn an Extension 0.8 (71432)",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1772611200000,
+   "type": "WARNUNG",
+   "price": 71111.4,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1772625600000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 73396.88,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 72271",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1772625600000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 71936.0,
+   "tranche_pct": 15,
+   "reason": "Leiter-Teilgewinn an Extension 0.9 (71936)",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1772625600000,
+   "type": "TEILVERKAUF_1",
+   "price": 72440.0,
+   "tranche_pct": 40,
+   "reason": "Extension 1.0 erreicht (72440)",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF 1 (Extension 1.0)"
+  },
+  {
+   "ts": 1772697600000,
+   "type": "VERKAUF_REST",
+   "price": 72915.79,
    "tranche_pct": 20,
    "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP",
    "stop_ref": null,
@@ -1624,59 +1704,39 @@
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1781395200000,
-   "type": "WARNUNG",
-   "price": 64545.3,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
-   "ts": 1781424000000,
-   "type": "WARNUNG",
-   "price": 64546.0,
-   "tranche_pct": 0,
-   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
-   "stop_ref": null,
-   "tag": "",
-   "label": "WARNUNG (Derivate-Pump aktiv)"
-  },
-  {
-   "ts": 1781467200000,
+   "ts": 1781337600000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 64838.015999999996,
+   "price": 63666.552,
    "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (64838)",
+   "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1781481600000,
+   "ts": 1781352000000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 65348.393,
+   "price": 64030.496,
    "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (65348)",
+   "reason": "Leiter-Teilgewinn an Extension 0.9 (64030)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   },
   {
-   "ts": 1781481600000,
+   "ts": 1781380800000,
    "type": "TEILVERKAUF_1",
-   "price": 65858.76999999999,
+   "price": 64394.44,
    "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (65859)",
+   "reason": "Extension 1.0 erreicht (64394)",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF 1 (Extension 1.0)"
   },
   {
-   "ts": 1781481600000,
+   "ts": 1781395200000,
    "type": "VERKAUF_REST",
-   "price": 65927.1,
+   "price": 64545.3,
    "tranche_pct": 20,
    "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP",
    "stop_ref": null,
