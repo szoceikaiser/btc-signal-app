@@ -284,6 +284,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1788724800000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 80341.83,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 80200",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
   }
  ]
 }
