@@ -1,16 +1,16 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1788724800000,
- "retrace_extreme": 79233.0,
+ "last_signal_ts": 1788753600000,
+ "retrace_extreme": 79001.1,
  "tp_rungs": 0,
  "dip_buys": 0,
- "buy_rungs": 0,
- "entry_ref": 78127.25890277777,
- "entry_pct": 180,
+ "buy_rungs": 1,
+ "entry_ref": 78334.09605813953,
+ "entry_pct": 215,
  "liq_exits": 0,
  "high_exits": 2,
- "liq_entries": 0,
+ "liq_entries": 1,
  "last_stop_ts": -1,
  "ziel_extrem": null,
  "be_aktiv": false,
@@ -26,8 +26,8 @@
   "gp_lower": 78376.6,
   "level_0786": 77555.704,
   "invalidation": 76264.0,
-  "ext1": 85269.0,
-  "ext2": 88999.248
+  "ext1": 85037.1,
+  "ext2": 88767.34800000001
  },
  "widerstand": {
   "richtung": "LONG",
@@ -41,9 +41,9 @@
  },
  "plan": {
   "richtung": "LONG",
-  "anteil_pct": 180,
-  "einstand": 78127.25890277777,
-  "kurs": 80341.83,
+  "anteil_pct": 215,
+  "einstand": 78334.09605813953,
+  "kurs": 79397.83,
   "nachkauf": [
    {
     "preis": 79369.17,
@@ -71,8 +71,8 @@
   ],
   "teilgewinn": [
    {
-    "preis": 80866.2569,
-    "was": "kurz unter dem letzten Hoch 81.273",
+    "preis": 79003.0,
+    "was": "kurz unter dem letzten Hoch 79.400",
     "tranche": 15
    },
    {
@@ -84,22 +84,22 @@
     "tranche": 0
    },
    {
-    "preis": 84061.8,
+    "preis": 83829.90000000001,
     "was": "Zwischenziel (Extension 0.8)",
     "tranche": 15
    },
    {
-    "preis": 84665.4,
+    "preis": 84433.5,
     "was": "Zwischenziel (Extension 0.9)",
     "tranche": 15
    },
    {
-    "preis": 85269.0,
+    "preis": 85037.1,
     "was": "Ziel 1.0",
     "tranche": 40
    },
    {
-    "preis": 88999.248,
+    "preis": 88767.34800000001,
     "was": "Ziel 1.618",
     "tranche": 40
    }
@@ -142,8 +142,8 @@
   "zonen_1d": false,
   "zonen_nachziehen": true
  },
- "updated_at": "2026-09-07T02:37:50Z",
- "last_close": 80341.83,
+ "updated_at": "2026-09-07T08:52:08Z",
+ "last_close": 79397.83,
  "zonen_vorschau": {
   "richtung": "LONG",
   "impuls_start": 76264.0,

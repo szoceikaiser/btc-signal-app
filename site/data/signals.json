@@ -294,6 +294,26 @@
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1788753600000,
+   "type": "NACHKAUF",
+   "price": 79397.83,
+   "tranche_pct": 15,
+   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1788753600000,
+   "type": "NACHKAUF",
+   "price": 79397.83,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 78660 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   }
  ]
 }
