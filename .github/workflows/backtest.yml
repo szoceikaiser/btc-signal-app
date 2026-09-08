@@ -26,7 +26,11 @@ jobs:
           # Pages veroeffentlicht ausschliesslich den Ordner site/ - ohne diese Kopie
           # ist die Varianten-Tabelle nur nach lokalem "stand-holen.bat" einsehbar.
           cp BACKTEST.md site/BACKTEST.md
+          # Zusaetzlich als .txt: GitHub Pages lieferte die .md-Fassung mit 404 aus
+          # (06.09.2026 geprueft - die Datei lag im Repo, war ueber die Webseite aber
+          # nicht abrufbar). Die .txt-Fassung wird zuverlaessig ausgeliefert.
+          cp BACKTEST.md site/BACKTEST.txt
           git pull --no-rebase
-          git add BACKTEST.md site/BACKTEST.md site/data/backtest.json site/data/backtest_signals.json
+          git add BACKTEST.md site/BACKTEST.md site/BACKTEST.txt site/data/backtest.json site/data/backtest_signals.json
           git diff --cached --quiet || git commit -m "Backtest-Bericht aktualisiert"
           git push
