@@ -334,6 +334,16 @@
    "stop_ref": 76264.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1789041600000,
+   "type": "NACHKAUF",
+   "price": 77555.704,
+   "tranche_pct": 25,
+   "reason": "0.786-Zone erreicht, Struktur intakt",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   }
  ]
 }
