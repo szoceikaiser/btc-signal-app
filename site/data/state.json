@@ -1,8 +1,8 @@
 {
  "direction": "LONG",
  "pos_state": "FULL",
- "last_signal_ts": 1789113600000,
- "retrace_extreme": 76464.0,
+ "last_signal_ts": 1789128000000,
+ "retrace_extreme": 76046.58,
  "tp_rungs": 0,
  "dip_buys": 0,
  "buy_rungs": 3,
@@ -26,8 +26,8 @@
   "gp_lower": 78376.6,
   "level_0786": 77555.704,
   "invalidation": 76264.0,
-  "ext1": 82500.0,
-  "ext2": 86230.248
+  "ext1": 82082.58,
+  "ext2": 85812.82800000001
  },
  "widerstand": {
   "richtung": "LONG",
@@ -43,7 +43,7 @@
   "richtung": "LONG",
   "anteil_pct": 290,
   "einstand": 78258.23190517242,
-  "kurs": 77036.12,
+  "kurs": 77732.25,
   "nachkauf": [
    {
     "zone": [
@@ -54,12 +54,12 @@
     "tranche": 15
    },
    {
-    "preis": 77000.0,
+    "preis": 77620.01,
     "was": "Liquidationszone",
     "tranche": 20
    },
    {
-    "preis": 76888.0,
+    "preis": 77000.0,
     "was": "Liquidationszone",
     "tranche": 20
    }
@@ -79,22 +79,22 @@
     "tranche": 0
    },
    {
-    "preis": 81292.8,
+    "preis": 80875.38,
     "was": "Zwischenziel (Extension 0.8)",
     "tranche": 15
    },
    {
-    "preis": 81896.4,
+    "preis": 81478.98,
     "was": "Zwischenziel (Extension 0.9)",
     "tranche": 15
    },
    {
-    "preis": 82500.0,
+    "preis": 82082.58,
     "was": "Ziel 1.0",
     "tranche": 40
    },
    {
-    "preis": 86230.248,
+    "preis": 85812.82800000001,
     "was": "Ziel 1.618",
     "tranche": 40
    }
@@ -137,8 +137,8 @@
   "zonen_1d": false,
   "zonen_nachziehen": true
  },
- "updated_at": "2026-09-11T12:58:26Z",
- "last_close": 77036.12,
+ "updated_at": "2026-09-11T18:56:42Z",
+ "last_close": 77732.25,
  "zonen_vorschau": {
   "richtung": "LONG",
   "impuls_start": 76264.0,
