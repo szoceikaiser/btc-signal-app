@@ -344,6 +344,16 @@
    "stop_ref": 76264.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1789070400000,
+   "type": "NACHKAUF",
+   "price": 76568.72,
+   "tranche_pct": 15,
+   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   }
  ]
 }
