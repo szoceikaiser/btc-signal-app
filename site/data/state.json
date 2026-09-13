@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "FULL",
- "last_signal_ts": 1789300800000,
+ "last_signal_ts": 1789315200000,
  "retrace_extreme": 76046.58,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -43,25 +43,28 @@
   "richtung": "LONG",
   "anteil_pct": 290,
   "einstand": 78258.23190517242,
-  "kurs": 77134.83,
+  "kurs": 77284.0,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 77.135 $ ueber EMA200 (70.067 $)",
+   "trend_text": "Uebergeordnet: Kurs 77.284 $ ueber EMA200 (70.069 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 76.264 $ -> 82.300 $",
-   "spot": "zurueckgekehrt",
-   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)"
+   "spot": "stabil",
+   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)",
+   "muster": "GESUNDER_TREND",
+   "muster_text": "gesunder Trend (Spot traegt die Bewegung)"
   },
   "ampel": {
    "stufe": "guenstig",
    "dafuer": [
     "Trend",
     "Struktur",
-    "Spot-Nachfrage"
+    "Spot-Nachfrage",
+    "Muster"
    ],
    "dagegen": [],
-   "gezaehlt": 3,
-   "text": "GUENSTIG \u2014 3 von 3 sprechen dafuer"
+   "gezaehlt": 4,
+   "text": "GUENSTIG \u2014 4 von 4 sprechen dafuer"
   },
   "nachkauf": [
    {
@@ -159,27 +162,30 @@
   "trend_ema": 200,
   "ampel_filter": "off"
  },
- "updated_at": "2026-09-13T18:29:54Z",
- "last_close": 77134.83,
+ "updated_at": "2026-09-13T22:02:54Z",
+ "last_close": 77284.0,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 77.135 $ ueber EMA200 (70.067 $)",
+   "trend_text": "Uebergeordnet: Kurs 77.284 $ ueber EMA200 (70.069 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 76.264 $ -> 82.300 $",
-   "spot": "zurueckgekehrt",
-   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)"
+   "spot": "stabil",
+   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)",
+   "muster": "GESUNDER_TREND",
+   "muster_text": "gesunder Trend (Spot traegt die Bewegung)"
   },
   "ampel": {
    "stufe": "guenstig",
    "dafuer": [
     "Trend",
-    "Spot-Nachfrage"
+    "Spot-Nachfrage",
+    "Muster"
    ],
    "dagegen": [],
-   "gezaehlt": 2,
-   "text": "GUENSTIG \u2014 2 von 2 sprechen dafuer"
+   "gezaehlt": 3,
+   "text": "GUENSTIG \u2014 3 von 3 sprechen dafuer"
   },
   "impuls_start": 76264.0,
   "impuls_ende": 82300.0,
