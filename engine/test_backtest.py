@@ -640,3 +640,33 @@ def test_ohne_flush_zeile_unterscheidet_sich_nur_im_flush():
     assert set(abweichend) == {"flush_entry"}, (
         "Die Zeile darf sich nur in flush_entry unterscheiden, weicht aber ab in: "
         f"{abweichend}")
+
+
+def test_ampel_zeilen_unterscheiden_sich_von_der_live_zeile_in_genau_einem_punkt():
+    """E34: Die drei Ampel-Zeilen sind nur dann deutbar, wenn sie sich von der
+    Live-Zeile in GENAU EINEM benannten Punkt unterscheiden - sonst weiss man am
+    Ende nicht, was den Unterschied gemacht hat.
+    """
+    live = next(v for v in backtest.GRID if v.get("panel"))
+    erwartet = {
+        "LIVE-heute +Ampel klein bei unguenstig": "klein",
+        "LIVE-heute +Ampel UMGEKEHRT (Gegenprobe)": "gross",
+        "LIVE-heute +immer halbe Tranche (Nullhypothese)": "immer",
+    }
+    for label, wert in erwartet.items():
+        v = next(x for x in backtest.GRID if x["label"] == label)
+        assert v["ampel_filter"] == wert
+        anders = {k for k in backtest.EVAL_KEYS if live.get(k) != v.get(k)}
+        assert anders == {"ampel_filter"}, f"{label}: unterscheidet sich in {anders}"
+    # ... und die Live-Zeile selbst misst die Ampel NICHT
+    assert live.get("ampel_filter") == "off"
+
+
+def test_ampel_filter_kommt_im_backtest_ueberhaupt_an():
+    """Der Weg DURCH simulate(): ein Test, der nur evaluate() aufruft, bliebe gruen,
+    wenn ampel_filter aus EVAL_KEYS faellt - dann liefe die Gitterzeile stumm mit der
+    Live-Einstellung und haette dasselbe Ergebnis wie sie."""
+    assert "ampel_filter" in backtest.EVAL_KEYS
+    import inspect
+    from strategy_core import evaluate
+    assert "ampel_filter" in inspect.signature(evaluate).parameters

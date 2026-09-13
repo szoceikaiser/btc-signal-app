@@ -11,7 +11,8 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            gleiches_bein, liq_cascade, liq_levels, next_pivot_beyond,
                            trend_intakt,
                            lage_bericht, spot_nachfrage, MUSTER_KLARTEXT,
-                           daily_fib_zone,
+                           daily_fib_zone, trend_lage,
+                           ampel, AMPEL_TRANCHE, kuerze_einstiege, Signal, _ENTRY_TYPES,
                            resample_daily)
 
 DAY_MS = 86_400_000
@@ -369,11 +370,37 @@ def test_trend_filter_blockt_long_gegen_1d_trend():
     pos = Position()
     sig_off = run_incremental(down, flow, pos, pivot_n=2, bias_short=False)
     assert any(s.type == SignalType.KAUF_2 for s in sig_off)
-    # Mit Trendfilter: Preis unter der Tages-EMA -> Long wird blockiert
+    # Mit Trendfilter: Preis unter der Tages-EMA -> Long wird blockiert.
+    # trend_ema=10 statt des Defaults 50, weil die Serie nur 16 Tage umfasst. Seit E33
+    # ist daily_trend streng: Fuer einen EMA50 ueber 16 Tage gibt es KEINE Zahl mehr,
+    # sondern None - frueher wurde stillschweigend ein EMA16 geliefert und als EMA50
+    # ausgegeben. Der Test misst jetzt einen EMA, den es wirklich gibt.
     pos2 = Position()
     sig_on = run_incremental(down, flow, pos2, pivot_n=2, bias_short=False,
-                             trend_filter=True)
+                             trend_filter=True, trend_ema=10)
     assert not any(s.type == SignalType.KAUF_2 for s in sig_on)
+
+
+def test_trend_filter_blockt_nichts_wenn_die_historie_nicht_reicht():
+    """E33: Die Kehrseite der Strenge - verlangt jemand einen EMA200, hat aber nur 16
+    Tage, wird NICHT blockiert. Unbekannt heisst nicht verboten.
+
+    Vorher lieferte daily_trend in dieser Lage klaglos einen EMA16 und der Filter
+    entschied auf dieser Grundlage. Der Backtest mit voller Historie rechnete
+    gleichzeitig einen echten EMA200 - Live und Messung taten also verschiedene Dinge,
+    ohne dass es auffiel.
+    """
+    down = _downtrend_long_series()
+    flow = [FlowPoint(i, 100 + i, 100, 1000, -0.0001) for i in range(len(down))]
+    pos_ohne = Position()
+    ohne = run_incremental(down, flow, pos_ohne, pivot_n=2, bias_short=False)
+    pos_mit = Position()
+    mit = run_incremental(down, flow, pos_mit, pivot_n=2, bias_short=False,
+                          trend_filter=True, trend_ema=200)
+    assert [(s.ts, s.type) for s in ohne] == [(s.ts, s.type) for s in mit], (
+        "ohne ausreichende Historie darf der Trendfilter nichts veraendern")
+    assert daily_trend(down, 200, streng=True) is None
+    assert daily_trend(down, 200, streng=False) is not None   # altes Verhalten abrufbar
 
 
 def test_muster4_via_long_liq_kaskade_ohne_oi_wipeout():
@@ -1860,3 +1887,330 @@ def test_pivot_n_1d_kommt_durch_evaluate_an():
         "mit feiner 1D-Weite zeichnet die Ebene ein anderes Bein und steigt nicht ein - "
         f"kam aber: {[x.type.name for x in sig_fein]}")
     assert pos_fein.state == PosState.FLAT
+
+
+# ------------- E33: uebergeordneter Trend (13.09.2026)
+
+def _lange_serie(n_kerzen=1300, seed=42):
+    """Eine lange, schwankende 4h-Serie - lang genug fuer einen echten EMA200 auf 1D."""
+    import random
+    r = random.Random(seed)
+    preise, p = [], 60000.0
+    for _ in range(n_kerzen):
+        p *= 1 + r.gauss(0.0004, 0.012)
+        preise.append(p)
+    return [c(i * H4_MS, x, x * 1.006, x * 0.994, x) for i, x in enumerate(preise)]
+
+
+def test_mehr_historie_aendert_die_signale_nicht():
+    """DIE Voraussetzung fuer E33-A: LIMIT durfte nur erhoeht werden, wenn dadurch kein
+    einziges Signal anders ausfaellt. Sonst waere aus einer Datenbeschaffung heimlich
+    eine Strategieaenderung geworden.
+
+    Geprueft wird die LIVE-Einstellung ueber die letzten 60 Kerzen, einmal mit einem
+    Ladefenster von 400 und einmal mit 1200.
+    """
+    kerzen = _lange_serie()
+    flow = [FlowPoint(k.ts, 1000 + i * 7, 900 + i * 5, 1e9 * (1 + i * 0.0005), 0.0001)
+            for i, k in enumerate(kerzen)]
+    LIVE = dict(bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+                min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+                no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True)
+
+    def lauf(fenster, n_letzte=60):
+        pos, sigs = Position(), []
+        for i in range(len(kerzen) - n_letzte, len(kerzen) + 1):
+            aus = max(0, i - fenster)
+            sigs += evaluate(kerzen[aus:i], flow[aus:i], pos, **LIVE)
+        return [(x.ts, x.type, round(x.price, 4)) for x in sigs], pos.state
+
+    klein, st_klein = lauf(400)
+    gross, st_gross = lauf(1200)
+    assert klein == gross, (
+        f"mehr Historie darf die Signale nicht veraendern: "
+        f"{len(klein)} gegen {len(gross)} Signale")
+    assert st_klein == st_gross
+
+
+def test_ema200_braucht_echte_historie():
+    """Der stille Fehler, den E33 behebt: Mit 400 Kerzen (67 Tage) lieferte
+    daily_trend(period=200) klaglos einen EMA67 und gab ihn als EMA200 aus."""
+    kerzen = _lange_serie()
+    kurz, lang = kerzen[-400:], kerzen[-1200:]
+    assert len(resample_daily(kurz)) < 200, "400 Kerzen duerfen keine 200 Tage ergeben"
+    assert len(resample_daily(lang)) >= 200, "1200 Kerzen muessen fuer EMA200 reichen"
+
+    # streng: kurze Historie -> keine Aussage
+    assert daily_trend(kurz, 200, streng=True) is None
+    assert daily_trend(lang, 200, streng=True) is not None
+
+    # ohne streng: beide liefern eine Zahl - aber eben verschiedene
+    e_kurz = daily_trend(kurz, 200)[1]
+    e_lang = daily_trend(lang, 200)[1]
+    assert abs(e_kurz - e_lang) / e_lang > 0.05, (
+        "genau darin lag der Fehler: der kurze EMA weicht deutlich ab "
+        f"({e_kurz:.0f} gegen {e_lang:.0f})")
+
+
+def test_trend_lage_liefert_klartext_oder_nichts():
+    """E33-B: Anzeige, keine Regel. Ohne ausreichende Historie lieber gar nichts."""
+    kerzen = _lange_serie()
+    assert trend_lage(kerzen[-400:], 200) is None          # zu wenig Historie
+
+    tl = trend_lage(kerzen[-1200:], 200)
+    assert tl is not None
+    assert tl["stand"] in ("ueber", "unter")
+    assert "EMA200" in tl["text"] and "Uebergeordnet" in tl["text"]
+    # die Aussage muss zu den Zahlen passen
+    assert (tl["kurs"] >= tl["ema"]) == (tl["stand"] == "ueber")
+
+
+def test_lage_bericht_nimmt_den_trend_auf():
+    """Der Trend steht in der Lage - und nur, wenn eine Periode verlangt wird."""
+    kerzen = _lange_serie()
+    f = [FlowPoint(k.ts, 100 + i, 100, 1000, 0.0001) for i, k in enumerate(kerzen)]
+    mit = lage_bericht(kerzen[-1200:], f[-1200:], trend_period=200)
+    assert "trend" in mit and "Uebergeordnet" in mit["trend_text"]
+    ohne = lage_bericht(kerzen[-1200:], f[-1200:], trend_period=0)
+    assert "trend" not in ohne
+    # zu kurze Historie -> keine Trendangabe, aber der Rest der Lage bleibt
+    kurz = lage_bericht(kerzen[-400:], f[-400:], trend_period=200)
+    assert "trend" not in kurz and "spot" in kurz
+
+
+# ------------------------------------------------- E34: die Ampel
+
+def test_ampel_stufen_nach_einfacher_mehrheit():
+    """Die Regel in Reinform: Mehrheit unter denen, die ueberhaupt etwas sagen."""
+    alles_dafuer = {"trend": "ueber", "struktur": "intakt",
+                    "spot": "zurueckgekehrt", "muster": "GESUNDER_TREND"}
+    a = ampel(alles_dafuer)
+    assert a["stufe"] == "guenstig" and a["gezaehlt"] == 4
+    assert a["dagegen"] == [] and len(a["dafuer"]) == 4
+    assert "4 von 4" in a["text"] and "GUENSTIG" in a["text"]
+
+    alles_dagegen = {"trend": "unter", "struktur": "gebrochen",
+                     "spot": "schwach", "muster": "DERIVATE_PUMP"}
+    assert ampel(alles_dagegen)["stufe"] == "unguenstig"
+
+    # 2:2 -> gemischt, nicht guenstig und nicht unguenstig
+    assert ampel({"trend": "ueber", "struktur": "intakt",
+                  "spot": "schwach", "muster": "DERIVATE_PUMP"})["stufe"] == "gemischt"
+    # 3:1 -> die Mehrheit entscheidet, ein Gegenargument kippt sie nicht
+    assert ampel({"trend": "ueber", "struktur": "intakt",
+                  "spot": "stabil", "muster": "DERIVATE_PUMP"})["stufe"] == "guenstig"
+
+
+def test_ampel_schweigt_bei_zu_duenner_lage():
+    """Lieber keine Aussage als eine aus einem einzigen Datenpunkt."""
+    assert ampel({}) is None
+    assert ampel(None) is None
+    assert ampel({"trend": "ueber"}) is None                    # nur eines sagt etwas
+    # "neu" heisst: kein Vergleichsbein. Das ist kein Gegenargument, sondern Schweigen.
+    assert ampel({"struktur": "neu", "trend": "ueber"}) is None
+    assert ampel({"struktur": "neu", "trend": "ueber", "spot": "stabil"})["gezaehlt"] == 2
+    # unbekannte Werte zaehlen nicht mit, statt still als "dagegen" zu gelten
+    assert ampel({"trend": "seitwaerts", "spot": "stabil"}) is None
+
+
+def test_ampel_kapitulation_spricht_fuer_den_long():
+    """Die einzige Zeile, die ueberrascht - und der Grund steht im Bauplan:
+    live steht flush_entry='core', die Engine kauft bewusst in die Kapitulation.
+    Short-Covering dagegen ist ein Anstieg OHNE echte Nachfrage."""
+    a = ampel({"muster": "CAPITULATION_RESET", "spot": "stabil"})
+    assert a["dagegen"] == [] and "Muster" in a["dafuer"]
+    b = ampel({"muster": "SHORT_COVERING", "spot": "stabil"})
+    assert "Muster" in b["dagegen"]
+
+
+def test_ampel_spiegelt_fuer_short_aber_nicht_die_struktur():
+    """Der Fehler, den der erste Bauversuch hatte.
+
+    Trend, Spot und Muster sind absolut (steigend/fallend) und kehren sich beim Short
+    um. Die STRUKTUR kommt aus trend_intakt() und misst das Bein DER POSITION - bei
+    einem Short also tieferes Tief und tieferes Hoch. Sie spricht damit immer schon in
+    der Richtung der Position und darf nicht gespiegelt werden.
+    """
+    lage = {"trend": "unter", "struktur": "intakt",
+            "spot": "nachgelassen", "muster": "UNGESUNDER_ABVERKAUF"}
+    lang = ampel(lage, long_side=True)
+    kurz = ampel(lage, long_side=False)
+    assert lang["stufe"] == "unguenstig" and lang["dafuer"] == ["Struktur"]
+    # fallender Markt + intakte Abwaertsstruktur + schwache Nachfrage = 4 von 4 fuer Short
+    assert kurz["stufe"] == "guenstig" and kurz["dagegen"] == []
+    assert "Struktur" in kurz["dafuer"]
+
+
+def e34_signale(cs, fl, **kw):
+    """Wie e13_lauf, gibt aber die Signal-Objekte zurueck - fuer die Tranchen."""
+    pos = Position()
+    raus = []
+    for i in range(len(cs)):
+        raus += evaluate(cs[:i + 1], fl[:i + 1], pos, bias_short=False, pivot_n=2, **kw)
+    return raus
+
+
+def _tranchen(sig):
+    return [(s.type, s.tranche_pct) for s in sig if s.type in _ENTRY_TYPES]
+
+
+def test_ampel_filter_aus_aendert_nichts():
+    """Vorgabe 'off': live und in jeder bestehenden Gitterzeile passiert nichts."""
+    cs, fl = e13_szenario()
+    assert _tranchen(e34_signale(cs, fl)) == _tranchen(e34_signale(cs, fl, ampel_filter="off"))
+    assert _tranchen(e34_signale(cs, fl))            # es gibt ueberhaupt Einstiege
+
+
+def test_ampel_filter_klein_halbiert_bei_unguenstiger_lage():
+    """Kaisers Frage in Testform: bei unguenstiger Ampel nur die halbe Tranche."""
+    cs, fl = e13_szenario()                       # Spot faellt, ungesunder Abverkauf
+    assert classify_pattern(cs, fl) == Pattern.UNGESUNDER_ABVERKAUF
+    voll = _tranchen(e34_signale(cs, fl))
+    halb = _tranchen(e34_signale(cs, fl, ampel_filter="klein"))
+    assert [t for _s, t in voll] != [t for _s, t in halb], "die Ampel hat nichts bewirkt"
+    assert [s for s, _t in voll] == [s for s, _t in halb], "es darf kein Signal entfallen"
+    for (_sv, tv), (_sh, th) in zip(voll, halb):
+        assert th == max(1, int(tv * AMPEL_TRANCHE))
+
+
+def e34_szenario_mit_ausstieg():
+    """e13_szenario, danach unter die Invalidierung (97,6) -> Einstiege UND ein Stop.
+
+    Das Basis-Szenario erzeugt nur ein einziges KAUF_1 und ueberhaupt keinen Ausstieg.
+    Ein Test, der dort "Ausstiege bleiben unberuehrt" prueft, vergleicht zwei leere
+    Listen und ist gruen, egal was der Code tut - genau so ist die erste Fassung
+    dieses Tests durch die Sabotage-Probe gerutscht.
+    """
+    cs, fl = e13_szenario()
+    for v in (104, 101, 98, 95, 92):
+        cs.append(Candle(cs[-1].ts + H4_MS, v, v * 1.004, v * 0.996, v))
+        fl.append(FlowPoint(cs[-1].ts, fl[-1].spot_cvd - 30, 0.0,
+                            fl[-1].oi + 1e6, 0.0002))
+    return cs, fl
+
+
+def test_kuerzen_laesst_ausstiege_unberuehrt():
+    """Ein Ausstieg muss IMMER durchkommen - die Ampel darf nur Einstiege verkleinern.
+
+    Ein halbierter STOPLOSS liesse die halbe Position im fallenden Markt liegen: der
+    gefaehrlichste denkbare Fehler dieses Ausbaus. Geprueft wird hier direkt an
+    kuerze_einstiege(), mit einer von Hand gemischten Liste - denn durch evaluate()
+    ist der Fall heute nicht erreichbar (die Ausstiegs-Zweige kehren zurueck, bevor
+    ein Einstieg feuern kann). Die erste Fassung dieses Tests lief deshalb ueber zwei
+    LEERE Listen und war gruen, egal was der Code tat; die Sabotage-Probe hat sie
+    entlarvt.
+    """
+    def sig(t, pct):
+        return Signal(ts=1, type=t, price=100.0, tranche_pct=pct, reason="Test")
+
+    liste = [sig(SignalType.KAUF_1, 25), sig(SignalType.STOPLOSS, 100),
+             sig(SignalType.TEILVERKAUF_1, 40), sig(SignalType.NACHKAUF, 25),
+             sig(SignalType.VERKAUF_REST, 20), sig(SignalType.WARNUNG, 0)]
+    kuerze_einstiege(liste, lambda _long: True)      # haerter geht es nicht
+    ergebnis = {s.type: s.tranche_pct for s in liste}
+    assert ergebnis[SignalType.STOPLOSS] == 100, "der Stop wurde angefasst"
+    assert ergebnis[SignalType.TEILVERKAUF_1] == 40
+    assert ergebnis[SignalType.VERKAUF_REST] == 20
+    assert ergebnis[SignalType.WARNUNG] == 0
+    assert ergebnis[SignalType.KAUF_1] == 12 and ergebnis[SignalType.NACHKAUF] == 12
+
+
+def test_kuerzen_fragt_je_signal_nach_der_richtung():
+    """Was fuer einen Long spricht, spricht gegen einen Short - also wird je Signal
+    in dessen eigener Richtung entschieden, nicht einmal pauschal fuer die Kerze."""
+    def sig(t):
+        return Signal(ts=1, type=t, price=100.0, tranche_pct=20, reason="Test")
+
+    liste = [sig(SignalType.KAUF_1), sig(SignalType.SHORT_1)]
+    gefragt = []
+
+    def nur_long(long_side):
+        gefragt.append(long_side)
+        return long_side
+
+    kuerze_einstiege(liste, nur_long)
+    assert sorted(gefragt) == [False, True], "die Richtung wurde nicht je Signal gefragt"
+    assert [s.tranche_pct for s in liste] == [10, 20]
+
+
+def test_ampel_filter_laesst_ausstiege_auch_im_lauf_unberuehrt():
+    """Dieselbe Zusicherung noch einmal durch evaluate() - Ende zu Ende."""
+    cs, fl = e34_szenario_mit_ausstieg()
+    voll = [(s.type, s.tranche_pct) for s in e34_signale(cs, fl)]
+    halb = [(s.type, s.tranche_pct) for s in e34_signale(cs, fl, ampel_filter="klein")]
+    aus_voll = [x for x in voll if x[0] not in _ENTRY_TYPES]
+    assert aus_voll, "ohne Ausstieg prueft dieser Test nichts"
+    assert any(t == 100 for _s, t in aus_voll), "der Stop muss die GANZE Position raeumen"
+    assert aus_voll == [x for x in halb if x[0] not in _ENTRY_TYPES]
+    # ... und die Einstiege im selben Lauf muessen sehr wohl kleiner geworden sein,
+    # sonst waere die Gleichheit oben nur ein Zeichen dafuer, dass gar nichts wirkt
+    ein_voll = [x for x in voll if x[0] in _ENTRY_TYPES]
+    assert ein_voll and ein_voll != [x for x in halb if x[0] in _ENTRY_TYPES]
+
+
+def test_ampel_filter_gegenprobe_und_nullhypothese():
+    """Ohne diese beiden Zeilen waere ein gutes Ergebnis von 'klein' nicht deutbar.
+
+    'gross' halbiert bei GUENSTIG - also im selben Szenario NICHT, weil die Lage hier
+    unguenstig ist. 'immer' halbiert ohne jede Ampel, also auch hier.
+    """
+    cs, fl = e13_szenario()
+    # nachweislich unguenstig - sonst waere dieser Test still gegenstandslos
+    assert ampel(lage_bericht(cs, fl, pattern=classify_pattern(cs, fl),
+                              trend_period=200))["stufe"] == "unguenstig"
+    voll = [t for _s, t in _tranchen(e34_signale(cs, fl))]
+    klein = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="klein"))]
+    gross = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="gross"))]
+    immer = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="immer"))]
+    assert klein != voll and klein == immer          # unguenstig -> beide halbieren
+    assert gross == voll, "die umgekehrte Ampel darf hier gerade NICHT halbieren"
+
+
+def test_ampel_filter_bei_guenstiger_lage_genau_andersherum():
+    """Spiegelbild: jetzt ist die Lage guenstig - also halbiert 'gross' und 'klein' nicht.
+
+    Ohne diesen Test koennte 'gross' schlicht nie halbieren und der Test oben waere
+    trotzdem gruen.
+    """
+    cs, fl = e13_szenario(spot_faellt=False, oi_steigt=False)
+    assert ampel(lage_bericht(cs, fl, pattern=classify_pattern(cs, fl),
+                              trend_period=200))["stufe"] == "guenstig"
+    voll = [t for _s, t in _tranchen(e34_signale(cs, fl))]
+    klein = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="klein"))]
+    gross = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="gross"))]
+    assert voll and klein == voll, "bei guenstiger Lage darf 'klein' nicht halbieren"
+    assert gross == [max(1, int(t * AMPEL_TRANCHE)) for t in voll]
+
+
+def test_ampel_filter_haelt_still_wenn_die_ampel_schweigt():
+    """Sagt die Ampel nichts, aendert 'klein' und 'gross' nichts - 'immer' schon.
+
+    Das trennt die Nullhypothese sauber von der Ampel: 'immer' darf an keiner
+    Ampel-Aussage haengen.
+    """
+    cs, fl = e13_szenario(spot_faellt=False)
+    assert ampel(lage_bericht(cs, fl, pattern=classify_pattern(cs, fl),
+                              trend_period=200)) is None
+    voll = [t for _s, t in _tranchen(e34_signale(cs, fl))]
+    assert voll, "ohne Einstiege prueft dieser Test nichts"
+    for modus in ("klein", "gross"):
+        assert [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter=modus))] == voll
+    immer = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="immer"))]
+    assert immer == [max(1, int(t * AMPEL_TRANCHE)) for t in voll]
+
+
+def test_ampel_vergleicht_nicht_das_bein_mit_sich_selbst():
+    """Bei einem frischen Einstieg gibt es noch kein Vergleichsbein.
+
+    Ohne den Merker _pos_imp_vorher wuerde evaluate() die Lage NACH dem Einstieg
+    bewerten: pos.zones ist dann bereits aus genau dem Bein gesetzt, auf das gerade
+    eingestiegen wurde - "Struktur unveraendert", ein geschenktes Argument dafuer, das
+    keine Information enthaelt. Gefunden, weil ein Gegenproben-Test unerwartet ansprang.
+    """
+    cs, fl = e13_szenario(spot_faellt=False)      # am Einstieg sagt nur der Spot etwas
+    lg = lage_bericht(cs, fl, pattern=classify_pattern(cs, fl), trend_period=200)
+    assert "struktur" not in lg and ampel(lg) is None, "Szenario passt nicht mehr"
+    voll = [t for _s, t in _tranchen(e34_signale(cs, fl))]
+    # eine einzige Aussage reicht der Ampel nicht -> niemand darf hier halbieren
+    assert [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="klein"))] == voll
+    assert [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="gross"))] == voll

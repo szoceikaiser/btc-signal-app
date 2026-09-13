@@ -306,17 +306,57 @@ def resample_daily(candles: list[Candle]) -> list[Candle]:
     return [Candle(day, days[day][0], days[day][1], days[day][2], days[day][3]) for day in order]
 
 
-def daily_trend(candles: list[Candle], period: int = 50):
+def daily_trend(candles: list[Candle], period: int = 50, streng: bool = False):
     """(letzter Tages-Schluss, Tages-EMA(period)) — Basis fuer den Trendfilter.
 
-    Live reichen ~66 Tage (400 4h-Kerzen); EMA200/1D braeuchte mehr Historie, daher
-    ist period=50 ein tragfaehiger Naeherungswert fuer den uebergeordneten Trend.
+    E33 (13.09.2026) — STILLER FEHLER, der hier lag: Die Zeile rechnete
+    `ema(closes, min(period, len(closes)))`. Wer `period=200` verlangte, aber nur 67
+    Tage Historie hatte (Live-Engine mit LIMIT=400), bekam klaglos einen EMA ueber 67
+    Tage zurueck - als waere es ein EMA200. Nachgemessen an einer 1300-Kerzen-Serie
+    lagen die beiden Werte 21 % auseinander. Schlimmer noch: Der Backtest sieht das
+    volle Fenster und rechnete den ECHTEN EMA200 - Live und Messung haetten also
+    verschiedene Dinge getan, ohne dass es jemandem aufgefallen waere.
+
+    `streng=True` gibt in diesem Fall None zurueck: lieber keine Aussage als eine
+    falsche. Aufrufer behandeln None als "unbekannt" und blockieren nichts.
+    `streng=False` bleibt das alte Verhalten (rueckwaertskompatibel).
     """
     daily = resample_daily(candles)
     if len(daily) < 2:
         return None
+    if streng and len(daily) < period:
+        return None
     closes = [c.close for c in daily]
     return daily[-1].close, ema(closes, min(period, len(closes)))
+
+
+def trend_lage(candles: list[Candle], period: int = 200) -> Optional[dict]:
+    """Der uebergeordnete Trend als ANZEIGE (E33-B) - nicht als Regel.
+
+    Furkan leitet seinen Bias aus Makro ab (Transkript 15:58: "Ich benutze keine 17
+    verschiedenen Indikatoren ... Makrokorrelation, US-Aktienmarkt, Renditen ... damit
+    ich ueberhaupt erstmal meinen Bias habe"). Ein Tages-EMA ist NICHT seine Methode,
+    sondern der backtestbare Behelf aus STRATEGIE.md Abschnitt 5.
+
+    Deshalb steht er zuerst nur in der Nachricht: Kaiser sieht die Lage und entscheidet.
+    Neun Order-Flow-FILTER wurden in diesem Projekt gemessen, alle waren schlechter -
+    die ANZEIGE kostet dagegen nichts.
+
+    Gibt None zurueck, wenn die Historie fuer den verlangten EMA nicht reicht.
+    """
+    t = daily_trend(candles, period, streng=True)
+    if t is None:
+        return None
+    close, e = t
+    if e is None:
+        return None
+    ueber = close >= e
+    return {
+        "stand": "ueber" if ueber else "unter",
+        "ema": e, "period": period, "kurs": close,
+        "text": (f"Uebergeordnet: Kurs {_p(close)} {'ueber' if ueber else 'unter'} "
+                 f"EMA{period} ({_p(e)})"),
+    }
 
 
 def daily_fib_zone(candles: list[Candle], pivot_n: int = 5,
@@ -480,7 +520,8 @@ def lage_bericht(candles: list[Candle], flow: list[FlowPoint],
                  imp: Optional[Impulse] = None,
                  pos_impulse: Optional[Impulse] = None,
                  pattern: Optional[Pattern] = None,
-                 fenster: int = SPOT_FENSTER) -> dict:
+                 fenster: int = SPOT_FENSTER,
+                 trend_period: int = 0) -> dict:
     """Der Marktzustand in Klartext - REINE INFORMATION, keine Handelsregel (E32).
 
     Anlass (Kaiser 12.09.2026): "ich bekomme die info zur struktur nur, wenn ich eine
@@ -496,6 +537,15 @@ def lage_bericht(candles: list[Candle], flow: list[FlowPoint],
     um ein Signal zu erzeugen oder zu unterdruecken.
     """
     lage: dict = {}
+
+    # --- Uebergeordneter Trend (E33-B): steht ZUERST, weil er den Rahmen setzt.
+    # Furkans Reihenfolge (Transkript 19:16): "uebergeordnet erstmal ein Bias ... dann
+    # gehe ich rein, schaue mir vor allem die Orderflow Daten an".
+    if trend_period:
+        _tl = trend_lage(candles, trend_period)
+        if _tl is not None:
+            lage["trend"] = _tl["stand"]
+            lage["trend_text"] = _tl["text"]
 
     # --- Struktur (Preis)
     if imp is not None:
@@ -533,6 +583,89 @@ def lage_bericht(candles: list[Candle], flow: list[FlowPoint],
         lage["muster_text"] = MUSTER_KLARTEXT.get(pattern.name, pattern.name)
 
     return lage
+
+
+# --- E34: die Ampel --------------------------------------------------------------
+# Kaiser 13.09.2026: "Ich brauche einen genauen Plan, wonach ich handele, ohne selbst
+# entscheiden zu muessen." Die vier Lage-Angaben sind richtig, verlangen aber eine
+# Abwaegung. Die Ampel nimmt die Abwaegung ab - und NUR die. Sie schreibt keine
+# Handlung vor (docs/PLAN-E34-AMPEL.md).
+
+# Je Kriterium: welche Werte sprechen DAFUER, dass die LONG-Richtung weiter traegt.
+# Alles, was weder hier noch in _AMPEL_DAGEGEN steht, gilt als "keine Aussage" -
+# Schweigen ist nie ein Gegenargument.
+_AMPEL_DAFUER = {
+    "trend":    {"ueber"},
+    "struktur": {"intakt", "unveraendert"},
+    "spot":     {"stabil", "zurueckgekehrt"},
+    # Kapitulation ist in Furkans Methode kein Warnzeichen, sondern die Einstiegslage -
+    # deshalb steht live flush_entry="core". Short-Covering dagegen ist eine Aufwaerts-
+    # bewegung OHNE echte Nachfrage und spricht nicht fuer einen Long.
+    "muster":   {"GESUNDER_TREND", "CAPITULATION_RESET"},
+}
+_AMPEL_DAGEGEN = {
+    "trend":    {"unter"},
+    "struktur": {"gebrochen"},
+    "spot":     {"nachgelassen", "schwach"},
+    "muster":   {"DERIVATE_PUMP", "SHORT_COVERING", "UNGESUNDER_ABVERKAUF"},
+}
+# Kriterien, die NICHT gespiegelt werden, weil sie schon in der Richtung der Position
+# sprechen. "Struktur intakt" kommt aus trend_intakt() und heisst: das Bein der Position
+# setzt sich fort - bei einem Short also tieferes Tief und tieferes Hoch. Das spricht
+# FUER den Short. Trend, Spot-Nachfrage und Muster sind dagegen absolut (steigend /
+# fallend) und kehren sich bei einem Short um.
+_AMPEL_RELATIV = {"struktur"}
+AMPEL_NAMEN = {"trend": "Trend", "struktur": "Struktur",
+               "spot": "Spot-Nachfrage", "muster": "Muster"}
+AMPEL_REIHENFOLGE = ("trend", "struktur", "spot", "muster")
+AMPEL_SCHLUSSSATZ = ("Der Plan oben bleibt unveraendert. Die Engine handelt die Lage "
+                     "NICHT — die Ampel ist eine Beobachtung, keine Anweisung.")
+
+
+def ampel(lage: dict, long_side: bool = True) -> Optional[dict]:
+    """Fasst die vier Lage-Angaben zu EINER Aussage zusammen (E34).
+
+    Jedes Kriterium sagt dafuer, dagegen oder nichts; die einfache Mehrheit unter
+    denen, die etwas sagen, ergibt die Stufe. Alle vier zaehlen gleich viel - eine
+    Setzung, keine Messung, im Bauplan offen als solche benannt.
+
+    Bei einer SHORT-Position kehrt sich jede Zeile um: was fuer einen Long spricht,
+    spricht gegen einen Short. Live steht bias_short=false; die Seite existiert, damit
+    die Ampel nicht Unsinn sagt, falls sie je eingeschaltet wird.
+
+    Liefert None, wenn weniger als zwei Kriterien etwas sagen - lieber keine Aussage
+    als eine aus einem einzigen Datenpunkt.
+    """
+    if not lage:
+        return None
+    dafuer, dagegen = [], []
+    for feld in AMPEL_REIHENFOLGE:
+        wert = lage.get(feld)
+        if wert is None:
+            continue
+        spiegeln = not long_side and feld not in _AMPEL_RELATIV
+        if wert in _AMPEL_DAFUER[feld]:
+            (dagegen if spiegeln else dafuer).append(AMPEL_NAMEN[feld])
+        elif wert in _AMPEL_DAGEGEN[feld]:
+            (dafuer if spiegeln else dagegen).append(AMPEL_NAMEN[feld])
+    gezaehlt = len(dafuer) + len(dagegen)
+    if gezaehlt < 2:
+        return None
+    if len(dafuer) > len(dagegen):
+        stufe = "guenstig"
+    elif len(dagegen) > len(dafuer):
+        stufe = "unguenstig"
+    else:
+        stufe = "gemischt"
+    return {
+        "stufe": stufe,
+        "dafuer": dafuer,
+        "dagegen": dagegen,
+        "gezaehlt": gezaehlt,
+        "text": f"{stufe.upper()} — {len(dafuer)} von {gezaehlt} spricht dafuer"
+                if len(dafuer) == 1 else
+                f"{stufe.upper()} — {len(dafuer)} von {gezaehlt} sprechen dafuer",
+    }
 
 
 def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
@@ -661,6 +794,35 @@ def _reset_position(pos: "Position") -> None:
 # (Basis fuer den nachgezogenen Break-even-Stop, E9.10).
 _ENTRY_TYPES = {SignalType.KAUF_1, SignalType.KAUF_2, SignalType.NACHKAUF,
                 SignalType.SHORT_1, SignalType.SHORT_2, SignalType.SHORT_NACHLEGEN}
+# E34: welche davon eine LONG-Position aufbauen. Die Ampel bewertet je Signal in
+# dessen eigener Richtung - was fuer einen Long spricht, spricht gegen einen Short.
+_LONG_ENTRY_TYPES = {SignalType.KAUF_1, SignalType.KAUF_2, SignalType.NACHKAUF}
+
+# E34: Faktor, mit dem die Ampel eine Einstiegs-Tranche verkleinert. 0.5 ist eine
+# Setzung - halbe Position ist die einfachste Abstufung, die es gibt. Ob sie etwas
+# bringt, beantwortet der Backtest; der Wert selbst wird NICHT mitoptimiert, solange
+# nicht feststeht, dass die Ampel ueberhaupt etwas misst.
+AMPEL_TRANCHE = 0.5
+
+
+def kuerze_einstiege(signals: list, halbieren) -> None:
+    """Verkleinert die EINSTIEGE einer Kerze; alles andere bleibt unangetastet (E34).
+
+    `halbieren(long_side: bool) -> bool` entscheidet je Richtung.
+
+    Eigene Funktion, weil sich die wichtigste Regel dieses Ausbaus sonst nicht pruefen
+    laesst: In `evaluate` kann heute kein Ausstieg mit Tranche in derselben Kerze wie
+    ein Einstieg stehen - die Ausstiegs-Zweige kehren vorher zurueck (nachgesehen ueber
+    9.000 Kerzen: nur WARNUNG mit Tranche 0 kommt zusammen mit Einstiegen vor). Der
+    Schutz waere damit zwar vorhanden, aber tote Absicherung, die kein Test erreicht -
+    und eine kuenftige Aenderung koennte ihn unbemerkt entfernen. Hier ist er direkt
+    pruefbar: ein halbierter STOPLOSS liesse die halbe Position im fallenden Markt
+    liegen, der gefaehrlichste denkbare Fehler dieses Ausbaus.
+    """
+    for s in signals:
+        if s.type in _ENTRY_TYPES and s.tranche_pct > 0 \
+                and halbieren(s.type in _LONG_ENTRY_TYPES):
+            s.tranche_pct = max(1, int(s.tranche_pct * AMPEL_TRANCHE))
 
 # E18.2: Signale, die eine bestehende Position VERGROESSERN bzw. VERKLEINERN. Nur diese
 # beiden Gruppen schliessen sich bei no_flip innerhalb einer Kerze gegenseitig aus.
@@ -795,7 +957,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
              pivot_n: int = 5, k_atr: float = 2.0,
              flush_entry: str = "core", tp_ladder: bool = True,
-             trend_filter: bool = False, trend_ema: int = 50,
+             trend_filter: bool = False, trend_ema: int = 200,
              strict_confirm: bool = False, confluence: bool = False,
              conditional_stop: bool = False, buy_ladder: bool = True,
              release_stale_rest: bool = False, trail_stop: bool = False,
@@ -811,7 +973,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              neustart_mit_rest: bool = False,
              zonen_1d: bool = False,
              zonen_nachziehen: bool = False,
-             pivot_n_1d: int = 0) -> list[Signal]:
+             pivot_n_1d: int = 0,
+             ampel_filter: str = "off") -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -822,6 +985,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # damals fehlte echtes OI, Muster 4 war blind. Mit echten Liquidationsdaten dreht
     # sich das Ergebnis. tp_ladder (E8.2) bildet Furkans gestaffelte Gewinnmitnahme ab
     # (Recall/Praezision unveraendert, Rendite leicht besser). Recall != Gewinn.
+    # E33 (13.09.2026): trend_ema Vorgabe von 50 auf 200 gehoben. 50 Tage sind kein
+    # "uebergeordneter" Trend - Furkans Bias-Ebene sind Monate (Transkript 16:03).
+    # Gefahrlos, weil trend_filter ueberall aus ist: kein Gitter-Eintrag und keine
+    # Live-Einstellung nutzt ihn. Mit LIMIT_HAUPT=1300 reicht die Historie jetzt dafuer.
     # E8.5-Filter fuer bessere Einstiege (alle Furkans Methode, schaltbar, Default aus
     # bis per Backtest gemessen): trend_filter = nur Setups in Richtung des 1D-Trends
     # (Furkans Schritt 1, Preis vs. Tages-EMA); strict_confirm = KAUF 2 nur mit
@@ -920,6 +1087,14 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     """
     if not candles:
         return []
+
+    # E34: das Bein der Position, wie es zu BEGINN dieser Kerze feststand. Die Ampel
+    # bewertet die Lage, in der die Entscheidung faellt - nicht die Lage danach.
+    # Ohne diesen Merker vergliche sie bei einem frischen Einstieg das gerade gesetzte
+    # Bein mit sich selbst ("Struktur unveraendert") und bekaeme ein Argument dafuer
+    # geschenkt, das keine Information enthaelt. Steht hier ganz oben, weil sowohl
+    # _versuche_einstieg() als auch zonen_nachziehen pos.zones unterwegs ersetzen.
+    _pos_imp_vorher = pos.zones.impulse if pos.zones is not None else None
     cur = candles[-1]
     if cur.ts <= pos.last_signal_ts:
         return []
@@ -944,7 +1119,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                    nur_auf=_nur_auf)
 
     # --- E8.5-Kontext (nur berechnen, wenn ein Filter aktiv ist)
-    _trend = daily_trend(candles, trend_ema) if trend_filter else None
+    _trend = daily_trend(candles, trend_ema, streng=True) if trend_filter else None
     _dzone = daily_fib_zone(candles, min_bein_pct=min_bein_pct,
                             bein_wahl=bein_wahl) if confluence else None
 
@@ -964,6 +1139,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             _imp_1d = _z1d.impulse
 
     def _trend_ok(long_side: bool) -> bool:
+        # E33: _trend wird streng berechnet - reicht die Historie fuer den verlangten
+        # EMA nicht, ist _trend None und es wird NICHTS blockiert. Unbekannt heisst
+        # nicht verboten.
         if not trend_filter or _trend is None or _trend[1] is None:
             return True                                  # unbekannt -> nicht blockieren
         close, e = _trend
@@ -1449,6 +1627,31 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             pos.tp_rungs = pos.buy_rungs = pos.dip_buys = 0
             pos.liq_entries = pos.liq_exits = pos.high_exits = pos.widerstand_exits = 0
             pos.ziel_extrem = None
+
+    # E34: die Ampel darf die GROESSE eines Einstiegs aendern - mehr nicht.
+    # Bewusst HIER, nach allen Einstiegspfaden und VOR der Einstands-Rechnung:
+    # der Zustandsautomat haengt am Signaltyp, nicht an der Tranche, also stoert eine
+    # kleinere Tranche den Ablauf nicht. Ausstiege bleiben unberuehrt - ein Ausstieg
+    # muss immer durchkommen. Default "off": live und in jeder bestehenden Gitterzeile
+    # passiert hier nichts, auch nicht die Rechenarbeit.
+    if ampel_filter != "off" and any(s.type in _ENTRY_TYPES for s in signals):
+        _lage_jetzt = None if ampel_filter == "immer" else lage_bericht(
+            candles, flow, imp=imp,
+            pos_impulse=_pos_imp_vorher,
+            pattern=pattern, trend_period=trend_ema)
+        _amp_cache: dict = {}
+
+        def _halbieren(long_side: bool) -> bool:
+            if ampel_filter == "immer":
+                return True                      # Nullhypothese: gar keine Ampel
+            if long_side not in _amp_cache:
+                _amp_cache[long_side] = ampel(_lage_jetzt, long_side=long_side)
+            a = _amp_cache[long_side]
+            if a is None:
+                return False                     # keine Aussage -> nichts aendern
+            return a["stufe"] == ("guenstig" if ampel_filter == "gross" else "unguenstig")
+
+        kuerze_einstiege(signals, _halbieren)
 
     # Durchschnitts-Einstand fortschreiben (E9.10): tranchengewichtet ueber alle
     # Einstiegs-Signale dieser Kerze. Zentral hier, damit kein Einstiegspfad vergessen

@@ -68,7 +68,7 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "no_flip", "freeze_targets",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
              "rest_halten", "neustart_mit_rest", "zonen_1d",
-             "zonen_nachziehen", "pivot_n_1d")
+             "zonen_nachziehen", "pivot_n_1d", "ampel_filter")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, trend_ema=50, strict_confirm=False, confluence=False,
@@ -79,7 +79,7 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
              bein_richtung="auto", widerstand_exit="off",
              rest_halten=False, neustart_mit_rest=False, zonen_1d=False,
-             zonen_nachziehen=False, pivot_n_1d=0)
+             zonen_nachziehen=False, pivot_n_1d=0, ampel_filter="off")
 
 
 def V(label, panel=False, **kw):
@@ -373,6 +373,22 @@ GRID = [
     # unterscheidet sich von ihr in GENAU ZWEI benannten Punkten (zonen_1d an,
     # pivot_n_1d=8), deshalb zusaetzlich die Gegenprobe mit n=5 darunter: sie zeigt,
     # wie viel davon auf die 1D-Ebene und wie viel auf die groebere Weite entfaellt.
+    # E33 (13.09.2026): Der uebergeordnete Trend als FILTER - erstmals ueberhaupt
+    # gemessen. trend_filter existiert seit E8.5 im Code, stand aber nie in config.json
+    # und hatte nie eine Gitterzeile. Furkans Bias kommt aus Makro (Transkript 15:58:
+    # "Ich benutze keine 17 verschiedenen Indikatoren ... Makrokorrelation,
+    # US-Aktienmarkt, Renditen"); ein Tages-EMA ist der backtestbare Behelf aus
+    # STRATEGIE.md Abschnitt 5. Zwei Weiten, weil 50 Tage kaum "uebergeordnet" sind.
+    V("LIVE-heute +Trendfilter EMA200",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      trend_filter=True, trend_ema=200),
+    V("LIVE-heute +Trendfilter EMA50",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      trend_filter=True, trend_ema=50),
     V("LIVE-heute +1D-Ebene grob (n=8)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
@@ -388,6 +404,30 @@ GRID = [
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
       zonen_1d=True, pivot_n_1d=12),
+    # E34 (13.09.2026): Die Ampel als FILTER - Kaisers Frage, ob bei unguenstiger Lage
+    # kleinere Tranchen besser gewesen waeren. Die Ampel selbst ist eine Anzeige und
+    # bleibt es; diese drei Zeilen sollen klaeren, ob mehr darin steckt.
+    # Die beiden letzten Zeilen sind der Kern: ohne sie waere ein gutes Ergebnis der
+    # ersten nicht deutbar. "umgekehrt" halbiert bei GUENSTIG statt bei UNGUENSTIG -
+    # gewinnt sie auch, misst die Ampel nichts. "immer halbe Tranche" laesst die Ampel
+    # ganz weg - gewinnt sie genauso, lag es nie an der Ampel, sondern daran, dass
+    # kleinere Tranchen in diesem Fenster ohnehin besser waren. Dieselbe Lehre wie aus
+    # der Robustheitspruefung: eine Rangfolge allein ist kein Beleg.
+    V("LIVE-heute +Ampel klein bei unguenstig",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      ampel_filter="klein"),
+    V("LIVE-heute +Ampel UMGEKEHRT (Gegenprobe)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      ampel_filter="gross"),
+    V("LIVE-heute +immer halbe Tranche (Nullhypothese)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      ampel_filter="immer"),
     V("LIVE-heute +Rest halten +Neustart mit Rest",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,

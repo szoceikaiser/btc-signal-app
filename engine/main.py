@@ -31,7 +31,7 @@ import coinalyze
 from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
                            Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots, gegen_zonen,
-                           classify_pattern, lage_bericht,
+                           ampel, classify_pattern, lage_bericht,
                            last_significant_impulse, liq_levels, next_pivot_beyond)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
                              send_plan, send_signals, send_text, send_vorschau)
@@ -40,7 +40,18 @@ ROOT = Path(__file__).resolve().parent.parent          # Repo-Wurzel (signal-app
 DATA = ROOT / "site" / "data"
 TIMEFRAME = "4h"
 CANDLE_MS = 4 * 3600 * 1000
-LIMIT = 400                                            # ~66 Tage Kontext
+LIMIT = 400                                            # ~66 Tage - fuer die Flush-Wache
+# E33 (13.09.2026): Der Hauptlauf braucht mehr Historie. daily_trend(period=200)
+# resampelt auf Tageskerzen - mit 400 4h-Kerzen sind das nur 67 Tage, und der "EMA200"
+# waere in Wahrheit ein EMA67 (nachgemessen: 21 % Unterschied). Der Backtest sieht das
+# volle Fenster und rechnet den echten EMA200; ohne diese Erhoehung wuerden Live und
+# Messung verschiedene Dinge tun. 1300 Kerzen = ~217 Tage.
+# GEPRUEFT vor der Aenderung: Bei der Live-Einstellung aendert mehr Historie KEIN
+# einziges Signal (Test test_mehr_historie_aendert_die_signale_nicht). Nur daily_trend
+# und daily_fib_zone lesen die gesamte Historie - beide haengen an Schaltern.
+LIMIT_HAUPT = 1300                                     # ~217 Tage - reicht fuer EMA200
+MAX_JE_ABRUF = 1000                                    # Grenze der Binance-API
+MAX_ABRUFE = 5                                         # Notbremse gegen Endlosschleifen
 
 SPOT_URL = ("https://data-api.binance.vision/api/v3/klines"
             f"?symbol=BTCUSDT&interval={TIMEFRAME}&limit={LIMIT}")
@@ -60,6 +71,39 @@ def _get_json(url: str, tries: int = 3):
             last = exc
             time.sleep(2 * (i + 1))
     raise RuntimeError(f"Abruf fehlgeschlagen: {url} ({last})")
+
+
+def fetch_spot(limit: int = LIMIT) -> list:
+    """Spot-Kerzen holen - paginiert, weil die Binance-API hoechstens 1000 je Abruf
+    liefert (E33). Bis 1000 genau ein Abruf wie bisher; darueber wird rueckwaerts
+    nachgeladen und chronologisch zusammengesetzt.
+    """
+    basis = ("https://data-api.binance.vision/api/v3/klines"
+             f"?symbol=BTCUSDT&interval={TIMEFRAME}")
+    if limit <= MAX_JE_ABRUF:
+        return _get_json(f"{basis}&limit={limit}")
+    out = _get_json(f"{basis}&limit={MAX_JE_ABRUF}")
+    # Abbruchsicherung: Waechst `out` in einem Durchlauf nicht, wird abgebrochen. Ohne
+    # das liefe die Schleife ewig, falls die API wiederholt dieselben oder gar keine
+    # neuen Kerzen liefert - im 15-Minuten-Takt ein haengender Workflow. Diese Luecke
+    # hat die Sabotage-Probe zu E33 aufgedeckt, nicht der normale Testlauf.
+    for _ in range(MAX_ABRUFE):
+        if limit - len(out) <= 0:
+            break
+        bis = int(out[0][0])                       # aelteste bekannte Kerze
+        block = _get_json(
+            f"{basis}&limit={min(limit - len(out), MAX_JE_ABRUF)}&endTime={bis - 1}")
+        if not block:
+            break
+        aeltester = int(out[0][0])
+        out = block + out
+        # Fortschritt heisst: die Historie reicht jetzt WEITER ZURUECK. Die blosse
+        # Listenlaenge taugt nicht - liefert die API zweimal denselben Block, waechst
+        # sie trotzdem (mit Duplikaten). Genau das hat die Sabotage-Probe gezeigt.
+        if int(out[0][0]) >= aeltester:
+            break
+        time.sleep(0.3)
+    return out
 
 
 def _iso_to_ms(iso: str) -> int:
@@ -112,7 +156,7 @@ def fetch_market_data(oi_history: list[list] | None = None,
       mit jedem Lauf — die ersten ~2 Tage sind die OI-Muster noch neutral.
     """
     now_ms = now_ms or int(time.time() * 1000)
-    spot_raw = _get_json(SPOT_URL)
+    spot_raw = fetch_spot(LIMIT_HAUPT)
     funding = fetch_funding_8h()
 
     # E9.1: echtes OI + Liquidationen von Coinalyze (falls Secret gesetzt), sonst
@@ -192,7 +236,6 @@ EVAL_DEFAULTS = {
     "bias_long": True, "bias_short": True,
     "pivot_n": 5, "k_atr": 2.0,
     "flush_entry": "core", "tp_ladder": True,
-    "trend_filter": False, "trend_ema": 50,
     "strict_confirm": False, "confluence": False,
     "conditional_stop": False, "buy_ladder": True,
     "release_stale_rest": False, "trail_stop": False,
@@ -204,6 +247,8 @@ EVAL_DEFAULTS = {
     "bein_richtung": "auto", "widerstand_exit": "off",
     "rest_halten": False, "neustart_mit_rest": False,
     "zonen_1d": False, "zonen_nachziehen": False, "pivot_n_1d": 0,
+    "trend_filter": False, "trend_ema": 200,
+    "ampel_filter": "off",
 }
 
 
@@ -340,10 +385,16 @@ def zonen_vorschau(candles: list[Candle], cfg: dict | None = None,
     # Limit-Orders setzt. Ohne Position gibt es kein Vergleichsbein, also nur das
     # aktuelle Bein, die Spot-Nachfrage und das Muster.
     _lage = lage_bericht(candles, flow or [], imp=imp,
-                         pattern=classify_pattern(candles, flow) if flow else None)
+                         pattern=classify_pattern(candles, flow) if flow else None,
+                         trend_period=par.get("trend_ema", 200))
+    # E34: die Ampel fasst die Lage zu EINER Aussage zusammen. Richtung aus dem Bein,
+    # denn ohne Position gibt es noch keine eigene - die Vorschau kuendigt genau dieses
+    # Setup an. Reine Anzeige, unabhaengig davon, ob ampel_filter an ist.
+    _ampel = ampel(_lage, long_side=imp.up) if _lage else None
     return {
         "richtung": "LONG" if imp.up else "SHORT",
         "lage": _lage or None,
+        "ampel": _ampel,
         "impuls_start": imp.start.price, "impuls_ende": imp.end.price,
         "impuls_start_ts": imp.start.ts, "impuls_ende_ts": imp.end.ts,
         "level_05": z.level_05, "gp_upper": z.gp_upper, "gp_lower": z.gp_lower,
@@ -418,9 +469,15 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
                                           bein_wahl=par["bein_wahl"], nur_auf=_nur_auf_p)
     _lage = lage_bericht(candles, flow, imp=_imp_jetzt,
                          pos_impulse=z.impulse,
-                         pattern=classify_pattern(candles, flow) if flow else None)
+                         pattern=classify_pattern(candles, flow) if flow else None,
+                         trend_period=par.get("trend_ema", 200))
     if _lage:
         plan["lage"] = _lage
+        # E34: Richtung aus der LAUFENDEN Position (nicht aus dem aktuellen Bein) -
+        # bewertet wird, ob der Plan traegt, den Kaiser gerade abarbeitet.
+        _ampel = ampel(_lage, long_side=lang)
+        if _ampel:
+            plan["ampel"] = _ampel
 
     # --- wo nachgekauft wird ---
     nach = []

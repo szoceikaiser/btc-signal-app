@@ -526,3 +526,151 @@ def test_plan_meldet_verschobene_marken_weiterhin():
     p3 = copy.deepcopy(p1)
     p3["stop"]["preis"] *= 1.01
     assert main.plan_geaendert(p1, p3) is True, "Stop verschoben, aber keine Meldung"
+
+
+def test_fetch_spot_paginiert_ueber_1000_kerzen():
+    """E33-A: Die Binance-API liefert hoechstens 1000 Kerzen je Abruf. Fuer den
+    EMA200 braucht die Engine ~1300 - also muss nachgeladen und chronologisch
+    zusammengesetzt werden. Ohne echten Netzzugriff geprueft, indem _get_json
+    ersetzt wird.
+    """
+    import main as M
+    aufrufe = []
+
+    JETZT = 1_789_000_000_000        # realistischer ms-Zeitstempel, keine negativen Werte
+
+    def fake(url):
+        aufrufe.append(url)
+        import re
+        lim = int(re.search(r"limit=(\d+)", url).group(1))
+        ende = re.search(r"endTime=(-?\d+)", url)
+        bis = int(ende.group(1)) if ende else JETZT
+        # Binance liefert aufsteigend sortiert, aelteste Kerze zuerst
+        start = bis - lim * M.CANDLE_MS
+        return [[start + i * M.CANDLE_MS, "1", "2", "0.5", "1.5", "0", 0, 0]
+                for i in range(lim)]
+
+    echt = M._get_json
+    try:
+        M._get_json = fake
+        # bis 1000: genau ein Abruf, wie bisher
+        aufrufe.clear()
+        einer = M.fetch_spot(400)
+        assert len(aufrufe) == 1 and len(einer) == 400
+
+        # darueber: mehrere Abrufe, Ergebnis in voller Laenge und chronologisch
+        aufrufe.clear()
+        viele = M.fetch_spot(1300)
+        assert len(aufrufe) >= 2, f"1300 Kerzen brauchen mehr als einen Abruf, waren {len(aufrufe)}"
+        assert len(viele) >= 1300, f"es fehlen Kerzen: {len(viele)}"
+        ts = [int(k[0]) for k in viele]
+        assert ts == sorted(ts), "die Kerzen muessen chronologisch sortiert sein"
+        assert len(set(ts)) == len(ts), "keine Kerze darf doppelt vorkommen"
+    finally:
+        M._get_json = echt
+
+
+def test_hauptlauf_laedt_mehr_historie_als_die_flush_wache():
+    """Die Flush-Wache laeuft alle 15 Minuten und braucht keinen Trend - ihre Last
+    soll nicht verdoppelt werden."""
+    import main as M
+    assert M.LIMIT_HAUPT > M.LIMIT
+    assert M.LIMIT_HAUPT >= 1200, "fuer einen echten EMA200 auf 1D noetig"
+    assert f"limit={M.LIMIT}" in M.SPOT_URL, "die Flush-Wache bleibt beim kleinen Fenster"
+
+
+def test_fetch_spot_bricht_ab_wenn_die_api_nicht_vorankommt():
+    """Notbremse (E33): Liefert die API wiederholt dieselben Kerzen, darf fetch_spot
+    NICHT endlos weiterfragen - im 15-Minuten-Takt waere das ein haengender Workflow,
+    der niemandem auffaellt.
+
+    Diese Luecke hat die Sabotage-Probe aufgedeckt: Die erste Fassung der Schleife
+    pruefte nur `fehlt > 0` und haette bei ausbleibendem Fortschritt ewig gedreht.
+    """
+    import main as M
+    aufrufe = []
+    JETZT = 1_789_000_000_000
+
+    def stur(url):
+        """Gibt immer denselben Block zurueck - egal was gefragt wird."""
+        aufrufe.append(url)
+        return [[JETZT - (999 - i) * M.CANDLE_MS, "1", "2", "0.5", "1.5", "0", 0, 0]
+                for i in range(1000)]
+
+    echt = M._get_json
+    try:
+        M._get_json = stur
+        out = M.fetch_spot(5000)                  # weit mehr als erreichbar
+        # Zwei Abrufe: der erste holt, der zweite zeigt, dass es nicht weiter
+        # zurueckgeht. Danach muss Schluss sein - NICHT erst nach MAX_ABRUFE.
+        assert len(aufrufe) <= 2, (
+            f"die Fortschrittspruefung hat nicht gegriffen: {len(aufrufe)} Abrufe")
+        assert out, "trotz Abbruch muessen die geholten Kerzen zurueckkommen"
+    finally:
+        M._get_json = echt
+
+
+def test_fetch_spot_gibt_zurueck_was_da_ist_wenn_die_api_versiegt():
+    """Liefert ein Nachlade-Abruf nichts mehr, wird mit dem Vorhandenen gearbeitet -
+    die Engine soll nicht wegen fehlender Althistorie ausfallen."""
+    import main as M
+    JETZT = 1_789_000_000_000
+    zaehler = {"n": 0}
+
+    def versiegt(url):
+        zaehler["n"] += 1
+        if zaehler["n"] > 1:
+            return []                              # ab dem zweiten Abruf nichts mehr
+        return [[JETZT - (999 - i) * M.CANDLE_MS, "1", "2", "0.5", "1.5", "0", 0, 0]
+                for i in range(1000)]
+
+    echt = M._get_json
+    try:
+        M._get_json = versiegt
+        out = M.fetch_spot(1300)
+        assert len(out) == 1000, f"es sollten die 1000 geholten Kerzen bleiben, sind {len(out)}"
+    finally:
+        M._get_json = echt
+
+
+def test_eval_defaults_hat_keinen_doppelten_schluessel():
+    """Ein Python-dict schluckt doppelte Schluessel still - der letzte gewinnt.
+
+    Gefunden am 13.09.2026: EVAL_DEFAULTS enthielt trend_filter und trend_ema ZWEIMAL
+    (einmal mit 50, einmal mit 200). Das Verhalten war zufaellig richtig, aber wer die
+    obere Zeile geaendert haette, haette keine Wirkung gesehen und keinen Fehler.
+    test_alle_evaluate_parameter_werden_durchgereicht kann das nicht finden, weil es
+    das fertige dict prueft - also wird hier der QUELLTEXT gelesen.
+    """
+    import ast
+    import inspect
+    from pathlib import Path
+    baum = ast.parse(Path(inspect.getfile(main)).read_text(encoding="utf-8"))
+    for knoten in ast.walk(baum):
+        if (isinstance(knoten, ast.Assign)
+                and any(getattr(z, "id", "") == "EVAL_DEFAULTS" for z in knoten.targets)):
+            namen = [s.value for s in knoten.value.keys if isinstance(s, ast.Constant)]
+            doppelt = sorted({n for n in namen if namen.count(n) > 1})
+            assert not doppelt, f"EVAL_DEFAULTS nennt doppelt: {doppelt}"
+            return
+    raise AssertionError("EVAL_DEFAULTS im Quelltext nicht gefunden")
+
+
+def test_ampel_steht_in_plan_und_vorschau():
+    """E34: Die Ampel ist eine ANZEIGE und haengt an keinem Schalter.
+
+    ampel_filter steht auf 'off' (live) und darf daran nichts aendern - sonst saehe
+    Kaiser die Zusammenfassung nur, wenn die Engine auch danach handelt.
+    """
+    import inspect
+    from strategy_core import evaluate
+    assert "ampel_filter" in inspect.signature(evaluate).parameters
+    assert main.EVAL_DEFAULTS["ampel_filter"] == "off"
+
+    for stelle in ("zonen_vorschau", "positions_plan"):
+        fn = inspect.getsource(getattr(main, stelle))
+        assert "ampel(" in fn, f"{stelle} berechnet die Ampel nicht"
+        # gemeint ist ein echter Zugriff auf den Schalter, nicht das Wort im Kommentar
+        for zugriff in ('par.get("ampel_filter"', 'par["ampel_filter"]',
+                        "par.get('ampel_filter'", "par['ampel_filter']"):
+            assert zugriff not in fn, f"{stelle} haengt die Anzeige an den Schalter"

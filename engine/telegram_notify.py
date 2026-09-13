@@ -14,6 +14,12 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
+# E34: EINE Quelle fuer den Schlusssatz der Ampel. Bewusst importiert statt abgetippt -
+# ein zweiter Wortlaut, der irgendwann von diesem abweicht, waere genau der Satz, der
+# eine Anweisung suggeriert, wo keine ist. strategy_core haengt nur an der
+# Standardbibliothek, ein Ringschluss ist ausgeschlossen.
+from strategy_core import AMPEL_SCHLUSSSATZ
+
 # Emoji + Kurzcode je Signaltyp (Kurzcode erscheint auch im Chart als Marker-Text)
 STYLE = {
     "KAUF_1":           ("\U0001F7E2", "K1"),   # gruener Kreis
@@ -50,7 +56,7 @@ def _lage_zeilen(lage: dict | None) -> list[str]:
     if not lage:
         return []
     zeilen = []
-    for feld in ("struktur_text", "spot_text", "muster_text"):
+    for feld in ("trend_text", "struktur_text", "spot_text", "muster_text"):
         wert = lage.get(feld)
         # "neu" heisst: es gibt kein Vergleichsbein (kein offener Trade). Die Vorschau
         # nennt das aktuelle Bein bereits in ihrer Kopfzeile - nicht doppelt schreiben.
@@ -60,6 +66,25 @@ def _lage_zeilen(lage: dict | None) -> list[str]:
             vorsatz = "Muster: " if feld == "muster_text" else ""
             zeilen.append(("Lage:  " if not zeilen else "       ") + vorsatz + wert)
     return ["", *zeilen] if zeilen else []
+
+
+def _ampel_zeilen(ampel: dict | None) -> list[str]:
+    """Die Ampel: aus den vier Lage-Angaben EINE Aussage (E34, Kaiser 13.09.2026).
+
+    "Ich brauche einen genauen Plan, wonach ich handele, ohne selbst entscheiden zu
+    muessen." Die Ampel nimmt die Abwaegung ab - und NUR die. Der Schlusssatz steht
+    IMMER dabei, auch bei GUENSTIG: die Engine handelt die Lage nicht, und niemand
+    soll aus dieser Zeile eine Anweisung lesen, die keine Messung deckt.
+    """
+    if not ampel:
+        return []
+    zeilen = ["", "Ampel: " + ampel["text"]]
+    if ampel.get("dafuer"):
+        zeilen.append("       dafuer:  " + ", ".join(ampel["dafuer"]))
+    if ampel.get("dagegen"):
+        zeilen.append("       dagegen: " + ", ".join(ampel["dagegen"]))
+    zeilen.append("       " + AMPEL_SCHLUSSSATZ)
+    return zeilen
 
 
 def format_vorschau(z: dict, ts_ms: int) -> str:
@@ -95,6 +120,7 @@ def format_vorschau(z: dict, ts_ms: int) -> str:
         lines.append(f"Abstand Golden Pocket -> Stop: {a:.1f} %"
                      + ("" if a >= 2 else "  ⚠️ unter 2 % — die Engine steigt hier NICHT ein"))
     lines += _lage_zeilen(z.get("lage"))
+    lines += _ampel_zeilen(z.get("ampel"))
     lines += [
         "",
         _fmt_ts(ts_ms),
@@ -142,6 +168,7 @@ def format_plan(p: dict) -> str:
     zeilen.append(f"Stop {_fmt_usd(p['stop']['preis'])} — {p['stop']['grund']}, "
                   f"bei Kerzenschluss {'darunter' if lang else 'darueber'}")
     zeilen += _lage_zeilen(p.get("lage"))
+    zeilen += _ampel_zeilen(p.get("ampel"))
     zeilen.append("")
     zeilen.append("— Diese Preise kannst du als Limit-Order hinterlegen. Neue Nachricht "
                   "gibt es erst, wenn sich eine Marke aendert.")
