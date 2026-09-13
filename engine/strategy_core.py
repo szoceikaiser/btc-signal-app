@@ -321,12 +321,35 @@ def daily_trend(candles: list[Candle], period: int = 50):
 
 def daily_fib_zone(candles: list[Candle], pivot_n: int = 5,
                    k_atr: float = 3.0, min_bein_pct: float = 0.0,
-                   bein_wahl: str = "juengstes") -> Optional[FibZones]:
-    """Fib-Zonen des letzten signifikanten 1D-Impulses (fuer die 4h+1D-Konfluenz)."""
+                   bein_wahl: str = "juengstes",
+                   pivot_n_1d: int = 0) -> Optional[FibZones]:
+    """Fib-Zonen des letzten signifikanten 1D-Impulses (fuer die 4h+1D-Konfluenz).
+
+    E32.3 (13.09.2026): `pivot_n_1d` ist die Swing-Weite AUF DER TAGESEBENE. 0 = wie
+    `pivot_n`, also das bisherige Verhalten.
+
+    WARUM DAS NOETIG WURDE: E23 rief diese Funktion mit `pivot_n` auf - also mit der
+    Weite, die fuer 4h-Kerzen eingestellt ist (5). Auf Tageskerzen ist das sehr fein;
+    schon ein kleines Zwischentief zaehlt dann als Swing, und `bein_wahl="juengstes"`
+    nimmt anschliessend das kleine, junge Bein. Die "1D-Ebene" war damit nicht Furkans
+    uebergeordnete Ebene, sondern dieselbe Feinstruktur auf groeberen Kerzen.
+
+    Nachgerechnet am 13.09.2026 mit echten Tageskerzen (Stand 12.09.):
+      n=5 -> Bein 76.264 -> 82.300 ( 8 %), Golden Pocket 78.377-78.570
+      n=8 -> Bein 62.535 -> 82.300 (32 %), Golden Pocket 69.453-70.085
+    Furkan nannte im Video vom 10.09.2026 "das Golden Pocket aus dieser Bewegung von
+    62.000 auf 82.000" - im Chart abgelesen 69.000-70.000. Das trifft n=8, nicht n=5.
+
+    PREIS DAFUER (ebenfalls nachgerechnet, ehrlich halten): Ein Pivot bei n=8 braucht
+    acht Tageskerzen RECHTS zur Bestaetigung. Ueber die letzten 21 Tage lieferte n=8 an
+    8 Tagen gar kein Bein, waehrend n=5 durchgehend eines hatte. Die groebere Ebene ist
+    traeger und zeigt die Zone spaeter. Ob sich das lohnt, entscheidet der Backtest.
+    """
     daily = resample_daily(candles)
-    if len(daily) < 2 * pivot_n + 2:
+    n1d = pivot_n_1d if pivot_n_1d > 0 else pivot_n
+    if len(daily) < 2 * n1d + 2:
         return None
-    piv = find_pivots(daily, n=pivot_n)
+    piv = find_pivots(daily, n=n1d)
     imp = last_significant_impulse(daily, piv, k_atr=k_atr, min_bein_pct=min_bein_pct,
                                    bein_wahl=bein_wahl)
     return fib_zones(imp) if imp is not None else None
@@ -787,7 +810,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              rest_halten: bool = False,
              neustart_mit_rest: bool = False,
              zonen_1d: bool = False,
-             zonen_nachziehen: bool = False) -> list[Signal]:
+             zonen_nachziehen: bool = False,
+             pivot_n_1d: int = 0) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -934,7 +958,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     _imp_1d = None
     if zonen_1d:
         _z1d = daily_fib_zone(candles, pivot_n=pivot_n, k_atr=k_atr,
-                              min_bein_pct=min_bein_pct, bein_wahl=bein_wahl)
+                              min_bein_pct=min_bein_pct, bein_wahl=bein_wahl,
+                              pivot_n_1d=pivot_n_1d)
         if _z1d is not None:
             _imp_1d = _z1d.impulse
 

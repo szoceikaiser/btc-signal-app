@@ -68,7 +68,7 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "no_flip", "freeze_targets",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
              "rest_halten", "neustart_mit_rest", "zonen_1d",
-             "zonen_nachziehen")
+             "zonen_nachziehen", "pivot_n_1d")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              trend_filter=False, trend_ema=50, strict_confirm=False, confluence=False,
@@ -79,7 +79,7 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
              bein_richtung="auto", widerstand_exit="off",
              rest_halten=False, neustart_mit_rest=False, zonen_1d=False,
-             zonen_nachziehen=False)
+             zonen_nachziehen=False, pivot_n_1d=0)
 
 
 def V(label, panel=False, **kw):
@@ -364,6 +364,30 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True),
+    # E32.3 (13.09.2026): Die 1D-Ebene mit EIGENER Swing-Weite. E23 rief sie mit
+    # pivot_n=5 auf - der Weite fuer 4h-Kerzen. Auf Tageskerzen ist das so fein, dass
+    # wieder nur kleine, junge Beine herauskommen; die "1D-Ebene" war damit gar nicht
+    # Furkans uebergeordnete Ebene. Mit n=8 findet sie am 12.09.2026 das Bein
+    # 62.535 -> 82.300 (32 %), Golden Pocket 69.453-70.085 - genau die Zone, die Furkan
+    # im Video vom 10.09. nennt. Die Live-Zeile bleibt unveraendert; diese hier
+    # unterscheidet sich von ihr in GENAU ZWEI benannten Punkten (zonen_1d an,
+    # pivot_n_1d=8), deshalb zusaetzlich die Gegenprobe mit n=5 darunter: sie zeigt,
+    # wie viel davon auf die 1D-Ebene und wie viel auf die groebere Weite entfaellt.
+    V("LIVE-heute +1D-Ebene grob (n=8)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      zonen_1d=True, pivot_n_1d=8),
+    V("LIVE-heute +1D-Ebene fein (n=5, Gegenprobe zu E23)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      zonen_1d=True, pivot_n_1d=0),
+    V("LIVE-heute +1D-Ebene sehr grob (n=12)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      zonen_1d=True, pivot_n_1d=12),
     V("LIVE-heute +Rest halten +Neustart mit Rest",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,

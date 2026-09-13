@@ -11,6 +11,7 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            gleiches_bein, liq_cascade, liq_levels, next_pivot_beyond,
                            trend_intakt,
                            lage_bericht, spot_nachfrage, MUSTER_KLARTEXT,
+                           daily_fib_zone,
                            resample_daily)
 
 DAY_MS = 86_400_000
@@ -1764,3 +1765,98 @@ def test_lage_aendert_keine_signale():
     assert [(s.ts, s.type, s.price) for s in sigs1] == \
            [(s.ts, s.type, s.price) for s in sigs2]
     assert pos1.state == pos2.state and pos1.entry_pct == pos2.entry_pct
+
+
+# ---------- E32.3: eigene Swing-Weite fuer die 1D-Ebene (13.09.2026)
+
+def _tageskerzen_gross_und_klein():
+    """Ein Verlauf mit einem GROSSEN uebergeordneten Bein (90 -> 151) und einem kurzen,
+    JUNGEN Ruecksetzer am Ende. Eine feine Swing-Weite bestaetigt den Ruecksetzer als
+    Pivot und nimmt anschliessend das kleine, junge Bein; eine grobe Weite tut das
+    nicht und behaelt das uebergeordnete. Genau dieser Unterschied trennt Furkans
+    Ebene von der, die E23 tatsaechlich abgetastet hat.
+
+    Gebaut als 4h-Kerzen (6 je Tag), weil daily_fib_zone selbst auf 1D resampelt.
+    Die Werte sind nicht geraten, sondern durchprobiert (13.09.2026).
+    """
+    segmente = [(8, 100, 90), (22, 90, 150), (4, 150, 138), (5, 138, 152)]
+    tage = []
+    for n, anf, ende in segmente:
+        tage += [anf + (ende - anf) * i / max(n - 1, 1) for i in range(n)]
+    kerzen, ts = [], 0
+    for preis in tage:
+        for _ in range(6):
+            kerzen.append(c(ts, preis, preis + 1.0, preis - 1.0, preis))
+            ts += 4 * 3600 * 1000
+    return kerzen
+
+
+def test_pivot_n_1d_waehlt_die_groebere_ebene():
+    """Der Kern von E32.3: Auf DERSELBEN Kurshistorie liefert eine groebere Swing-Weite
+    ein anderes, deutlich groesseres Bein. E23 rief die 1D-Ebene mit pivot_n auf - der
+    Weite fuer 4h-Kerzen - und bekam deshalb wieder Feinstruktur statt der
+    uebergeordneten Ebene."""
+    k = _tageskerzen_gross_und_klein()
+    fein = daily_fib_zone(k, pivot_n=2, k_atr=1.0, min_bein_pct=0.02, pivot_n_1d=2)
+    grob = daily_fib_zone(k, pivot_n=2, k_atr=1.0, min_bein_pct=0.02, pivot_n_1d=8)
+    assert fein is not None and grob is not None, "beide Ebenen muessen ein Bein finden"
+    spanne_fein = abs(fein.impulse.end.price - fein.impulse.start.price)
+    spanne_grob = abs(grob.impulse.end.price - grob.impulse.start.price)
+    assert spanne_grob > 3 * spanne_fein, (
+        f"die groebere Weite muss das deutlich groessere Bein liefern: "
+        f"grob {spanne_grob:.0f} gegen fein {spanne_fein:.0f}")
+    # und die Zonen liegen dadurch woanders - das ist der ganze Punkt
+    assert abs(grob.gp_upper - fein.gp_upper) > 0.05 * grob.gp_upper
+
+
+def test_pivot_n_1d_null_ist_das_alte_verhalten():
+    """Rueckwaertskompatibel: 0 heisst 'wie pivot_n'. Ohne diese Zusage wuerde der
+    Schalter stillschweigend alle bisherigen Messungen entwerten."""
+    k = _tageskerzen_gross_und_klein()
+    for n in (2, 3, 5):
+        a = daily_fib_zone(k, pivot_n=n, k_atr=1.0, min_bein_pct=0.02)
+        b = daily_fib_zone(k, pivot_n=n, k_atr=1.0, min_bein_pct=0.02, pivot_n_1d=0)
+        cc = daily_fib_zone(k, pivot_n=n, k_atr=1.0, min_bein_pct=0.02, pivot_n_1d=n)
+        assert (a is None) == (b is None) == (cc is None)
+        if a is not None:
+            assert a.impulse.start.price == b.impulse.start.price == cc.impulse.start.price
+            assert a.impulse.end.price == b.impulse.end.price == cc.impulse.end.price
+
+
+def test_pivot_n_1d_wirkt_nur_mit_zonen_1d():
+    """Der Parameter darf nichts tun, solange die 1D-Ebene ausgeschaltet ist - sonst
+    haette die Live-Einstellung sich unbemerkt geaendert."""
+    path = _intakter_trend_pfad()
+    erg = []
+    for n1d in (0, 8, 12):
+        pos = Position()
+        sigs = run_incremental(path, neg_funding_flow(), pos, pivot_n=2,
+                               bias_short=False, tp_ladder=False, buy_ladder=False,
+                               zonen_1d=False, pivot_n_1d=n1d)
+        erg.append([(x.ts, x.type, round(x.price, 4)) for x in sigs])
+    assert erg[0] == erg[1] == erg[2], "ohne zonen_1d darf pivot_n_1d nichts veraendern"
+
+
+def test_pivot_n_1d_kommt_durch_evaluate_an():
+    """Gegenprobe zur Verdrahtung - NICHT nur daily_fib_zone direkt pruefen.
+
+    Dieselbe Lehre wie dreimal zuvor in diesem Projekt: Ein Test, der nur die
+    Hilfsfunktion aufruft, bleibt gruen, wenn der Parameter auf dem Weg durch
+    evaluate() verlorengeht. Hier wird er deshalb ueber evaluate() gemessen:
+    Mit der Standardweite findet die 1D-Ebene das Aufwaerts-Bein 99,8 -> 140,3 und
+    steigt am 0.5-Level ein; mit einer sehr feinen Weite (n=2) zeichnet sie ein
+    anderes, abwaertsgerichtetes Bein und steigt gar nicht ein.
+    """
+    cs, flow = _zwei_ebenen_serie()
+
+    pos_std = Position()
+    sig_std = evaluate(cs, flow, pos_std, bias_short=False, zonen_1d=True, pivot_n_1d=0)
+    assert len(sig_std) == 1 and sig_std[0].type == SignalType.KAUF_1
+    assert abs(sig_std[0].price - 120.04) < 0.05
+
+    pos_fein = Position()
+    sig_fein = evaluate(cs, flow, pos_fein, bias_short=False, zonen_1d=True, pivot_n_1d=2)
+    assert sig_fein == [], (
+        "mit feiner 1D-Weite zeichnet die Ebene ein anderes Bein und steigt nicht ein - "
+        f"kam aber: {[x.type.name for x in sig_fein]}")
+    assert pos_fein.state == PosState.FLAT
