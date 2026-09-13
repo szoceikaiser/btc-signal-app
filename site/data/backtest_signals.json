@@ -1,78 +1,8 @@
 {
- "generated_at": "2026-09-06T19:00:23Z",
+ "generated_at": "2026-09-13T08:23:37Z",
  "variante": "LIVE-heute +Zonen nachziehen",
- "fenster": "29.12.2025-06.09.2026",
+ "fenster": "05.01.2026-13.09.2026",
  "signals": [
-  {
-   "ts": 1767052800000,
-   "type": "KAUF_1",
-   "price": 86924.98999999999,
-   "tranche_pct": 25,
-   "reason": "0.5-Retracement des Impulses 84450->89400",
-   "stop_ref": 84450.01,
-   "tag": "",
-   "label": "KAUF 1 (Teilposition am 0.5-Level)"
-  },
-  {
-   "ts": 1767096000000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 89016.35,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 89228",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1767110400000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 88226.16,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 89228",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1767369600000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 90805.62800000001,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (90806)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1767484800000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 91300.62400000001,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (91301)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1767499200000,
-   "type": "TEILVERKAUF_1",
-   "price": 91795.62000000001,
-   "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (91796)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF 1 (Extension 1.0)"
-  },
-  {
-   "ts": 1767571200000,
-   "type": "VERKAUF_REST",
-   "price": 92878.22,
-   "tranche_pct": 20,
-   "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
-   "stop_ref": null,
-   "tag": "",
-   "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
-  },
   {
    "ts": 1767801600000,
    "type": "KAUF_1",
@@ -2506,12 +2436,82 @@
   {
    "ts": 1788710400000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 79920.44,
+   "price": 79829.99,
    "tranche_pct": 15,
    "reason": "Teilgewinn am letzten Hoch 80200",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1788724800000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 80341.83,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 80200",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1788753600000,
+   "type": "NACHKAUF",
+   "price": 79397.83,
+   "tranche_pct": 15,
+   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1788753600000,
+   "type": "NACHKAUF",
+   "price": 79397.83,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 78660 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1788768000000,
+   "type": "NACHKAUF",
+   "price": 79420.16,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 79369 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1788840000000,
+   "type": "NACHKAUF",
+   "price": 78482.0,
+   "tranche_pct": 15,
+   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1789041600000,
+   "type": "NACHKAUF",
+   "price": 77555.704,
+   "tranche_pct": 25,
+   "reason": "0.786-Zone erreicht, Struktur intakt",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1789070400000,
+   "type": "NACHKAUF",
+   "price": 76568.72,
+   "tranche_pct": 15,
+   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 76264.0,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   }
  ]
 }
