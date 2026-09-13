@@ -10,6 +10,7 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            find_pivots, in_liq_zone, last_significant_impulse,
                            gleiches_bein, liq_cascade, liq_levels, next_pivot_beyond,
                            trend_intakt,
+                           lage_bericht, spot_nachfrage, MUSTER_KLARTEXT,
                            resample_daily)
 
 DAY_MS = 86_400_000
@@ -1683,3 +1684,83 @@ def test_no_flip_deckt_auch_den_neustart_mit_rest_ab():
         for ts, typen in proc.items():
             assert not (typen & aufbau and typen & abbau), \
                 f"Gegengeschaeft bei ts={ts} (zonen_nachziehen={nachziehen}): {typen}"
+
+
+# ------------------- E32: Lage-Bericht (Kaiser 12.09.2026, Video 10.09.)
+
+def _flow_cvd(werte):
+    """FlowPoints mit vorgegebenem kumuliertem Spot-CVD."""
+    return [FlowPoint(i, v, 100.0, 1000.0, 0.0001) for i, v in enumerate(werte)]
+
+
+def test_spot_nachfrage_vier_zustaende():
+    """Die vier Faelle, die Kaiser lesen will. spot_cvd ist KUMULIERT - verglichen wird
+    die Netto-Nachfrage der letzten 3 Kerzen mit der der 3 davor."""
+    # davor +, jetzt +  -> stabil
+    assert spot_nachfrage(_flow_cvd([0, 10, 20, 30, 40, 50, 60]))["stand"] == "stabil"
+    # davor -, jetzt +  -> zurueckgekehrt
+    assert spot_nachfrage(_flow_cvd([100, 90, 80, 70, 80, 90, 100]))["stand"] == "zurueckgekehrt"
+    # davor +, jetzt -  -> nachgelassen
+    assert spot_nachfrage(_flow_cvd([0, 10, 20, 30, 25, 20, 15]))["stand"] == "nachgelassen"
+    # davor -, jetzt -  -> schwach
+    assert spot_nachfrage(_flow_cvd([100, 90, 80, 70, 60, 50, 40]))["stand"] == "schwach"
+
+
+def test_spot_nachfrage_ohne_genug_daten_ist_none():
+    """Lieber nichts sagen als etwas erfinden: unter 2*fenster+1 Punkten -> None."""
+    assert spot_nachfrage(_flow_cvd([0, 10, 20])) is None
+    assert spot_nachfrage([]) is None
+    assert spot_nachfrage(_flow_cvd([0] * 7)) is not None      # genau genug
+
+
+def test_lage_struktur_intakt_unveraendert_gebrochen():
+    """Die Struktur-Aussage kommt aus dem PREIS, nicht aus dem Order-Flow."""
+    alt = Impulse(Pivot(0, 0, 75546.0, "L"), Pivot(5, 5, 81273.0, "H"))
+    hoeher = Impulse(Pivot(8, 8, 76264.0, "L"), Pivot(12, 12, 82300.0, "H"))
+    tiefer = Impulse(Pivot(8, 8, 76264.0, "L"), Pivot(12, 12, 80000.0, "H"))
+    f = _flow_cvd([0, 10, 20, 30, 40, 50, 60])
+
+    l = lage_bericht([], f, imp=hoeher, pos_impulse=alt)
+    assert l["struktur"] == "intakt" and "76.264" in l["struktur_text"]
+
+    l = lage_bericht([], f, imp=tiefer, pos_impulse=alt)
+    assert l["struktur"] == "gebrochen"
+
+    l = lage_bericht([], f, imp=alt, pos_impulse=alt)
+    assert l["struktur"] == "unveraendert"
+
+    # ohne Vergleichsbein (kein offener Trade)
+    l = lage_bericht([], f, imp=hoeher)
+    assert l["struktur"] == "neu"
+
+
+def test_lage_muster_wird_uebersetzt():
+    """Pattern.UNGESUNDER_ABVERKAUF sagt einem Menschen nichts."""
+    f = _flow_cvd([0, 10, 20, 30, 40, 50, 60])
+    l = lage_bericht([], f, pattern=Pattern.UNGESUNDER_ABVERKAUF)
+    assert l["muster"] == "UNGESUNDER_ABVERKAUF"
+    assert "Dip wird nicht gekauft" in l["muster_text"]
+    # NEUTRAL ist keine Aussage und wird weggelassen
+    assert "muster" not in lage_bericht([], f, pattern=Pattern.NEUTRAL)
+    # jedes Muster hat einen Klartext
+    for m in Pattern:
+        assert m.name in MUSTER_KLARTEXT, f"Klartext fehlt fuer {m.name}"
+
+
+def test_lage_aendert_keine_signale():
+    """Kernzusage von E32: reine Information. Derselbe Kurslauf muss mit und ohne
+    Lage-Berechnung exakt dieselben Signale liefern - die Funktion darf nichts
+    veraendern, was die Engine liest."""
+    path = _intakter_trend_pfad()
+    pos1 = Position()
+    sigs1 = run_incremental(path, neg_funding_flow(), pos1, pivot_n=2, bias_short=False,
+                            tp_ladder=False, buy_ladder=False, zonen_nachziehen=True)
+    pos2 = Position()
+    sigs2 = run_incremental(path, neg_funding_flow(), pos2, pivot_n=2, bias_short=False,
+                            tp_ladder=False, buy_ladder=False, zonen_nachziehen=True)
+    for i in range(1, len(path) + 1):
+        lage_bericht(path[:i], neg_funding_flow(),
+                     imp=None, pattern=Pattern.DERIVATE_PUMP)
+    assert [(s.ts, s.type, s.price) for s in sigs1] == \
+           [(s.ts, s.type, s.price) for s in sigs2]
+    assert pos1.state == pos2.state and pos1.entry_pct == pos2.entry_pct

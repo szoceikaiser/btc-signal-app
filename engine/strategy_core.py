@@ -398,6 +398,120 @@ def _slope(vals: list[float]) -> float:
     return (vals[-1] - vals[0]) / abs(vals[0])
 
 
+# ------------------------------------------------ E32: Lage-Bericht (reine Information)
+
+# Klartext zu den Kompass-Mustern. Pattern.UNGESUNDER_ABVERKAUF sagt einem Menschen
+# nichts; in der Telegram-Nachricht muss stehen, was es bedeutet.
+MUSTER_KLARTEXT = {
+    "GESUNDER_TREND": "gesunder Trend (Spot traegt die Bewegung)",
+    "DERIVATE_PUMP": "Derivate-Pump (Hebel treibt, Spot fehlt)",
+    "SHORT_COVERING": "Short-Covering (Shorts decken sich ein)",
+    "CAPITULATION_RESET": "Kapitulation (der Markt ist ausgeraeumt)",
+    "UNGESUNDER_ABVERKAUF": "ungesunder Abverkauf (der Dip wird nicht gekauft)",
+    "NEUTRAL": "neutral",
+}
+
+SPOT_FENSTER = 3          # Kerzen je Vergleichsfenster (3 x 4h = 12 Stunden)
+
+
+def spot_nachfrage(flow: list[FlowPoint], fenster: int = SPOT_FENSTER) -> Optional[dict]:
+    """Wie steht die Spot-Nachfrage? (E32, Kaiser 12.09.2026)
+
+    Furkan im Video vom 10.09.2026 (17:22): "auch Spot ist verkauft worden in dieser
+    Bewegung rein. Was wir jetzt sehen wollen, ist bei einer Gegenbewegung nach oben,
+    dass wieder die Spot Nachfrage kommt und nicht nur ein Short Liquidierungsevent
+    stattfindet."
+
+    spot_cvd ist ein KUMULIERTES Delta - die Differenz ueber ein Fenster ist damit die
+    Netto-Nachfrage in diesem Fenster. Verglichen wird das juengste Fenster mit dem
+    davor. Daraus die vier Zustaende, die Kaiser lesen will.
+
+    Gibt None zurueck, wenn zu wenige Punkte vorliegen - dann steht in der Nachricht
+    nichts, statt etwas Erfundenes.
+    """
+    if len(flow) < 2 * fenster + 1:
+        return None
+    werte = [p.spot_cvd for p in flow]
+    jetzt = werte[-1] - werte[-1 - fenster]
+    davor = werte[-1 - fenster] - werte[-1 - 2 * fenster]
+    if jetzt > 0:
+        stand = "stabil" if davor > 0 else "zurueckgekehrt"
+    else:
+        stand = "nachgelassen" if davor > 0 else "schwach"
+    text = {
+        "stabil": "Spot-Nachfrage stabil (Nachfrage traegt)",
+        "zurueckgekehrt": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)",
+        "nachgelassen": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)",
+        "schwach": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)",
+    }[stand]
+    return {"stand": stand, "text": text, "jetzt": jetzt, "davor": davor,
+            "fenster": fenster}
+
+
+def _p(v: float) -> str:
+    """Preis fuer die Lage-Texte: deutsche Tausenderpunkte, keine Nachkommastellen."""
+    return f"{v:,.0f}".replace(",", ".") + " $"
+
+
+def lage_bericht(candles: list[Candle], flow: list[FlowPoint],
+                 imp: Optional[Impulse] = None,
+                 pos_impulse: Optional[Impulse] = None,
+                 pattern: Optional[Pattern] = None,
+                 fenster: int = SPOT_FENSTER) -> dict:
+    """Der Marktzustand in Klartext - REINE INFORMATION, keine Handelsregel (E32).
+
+    Anlass (Kaiser 12.09.2026): "ich bekomme die info zur struktur nur, wenn ich eine
+    nachricht fuer ein nachkauf erhalte. doch das ist zu spaet, weil ich doch die limits
+    vorher setze." Die Engine wertet den kompletten Order-Flow aus und behielt das
+    Ergebnis bisher fuer sich.
+
+    Zwei GETRENNTE Aussagen, weil Furkan sie getrennt haelt:
+      - Struktur intakt?  -> am PREIS (hoeheres Tief und hoeheres Hoch, wie trend_intakt)
+      - Bewegung gesund?  -> am ORDER-FLOW (Spot-Nachfrage)
+
+    Dieser Bericht aendert NICHTS am Verhalten der Engine. Er wird nirgends abgefragt,
+    um ein Signal zu erzeugen oder zu unterdruecken.
+    """
+    lage: dict = {}
+
+    # --- Struktur (Preis)
+    if imp is not None:
+        if pos_impulse is not None:
+            if (imp.start.ts, imp.end.ts) == (pos_impulse.start.ts, pos_impulse.end.ts):
+                lage["struktur"] = "unveraendert"
+                lage["struktur_text"] = (
+                    f"Struktur unveraendert - Bein {_p(pos_impulse.start.price)} -> "
+                    f"{_p(pos_impulse.end.price)}")
+            elif trend_intakt(pos_impulse, imp):
+                hoch_tief = "hoeheres" if imp.up else "tieferes"
+                lage["struktur"] = "intakt"
+                lage["struktur_text"] = (
+                    f"Struktur intakt - {hoch_tief} Tief {_p(imp.start.price)}, "
+                    f"{hoch_tief} Hoch {_p(imp.end.price)}")
+            else:
+                lage["struktur"] = "gebrochen"
+                lage["struktur_text"] = (
+                    f"Struktur gebrochen - neues Bein {_p(imp.start.price)} -> "
+                    f"{_p(imp.end.price)} setzt den Trend nicht fort")
+        else:
+            lage["struktur"] = "neu"
+            lage["struktur_text"] = (
+                f"Aktuelles Bein {_p(imp.start.price)} -> {_p(imp.end.price)}")
+
+    # --- Spot-Nachfrage (Order-Flow)
+    sn = spot_nachfrage(flow, fenster)
+    if sn is not None:
+        lage["spot"] = sn["stand"]
+        lage["spot_text"] = sn["text"]
+
+    # --- Muster
+    if pattern is not None and pattern != Pattern.NEUTRAL:
+        lage["muster"] = pattern.name
+        lage["muster_text"] = MUSTER_KLARTEXT.get(pattern.name, pattern.name)
+
+    return lage
+
+
 def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
                      window: int = 12,
                      oi_wipeout_pct: float = 0.05,

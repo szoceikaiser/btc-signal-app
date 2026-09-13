@@ -31,6 +31,7 @@ import coinalyze
 from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
                            Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots, gegen_zonen,
+                           classify_pattern, lage_bericht,
                            last_significant_impulse, liq_levels, next_pivot_beyond)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
                              send_plan, send_signals, send_text, send_vorschau)
@@ -292,7 +293,8 @@ def pos_from_state(d: dict) -> Position:
     return pos
 
 
-def zonen_vorschau(candles: list[Candle], cfg: dict | None = None) -> dict | None:
+def zonen_vorschau(candles: list[Candle], cfg: dict | None = None,
+                   flow: list[FlowPoint] | None = None) -> dict | None:
     """Die aktuell gueltigen Fib-Zonen — UNABHAENGIG davon, ob eine Position offen ist.
 
     WARUM DAS NOETIG IST (Kaisers Befund 2026-07-29): Die meisten Kaufsignale nennen ein
@@ -334,8 +336,14 @@ def zonen_vorschau(candles: list[Candle], cfg: dict | None = None) -> dict | Non
     # ueberhaupt einsteigen wuerde, statt eine Order fuer ein Setup zu legen, das die
     # Engine spaeter verwirft.
     abstand = (abs(z.gp_upper - z.invalidation) / z.gp_upper * 100) if z.gp_upper else None
+    # E32: Lage-Angabe auch hier - die Vorschau ist die Nachricht, nach der Kaiser die
+    # Limit-Orders setzt. Ohne Position gibt es kein Vergleichsbein, also nur das
+    # aktuelle Bein, die Spot-Nachfrage und das Muster.
+    _lage = lage_bericht(candles, flow or [], imp=imp,
+                         pattern=classify_pattern(candles, flow) if flow else None)
     return {
         "richtung": "LONG" if imp.up else "SHORT",
+        "lage": _lage or None,
         "impuls_start": imp.start.price, "impuls_ende": imp.end.price,
         "impuls_start_ts": imp.start.ts, "impuls_ende_ts": imp.end.ts,
         "level_05": z.level_05, "gp_upper": z.gp_upper, "gp_lower": z.gp_lower,
@@ -398,6 +406,21 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
 
     plan: dict = {"richtung": pos.direction, "anteil_pct": pos.entry_pct,
                   "einstand": pos.entry_ref, "kurs": cur.close}
+    # E32: Die Lage dazu - Struktur (Preis) und Spot-Nachfrage (Order-Flow). Reine
+    # Information; sie aendert keine einzige Marke des Plans. Kaiser am 12.09.2026:
+    # "ich bekomme die info zur struktur nur, wenn ich eine nachricht fuer ein nachkauf
+    # erhalte. doch das ist zu spaet, weil ich doch die limits vorher setze."
+    _nur_auf_p = None
+    if par["bein_richtung"] == "bias" and par["bias_long"] != par["bias_short"]:
+        _nur_auf_p = par["bias_long"]
+    _imp_jetzt = last_significant_impulse(candles, piv, k_atr=par["k_atr"],
+                                          min_bein_pct=par["min_bein_pct"],
+                                          bein_wahl=par["bein_wahl"], nur_auf=_nur_auf_p)
+    _lage = lage_bericht(candles, flow, imp=_imp_jetzt,
+                         pos_impulse=z.impulse,
+                         pattern=classify_pattern(candles, flow) if flow else None)
+    if _lage:
+        plan["lage"] = _lage
 
     # --- wo nachgekauft wird ---
     nach = []
@@ -660,7 +683,7 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     state["config"] = cfg
     state["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     state["last_close"] = candles[-1].close
-    vorschau = zonen_vorschau(candles, cfg)
+    vorschau = zonen_vorschau(candles, cfg, flow)
     state["zonen_vorschau"] = vorschau
 
     # --- Vorschau-Ankuendigung per Telegram (2026-07-29) -----------------------------

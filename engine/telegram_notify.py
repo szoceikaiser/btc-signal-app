@@ -40,6 +40,28 @@ STYLE = {
 }
 
 
+def _lage_zeilen(lage: dict | None) -> list[str]:
+    """Die Lage-Angabe fuer Plan und Vorschau (E32, Kaiser 12.09.2026).
+
+    Struktur (Preis) und Spot-Nachfrage (Order-Flow) getrennt, so wie Furkan sie
+    getrennt haelt. Rein informativ - die Engine handelt danach nicht. Fehlt die
+    Angabe (zu wenig Daten), entfaellt der Block ganz, statt etwas zu erfinden.
+    """
+    if not lage:
+        return []
+    zeilen = []
+    for feld in ("struktur_text", "spot_text", "muster_text"):
+        wert = lage.get(feld)
+        # "neu" heisst: es gibt kein Vergleichsbein (kein offener Trade). Die Vorschau
+        # nennt das aktuelle Bein bereits in ihrer Kopfzeile - nicht doppelt schreiben.
+        if feld == "struktur_text" and lage.get("struktur") == "neu":
+            continue
+        if wert:
+            vorsatz = "Muster: " if feld == "muster_text" else ""
+            zeilen.append(("Lage:  " if not zeilen else "       ") + vorsatz + wert)
+    return ["", *zeilen] if zeilen else []
+
+
 def format_vorschau(z: dict, ts_ms: int) -> str:
     """Ankuendigungs-Nachricht: WO die naechsten Einstiege lauern — BEVOR es soweit ist.
 
@@ -72,6 +94,7 @@ def format_vorschau(z: dict, ts_ms: int) -> str:
         a = z["abstand_pct"]
         lines.append(f"Abstand Golden Pocket -> Stop: {a:.1f} %"
                      + ("" if a >= 2 else "  ⚠️ unter 2 % — die Engine steigt hier NICHT ein"))
+    lines += _lage_zeilen(z.get("lage"))
     lines += [
         "",
         _fmt_ts(ts_ms),
@@ -118,6 +141,7 @@ def format_plan(p: dict) -> str:
     zeilen.append("")
     zeilen.append(f"Stop {_fmt_usd(p['stop']['preis'])} — {p['stop']['grund']}, "
                   f"bei Kerzenschluss {'darunter' if lang else 'darueber'}")
+    zeilen += _lage_zeilen(p.get("lage"))
     zeilen.append("")
     zeilen.append("— Diese Preise kannst du als Limit-Order hinterlegen. Neue Nachricht "
                   "gibt es erst, wenn sich eine Marke aendert.")
