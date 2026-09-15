@@ -354,6 +354,16 @@
    "stop_ref": 76264.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1789488000000,
+   "type": "STOPLOSS",
+   "price": 76186.48,
+   "tranche_pct": 100,
+   "reason": "Kerzenschluss unter Invalidierung 76264",
+   "stop_ref": null,
+   "tag": "",
+   "label": "STOPLOSS"
   }
  ]
 }
