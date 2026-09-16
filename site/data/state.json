@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1789545600000,
+ "last_signal_ts": 1789560000000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -17,13 +17,13 @@
  "zones": null,
  "widerstand": {
   "richtung": "LONG",
-  "bein_start": 79890.0,
-  "bein_ende": 76046.58,
-  "level_05": 77968.29000000001,
-  "gp_von": 78421.81356,
-  "gp_bis": 78544.803,
-  "level_0786": 79067.50812,
-  "ausbruch": 79890.0
+  "bein_start": 79600.0,
+  "bein_ende": 74967.97,
+  "level_05": 77283.985,
+  "gp_von": 77830.56454,
+  "gp_bis": 77978.7895,
+  "level_0786": 78608.74558,
+  "ausbruch": 79600.0
  },
  "plan": null,
  "config": {
@@ -62,38 +62,38 @@
   "trend_ema": 200,
   "ampel_filter": "off"
  },
- "updated_at": "2026-09-16T15:25:28Z",
- "last_close": 76250.0,
+ "updated_at": "2026-09-16T16:01:35Z",
+ "last_close": 75788.41,
  "zonen_vorschau": {
-  "richtung": "LONG",
+  "richtung": "SHORT",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 76.250 $ ueber EMA200 (69.824 $)",
+   "trend_text": "Uebergeordnet: Kurs 75.788 $ ueber EMA200 (69.819 $)",
    "struktur": "neu",
-   "struktur_text": "Aktuelles Bein 76.264 $ -> 82.300 $",
+   "struktur_text": "Aktuelles Bein 79.600 $ -> 74.968 $",
    "spot": "schwach",
    "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
   "ampel": {
    "stufe": "gemischt",
    "dafuer": [
-    "Trend"
+    "Spot-Nachfrage"
    ],
    "dagegen": [
-    "Spot-Nachfrage"
+    "Trend"
    ],
    "gezaehlt": 2,
    "text": "GEMISCHT \u2014 1 von 2 spricht dafuer"
   },
-  "impuls_start": 76264.0,
-  "impuls_ende": 82300.0,
-  "impuls_start_ts": 1788336000000,
-  "impuls_ende_ts": 1788465600000,
-  "level_05": 79282.0,
-  "gp_upper": 78569.752,
-  "gp_lower": 78376.6,
-  "level_0786": 77555.704,
-  "invalidation": 76264.0,
-  "abstand_pct": 2.93
+  "impuls_start": 79600.0,
+  "impuls_ende": 74967.97,
+  "impuls_start_ts": 1789416000000,
+  "impuls_ende_ts": 1789488000000,
+  "level_05": 77283.985,
+  "gp_upper": 77830.56454,
+  "gp_lower": 77978.7895,
+  "level_0786": 78608.74558,
+  "invalidation": 79600.0,
+  "abstand_pct": 2.27
  }
 }
