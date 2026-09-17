@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1789574400000,
+ "last_signal_ts": 1789588800000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -62,13 +62,13 @@
   "trend_ema": 200,
   "ampel_filter": "off"
  },
- "updated_at": "2026-09-16T22:36:38Z",
- "last_close": 76080.0,
+ "updated_at": "2026-09-17T03:09:48Z",
+ "last_close": 76206.01,
  "zonen_vorschau": {
   "richtung": "SHORT",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 76.080 $ ueber EMA200 (69.822 $)",
+   "trend_text": "Uebergeordnet: Kurs 76.206 $ ueber EMA200 (69.823 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 79.600 $ -> 74.968 $",
    "spot": "zurueckgekehrt",
