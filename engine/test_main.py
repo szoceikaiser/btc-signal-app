@@ -674,3 +674,118 @@ def test_ampel_steht_in_plan_und_vorschau():
         for zugriff in ('par.get("ampel_filter"', 'par["ampel_filter"]',
                         "par.get('ampel_filter'", "par['ampel_filter']"):
             assert zugriff not in fn, f"{stelle} haengt die Anzeige an den Schalter"
+
+
+# ------------------------------------------------- E35: Lage auf Abruf
+
+def _lage_kerzen(auf: bool = True):
+    """Kerzen mit klarem Aufwaerts- bzw. Abwaerts-Impuls, danach Ruecklauf."""
+    ms = 4 * 3600 * 1000
+    if auf:
+        werte = [100, 99, 98, 99, 104, 110, 116, 122, 128, 130] \
+            + [130 - i * 0.8 for i in range(1, 17)]
+    else:
+        werte = [130, 131, 132, 131, 126, 120, 114, 108, 102, 100] \
+            + [100 + i * 0.8 for i in range(1, 17)]
+    cs = [Candle(1_700_000_000_000 + i * ms, v, v * 1.004, v * 0.996, v)
+          for i, v in enumerate(werte)]
+    fl = [FlowPoint(c.ts, 5000.0 + i * 30, 0.0, 1e9 + i * 1e6, 0.0001)
+          for i, c in enumerate(cs)]
+    return cs, fl
+
+
+def _lage_lauf(cs, fl, cfg=None):
+    with tempfile.TemporaryDirectory() as d:
+        ordner = Path(d)
+        (ordner / "config.json").write_text(
+            json.dumps(cfg or {"pivot_n": 2, "bias_short": False}), encoding="utf-8")
+        out = main.lage_abruf(fetch=lambda oi=None: (cs, fl, []),
+                              data_dir=ordner, dry_run=True)
+        dateien = sorted(p.name for p in ordner.iterdir())
+    return out, dateien
+
+
+def test_lage_abruf_fasst_den_zustand_nicht_an():
+    """Die wichtigste Zusicherung: der Abruf darf NICHTS veraendern.
+
+    Kein Signal, kein state.json, keine Auswirkung auf den naechsten regulaeren Lauf -
+    dasselbe Prinzip wie --watch. Sonst koennte ein Blick auf die Lage den Ablauf der
+    Engine stoeren, und das waere der schlimmste denkbare Nebeneffekt eines Knopfes,
+    den Kaiser jederzeit druecken darf.
+    """
+    cs, fl = _lage_kerzen()
+    out, dateien = _lage_lauf(cs, fl)
+    assert out is not None
+    assert dateien == ["config.json"], f"Abruf hat Dateien angelegt: {dateien}"
+
+
+def test_lage_abruf_sucht_immer_ein_aufwaerts_bein():
+    """Angenommen wird eine LONG-Position - also zaehlt nur ein Aufwaerts-Bein.
+
+    Genau das war Kaisers Lage am 17.09.2026: Die Engine fand ein Abwaerts-Bein
+    (79.600 -> 74.968) und rechnete alles dafuer, waehrend er long war.
+    """
+    cs, fl = _lage_kerzen(auf=True)
+    out, _ = _lage_lauf(cs, fl)
+    assert out["bein"] is not None
+    assert out["bein"][1] > out["bein"][0], "kein Aufwaerts-Bein geliefert"
+
+    # Auch bei bein_richtung="bias" und reiner Long-Engine bleibt es dabei ...
+    out2, _ = _lage_lauf(cs, fl, {"pivot_n": 2, "bias_short": False,
+                                  "bein_richtung": "bias"})
+    assert out2["bein"] == out["bein"]
+
+
+def test_lage_abruf_erfindet_kein_bein_wenn_keins_da_ist():
+    """Ohne Aufwaerts-Bein lieber gar keins als ein Abwaerts-Bein, das fuer einen
+    Long nichts bedeutet. Die Nachricht sagt das dann ausdruecklich."""
+    from telegram_notify import format_lage
+    cs, fl = _lage_kerzen(auf=False)                  # nur ein Abwaerts-Impuls
+    out, _ = _lage_lauf(cs, fl)
+    assert out["bein"] is None, f"Abwaerts-Bein durchgerutscht: {out['bein']}"
+    txt = format_lage(out, cs[-1].ts)
+    assert "Kein signifikantes Aufwaerts-Bein" in txt
+    assert "0.5-Level" not in txt, "Zonen ohne Bein ergeben keinen Sinn"
+
+
+def test_lage_abruf_rechnet_die_ampel_fuer_long():
+    """Die Annahme ist Long - also rechnet die Ampel fuer Long, immer.
+
+    trend_ema=3 ist Absicht: Mit der Live-Vorgabe 200 reicht die Historie eines
+    Testszenarios nie, die Ampel schwiege, und der Test pruefte NICHTS. Genau so war
+    die erste Fassung - sie stand unter "if out.get('ampel')" und lief ins Leere.
+    """
+    cs, fl = _lage_kerzen()
+    out, _ = _lage_lauf(cs, fl, {"pivot_n": 2, "bias_short": False, "trend_ema": 3})
+    assert out["ampel"] is not None, "Szenario passt nicht mehr - Ampel schweigt"
+    assert out["ampel"]["richtung"] == "LONG"
+
+    from telegram_notify import format_lage
+    txt = format_lage(out, cs[-1].ts)
+    assert "Ampel (fuer LONG)" in txt
+    assert "LONG-Position" in txt
+    assert "FLAT" in txt, "der Hinweis auf den echten Engine-Zustand fehlt"
+
+
+def test_vorschau_ampel_folgt_dem_bias_nicht_dem_bein():
+    """E35-Reparatur, Ende zu Ende durch zonen_vorschau().
+
+    Der Fehler vom 17.09.2026: bei bias_short=false und einem ABWAERTS-Bein rechnete
+    die Vorschau die Ampel fuer einen Short. Dieser Test geht durch dieselbe Funktion
+    wie die echte Nachricht - ein Test nur auf ampel_richtung() waere gruen geblieben,
+    haette man die Verdrahtung wieder geloest.
+    """
+    cs, fl = _lage_kerzen(auf=False)                  # Abwaerts-Bein
+    nur_long = {"pivot_n": 2, "bias_short": False, "trend_ema": 3}
+    z = main.zonen_vorschau(cs, nur_long, flow=fl)
+    assert z is not None and z["richtung"] == "SHORT", "Szenario passt nicht mehr"
+    assert z["ampel"] is not None, "Szenario passt nicht mehr - Ampel schweigt"
+    assert z["ampel"]["richtung"] == "LONG", \
+        "Ampel rechnet fuer einen Short, den die Engine nie eingehen wuerde"
+
+    # Gegenprobe: sind BEIDE Richtungen erlaubt, entscheidet wieder das Bein
+    beide = {"pivot_n": 2, "bias_short": True, "trend_ema": 3}
+    z2 = main.zonen_vorschau(cs, beide, flow=fl)
+    assert z2["ampel"] is not None and z2["ampel"]["richtung"] == "SHORT"
+    # ... und die Stufen sind dann spiegelbildlich, nicht zufaellig gleich
+    assert z2["ampel"]["dafuer"] == z["ampel"]["dagegen"]

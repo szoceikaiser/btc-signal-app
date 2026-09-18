@@ -38,6 +38,14 @@ on:
         description: "Alle bisherigen Trigger erneut an Telegram senden"
         type: boolean
         default: false
+      # E35 (17.09.2026, Kaisers Anlass): Sein Trade lief nach einem Stop weiter, weil
+      # er den Stop nicht als Limit hinterlegt hatte - die Engine steht auf FLAT, er ist
+      # noch drin. Dieser Knopf zeigt ihm auf Abruf, wie die Lage unter der Annahme
+      # einer Long-Position aussieht. Erzeugt kein Signal, aendert state.json nicht.
+      lage_jetzt:
+        description: "Lage jetzt abrufen (Annahme: Long-Position laeuft)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -66,16 +74,27 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: cd engine && python3 main.py --resend-all
 
+      - name: Lage jetzt abrufen
+        if: ${{ inputs.lage_jetzt }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
+        run: cd engine && python3 main.py --lage
+
       - name: Engine-Lauf
-        if: ${{ !inputs.test_telegram && !inputs.resend_all }}
+        if: ${{ !inputs.test_telegram && !inputs.resend_all && !inputs.lage_jetzt }}
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
         run: cd engine && python3 main.py
 
+      # E35: lage_jetzt ist hier ausgenommen. Der Abruf schreibt ohnehin nichts (dann
+      # waere der Commit leer), aber die Zusicherung "aendert nichts am Repo" soll im
+      # Workflow stehen und nicht davon abhaengen, dass main.py sich daran haelt.
       - name: Zustand committen
-        if: ${{ !inputs.test_telegram && !inputs.resend_all }}
+        if: ${{ !inputs.test_telegram && !inputs.resend_all && !inputs.lage_jetzt }}
         run: |
           git config user.name "signal-engine"
           git config user.email "actions@users.noreply.github.com"

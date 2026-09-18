@@ -139,17 +139,17 @@ def test_ampel_steht_in_den_nachrichten_mit_dem_schlusssatz():
             "stop": {"preis": 75546.0, "grund": "Invalidierung"},
             "lage": lage, "ampel": ampel(lage)}
     txt = format_plan(plan)
-    assert "Ampel: UNGUENSTIG" in txt and "1 von 4" in txt
+    assert "Ampel (fuer LONG): UNGUENSTIG" in txt and "1 von 4" in txt
     assert "dafuer:  Struktur" in txt and "Spot-Nachfrage" in txt
     assert AMPEL_SCHLUSSSATZ in txt
     # die Ampel steht UNTER der Lage, nicht davor
-    assert txt.index("Lage:") < txt.index("Ampel:")
+    assert txt.index("Lage:") < txt.index("Ampel (")
 
     vs = {"richtung": "LONG", "impuls_start": 76264.0, "impuls_ende": 82300.0,
           "level_05": 79282.0, "gp_lower": 78377.0, "gp_upper": 78570.0,
           "level_0786": 77556.0, "invalidation": 76264.0,
           "lage": lage, "ampel": ampel(lage)}
-    assert "Ampel: UNGUENSTIG" in format_vorschau(vs, 1789000000000)
+    assert "Ampel (fuer LONG): UNGUENSTIG" in format_vorschau(vs, 1789000000000)
 
     # auch bei GUENSTIG - gerade dann - steht der Schlusssatz dabei
     gut = {"trend": "ueber", "trend_text": "Uebergeordnet: Kurs ueber EMA200",
@@ -158,7 +158,7 @@ def test_ampel_steht_in_den_nachrichten_mit_dem_schlusssatz():
            "muster": "GESUNDER_TREND", "muster_text": "gesunder Trend"}
     plan2 = dict(plan); plan2["lage"] = gut; plan2["ampel"] = ampel(gut)
     gut_txt = format_plan(plan2)
-    assert "Ampel: GUENSTIG" in gut_txt and AMPEL_SCHLUSSSATZ in gut_txt
+    assert "Ampel (fuer LONG): GUENSTIG" in gut_txt and AMPEL_SCHLUSSSATZ in gut_txt
     assert "dagegen" not in gut_txt, "ohne Gegenargumente keine leere Zeile"
 
     # ohne Ampel (zu duenne Lage) faellt der Block ganz weg, statt leer dazustehen

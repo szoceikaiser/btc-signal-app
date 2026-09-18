@@ -12,7 +12,8 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            trend_intakt,
                            lage_bericht, spot_nachfrage, MUSTER_KLARTEXT,
                            daily_fib_zone, trend_lage,
-                           ampel, AMPEL_TRANCHE, kuerze_einstiege, Signal, _ENTRY_TYPES,
+                           ampel, ampel_richtung, AMPEL_TRANCHE, kuerze_einstiege,
+                           Signal, _ENTRY_TYPES,
                            resample_daily)
 
 DAY_MS = 86_400_000
@@ -2214,3 +2215,47 @@ def test_ampel_vergleicht_nicht_das_bein_mit_sich_selbst():
     # eine einzige Aussage reicht der Ampel nicht -> niemand darf hier halbieren
     assert [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="klein"))] == voll
     assert [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="gross"))] == voll
+
+
+# ------------------------------------------------- E35: Richtung der Ampel
+
+def test_ampel_richtung_folgt_dem_bias_nicht_dem_bein():
+    """Der Fehler vom 17.09.2026 in Reinform.
+
+    Live steht bias_short=false - die Engine ist reine Long-Engine. Findet sie ein
+    ABWAERTS-Bein (bei bein_richtung="auto" der Normalfall), darf die Ampel trotzdem
+    NICHT fuer einen Short rechnen: diesen Short wuerde die Engine nie eingehen.
+    """
+    # nur Long erlaubt -> immer Long, egal welches Bein
+    assert ampel_richtung(True, False, bein_auf=False) is True
+    assert ampel_richtung(True, False, bein_auf=True) is True
+    # nur Short erlaubt -> immer Short
+    assert ampel_richtung(False, True, bein_auf=True) is False
+    assert ampel_richtung(False, True, bein_auf=False) is False
+    # beide erlaubt -> das Bein entscheidet
+    assert ampel_richtung(True, True, bein_auf=True) is True
+    assert ampel_richtung(True, True, bein_auf=False) is False
+    # kein Bein bekannt -> Long, die Grundeinstellung des Projekts
+    assert ampel_richtung(True, True, bein_auf=None) is True
+
+
+def test_ampel_nennt_die_richtung_im_ergebnis():
+    """Wer die Ampel liest, muss sehen, wofuer sie gilt."""
+    lage = {"trend": "ueber", "spot": "stabil"}
+    assert ampel(lage, long_side=True)["richtung"] == "LONG"
+    assert ampel(lage, long_side=False)["richtung"] == "SHORT"
+
+
+def test_ampel_dreht_sich_mit_der_richtung_echter_livestand():
+    """Die echten Zahlen vom 17.09.2026, 13:41 UTC (state.json).
+
+    Kurs 76.482 ueber EMA200 (70.184), Spot-Nachfrage stabil, Bein 79.600 -> 74.968
+    (abwaerts). In der Nachricht stand UNGUENSTIG - gerechnet fuer einen Short. Fuer
+    Kaisers Long-Position ergeben dieselben Daten das genaue Gegenteil.
+    """
+    lage = {"trend": "ueber", "struktur": "neu", "spot": "stabil"}
+    kurz = ampel(lage, long_side=False)
+    lang = ampel(lage, long_side=True)
+    assert kurz["stufe"] == "unguenstig" and kurz["dafuer"] == []
+    assert lang["stufe"] == "guenstig" and lang["dagegen"] == []
+    assert sorted(lang["dafuer"]) == sorted(kurz["dagegen"])   # exakt gespiegelt

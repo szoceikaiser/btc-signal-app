@@ -31,10 +31,11 @@ import coinalyze
 from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
                            Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots, gegen_zonen,
-                           ampel, classify_pattern, lage_bericht,
+                           ampel, ampel_richtung, classify_pattern, lage_bericht,
                            last_significant_impulse, liq_levels, next_pivot_beyond)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
-                             send_plan, send_signals, send_text, send_vorschau)
+                             send_lage, send_plan, send_signals, send_text,
+                             send_vorschau)
 
 ROOT = Path(__file__).resolve().parent.parent          # Repo-Wurzel (signal-app/)
 DATA = ROOT / "site" / "data"
@@ -390,7 +391,12 @@ def zonen_vorschau(candles: list[Candle], cfg: dict | None = None,
     # E34: die Ampel fasst die Lage zu EINER Aussage zusammen. Richtung aus dem Bein,
     # denn ohne Position gibt es noch keine eigene - die Vorschau kuendigt genau dieses
     # Setup an. Reine Anzeige, unabhaengig davon, ob ampel_filter an ist.
-    _ampel = ampel(_lage, long_side=imp.up) if _lage else None
+    # E35: Die Richtung kommt aus dem BIAS, nicht aus dem Bein. Steht live
+    # bias_short=false, ist die Engine reine Long-Engine - eine Ampel fuer einen Short,
+    # den sie nie eingehen wuerde, waere irrefuehrend. Nur wenn beide Richtungen erlaubt
+    # sind, entscheidet das Bein. Siehe docs/PLAN-E35-LAGE-ABRUF.md.
+    _ampel = ampel(_lage, long_side=ampel_richtung(
+        par["bias_long"], par["bias_short"], imp.up)) if _lage else None
     return {
         "richtung": "LONG" if imp.up else "SHORT",
         "lage": _lage or None,
@@ -676,6 +682,67 @@ def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
 
 # ------------------------------------------------------------ Orchestrierung
 
+def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
+               dry_run: bool = False) -> dict | None:
+    """Die Lage auf Knopfdruck — unter der Annahme einer LONG-Position (E35).
+
+    Anlass (Kaiser 17.09.2026): *"Zuletzt wurde der Plan ausgestoppt ... Ich habe aber
+    den Stoploss nicht als Limit eingestellt und mein Trade laeuft jetzt weiter. Jetzt
+    wuerde ich gerne zwischendurch sehen, wie die Struktur aussieht."*
+
+    Die Engine steht auf FLAT, er ist noch drin. Dieser Abruf schliesst die Luecke,
+    ohne den Zustand zu verbiegen: Er rechnet ausdruecklich unter einer ANNAHME und
+    sagt das in der Nachricht auch.
+
+    Drei Zusicherungen, damit der Abruf nie Schaden anrichten kann:
+      - Er sucht gezielt ein AUFWAERTS-Bein (nur_auf=True), unabhaengig davon, was
+        bein_richtung sagt. Ein Abwaerts-Bein bedeutet fuer einen Long nichts; findet
+        sich kein Aufwaerts-Bein, sagt die Nachricht genau das.
+      - Er fasst state.json NICHT an und erzeugt KEIN Signal — wie `--watch`.
+      - Er sendet IMMER, ohne Dedupe. Der Abruf ist ja gerade der Wunsch, jetzt zu
+        sehen, wie es steht.
+    """
+    cfg = {}
+    cfg_path = data_dir / "config.json"
+    if cfg_path.exists():
+        try:
+            cfg = {k: v for k, v in json.loads(cfg_path.read_text(encoding="utf-8")).items()
+                   if not k.startswith("_")}
+        except Exception as exc:  # noqa: BLE001
+            print(f"config.json nicht lesbar ({exc}) -> Standardwerte.")
+
+    candles, flow, _oi = fetch(None)
+    if not candles:
+        print("Keine Kerzen erhalten — Abbruch.")
+        return None
+
+    par = eval_params(cfg)
+    piv = find_pivots(candles, n=par["pivot_n"])
+    # nur_auf=True: gesucht wird das Bein, auf dem eine LONG-Position laeuft.
+    imp = last_significant_impulse(candles, piv, k_atr=par["k_atr"],
+                                   min_bein_pct=par["min_bein_pct"],
+                                   bein_wahl=par["bein_wahl"], nur_auf=True)
+    lage = lage_bericht(candles, flow or [], imp=imp,
+                        pattern=classify_pattern(candles, flow) if flow else None,
+                        trend_period=par.get("trend_ema", 200))
+    out = {
+        "kurs": candles[-1].close,
+        "bein": None,
+        "lage": lage or None,
+        # Die Annahme ist Long — deshalb hier fest, nicht ueber den Bias.
+        "ampel": ampel(lage, long_side=True) if lage else None,
+    }
+    if imp is not None:
+        z = fib_zones(imp)
+        out.update({
+            "bein": [imp.start.price, imp.end.price],
+            "level_05": z.level_05, "gp_upper": z.gp_upper, "gp_lower": z.gp_lower,
+            "level_0786": z.level_0786, "invalidation": z.invalidation,
+        })
+    send_lage(out, candles[-1].ts, dry_run=dry_run)
+    return out
+
+
 def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
                dry_run: bool = False) -> list[dict]:
     """Ein Engine-Lauf: nachholen aller neuen abgeschlossenen Kerzen, Signale senden."""
@@ -823,6 +890,10 @@ if __name__ == "__main__":
         # Leichter Zwischenlauf (alle 15 Min): nur nach sich entwickelnden Flushs
         # schauen. Fasst state.json nicht an, erzeugt keine Signale.
         watch_flush(dry_run="--dry-run" in sys.argv or not os.environ.get("TELEGRAM_BOT_TOKEN"))
+    elif "--lage" in sys.argv:
+        # E35: Lage auf Knopfdruck, unter Annahme einer Long-Position. Erzeugt kein
+        # Signal, fasst state.json nicht an.
+        lage_abruf(dry_run="--dry-run" in sys.argv or not os.environ.get("TELEGRAM_BOT_TOKEN"))
     elif "--resend-all" in sys.argv:
         resend_all_signals()
     else:

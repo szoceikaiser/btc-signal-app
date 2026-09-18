@@ -622,6 +622,28 @@ AMPEL_SCHLUSSSATZ = ("Der Plan oben bleibt unveraendert. Die Engine handelt die 
                      "NICHT — die Ampel ist eine Beobachtung, keine Anweisung.")
 
 
+def ampel_richtung(bias_long: bool, bias_short: bool, bein_auf: Optional[bool]) -> bool:
+    """Fuer WELCHE Richtung die Ampel rechnet (E35).
+
+    Der Fehler, den das behebt (17.09.2026): `zonen_vorschau` haengte die Ampel an
+    `imp.up` - die Richtung des gefundenen Beins. Live steht `bias_short: false`, die
+    Engine ist also reine Long-Engine; sobald sie aber ein ABWAERTS-Bein fand (bei
+    `bein_richtung: "auto"` der Normalfall), rechnete die Ampel fuer einen Short, den
+    sie nie eingehen wuerde. Kaiser las am 17.09. "UNGUENSTIG - 0 von 2", waehrend
+    dieselben Daten fuer seine Long-Position "GUENSTIG - 2 von 2" ergaben.
+
+    Keine falsche Zahl, sondern eine richtige mit verkehrtem Vorzeichen - der
+    gefaehrlichste Fehlertyp, den dieses Projekt bisher hatte.
+
+    Regel: Ist genau EINE Richtung erlaubt, gilt sie. Sind beide erlaubt, entscheidet
+    das Bein (dann kann die Engine beides, und das Bein ist die beste Auskunft).
+    Fehlt auch das Bein, wird Long angenommen - die Grundeinstellung des Projekts.
+    """
+    if bias_long != bias_short:
+        return bias_long
+    return True if bein_auf is None else bein_auf
+
+
 def ampel(lage: dict, long_side: bool = True) -> Optional[dict]:
     """Fasst die vier Lage-Angaben zu EINER Aussage zusammen (E34).
 
@@ -659,6 +681,10 @@ def ampel(lage: dict, long_side: bool = True) -> Optional[dict]:
         stufe = "gemischt"
     return {
         "stufe": stufe,
+        # E35: Die Richtung gehoert INS ERGEBNIS, nicht nur in den Aufruf. Wer die
+        # Ampel liest, muss sehen, wofuer sie gilt - dieselbe Lage ergibt fuer Long und
+        # Short das genaue Gegenteil.
+        "richtung": "LONG" if long_side else "SHORT",
         "dafuer": dafuer,
         "dagegen": dagegen,
         "gezaehlt": gezaehlt,

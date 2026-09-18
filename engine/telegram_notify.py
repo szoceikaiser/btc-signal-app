@@ -78,7 +78,12 @@ def _ampel_zeilen(ampel: dict | None) -> list[str]:
     """
     if not ampel:
         return []
-    zeilen = ["", "Ampel: " + ampel["text"]]
+    # E35: Die Richtung IMMER dazuschreiben. Dieselbe Lage ergibt fuer Long und Short
+    # das genaue Gegenteil; am 17.09.2026 stand in der Nachricht "UNGUENSTIG" fuer einen
+    # Short, waehrend die Daten fuer Kaisers Long-Position "GUENSTIG" ergaben. Auch wenn
+    # die Richtung eindeutig scheint - genau diese Selbstverstaendlichkeit war der Fehler.
+    kopf = f"Ampel (fuer {ampel['richtung']}): " if ampel.get("richtung") else "Ampel: "
+    zeilen = ["", kopf + ampel["text"]]
     if ampel.get("dafuer"):
         zeilen.append("       dafuer:  " + ", ".join(ampel["dafuer"]))
     if ampel.get("dagegen"):
@@ -312,6 +317,58 @@ def send_signals(signals: list[dict], dry_run: bool = False) -> list[str]:
     for m in messages:
         send_telegram(m, token, chat_id)
     return messages
+
+
+def format_lage(l: dict, ts_ms: int) -> str:
+    """Die Lage auf Abruf (E35, Kaiser 17.09.2026).
+
+    Anlass: Sein Trade lief nach einem Stop weiter, weil er den Stop nicht als Limit
+    hinterlegt hatte - die Engine steht auf FLAT, er ist noch drin. Er wollte
+    zwischendurch sehen koennen, wie die Struktur aussieht.
+
+    Diese Nachricht rechnet deshalb ausdruecklich unter der ANNAHME einer
+    Long-Position und sagt das auch. Sie erzeugt kein Signal und aendert nichts.
+    """
+    zeilen = ["🔎 LAGE AUF ABRUF — angenommen wird eine LONG-Position", ""]
+    zeilen.append(f"Kurs {_fmt_usd(l['kurs'])}")
+
+    if l.get("bein") is None:
+        zeilen += ["", "Kein signifikantes Aufwaerts-Bein erkennbar.",
+                   "Fuer eine Long-Position gibt es derzeit also keine Struktur, an der",
+                   "sich Zonen oder eine Invalidierung festmachen liessen."]
+    else:
+        a, b = l["bein"]
+        zeilen += ["", f"Aufwaerts-Bein {_fmt_usd(a)} -> {_fmt_usd(b)}", ""]
+        zeilen += [
+            f"  0.5-Level        {_fmt_usd(l['level_05'])}",
+            f"  Golden Pocket    {_fmt_usd(l['gp_lower'])} - {_fmt_usd(l['gp_upper'])}",
+            f"  0.786-Zone       {_fmt_usd(l['level_0786'])}",
+            "",
+            f"Ungueltig ab       {_fmt_usd(l['invalidation'])}",
+        ]
+
+    zeilen += _lage_zeilen(l.get("lage"))
+    zeilen += _ampel_zeilen(l.get("ampel"))
+    zeilen += [
+        "",
+        _fmt_ts(ts_ms),
+        "— Abruf auf Knopfdruck. Die Engine selbst steht auf FLAT und hat keine "
+        "Position; diese Angaben sind unter der Annahme gerechnet, dass eine "
+        "Long-Position laeuft. Es wurde nichts ausgeloest und nichts veraendert.",
+    ]
+    return "\n".join(zeilen)
+
+
+def send_lage(l: dict, ts_ms: int, dry_run: bool = False) -> str:
+    """Sendet die Lage auf Abruf (siehe format_lage). Immer - kein Dedupe."""
+    text = format_lage(l, ts_ms)
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+    if dry_run or not token or not chat_id:
+        print("[DRY-RUN]\n" + text + "\n")
+    else:
+        send_telegram(text, token, chat_id)
+    return text
 
 
 def send_vorschau(z: dict, ts_ms: int, dry_run: bool = False) -> str:
