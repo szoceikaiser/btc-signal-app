@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1789689600000,
+ "last_signal_ts": 1789704000000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -62,30 +62,27 @@
   "trend_ema": 200,
   "ampel_filter": "off"
  },
- "updated_at": "2026-09-18T04:02:25Z",
- "last_close": 77383.47,
+ "updated_at": "2026-09-18T08:02:24Z",
+ "last_close": 77798.01,
  "zonen_vorschau": {
   "richtung": "SHORT",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 77.383 $ ueber EMA200 (70.255 $)",
+   "trend_text": "Uebergeordnet: Kurs 77.798 $ ueber EMA200 (70.259 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 79.600 $ -> 74.968 $",
    "spot": "stabil",
-   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)",
-   "muster": "GESUNDER_TREND",
-   "muster_text": "gesunder Trend (Spot traegt die Bewegung)"
+   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)"
   },
   "ampel": {
    "stufe": "unguenstig",
    "dafuer": [],
    "dagegen": [
     "Trend",
-    "Spot-Nachfrage",
-    "Muster"
+    "Spot-Nachfrage"
    ],
-   "gezaehlt": 3,
-   "text": "UNGUENSTIG \u2014 0 von 3 sprechen dafuer"
+   "gezaehlt": 2,
+   "text": "UNGUENSTIG \u2014 0 von 2 sprechen dafuer"
   },
   "impuls_start": 79600.0,
   "impuls_ende": 74967.97,
