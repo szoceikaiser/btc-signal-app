@@ -620,13 +620,48 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
         zeilen.append({"name": "Spot-CVD", "wert": _usd_kurz(sp["aenderung"]),
                        "richtung": sp["richtung"],
                        "hinweis": "echte Nachfrage, ohne Hebel"})
+        # E36.2 (19.09.2026, Kaisers Fund): Die Lage-Zeile "Spot-Nachfrage ..."
+        # rechnet mit SPOT_FENSTER (12 h), dieser Block mit OF_FENSTER (48 h).
+        # In der Nachricht standen dadurch zwei Zahlen unter fast demselben Namen,
+        # die sich zu widersprechen schienen ("steigt" gegen "nachgelassen") -
+        # beides richtig, nur ueber verschiedene Zeitraeume. Die kurze Ebene steht
+        # jetzt daneben: Der Unterschied IST die Information (Tempoverlust).
+        kurz = _of_reihe([p.spot_cvd for p in flow], SPOT_FENSTER)
+        if kurz:
+            # Richtung hier nach dem VORZEICHEN, nicht nach dem Massstab: Diese Zeile
+            # existiert nur wegen der Drehung, und ein Vorzeichenwechsel ist die
+            # Aussage. Nach Massstab gerechnet hiesse -11 Mio nach +48 Mio "flach" -
+            # richtig gerechnet, aber am Punkt vorbei.
+            vz = ("steigt" if kurz["aenderung"] > 0
+                  else "faellt" if kurz["aenderung"] < 0 else "flach")
+            lang_vz = ("steigt" if sp["aenderung"] > 0
+                       else "faellt" if sp["aenderung"] < 0 else "flach")
+            if vz != lang_vz:
+                zeilen.append({
+                    "name": f"... letzte {SPOT_FENSTER * 4} h",
+                    "wert": _usd_kurz(kurz["aenderung"]),
+                    "richtung": vz, "hinweis": "zuletzt gedreht",
+                })
 
     # --- Futures-CVD: der gehebelte Flow
     fu = _of_reihe([p.fut_cvd for p in flow], fenster)
     if fu:
+        # E36.2: Die Groessenordnung ist die eigentliche Aussage. "+7 Tsd $ steigt"
+        # neben "+177,7 Mio $" verdeckt, dass der Hebel praktisch keine Rolle spielt -
+        # und genau das ist Furkans "gesunder Trend" (Transkript 9:06).
+        hinweis = "gehebelter Flow, oft kurzfristig"
+        if sp and sp["aenderung"]:
+            anteil = abs(fu["aenderung"]) / abs(sp["aenderung"]) * 100
+            if anteil < 0.5:
+                # "0,0 % des Spot-Flows" sieht nach einem Rechenfehler aus. Gemeint
+                # ist: der Hebel spielt keine Rolle - Furkans "gesunder Trend".
+                hinweis = "verschwindend gegen den Spot"
+            elif anteil < 10:
+                hinweis = f"nur {anteil:.1f} % des Spot-Flows".replace(".", ",")
+            else:
+                hinweis = f"{anteil:.0f} % des Spot-Flows"
         zeilen.append({"name": "Futures-CVD", "wert": _usd_kurz(fu["aenderung"]),
-                       "richtung": fu["richtung"],
-                       "hinweis": "gehebelter Flow, oft kurzfristig"})
+                       "richtung": fu["richtung"], "hinweis": hinweis})
 
     # --- Open Interest: kommt neues Geld herein?
     oi = _of_reihe([p.oi for p in flow], fenster)
@@ -663,10 +698,10 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
     if ll or sl:
         zeilen.append({"name": "Long-Liquidationen",
                        "wert": _usd_kurz(ll, vorzeichen=False),
-                       "richtung": "", "hinweis": "Longs wurden geschlossen"})
+                       "richtung": "", "hinweis": ""})
         zeilen.append({"name": "Short-Liquidationen",
                        "wert": _usd_kurz(sl, vorzeichen=False),
-                       "richtung": "", "hinweis": "Shorts wurden geschlossen"})
+                       "richtung": "", "hinweis": ""})
 
     # --- Positionierung: 0.0 heisst laut FlowPoint ausdruecklich "keine Daten"
     lp = flow[-1].long_pct

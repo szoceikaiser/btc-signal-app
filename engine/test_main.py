@@ -762,7 +762,7 @@ def test_lage_abruf_rechnet_die_ampel_fuer_long():
 
     from telegram_notify import format_lage
     txt = format_lage(out, cs[-1].ts)
-    assert "Ampel (fuer LONG)" in txt
+    assert "AMPEL (fuer LONG)" in txt
     assert "LONG-Position" in txt
     assert "FLAT" in txt, "der Hinweis auf den echten Engine-Zustand fehlt"
 
@@ -812,10 +812,160 @@ def test_lage_abruf_enthaelt_furkans_rohwerte():
     assert dateien == ["config.json"], "der Abruf hat etwas geschrieben"
 
     txt = format_lage(out, cs[-1].ts)
-    assert "Order-Flow im Detail" in txt
-    assert "letzte 48 Stunden" in txt, "das Fenster muss in der Nachricht stehen"
+    assert "ORDER-FLOW" in txt
+    assert "48 h" in txt, "das Fenster muss in der Nachricht stehen"
     for name in ("Spot-CVD", "Futures-CVD", "Open Interest", "Funding",
                  "Positionierung"):
         assert name in txt, f"{name} fehlt in der Nachricht"
     assert "echte Nachfrage, ohne Hebel" in txt      # Furkans Wortwahl zum Spot-CVD
-    assert "gehebelter Flow" in txt                  # ... und zum Futures-CVD
+    # E36.2: Beim Futures-CVD steht jetzt das VERHAELTNIS zum Spot - die
+    # Groessenordnung ist die eigentliche Aussage (Furkans "gesunder Trend").
+    assert "des Spot-Flows" in txt
+
+
+def test_lage_nachricht_bleibt_handy_tauglich():
+    """E36.2 (Kaisers Fund 19.09.2026): Keine Zeile darf auf dem Handy umbrechen.
+
+    Telegram rendert den Text PROPORTIONAL und ohne parse_mode - eine Ausrichtung mit
+    Leerzeichen kann dort gar nicht funktionieren. Die vorherige Fassung hatte Zeilen
+    bis 210 Zeichen; auf dem Handy brach jede zwei- bis dreimal um und war unlesbar.
+
+    Dieser Test misst die Laenge, statt sie zu schaetzen - und prueft BEIDE Faelle
+    (mit und ohne Bein), damit kein Zweig der Nachricht ungeprueft bleibt.
+    """
+    from telegram_notify import format_lage, ZEILE_MAX
+    # FESTE Zahl, nicht ZEILE_MAX: Ein Test, der gegen dieselbe Konstante prueft, die
+    # er absichern soll, misst sich selbst - die Sabotage "ZEILE_MAX = 99" blieb
+    # dadurch ungefangen. 38 Zeichen sind die Handybreite, um die es geht.
+    HANDY = 38
+    assert ZEILE_MAX <= HANDY, f"ZEILE_MAX ist auf {ZEILE_MAX} hochgesetzt worden"
+    import random
+    r = random.Random(3)
+    ms = 4 * 3600 * 1000
+
+    def _serie(aufwaerts: bool):
+        cs, fl = [], []
+        cvd_s, cvd_f, oi = 5000.0, 1000.0, 8.3e9
+        werte = ([76264 + i * 250 for i in range(10)] + [82300 - i * 90 for i in range(1, 30)]
+                 if aufwaerts else
+                 [82300 - i * 250 for i in range(10)] + [76264 + i * 90 for i in range(1, 30)])
+        for i, v in enumerate(werte):
+            cs.append(Candle(1_700_000_000_000 + i * ms, v, v * 1.004, v * 0.996, v))
+            cvd_s += r.gauss(15e6, 6e6); cvd_f += r.gauss(600, 3000)
+            oi *= (1 + r.gauss(0.004, 0.006))
+            fl.append(FlowPoint(cs[-1].ts, cvd_s, cvd_f, oi, 0.000038,
+                                long_liq=abs(r.gauss(8e5, 4e5)),
+                                short_liq=abs(r.gauss(7.5e6, 2e6)), long_pct=47.0))
+        return cs, fl
+
+    geprueft = 0
+    for aufwaerts in (True, False):
+        cs, fl = _serie(aufwaerts)
+        out, _ = _lage_lauf(cs, fl, {"pivot_n": 5, "bias_short": False, "trend_ema": 3})
+        txt = format_lage(out, cs[-1].ts)
+        lang = [(len(z), z) for z in txt.split("\n") if len(z) > HANDY]
+        assert not lang, f"zu lange Zeilen ({'mit' if aufwaerts else 'ohne'} Bein): {lang[:3]}"
+        geprueft += 1
+        # ... und der Zweig muss wirklich durchlaufen sein. "Aufwaerts-Bein" allein
+        # taugt nicht als Merkmal: Es steckt auch in "Kein signifikantes
+        # Aufwaerts-Bein erkennbar". Geprueft wird deshalb der Zonen-Block.
+        hat_zonen = "0.5-Level:" in txt
+        assert hat_zonen == (out["bein"] is not None), \
+            f"Zonen-Block passt nicht zum Bein (bein={out['bein']})"
+    assert geprueft == 2, "beide Zweige muessen geprueft worden sein"
+
+
+def test_spot_cvd_zeigt_beide_zeitebenen_wenn_sie_sich_unterscheiden():
+    """E36.2, Kaisers Fund: Der Block rechnete 48 h, die Lage-Zeile 12 h - in der
+    Nachricht standen zwei Zahlen unter fast demselben Namen, die sich zu
+    widersprechen schienen ('steigt' gegen 'nachgelassen'). Beides war richtig.
+
+    Jetzt steht die kurze Ebene daneben, WENN sie in eine andere Richtung zeigt.
+    Der Unterschied ist die eigentliche Information: Tempoverlust.
+    """
+    from strategy_core import orderflow_detail, SPOT_FENSTER
+    ms = 4 * 3600 * 1000
+    # 48 h stark steigend, die letzten 12 h fallend
+    cvd = [float(i) * 15e6 for i in range(30)]
+    cvd += [cvd[-1] - (i + 1) * 3e6 for i in range(3)]
+    cs = [Candle(1_700_000_000_000 + i * ms, 80000, 80300, 79700, 80000)
+          for i in range(len(cvd))]
+    fl = [FlowPoint(c.ts, v, 0.0, 8e9, 0.0) for c, v in zip(cs, cvd)]
+
+    zeilen = orderflow_detail(cs, fl)
+    namen = [z["name"] for z in zeilen]
+    kurz = f"... letzte {SPOT_FENSTER * 4} h"
+    assert "Spot-CVD" in namen, "Szenario passt nicht - Spot-CVD fehlt"
+    lang_r = next(z["richtung"] for z in zeilen if z["name"] == "Spot-CVD")
+    assert lang_r == "steigt", f"Szenario passt nicht - 48 h sagt {lang_r}"
+    assert kurz in namen, "die kurze Ebene fehlt, obwohl sie widerspricht"
+    kurz_r = next(z["richtung"] for z in zeilen if z["name"] == kurz)
+    assert kurz_r != lang_r, "die kurze Ebene zeigt dieselbe Richtung - kein Befund"
+
+    # Gegenprobe: zeigen beide in dieselbe Richtung, entfaellt die Zusatzzeile
+    cvd2 = [float(i) * 15e6 for i in range(33)]
+    fl2 = [FlowPoint(c.ts, v, 0.0, 8e9, 0.0) for c, v in zip(cs, cvd2)]
+    assert kurz not in [z["name"] for z in orderflow_detail(cs, fl2)]
+
+
+def test_futures_cvd_zeigt_das_verhaeltnis_zum_spot():
+    """E36.2: '+7 Tsd $ steigt' neben '+177,7 Mio $' verdeckt, dass der Hebel
+    praktisch keine Rolle spielt - und genau das ist Furkans 'gesunder Trend'."""
+    from strategy_core import orderflow_detail
+    ms = 4 * 3600 * 1000
+    cs = [Candle(1_700_000_000_000 + i * ms, 80000, 80300, 79700, 80000) for i in range(30)]
+    fl = [FlowPoint(c.ts, float(i) * 15e6, float(i) * 600.0, 8e9, 0.0)
+          for i, c in enumerate(cs)]
+    fu = next(z for z in orderflow_detail(cs, fl) if z["name"] == "Futures-CVD")
+    # 600 gegen 15 Mio je Kerze = 0,004 % -> unter 0,5 %, also der Klartext-Fall.
+    # "0,0 % des Spot-Flows" saehe nach einem Rechenfehler aus.
+    assert fu["hinweis"] == "verschwindend gegen den Spot", fu["hinweis"]
+
+    # Gegenprobe: bei spuerbarem Futures-Anteil steht das Verhaeltnis als Zahl da
+    fl2 = [FlowPoint(c.ts, float(i) * 15e6, float(i) * 3e6, 8e9, 0.0)
+           for i, c in enumerate(cs)]
+    fu2 = next(z for z in orderflow_detail(cs, fl2) if z["name"] == "Futures-CVD")
+    assert "% des Spot-Flows" in fu2["hinweis"], fu2["hinweis"]
+    assert "20" in fu2["hinweis"], f"Verhaeltnis falsch: {fu2['hinweis']}"
+
+
+def test_kurze_spot_ebene_zeigt_das_vorzeichen_nicht_den_massstab():
+    """E36.2: Die Zusatzzeile existiert NUR wegen der Drehung - also muss sie das
+    Vorzeichen zeigen.
+
+    Nach dem Massstab gerechnet hiesse -11 Mio nach typischen +48 Mio "flach":
+    rechnerisch richtig, aber am Punkt vorbei. Dieses Szenario trennt beides,
+    denn ein Test, in dem Massstab und Vorzeichen dasselbe sagen, prueft nichts
+    (die Sabotage blieb genau daran zuerst ungefangen).
+    """
+    from strategy_core import orderflow_detail, SPOT_FENSTER, _of_reihe
+    ms = 4 * 3600 * 1000
+    # 48 h sehr kraeftig steigend, die letzten 3 Kerzen leicht fallend
+    cvd = [float(i) * 16e6 for i in range(30)]
+    cvd += [cvd[-1] - (i + 1) * 3.5e6 for i in range(SPOT_FENSTER)]
+    cs = [Candle(1_700_000_000_000 + i * ms, 80000, 80300, 79700, 80000)
+          for i in range(len(cvd))]
+    fl = [FlowPoint(c.ts, v, 0.0, 8e9, 0.0) for c, v in zip(cs, cvd)]
+
+    # Nachweis, dass das Szenario die Regel ueberhaupt trifft: der Massstab wuerde
+    # hier "flach" sagen, das Vorzeichen aber "faellt".
+    roh = _of_reihe([p.spot_cvd for p in fl], SPOT_FENSTER)
+    assert roh["aenderung"] < 0, "Szenario passt nicht - die Aenderung muss negativ sein"
+    assert roh["richtung"] == "flach", \
+        f"Szenario trennt nicht - Massstab sagt bereits {roh['richtung']}"
+
+    kurz = next(z for z in orderflow_detail(cs, fl)
+                if z["name"] == f"... letzte {SPOT_FENSTER * 4} h")
+    assert kurz["richtung"] == "faellt", \
+        f"Zusatzzeile zeigt {kurz['richtung']} statt des Vorzeichens"
+
+
+def test_kurze_spot_ebene_nutzt_dasselbe_fenster_wie_die_lage_zeile():
+    """Die Zusatzzeile soll genau die Zahl erklaeren, die in der Lage-Zeile steht.
+    Ein anderes Fenster brächte den Widerspruch zurück, den sie aufloesen soll."""
+    import inspect
+    from strategy_core import SPOT_FENSTER, spot_nachfrage, orderflow_detail
+    assert inspect.signature(spot_nachfrage).parameters["fenster"].default == SPOT_FENSTER
+    quelle = inspect.getsource(orderflow_detail)
+    assert "_of_reihe([p.spot_cvd for p in flow], SPOT_FENSTER)" in quelle, \
+        "die Zusatzzeile rechnet nicht mit SPOT_FENSTER"

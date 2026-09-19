@@ -319,6 +319,24 @@ def send_signals(signals: list[dict], dry_run: bool = False) -> list[str]:
     return messages
 
 
+# E36.2 (19.09.2026, Kaisers Fund): Telegram rendert den Nachrichtentext PROPORTIONAL
+# und ohne parse_mode - eine Spaltenausrichtung mit Leerzeichen kann darin gar nicht
+# funktionieren. Auf dem Handy brach jede Zeile zwei- bis dreimal um; gemessen waren
+# Zeilen bis 210 Zeichen lang. Deshalb: kurze Zeilen statt Tabellen, und jeder
+# Fliesstext wird selbst umgebrochen, damit nichts dem Zufall der Displaybreite
+# ueberlassen bleibt.
+ZEILE_MAX = 38          # Zeichen - passt auf ein Handy, ohne umzubrechen
+
+PFEIL = {"steigt": "\u2191", "faellt": "\u2193", "flach": "\u2192"}
+
+
+def _umbruch(text: str, breite: int = ZEILE_MAX, einzug: str = "") -> list[str]:
+    """Bricht Fliesstext auf `breite` Zeichen um. Nur Standardbibliothek."""
+    import textwrap
+    return textwrap.wrap(text, width=breite, initial_indent=einzug,
+                         subsequent_indent=einzug) or [""]
+
+
 def _orderflow_zeilen(zeilen: list | None, fenster_h: int | None) -> list[str]:
     """Furkans Rohwerte als Block (E36, Kaiser 19.09.2026).
 
@@ -328,17 +346,48 @@ def _orderflow_zeilen(zeilen: list | None, fenster_h: int | None) -> list[str]:
     """
     if not zeilen:
         return []
-    kopf = "Order-Flow im Detail"
-    if fenster_h:
-        kopf += f" (letzte {fenster_h} Stunden)"
-    out = ["", kopf + ":"]
-    breite = max(len(z["name"]) for z in zeilen)
+    out = ["", f"ORDER-FLOW ({fenster_h} h)" if fenster_h else "ORDER-FLOW", ""]
     for z in zeilen:
-        # Feste Breite fuer die Richtung: "flach" ist kuerzer als "steigt"/"faellt",
-        # sonst verrutschen die Hinweise in der Spalte dahinter.
-        richtung = f"  {z.get('richtung', ''):<7}" if z.get("richtung") else "  " + " " * 7
-        hinweis = f"  ({z['hinweis']})" if z.get("hinweis") else ""
-        out.append(f"  {z['name']:<{breite}}  {z['wert']:>20}{richtung}{hinweis}")
+        pfeil = PFEIL.get(z.get("richtung", ""), "")
+        kopf = f"{z['name']}: {z['wert']}"
+        if pfeil:
+            kopf += f" {pfeil}"
+        out += _umbruch(kopf)
+        if z.get("hinweis"):
+            out += _umbruch(z["hinweis"], einzug="  ")
+    return out
+
+
+def _lage_kurz(lage: dict | None) -> list[str]:
+    """Wie _lage_zeilen, aber mit Umbruch statt Einrueckung (E36.2).
+
+    Plan und Vorschau behalten bewusst ihr bisheriges Format - deren Zeilen sind
+    kuerzer, und ein ungefragter Umbau haette Kaisers gewohnte Nachrichten veraendert.
+    """
+    if not lage:
+        return []
+    out = ["", "LAGE", ""]
+    for feld in ("trend_text", "struktur_text", "spot_text", "muster_text"):
+        wert = lage.get(feld)
+        if feld == "struktur_text" and lage.get("struktur") == "neu":
+            continue
+        if wert:
+            vorsatz = "Muster: " if feld == "muster_text" else ""
+            out += _umbruch(vorsatz + wert)
+    return out if len(out) > 3 else []
+
+
+def _ampel_kurz(ampel: dict | None) -> list[str]:
+    """Wie _ampel_zeilen, aber mit Umbruch (E36.2). Der Schlusssatz bleibt woertlich."""
+    if not ampel:
+        return []
+    kopf = f"AMPEL (fuer {ampel['richtung']})" if ampel.get("richtung") else "AMPEL"
+    out = ["", kopf, "", *_umbruch(ampel["text"])]
+    if ampel.get("dafuer"):
+        out += _umbruch("dafuer:  " + ", ".join(ampel["dafuer"]), einzug="")
+    if ampel.get("dagegen"):
+        out += _umbruch("dagegen: " + ", ".join(ampel["dagegen"]), einzug="")
+    out += ["", *_umbruch(AMPEL_SCHLUSSSATZ)]
     return out
 
 
@@ -351,35 +400,39 @@ def format_lage(l: dict, ts_ms: int) -> str:
 
     Diese Nachricht rechnet deshalb ausdruecklich unter der ANNAHME einer
     Long-Position und sagt das auch. Sie erzeugt kein Signal und aendert nichts.
+
+    E36.2 (19.09.2026): Jede Zeile bleibt unter ZEILE_MAX Zeichen. Telegram rendert
+    proportional und ohne parse_mode - auf dem Handy brach die vorherige Fassung
+    jede Zeile mehrfach um (gemessen bis 210 Zeichen). Spaltenausrichtung mit
+    Leerzeichen kann dort ohnehin nicht funktionieren, deshalb kurze Zeilen mit
+    Doppelpunkt statt Tabellen.
     """
-    zeilen = ["🔎 LAGE AUF ABRUF — angenommen wird eine LONG-Position", ""]
-    zeilen.append(f"Kurs {_fmt_usd(l['kurs'])}")
+    zeilen = ["\U0001F50E LAGE AUF ABRUF", "Annahme: LONG-Position", "",
+              f"Kurs {_fmt_usd(l['kurs'])}"]
 
     if l.get("bein") is None:
-        zeilen += ["", "Kein signifikantes Aufwaerts-Bein erkennbar.",
-                   "Fuer eine Long-Position gibt es derzeit also keine Struktur, an der",
-                   "sich Zonen oder eine Invalidierung festmachen liessen."]
+        zeilen.append("")
+        zeilen += _umbruch("Kein signifikantes Aufwaerts-Bein erkennbar - fuer einen "
+                           "Long gibt es derzeit keine Struktur, an der sich Zonen "
+                           "oder eine Invalidierung festmachen liessen.")
     else:
         a, b = l["bein"]
-        zeilen += ["", f"Aufwaerts-Bein {_fmt_usd(a)} -> {_fmt_usd(b)}", ""]
-        zeilen += [
-            f"  0.5-Level        {_fmt_usd(l['level_05'])}",
-            f"  Golden Pocket    {_fmt_usd(l['gp_lower'])} - {_fmt_usd(l['gp_upper'])}",
-            f"  0.786-Zone       {_fmt_usd(l['level_0786'])}",
-            "",
-            f"Ungueltig ab       {_fmt_usd(l['invalidation'])}",
-        ]
+        zeilen += ["", "Aufwaerts-Bein",
+                   f"{_fmt_usd(a)} -> {_fmt_usd(b)}", "",
+                   f"0.5-Level: {_fmt_usd(l['level_05'])}",
+                   f"Golden Pocket: {_fmt_usd(l['gp_lower'])}",
+                   f"  bis {_fmt_usd(l['gp_upper'])}",
+                   f"0.786-Zone: {_fmt_usd(l['level_0786'])}",
+                   f"Ungueltig ab: {_fmt_usd(l['invalidation'])}"]
 
     zeilen += _orderflow_zeilen(l.get("orderflow"), l.get("fenster_h"))
-    zeilen += _lage_zeilen(l.get("lage"))
-    zeilen += _ampel_zeilen(l.get("ampel"))
-    zeilen += [
-        "",
-        _fmt_ts(ts_ms),
-        "— Abruf auf Knopfdruck. Die Engine selbst steht auf FLAT und hat keine "
-        "Position; diese Angaben sind unter der Annahme gerechnet, dass eine "
-        "Long-Position laeuft. Es wurde nichts ausgeloest und nichts veraendert.",
-    ]
+    zeilen += _lage_kurz(l.get("lage"))
+    zeilen += _ampel_kurz(l.get("ampel"))
+    zeilen += ["", _fmt_ts(ts_ms), ""]
+    zeilen += _umbruch("Abruf auf Knopfdruck. Die Engine steht selbst auf FLAT und "
+                       "hat keine Position - diese Angaben sind unter der Annahme "
+                       "gerechnet, dass eine Long-Position laeuft. Es wurde nichts "
+                       "ausgeloest und nichts veraendert.")
     return "\n".join(zeilen)
 
 
