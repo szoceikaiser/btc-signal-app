@@ -156,6 +156,171 @@ def long_short_by_ts(api_key: str, **kw) -> dict:
     return {int(p["t"]) * 1000: float(p["l"]) for p in pts if "t" in p and "l" in p}
 
 
+# ------------------------------------------- E37: Spot-Maerkte (Kaisers Frage 19.09.2026)
+# BEFUND, der die Frage ausgeloest hat: Furkan aggregiert sein Spot-CVD auf Velo ueber
+# Binance, Coinbase, Bybit und OKX und betont es ausdruecklich ("Wir schauen nicht nur
+# auf eine Boerse"). Unser Spot-CVD kommt allein von Binance (data-api.binance.vision),
+# waehrend Futures-CVD, OI, Funding und Liquidationen laengst aggregiert sind (.A).
+# Die Velo-API selbst scheidet aus: 199 $/Monat (nur die Webseite ist gratis).
+# Laut Coinalyze-Doku gibt es aber /spot-markets mit einem Feld fuer die Verfuegbarkeit
+# von Kauf-/Verkaufsdaten. Wenn ohlcv-history auch fuer Spot-Symbole 'v' und 'bv'
+# liefert, waere das aggregierte Spot-CVD ohne neue Datenquelle und ohne neuen Schluessel
+# zu haben — mit demselben Rechenweg (Delta = 2*bv - v) wie beim Futures-CVD.
+# PROJEKTREGEL: kein Blind-Parsen. Diese Probe FRAGT nur und schreibt die rohe Antwort.
+SPOT_BOERSEN = ("binance", "coinbase", "bybit", "okx")     # Furkans vier Spotboersen
+SPOT_TESTE_MAX = 4                # hoechstens so viele Symbole probeweise abfragen
+SPOT_REICHWEITE_TAGE = 365        # so weit zurueck fragen, um die ECHTE Grenze zu sehen
+
+
+def _als_text(x) -> str:
+    """Ganzen Eintrag als Kleinbuchstaben-Text — Suche ohne Kenntnis der Feldnamen."""
+    try:
+        return json.dumps(x, ensure_ascii=False).lower()
+    except Exception:  # noqa: BLE001
+        return str(x).lower()
+
+
+def _symbol_von(eintrag) -> str:
+    """Symbol aus einem Markt-Eintrag ziehen, ohne das Schema vorauszusetzen."""
+    if not isinstance(eintrag, dict):
+        return ""
+    for schluessel in ("symbol", "Symbol", "symbol_on_exchange", "market", "id"):
+        wert = eintrag.get(schluessel)
+        if isinstance(wert, str) and wert:
+            return wert
+    return ""
+
+
+def _btc_spot_maerkte(data) -> list:
+    """Alle Spot-Markt-Eintraege, in denen BTC vorkommt (Feldnamen egal)."""
+    if not isinstance(data, list):
+        return []
+    return [e for e in data if "btc" in _als_text(e)]
+
+
+def _waehle_spot_symbole(maerkte: list) -> list:
+    """Aggregiertes Symbol zuerst, danach je eine von Furkans vier Boersen.
+
+    Warum diese Reihenfolge: Gibt es ein '.A'-Symbol wie bei den Futures, ist die
+    Aggregation schon erledigt und wir brauchen nur EINEN Abruf. Sonst muessten wir
+    die vier Boersen selbst zusammenrechnen — dafuer wird hier je eine Stichprobe
+    geholt, um zu sehen, ob sie ueberhaupt Kauf-/Verkaufsvolumen liefern.
+    """
+    gewaehlt, gesehene_boersen = [], set()
+    for e in maerkte:                                    # 1. Vorrang: aggregierte Symbole
+        sym = _symbol_von(e)
+        if sym.endswith(".A") and sym not in gewaehlt:
+            gewaehlt.append(sym)
+    for boerse in SPOT_BOERSEN:                          # 2. je eine je Furkan-Boerse
+        for e in maerkte:
+            sym = _symbol_von(e)
+            if not sym or sym in gewaehlt or boerse in gesehene_boersen:
+                continue
+            if boerse in _als_text(e) and "usd" in _als_text(e):
+                gewaehlt.append(sym)
+                gesehene_boersen.add(boerse)
+                break
+    return gewaehlt[:SPOT_TESTE_MAX]
+
+
+def _pruefe_spot_symbol(api_key: str, symbol: str, **kw) -> dict:
+    """Eine ohlcv-history fuer EIN Spot-Symbol holen und beschreiben, was ankam.
+
+    `**kw` geht an fetch_history durch (u. a. `opener`), damit die Auswertung ohne
+    Netz und ohne Schluessel testbar ist.
+    """
+    try:
+        roh = fetch_history("ohlcv-history", api_key, symbol=symbol,
+                            days=SPOT_REICHWEITE_TAGE, **kw)
+    except urllib.error.HTTPError as e:
+        return {"http_error": e.code, "body": e.read().decode(errors="replace")[:300]}
+    except Exception as e:  # noqa: BLE001
+        return {"error": f"{type(e).__name__}: {str(e)[:250]}"}
+    punkte = _history_points(roh, symbol=symbol)
+    if not punkte:
+        return {"punkte": 0, "hinweis": "Antwort kam, enthielt aber keine History.",
+                "antwort_roh": _sample(roh)}
+    felder = sorted({k for p in punkte if isinstance(p, dict) for k in p})
+    zeiten = [int(p["t"]) for p in punkte if isinstance(p, dict) and "t" in p]
+    spanne = (max(zeiten) - min(zeiten)) / 86400.0 if len(zeiten) > 1 else 0.0
+    return {
+        "punkte": len(punkte),
+        "felder": felder,
+        # Das ist die eigentliche Frage: 'v' (Gesamtvolumen) UND 'bv' (Taker-Kaeufe)
+        # sind zusammen die Voraussetzung fuer Delta = 2*bv - v.
+        "hat_v_und_bv": ("v" in felder and "bv" in felder),
+        "reichweite_tage": round(spanne, 1),
+        "von": time.strftime("%Y-%m-%d %H:%M", time.gmtime(min(zeiten))) if zeiten else "",
+        "bis": time.strftime("%Y-%m-%d %H:%M", time.gmtime(max(zeiten))) if zeiten else "",
+        "erster_punkt": punkte[0],
+        "letzter_punkt": punkte[-1],
+    }
+
+
+def spot_probe(api_key: str, **kw) -> dict:
+    """Beantwortet EINE Frage: laesst sich ein aggregiertes Spot-CVD von Coinalyze holen?
+
+    Schritt 1: /spot-markets abfragen — gibt es den Endpunkt ueberhaupt, und welche
+               BTC-Maerkte stehen darin?
+    Schritt 2: fuer bis zu vier davon eine ohlcv-history holen und nachsehen, ob 'v'
+               und 'bv' drin sind und wie weit die 4h-Historie zurueckreicht.
+    Es wird nichts gebaut und nichts entschieden — nur berichtet.
+    """
+    out: dict = {"_frage": ("Liefert Coinalyze ein aggregiertes Spot-CVD (Taker-Kauf- "
+                            "und Gesamtvolumen je 4h-Kerze) mit brauchbarer Historie?")}
+    try:
+        maerkte_roh = get_json("spot-markets", {}, api_key, **kw)
+    except urllib.error.HTTPError as e:
+        out["spot_markets"] = {"http_error": e.code,
+                               "body": e.read().decode(errors="replace")[:300]}
+        out["_ergebnis"] = ("Der Endpunkt /spot-markets hat NICHT geantwortet (siehe "
+                            "http_error). Damit faellt der Coinalyze-Weg aus; es bliebe "
+                            "nur, die Boersen einzeln selbst zu aggregieren.")
+        return out
+    except Exception as e:  # noqa: BLE001
+        out["spot_markets"] = {"error": f"{type(e).__name__}: {str(e)[:250]}"}
+        out["_ergebnis"] = "Abruf gescheitert (kein HTTP-Fehler) — siehe 'error'."
+        return out
+
+    btc = _btc_spot_maerkte(maerkte_roh)
+    out["spot_markets"] = {
+        "anzahl_gesamt": len(maerkte_roh) if isinstance(maerkte_roh, list) else "?",
+        "anzahl_mit_btc": len(btc),
+        "btc_eintraege_roh": btc[:12],        # roh, damit die Feldnamen sichtbar werden
+    }
+
+    symbole = _waehle_spot_symbole(btc)
+    out["gepruefte_symbole"] = symbole or ["— keines gefunden"]
+    geprueft = {}
+    for sym in symbole:
+        if not kw:                             # im Test nicht warten
+            time.sleep(1.6)                    # Rate-Limit 40/Min respektieren
+        geprueft[sym] = _pruefe_spot_symbol(api_key, sym, **kw)
+    out["ohlcv_je_symbol"] = geprueft
+
+    brauchbar = [s for s, d in geprueft.items() if d.get("hat_v_und_bv")]
+    aggregiert = [s for s in brauchbar if s.endswith(".A")]
+    if aggregiert:
+        ergebnis = (f"JA, und zwar direkt aggregiert: {', '.join(aggregiert)} liefert "
+                    "Gesamtvolumen und Taker-Kaeufe je Kerze. Damit laesst sich das "
+                    "Spot-CVD genauso rechnen wie das Futures-CVD (2*bv - v).")
+    elif brauchbar:
+        ergebnis = (f"TEILWEISE: {', '.join(brauchbar)} liefern die noetigen Felder, "
+                    "aber kein aggregiertes '.A'-Symbol war dabei. Die Boersen muessten "
+                    "einzeln geholt und selbst zusammengerechnet werden.")
+    else:
+        ergebnis = ("NEIN: kein geprueftes Spot-Symbol liefert 'v' UND 'bv'. Ohne beide "
+                    "Zahlen gibt es kein Kauf-/Verkaufs-Delta und damit kein Spot-CVD.")
+    reichweiten = [d.get("reichweite_tage") for d in geprueft.values()
+                   if isinstance(d.get("reichweite_tage"), (int, float))]
+    if reichweiten:
+        ergebnis += (f" Reichweite der 4h-Historie: rund {max(reichweiten):.0f} Tage "
+                     "(gefragt war 365). Weniger als das heisst: der Backtest kann nur "
+                     "das Fenster messen, das davon abgedeckt ist.")
+    out["_ergebnis"] = ergebnis
+    return out
+
+
 def _sample(data):
     """Behaelt nur die letzten 3 Punkte je Symbol (kleine Probe fuers Log/JSON)."""
     try:
@@ -210,6 +375,14 @@ def probe():
             kand[name] = {"pfad": ep, "antwort": daten}
             (fehlt if fehler else gefunden).append(f"{name} ({ep})")
         out["kandidaten"] = kand
+
+        # --- E37: Spot-Maerkte (Kaisers Frage nach Furkans Aggregation) --------------
+        time.sleep(1.6)
+        try:
+            out["spot"] = spot_probe(api_key)
+        except Exception as e:  # noqa: BLE001 — Probe soll nie hart scheitern
+            out["spot"] = {"error": f"{type(e).__name__}: {str(e)[:300]}"}
+
         out["_ergebnis"] = {
             "nutzbar": gefunden or ["— keiner"],
             "nicht_vorhanden": fehlt or ["— keiner"],
@@ -222,6 +395,7 @@ def probe():
         }
         print("\nNUTZBAR:", ", ".join(gefunden) or "keiner")
         print("NICHT VORHANDEN:", ", ".join(fehlt) or "keiner")
+        print("\nSPOT (E37):", out.get("spot", {}).get("_ergebnis", "— nicht gelaufen"))
     path = ROOT / "site" / "data" / "coinalyze_probe.json"
     path.write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     print("Probe geschrieben:", path)
