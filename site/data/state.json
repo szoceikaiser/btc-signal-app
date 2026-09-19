@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1789804800000,
+ "last_signal_ts": 1789819200000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -62,32 +62,31 @@
   "trend_ema": 200,
   "ampel_filter": "off"
  },
- "updated_at": "2026-09-19T12:37:40Z",
- "last_close": 81302.63,
+ "updated_at": "2026-09-19T16:02:24Z",
+ "last_close": 81636.01,
  "zonen_vorschau": {
   "richtung": "SHORT",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 81.303 $ ueber EMA200 (70.396 $)",
+   "trend_text": "Uebergeordnet: Kurs 81.636 $ ueber EMA200 (70.399 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 79.600 $ -> 74.968 $",
-   "spot": "nachgelassen",
-   "spot_text": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)",
-   "muster": "DERIVATE_PUMP",
-   "muster_text": "Derivate-Pump (Hebel treibt, Spot fehlt)"
+   "spot": "zurueckgekehrt",
+   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)",
+   "muster": "GESUNDER_TREND",
+   "muster_text": "gesunder Trend (Spot traegt die Bewegung)"
   },
   "ampel": {
-   "stufe": "unguenstig",
+   "stufe": "guenstig",
    "richtung": "LONG",
    "dafuer": [
-    "Trend"
-   ],
-   "dagegen": [
+    "Trend",
     "Spot-Nachfrage",
     "Muster"
    ],
+   "dagegen": [],
    "gezaehlt": 3,
-   "text": "UNGUENSTIG \u2014 1 von 3 spricht dafuer"
+   "text": "GUENSTIG \u2014 3 von 3 sprechen dafuer"
   },
   "impuls_start": 79600.0,
   "impuls_ende": 74967.97,
