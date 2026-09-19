@@ -1,128 +1,8 @@
 {
- "generated_at": "2026-09-13T12:57:45Z",
+ "generated_at": "2026-09-19T19:16:06Z",
  "variante": "LIVE-heute +Zonen nachziehen",
- "fenster": "05.01.2026-13.09.2026",
+ "fenster": "11.01.2026-19.09.2026",
  "signals": [
-  {
-   "ts": 1767801600000,
-   "type": "KAUF_1",
-   "price": 91019.54000000001,
-   "tranche_pct": 25,
-   "reason": "0.5-Retracement des Impulses 87250->94789",
-   "stop_ref": 87250.0,
-   "tag": "",
-   "label": "KAUF 1 (Teilposition am 0.5-Level)"
-  },
-  {
-   "ts": 1767830400000,
-   "type": "NACHKAUF",
-   "price": 90813.4,
-   "tranche_pct": 15,
-   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (UNGESUNDER_ABVERKAUF)",
-   "stop_ref": 87250.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1767830400000,
-   "type": "NACHKAUF",
-   "price": 90813.4,
-   "tranche_pct": 20,
-   "reason": "Konfluenz: Fib-Zone + Liquidationszone 90676 \u2014 aufstocken (UNGESUNDER_ABVERKAUF)",
-   "stop_ref": 87250.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1767859200000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 90226.77,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 90588",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1767873600000,
-   "type": "NACHKAUF",
-   "price": 90781.57,
-   "tranche_pct": 15,
-   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
-   "stop_ref": 87250.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1767873600000,
-   "type": "NACHKAUF",
-   "price": 90781.57,
-   "tranche_pct": 20,
-   "reason": "Konfluenz: Fib-Zone + Liquidationszone 89642 \u2014 aufstocken (NEUTRAL)",
-   "stop_ref": 87250.0,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1767916800000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 91220.23,
-   "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 92000",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1767988800000,
-   "type": "KAUF_2",
-   "price": 90129.92856,
-   "tranche_pct": 50,
-   "reason": "Golden Pocket 89889-90130 + Bestaetigung (NEUTRAL)",
-   "stop_ref": 87250.0,
-   "tag": "",
-   "label": "KAUF 2 (Kernposition im Golden Pocket)"
-  },
-  {
-   "ts": 1768334400000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 95342.264,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.8 (95342)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1768392000000,
-   "type": "TEILVERKAUF_LADDER",
-   "price": 96096.172,
-   "tranche_pct": 15,
-   "reason": "Leiter-Teilgewinn an Extension 0.9 (96096)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
-  },
-  {
-   "ts": 1768392000000,
-   "type": "TEILVERKAUF_1",
-   "price": 96850.08,
-   "tranche_pct": 40,
-   "reason": "Extension 1.0 erreicht (96850)",
-   "stop_ref": null,
-   "tag": "",
-   "label": "TEILVERKAUF 1 (Extension 1.0)"
-  },
-  {
-   "ts": 1768392000000,
-   "type": "VERKAUF_REST",
-   "price": 96764.57,
-   "tranche_pct": 20,
-   "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
-   "stop_ref": null,
-   "tag": "",
-   "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
-  },
   {
    "ts": 1768766400000,
    "type": "KAUF_1",
@@ -145,30 +25,10 @@
   },
   {
    "ts": 1768795200000,
-   "type": "NACHKAUF",
-   "price": 92841.62,
-   "tranche_pct": 20,
-   "reason": "Konfluenz: Fib-Zone + Liquidationszone 92407 \u2014 aufstocken (NEUTRAL)",
-   "stop_ref": 90128.44,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1768809600000,
-   "type": "NACHKAUF",
-   "price": 93191.96,
-   "tranche_pct": 20,
-   "reason": "Konfluenz: Fib-Zone + Liquidationszone 92407 \u2014 aufstocken (NEUTRAL)",
-   "stop_ref": 90128.44,
-   "tag": "",
-   "label": "NACHKAUF (0.786-Zone)"
-  },
-  {
-   "ts": 1768824000000,
    "type": "TEILVERKAUF_LADDER",
-   "price": 93068.62,
+   "price": 92841.62,
    "tranche_pct": 15,
-   "reason": "Teilgewinn am letzten Hoch 93555",
+   "reason": "Teilgewinn am letzten Hoch 93092",
    "stop_ref": null,
    "tag": "",
    "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
@@ -2512,6 +2372,16 @@
    "stop_ref": 76264.0,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1789488000000,
+   "type": "STOPLOSS",
+   "price": 76186.48,
+   "tranche_pct": 100,
+   "reason": "Kerzenschluss unter Invalidierung 76264",
+   "stop_ref": null,
+   "tag": "",
+   "label": "STOPLOSS"
   }
  ]
 }
