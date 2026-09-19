@@ -473,12 +473,23 @@ def fetch_candles_range(start_ms: int, end_ms: int) -> list:
 
 def build_series(raw: list, funding: list[tuple[int, float]],
                  oi_map: dict | None = None, liq_map: dict | None = None,
-                 fut_map: dict | None = None, ls_map: dict | None = None):
+                 fut_map: dict | None = None, ls_map: dict | None = None,
+                 spot_map: dict | None = None):
     """OI aus oi_map (Coinalyze, E9.1) je Kerze; ohne oi_map bleibt OI konstant (neutral).
     liq_map liefert (long_liq, short_liq) je Kerzen-Open-ts.
     fut_map (E16) liefert das Futures-Taker-Delta je Kerze -> wird hier zum Futures-CVD
     aufsummiert; ohne fut_map bleibt es 0 und classify_pattern nutzt den Ersatzweg.
-    ls_map (E16) liefert den Long-Anteil in Prozent."""
+    ls_map (E16) liefert den Long-Anteil in Prozent.
+
+    spot_map (E37.2) liefert das ueber mehrere Boersen AGGREGIERTE Taker-Delta je Kerze.
+    Ohne spot_map bleibt es beim bisherigen Weg: Taker-Delta aus den Binance-Vision-
+    Kerzen, also EINE Boerse. Mit spot_map wird die Binance-Rechnung nicht etwa
+    ergaenzt, sondern ERSETZT — sonst waere Binance doppelt drin. Kerzen, fuer die
+    spot_map nichts hat, lassen das kumulierte CVD unveraendert (Delta 0); wie viele
+    das sind, meldet der Bericht aus coinalyze.spot_delta_aggregiert().
+    EINHEIT: spot_map rechnet in BTC, der Binance-Vision-Weg in USD. Beide gehen nur
+    als relative Aenderung in classify_pattern ein — mischen darf man sie trotzdem nie,
+    deshalb ist es ein Entweder-oder und keine Summe."""
     candles, flow, spot_cvd, fut_cvd = [], [], 0.0, 0.0
     oi_pairs = sorted(oi_map.items()) if oi_map else []
     first_oi = oi_pairs[0][1] if oi_pairs else 1.0
@@ -495,7 +506,10 @@ def build_series(raw: list, funding: list[tuple[int, float]],
     for k in raw:
         ts = int(k[0])
         candles.append(Candle(ts, float(k[1]), float(k[2]), float(k[3]), float(k[4])))
-        spot_cvd += 2.0 * float(k[10]) - float(k[7])
+        # Entweder das aggregierte Delta (E37.2) ODER das aus den Binance-Kerzen —
+        # nie beides, sonst zaehlt Binance doppelt und in zwei Einheiten.
+        spot_cvd += (spot_map.get(ts, 0.0) if spot_map is not None
+                     else 2.0 * float(k[10]) - float(k[7]))
         oi_val = latest_leq(oi_pairs, ts, first_oi) if oi_pairs else 1.0
         long_liq, short_liq = (liq_map.get(ts, (0.0, 0.0)) if liq_map else (0.0, 0.0))
         fut_cvd += (fut_map.get(ts, 0.0) if fut_map else 0.0)
@@ -987,6 +1001,35 @@ def main():
         except Exception as exc:  # noqa: BLE001
             print(f"Coinalyze Futures/Long-Short nicht verfuegbar ({exc}) -> wie bisher.")
 
+    # E37.2: aggregiertes Spot-CVD ueber Binance, Bybit und Coinbase (OKX hat bei
+    # Coinalyze keinen Spot). Nur fuer den VERGLEICH geholt — die Hauptreihe `flow`
+    # bleibt auf dem bisherigen Binance-Vision-Weg, damit alle Zahlen des Berichts
+    # weiter mit frueheren Laeufen vergleichbar sind.
+    spot_agg, spot_bericht = {}, {}
+    spot_alle, spot_alle_bericht = {}, {}
+    if api_key:
+        try:
+            auswahl = coinalyze.spot_auswahl(api_key)       # beide Wahlen, ein Durchgang
+        except Exception as exc:  # noqa: BLE001
+            auswahl = {}
+            print(f"Coinalyze Spot-Auswahl nicht verfuegbar ({exc}) -> Vergleich entfaellt.")
+        for wahl in (coinalyze.SPOT_WAHL_GROESSTER, coinalyze.SPOT_WAHL_ALLE):
+            syms = [s for liste in auswahl.get(wahl, {}).values() for s in liste]
+            if not syms:
+                continue
+            try:
+                karte, bericht = coinalyze.spot_delta_aggregiert(
+                    api_key, syms, frm=WARMUP_MS // 1000, to=END_MS // 1000)
+                if wahl == coinalyze.SPOT_WAHL_GROESSTER:
+                    spot_agg, spot_bericht = karte, bericht
+                else:
+                    spot_alle, spot_alle_bericht = karte, bericht
+                print(f"Coinalyze Spot ({wahl}): {len(syms)} Maerkte, {len(karte)} "
+                      f"vollstaendige Punkte, {bericht.get('punkte_ausgelassen', 0)} "
+                      f"ausgelassen (nicht auf allen Boersen vorhanden).")
+            except Exception as exc:  # noqa: BLE001
+                print(f"Coinalyze Spot ({wahl}) nicht verfuegbar ({exc}) -> Zeile entfaellt.")
+
     candles, flow = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map)
     # Vergleichsreihe OHNE Futures-Daten: dieselben Kerzen, fut_cvd = 0. Damit laesst sich
     # die Wirkung der neuen Daten sauber isolieren (gleiche Variante, nur andere Daten).
@@ -1109,6 +1152,74 @@ def main():
         ]
         print(f"E16 Futures-CVD: mit {p_mit['rendite_pct']:+.1f} % ({len(v_mit)} Signale) "
               f"gegen ohne {p_ohne['rendite_pct']:+.1f} % ({len(v_ohne)} Signale)")
+
+    # --- E37.2: Wirkung des aggregierten Spot-CVD isolieren --------------------------
+    # Wieder nach dem Muster von E16: dieselbe Variante, dieselben Kerzen, derselbe
+    # Zeitraum — nur die Datenquelle des Spot-CVD ist eine andere. Heute Binance allein
+    # (Binance-Vision, USD), zum Vergleich Binance + Bybit + Coinbase (Coinalyze, BTC).
+    spot_zeilen = []
+    if spot_agg:
+        _scfg = next((c for c in GRID if c.get("panel")), GRID[0])
+        _zeilen, _ergebnisse = [], {}
+        for name, karte in (("heute (nur Binance)", None),
+                            ("aggregiert, groesster Markt je Boerse", spot_agg),
+                            ("aggregiert, alle Dollar-Maerkte", spot_alle)):
+            if name != "heute (nur Binance)" and not karte:
+                continue
+            _, _fl = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map,
+                                  spot_map=karte)
+            _v = run_backtest(candles, _fl, _scfg, start_ms=eff_start)
+            _p = simulate(_v, candles, start_ms=eff_start)
+            _s = score(_v, start_ms=eff_start)
+            _ergebnisse[name] = (_v, _p, _s)
+            hervor = "**" if karte is not None else ""
+            _zeilen.append(
+                f"| {hervor}{name}{hervor} | {_s['recall']:.0%} | {_s['precision']:.0%} | "
+                f"{hervor}{_p['rendite_pct']:+.1f} %{hervor} | "
+                f"{_p['max_drawdown_pct']:.1f} % | {len(_v)} |")
+        _n_heute = len(_ergebnisse["heute (nur Binance)"][0])
+        _gleich = all(len(v) == _n_heute for v, _, _ in _ergebnisse.values())
+        spot_zeilen = [
+            "",
+            "## Aggregiertes Spot-CVD: was bringt es?",
+            "",
+            "Bis E37 kam JEDE Zahl der Engine von einer einzigen Boerse. Das Kuerzel "
+            "`.A` in den Coinalyze-Symbolen heisst Binance, nicht 'aggregiert' — der "
+            "Code behauptete das Gegenteil, von E9.1 bis zum 19.09.2026. Furkan "
+            "aggregiert dagegen ausdruecklich ueber mehrere Boersen.",
+            "",
+            f"Hier nur der Spot-Teil: {len(spot_bericht.get('symbole', []))} Maerkte "
+            f"(Binance, Bybit, Coinbase — OKX hat bei Coinalyze keinen Spot), "
+            f"{spot_bericht.get('punkte_vollstaendig', 0)} vollstaendige Punkte, "
+            f"{spot_bericht.get('punkte_ausgelassen', 0)} ausgelassen (ein Zeitpunkt "
+            "zaehlt nur, wenn ihn alle Boersen haben — sonst saehe eine Teilsumme aus "
+            "wie ein Einbruch des Spot-Flows).",
+            "",
+            f"Alle Zeilen: Variante *{_scfg['label']}*, dieselben Kerzen, derselbe "
+            "Zeitraum. Der einzige Unterschied ist die Herkunft des Spot-CVD.",
+            "",
+            "| Datenlage | Recall | Praez. | Rendite | max. Rueckgang | Signale |",
+            "|---|---|---|---|---|---|",
+            *_zeilen,
+            "",
+            ("**Gleiche Signalzahl in allen Zeilen — die Aggregation aendert nichts.** "
+             "Der Spot-Flow von Binance laeuft offenbar so parallel zum Rest des Marktes, "
+             "dass die Muster an denselben Stellen feuern. Dann ist 'wir sehen nur eine "
+             "Boerse' zwar richtig, aber folgenlos."
+             if _gleich else
+             "**Die Signalzahl aendert sich** — die Muster feuern an anderen Stellen, "
+             "sobald mehr als eine Boerse zaehlt. Ob das hilft, sagt die Rendite-Spalte; "
+             "ob es Zufall war, die Fensterhalbierung weiter unten."),
+            "",
+            "**Einheiten, damit es niemand spaeter vermischt:** Die heutige Zeile rechnet "
+            "in Dollar (Quote-Volumen der Binance-Kerzen), die aggregierten in BTC "
+            "(Basiswert, wie das Futures-CVD). In `classify_pattern` geht beides nur als "
+            "relative Aenderung ein, die Einheit kuerzt sich also heraus — summiert "
+            "werden duerfen die Reihen trotzdem nie.",
+        ]
+        print("E37.2 Spot-CVD: " + " | ".join(
+            f"{n}: {p['rendite_pct']:+.1f} % ({len(v)} Signale)"
+            for n, (v, p, _) in _ergebnisse.items()))
 
     # --- E11: Robustheitspruefung, Fenster halbiert ---------------------------------
     mid_ms = eff_start + (END_MS - eff_start) // 2
@@ -1397,6 +1508,7 @@ def main():
         *monats_zeilen,
         *vorab_zeilen,
         *fut_zeilen,
+        *spot_zeilen,
         *furkan_zeilen,
         "",
         "## Robustheitspruefung: Fenster halbiert",

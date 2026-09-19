@@ -353,3 +353,119 @@ def test_sample_deckelt_lange_listen_und_sagt_wie_viele_fehlen():
     assert "460" in s[-1]["_gekuerzt"] and "500" in s[-1]["_gekuerzt"], s[-1]
     kurz = [{"symbol": "X", "history": [1, 2, 3, 4, 5]}]
     assert coinalyze._sample(kurz) == [{"symbol": "X", "history": [3, 4, 5]}]
+
+
+# ----------------------------------- E37.2: aggregiertes Spot-CVD ueber die Boersen
+
+def _ohlcv_opener(je_symbol, maerkte=None):
+    """Opener, der spot-markets und ohlcv-history bedient."""
+    def fake(req, timeout=0):
+        if "spot-markets" in req.full_url:
+            return _FakeResp(json.dumps(maerkte or []).encode())
+        gefragt = req.full_url.split("symbols=")[1].split("&")[0]
+        raus = [{"symbol": s, "history": h} for s, h in je_symbol.items()
+                if s.replace(".", "%2E") in gefragt or s in gefragt]
+        return _FakeResp(json.dumps(raus).encode())
+    return fake
+
+
+def _pkt(ts, v, bv, c=80000.0):
+    return {"t": ts, "v": v, "bv": bv, "c": c}
+
+
+def test_spot_delta_summiert_ueber_die_boersen():
+    """Delta = 2*bv - v je Markt, dann Summe. Dieselbe Formel wie beim Futures-CVD."""
+    je = {
+        "A.1": [_pkt(1000, 10.0, 7.0)],     # 2*7 - 10 = +4
+        "B.2": [_pkt(1000, 20.0, 5.0)],     # 2*5 - 20 = -10
+    }
+    summe, b = coinalyze.spot_delta_aggregiert("KEY", ["A.1", "B.2"],
+                                               opener=_ohlcv_opener(je))
+    assert summe == {1000 * 1000: -6.0}, summe
+    assert b["punkte_vollstaendig"] == 1 and b["punkte_ausgelassen"] == 0, b
+
+
+def test_spot_delta_laesst_unvollstaendige_zeitpunkte_aus_und_zaehlt_sie():
+    """DIE Kernregel: eine Teilsumme saehe aus wie ein Einbruch des Spot-Flows.
+
+    Zeitpunkt 2000 fehlt bei B — er darf NICHT als 'nur A' in die Reihe wandern.
+    """
+    je = {
+        "A.1": [_pkt(1000, 10.0, 7.0), _pkt(2000, 10.0, 9.0), _pkt(3000, 10.0, 7.0)],
+        "B.2": [_pkt(1000, 20.0, 5.0),                        _pkt(3000, 20.0, 5.0)],
+    }
+    summe, b = coinalyze.spot_delta_aggregiert("KEY", ["A.1", "B.2"],
+                                               opener=_ohlcv_opener(je))
+    assert set(summe) == {1000 * 1000, 3000 * 1000}, summe
+    assert 2000 * 1000 not in summe, "unvollstaendiger Zeitpunkt darf nicht mitzaehlen"
+    assert b["punkte_gesamt"] == 3 and b["punkte_vollstaendig"] == 2, b
+    assert b["punkte_ausgelassen"] == 1, b
+
+
+def test_spot_delta_meldet_symbole_ohne_antwort():
+    """Ein Markt, der gar nicht antwortet, darf nicht stillschweigend fehlen."""
+    je = {"A.1": [_pkt(1000, 10.0, 7.0)]}
+    summe, b = coinalyze.spot_delta_aggregiert("KEY", ["A.1", "FEHLT.9"],
+                                               opener=_ohlcv_opener(je))
+    assert b["ohne_antwort"] == ["FEHLT.9"], b
+    assert b["symbole"] == ["A.1"], b
+    assert summe == {1000 * 1000: 4.0}, summe       # laeuft weiter mit dem, was da ist
+
+
+def test_spot_delta_ueberspringt_punkte_ohne_v_oder_bv():
+    je = {"A.1": [{"t": 1000, "v": 10.0},            # bv fehlt
+                  {"t": 2000, "bv": 5.0},            # v fehlt
+                  _pkt(3000, 10.0, 7.0)]}
+    summe, _ = coinalyze.spot_delta_aggregiert("KEY", ["A.1"], opener=_ohlcv_opener(je))
+    assert summe == {3000 * 1000: 4.0}, summe
+
+
+def test_spot_symbole_groesster_gegen_alle_dollar():
+    """Die beiden Wahlmoeglichkeiten muessen wirklich verschiedene Mengen liefern."""
+    maerkte = [_markt("BTCUSDT.A", "A", quote="USDT"),
+               _markt("BTCFDUSD.A", "A", quote="FDUSD"),
+               _markt("BTCUSD.C", "C", quote="USD")]
+    je = {
+        "BTCUSDT.A":  [_pkt(1000, 100.0, 60.0)],     # groesser
+        "BTCFDUSD.A": [_pkt(1000, 30.0, 20.0)],
+        "BTCUSD.C":   [_pkt(1000, 50.0, 30.0)],
+    }
+    op = _ohlcv_opener(je, maerkte)
+    g = coinalyze.spot_symbole("KEY", wahl=coinalyze.SPOT_WAHL_GROESSTER, opener=op)
+    assert g == {"A": ["BTCUSDT.A"], "C": ["BTCUSD.C"]}, g
+    a = coinalyze.spot_symbole("KEY", wahl=coinalyze.SPOT_WAHL_ALLE, opener=op)
+    assert sorted(a["A"]) == ["BTCFDUSD.A", "BTCUSDT.A"], a
+    assert a["C"] == ["BTCUSD.C"], a
+
+
+def test_spot_symbole_nimmt_bei_alle_dollar_nur_lesbare_reihen():
+    """Ein Markt ohne 'bv' liefert kein Delta — er darf die Summe nicht verwaessern."""
+    maerkte = [_markt("BTCUSDT.A", "A", quote="USDT"),
+               _markt("BTCFDUSD.A", "A", quote="FDUSD")]
+    je = {
+        "BTCUSDT.A":  [_pkt(1000, 100.0, 60.0)],
+        "BTCFDUSD.A": [{"t": 1000, "v": 30.0, "c": 80000.0}],     # kein bv
+    }
+    a = coinalyze.spot_symbole("KEY", wahl=coinalyze.SPOT_WAHL_ALLE,
+                               opener=_ohlcv_opener(je, maerkte))
+    assert a["A"] == ["BTCUSDT.A"], a
+
+
+def test_spot_auswahl_holt_die_marktliste_nur_EINMAL():
+    """Zwei getrennte Durchgaenge koennten unterschiedlich ausfallen — und kosten doppelt."""
+    maerkte = [_markt("BTCUSDT.A", "A", quote="USDT"),
+               _markt("BTCFDUSD.A", "A", quote="FDUSD")]
+    je = {"BTCUSDT.A": [_pkt(1000, 100.0, 60.0)],
+          "BTCFDUSD.A": [_pkt(1000, 30.0, 20.0)]}
+    zaehler = {"markt": 0}
+    inner = _ohlcv_opener(je, maerkte)
+
+    def zaehlend(req, timeout=0):
+        if "spot-markets" in req.full_url:
+            zaehler["markt"] += 1
+        return inner(req, timeout)
+
+    a = coinalyze.spot_auswahl("KEY", opener=zaehlend)
+    assert zaehler["markt"] == 1, zaehler
+    assert a[coinalyze.SPOT_WAHL_GROESSTER] == {"A": ["BTCUSDT.A"]}, a
+    assert sorted(a[coinalyze.SPOT_WAHL_ALLE]["A"]) == ["BTCFDUSD.A", "BTCUSDT.A"], a

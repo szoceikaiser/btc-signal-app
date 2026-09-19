@@ -677,3 +677,56 @@ def test_ampel_filter_kommt_im_backtest_ueberhaupt_an():
     import inspect
     from strategy_core import evaluate
     assert "ampel_filter" in inspect.signature(evaluate).parameters
+
+
+# ------------------------------- E37.2: aggregiertes Spot-CVD im Backtest verdrahtet
+
+def test_build_series_ohne_spot_map_rechnet_wie_bisher():
+    """Rueckwaertskompatibel: ohne spot_map bleibt der Binance-Vision-Weg unveraendert.
+
+    Rohkerze: Feld 7 = Quote-Volumen 1000, Feld 10 = Taker-Kauf-Quote 600.
+    Delta = 2*600 - 1000 = +200 je Kerze, kumuliert 200 / 400 / 600.
+    """
+    raw = _rohkerzen(3)
+    _cs, flow = backtest.build_series(raw, [], {int(raw[0][0]): 1e9}, None, None, None)
+    assert [f.spot_cvd for f in flow] == [200.0, 400.0, 600.0], [f.spot_cvd for f in flow]
+
+
+def test_build_series_mit_spot_map_ERSETZT_die_binance_rechnung():
+    """Entweder-oder, nie beides: sonst zaehlt Binance doppelt — und in zwei Einheiten.
+
+    Der Binance-Weg ergaebe +200 je Kerze (USD), die spot_map liefert hier ganz andere
+    Zahlen (BTC). Kommt am Ende die Summe aus beiden heraus, ist die Verdrahtung falsch.
+    """
+    raw = _rohkerzen(3)
+    ts = [int(k[0]) for k in raw]
+    spot = {ts[0]: 5.0, ts[1]: -2.0, ts[2]: 3.0}
+    _cs, flow = backtest.build_series(raw, [], {ts[0]: 1e9}, None, None, None,
+                                      spot_map=spot)
+    assert [f.spot_cvd for f in flow] == [5.0, 3.0, 6.0], [f.spot_cvd for f in flow]
+    # Gegenprobe: waere der Binance-Anteil mit drin, stuende hier 205 / 403 / 606
+    assert flow[0].spot_cvd != 205.0, "Binance darf nicht zusaetzlich mitgerechnet werden"
+
+
+def test_build_series_leere_spot_map_haelt_das_cvd_flach_statt_binance_zu_nehmen():
+    """Eine uebergebene, aber leere Karte heisst 'keine Daten' — nicht 'nimm Binance'.
+
+    Sonst faellt ein Totalausfall der Aggregation nicht auf: der Backtest liefe
+    stillschweigend wieder auf einer Boerse und der Vergleich zeigte keinen
+    Unterschied, weil beide Zeilen dasselbe rechnen.
+    """
+    raw = _rohkerzen(3)
+    _cs, flow = backtest.build_series(raw, [], {int(raw[0][0]): 1e9}, None, None, None,
+                                      spot_map={})
+    assert [f.spot_cvd for f in flow] == [0.0, 0.0, 0.0], [f.spot_cvd for f in flow]
+
+
+def test_build_series_fehlende_kerze_in_der_spot_map_aendert_das_cvd_nicht():
+    """Ausgelassene Zeitpunkte (nicht auf allen Boersen) lassen die Linie flach —
+    sie duerfen sie nicht auf 0 zuruecksetzen."""
+    raw = _rohkerzen(3)
+    ts = [int(k[0]) for k in raw]
+    spot = {ts[0]: 5.0, ts[2]: 3.0}                  # ts[1] fehlt
+    _cs, flow = backtest.build_series(raw, [], {ts[0]: 1e9}, None, None, None,
+                                      spot_map=spot)
+    assert [f.spot_cvd for f in flow] == [5.0, 5.0, 8.0], [f.spot_cvd for f in flow]

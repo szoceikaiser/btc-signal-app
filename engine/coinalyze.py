@@ -331,8 +331,8 @@ def _reihe_auswerten(eintrag: dict) -> dict:
     }
 
 
-def _pruefe_symbole(api_key: str, symbole: list, **kw) -> dict:
-    """Holt alle Symbole in Bloecken und beschreibt jede Reihe.
+def _hole_reihen_roh(api_key: str, symbole: list, **kw) -> tuple:
+    """Holt alle Symbole in Bloecken; gibt (rohe Eintraege, Blockprotokoll) zurueck.
 
     Coinalyze nimmt den Parameter `symbols` (Mehrzahl); der Lauf vom 19.09.2026 hat
     belegt, dass je Symbol eine eigene Reihe zurueckkommt. Wie viele Symbole ein Abruf
@@ -340,10 +340,12 @@ def _pruefe_symbole(api_key: str, symbole: list, **kw) -> dict:
     dazwischen (Rate-Limit 40/Min). Faellt ein Block aus, wird er als Fehler vermerkt
     und die uebrigen laufen weiter; ein stiller Totalausfall waere schlimmer als eine
     Luecke, die man sieht.
+
+    Probe (_pruefe_symbole) und Produktion (spot_delta_aggregiert) teilen sich diese
+    Mechanik bewusst: waeren es zwei Wege, koennte die Probe etwas bestaetigen, was
+    der Produktionsweg anders macht.
     """
-    if not symbole:
-        return {"fehler": "keine Symbole zu pruefen"}
-    je_symbol, bloecke = {}, []
+    eintraege, bloecke = [], []
     for i in range(0, len(symbole), SYMBOLE_JE_ABRUF):
         teil = symbole[i:i + SYMBOLE_JE_ABRUF]
         if i and not kw:                       # im Test nicht warten
@@ -362,14 +364,110 @@ def _pruefe_symbole(api_key: str, symbole: list, **kw) -> dict:
             bloecke.append({"symbole": teil, "fehler": "Antwort ist keine Liste",
                             "antwort_roh": _sample(roh)})
             continue
-        vorher = len(je_symbol)
-        for eintrag in roh:
-            if isinstance(eintrag, dict):
-                je_symbol[eintrag.get("symbol", "?")] = _reihe_auswerten(eintrag)
-        bloecke.append({"symbole": teil, "zurueck": len(je_symbol) - vorher})
+        neu = [e for e in roh if isinstance(e, dict)]
+        eintraege.extend(neu)
+        bloecke.append({"symbole": teil, "zurueck": len(neu)})
+    return eintraege, bloecke
+
+
+def _pruefe_symbole(api_key: str, symbole: list, **kw) -> dict:
+    """Beschreibt jede Symbolreihe (Probe-Sicht): Felder, Reichweite, Volumen, Einheit."""
+    if not symbole:
+        return {"fehler": "keine Symbole zu pruefen"}
+    eintraege, bloecke = _hole_reihen_roh(api_key, symbole, **kw)
+    je_symbol = {e.get("symbol", "?"): _reihe_auswerten(e) for e in eintraege}
     return {"angefragt": len(symbole), "zurueck": len(je_symbol),
             "mehrfachabruf_geht": any(b.get("zurueck", 0) > 1 for b in bloecke),
             "bloecke": bloecke, "je_symbol": je_symbol}
+
+
+# ------------------------------------------------ E37.2: aggregiertes Spot-CVD
+# Die Auswahl der Maerkte steht seit E37.1 fest (nach gemessenem Volumen, Lauf vom
+# 19.09.2026): Binance BTCUSD.A, Bybit sBTCUSDT.6, Coinbase BTCUSD.C. OKX hat bei
+# Coinalyze keinen Spot.
+#
+# ZWEI WAHLMOEGLICHKEITEN, weil das Dollar-Volumen einer Boerse auf mehrere Maerkte
+# faellt (Binance: USDT 61 %, FDUSD 21 %, USDC 18 %). Welche besser ist, wird in E37.5
+# gemessen und hier nicht behauptet.
+SPOT_WAHL_GROESSTER = "groesster"     # je Boerse nur der groesste Dollar-Markt
+SPOT_WAHL_ALLE = "alle_dollar"        # je Boerse alle Dollar-Maerkte zusammen
+
+
+def spot_auswahl(api_key: str, **kw) -> dict:
+    """BEIDE Auswahlen in EINEM Durchgang: {"groesster": {...}, "alle_dollar": {...}}.
+
+    Je Wert {Boersencode: [Symbole]}. Bewusst zusammen, nicht zweimal einzeln: die
+    Marktliste hat 5953 Eintraege und die Volumenmessung kostet mehrere Abrufe — das
+    zweimal zu holen waere Verschwendung und koennte zwischen den beiden Laeufen sogar
+    unterschiedlich ausfallen.
+    """
+    maerkte = get_json("spot-markets", {}, api_key, **kw)
+    kandidaten = _kandidaten_je_boerse(maerkte if isinstance(maerkte, list) else [])
+    alle = [e["symbol"] for liste in kandidaten.values() for e in liste if e.get("symbol")]
+    if not alle:
+        return {SPOT_WAHL_GROESSTER: {}, SPOT_WAHL_ALLE: {}}
+    reihen = _pruefe_symbole(api_key, alle, **kw).get("je_symbol", {})
+    return {
+        SPOT_WAHL_GROESSTER: {code: [d["symbol"]] for code, d
+                              in _groesster_je_boerse(kandidaten, reihen).items()},
+        SPOT_WAHL_ALLE: {code: [e["symbol"] for e in liste
+                                if (reihen.get(e.get("symbol")) or {}).get("hat_v_und_bv")]
+                         for code, liste in kandidaten.items()},
+    }
+
+
+def spot_symbole(api_key: str, wahl: str = SPOT_WAHL_GROESSTER, **kw) -> dict:
+    """Eine der beiden Auswahlen (Bequemlichkeit; holt beide und gibt eine zurueck)."""
+    return spot_auswahl(api_key, **kw).get(wahl, {})
+
+
+def spot_delta_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
+    """{Open-Time_ms: Summe der Taker-Deltas} ueber mehrere Boersen, plus Bericht.
+
+    Delta je Markt = 2*bv - v (Kaeufe minus Verkaeufe), dieselbe Formel wie beim
+    Futures-CVD. Summiert wird ueber die Boersen.
+
+    DIE WICHTIGE REGEL: Ein Zeitpunkt zaehlt nur, wenn ihn ALLE gefragten Maerkte
+    haben. Fehlt einer, entstuende sonst eine Teilsumme, die wie eine volle aussieht —
+    an einem Tag, an dem Coinbase eine Luecke hat, waere der Spot-Flow scheinbar um ein
+    Drittel eingebrochen, ohne dass irgendetwas am Markt passiert waere. Solche
+    Zeitpunkte werden ausgelassen und GEZAEHLT; der Bericht sagt, wie viele es waren.
+
+    Einheit: BTC (Basiswert), wie beim Futures-CVD. Das heutige Spot-CVD aus
+    Binance-Vision rechnet dagegen in USD (Quote-Volumen). Beide gehen nur ueber
+    _slope() als relative Aenderung in classify_pattern ein — die Einheit kuerzt sich
+    heraus. Gemischt werden duerfen die beiden Reihen trotzdem nie.
+    """
+    if not symbole:
+        return {}, {"fehler": "keine Symbole"}
+    eintraege, bloecke = _hole_reihen_roh(api_key, symbole, **kw)
+    je_symbol: dict = {}
+    for e in eintraege:
+        sym, deltas = e.get("symbol", "?"), {}
+        for p in e.get("history") or []:
+            if isinstance(p, dict) and "t" in p and "v" in p and "bv" in p:
+                deltas[int(p["t"]) * 1000] = 2.0 * float(p["bv"]) - float(p["v"])
+        je_symbol[sym] = deltas
+
+    fehlende = [s for s in symbole if s not in je_symbol]
+    vorhanden = [s for s in symbole if s in je_symbol]
+    if not vorhanden:
+        return {}, {"fehler": "keine einzige Reihe erhalten", "bloecke": bloecke}
+
+    alle_ts = set().union(*(set(je_symbol[s]) for s in vorhanden))
+    vollstaendig = set.intersection(*(set(je_symbol[s]) for s in vorhanden))
+    summe = {ts: sum(je_symbol[s][ts] for s in vorhanden) for ts in sorted(vollstaendig)}
+    bericht = {
+        "symbole": vorhanden,
+        "ohne_antwort": fehlende,
+        "punkte_gesamt": len(alle_ts),
+        "punkte_vollstaendig": len(summe),
+        "punkte_ausgelassen": len(alle_ts) - len(summe),
+        "je_symbol_punkte": {s: len(je_symbol[s]) for s in vorhanden},
+        "bloecke": bloecke,
+        "einheit": "BTC (Basiswert) — NICHT mit dem USD-Spot-CVD aus Binance-Vision mischen",
+    }
+    return summe, bericht
 
 
 def spot_probe(api_key: str, **kw) -> dict:
