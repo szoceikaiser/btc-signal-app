@@ -32,6 +32,7 @@ from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCH
                            Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots, gegen_zonen,
                            ampel, ampel_richtung, classify_pattern, lage_bericht,
+                           orderflow_detail, OF_FENSTER,
                            last_significant_impulse, liq_levels, next_pivot_beyond)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
                              send_lage, send_plan, send_signals, send_text,
@@ -728,6 +729,11 @@ def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
     out = {
         "kurs": candles[-1].close,
         "bein": None,
+        # E36: Furkans Rohwerte - dieselben Groessen, aus denen das Muster entsteht.
+        # Reine Anzeige; evaluate() sieht davon nichts.
+        "orderflow": orderflow_detail(candles, flow or []),
+        "fenster_h": OF_FENSTER * 4,
+
         "lage": lage or None,
         # Die Annahme ist Long — deshalb hier fest, nicht ueber den Bias.
         "ampel": ampel(lage, long_side=True) if lage else None,

@@ -13,6 +13,7 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            lage_bericht, spot_nachfrage, MUSTER_KLARTEXT,
                            daily_fib_zone, trend_lage,
                            ampel, ampel_richtung, AMPEL_TRANCHE, kuerze_einstiege,
+                           orderflow_detail, OF_FENSTER,
                            Signal, _ENTRY_TYPES,
                            resample_daily)
 
@@ -2259,3 +2260,99 @@ def test_ampel_dreht_sich_mit_der_richtung_echter_livestand():
     assert kurz["stufe"] == "unguenstig" and kurz["dafuer"] == []
     assert lang["stufe"] == "guenstig" and lang["dagegen"] == []
     assert sorted(lang["dafuer"]) == sorted(kurz["dagegen"])   # exakt gespiegelt
+
+
+# ------------------------------------------------- E36: Furkans Rohwerte
+
+def _of_serie(n=40, fut=True, liq=True, lp=54.0, seed=3):
+    """Kerzen + Flow mit allen sieben Groessen. fut/liq/lp abschaltbar, um die
+    Behandlung fehlender Daten zu pruefen."""
+    import random
+    r = random.Random(seed)
+    cs, fl = [], []
+    cvd_s, cvd_f, oi, v = 5000.0, 1000.0, 1e9, 76000.0
+    for i in range(n):
+        v *= (1 + r.gauss(0.001, 0.01))
+        cs.append(Candle(1_700_000_000_000 + i * H4_MS, v, v * 1.004, v * 0.996, v))
+        cvd_s += r.gauss(4e6, 2e6)
+        cvd_f = cvd_f + r.gauss(1e6, 3e6) if fut else 0.0
+        oi *= (1 + r.gauss(0, 0.008))
+        fl.append(FlowPoint(cs[-1].ts, cvd_s, cvd_f, oi, r.gauss(0.0001, 0.0002),
+                            long_liq=abs(r.gauss(2e6, 1e6)) if liq else 0.0,
+                            short_liq=abs(r.gauss(1e6, 5e5)) if liq else 0.0,
+                            long_pct=lp))
+    return cs, fl
+
+
+def test_orderflow_detail_zeigt_furkans_sieben_groessen():
+    """Alle Groessen aus dem Video (Transkript 8:05-11:26), plus der Preis - Furkans
+    Regeln lauten immer "Preis X UND Open Interest Y"."""
+    cs, fl = _of_serie()
+    namen = [z["name"] for z in orderflow_detail(cs, fl)]
+    for erwartet in ("Preis", "Spot-CVD", "Futures-CVD", "Open Interest", "Funding",
+                     "Long-Liquidationen", "Short-Liquidationen", "Positionierung"):
+        assert erwartet in namen, f"{erwartet} fehlt: {namen}"
+
+
+def test_orderflow_detail_zeigt_fehlende_daten_nicht_als_null():
+    """Ohne Coinalyze-Schluessel bleiben Futures-CVD und Positionierung bei 0.
+
+    Eine Zeile "Futures-CVD 0 $ - flach" waere FALSCH: Sie behauptet Stillstand, wo
+    in Wahrheit nichts bekannt ist. Solche Groessen fehlen ganz.
+    """
+    cs, fl = _of_serie(fut=False, liq=False, lp=0.0)
+    namen = [z["name"] for z in orderflow_detail(cs, fl)]
+    assert "Futures-CVD" not in namen, "Futures-CVD ohne Daten als 0 gezeigt"
+    assert "Positionierung" not in namen
+    assert "Long-Liquidationen" not in namen
+    # ... die Groessen MIT Daten bleiben aber stehen
+    assert "Spot-CVD" in namen and "Preis" in namen and "Open Interest" in namen
+
+
+def test_orderflow_detail_nutzt_dasselbe_fenster_wie_das_muster():
+    """Die Rohwerte sollen ERKLAEREN, warum das Muster so lautet. Ein anderes Fenster
+    zeigte Zahlen, die zur Schlussfolgerung darunter nicht passen."""
+    import inspect
+    from strategy_core import OF_FENSTER, classify_pattern
+    muster_fenster = inspect.signature(classify_pattern).parameters["window"].default
+    assert OF_FENSTER == muster_fenster == 12
+
+
+def test_orderflow_richtung_kennt_flach():
+    """Furkans wichtigste Unterscheidung: steigt / faellt / FLACH (Transkript 9:06:
+    'Spot CVD steigt und Future CVD ist hier flach ... das ist gesund').
+
+    ENTSCHEIDEND ist der Fall "kleine, aber nicht null" Aenderung - nur dort greift die
+    Schwellenregel. Die erste Fassung dieses Tests nutzte eine Reihe mit Aenderung
+    GENAU 0; da trifft der triviale Zweig am Funktionsende, und die Sabotage
+    "'flach' verschwindet" ueberlebte unbemerkt. Derselbe Fehlertyp wie bei E34 und
+    E35 - ein Test, der richtig aussieht und die Regel nicht beruehrt.
+    """
+    from strategy_core import _of_reihe, _median, OF_FLACH_ANTEIL
+    stark = [float(i) * 100 for i in range(40)]      # +1200 je Fenster
+    assert _of_reihe(stark, 12)["richtung"] == "steigt"
+
+    # letzte 12 Schritte: +10 statt +100 -> Aenderung 120, Schwelle 1200/3 = 400
+    kaum = stark[:28] + [stark[27] + 10.0 * (i + 1) for i in range(12)]
+    r = _of_reihe(kaum, 12)
+    assert r["aenderung"] > 0, "Szenario passt nicht - die Aenderung muss > 0 sein"
+    massstab = _median([abs(kaum[i] - kaum[i - 12])
+                        for i in range(12, len(kaum) - 12)])
+    assert 0 < r["aenderung"] < massstab * OF_FLACH_ANTEIL, "Szenario trifft die Regel nicht"
+    assert r["richtung"] == "flach", "kleine Bewegung wurde nicht als flach erkannt"
+
+    # fallend
+    fallend = [float(-i) * 100 for i in range(40)]
+    assert _of_reihe(fallend, 12)["richtung"] == "faellt"
+    # Stillstand bei exakt 0 Aenderung ist ebenfalls flach (trivialer Zweig)
+    assert _of_reihe(stark[:28] + [stark[27]] * 12, 12)["richtung"] == "flach"
+    # durchgehend 0 heisst KEINE DATEN, nicht "flach"
+    assert _of_reihe([0.0] * 40, 12) is None
+
+
+def test_orderflow_detail_ist_reine_anzeige():
+    """Die Engine darf diese Funktion nicht aufrufen - sonst waere sie eine Regel."""
+    import inspect
+    from strategy_core import evaluate
+    quelle = inspect.getsource(evaluate)
+    assert "orderflow_detail" not in quelle

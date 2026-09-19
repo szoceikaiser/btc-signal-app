@@ -477,6 +477,58 @@ MUSTER_KLARTEXT = {
 SPOT_FENSTER = 3          # Kerzen je Vergleichsfenster (3 x 4h = 12 Stunden)
 
 
+# --- E36: Furkans Rohwerte -------------------------------------------------------
+# Kaiser 19.09.2026: "Koennen wir die Indikatoren aus seinem Video fuer diesen manuellen
+# Button freischalten?" - Die Engine holt diese Groessen laengst und rechnet daraus die
+# Muster; gezeigt wurde bisher nur das Ergebnis. Der Abruf handelt nicht, also kostet
+# eine Zahl dort nichts (docs/PLAN-E36-ORDERFLOW-ROHWERTE.md).
+
+OF_FENSTER = 12        # Kerzen - dasselbe Fenster wie classify_pattern (2 Tage)
+# Anteil der typischen Fensterbewegung, unter dem eine Groesse als "flach" gilt.
+# SETZUNG, keine Messung: Furkan sagt "flach" nach Augenmass. Der Median der
+# vergangenen Fensteraenderungen als Massstab kalibriert sich selbst und kommt ohne
+# eine USD-Zahl aus, die bei anderem Kursniveau falsch waere.
+OF_FLACH_ANTEIL = 1.0 / 3.0
+
+
+def _median(werte: list[float]) -> float:
+    s = sorted(werte)
+    n = len(s)
+    if not n:
+        return 0.0
+    m = n // 2
+    return s[m] if n % 2 else (s[m - 1] + s[m]) / 2.0
+
+
+def _of_richtung(aenderung: float, verlauf: list[float]) -> str:
+    """steigt / faellt / flach - gemessen an der typischen Bewegung dieser Groesse."""
+    massstab = _median([abs(v) for v in verlauf]) if verlauf else 0.0
+    if massstab > 0 and abs(aenderung) < massstab * OF_FLACH_ANTEIL:
+        return "flach"
+    if aenderung > 0:
+        return "steigt"
+    if aenderung < 0:
+        return "faellt"
+    return "flach"
+
+
+def _of_reihe(werte: list[float], fenster: int) -> Optional[dict]:
+    """Aenderung einer KUMULIERTEN Reihe (CVD, OI) im letzten Fenster + Richtung.
+
+    Gibt None, wenn die Reihe durchgehend 0 ist: Dann liegen keine Daten vor (ohne
+    Coinalyze-Schluessel bleiben fut_cvd und long_pct bei 0). Eine Zeile
+    "Futures-CVD 0 $ - flach" waere in dem Fall FALSCH - sie behauptet Stillstand,
+    wo in Wahrheit nichts bekannt ist.
+    """
+    if len(werte) < fenster + 1 or all(v == 0 for v in werte):
+        return None
+    jetzt = werte[-1] - werte[-1 - fenster]
+    # Massstab: die frueheren Fensteraenderungen derselben Groesse
+    verlauf = [werte[i] - werte[i - fenster]
+               for i in range(fenster, len(werte) - fenster)]
+    return {"aenderung": jetzt, "richtung": _of_richtung(jetzt, verlauf)}
+
+
 def spot_nachfrage(flow: list[FlowPoint], fenster: int = SPOT_FENSTER) -> Optional[dict]:
     """Wie steht die Spot-Nachfrage? (E32, Kaiser 12.09.2026)
 
@@ -514,6 +566,117 @@ def spot_nachfrage(flow: list[FlowPoint], fenster: int = SPOT_FENSTER) -> Option
 def _p(v: float) -> str:
     """Preis fuer die Lage-Texte: deutsche Tausenderpunkte, keine Nachkommastellen."""
     return f"{v:,.0f}".replace(",", ".") + " $"
+
+
+def _usd_kurz(v: float, vorzeichen: bool = True) -> str:
+    """USD-Betrag kompakt: 12.400.000 -> '12,4 Mio $'.
+
+    `vorzeichen=False` fuer reine Summen (Liquidationen): Die sind immer positiv,
+    ein "+" davor sieht dort nach einer Veraenderung aus, die es nicht gibt.
+    """
+    vz = ("+" if v > 0 else ("-" if v < 0 else "")) if vorzeichen else ""
+    a = abs(v)
+    if a >= 1e9:
+        return f"{vz}{a / 1e9:.1f} Mrd $".replace(".", ",")
+    if a >= 1e6:
+        return f"{vz}{a / 1e6:.1f} Mio $".replace(".", ",")
+    if a >= 1e3:
+        return f"{vz}{a / 1e3:.0f} Tsd $"
+    return f"{vz}{a:.0f} $"
+
+
+def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
+                     fenster: int = OF_FENSTER) -> list[dict]:
+    """Die Rohwerte, die Furkan im Video abliest - als Liste von Zeilen (E36).
+
+    REINE ANZEIGE. Diese Funktion wird von `evaluate()` nicht aufgerufen und kann das
+    Handelsverhalten nicht beeinflussen.
+
+    Furkans Leseweise (Transkript 8:05-11:26): Spot-CVD ist "echte Nachfrage ... ohne
+    Hebel", Futures-CVD der "gehebelte Flow". Steigt Spot und bleibt Futures flach, ist
+    die Bewegung gesund; treibt Futures allein, ist sie "anfaellig fuer einen Long
+    Flush". Open Interest sagt, ob NEUES GELD hereinkommt (steigt) oder ob Positionen
+    zwangsgeschlossen werden (faellt). Funding zeigt Ueberhebelung.
+
+    Jede Zeile: {name, wert (Klartext), richtung, hinweis}. Groessen ohne Daten fehlen
+    ganz, statt als 0 zu erscheinen.
+    """
+    if len(flow) < fenster + 1 or len(candles) < fenster + 1:
+        return []
+    zeilen: list[dict] = []
+
+    # --- Preis: Furkans Regeln lauten immer "Preis X UND Open Interest Y"
+    p_jetzt, p_davor = candles[-1].close, candles[-1 - fenster].close
+    p_pct = (p_jetzt - p_davor) / p_davor * 100 if p_davor else 0.0
+    zeilen.append({
+        "name": "Preis", "wert": f"{p_pct:+.1f} %".replace(".", ","),
+        "richtung": "steigt" if p_pct > 0 else ("faellt" if p_pct < 0 else "flach"),
+        "hinweis": "",
+    })
+
+    # --- Spot-CVD: die echte Nachfrage
+    sp = _of_reihe([p.spot_cvd for p in flow], fenster)
+    if sp:
+        zeilen.append({"name": "Spot-CVD", "wert": _usd_kurz(sp["aenderung"]),
+                       "richtung": sp["richtung"],
+                       "hinweis": "echte Nachfrage, ohne Hebel"})
+
+    # --- Futures-CVD: der gehebelte Flow
+    fu = _of_reihe([p.fut_cvd for p in flow], fenster)
+    if fu:
+        zeilen.append({"name": "Futures-CVD", "wert": _usd_kurz(fu["aenderung"]),
+                       "richtung": fu["richtung"],
+                       "hinweis": "gehebelter Flow, oft kurzfristig"})
+
+    # --- Open Interest: kommt neues Geld herein?
+    oi = _of_reihe([p.oi for p in flow], fenster)
+    if oi:
+        oi_davor = flow[-1 - fenster].oi
+        pct = (oi["aenderung"] / oi_davor * 100) if oi_davor else 0.0
+        if oi["richtung"] == "steigt":
+            hin = "neues Geld kommt herein"
+        elif oi["richtung"] == "faellt":
+            hin = "Positionen werden geschlossen"
+        else:
+            hin = "unveraendert"
+        pct_txt = f"{pct:+.1f}".replace(".", ",")
+        zeilen.append({"name": "Open Interest",
+                       "wert": f"{_usd_kurz(oi['aenderung'])} ({pct_txt} %)",
+                       "richtung": oi["richtung"], "hinweis": hin})
+
+    # --- Funding: Ueberhebelung. Kein kumulierter Wert - der Stand zaehlt.
+    fund = [p.funding for p in flow[-fenster:]]
+    if any(f != 0 for f in fund):
+        jetzt = fund[-1]
+        mittel = sum(fund) / len(fund)
+        zeilen.append({
+            "name": "Funding", "wert": f"{jetzt * 100:+.4f} %".replace(".", ","),
+            "richtung": "steigt" if jetzt > mittel else (
+                "faellt" if jetzt < mittel else "flach"),
+            "hinweis": ("Longueberhang" if jetzt > 0 else
+                        "Shortueberhang" if jetzt < 0 else "neutral"),
+        })
+
+    # --- Liquidationen: Summe im Fenster, je Seite
+    ll = sum(p.long_liq for p in flow[-fenster:])
+    sl = sum(p.short_liq for p in flow[-fenster:])
+    if ll or sl:
+        zeilen.append({"name": "Long-Liquidationen",
+                       "wert": _usd_kurz(ll, vorzeichen=False),
+                       "richtung": "", "hinweis": "Longs wurden geschlossen"})
+        zeilen.append({"name": "Short-Liquidationen",
+                       "wert": _usd_kurz(sl, vorzeichen=False),
+                       "richtung": "", "hinweis": "Shorts wurden geschlossen"})
+
+    # --- Positionierung: 0.0 heisst laut FlowPoint ausdruecklich "keine Daten"
+    lp = flow[-1].long_pct
+    if lp:
+        zeilen.append({
+            "name": "Positionierung", "wert": f"{lp:.0f} % long",
+            "richtung": "",
+            "hinweis": "mehrheitlich long" if lp > 50 else "mehrheitlich short",
+        })
+    return zeilen
 
 
 def lage_bericht(candles: list[Candle], flow: list[FlowPoint],

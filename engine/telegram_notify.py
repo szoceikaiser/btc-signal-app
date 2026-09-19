@@ -319,6 +319,29 @@ def send_signals(signals: list[dict], dry_run: bool = False) -> list[str]:
     return messages
 
 
+def _orderflow_zeilen(zeilen: list | None, fenster_h: int | None) -> list[str]:
+    """Furkans Rohwerte als Block (E36, Kaiser 19.09.2026).
+
+    Zeigt, WORAUS das Muster darunter entsteht - dieselben Groessen, die Furkan im
+    Video abliest (Transkript 8:05-11:26). Groessen ohne Daten stehen gar nicht erst
+    da, statt als 0 zu erscheinen und Stillstand zu behaupten, wo nichts bekannt ist.
+    """
+    if not zeilen:
+        return []
+    kopf = "Order-Flow im Detail"
+    if fenster_h:
+        kopf += f" (letzte {fenster_h} Stunden)"
+    out = ["", kopf + ":"]
+    breite = max(len(z["name"]) for z in zeilen)
+    for z in zeilen:
+        # Feste Breite fuer die Richtung: "flach" ist kuerzer als "steigt"/"faellt",
+        # sonst verrutschen die Hinweise in der Spalte dahinter.
+        richtung = f"  {z.get('richtung', ''):<7}" if z.get("richtung") else "  " + " " * 7
+        hinweis = f"  ({z['hinweis']})" if z.get("hinweis") else ""
+        out.append(f"  {z['name']:<{breite}}  {z['wert']:>20}{richtung}{hinweis}")
+    return out
+
+
 def format_lage(l: dict, ts_ms: int) -> str:
     """Die Lage auf Abruf (E35, Kaiser 17.09.2026).
 
@@ -347,6 +370,7 @@ def format_lage(l: dict, ts_ms: int) -> str:
             f"Ungueltig ab       {_fmt_usd(l['invalidation'])}",
         ]
 
+    zeilen += _orderflow_zeilen(l.get("orderflow"), l.get("fenster_h"))
     zeilen += _lage_zeilen(l.get("lage"))
     zeilen += _ampel_zeilen(l.get("ampel"))
     zeilen += [

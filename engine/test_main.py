@@ -789,3 +789,33 @@ def test_vorschau_ampel_folgt_dem_bias_nicht_dem_bein():
     assert z2["ampel"] is not None and z2["ampel"]["richtung"] == "SHORT"
     # ... und die Stufen sind dann spiegelbildlich, nicht zufaellig gleich
     assert z2["ampel"]["dafuer"] == z["ampel"]["dagegen"]
+
+
+def test_lage_abruf_enthaelt_furkans_rohwerte():
+    """E36: Der Abruf zeigt die Groessen, aus denen das Muster entsteht - und die
+    Nachricht gibt sie auch aus, nicht nur das dict."""
+    from telegram_notify import format_lage
+    import random
+    r = random.Random(3)
+    ms = 4 * 3600 * 1000
+    cs, fl = [], []
+    cvd_s, cvd_f, oi, v = 5000.0, 1000.0, 1e9, 76000.0
+    for i in range(40):
+        v *= (1 + r.gauss(0.001, 0.01))
+        cs.append(Candle(1_700_000_000_000 + i * ms, v, v * 1.004, v * 0.996, v))
+        cvd_s += r.gauss(4e6, 2e6); cvd_f += r.gauss(1e6, 3e6); oi *= (1 + r.gauss(0, 0.008))
+        fl.append(FlowPoint(cs[-1].ts, cvd_s, cvd_f, oi, r.gauss(0.0001, 0.0002),
+                            long_liq=abs(r.gauss(2e6, 1e6)),
+                            short_liq=abs(r.gauss(1e6, 5e5)), long_pct=54.0))
+    out, dateien = _lage_lauf(cs, fl, {"pivot_n": 5, "bias_short": False})
+    assert out["orderflow"], "keine Rohwerte im Abruf"
+    assert dateien == ["config.json"], "der Abruf hat etwas geschrieben"
+
+    txt = format_lage(out, cs[-1].ts)
+    assert "Order-Flow im Detail" in txt
+    assert "letzte 48 Stunden" in txt, "das Fenster muss in der Nachricht stehen"
+    for name in ("Spot-CVD", "Futures-CVD", "Open Interest", "Funding",
+                 "Positionierung"):
+        assert name in txt, f"{name} fehlt in der Nachricht"
+    assert "echte Nachfrage, ohne Hebel" in txt      # Furkans Wortwahl zum Spot-CVD
+    assert "gehebelter Flow" in txt                  # ... und zum Futures-CVD
