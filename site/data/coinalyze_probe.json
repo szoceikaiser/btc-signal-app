@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-19T18:08:48Z",
+ "generated_at": "2026-09-19T18:42:56Z",
  "symbol": "BTCUSDT_PERP.A",
  "interval": "4hour",
  "open_interest": [
@@ -22,10 +22,10 @@
     },
     {
      "t": 1789833600,
-     "o": 8785618631.4025,
-     "h": 8800956198.48,
-     "l": 8778359575.4875,
-     "c": 8788948406.3275
+     "o": 8789988109.861,
+     "h": 8805333304.992,
+     "l": 8782725443.695,
+     "c": 8784038706.982
     }
    ]
   }
@@ -74,8 +74,8 @@
     },
     {
      "t": 1789833600,
-     "l": 1247871.63,
-     "s": 496575.38499999983
+     "l": 1466593.6729000004,
+     "s": 706451.5158999999
     }
    ]
   }
@@ -113,12 +113,12 @@
        "t": 1789833600,
        "o": 81609,
        "h": 81879.9,
-       "l": 81400.2,
-       "c": 81432.5,
-       "v": 8024.388000000184,
-       "bv": 3550.3290000000466,
-       "tx": 82737,
-       "btx": 39758
+       "l": 81289.3,
+       "c": 81473,
+       "v": 9702.4750000004,
+       "bv": 4371.377000000132,
+       "tx": 101215,
+       "btx": 49297
       }
      ]
     }
@@ -183,8 +183,8 @@
        "t": 1789833600,
        "o": 0.01,
        "h": 0.01,
-       "l": 0.007282,
-       "c": 0.007366
+       "l": 0.006967,
+       "c": 0.007024
       }
      ]
     }
@@ -880,112 +880,642 @@
   "_frage": "Gibt es BTC-Dollar-Spotmaerkte auf Binance, Coinbase, Bybit und OKX mit Kauf-/Verkaufsdaten, laesst sich alles in EINEM Abruf holen, und wie weit reicht die Historie?",
   "spot_markets": {
    "anzahl_gesamt": 5953,
-   "btc_dollar_auf_furkans_boersen": 10,
-   "alle_passenden_roh": [
-    {
-     "symbol": "BTCFDUSD.A",
-     "exchange": "A",
-     "symbol_on_exchange": "BTCFDUSD",
-     "base_asset": "BTC",
-     "quote_asset": "FDUSD",
-     "has_buy_sell_data": true
-    },
-    {
-     "symbol": "BTCUSD.C",
-     "exchange": "C",
-     "symbol_on_exchange": "BTC-USD",
-     "base_asset": "BTC",
-     "quote_asset": "USD",
-     "has_buy_sell_data": true
-    },
-    {
-     "symbol": "BTCUSD.A",
-     "exchange": "A",
-     "symbol_on_exchange": "BTCUSDT",
-     "base_asset": "BTC",
-     "quote_asset": "USDT",
-     "has_buy_sell_data": true
-    },
-    {
-     "symbol": "BTCUSDC.A",
-     "exchange": "A",
-     "symbol_on_exchange": "BTCUSDC",
-     "base_asset": "BTC",
-     "quote_asset": "USDC",
-     "has_buy_sell_data": true
-    },
-    {
-     "symbol": "BTCUSDT.C",
-     "exchange": "C",
-     "symbol_on_exchange": "BTC-USDT",
-     "base_asset": "BTC",
-     "quote_asset": "USDT",
-     "has_buy_sell_data": true
-    },
-    {
-     "symbol": "BTCUD.A",
-     "exchange": "A",
-     "symbol_on_exchange": "BTCUSD",
-     "base_asset": "BTC",
-     "quote_asset": "USD",
-     "has_buy_sell_data": true
-    },
-    {
-     "symbol": "sBTCUSDT.6",
-     "exchange": "6",
-     "symbol_on_exchange": "BTCUSDT",
-     "base_asset": "BTC",
-     "quote_asset": "USDT",
-     "has_buy_sell_data": true
-    },
-    {
-     "symbol": "sBTCUSDC.6",
-     "exchange": "6",
-     "symbol_on_exchange": "BTCUSDC",
-     "base_asset": "BTC",
-     "quote_asset": "USDC",
-     "has_buy_sell_data": true
-    },
-    {
-     "symbol": "sBTCUSD.6",
-     "exchange": "6",
-     "symbol_on_exchange": "BTCUSD",
-     "base_asset": "BTC",
-     "quote_asset": "USD",
-     "has_buy_sell_data": true
-    },
-    {
-     "symbol": "sBTCUSDE.6",
-     "exchange": "6",
-     "symbol_on_exchange": "BTCUSDE",
-     "base_asset": "BTC",
-     "quote_asset": "USDE",
-     "has_buy_sell_data": true
-    }
-   ]
-  },
-  "gewaehlt_je_boerse": {
-   "A": {
-    "symbol": "BTCUSD.A",
-    "quote": "USDT",
-    "boerse": "Binance"
+   "kandidaten_je_boerse": {
+    "Binance": [
+     "BTCFDUSD.A",
+     "BTCUSD.A",
+     "BTCUSDC.A",
+     "BTCUD.A"
+    ],
+    "Coinbase": [
+     "BTCUSD.C",
+     "BTCUSDT.C"
+    ],
+    "Bybit": [
+     "sBTCUSDT.6",
+     "sBTCUSDC.6",
+     "sBTCUSD.6",
+     "sBTCUSDE.6"
+    ]
    },
-   "C": {
-    "symbol": "BTCUSDT.C",
-    "quote": "USDT",
-    "boerse": "Coinbase"
-   },
-   "6": {
-    "symbol": "sBTCUSDT.6",
-    "quote": "USDT",
-    "boerse": "Bybit"
+   "abgelehnte_btc_maerkte": {
+    "Binance": [
+     {
+      "symbol": "BTCARS.A",
+      "quote": "ARS",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'ARS' ist kein Dollar"
+     },
+     {
+      "symbol": "WLDBTC.A",
+      "quote": "BTC",
+      "base": "WLD",
+      "grund": "Basiswert ist 'WLD', nicht BTC"
+     },
+     {
+      "symbol": "BTCU.A",
+      "quote": "U",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'U' ist kein Dollar"
+     },
+     {
+      "symbol": "PENDLEBTC.A",
+      "quote": "BTC",
+      "base": "PENDLE",
+      "grund": "Basiswert ist 'PENDLE', nicht BTC"
+     },
+     {
+      "symbol": "AAVEBTC.A",
+      "quote": "BTC",
+      "base": "AAVE",
+      "grund": "Basiswert ist 'AAVE', nicht BTC"
+     },
+     {
+      "symbol": "NEARBTC.A",
+      "quote": "BTC",
+      "base": "NEAR",
+      "grund": "Basiswert ist 'NEAR', nicht BTC"
+     },
+     {
+      "symbol": "BTCTRY.A",
+      "quote": "TRY",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'TRY' ist kein Dollar"
+     },
+     {
+      "symbol": "ETHBTC.A",
+      "quote": "BTC",
+      "base": "ETH",
+      "grund": "Basiswert ist 'ETH', nicht BTC"
+     },
+     {
+      "symbol": "LTCBTC.A",
+      "quote": "BTC",
+      "base": "LTC",
+      "grund": "Basiswert ist 'LTC', nicht BTC"
+     },
+     {
+      "symbol": "ADABTC.A",
+      "quote": "BTC",
+      "base": "ADA",
+      "grund": "Basiswert ist 'ADA', nicht BTC"
+     },
+     {
+      "symbol": "XRPBTC.A",
+      "quote": "BTC",
+      "base": "XRP",
+      "grund": "Basiswert ist 'XRP', nicht BTC"
+     },
+     {
+      "symbol": "DSHBTC.A",
+      "quote": "BTC",
+      "base": "DASH",
+      "grund": "Basiswert ist 'DASH', nicht BTC"
+     },
+     {
+      "symbol": "ETCBTC.A",
+      "quote": "BTC",
+      "base": "ETC",
+      "grund": "Basiswert ist 'ETC', nicht BTC"
+     },
+     {
+      "symbol": "ZECBTC.A",
+      "quote": "BTC",
+      "base": "ZEC",
+      "grund": "Basiswert ist 'ZEC', nicht BTC"
+     },
+     {
+      "symbol": "TRXBTC.A",
+      "quote": "BTC",
+      "base": "TRX",
+      "grund": "Basiswert ist 'TRX', nicht BTC"
+     },
+     {
+      "symbol": "BNBBTC.A",
+      "quote": "BTC",
+      "base": "BNB",
+      "grund": "Basiswert ist 'BNB', nicht BTC"
+     },
+     {
+      "symbol": "ICPBTC.A",
+      "quote": "BTC",
+      "base": "ICP",
+      "grund": "Basiswert ist 'ICP', nicht BTC"
+     },
+     {
+      "symbol": "LINKBTC.A",
+      "quote": "BTC",
+      "base": "LINK",
+      "grund": "Basiswert ist 'LINK', nicht BTC"
+     },
+     {
+      "symbol": "BTCEUR.A",
+      "quote": "EUR",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'EUR' ist kein Dollar"
+     },
+     {
+      "symbol": "FETBTC.A",
+      "quote": "BTC",
+      "base": "FET",
+      "grund": "Basiswert ist 'FET', nicht BTC"
+     },
+     {
+      "symbol": "ATOMBTC.A",
+      "quote": "BTC",
+      "base": "ATOM",
+      "grund": "Basiswert ist 'ATOM', nicht BTC"
+     },
+     {
+      "symbol": "DOGEBTC.A",
+      "quote": "BTC",
+      "base": "DOGE",
+      "grund": "Basiswert ist 'DOGE', nicht BTC"
+     },
+     {
+      "symbol": "THETABTC.A",
+      "quote": "BTC",
+      "base": "THETA",
+      "grund": "Basiswert ist 'THETA', nicht BTC"
+     },
+     {
+      "symbol": "XTZBTC.A",
+      "quote": "BTC",
+      "base": "XTZ",
+      "grund": "Basiswert ist 'XTZ', nicht BTC"
+     },
+     {
+      "symbol": "HBARBTC.A",
+      "quote": "BTC",
+      "base": "HBAR",
+      "grund": "Basiswert ist 'HBAR', nicht BTC"
+     },
+     {
+      "symbol": "STXBTC.A",
+      "quote": "BTC",
+      "base": "STX",
+      "grund": "Basiswert ist 'STX', nicht BTC"
+     },
+     {
+      "symbol": "BTCBRL.A",
+      "quote": "BRL",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'BRL' ist kein Dollar"
+     },
+     {
+      "symbol": "BCHBTC.A",
+      "quote": "BTC",
+      "base": "BCH",
+      "grund": "Basiswert ist 'BCH', nicht BTC"
+     },
+     {
+      "symbol": "BTCUSDS.A",
+      "quote": "USDS",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'USDS' ist kein Dollar"
+     },
+     {
+      "symbol": "SOLBTC.A",
+      "quote": "BTC",
+      "base": "SOL",
+      "grund": "Basiswert ist 'SOL', nicht BTC"
+     },
+     {
+      "symbol": "DOTBTC.A",
+      "quote": "BTC",
+      "base": "DOT",
+      "grund": "Basiswert ist 'DOT', nicht BTC"
+     },
+     {
+      "symbol": "RENDERBTC.A",
+      "quote": "BTC",
+      "base": "RENDER",
+      "grund": "Basiswert ist 'RENDER', nicht BTC"
+     },
+     {
+      "symbol": "UNIBTC.A",
+      "quote": "BTC",
+      "base": "UNI",
+      "grund": "Basiswert ist 'UNI', nicht BTC"
+     },
+     {
+      "symbol": "SUIBTC.A",
+      "quote": "BTC",
+      "base": "SUI",
+      "grund": "Basiswert ist 'SUI', nicht BTC"
+     },
+     {
+      "symbol": "FILBTC.A",
+      "quote": "BTC",
+      "base": "FIL",
+      "grund": "Basiswert ist 'FIL', nicht BTC"
+     },
+     {
+      "symbol": "AVAXBTC.A",
+      "quote": "BTC",
+      "base": "AVAX",
+      "grund": "Basiswert ist 'AVAX', nicht BTC"
+     },
+     {
+      "symbol": "PAXGBTC.A",
+      "quote": "BTC",
+      "base": "PAXG",
+      "grund": "Basiswert ist 'PAXG', nicht BTC"
+     },
+     {
+      "symbol": "WBTCBTC.A",
+      "quote": "BTC",
+      "base": "WBTC",
+      "grund": "Basiswert ist 'WBTC', nicht BTC"
+     },
+     {
+      "symbol": "CAKEBTC.A",
+      "quote": "BTC",
+      "base": "CAKE",
+      "grund": "Basiswert ist 'CAKE', nicht BTC"
+     },
+     {
+      "symbol": "INJBTC.A",
+      "quote": "BTC",
+      "base": "INJ",
+      "grund": "Basiswert ist 'INJ', nicht BTC"
+     },
+     {
+      "symbol": "TAOBTC.A",
+      "quote": "BTC",
+      "base": "TAO",
+      "grund": "Basiswert ist 'TAO', nicht BTC"
+     },
+     {
+      "symbol": "WBTCUSD.A",
+      "quote": "USDT",
+      "base": "WBTC",
+      "grund": "Basiswert ist 'WBTC', nicht BTC"
+     },
+     {
+      "symbol": "BTCUSD1.A",
+      "quote": "USD1",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'USD1' ist kein Dollar"
+     },
+     {
+      "symbol": "ARB_BTC.A",
+      "quote": "BTC",
+      "base": "ARB",
+      "grund": "Basiswert ist 'ARB', nicht BTC"
+     },
+     {
+      "symbol": "NEXOBTC.A",
+      "quote": "BTC",
+      "base": "NEXO",
+      "grund": "Basiswert ist 'NEXO', nicht BTC"
+     },
+     {
+      "symbol": "BTCJPY.A",
+      "quote": "JPY",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'JPY' ist kein Dollar"
+     },
+     {
+      "symbol": "BTCMXN.A",
+      "quote": "MXN",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'MXN' ist kein Dollar"
+     },
+     {
+      "symbol": "BTCIDR.A",
+      "quote": "IDR",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'IDR' ist kein Dollar"
+     },
+     {
+      "symbol": "XAUTBTC.A",
+      "quote": "BTC",
+      "base": "XAUT",
+      "grund": "Basiswert ist 'XAUT', nicht BTC"
+     }
+    ],
+    "Bybit": [
+     {
+      "symbol": "sMNTBTC.6",
+      "quote": "BTC",
+      "base": "MNT",
+      "grund": "Basiswert ist 'MNT', nicht BTC"
+     },
+     {
+      "symbol": "sBTCEUR.6",
+      "quote": "EUR",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'EUR' ist kein Dollar"
+     },
+     {
+      "symbol": "sWBTCBTC.6",
+      "quote": "BTC",
+      "base": "WBTC",
+      "grund": "Basiswert ist 'WBTC', nicht BTC"
+     },
+     {
+      "symbol": "sBTCBRL.6",
+      "quote": "BRL",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'BRL' ist kein Dollar"
+     },
+     {
+      "symbol": "sBTCPLN.6",
+      "quote": "PLN",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'PLN' ist kein Dollar"
+     },
+     {
+      "symbol": "sBTCTRY.6",
+      "quote": "TRY",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'TRY' ist kein Dollar"
+     },
+     {
+      "symbol": "sETHBTC.6",
+      "quote": "BTC",
+      "base": "ETH",
+      "grund": "Basiswert ist 'ETH', nicht BTC"
+     },
+     {
+      "symbol": "sWBTCUSDT.6",
+      "quote": "USDT",
+      "base": "WBTC",
+      "grund": "Basiswert ist 'WBTC', nicht BTC"
+     },
+     {
+      "symbol": "sXRPBTC.6",
+      "quote": "BTC",
+      "base": "XRP",
+      "grund": "Basiswert ist 'XRP', nicht BTC"
+     },
+     {
+      "symbol": "sXLMBTC.6",
+      "quote": "BTC",
+      "base": "XLM",
+      "grund": "Basiswert ist 'XLM', nicht BTC"
+     },
+     {
+      "symbol": "sSOLBTC.6",
+      "quote": "BTC",
+      "base": "SOL",
+      "grund": "Basiswert ist 'SOL', nicht BTC"
+     },
+     {
+      "symbol": "sLTCBTC.6",
+      "quote": "BTC",
+      "base": "LTC",
+      "grund": "Basiswert ist 'LTC', nicht BTC"
+     },
+     {
+      "symbol": "sBTCAED.6",
+      "quote": "AED",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'AED' ist kein Dollar"
+     },
+     {
+      "symbol": "sBTCRLUSD.6",
+      "quote": "RLUSD",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'RLUSD' ist kein Dollar"
+     },
+     {
+      "symbol": "sBTCUSD1.6",
+      "quote": "USD1",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'USD1' ist kein Dollar"
+     },
+     {
+      "symbol": "sBTCXUSD.6",
+      "quote": "XUSD",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'XUSD' ist kein Dollar"
+     }
+    ],
+    "Coinbase": [
+     {
+      "symbol": "BTCEUR.C",
+      "quote": "EUR",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'EUR' ist kein Dollar"
+     },
+     {
+      "symbol": "BTCGBP.C",
+      "quote": "GBP",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'GBP' ist kein Dollar"
+     },
+     {
+      "symbol": "ETHBTC.C",
+      "quote": "BTC",
+      "base": "ETH",
+      "grund": "Basiswert ist 'ETH', nicht BTC"
+     },
+     {
+      "symbol": "LTCBTC.C",
+      "quote": "BTC",
+      "base": "LTC",
+      "grund": "Basiswert ist 'LTC', nicht BTC"
+     },
+     {
+      "symbol": "ETCBTC.C",
+      "quote": "BTC",
+      "base": "ETC",
+      "grund": "Basiswert ist 'ETC', nicht BTC"
+     },
+     {
+      "symbol": "BCHBTC.C",
+      "quote": "BTC",
+      "base": "BCH",
+      "grund": "Basiswert ist 'BCH', nicht BTC"
+     },
+     {
+      "symbol": "XLMBTC.C",
+      "quote": "BTC",
+      "base": "XLM",
+      "grund": "Basiswert ist 'XLM', nicht BTC"
+     },
+     {
+      "symbol": "XTZBTC.C",
+      "quote": "BTC",
+      "base": "XTZ",
+      "grund": "Basiswert ist 'XTZ', nicht BTC"
+     },
+     {
+      "symbol": "DSHBTC.C",
+      "quote": "BTC",
+      "base": "DASH",
+      "grund": "Basiswert ist 'DASH', nicht BTC"
+     },
+     {
+      "symbol": "UNIBTC.C",
+      "quote": "BTC",
+      "base": "UNI",
+      "grund": "Basiswert ist 'UNI', nicht BTC"
+     },
+     {
+      "symbol": "ALGOBTC.C",
+      "quote": "BTC",
+      "base": "ALGO",
+      "grund": "Basiswert ist 'ALGO', nicht BTC"
+     },
+     {
+      "symbol": "LINKBTC.C",
+      "quote": "BTC",
+      "base": "LINK",
+      "grund": "Basiswert ist 'LINK', nicht BTC"
+     },
+     {
+      "symbol": "DOGEBTC.C",
+      "quote": "BTC",
+      "base": "DOGE",
+      "grund": "Basiswert ist 'DOGE', nicht BTC"
+     },
+     {
+      "symbol": "ATOMBTC.C",
+      "quote": "BTC",
+      "base": "ATOM",
+      "grund": "Basiswert ist 'ATOM', nicht BTC"
+     },
+     {
+      "symbol": "AVAXBTC.C",
+      "quote": "BTC",
+      "base": "AVAX",
+      "grund": "Basiswert ist 'AVAX', nicht BTC"
+     },
+     {
+      "symbol": "AAVEBTC.C",
+      "quote": "BTC",
+      "base": "AAVE",
+      "grund": "Basiswert ist 'AAVE', nicht BTC"
+     },
+     {
+      "symbol": "SOLBTC.C",
+      "quote": "BTC",
+      "base": "SOL",
+      "grund": "Basiswert ist 'SOL', nicht BTC"
+     },
+     {
+      "symbol": "ICPBTC.C",
+      "quote": "BTC",
+      "base": "ICP",
+      "grund": "Basiswert ist 'ICP', nicht BTC"
+     },
+     {
+      "symbol": "ADABTC.C",
+      "quote": "BTC",
+      "base": "ADA",
+      "grund": "Basiswert ist 'ADA', nicht BTC"
+     },
+     {
+      "symbol": "DOTBTC.C",
+      "quote": "BTC",
+      "base": "DOT",
+      "grund": "Basiswert ist 'DOT', nicht BTC"
+     },
+     {
+      "symbol": "CRVBTC.C",
+      "quote": "BTC",
+      "base": "CRV",
+      "grund": "Basiswert ist 'CRV', nicht BTC"
+     },
+     {
+      "symbol": "BTCINR.C",
+      "quote": "INR",
+      "base": "BTC",
+      "grund": "Gegenwaehrung 'INR' ist kein Dollar"
+     }
+    ]
    }
   },
   "mehrfachabruf": {
-   "angefragt": 3,
-   "zurueck": 3,
+   "angefragt": 10,
+   "zurueck": 10,
    "mehrfachabruf_geht": true,
+   "bloecke": [
+    {
+     "symbole": [
+      "BTCFDUSD.A",
+      "BTCUSD.A",
+      "BTCUSDC.A",
+      "BTCUD.A",
+      "BTCUSD.C",
+      "BTCUSDT.C"
+     ],
+     "zurueck": 6
+    },
+    {
+     "symbole": [
+      "sBTCUSDT.6",
+      "sBTCUSDC.6",
+      "sBTCUSD.6",
+      "sBTCUSDE.6"
+     ],
+     "zurueck": 4
+    }
+   ],
    "je_symbol": {
+    "BTCFDUSD.A": {
+     "punkte": 2005,
+     "felder": [
+      "btx",
+      "bv",
+      "c",
+      "h",
+      "l",
+      "o",
+      "t",
+      "tx",
+      "v"
+     ],
+     "hat_v_und_bv": true,
+     "summe_v": 2189801.02,
+     "reichweite_tage": 334.0,
+     "von": "2025-10-20 16:00",
+     "einheit": "BTC (v=63.0 BTC entspraeche 5,137,421 $ Umsatz — plausibel fuer 4 Stunden)",
+     "letzter_punkt": {
+      "t": 1789833600,
+      "o": 81684.99,
+      "h": 81980,
+      "l": 81410,
+      "c": 81579.24,
+      "v": 62.97461000000016,
+      "bv": 15.330969999999983,
+      "tx": 7314,
+      "btx": 2147
+     }
+    },
+    "BTCUD.A": {
+     "punkte": 1737,
+     "felder": [
+      "btx",
+      "bv",
+      "c",
+      "h",
+      "l",
+      "o",
+      "t",
+      "tx",
+      "v"
+     ],
+     "hat_v_und_bv": true,
+     "summe_v": 4375.59,
+     "reichweite_tage": 289.3,
+     "von": "2025-12-04 08:00",
+     "einheit": "BTC (v=1.8 BTC entspraeche 146,318 $ Umsatz — plausibel fuer 4 Stunden)",
+     "letzter_punkt": {
+      "t": 1789833600,
+      "o": 81575.24,
+      "h": 81848.14,
+      "l": 81327.43,
+      "c": 81492.37,
+      "v": 1.7954800000000002,
+      "bv": 0.5092800000000001,
+      "tx": 503,
+      "btx": 176
+     }
+    },
     "BTCUSD.A": {
      "punkte": 2005,
      "felder": [
@@ -1000,18 +1530,80 @@
       "v"
      ],
      "hat_v_und_bv": true,
+     "summe_v": 6311569.85,
      "reichweite_tage": 334.0,
      "von": "2025-10-20 16:00",
+     "einheit": "BTC (v=1,432.7 BTC entspraeche 116,773,042 $ Umsatz — plausibel fuer 4 Stunden)",
      "letzter_punkt": {
       "t": 1789833600,
       "o": 81636.01,
       "h": 81914.01,
-      "l": 81418.6,
-      "c": 81420,
-      "v": 1257.5450100000214,
-      "bv": 686.8028600000243,
-      "tx": 64124,
-      "btx": 30921
+      "l": 81334,
+      "c": 81503.95,
+      "v": 1432.7286200000196,
+      "bv": 746.259170000025,
+      "tx": 76526,
+      "btx": 37327
+     }
+    },
+    "BTCUSD.C": {
+     "punkte": 2005,
+     "felder": [
+      "btx",
+      "bv",
+      "c",
+      "h",
+      "l",
+      "o",
+      "t",
+      "tx",
+      "v"
+     ],
+     "hat_v_und_bv": true,
+     "summe_v": 2818916.64,
+     "reichweite_tage": 334.2,
+     "von": "2025-10-20 12:00",
+     "einheit": "BTC (v=484.7 BTC entspraeche 39,499,281 $ Umsatz — plausibel fuer 4 Stunden)",
+     "letzter_punkt": {
+      "t": 1789833600,
+      "o": 81626.45,
+      "h": 81889.17,
+      "l": 81308.01,
+      "c": 81487.12,
+      "v": 484.730361309996,
+      "bv": 234.3635780900003,
+      "tx": 46102,
+      "btx": 11763
+     }
+    },
+    "BTCUSDC.A": {
+     "punkte": 2005,
+     "felder": [
+      "btx",
+      "bv",
+      "c",
+      "h",
+      "l",
+      "o",
+      "t",
+      "tx",
+      "v"
+     ],
+     "hat_v_und_bv": true,
+     "summe_v": 1845580.47,
+     "reichweite_tage": 334.0,
+     "von": "2025-10-20 16:00",
+     "einheit": "BTC (v=387.8 BTC entspraeche 31,608,283 $ Umsatz — plausibel fuer 4 Stunden)",
+     "letzter_punkt": {
+      "t": 1789833600,
+      "o": 81633.05,
+      "h": 81900,
+      "l": 81319.5,
+      "c": 81499.06,
+      "v": 387.83617,
+      "bv": 187.17277999999976,
+      "tx": 16061,
+      "btx": 7575
      }
     },
     "BTCUSDT.C": {
@@ -1028,18 +1620,110 @@
       "v"
      ],
      "hat_v_und_bv": true,
+     "summe_v": 34005.92,
      "reichweite_tage": 334.2,
      "von": "2025-10-20 12:00",
+     "einheit": "BTC (v=2.4 BTC entspraeche 198,857 $ Umsatz — plausibel fuer 4 Stunden)",
      "letzter_punkt": {
       "t": 1789833600,
       "o": 81604.44,
       "h": 81877.02,
-      "l": 81409.66,
-      "c": 81409.66,
-      "v": 2.2048972,
-      "bv": 0.3448043,
-      "tx": 151,
-      "btx": 41
+      "l": 81332.83,
+      "c": 81492.41,
+      "v": 2.4401930199999993,
+      "bv": 0.44423455000000006,
+      "tx": 178,
+      "btx": 56
+     }
+    },
+    "sBTCUSD.6": {
+     "punkte": 917,
+     "felder": [
+      "btx",
+      "bv",
+      "c",
+      "h",
+      "l",
+      "o",
+      "t",
+      "tx",
+      "v"
+     ],
+     "hat_v_und_bv": true,
+     "summe_v": 7402.17,
+     "reichweite_tage": 156.3,
+     "von": "2026-04-16 08:00",
+     "einheit": "BTC (v=0.8 BTC entspraeche 67,789 $ Umsatz — plausibel fuer 4 Stunden)",
+     "letzter_punkt": {
+      "t": 1789833600,
+      "o": 81570.4,
+      "h": 81839.7,
+      "l": 81333.5,
+      "c": 81466.3,
+      "v": 0.8321140000000007,
+      "bv": 0.4818649999999999,
+      "tx": 195,
+      "btx": 81
+     }
+    },
+    "sBTCUSDC.6": {
+     "punkte": 2005,
+     "felder": [
+      "btx",
+      "bv",
+      "c",
+      "h",
+      "l",
+      "o",
+      "t",
+      "tx",
+      "v"
+     ],
+     "hat_v_und_bv": true,
+     "summe_v": 247004.69,
+     "reichweite_tage": 334.0,
+     "von": "2025-10-20 16:00",
+     "einheit": "BTC (v=29.8 BTC entspraeche 2,429,058 $ Umsatz — plausibel fuer 4 Stunden)",
+     "letzter_punkt": {
+      "t": 1789833600,
+      "o": 81629.4,
+      "h": 81896.4,
+      "l": 81320,
+      "c": 81496.3,
+      "v": 29.805744999999792,
+      "bv": 10.153990000000025,
+      "tx": 7868,
+      "btx": 3680
+     }
+    },
+    "sBTCUSDE.6": {
+     "punkte": 2005,
+     "felder": [
+      "btx",
+      "bv",
+      "c",
+      "h",
+      "l",
+      "o",
+      "t",
+      "tx",
+      "v"
+     ],
+     "hat_v_und_bv": true,
+     "summe_v": 1078.18,
+     "reichweite_tage": 345.7,
+     "von": "2025-10-09 00:00",
+     "einheit": "BTC (v=0.0 BTC entspraeche 34 $ Umsatz — plausibel fuer 4 Stunden)",
+     "letzter_punkt": {
+      "t": 1789833600,
+      "o": 81380.8,
+      "h": 81380.8,
+      "l": 81380.8,
+      "c": 81380.8,
+      "v": 0.000421,
+      "bv": 0,
+      "tx": 1,
+      "btx": 0
      }
     },
     "sBTCUSDT.6": {
@@ -1056,23 +1740,122 @@
       "v"
      ],
      "hat_v_und_bv": true,
+     "summe_v": 3189877.64,
      "reichweite_tage": 334.0,
      "von": "2025-10-20 16:00",
+     "einheit": "BTC (v=390.5 BTC entspraeche 31,829,140 $ Umsatz — plausibel fuer 4 Stunden)",
      "letzter_punkt": {
       "t": 1789833600,
       "o": 81638.6,
       "h": 81900,
-      "l": 81410.8,
-      "c": 81419,
-      "v": 318.42203000000063,
-      "bv": 160.6857639999994,
-      "tx": 41626,
-      "btx": 18853
+      "l": 81330.9,
+      "c": 81508.3,
+      "v": 390.50182800000096,
+      "bv": 197.77426199999937,
+      "tx": 53970,
+      "btx": 24179
      }
     }
    }
   },
-  "_ergebnis": "JA fuer 3 von 4 Boersen: BTCUSD.A, BTCUSDT.C, sBTCUSDT.6 liefern Gesamtvolumen und Taker-Kaeufe. Aggregiert wird von UNS, nicht von Coinalyze — dort gibt es kein Aggregat-Symbol. Ein Abruf liefert alle Reihen auf einmal. Ohne passenden Markt: OKX. Historie: 334 bis 334 Tage — der KUERZESTE bestimmt das Backtest-Fenster."
+  "gewaehlt_je_boerse": {
+   "A": {
+    "symbol": "BTCUSD.A",
+    "quote": "USDT",
+    "an_der_boerse": "BTCUSDT",
+    "boerse": "Binance",
+    "summe_v": 6311569.85,
+    "punkte": 2005,
+    "reichweite_tage": 334.0
+   },
+   "C": {
+    "symbol": "BTCUSD.C",
+    "quote": "USD",
+    "an_der_boerse": "BTC-USD",
+    "boerse": "Coinbase",
+    "summe_v": 2818916.64,
+    "punkte": 2005,
+    "reichweite_tage": 334.2
+   },
+   "6": {
+    "symbol": "sBTCUSDT.6",
+    "quote": "USDT",
+    "an_der_boerse": "BTCUSDT",
+    "boerse": "Bybit",
+    "summe_v": 3189877.64,
+    "punkte": 2005,
+    "reichweite_tage": 334.0
+   }
+  },
+  "volumenvergleich_je_boerse": {
+   "Binance": [
+    {
+     "symbol": "BTCUSD.A",
+     "quote": "USDT",
+     "summe_v": 6311569.85,
+     "anteil_prozent": 60.97
+    },
+    {
+     "symbol": "BTCFDUSD.A",
+     "quote": "FDUSD",
+     "summe_v": 2189801.02,
+     "anteil_prozent": 21.15
+    },
+    {
+     "symbol": "BTCUSDC.A",
+     "quote": "USDC",
+     "summe_v": 1845580.47,
+     "anteil_prozent": 17.83
+    },
+    {
+     "symbol": "BTCUD.A",
+     "quote": "USD",
+     "summe_v": 4375.59,
+     "anteil_prozent": 0.04
+    }
+   ],
+   "Coinbase": [
+    {
+     "symbol": "BTCUSD.C",
+     "quote": "USD",
+     "summe_v": 2818916.64,
+     "anteil_prozent": 98.81
+    },
+    {
+     "symbol": "BTCUSDT.C",
+     "quote": "USDT",
+     "summe_v": 34005.92,
+     "anteil_prozent": 1.19
+    }
+   ],
+   "Bybit": [
+    {
+     "symbol": "sBTCUSDT.6",
+     "quote": "USDT",
+     "summe_v": 3189877.64,
+     "anteil_prozent": 92.58
+    },
+    {
+     "symbol": "sBTCUSDC.6",
+     "quote": "USDC",
+     "summe_v": 247004.69,
+     "anteil_prozent": 7.17
+    },
+    {
+     "symbol": "sBTCUSD.6",
+     "quote": "USD",
+     "summe_v": 7402.17,
+     "anteil_prozent": 0.21
+    },
+    {
+     "symbol": "sBTCUSDE.6",
+     "quote": "USDE",
+     "summe_v": 1078.18,
+     "anteil_prozent": 0.03
+    }
+   ]
+  },
+  "_ergebnis": "JA fuer 3 von 4 Boersen — nach Volumen gewaehlt: Binance: BTCUSD.A, Coinbase: BTCUSD.C, Bybit: sBTCUSDT.6. Aggregiert wird von UNS, nicht von Coinalyze — dort gibt es kein Aggregat-Symbol. Ein Abruf liefert mehrere Reihen auf einmal. Ohne passenden Markt: OKX — Gruende unter 'abgelehnte_btc_maerkte'. Historie der gewaehlten Maerkte: 334 bis 334 Tage — der KUERZESTE bestimmt das Backtest-Fenster."
  },
  "_ergebnis": {
   "nutzbar": [
