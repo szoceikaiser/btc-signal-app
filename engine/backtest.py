@@ -71,7 +71,13 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "zonen_nachziehen", "pivot_n_1d", "ampel_filter")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
-             trend_filter=False, trend_ema=50, strict_confirm=False, confluence=False,
+             # E33 (13.09.2026) hob trend_ema von 50 auf 200 — in evaluate(),
+             # EVAL_DEFAULTS und config.json, aber HIER wurde es vergessen. Seither
+             # wich die Panel-Zeile von der Live-Einstellung ab. Folgenlos fuers
+             # Ergebnis (trend_filter ist ueberall aus, dann wird trend_ema nie
+             # gelesen), aber test_panel_variante_entspricht_der_live_einstellung
+             # schlug an — nur hat es niemand gesehen, siehe E36.1.
+             trend_filter=False, trend_ema=200, strict_confirm=False, confluence=False,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
              trail_stop=False, liq_exit="off", high_exit="off", liq_entry="off",
              block_unhealthy=False, confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0,

@@ -377,7 +377,14 @@ def test_panel_variante_entspricht_der_live_einstellung():
     import backtest
     import main
     cfg_datei = Path(__file__).resolve().parent.parent / "site" / "data" / "config.json"
-    if not cfg_datei.exists():                     # ohne Repo-Daten nichts zu pruefen
+    if not cfg_datei.exists():
+        # LAUT ueberspringen, nicht still (E36.1, 19.09.2026): Dieser Test hat am
+        # 13.09. angeschlagen (trend_ema 50 gegen 200) und SECHS TAGE lang jeden
+        # GitHub-Lauf rot gemacht - waehrend er in der Arbeitskopie, wo site/data
+        # fehlt, stillschweigend zurueckkehrte. Ein Test, der sich unbemerkt selbst
+        # ausschaltet, ist schlimmer als keiner: Er suggeriert Deckung, die es nicht
+        # gibt. Die Ausgabe steht jetzt im Protokoll.
+        print("  UEBERSPRUNGEN: site/data/config.json fehlt - Panel-Zeile ungeprueft!")
         return
     cfg = {k: v for k, v in json.loads(cfg_datei.read_text(encoding="utf-8")).items()
            if not k.startswith("_")}
