@@ -20,7 +20,13 @@ import urllib.request
 from pathlib import Path
 
 BASE = "https://api.coinalyze.net/v1"
-SYMBOL = "BTCUSDT_PERP.A"        # aggregiert ueber Boersen (.A = aggregated)
+# ACHTUNG, hier stand bis 19.09.2026 etwas Falsches: ".A" ist NICHT "aggregiert".
+# In /exchanges steht A fuer BINANCE (per Probe 19.09.2026 nachgeprueft; die Liste hat
+# 28 Boersen und KEINEN Code fuer ein Aggregat). Alles, was die Engine von Coinalyze
+# bezieht — Open Interest, Funding, Liquidationen, Futures-CVD, Long-Short — kommt
+# also von einer einzigen Boerse. Wer das aendern will, muss mehrere Symbole holen und
+# selbst zusammenrechnen; siehe spot_probe() weiter unten.
+SYMBOL = "BTCUSDT_PERP.A"        # BTC/USDT-Perpetual auf Binance (A = Binance)
 INTERVAL = "4hour"               # beim ersten Lauf verifizieren (evtl. "H4"/"4h")
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -126,7 +132,10 @@ def fut_delta_by_ts(api_key: str, **kw) -> dict:
     DAS SCHLIESST DIE GROESSTE DATENLUECKE DES PROJEKTS: Futures-CVD gab es bisher nicht
     (fapi.binance.com sperrt US-Runner mit HTTP 451), deshalb war in classify_pattern der
     Zweig `if has_fut:` seit dem ersten Tag toter Code und Muster 2 (Derivate-Pump) lief
-    nur ueber Ersatzmerkmale. Coinalyze liefert es aggregiert ueber Boersen, mit Historie.
+    nur ueber Ersatzmerkmale. Coinalyze liefert es mit Historie.
+
+    NICHT aggregiert (Korrektur 19.09.2026): wie bei OI, Funding und Liquidationen ist
+    das Symbol BTCUSDT_PERP.A der Binance-Markt, nicht ein Boersen-Durchschnitt.
 
     EINHEIT: Die Werte sind Kontrakt-/Basiswert-Mengen (BTC), nicht USD — anders als das
     Spot-Delta. Fuer classify_pattern ist das unerheblich: dort geht das kumulierte Delta
@@ -157,181 +166,201 @@ def long_short_by_ts(api_key: str, **kw) -> dict:
 
 
 # ------------------------------------------- E37: Spot-Maerkte (Kaisers Frage 19.09.2026)
-# BEFUND, der die Frage ausgeloest hat: Furkan aggregiert sein Spot-CVD auf Velo ueber
-# Binance, Coinbase, Bybit und OKX und betont es ausdruecklich ("Wir schauen nicht nur
-# auf eine Boerse"). Unser Spot-CVD kommt allein von Binance (data-api.binance.vision),
-# waehrend Futures-CVD, OI, Funding und Liquidationen laengst aggregiert sind (.A).
-# Die Velo-API selbst scheidet aus: 199 $/Monat (nur die Webseite ist gratis).
-# Laut Coinalyze-Doku gibt es aber /spot-markets mit einem Feld fuer die Verfuegbarkeit
-# von Kauf-/Verkaufsdaten. Wenn ohlcv-history auch fuer Spot-Symbole 'v' und 'bv'
-# liefert, waere das aggregierte Spot-CVD ohne neue Datenquelle und ohne neuen Schluessel
-# zu haben — mit demselben Rechenweg (Delta = 2*bv - v) wie beim Futures-CVD.
-# PROJEKTREGEL: kein Blind-Parsen. Diese Probe FRAGT nur und schreibt die rohe Antwort.
-SPOT_BOERSEN = ("binance", "coinbase", "bybit", "okx")     # Furkans vier Spotboersen
-SPOT_TESTE_MAX = 4                # hoechstens so viele Symbole probeweise abfragen
+# AUSLOESER: Furkan aggregiert sein Spot-CVD auf Velo ueber Binance, Coinbase, Bybit und
+# OKX und betont es ausdruecklich ("Wir schauen nicht nur auf eine Boerse"). Die
+# Velo-API scheidet aus (199 $/Monat), und ausser Binance liefert keine Boerse das
+# Taker-Kaufvolumen fertig in den Kerzen — Coinalyze ist der einzige gangbare Weg.
+#
+# BEFUND DER ERSTEN PROBE (Lauf 19.09.2026, 17:50 UTC) — und er ist groesser als die
+# Frage war: In /exchanges steht "A" fuer BINANCE. Es gibt in der ganzen Liste KEINEN
+# Code fuer ein Aggregat (28 Boersen, 16 davon mit Maerkten, kein unbekannter Code).
+# Damit ist der Kommentar an SYMBOL seit E9.1 falsch: BTCUSDT_PERP.A ist Binance,
+# nicht "aggregiert ueber Boersen". Open Interest, Funding, Liquidationen, Futures-CVD
+# und Long-Short-Verhaeltnis kommen also ALLE von einer einzigen Boerse — genau das,
+# wovon Furkan abraet. Aggregieren muessen wir selbst.
+#
+# WAS DIE ERSTE PROBE SCHON BEWIESEN HAT: ohlcv-history liefert fuer Spot-Symbole
+# 'v' (Gesamtvolumen) und 'bv' (Taker-Kaeufe), also alles fuer Delta = 2*bv - v,
+# und reicht rund 334 Tage zurueck (2005 4h-Punkte). Das genuegt fuer einen Backtest.
+#
+# WAS DIESE ZWEITE PROBE KLAERT — wieder nur fragen, nicht bauen:
+#   1. Welche BTC-Spotmaerkte gegen Dollar gibt es auf Furkans vier Boersen, und
+#      welches Symbol heisst dort wie? (Die Schreibweise ist je Boerse anders:
+#      "BTCARS.A" auf Binance, aber "sBTCEUR.6" auf Bybit.)
+#   2. Nimmt ein Abruf MEHRERE Symbole auf einmal? Nur dann ist Aggregieren billig.
+#   3. Reicht die Historie auf allen vier gleich weit? Der kuerzeste bestimmt das
+#      Backtest-Fenster.
+BOERSEN_CODES = {"A": "Binance", "C": "Coinbase", "6": "Bybit", "3": "OKX"}
+DOLLAR_QUOTES = ("USDT", "USD", "USDC", "FDUSD", "USDE")   # Vorrang in dieser Reihenfolge
 SPOT_REICHWEITE_TAGE = 365        # so weit zurueck fragen, um die ECHTE Grenze zu sehen
 
 
-def _als_text(x) -> str:
-    """Ganzen Eintrag als Kleinbuchstaben-Text — Suche ohne Kenntnis der Feldnamen."""
-    try:
-        return json.dumps(x, ensure_ascii=False).lower()
-    except Exception:  # noqa: BLE001
-        return str(x).lower()
+def _ist_btc_dollar_markt(e, codes) -> bool:
+    """BTC gegen Dollar, auf einer der gesuchten Boersen, mit Kauf-/Verkaufsdaten.
 
-
-def _symbol_von(eintrag) -> str:
-    """Symbol aus einem Markt-Eintrag ziehen, ohne das Schema vorauszusetzen."""
-    if not isinstance(eintrag, dict):
-        return ""
-    for schluessel in ("symbol", "Symbol", "symbol_on_exchange", "market", "id"):
-        wert = eintrag.get(schluessel)
-        if isinstance(wert, str) and wert:
-            return wert
-    return ""
-
-
-def _btc_spot_maerkte(data) -> list:
-    """Alle Spot-Markt-Eintraege, in denen BTC vorkommt (Feldnamen egal)."""
-    if not isinstance(data, list):
-        return []
-    return [e for e in data if "btc" in _als_text(e)]
-
-
-def _waehle_spot_symbole(maerkte: list) -> list:
-    """Aggregiertes Symbol zuerst, danach je eine von Furkans vier Boersen.
-
-    Warum diese Reihenfolge: Gibt es ein '.A'-Symbol wie bei den Futures, ist die
-    Aggregation schon erledigt und wir brauchen nur EINEN Abruf. Sonst muessten wir
-    die vier Boersen selbst zusammenrechnen — dafuer wird hier je eine Stichprobe
-    geholt, um zu sehen, ob sie ueberhaupt Kauf-/Verkaufsvolumen liefern.
+    Streng nach den Feldern, die der Lauf vom 19.09.2026 gezeigt hat:
+    {symbol, exchange, symbol_on_exchange, base_asset, quote_asset, has_buy_sell_data}.
+    base_asset MUSS BTC sein — sonst rutschen Paare wie WLDBTC (Worldcoin gegen BTC)
+    durch, die in der ersten Probe genau das getan haben.
     """
-    gewaehlt, gesehene_boersen = [], set()
-    for e in maerkte:                                    # 1. Vorrang: aggregierte Symbole
-        sym = _symbol_von(e)
-        if sym.endswith(".A") and sym not in gewaehlt:
-            gewaehlt.append(sym)
-    for boerse in SPOT_BOERSEN:                          # 2. je eine je Furkan-Boerse
-        for e in maerkte:
-            sym = _symbol_von(e)
-            if not sym or sym in gewaehlt or boerse in gesehene_boersen:
-                continue
-            if boerse in _als_text(e) and "usd" in _als_text(e):
-                gewaehlt.append(sym)
-                gesehene_boersen.add(boerse)
-                break
-    return gewaehlt[:SPOT_TESTE_MAX]
+    if not isinstance(e, dict):
+        return False
+    return (e.get("base_asset") == "BTC"
+            and e.get("quote_asset") in DOLLAR_QUOTES
+            and e.get("exchange") in codes
+            and bool(e.get("has_buy_sell_data")))
 
 
-def _pruefe_spot_symbol(api_key: str, symbol: str, **kw) -> dict:
-    """Eine ohlcv-history fuer EIN Spot-Symbol holen und beschreiben, was ankam.
+def _je_boerse_ein_symbol(maerkte: list, codes=BOERSEN_CODES) -> dict:
+    """Pro Boerse EIN Symbol, Quote-Waehrung nach der Rangfolge in DOLLAR_QUOTES.
 
-    `**kw` geht an fetch_history durch (u. a. `opener`), damit die Auswertung ohne
-    Netz und ohne Schluessel testbar ist.
+    Warum eine feste Rangfolge: BTC/USDT und BTC/USD sind verschiedene Maerkte mit
+    verschiedenem Volumen. Wuerde die Auswahl von der Listenreihenfolge abhaengen,
+    kaeme bei jedem Lauf etwas anderes heraus und die Messungen waeren nicht
+    vergleichbar.
     """
+    treffer: dict = {}
+    for e in maerkte:
+        if not _ist_btc_dollar_markt(e, codes):
+            continue
+        code = e["exchange"]
+        rang = DOLLAR_QUOTES.index(e["quote_asset"])
+        bisher = treffer.get(code)
+        if bisher is None or rang < bisher["rang"]:
+            treffer[code] = {"rang": rang, "symbol": e.get("symbol"),
+                             "quote": e.get("quote_asset"),
+                             "boerse": codes.get(code, code)}
+    return {c: {k: v for k, v in d.items() if k != "rang"} for c, d in treffer.items()}
+
+
+def _pruefe_symbole(api_key: str, symbole: list, **kw) -> dict:
+    """EIN Abruf mit ALLEN Symbolen — beantwortet Frage 2 und 3 in einem Zug.
+
+    Coinalyze nimmt den Parameter `symbols` (Mehrzahl). Kommt je Symbol eine eigene
+    Reihe zurueck, laesst sich das Aggregat mit einem einzigen Abruf bilden; kommt nur
+    eine, muessten wir je Boerse einzeln fragen (viermal so viele Abrufe).
+    """
+    if not symbole:
+        return {"fehler": "keine Symbole zu pruefen"}
     try:
-        roh = fetch_history("ohlcv-history", api_key, symbol=symbol,
+        roh = fetch_history("ohlcv-history", api_key, symbol=",".join(symbole),
                             days=SPOT_REICHWEITE_TAGE, **kw)
     except urllib.error.HTTPError as e:
         return {"http_error": e.code, "body": e.read().decode(errors="replace")[:300]}
     except Exception as e:  # noqa: BLE001
         return {"error": f"{type(e).__name__}: {str(e)[:250]}"}
-    punkte = _history_points(roh, symbol=symbol)
-    if not punkte:
-        return {"punkte": 0, "hinweis": "Antwort kam, enthielt aber keine History.",
-                "antwort_roh": _sample(roh)}
-    felder = sorted({k for p in punkte if isinstance(p, dict) for k in p})
-    zeiten = [int(p["t"]) for p in punkte if isinstance(p, dict) and "t" in p]
-    spanne = (max(zeiten) - min(zeiten)) / 86400.0 if len(zeiten) > 1 else 0.0
-    return {
-        "punkte": len(punkte),
-        "felder": felder,
-        # Das ist die eigentliche Frage: 'v' (Gesamtvolumen) UND 'bv' (Taker-Kaeufe)
-        # sind zusammen die Voraussetzung fuer Delta = 2*bv - v.
-        "hat_v_und_bv": ("v" in felder and "bv" in felder),
-        "reichweite_tage": round(spanne, 1),
-        "von": time.strftime("%Y-%m-%d %H:%M", time.gmtime(min(zeiten))) if zeiten else "",
-        "bis": time.strftime("%Y-%m-%d %H:%M", time.gmtime(max(zeiten))) if zeiten else "",
-        "erster_punkt": punkte[0],
-        "letzter_punkt": punkte[-1],
-    }
+    if not isinstance(roh, list):
+        return {"fehler": "Antwort ist keine Liste", "antwort_roh": _sample(roh)}
+
+    je_symbol = {}
+    for eintrag in roh:
+        if not isinstance(eintrag, dict):
+            continue
+        punkte = eintrag.get("history") or []
+        felder = sorted({k for p in punkte if isinstance(p, dict) for k in p})
+        zeiten = [int(p["t"]) for p in punkte if isinstance(p, dict) and "t" in p]
+        je_symbol[eintrag.get("symbol", "?")] = {
+            "punkte": len(punkte),
+            "felder": felder,
+            "hat_v_und_bv": ("v" in felder and "bv" in felder),
+            "reichweite_tage": round((max(zeiten) - min(zeiten)) / 86400.0, 1)
+                               if len(zeiten) > 1 else 0.0,
+            "von": time.strftime("%Y-%m-%d %H:%M", time.gmtime(min(zeiten))) if zeiten else "",
+            "letzter_punkt": punkte[-1] if punkte else None,
+        }
+    return {"angefragt": len(symbole), "zurueck": len(je_symbol),
+            "mehrfachabruf_geht": len(je_symbol) > 1, "je_symbol": je_symbol}
 
 
 def spot_probe(api_key: str, **kw) -> dict:
-    """Beantwortet EINE Frage: laesst sich ein aggregiertes Spot-CVD von Coinalyze holen?
+    """Klaert, ob sich ein ueber Boersen aggregiertes Spot-CVD bauen laesst.
 
-    Schritt 1: /spot-markets abfragen — gibt es den Endpunkt ueberhaupt, und welche
-               BTC-Maerkte stehen darin?
-    Schritt 2: fuer bis zu vier davon eine ohlcv-history holen und nachsehen, ob 'v'
-               und 'bv' drin sind und wie weit die 4h-Historie zurueckreicht.
-    Es wird nichts gebaut und nichts entschieden — nur berichtet.
+    Es wird nichts gebaut und nichts entschieden — nur gefragt und berichtet.
     """
-    out: dict = {"_frage": ("Liefert Coinalyze ein aggregiertes Spot-CVD (Taker-Kauf- "
-                            "und Gesamtvolumen je 4h-Kerze) mit brauchbarer Historie?")}
+    out: dict = {"_frage": ("Gibt es BTC-Dollar-Spotmaerkte auf Binance, Coinbase, Bybit "
+                            "und OKX mit Kauf-/Verkaufsdaten, laesst sich alles in EINEM "
+                            "Abruf holen, und wie weit reicht die Historie?")}
     try:
         maerkte_roh = get_json("spot-markets", {}, api_key, **kw)
     except urllib.error.HTTPError as e:
         out["spot_markets"] = {"http_error": e.code,
                                "body": e.read().decode(errors="replace")[:300]}
         out["_ergebnis"] = ("Der Endpunkt /spot-markets hat NICHT geantwortet (siehe "
-                            "http_error). Damit faellt der Coinalyze-Weg aus; es bliebe "
-                            "nur, die Boersen einzeln selbst zu aggregieren.")
+                            "http_error). Damit faellt der Coinalyze-Weg aus.")
         return out
     except Exception as e:  # noqa: BLE001
         out["spot_markets"] = {"error": f"{type(e).__name__}: {str(e)[:250]}"}
         out["_ergebnis"] = "Abruf gescheitert (kein HTTP-Fehler) — siehe 'error'."
         return out
 
-    btc = _btc_spot_maerkte(maerkte_roh)
+    maerkte = maerkte_roh if isinstance(maerkte_roh, list) else []
+    passend = [e for e in maerkte if _ist_btc_dollar_markt(e, BOERSEN_CODES)]
+    gewaehlt = _je_boerse_ein_symbol(maerkte)
     out["spot_markets"] = {
-        "anzahl_gesamt": len(maerkte_roh) if isinstance(maerkte_roh, list) else "?",
-        "anzahl_mit_btc": len(btc),
-        "btc_eintraege_roh": btc[:12],        # roh, damit die Feldnamen sichtbar werden
+        "anzahl_gesamt": len(maerkte),
+        "btc_dollar_auf_furkans_boersen": len(passend),
+        "alle_passenden_roh": passend[:40],       # roh, zum Nachsehen
     }
+    out["gewaehlt_je_boerse"] = gewaehlt
 
-    symbole = _waehle_spot_symbole(btc)
-    out["gepruefte_symbole"] = symbole or ["— keines gefunden"]
-    geprueft = {}
-    for sym in symbole:
-        if not kw:                             # im Test nicht warten
-            time.sleep(1.6)                    # Rate-Limit 40/Min respektieren
-        geprueft[sym] = _pruefe_spot_symbol(api_key, sym, **kw)
-    out["ohlcv_je_symbol"] = geprueft
+    symbole = [d["symbol"] for d in gewaehlt.values() if d.get("symbol")]
+    out["mehrfachabruf"] = _pruefe_symbole(api_key, symbole, **kw)
 
-    brauchbar = [s for s, d in geprueft.items() if d.get("hat_v_und_bv")]
-    aggregiert = [s for s in brauchbar if s.endswith(".A")]
-    if aggregiert:
-        ergebnis = (f"JA, und zwar direkt aggregiert: {', '.join(aggregiert)} liefert "
-                    "Gesamtvolumen und Taker-Kaeufe je Kerze. Damit laesst sich das "
-                    "Spot-CVD genauso rechnen wie das Futures-CVD (2*bv - v).")
-    elif brauchbar:
-        ergebnis = (f"TEILWEISE: {', '.join(brauchbar)} liefern die noetigen Felder, "
-                    "aber kein aggregiertes '.A'-Symbol war dabei. Die Boersen muessten "
-                    "einzeln geholt und selbst zusammengerechnet werden.")
+    fehlend = [name for code, name in BOERSEN_CODES.items() if code not in gewaehlt]
+    je = out["mehrfachabruf"].get("je_symbol", {})
+    brauchbar = [s for s, d in je.items() if d.get("hat_v_und_bv")]
+    weiten = [d["reichweite_tage"] for d in je.values()
+              if isinstance(d.get("reichweite_tage"), (int, float)) and d["reichweite_tage"]]
+
+    if not gewaehlt:
+        ergebnis = ("NEIN: auf keiner der vier Boersen wurde ein BTC-Dollar-Spotmarkt "
+                    "mit Kauf-/Verkaufsdaten gefunden.")
+    elif not brauchbar:
+        ergebnis = ("NEIN: Symbole gefunden, aber keines liefert 'v' UND 'bv'. Ohne "
+                    "beide Zahlen gibt es kein Kauf-/Verkaufs-Delta.")
     else:
-        ergebnis = ("NEIN: kein geprueftes Spot-Symbol liefert 'v' UND 'bv'. Ohne beide "
-                    "Zahlen gibt es kein Kauf-/Verkaufs-Delta und damit kein Spot-CVD.")
-    reichweiten = [d.get("reichweite_tage") for d in geprueft.values()
-                   if isinstance(d.get("reichweite_tage"), (int, float))]
-    if reichweiten:
-        ergebnis += (f" Reichweite der 4h-Historie: rund {max(reichweiten):.0f} Tage "
-                     "(gefragt war 365). Weniger als das heisst: der Backtest kann nur "
-                     "das Fenster messen, das davon abgedeckt ist.")
+        ergebnis = (f"JA fuer {len(brauchbar)} von {len(BOERSEN_CODES)} Boersen: "
+                    f"{', '.join(brauchbar)} liefern Gesamtvolumen und Taker-Kaeufe. "
+                    "Aggregiert wird von UNS, nicht von Coinalyze — dort gibt es kein "
+                    "Aggregat-Symbol.")
+        ergebnis += (" Ein Abruf liefert alle Reihen auf einmal."
+                     if out["mehrfachabruf"].get("mehrfachabruf_geht")
+                     else " ACHTUNG: der Mehrfachabruf gab nur eine Reihe zurueck — je "
+                          "Boerse muss einzeln gefragt werden.")
+    if fehlend:
+        ergebnis += f" Ohne passenden Markt: {', '.join(fehlend)}."
+    if weiten:
+        ergebnis += (f" Historie: {min(weiten):.0f} bis {max(weiten):.0f} Tage — der "
+                     "KUERZESTE bestimmt das Backtest-Fenster.")
     out["_ergebnis"] = ergebnis
     return out
 
 
+
+SAMPLE_MAX_EINTRAEGE = 40    # Listenlaenge in der Probe-Datei (siehe unten)
+
+
 def _sample(data):
-    """Behaelt nur die letzten 3 Punkte je Symbol (kleine Probe fuers Log/JSON)."""
+    """Behaelt nur die letzten 3 Punkte je Symbol (kleine Probe fuers Log/JSON).
+
+    Deckelt ausserdem die Laenge der Liste selbst. Grund (19.09.2026): die
+    Metadaten-Endpunkte geben Tausende Eintraege zurueck — future-markets 5436,
+    spot-markets 5953 — und die Probe-Datei wuchs dadurch auf 2 MB, die bei JEDEM
+    Lauf ins Repo committet wurden. Wie viele weggelassen wurden, steht als letzter
+    Eintrag drin, damit niemand eine gekuerzte Liste fuer die ganze haelt.
+    """
     try:
         if isinstance(data, list):
             slim = []
-            for item in data:
+            for item in data[:SAMPLE_MAX_EINTRAEGE]:
                 it = dict(item) if isinstance(item, dict) else item
                 if isinstance(it, dict) and isinstance(it.get("history"), list):
                     it = dict(it)
                     it["history"] = it["history"][-3:]
                 slim.append(it)
+            if len(data) > SAMPLE_MAX_EINTRAEGE:
+                slim.append({"_gekuerzt": f"{len(data) - SAMPLE_MAX_EINTRAEGE} weitere "
+                                          f"Eintraege weggelassen (von {len(data)})"})
             return slim
         return data
     except Exception:  # noqa: BLE001 — Probe soll nie hart scheitern

@@ -5,13 +5,17 @@ Datenbasis: Binance-Vision-Spotkerzen 4h (inkl. Taker-Volumen -> Spot-CVD) und
 Kraken-Funding-Historie (stuendlich, x8).
 
 STAND SEIT E9.1/E16 — der Satz darueber war bis 19.09.2026 veraltet: Open Interest,
-Liquidationen, Futures-CVD und Long-Short-Verhaeltnis kommen ECHT von Coinalyze,
-aggregiert ueber die Boersen. Das Messfenster beginnt dort, wo das OI einsetzt
-(`eff_start`), zuletzt 05.01.2026 mit ~1500 OI-Punkten. Coinalyze haelt intraday nur
-1500-2000 Punkte vor, aeltere werden taeglich geloescht — daher die Fenstergrenze.
-OFFEN (Kaiser 19.09.2026): Das Spot-CVD kommt weiterhin von Binance ALLEIN, waehrend
-Furkan es auf Velo ueber Binance, Coinbase, Bybit und OKX aggregiert. Siehe die
-Spot-Probe in coinalyze.py (`spot_probe`).
+Liquidationen, Futures-CVD und Long-Short-Verhaeltnis kommen ECHT von Coinalyze (nicht
+mehr konstant). Das Messfenster beginnt dort, wo das OI einsetzt (`eff_start`), zuletzt
+05.01.2026 mit ~1500 OI-Punkten. Coinalyze haelt intraday nur 1500-2000 Punkte vor,
+aeltere werden taeglich geloescht — daher die Fenstergrenze.
+
+OFFEN UND WICHTIG (Probe 19.09.2026): ALLE Zahlen stammen von EINER Boerse. Der
+Spot-CVD kommt von Binance-Vision, und die Coinalyze-Reihen haengen am Symbol
+BTCUSDT_PERP.A — das ".A" ist die Boersenkennung fuer Binance, NICHT "aggregiert",
+wie der Code bis dahin behauptete. Furkan aggregiert dagegen ueber Binance, Coinbase,
+Bybit und OKX. Solange das so ist, misst der Backtest eine Boerse, nicht den Markt.
+Siehe spot_probe() in coinalyze.py.
 
 Ergebnis: BACKTEST.md im Repo-Root (Tabelle aller Parameter-Kombinationen +
 Detailauswertung der besten). Ausfuehren: python3 backtest.py

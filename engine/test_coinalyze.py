@@ -143,104 +143,120 @@ def test_parser_ueberspringen_unvollstaendige_punkte():
 
 
 # --------------------------------------------- E37: Spot-Maerkte (Kaisers Frage 19.09.)
-# Diese Tests sichern die SCHEMA-RATEREI ab. Wir kennen das Antwortformat von
-# /spot-markets noch nicht; die Auswahl-Logik darf deshalb nicht an bestimmten
-# Feldnamen haengen. Genau das wird hier geprueft — mit drei verschiedenen Formen.
+# Diese Tests sichern die Auswahl der Boersen-Symbole. Das Schema ist seit dem Lauf vom
+# 19.09.2026 bekannt: {symbol, exchange, symbol_on_exchange, base_asset, quote_asset,
+# has_buy_sell_data}. Der erste Anlauf hatte hier ".A" faelschlich fuer "aggregiert"
+# gehalten und deshalb BTCARS (argentinischer Peso) und WLDBTC (Worldcoin) gewaehlt —
+# genau dagegen sind die folgenden Gegenproben gerichtet.
 
-def test_btc_spot_maerkte_findet_btc_egal_wie_die_felder_heissen():
-    roh = [
-        {"symbol": "BTCUSDT.A", "base_asset": "BTC"},          # BTC im Symbol
-        {"market": "xbt-usd", "base": "Bitcoin", "quote": "BTC"},  # BTC nur im Quote
-        {"symbol": "ETHUSDT.A", "base_asset": "ETH"},          # kein BTC -> raus
-        {"symbol": "SOLUSD", "base_asset": "SOL"},             # kein BTC -> raus
-    ]
-    treffer = coinalyze._btc_spot_maerkte(roh)
-    assert len(treffer) == 2, treffer
-    assert all("btc" in coinalyze._als_text(e) for e in treffer)
-    # Die Gegenprobe ist der eigentliche Punkt: ETH und SOL duerfen NICHT durchrutschen.
-    assert not any("ETH" in str(e) or "SOL" in str(e) for e in treffer), treffer
+def _markt(sym, ex, base="BTC", quote="USDT", buysell=True):
+    return {"symbol": sym, "exchange": ex, "symbol_on_exchange": sym.split(".")[0],
+            "base_asset": base, "quote_asset": quote, "has_buy_sell_data": buysell}
 
 
-def test_symbol_von_liest_verschiedene_feldnamen_und_gibt_sonst_leer():
-    assert coinalyze._symbol_von({"symbol": "BTCUSDT.A"}) == "BTCUSDT.A"
-    assert coinalyze._symbol_von({"market": "BTC-USD"}) == "BTC-USD"
-    assert coinalyze._symbol_von({"symbol_on_exchange": "BTCUSD"}) == "BTCUSD"
-    # Kein brauchbares Feld -> leerer String, nicht Absturz und kein Zahlenmuell
-    assert coinalyze._symbol_von({"base_asset": "BTC"}) == ""
-    assert coinalyze._symbol_von({"symbol": 17}) == ""
-    assert coinalyze._symbol_von("BTCUSDT.A") == ""
+def test_ist_btc_dollar_markt_weist_die_fallen_der_ersten_probe_ab():
+    codes = coinalyze.BOERSEN_CODES
+    assert coinalyze._ist_btc_dollar_markt(_markt("BTCUSDT.A", "A"), codes) is True
+    # 1. Worldcoin GEGEN Bitcoin: BTC steht im Namen, ist aber der Quote, nicht die Basis
+    assert coinalyze._ist_btc_dollar_markt(
+        _markt("WLDBTC.A", "A", base="WLD", quote="BTC"), codes) is False
+    # 1b. Derselbe Fehler, aber isoliert: Quote IST ein Dollar, nur die Basis stimmt
+    #     nicht. Ohne diesen Fall wuerde ein Wegfall der base_asset-Pruefung nicht
+    #     auffallen — bei WLDBTC faengt ihn schon die Quote-Pruefung ab.
+    assert coinalyze._ist_btc_dollar_markt(
+        _markt("ETHUSDT.A", "A", base="ETH", quote="USDT"), codes) is False
+    # 2. Argentinischer Peso: BTC ist Basis, aber die Gegenwaehrung ist kein Dollar
+    assert coinalyze._ist_btc_dollar_markt(
+        _markt("BTCARS.A", "A", quote="ARS"), codes) is False
+    # 3. Falsche Boerse (Kraken = K gehoert nicht zu Furkans vier)
+    assert coinalyze._ist_btc_dollar_markt(_markt("BTCUSDT.K", "K"), codes) is False
+    # 4. Ohne Kauf-/Verkaufsdaten nuetzt der Markt nichts
+    assert coinalyze._ist_btc_dollar_markt(
+        _markt("BTCUSDT.C", "C", buysell=False), codes) is False
 
 
-def test_waehle_spot_symbole_nimmt_aggregiertes_zuerst_und_dann_je_boerse():
+def test_je_boerse_ein_symbol_folgt_fester_quote_rangfolge():
+    """Ohne feste Rangfolge haengt das Ergebnis an der Listenreihenfolge — dann misst
+    jeder Lauf einen anderen Markt und die Zahlen sind nicht vergleichbar."""
     maerkte = [
-        {"symbol": "BTCUSD_BINANCE", "exchange": "Binance", "quote_asset": "USD"},
-        {"symbol": "BTCUSDT.A", "exchange": "aggregated", "quote_asset": "USDT"},
-        {"symbol": "BTCUSD_COINBASE", "exchange": "Coinbase", "quote_asset": "USD"},
-        {"symbol": "BTCUSD_KRAKEN", "exchange": "Kraken", "quote_asset": "USD"},
+        _markt("BTCUSDC.A", "A", quote="USDC"),     # schlechterer Rang, kommt zuerst
+        _markt("BTCUSDT.A", "A", quote="USDT"),     # bester Rang, kommt spaeter
+        _markt("BTCUSD.C", "C", quote="USD"),
+        _markt("BTCUSDT.K", "K"),                   # Kraken -> darf nicht auftauchen
     ]
-    gewaehlt = coinalyze._waehle_spot_symbole(maerkte)
-    assert gewaehlt[0] == "BTCUSDT.A", gewaehlt          # aggregiertes hat Vorrang
-    assert "BTCUSD_BINANCE" in gewaehlt and "BTCUSD_COINBASE" in gewaehlt
-    # Kraken gehoert nicht zu Furkans vier Boersen -> darf nicht mitkommen
-    assert "BTCUSD_KRAKEN" not in gewaehlt, gewaehlt
-    assert len(gewaehlt) == len(set(gewaehlt)) <= coinalyze.SPOT_TESTE_MAX
+    gewaehlt = coinalyze._je_boerse_ein_symbol(maerkte)
+    assert gewaehlt["A"]["symbol"] == "BTCUSDT.A", gewaehlt     # USDT schlaegt USDC
+    assert gewaehlt["C"]["symbol"] == "BTCUSD.C", gewaehlt
+    assert "K" not in gewaehlt, gewaehlt
+    assert gewaehlt["A"]["boerse"] == "Binance"
 
 
-def _spot_opener(punkte):
-    """Opener, der eine ohlcv-Antwort mit genau diesen Punkten liefert."""
+def _multi_opener(reihen):
+    """Opener, der fuer ohlcv-history mehrere Symbol-Reihen liefert."""
     def fake(req, timeout=0):
-        sym = "BTCUSDT.A"
-        return _FakeResp(json.dumps([{"symbol": sym, "history": punkte}]).encode())
+        if "spot-markets" in req.full_url:
+            return _FakeResp(json.dumps(reihen["maerkte"]).encode())
+        return _FakeResp(json.dumps(reihen["ohlcv"]).encode())
     return fake
 
 
-def test_pruefe_spot_symbol_verlangt_v_UND_bv():
-    """Ohne beide Zahlen gibt es kein Delta — halbe Daten duerfen nicht als 'ja' gelten."""
+def _punkte(n, mit_bv=True, start=1_700_000_000):
     vier_h = 4 * 3600
-    voll = [{"t": 1_700_000_000 + i * vier_h, "v": 10.0, "bv": 6.0} for i in range(3)]
-    d = coinalyze._pruefe_spot_symbol("KEY", "BTCUSDT.A", opener=_spot_opener(voll))
-    assert d["punkte"] == 3 and d["hat_v_und_bv"] is True, d
-
-    nur_v = [{"t": 1_700_000_000 + i * vier_h, "v": 10.0} for i in range(3)]
-    d2 = coinalyze._pruefe_spot_symbol("KEY", "BTCUSDT.A", opener=_spot_opener(nur_v))
-    assert d2["punkte"] == 3, d2
-    assert d2["hat_v_und_bv"] is False, d2       # <- der entscheidende Fall
+    p = [{"t": start + i * vier_h, "v": 10.0} for i in range(n)]
+    if mit_bv:
+        for e in p:
+            e["bv"] = 6.0
+    return p
 
 
-def test_pruefe_spot_symbol_misst_die_reichweite_in_tagen():
-    """Die Reichweite entscheidet, ob ein Backtest ueberhaupt moeglich ist."""
-    vier_h = 4 * 3600
-    punkte = [{"t": 1_700_000_000 + i * vier_h, "v": 1.0, "bv": 0.5} for i in range(61)]
-    d = coinalyze._pruefe_spot_symbol("KEY", "BTCUSDT.A", opener=_spot_opener(punkte))
-    assert d["reichweite_tage"] == 10.0, d       # 60 Schritte a 4 h = 10 Tage
+def test_pruefe_symbole_erkennt_ob_ein_abruf_mehrere_reihen_bringt():
+    """Daran haengt, ob Aggregieren einen Abruf kostet oder vier."""
+    viele = {"maerkte": [], "ohlcv": [
+        {"symbol": "BTCUSDT.A", "history": _punkte(61)},
+        {"symbol": "BTCUSD.C", "history": _punkte(61)},
+    ]}
+    r = coinalyze._pruefe_symbole("KEY", ["BTCUSDT.A", "BTCUSD.C"],
+                                  opener=_multi_opener(viele))
+    assert r["angefragt"] == 2 and r["zurueck"] == 2, r
+    assert r["mehrfachabruf_geht"] is True, r
+    assert r["je_symbol"]["BTCUSDT.A"]["reichweite_tage"] == 10.0, r
+
+    eine = {"maerkte": [], "ohlcv": [{"symbol": "BTCUSDT.A", "history": _punkte(61)}]}
+    r2 = coinalyze._pruefe_symbole("KEY", ["BTCUSDT.A", "BTCUSD.C"],
+                                   opener=_multi_opener(eine))
+    assert r2["zurueck"] == 1 and r2["mehrfachabruf_geht"] is False, r2
 
 
-def test_spot_probe_urteil_unterscheidet_aggregiert_von_einzelboersen():
-    """Das Urteil muss die drei Faelle auseinanderhalten — daran haengt der naechste Schritt."""
-    vier_h = 4 * 3600
-    voll = [{"t": 1_700_000_000 + i * vier_h, "v": 10.0, "bv": 6.0} for i in range(3)]
+def test_pruefe_symbole_verlangt_v_UND_bv():
+    """Halbe Daten duerfen nicht als brauchbar gelten — ohne beide gibt es kein Delta."""
+    nur_v = {"maerkte": [], "ohlcv": [
+        {"symbol": "BTCUSDT.A", "history": _punkte(5, mit_bv=False)},
+        {"symbol": "BTCUSD.C", "history": _punkte(5, mit_bv=True)},
+    ]}
+    r = coinalyze._pruefe_symbole("KEY", ["BTCUSDT.A", "BTCUSD.C"],
+                                  opener=_multi_opener(nur_v))
+    assert r["je_symbol"]["BTCUSDT.A"]["hat_v_und_bv"] is False, r
+    assert r["je_symbol"]["BTCUSD.C"]["hat_v_und_bv"] is True, r
 
-    def opener_fuer(maerkte):
-        zustand = {"erster": True}
 
-        def fake(req, timeout=0):
-            if "spot-markets" in req.full_url:
-                return _FakeResp(json.dumps(maerkte).encode())
-            sym = "BTCUSDT.A" if "BTCUSDT.A" in req.full_url else "BTCUSD_BINANCE"
-            return _FakeResp(json.dumps([{"symbol": sym, "history": voll}]).encode())
-        return fake
-
-    mit_agg = [{"symbol": "BTCUSDT.A", "exchange": "aggregated", "quote_asset": "USDT"}]
-    r1 = coinalyze.spot_probe("KEY", opener=opener_fuer(mit_agg))
-    assert r1["_ergebnis"].startswith("JA"), r1["_ergebnis"]
-
-    ohne_agg = [{"symbol": "BTCUSD_BINANCE", "exchange": "Binance", "quote_asset": "USD"}]
-    r2 = coinalyze.spot_probe("KEY", opener=opener_fuer(ohne_agg))
-    assert r2["_ergebnis"].startswith("TEILWEISE"), r2["_ergebnis"]
+def test_spot_probe_urteil_nennt_fehlende_boersen_und_die_kuerzeste_historie():
+    maerkte = [_markt("BTCUSDT.A", "A"), _markt("BTCUSD.C", "C", quote="USD")]
+    daten = {"maerkte": maerkte, "ohlcv": [
+        {"symbol": "BTCUSDT.A", "history": _punkte(61)},     # 10 Tage
+        {"symbol": "BTCUSD.C", "history": _punkte(31)},      # 5 Tage
+    ]}
+    r = coinalyze.spot_probe("KEY", opener=_multi_opener(daten))
+    u = r["_ergebnis"]
+    assert u.startswith("JA fuer 2 von 4"), u
+    # Bybit und OKX fehlen in den Maerkten -> muessen im Urteil stehen
+    assert "Bybit" in u and "OKX" in u, u
+    # Die kuerzeste Historie bestimmt das Fenster und muss genannt werden
+    assert "5 bis 10 Tage" in u, u
+    # Und es muss klarstellen, dass WIR aggregieren, nicht Coinalyze
+    assert "von UNS" in u, u
 
 
 def test_spot_probe_meldet_fehlenden_endpunkt_als_klares_nein():
-    """Gibt es /spot-markets nicht, muss das Urteil das sagen — nicht still leer bleiben."""
     import urllib.error
 
     def fake(req, timeout=0):
@@ -252,17 +268,27 @@ def test_spot_probe_meldet_fehlenden_endpunkt_als_klares_nein():
     assert "NICHT geantwortet" in r["_ergebnis"], r["_ergebnis"]
 
 
-def test_pruefe_spot_symbol_meldet_leere_history_statt_abzustuerzen():
-    """Der wahrscheinlichste Fehlerfall: Symbol geraten, Antwort kommt, History leer.
+def test_symbol_konstante_ist_binance_nicht_aggregiert():
+    """Gegen den Irrtum, der seit E9.1 im Code stand: '.A' ist Binance.
 
-    Ohne Schutz greift die Auswertung auf punkte[0] zu und wirft IndexError — dann
-    verschwindet die GANZE Spot-Probe hinter einer Fehlermeldung, statt zu sagen,
-    welches Symbol nichts geliefert hat.
+    Wenn jemand die Konstante spaeter wieder auf ein vermeintliches Aggregat setzt,
+    faellt dieser Test — und der Kommentar daneben erklaert, warum.
     """
-    def fake(req, timeout=0):
-        return _FakeResp(json.dumps([{"symbol": "BTCUSDT.A", "history": []}]).encode())
+    assert coinalyze.SYMBOL.endswith(".A")
+    assert coinalyze.BOERSEN_CODES["A"] == "Binance"
+    quelle = open(coinalyze.__file__, encoding="utf-8").read()
+    kopf = quelle.split("INTERVAL =")[0]
+    assert ".A\" ist NICHT \"aggregiert\"" in kopf or "NICHT" in kopf, \
+        "Der Warnhinweis an SYMBOL fehlt — dann glaubt der naechste wieder an ein Aggregat."
 
-    d = coinalyze._pruefe_spot_symbol("KEY", "BTCUSDT.A", opener=fake)
-    assert d["punkte"] == 0, d
-    assert "hinweis" in d, d                    # sagt, was los war
-    assert "hat_v_und_bv" not in d, d           # behauptet NICHT, es sei brauchbar
+
+def test_sample_deckelt_lange_listen_und_sagt_wie_viele_fehlen():
+    """Sonst wachsen Metadaten-Antworten (5000+ Eintraege) zur 2-MB-Datei im Repo."""
+    lang = [{"symbol": f"S{i}"} for i in range(500)]
+    s = coinalyze._sample(lang)
+    assert len(s) == coinalyze.SAMPLE_MAX_EINTRAEGE + 1, len(s)
+    assert "_gekuerzt" in s[-1], s[-1]
+    assert "460" in s[-1]["_gekuerzt"] and "500" in s[-1]["_gekuerzt"], s[-1]
+    # Kurze Listen bleiben unveraendert — kein Hinweis-Eintrag, der nicht hingehoert
+    kurz = [{"symbol": "X", "history": [1, 2, 3, 4, 5]}]
+    assert coinalyze._sample(kurz) == [{"symbol": "X", "history": [3, 4, 5]}]
