@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 12.01.2026-20.09.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2439 4h-Kerzen geladen · Stand: 2026-09-20 10:52 UTC
+**Voll-Daten-Fenster: 12.01.2026-20.09.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2439 4h-Kerzen geladen · Stand: 2026-09-20 11:31 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -59,7 +59,7 @@ waerts |
 | NEU-LIVE +Bein in Handelsrichtung | 50% | 32% | +27.6 % | -9.9 % | 100 % | 229 | 16 | 59 % | 5 % |
 | NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | 39% | 31% | +32.3 % | -9.9 % | 100 % | 234 | 16 | 43 % | -15 % **<-- beste** |
 | NEU-LIVE +Break-even im Plus | 50% | 30% | +15.2 % | -8.0 % | 100 % | 213 | 26 | 28 % | -3 % |
-| NEU-LIVE +Bein-Wahl +Break-even im Plus | 28% | 71% | +8.5 % | -11.1 % | 100 % | 161 | 17 | 10 % | -8 % |
+| NEU-LIVE +Bein-Wahl +Break-even im Plus | 28% | 71% | +8.6 % | -11.1 % | 100 % | 161 | 17 | 10 % | -8 % |
 | LIVE +Widerstand des Gegen-Beins | 61% | 37% | +22.6 % | -8.7 % | 100 % | 261 | 17 | 42 % | -1 % |
 | LIVE +Widerstand statt Verkauf am letzten Hoch | 56% | 35% | +23.6 % | -9.0 % | 100 % | 219 | 4 | 46 % | 0 % |
 | LIVE +Rest halten | 33% | 50% | +14.4 % | -9.4 % | 100 % | 77 | 4 | 25 % | -3 % |
@@ -91,7 +91,7 @@ waerts |
 
 ## P&L-Simulation (beste Kombination) — getrennt nach Richtung
 
-Start 10.000 € -> **13,230 €** (+32.3 %) · Buy&Hold im Fenster: -12.0 % · Gebuehr 0.1 %/Order, kein Hebel.
+Start 10.000 € -> **13,231 €** (+32.3 %) · Buy&Hold im Fenster: -12.0 % · Gebuehr 0.1 %/Order, kein Hebel.
 
 - **LONG-Trades:** +3,047 € · 87 Abschluesse, 59 im Gewinn
 - **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
@@ -136,7 +136,7 @@ Dieselben Monate, jetzt neben der Bitcoin-Bewegung. **Aufwaerts-Beteiligung** = 
 | 2026-08 | +24.9 % | +2.4 % | 10 % |
 | 2026-09 | +2.3 % | -0.8 % | -35 % |
 
-**Aufwaerts-Beteiligung: 42 %** — in den 5 steigenden Monaten legte Bitcoin zusammen +48.2 % zu, die Engine +20.5 %.
+**Aufwaerts-Beteiligung: 42 %** — in den 5 steigenden Monaten legte Bitcoin zusammen +48.3 % zu, die Engine +20.5 %.
 
 **Abwaerts-Beteiligung: -3 %** — in den 4 fallenden Monaten verlor Bitcoin zusammen -52.6 %, die Engine +1.4 %.
 
@@ -193,9 +193,22 @@ Alle Zeilen: Variante *LIVE-heute +Zonen nachziehen*, dieselben Kerzen, derselbe
 
 ## Aggregierte Derivate-Daten: was bringen sie?
 
-**Dieser Vergleich konnte nicht gerechnet werden.** Grund: Abruf lief durch, lieferte aber keine OI-Punkte. Gewaehlte Maerkte: {'Binance': 'BTCUSD_PERP.A', 'Bybit': 'BTCUSD.6', 'OKX': 'BTCUSD_PERP.3', 'Hyperliquid': 'BTC.H'}. Meldung: keine einzige Reihe erhalten. Bloecke: {'symbole': ['BTCUSD_PERP.A', 'BTCUSD.6', 'BTCUSD_PERP.3', 'BTC.H'], 'http_error': 429, 'body': '{"message":"Too Many Requests. See the \\"Retry-After\\" header."}'}
+Open Interest, Liquidationen und Futures-CVD stehen **direkt** in den Bedingungen aller fuenf Muster — ein OI-Wipeout von 5 %, eine Liquidations-Kaskade, Futures-CVD gegen Spot. Das Spot-CVD (Abschnitt darueber) geht dagegen nur ueber zwei Steigungsvergleiche ein. Wenn Aggregation irgendwo wirkt, dann hier.
 
-Die Zeile steht hier trotzdem — ein Abschnitt, der lautlos fehlt, sieht aus wie ein Abschnitt, den es nie gab.
+Perp-Maerkte: Binance (BTCUSD_PERP.A), Bybit (BTCUSD.6), OKX (BTCUSD_PERP.3), Hyperliquid (BTC.H). OI 1502 Punkte, Liquidationen 1469, Futures-CVD 2001.
+
+**Einheiten:** OI und Liquidationen kommen in USD zurueck (`convert_to_usd`) und sind ueber Boersen hinweg summierbar. Das Futures-CVD dagegen kommt in der Denominierung des jeweiligen Marktes — deshalb werden dafuer nur Maerkte derselben Einheit zusammengerechnet. Ausgeschlossen: BTC.H.
+
+Alle Zeilen: Variante *LIVE-heute +Zonen nachziehen*, dieselben Kerzen, derselbe Zeitraum. Der Unterschied sind allein die Daten.
+
+| Datenlage | Recall | Praez. | Rendite | max. Rueckgang | Signale |
+|---|---|---|---|---|---|
+| heute (nur Binance) | 56% | 32% | +23.5 % | -9.4 % | 238 |
+| **+OI aggregiert** | 56% | 32% | **+24.6 %** | -9.4 % | 230 |
+| **+OI +Liquidationen aggregiert** | 61% | 33% | **+23.3 %** | -9.4 % | 228 |
+| **+alle drei aggregiert** | 61% | 35% | **+23.2 %** | -9.4 % | 217 |
+
+**Die Signalzahl aendert sich** — mehrere Boersen fuehren zu anderen Entscheidungen. Ob das hilft, sagt die Rendite-Spalte.
 
 ## Furkans eigene Termine gegen die Engine
 
@@ -262,7 +275,7 @@ Haelfte 1: 12.01.2026–18.05.2026 · Haelfte 2: 18.05.2026–20.09.2026. Jede H
 | NEU-LIVE +Bein in Handelsrichtung | +19.2 % | 24. | +7.0 % | 6. |
 | NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | +22.6 % | 7. | +7.9 % | 5. |
 | NEU-LIVE +Break-even im Plus | +12.3 % | 52. | +2.5 % | 30. |
-| NEU-LIVE +Bein-Wahl +Break-even im Plus | +14.1 % | 46. | -4.9 % | 56. |
+| NEU-LIVE +Bein-Wahl +Break-even im Plus | +14.1 % | 46. | -4.8 % | 56. |
 | LIVE +Widerstand des Gegen-Beins | +15.4 % | 43. | +6.3 % | 11. |
 | LIVE +Widerstand statt Verkauf am letzten Hoch | +16.2 % | 38. | +6.4 % | 10. |
 | LIVE +Rest halten | +3.3 % | 58. | +10.7 % | 1. |
