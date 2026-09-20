@@ -869,3 +869,108 @@ def test_der_echte_abruf_benutzt_die_wiederholung_auch_wirklich():
     assert versuche["n"] == 2, versuche               # einmal gescheitert, einmal geklappt
     assert summe == {1000 * 1000: 5.0}, summe
     assert not any("http_error" in z for z in b["bloecke"]), b["bloecke"]
+
+
+# ------------------- E37.4: gewichtete Mittel (Funding, Long-Short)
+# Anders als die Summen. Eine Funding-Rate ist ein Preis, keine Menge — zwei Boersen
+# mit 0,01 % und 0,03 % haben zusammen nicht 0,04 %.
+
+def test_gewichtetes_mittel_ist_KEIN_einfacher_durchschnitt():
+    """DIE Falle dieser Etappe: Ein einfacher Durchschnitt gibt einer Zwergboerse
+    dasselbe Gewicht wie Binance — und die Zahl sieht dabei voellig normal aus.
+
+    Hier haelt 'GROSS' 90 % des Open Interest. Einfacher Durchschnitt ergaebe 0,055,
+    richtig gewichtet 0,019. Faktor drei Unterschied, beide Zahlen plausibel.
+    """
+    werte = {"GROSS": {1: 0.01}, "ZWERG": {1: 0.10}}
+    gewichte = {"GROSS": {1: 900.0}, "ZWERG": {1: 100.0}}
+    m, b = coinalyze.gewichtetes_mittel(werte, gewichte, ["GROSS", "ZWERG"], [], "x")
+    assert abs(m[1] - 0.019) < 1e-9, m               # (0.01*900 + 0.10*100)/1000
+    assert abs(m[1] - 0.055) > 0.03, "das waere der einfache Durchschnitt"
+    assert "Open Interest" in b["gewichtung"], b
+
+
+def test_gewichte_werden_normiert():
+    """Ohne Normierung kaeme statt eines Mittels eine mit dem Open Interest skalierte
+    Zahl heraus, die je nach Marktphase um Groessenordnungen schwankt."""
+    werte = {"A": {1: 0.02, 2: 0.02}}
+    # Zeitpunkt 2 hat das ZEHNFACHE Open Interest — das Mittel muss gleich bleiben
+    gewichte = {"A": {1: 100.0, 2: 1000.0}}
+    m, _ = coinalyze.gewichtetes_mittel(werte, gewichte, ["A"], [], "x")
+    assert m[1] == m[2] == 0.02, m
+
+
+def test_gewichtetes_mittel_laesst_zeitpunkte_ohne_gewicht_aus():
+    """Ein Markt ohne Open Interest darf nicht mit Gewicht 0 mitlaufen — rechnerisch
+    waere das dasselbe wie Weglassen, aber niemand saehe es."""
+    werte = {"A": {1: 0.01, 2: 0.02, 3: 0.03}, "B": {1: 0.05, 2: 0.06, 3: 0.07}}
+    gewichte = {"A": {1: 10.0, 2: 10.0, 3: 10.0}, "B": {1: 10.0, 3: 10.0}}  # 2 fehlt
+    m, b = coinalyze.gewichtetes_mittel(werte, gewichte, ["A", "B"], [], "x")
+    assert sorted(m) == [1, 3], m
+    assert b["punkte_ausgelassen"] == 1, b
+
+
+def test_gewichtetes_mittel_ueberspringt_zeitpunkte_mit_gewicht_null():
+    """Summe der Gewichte null -> Division durch null. Zaehlen statt abstuerzen."""
+    werte = {"A": {1: 0.01, 2: 0.02}}
+    gewichte = {"A": {1: 0.0, 2: 5.0}}
+    m, b = coinalyze.gewichtetes_mittel(werte, gewichte, ["A"], [], "x")
+    assert sorted(m) == [2], m
+    assert b["punkte_ohne_gewicht"] == 1, b
+
+
+def test_funding_und_long_short_holen_die_richtigen_endpunkte_und_felder():
+    gefragt = []
+
+    def fake(req, timeout=0):
+        gefragt.append(req.full_url)
+        if "funding-rate-history" in req.full_url:
+            return _FakeResp(json.dumps([{"symbol": "A.1", "history": [
+                {"t": 1000, "o": 9.0, "c": 0.0002}]}]).encode())
+        if "long-short-ratio-history" in req.full_url:
+            return _FakeResp(json.dumps([{"symbol": "A.1", "history": [
+                {"t": 1000, "r": 1.9, "l": 65.0, "s": 35.0}]}]).encode())
+        return _FakeResp(json.dumps([]).encode())
+
+    g = {"A.1": {1000 * 1000: 500.0}}
+    f, _ = coinalyze.funding_aggregiert("KEY", ["A.1"], g, opener=fake, pause=0)
+    assert f == {1000 * 1000: 0.0002}, f             # 'c', nicht 'o'
+    ls, _ = coinalyze.long_short_aggregiert("KEY", ["A.1"], g, opener=fake, pause=0)
+    assert ls == {1000 * 1000: 65.0}, ls             # 'l', nicht 's' oder 'r'
+    assert any("funding-rate-history" in u for u in gefragt), gefragt
+    assert any("long-short-ratio-history" in u for u in gefragt), gefragt
+
+
+def test_skalen_vergleich_findet_einen_faktor_und_das_vorzeichen():
+    """Vor dem Quellentausch: In classify_pattern ist das Vorzeichen skalenunabhaengig,
+    die Schwelle funding_hot = 0.0001 aber nicht."""
+    kraken = {1: 0.0008, 2: -0.0004, 3: 0.0016}
+    coin = {1: 0.0001, 2: -0.00005, 3: 0.0002}       # rund ein Achtel
+    v = coinalyze.skalen_vergleich(kraken, coin, "kraken", "coinalyze")
+    assert v["gemeinsame_punkte"] == 3, v
+    assert abs(v["faktor"] - 8.0) < 0.5, v
+    assert v["gleiches_vorzeichen_anteil"] == 1.0, v
+
+
+def test_skalen_vergleich_meldet_wenn_es_nichts_zu_vergleichen_gibt():
+    v = coinalyze.skalen_vergleich({1: 0.1}, {2: 0.2}, "a", "b")
+    assert "fehler" in v, v
+
+
+def test_skalen_vergleich_zeigt_abweichende_vorzeichen():
+    """Drehen die Reihen gegeneinander, ist es nicht dieselbe Groesse — dann hilft
+    auch kein Umrechnungsfaktor."""
+    v = coinalyze.skalen_vergleich({1: 0.1, 2: 0.1}, {1: 0.1, 2: -0.1}, "a", "b")
+    assert v["gleiches_vorzeichen_anteil"] == 0.5, v
+
+
+def test_gewichtetes_mittel_meldet_symbole_ganz_ohne_gewichtsreihe():
+    """Randfall, den die anderen Tests nicht treffen: Ein Markt liefert Werte, aber
+    ueberhaupt kein Open Interest. Er darf nicht als 'vorhanden' gelten — sonst
+    stolpert die Rechnung ueber ein Gewicht, das es nicht gibt."""
+    werte = {"A": {1: 0.01}, "OHNE_OI": {1: 0.99}}
+    gewichte = {"A": {1: 10.0}}                      # OHNE_OI fehlt komplett
+    m, b = coinalyze.gewichtetes_mittel(werte, gewichte, ["A", "OHNE_OI"], [], "x")
+    assert m == {1: 0.01}, m                         # nur A zaehlt
+    assert b["symbole"] == ["A"], b
+    assert b["ohne_antwort"] == ["OHNE_OI"], b

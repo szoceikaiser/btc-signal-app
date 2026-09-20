@@ -1057,6 +1057,7 @@ def main():
     # E37.3: Open Interest, Liquidationen und Futures-CVD ueber mehrere Perp-Maerkte.
     # Wieder nur fuer den Vergleich — die Hauptreihe bleibt auf Binance.
     oi_agg, liq_agg, fut_agg, derivate_bericht = {}, {}, {}, {}
+    fund_agg, ls_agg = {}, {}
     derivate_fehler = "kein COINALYZE_API_KEY gesetzt"
     if api_key:
         derivate_fehler = ""
@@ -1069,7 +1070,12 @@ def main():
             alle_syms = pa["alle_symbole"]
             cvd_syms, ausgeschlossen = pa["cvd_symbole"], pa["cvd_ausgeschlossen"]
             zeitraum = {"frm": WARMUP_MS // 1000, "to": END_MS // 1000}
-            oi_agg, b_oi = coinalyze.oi_aggregiert(api_key, alle_syms, **zeitraum)
+            # Open Interest EINMAL je Boerse holen: als Summe (E37.3) und zugleich als
+            # Gewicht fuer die Mittel (E37.4). Ein zweiter Abruf derselben Daten hat
+            # am 20.09.2026 das Rate-Limit gesprengt.
+            oi_einzeln, b_oi_roh = coinalyze.oi_je_symbol(api_key, alle_syms, **zeitraum)
+            oi_agg, b_oi = coinalyze._summiere_vollstaendig(
+                oi_einzeln, alle_syms, b_oi_roh, "USD (convert_to_usd)")
             liq_agg, b_liq = coinalyze.liq_aggregiert(api_key, alle_syms, **zeitraum)
             fut_agg, b_fut = coinalyze.fut_delta_aggregiert(api_key, cvd_syms, **zeitraum)
             derivate_bericht = {
@@ -1083,6 +1089,25 @@ def main():
                   f"{len(cvd_syms)} Maerkte gleicher Denominierung"
                   + (f", {len(ausgeschlossen)} wegen abweichender Einheit ausgeschlossen"
                      if ausgeschlossen else ""))
+            # E37.4: gewichtete Mittel — Funding und Long-Short. Die Gewichte sind das
+            # eben geholte Open Interest je Boerse, kein zusaetzlicher Abruf.
+            try:
+                fund_agg, b_fund = coinalyze.funding_aggregiert(
+                    api_key, alle_syms, oi_einzeln, **zeitraum)
+                ls_agg, b_ls = coinalyze.long_short_aggregiert(
+                    api_key, alle_syms, oi_einzeln, **zeitraum)
+                # VOR dem Austausch: Haben Kraken und Coinalyze dieselbe Skala?
+                skala = coinalyze.skalen_vergleich(
+                    {t: v for t, v in funding}, fund_agg, "kraken", "coinalyze")
+                derivate_bericht.update({"funding": b_fund, "long_short": b_ls,
+                                         "funding_skala": skala})
+                print(f"Coinalyze gewichtet: Funding {len(fund_agg)} Punkte, "
+                      f"Long-Short {len(ls_agg)}; Skala Kraken/Coinalyze "
+                      f"Faktor {skala.get('faktor')}")
+            except Exception as exc:  # noqa: BLE001
+                fund_agg, ls_agg = {}, {}
+                derivate_bericht["funding_fehler"] = f"{type(exc).__name__}: {exc}"
+                print(f"Coinalyze Funding/Long-Short nicht verfuegbar ({exc}).")
         except Exception as exc:  # noqa: BLE001
             derivate_fehler = f"{type(exc).__name__}: {exc}"
             print(f"Coinalyze Derivate nicht verfuegbar ({exc}) -> Vergleich entfaellt.")
@@ -1376,6 +1401,95 @@ def main():
             f"{n}: {p['rendite_pct']:+.1f} % ({len(v)} Signale)"
             for n, (v, p, _) in _derg.items()))
 
+    # --- E37.4: gewichtete Mittel — Funding und Long-Short --------------------------
+    # Anders als die Summen: Eine Funding-Rate ist ein Preis, kein Betrag. Zwei Boersen
+    # mit 0,01 % und 0,03 % haben zusammen nicht 0,04 %. Gewichtet wird nach Open
+    # Interest, wie Furkan es bei Velo einstellt.
+    gewicht_zeilen = []
+    if not fund_agg:
+        gewicht_zeilen = abschnitt_oder_grund(
+            "Gewichtete Mittel: Funding und Long-Short", None,
+            derivate_bericht.get("funding_fehler")
+            or (derivate_fehler if derivate_fehler else "Abruf lieferte keine Punkte"),
+            list)
+    else:
+        _gcfg = next((c for c in GRID if c.get("panel")), GRID[0])
+        _fund_liste = sorted(fund_agg.items())
+        _gz, _gerg = [], {}
+        for name, fu, ls in (("heute (Kraken-Funding, Binance-Long-Short)", None, None),
+                             ("+Funding aggregiert", _fund_liste, None),
+                             ("+Funding +Long-Short aggregiert", _fund_liste, ls_agg)):
+            if name.startswith("+") and not fu:
+                continue
+            _, _fl = build_series(raw, fu if fu is not None else funding,
+                                  oi_map, liq_map, fut_map,
+                                  ls if ls is not None else ls_map)
+            _v = run_backtest(candles, _fl, _gcfg, start_ms=eff_start)
+            _p = simulate(_v, candles, start_ms=eff_start)
+            _s = score(_v, start_ms=eff_start)
+            _gerg[name] = (_v, _p, _s)
+            h = "**" if fu is not None else ""
+            _gz.append(f"| {h}{name}{h} | {_s['recall']:.0%} | {_s['precision']:.0%} | "
+                       f"{h}{_p['rendite_pct']:+.1f} %{h} | "
+                       f"{_p['max_drawdown_pct']:.1f} % | {len(_v)} |")
+        _sk = derivate_bericht.get("funding_skala", {})
+        _f = _sk.get("faktor")
+        _bf = derivate_bericht.get("funding", {})
+        gewicht_zeilen = [
+            "",
+            "## Gewichtete Mittel: Funding und Long-Short",
+            "",
+            "Diese beiden Werte werden **nicht summiert**. Eine Funding-Rate ist ein "
+            "Preis, keine Menge — zwei Boersen mit 0,01 % und 0,03 % haben zusammen "
+            "nicht 0,04 %. Gewichtet wird nach Open Interest je Zeitpunkt, wie Furkan "
+            "es bei Velo einstellt ('Open Interest gewichtet, 8 Stunden, Durchschnitt').",
+            "",
+            "**Ein einfacher Durchschnitt waere hier die Falle:** Er gaebe einer "
+            "Zwergboerse dasselbe Gewicht wie Binance — und die Zahl saehe dabei "
+            "voellig normal aus.",
+            "",
+            f"{_bf.get('punkte_vollstaendig', 0)} vollstaendige Punkte, "
+            f"{_bf.get('punkte_ausgelassen', 0)} ausgelassen (ein Zeitpunkt zaehlt nur, "
+            "wenn alle Boersen dort BEIDES haben: einen Wert und ein Gewicht).",
+            "",
+            "### Zuerst die Skala — vor dem Austausch der Quelle",
+            "",
+            "Das Funding der Engine kommt bis heute von **Kraken** "
+            "(`relativeFundingRate * 8`), nicht von Coinalyze. Ob beide dieselbe Skala "
+            "haben, stand nirgends. In `classify_pattern` ist das Vorzeichen "
+            "skalenunabhaengig — die Schwelle `funding_hot = 0.0001` aber nicht. Wer "
+            "die Quelle tauscht, ohne das zu pruefen, verschiebt stillschweigend eine "
+            "Musterbedingung.",
+            "",
+            (f"Gemessen an {_sk.get('gemeinsame_punkte', 0)} gemeinsamen Zeitpunkten: "
+             f"Median-Betrag Kraken {_sk.get('median_betrag_kraken', 0):.3e}, "
+             f"Coinalyze {_sk.get('median_betrag_coinalyze', 0):.3e} — "
+             + (f"**Faktor {_f:.2f}**. " if isinstance(_f, (int, float)) else "Faktor nicht bestimmbar. ")
+             + f"Gleiches Vorzeichen in "
+               f"{_sk.get('gleiches_vorzeichen_anteil', 0):.0%} der Faelle."
+             if _sk.get("gemeinsame_punkte") else
+             f"Skalenvergleich nicht moeglich: {_sk.get('fehler', 'unbekannt')}."),
+            "",
+            ((f"**Achtung, die Skalen weichen um Faktor {_f:.1f} ab.** Die Zeilen unten "
+              "tauschen die Quelle OHNE Umrechnung — die Schwelle `funding_hot` meint "
+              "damit etwas anderes als vorher. Wer diese Zeile je live schalten will, "
+              "muss die Schwelle mit umrechnen." if isinstance(_f, (int, float)) and (_f > 2 or _f < 0.5) else
+              "**Die Skalen liegen nahe beieinander** — ein Quellentausch verschiebt die "
+              "Schwelle `funding_hot` also nicht wesentlich.")
+             if isinstance(_f, (int, float)) else
+             "**Ohne Skalenvergleich ist ein Quellentausch nicht zu beurteilen.**"),
+            "",
+            f"Alle Zeilen: Variante *{_gcfg['label']}*, dieselben Kerzen, derselbe "
+            "Zeitraum. Der Unterschied sind allein die Daten.",
+            "",
+            "| Datenlage | Recall | Praez. | Rendite | max. Rueckgang | Signale |",
+            "|---|---|---|---|---|---|",
+            *_gz,
+        ]
+        print("E37.4 Gewichtet: " + " | ".join(
+            f"{n}: {p['rendite_pct']:+.1f} % ({len(v)} Signale)"
+            for n, (v, p, _) in _gerg.items()))
+
     # --- E11: Robustheitspruefung, Fenster halbiert ---------------------------------
     mid_ms = eff_start + (END_MS - eff_start) // 2
     print(f"\nRobustheitspruefung: Haelfte 1 bis {to_date(mid_ms).strftime('%d.%m.%Y')}, "
@@ -1665,6 +1779,7 @@ def main():
         *fut_zeilen,
         *spot_zeilen,
         *derivate_zeilen,
+        *gewicht_zeilen,
         *furkan_zeilen,
         "",
         "## Robustheitspruefung: Fenster halbiert",

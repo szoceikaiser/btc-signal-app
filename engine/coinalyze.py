@@ -696,18 +696,147 @@ def fut_delta_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
         "Denominierung des Marktes (meist BTC) — NICHT mit USD-Reihen mischen")
 
 
+def _werte_je_symbol(eintraege: list, feld: str) -> dict:
+    """{Symbol: {ts_ms: Wert}} aus rohen History-Eintraegen, ein Feld herausgezogen."""
+    return {
+        e.get("symbol", "?"): {int(p["t"]) * 1000: float(p[feld])
+                               for p in e.get("history") or []
+                               if isinstance(p, dict) and "t" in p and feld in p}
+        for e in eintraege}
+
+
+def oi_je_symbol(api_key: str, symbole: list, **kw) -> tuple:
+    """Open Interest je Boerse EINZELN — Grundlage fuer die Gewichtung in E37.4."""
+    if not symbole:
+        return {}, []
+    eintraege, bloecke = _hole_reihen_roh(api_key, symbole,
+                                          endpoint="open-interest-history", **kw)
+    return _werte_je_symbol(eintraege, "c"), bloecke
+
+
 def oi_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
     """Open Interest ueber mehrere Perp-Maerkte, in USD (convert_to_usd=true)."""
     if not symbole:
         return {}, {"fehler": "keine Symbole"}
-    eintraege, bloecke = _hole_reihen_roh(api_key, symbole,
-                                          endpoint="open-interest-history", **kw)
-    je_symbol = {
-        e.get("symbol", "?"): {int(p["t"]) * 1000: float(p["c"])
-                               for p in e.get("history") or []
-                               if isinstance(p, dict) and "t" in p and "c" in p}
-        for e in eintraege}
+    je_symbol, bloecke = oi_je_symbol(api_key, symbole, **kw)
     return _summiere_vollstaendig(je_symbol, symbole, bloecke, "USD (convert_to_usd)")
+
+
+# ------------------------------- E37.4: gewichtete Mittel (Funding, Long-Short)
+# Funding und Long-Short werden NICHT summiert. Furkan stellt bei Velo ausdruecklich
+# "Open Interest gewichtet, 8 Stunden, Durchschnitt" ein — und das ist auch sachlich
+# richtig: Eine Funding-Rate ist ein Preis, keine Menge. Zwei Boersen mit 0,01 % und
+# 0,03 % haben zusammen nicht 0,04 %.
+#
+# DIE FALLE: Ein EINFACHER Durchschnitt gibt einer Zwergboerse dasselbe Gewicht wie
+# Binance. Bei vier Boersen, von denen eine 90 % des Open Interest haelt, verschiebt
+# das den Wert um ein Vielfaches — und die Zahl sieht dabei voellig normal aus.
+
+
+def gewichtetes_mittel(werte: dict, gewichte: dict, symbole: list, bloecke: list,
+                       einheit: str) -> tuple:
+    """Nach `gewichte` gewichtetes Mittel von `werte`, je Zeitpunkt.
+
+    Dieselbe Vollstaendigkeitsregel wie bei den Summen, nur strenger: Ein Zeitpunkt
+    zaehlt nur, wenn ALLE gefragten Symbole dort BEIDES haben — einen Wert UND ein
+    Gewicht. Ein Markt ohne Open Interest wird also nicht etwa mit Gewicht 0
+    mitgeschleift (das waere rechnerisch dasselbe wie Weglassen, aber niemand saehe
+    es), sondern der ganze Zeitpunkt faellt weg und wird gezaehlt.
+
+    Die Gewichte werden je Zeitpunkt normiert — die Summe der Gewichte kuerzt sich
+    heraus. Ohne Normierung kaeme statt eines Mittels eine mit dem Open Interest
+    skalierte Zahl heraus, die je nach Marktphase um Groessenordnungen schwankt.
+    """
+    fehlende = [s for s in symbole if s not in werte or s not in gewichte]
+    vorhanden = [s for s in symbole if s in werte and s in gewichte]
+    if not vorhanden:
+        return {}, {"fehler": "keine einzige vollstaendige Reihe erhalten",
+                    "bloecke": bloecke, "ohne_antwort": fehlende}
+
+    alle_ts = set().union(*(set(werte[s]) for s in vorhanden))
+    vollstaendig = set.intersection(
+        *(set(werte[s]) & set(gewichte[s]) for s in vorhanden))
+    out = {}
+    ohne_gewicht = 0
+    for ts in sorted(vollstaendig):
+        summe_g = sum(gewichte[s][ts] for s in vorhanden)
+        if summe_g <= 0:           # alle Gewichte null -> kein sinnvolles Mittel
+            ohne_gewicht += 1
+            continue
+        out[ts] = sum(werte[s][ts] * gewichte[s][ts] for s in vorhanden) / summe_g
+    bericht = {
+        "symbole": vorhanden,
+        "ohne_antwort": fehlende,
+        "punkte_gesamt": len(alle_ts),
+        "punkte_vollstaendig": len(out),
+        "punkte_ausgelassen": len(alle_ts) - len(out),
+        "punkte_ohne_gewicht": ohne_gewicht,
+        "je_symbol_punkte": {s: len(werte[s]) for s in vorhanden},
+        "bloecke": bloecke,
+        "einheit": einheit,
+        "gewichtung": "nach Open Interest je Zeitpunkt, normiert",
+    }
+    return out, bericht
+
+
+def funding_aggregiert(api_key: str, symbole: list, gewichte: dict, **kw) -> tuple:
+    """Funding-Rate ueber mehrere Perp-Maerkte, nach Open Interest gewichtet.
+
+    `gewichte` kommt aus oi_je_symbol() — bewusst als Parameter statt intern geholt:
+    Der Backtest braucht das Open Interest ohnehin, und ein zweiter Abruf derselben
+    Daten hat am 20.09.2026 das Rate-Limit gesprengt.
+    """
+    if not symbole:
+        return {}, {"fehler": "keine Symbole"}
+    eintraege, bloecke = _hole_reihen_roh(api_key, symbole,
+                                          endpoint="funding-rate-history", **kw)
+    return gewichtetes_mittel(_werte_je_symbol(eintraege, "c"), gewichte, symbole,
+                              bloecke, "Funding-Rate je Intervall (Skala pruefen!)")
+
+
+def long_short_aggregiert(api_key: str, symbole: list, gewichte: dict, **kw) -> tuple:
+    """Long-Anteil in Prozent, nach Open Interest gewichtet.
+
+    Ein Prozentsatz ist wie das Funding ein Verhaeltnis, keine Menge — summieren
+    ergaebe Werte ueber 100 %.
+    """
+    if not symbole:
+        return {}, {"fehler": "keine Symbole"}
+    eintraege, bloecke = _hole_reihen_roh(api_key, symbole,
+                                          endpoint="long-short-ratio-history", **kw)
+    return gewichtetes_mittel(_werte_je_symbol(eintraege, "l"), gewichte, symbole,
+                              bloecke, "Prozent Long-Anteil")
+
+
+def skalen_vergleich(a: dict, b: dict, name_a: str, name_b: str) -> dict:
+    """Vergleicht zwei Reihen in der Groessenordnung — VOR dem Austausch der Quelle.
+
+    Grund (E37.4): Das Funding kommt heute von Kraken (`relativeFundingRate * 8`),
+    die aggregierte Reihe von Coinalyze. Ob beide dieselbe Skala haben, steht
+    NIRGENDS. In classify_pattern ist das Vorzeichen skalenunabhaengig — die Schwelle
+    `funding_hot = 0.0001` aber nicht. Wer die Quelle tauscht, ohne die Skala zu
+    pruefen, verschiebt stillschweigend eine Musterbedingung.
+    """
+    gemeinsam = sorted(set(a) & set(b))
+    if not gemeinsam:
+        return {"fehler": "keine gemeinsamen Zeitpunkte",
+                f"punkte_{name_a}": len(a), f"punkte_{name_b}": len(b)}
+
+    def _median(werte):
+        s = sorted(werte)
+        return s[len(s) // 2] if s else 0.0
+
+    med_a = _median([abs(a[ts]) for ts in gemeinsam])
+    med_b = _median([abs(b[ts]) for ts in gemeinsam])
+    gleiches_vz = sum(1 for ts in gemeinsam
+                      if (a[ts] > 0) == (b[ts] > 0)) / len(gemeinsam)
+    return {
+        "gemeinsame_punkte": len(gemeinsam),
+        f"median_betrag_{name_a}": med_a,
+        f"median_betrag_{name_b}": med_b,
+        "faktor": (med_a / med_b) if med_b else None,
+        "gleiches_vorzeichen_anteil": round(gleiches_vz, 4),
+    }
 
 
 def liq_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
