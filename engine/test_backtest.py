@@ -767,3 +767,37 @@ def test_abschnitt_oder_grund_rechnet_im_fehlerfall_NICHT():
     assert gelaufen == [], "bauen() wurde trotz fehlender Daten aufgerufen"
     backtest.abschnitt_oder_grund("Titel", {1: 1}, "", bauen)
     assert gelaufen == [1], "bauen() wurde bei vorhandenen Daten NICHT aufgerufen"
+
+
+# ------------------------------- E37.5: Robustheitspruefung der Datenvarianten
+
+def test_besser_in_beiden_haelften_verlangt_BEIDE():
+    """Ein Vorsprung in nur EINER Haelfte ist nicht von Zufall zu unterscheiden —
+    genau deshalb gibt es die Halbierung."""
+    zeilen = [
+        ("heute", 10.0, 10.0),
+        ("beide besser", 12.0, 11.0),
+        ("nur H1 besser", 12.0, 9.0),
+        ("nur H2 besser", 9.0, 11.0),
+        ("beide schlechter", 8.0, 8.0),
+    ]
+    assert backtest.besser_in_beiden_haelften(zeilen, "heute") == ["beide besser"]
+
+
+def test_besser_in_beiden_haelften_zaehlt_gleichstand_NICHT_als_besser():
+    """Gleichstand ist kein Vorsprung. Sonst faende man 'Verbesserungen', die keine sind."""
+    zeilen = [("heute", 10.0, 10.0), ("gleich", 10.0, 10.0), ("knapp", 10.0, 10.1)]
+    assert backtest.besser_in_beiden_haelften(zeilen, "heute") == []
+
+
+def test_besser_in_beiden_haelften_behauptet_nichts_ohne_basis():
+    """Fehlt die Vergleichsbasis, ist die Frage nicht beantwortbar — dann lieber
+    nichts sagen, als eine Rangfolge ohne Bezugspunkt zu melden."""
+    zeilen = [("a", 12.0, 11.0), ("b", 9.0, 9.0)]
+    assert backtest.besser_in_beiden_haelften(zeilen, "heute") == []
+    assert backtest.besser_in_beiden_haelften([], "heute") == []
+
+
+def test_besser_in_beiden_haelften_nennt_alle_gewinner_nicht_nur_den_ersten():
+    zeilen = [("heute", 5.0, 5.0), ("a", 6.0, 6.0), ("b", 7.0, 7.0)]
+    assert sorted(backtest.besser_in_beiden_haelften(zeilen, "heute")) == ["a", "b"]

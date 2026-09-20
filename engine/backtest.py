@@ -471,6 +471,23 @@ def fetch_candles_range(start_ms: int, end_ms: int) -> list:
     return out
 
 
+def besser_in_beiden_haelften(zeilen: list, basis: str) -> list:
+    """Welche Varianten schlagen die Basis in BEIDEN Fensterhaelften?
+
+    `zeilen` = [(Name, Rendite H1, Rendite H2)]. Genau eine davon ist die Basis.
+    Das ist die einzige Aussage, die aus einer Halbierung wirklich folgt: Ein
+    Vorsprung, der nur in EINER Haelfte besteht, ist nicht von Zufall zu unterscheiden
+    (BACKTEST.md, Robustheitspruefung: "Kippt die Rangfolge, war es Zufall").
+
+    Fehlt die Basis, ist die Frage nicht beantwortbar — dann lieber nichts behaupten.
+    """
+    werte = {n: (a, b) for n, a, b in zeilen}
+    if basis not in werte:
+        return []
+    b1, b2 = werte[basis]
+    return [n for n, (a, b) in werte.items() if n != basis and a > b1 and b > b2]
+
+
 def abschnitt_oder_grund(titel: str, daten, fehler: str, bauen) -> list:
     """Baut einen Vergleichsabschnitt — oder eine Notiz, WARUM es ihn nicht gibt.
 
@@ -1129,6 +1146,53 @@ def main():
                                    f"Bloecke: {_bl}")
 
     candles, flow = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map)
+
+    # --- E37.5: ALLE Datenvarianten an EINER Stelle ---------------------------------
+    # Bis hierher baute jeder Vergleichsabschnitt seine Reihen selbst. Fuer die
+    # Robustheitspruefung (Fensterhalbierung) muessen es garantiert DIESELBEN Reihen
+    # sein — sonst misst die Halbierung etwas anderes als die Vollfenster-Tabelle und
+    # niemand merkt es. Deshalb hier einmal bauen und ueberall daraus bedienen.
+    def _reihe(**abweichung):
+        """Eine Flow-Reihe mit genau den genannten Abweichungen vom heutigen Stand."""
+        _, fl = build_series(
+            raw,
+            abweichung.get("funding", funding),
+            abweichung.get("oi_map", oi_map),
+            abweichung.get("liq_map", liq_map),
+            abweichung.get("fut_map", fut_map),
+            abweichung.get("ls_map", ls_map),
+            spot_map=abweichung.get("spot_map"))
+        return fl
+
+    # Funding: die aggregierte Reihe auf die heutige Groessenordnung normiert. Der
+    # Faktor ist gemessen (skalen_vergleich), nicht geraten. Ohne Normierung wuerde
+    # ein Vergleich vor allem zeigen, dass `funding_hot` nicht mehr passt.
+    _fkt = derivate_bericht.get("funding_skala", {}).get("faktor")
+    fund_norm = (sorted((t, v * _fkt) for t, v in fund_agg.items())
+                 if fund_agg and isinstance(_fkt, (int, float)) and _fkt else None)
+
+    # EINE Quelle der Wahrheit fuer alle Vergleiche UND die Fensterhalbierung.
+    varianten = {"heute (Binance/Kraken)": flow}
+    if spot_agg:
+        varianten["Spot-CVD aggregiert"] = _reihe(spot_map=spot_agg)
+    if spot_alle:
+        varianten["Spot-CVD, alle Dollar-Maerkte"] = _reihe(spot_map=spot_alle)
+    if oi_agg:
+        varianten["OI aggregiert"] = _reihe(oi_map=oi_agg)
+        varianten["OI +Liquidationen"] = _reihe(oi_map=oi_agg, liq_map=liq_agg)
+        varianten["OI +Liq +Futures-CVD"] = _reihe(oi_map=oi_agg, liq_map=liq_agg,
+                                                   fut_map=fut_agg)
+    if fund_norm:
+        varianten["Funding normiert"] = _reihe(funding=fund_norm)
+        if ls_agg:
+            varianten["Funding normiert +Long-Short"] = _reihe(funding=fund_norm,
+                                                               ls_map=ls_agg)
+    if spot_agg and oi_agg and fund_norm:
+        varianten["ALLES aggregiert"] = _reihe(
+            spot_map=spot_agg, oi_map=oi_agg, liq_map=liq_agg, fut_map=fut_agg,
+            funding=fund_norm, ls_map=ls_agg or ls_map)
+    print(f"E37.5: {len(varianten)} Datenvarianten gebaut "
+          f"({', '.join(list(varianten)[1:]) or 'nur heute'})")
     # Vergleichsreihe OHNE Futures-Daten: dieselben Kerzen, fut_cvd = 0. Damit laesst sich
     # die Wirkung der neuen Daten sauber isolieren (gleiche Variante, nur andere Daten).
     _, flow_ohne_fut = build_series(raw, funding, oi_map, liq_map, None, ls_map)
@@ -1264,13 +1328,15 @@ def main():
     else:
         _scfg = next((c for c in GRID if c.get("panel")), GRID[0])
         _zeilen, _ergebnisse = [], {}
-        for name, karte in (("heute (nur Binance)", None),
-                            ("aggregiert, groesster Markt je Boerse", spot_agg),
-                            ("aggregiert, alle Dollar-Maerkte", spot_alle)):
-            if name != "heute (nur Binance)" and not karte:
+        for name, schluessel in (("heute (nur Binance)", "heute (Binance/Kraken)"),
+                                 ("aggregiert, groesster Markt je Boerse",
+                                  "Spot-CVD aggregiert"),
+                                 ("aggregiert, alle Dollar-Maerkte",
+                                  "Spot-CVD, alle Dollar-Maerkte")):
+            _fl = varianten.get(schluessel)
+            if _fl is None:
                 continue
-            _, _fl = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map,
-                                  spot_map=karte)
+            karte = None if schluessel.startswith("heute") else True
             _v = run_backtest(candles, _fl, _scfg, start_ms=eff_start)
             _p = simulate(_v, candles, start_ms=eff_start)
             _s = score(_v, start_ms=eff_start)
@@ -1340,16 +1406,14 @@ def main():
     else:
         _dcfg = next((c for c in GRID if c.get("panel")), GRID[0])
         _dz, _derg = [], {}
-        for name, o, l, f in (("heute (nur Binance)", None, None, None),
-                              ("+OI aggregiert", oi_agg, None, None),
-                              ("+OI +Liquidationen aggregiert", oi_agg, liq_agg, None),
-                              ("+alle drei aggregiert", oi_agg, liq_agg, fut_agg)):
-            if name != "heute (nur Binance)" and not o:
+        for name, schluessel in (("heute (nur Binance)", "heute (Binance/Kraken)"),
+                                 ("+OI aggregiert", "OI aggregiert"),
+                                 ("+OI +Liquidationen aggregiert", "OI +Liquidationen"),
+                                 ("+alle drei aggregiert", "OI +Liq +Futures-CVD")):
+            _fl = varianten.get(schluessel)
+            if _fl is None:
                 continue
-            _, _fl = build_series(raw, funding,
-                                  o if o is not None else oi_map,
-                                  l if l is not None else liq_map,
-                                  f if f is not None else fut_map, ls_map)
+            o = None if schluessel.startswith("heute") else True
             _v = run_backtest(candles, _fl, _dcfg, start_ms=eff_start)
             _p = simulate(_v, candles, start_ms=eff_start)
             _s = score(_v, start_ms=eff_start)
@@ -1419,21 +1483,23 @@ def main():
         # einmal — sie misst deshalb vor allem, dass `funding_hot` nicht mehr passt.
         # Diese Zeile normiert die aggregierte Reihe auf die heutige Groessenordnung;
         # erst sie misst die Aggregation allein. Der Faktor ist gemessen, nicht geraten.
-        _fk = derivate_bericht.get("funding_skala", {}).get("faktor")
-        _fund_norm = (sorted((t, v * _fk) for t, v in fund_agg.items())
-                      if isinstance(_fk, (int, float)) and _fk else None)
         _gz, _gerg = [], {}
-        for name, fu, ls in (("heute (Kraken-Funding, Binance-Long-Short)", None, None),
-                             ("+Funding aggregiert (rohe Skala)", _fund_liste, None),
-                             ("+Funding aggregiert, auf heutige Skala normiert",
-                              _fund_norm, None),
-                             ("+Funding normiert +Long-Short aggregiert",
-                              _fund_norm, ls_agg)):
-            if name.startswith("+") and not fu:
+        # Die rohe Skala ist die EINZIGE Reihe, die hier extra gebaut wird — sie taugt
+        # nur zur Veranschaulichung des Skalenfehlers und gehoert nicht in die
+        # Robustheitspruefung.
+        _roh = _reihe(funding=_fund_liste)
+        for name, schluessel, extra in (
+                ("heute (Kraken-Funding, Binance-Long-Short)",
+                 "heute (Binance/Kraken)", None),
+                ("+Funding aggregiert (rohe Skala)", None, _roh),
+                ("+Funding aggregiert, auf heutige Skala normiert",
+                 "Funding normiert", None),
+                ("+Funding normiert +Long-Short aggregiert",
+                 "Funding normiert +Long-Short", None)):
+            _fl = extra if extra is not None else varianten.get(schluessel)
+            if _fl is None:
                 continue
-            _, _fl = build_series(raw, fu if fu is not None else funding,
-                                  oi_map, liq_map, fut_map,
-                                  ls if ls is not None else ls_map)
+            fu = None if name.startswith("heute") else True
             _v = run_backtest(candles, _fl, _gcfg, start_ms=eff_start)
             _p = simulate(_v, candles, start_ms=eff_start)
             _s = score(_v, start_ms=eff_start)
@@ -1519,6 +1585,58 @@ def main():
         print("E37.4 Gewichtet: " + " | ".join(
             f"{n}: {p['rendite_pct']:+.1f} % ({len(v)} Signale)"
             for n, (v, p, _) in _gerg.items()))
+
+    # --- E37.5: Robustheitspruefung fuer die DATEN-Varianten ------------------------
+    # Die Halbierung weiter unten deckt nur das Parameter-Gitter ab. Die Datenzeilen
+    # aus E37.2/3/4 standen bisher ohne jede Robustheitspruefung im Bericht — und
+    # genau davor warnt der Abschnitt dort: "Die beste von vielen sieht immer besser
+    # aus als sie ist." Hier laufen dieselben Reihen (varianten, eine Quelle) noch
+    # einmal getrennt in beiden Haelften.
+    daten_halb_zeilen = []
+    if len(varianten) > 1:
+        _mid = eff_start + (END_MS - eff_start) // 2
+        _dcfg5 = next((c for c in GRID if c.get("panel")), GRID[0])
+        _roh5 = []
+        for name, fl in varianten.items():
+            _s1, p1 = run_half(candles, fl, _dcfg5, eff_start, end_ms=_mid)
+            _s2, p2 = run_half(candles, fl, _dcfg5, _mid)
+            if p1 is None or p2 is None:
+                continue
+            _roh5.append((name, p1["rendite_pct"], p2["rendite_pct"]))
+        if _roh5:
+            _r1 = {n: i + 1 for i, (n, _, _) in
+                   enumerate(sorted(_roh5, key=lambda z: -z[1]))}
+            _r2 = {n: i + 1 for i, (n, _, _) in
+                   enumerate(sorted(_roh5, key=lambda z: -z[2]))}
+            _heute = "heute (Binance/Kraken)"
+            _besser_beide = besser_in_beiden_haelften(_roh5, _heute)
+            daten_halb_zeilen = [
+                "",
+                "## Robustheitspruefung der Datenvarianten (E37.5)",
+                "",
+                "Die Halbierung weiter unten prueft das Parameter-Gitter. Die "
+                "Datenzeilen aus den Abschnitten darueber standen bisher **ohne jede "
+                "Robustheitspruefung** im Bericht — obwohl fuer sie genau dasselbe "
+                "gilt: Die beste von vielen sieht immer besser aus als sie ist.",
+                "",
+                f"Haelfte 1 bis {to_date(_mid).strftime('%d.%m.%Y')}, Haelfte 2 danach. "
+                f"Variante *{_dcfg5['label']}*, nur die Datenquelle unterscheidet sich.",
+                "",
+                "| Datenvariante | Rendite H1 | Platz H1 | Rendite H2 | Platz H2 |",
+                "|---|---|---|---|---|",
+                *[f"| {'**' if n == _heute else ''}{n}{'**' if n == _heute else ''} | "
+                  f"{a:+.1f} % | {_r1[n]}. | {b:+.1f} % | {_r2[n]}. |"
+                  for n, a, b in _roh5],
+                "",
+                (f"**In BEIDEN Haelften besser als der heutige Stand: "
+                 f"{', '.join(_besser_beide)}.**" if _besser_beide else
+                 "**In BEIDEN Haelften besser als der heutige Stand: keine einzige "
+                 "Variante.** Damit ist jeder Vorsprung, den eine Datenzeile im "
+                 "Vollfenster zeigte, mindestens fragwuerdig — und die Richtung "
+                 "'mehr Boersen' als Ganzes nicht belegt."),
+            ]
+            print("E37.5 Halbierung: " + " | ".join(
+                f"{n}: {a:+.1f}/{b:+.1f}" for n, a, b in _roh5))
 
     # --- E11: Robustheitspruefung, Fenster halbiert ---------------------------------
     mid_ms = eff_start + (END_MS - eff_start) // 2
@@ -1810,6 +1928,7 @@ def main():
         *spot_zeilen,
         *derivate_zeilen,
         *gewicht_zeilen,
+        *daten_halb_zeilen,
         *furkan_zeilen,
         "",
         "## Robustheitspruefung: Fenster halbiert",
