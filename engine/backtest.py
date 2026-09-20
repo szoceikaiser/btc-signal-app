@@ -471,6 +471,30 @@ def fetch_candles_range(start_ms: int, end_ms: int) -> list:
     return out
 
 
+def abschnitt_oder_grund(titel: str, daten, fehler: str, bauen) -> list:
+    """Baut einen Vergleichsabschnitt — oder eine Notiz, WARUM es ihn nicht gibt.
+
+    E37.3 (20.09.2026): Der Derivate-Abschnitt verschwand aus dem Bericht, ohne ein
+    Wort. Niemand konnte sagen, ob der Abruf scheiterte, ob Daten fehlten oder ob der
+    Code gar nicht lief. Ein Abschnitt, der lautlos fehlt, sieht aus wie ein Abschnitt,
+    den es nie gab — derselbe Fehlertyp wie ein Test, der sich still ueberspringt.
+
+    `bauen` wird nur aufgerufen, wenn `daten` da sind (spart die Rechnung im Fehlerfall).
+    """
+    if daten:
+        return bauen()
+    return [
+        "",
+        f"## {titel}",
+        "",
+        f"**Dieser Vergleich konnte nicht gerechnet werden.** Grund: "
+        f"{fehler or 'unbekannt — es wurde kein Grund festgehalten'}",
+        "",
+        "Die Zeile steht hier trotzdem — ein Abschnitt, der lautlos fehlt, sieht aus "
+        "wie ein Abschnitt, den es nie gab.",
+    ]
+
+
 def build_series(raw: list, funding: list[tuple[int, float]],
                  oi_map: dict | None = None, liq_map: dict | None = None,
                  fut_map: dict | None = None, ls_map: dict | None = None,
@@ -1033,7 +1057,9 @@ def main():
     # E37.3: Open Interest, Liquidationen und Futures-CVD ueber mehrere Perp-Maerkte.
     # Wieder nur fuer den Vergleich — die Hauptreihe bleibt auf Binance.
     oi_agg, liq_agg, fut_agg, derivate_bericht = {}, {}, {}, {}
+    derivate_fehler = "kein COINALYZE_API_KEY gesetzt"
     if api_key:
+        derivate_fehler = ""
         try:
             pa = coinalyze.perp_auswahl(api_key)
             gewaehlt = pa["gewaehlt"]
@@ -1058,7 +1084,15 @@ def main():
                   + (f", {len(ausgeschlossen)} wegen abweichender Einheit ausgeschlossen"
                      if ausgeschlossen else ""))
         except Exception as exc:  # noqa: BLE001
+            derivate_fehler = f"{type(exc).__name__}: {exc}"
             print(f"Coinalyze Derivate nicht verfuegbar ({exc}) -> Vergleich entfaellt.")
+        else:
+            if not oi_agg:
+                _m = list(derivate_bericht.get("maerkte", {})) or "keine"
+                _b = derivate_bericht.get("oi", {})
+                derivate_fehler = (f"Abruf lief durch, lieferte aber keine OI-Punkte. "
+                                   f"Gewaehlte Maerkte: {_m}. "
+                                   f"Bericht: {_b.get('fehler') or _b}")
 
     candles, flow = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map)
     # Vergleichsreihe OHNE Futures-Daten: dieselben Kerzen, fut_cvd = 0. Damit laesst sich
@@ -1188,7 +1222,12 @@ def main():
     # Zeitraum — nur die Datenquelle des Spot-CVD ist eine andere. Heute Binance allein
     # (Binance-Vision, USD), zum Vergleich Binance + Bybit + Coinbase (Coinalyze, BTC).
     spot_zeilen = []
-    if spot_agg:
+    if not spot_agg:
+        spot_zeilen = abschnitt_oder_grund(
+            "Aggregiertes Spot-CVD: was bringt es?", None,
+            spot_bericht.get("fehler") or ("kein COINALYZE_API_KEY gesetzt" if not api_key
+                                           else "Abruf lieferte keine Punkte"), list)
+    else:
         _scfg = next((c for c in GRID if c.get("panel")), GRID[0])
         _zeilen, _ergebnisse = [], {}
         for name, karte in (("heute (nur Binance)", None),
@@ -1255,8 +1294,16 @@ def main():
     # Open Interest, Liquidationen und Futures-CVD stehen direkt in den Bedingungen
     # aller fuenf Muster (OI-Wipeout 5 %, Liquidations-Kaskade, Futures-CVD gegen Spot).
     # Anders als beim Spot-CVD, das nur ueber zwei Steigungsvergleiche eingeht.
+    # Fehlt die Zeile, steht sie trotzdem im Bericht — mit dem GRUND. Beim Lauf vom
+    # 20.09.2026, 09:25 UTC verschwand dieser Abschnitt lautlos, und niemand konnte
+    # sagen warum. Ein Abschnitt, der einfach nicht da ist, ist derselbe Fehlertyp wie
+    # ein Test, der sich still ueberspringt: er meldet nichts und man haelt es fuer
+    # Ordnung.
     derivate_zeilen = []
-    if oi_agg:
+    if not oi_agg:
+        derivate_zeilen = abschnitt_oder_grund(
+            "Aggregierte Derivate-Daten: was bringen sie?", None, derivate_fehler, list)
+    else:
         _dcfg = next((c for c in GRID if c.get("panel")), GRID[0])
         _dz, _derg = [], {}
         for name, o, l, f in (("heute (nur Binance)", None, None, None),

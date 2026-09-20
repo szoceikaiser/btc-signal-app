@@ -635,3 +635,29 @@ def test_perp_auswahl_liefert_die_einheiten_trennung_gleich_mit():
     assert [a["symbol"] for a in pa["cvd_ausgeschlossen"]] == ["BTCUSD_PERP.3"], pa
     # OI und Liquidationen dagegen duerfen ALLE — die stehen in alle_symbole
     assert len(pa["alle_symbole"]) > len(pa["cvd_symbole"]), pa
+
+
+def test_auswahl_misst_nur_30_tage_die_datenabfrage_aber_das_volle_fenster():
+    """Fuer die RANGFOLGE genuegen 30 Tage; ein Jahr mal zehn Symbole ist zehnmal so
+    viel Last auf einer API mit 40 Abrufen je Minute. Ohne diesen Test faellt es nicht
+    auf, wenn der Parameter zwar da ist, aber nirgends ankommt."""
+    spannen = []
+
+    def messend(req, timeout=0):
+        if "spot-markets" in req.full_url:
+            return _FakeResp(json.dumps(
+                [_markt("BTCUSDT.A", "A"), _markt("BTCUSD.C", "C", quote="USD")]).encode())
+        teile = dict(p.split("=") for p in req.full_url.split("?")[1].split("&"))
+        spannen.append((int(teile["to"]) - int(teile["from"])) / 86400.0)
+        gefragt = teile["symbols"]
+        return _FakeResp(json.dumps(
+            [{"symbol": s, "history": _punkte(3)} for s in ("BTCUSDT.A", "BTCUSD.C")
+             if s.replace(".", "%2E") in gefragt or s in gefragt]).encode())
+
+    coinalyze.spot_auswahl("KEY", opener=messend)
+    assert spannen, "es wurde gar keine History abgefragt"
+    assert all(abs(t - coinalyze.AUSWAHL_TAGE) < 1 for t in spannen), spannen
+
+    spannen.clear()
+    coinalyze.spot_delta_aggregiert("KEY", ["BTCUSDT.A"], opener=messend)
+    assert all(abs(t - coinalyze.SPOT_REICHWEITE_TAGE) < 1 for t in spannen), spannen

@@ -730,3 +730,40 @@ def test_build_series_fehlende_kerze_in_der_spot_map_aendert_das_cvd_nicht():
     _cs, flow = backtest.build_series(raw, [], {ts[0]: 1e9}, None, None, None,
                                       spot_map=spot)
     assert [f.spot_cvd for f in flow] == [5.0, 5.0, 8.0], [f.spot_cvd for f in flow]
+
+
+# ------- E37.3: ein Vergleich, der nicht gerechnet werden konnte, verschwindet nicht
+
+def test_abschnitt_oder_grund_baut_bei_daten_den_echten_abschnitt():
+    gebaut = ["", "## Titel", "", "| a | b |"]
+    assert backtest.abschnitt_oder_grund("Titel", {1: 2}, "", lambda: gebaut) == gebaut
+
+
+def test_abschnitt_oder_grund_nennt_den_grund_statt_zu_verschwinden():
+    """Der Fall vom 20.09.2026: Der Derivate-Abschnitt fiel lautlos aus dem Bericht,
+    und niemand konnte sagen, ob der Abruf scheiterte oder der Code gar nicht lief."""
+    z = backtest.abschnitt_oder_grund("Aggregierte Derivate-Daten", None,
+                                      "HTTPError: 429 Too Many Requests", list)
+    assert z, "leer heisst: der Abschnitt verschwindet doch"
+    assert any(zeile.startswith("## Aggregierte Derivate-Daten") for zeile in z), z
+    assert any("429" in zeile for zeile in z), z
+
+
+def test_abschnitt_oder_grund_sagt_auch_wenn_niemand_einen_grund_festhielt():
+    """Ohne Grund darf nicht einfach nichts dastehen — 'unbekannt' ist eine Aussage."""
+    z = backtest.abschnitt_oder_grund("Titel", None, "", list)
+    assert any("unbekannt" in zeile for zeile in z), z
+
+
+def test_abschnitt_oder_grund_rechnet_im_fehlerfall_NICHT():
+    """Die teure Rechnung darf nicht laufen, wenn es nichts zu rechnen gibt."""
+    gelaufen = []
+
+    def bauen():
+        gelaufen.append(1)
+        return ["x"]
+
+    backtest.abschnitt_oder_grund("Titel", None, "Grund", bauen)
+    assert gelaufen == [], "bauen() wurde trotz fehlender Daten aufgerufen"
+    backtest.abschnitt_oder_grund("Titel", {1: 1}, "", bauen)
+    assert gelaufen == [1], "bauen() wurde bei vorhandenen Daten NICHT aufgerufen"

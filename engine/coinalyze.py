@@ -331,8 +331,11 @@ def _reihe_auswerten(eintrag: dict) -> dict:
     }
 
 
+AUSWAHL_TAGE = 30        # Fenster fuer die Rangfolge-Messung (siehe _hole_reihen_roh)
+
+
 def _hole_reihen_roh(api_key: str, symbole: list, endpoint: str = "ohlcv-history",
-                     **kw) -> tuple:
+                     tage: int = SPOT_REICHWEITE_TAGE, **kw) -> tuple:
     """Holt alle Symbole in Bloecken; gibt (rohe Eintraege, Blockprotokoll) zurueck.
 
     Coinalyze nimmt den Parameter `symbols` (Mehrzahl); der Lauf vom 19.09.2026 hat
@@ -353,7 +356,7 @@ def _hole_reihen_roh(api_key: str, symbole: list, endpoint: str = "ohlcv-history
             time.sleep(1.6)
         try:
             roh = fetch_history(endpoint, api_key, symbol=",".join(teil),
-                                days=SPOT_REICHWEITE_TAGE, **kw)
+                                days=tage, **kw)
         except urllib.error.HTTPError as e:
             bloecke.append({"symbole": teil, "http_error": e.code,
                             "body": e.read().decode(errors="replace")[:200]})
@@ -371,11 +374,12 @@ def _hole_reihen_roh(api_key: str, symbole: list, endpoint: str = "ohlcv-history
     return eintraege, bloecke
 
 
-def _pruefe_symbole(api_key: str, symbole: list, **kw) -> dict:
+def _pruefe_symbole(api_key: str, symbole: list, tage: int = SPOT_REICHWEITE_TAGE,
+                    **kw) -> dict:
     """Beschreibt jede Symbolreihe (Probe-Sicht): Felder, Reichweite, Volumen, Einheit."""
     if not symbole:
         return {"fehler": "keine Symbole zu pruefen"}
-    eintraege, bloecke = _hole_reihen_roh(api_key, symbole, **kw)
+    eintraege, bloecke = _hole_reihen_roh(api_key, symbole, tage=tage, **kw)
     je_symbol = {e.get("symbol", "?"): _reihe_auswerten(e) for e in eintraege}
     return {"angefragt": len(symbole), "zurueck": len(je_symbol),
             "mehrfachabruf_geht": any(b.get("zurueck", 0) > 1 for b in bloecke),
@@ -407,7 +411,10 @@ def spot_auswahl(api_key: str, **kw) -> dict:
     alle = [e["symbol"] for liste in kandidaten.values() for e in liste if e.get("symbol")]
     if not alle:
         return {SPOT_WAHL_GROESSTER: {}, SPOT_WAHL_ALLE: {}}
-    reihen = _pruefe_symbole(api_key, alle, **kw).get("je_symbol", {})
+    # Fuer die RANGFOLGE genuegen 30 Tage: welcher Markt einer Boerse der groesste ist,
+    # aendert sich nicht dadurch, dass man ein Jahr statt einen Monat misst — aber ein
+    # Jahr mal zehn Symbole ist zehnmal so viel Last auf einer API mit 40 Abrufen/Minute.
+    reihen = _pruefe_symbole(api_key, alle, tage=AUSWAHL_TAGE, **kw).get("je_symbol", {})
     return {
         SPOT_WAHL_GROESSTER: {code: [d["symbol"]] for code, d
                               in _groesster_je_boerse(kandidaten, reihen).items()},
@@ -546,7 +553,7 @@ def perp_auswahl(api_key: str, **kw) -> dict:
     alle = [e["symbol"] for liste in kandidaten.values() for e in liste if e.get("symbol")]
     if not alle:
         return {"gewaehlt": {}, "kandidaten": {}, "abgelehnt": {}}
-    reihen = _pruefe_symbole(api_key, alle, **kw).get("je_symbol", {})
+    reihen = _pruefe_symbole(api_key, alle, tage=AUSWAHL_TAGE, **kw).get("je_symbol", {})
     gewaehlt = _groesster_je_boerse(kandidaten, reihen, codes=PERP_BOERSEN)
     denom = {e["symbol"]: e.get(DENOM_FELD)
              for liste in kandidaten.values() for e in liste if e.get("symbol")}
