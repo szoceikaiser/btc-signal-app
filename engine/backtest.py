@@ -1008,6 +1008,148 @@ def furkan_pnl(candles, kauf_tage: list[str], verkauf_tage: list[str],
     }
 
 
+# ------------------------------------- E38.1: Was passiert NACH einem Kompass-Muster?
+
+MUSTER_HORIZONTE = (6, 12, 24)        # Kerzen a 4h = 1 Tag, 2 Tage, 4 Tage
+MUSTER_MIN_EPISODEN = 20              # darunter ist jede Aussage Rauschen
+
+
+def _med(xs: list) -> float:
+    s = sorted(xs)
+    n = len(s)
+    if not n:
+        return 0.0
+    return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2.0
+
+
+def muster_nachlauf(candles, flow, start_ms: int,
+                    horizonte: tuple = MUSTER_HORIZONTE) -> dict:
+    """E38.1: Wie oft tritt jedes Kompass-Muster auf, und was tat der Kurs DANACH?
+
+    Die Frage hinter E38: Muster 5 (ungesunder Abverkauf) heisst in der Lagezeile
+    "Warnung", bewirkt aber nichts — `block_unhealthy` ist seit E13 aus, weil er
+    Rendite gekostet hat. Furkan liest dieselbe Lage (OI steigt, CVD negativ, neue
+    aggressive Shorts) zusaetzlich als Hinweis auf Liquiditaet OBERHALB, also als
+    Treibstoff (Video 13.09.2026, 15:44). Wer recht hat, entscheidet nicht die
+    Benennung, sondern was nach dem Muster tatsaechlich passiert ist.
+
+    DREI FALLEN, DIE HIER ABGEFANGEN WERDEN:
+
+    1. Ohne Grundrate ist die Zahl wertlos. Steigt der Kurs im Fenster ohnehin um 3 %
+       je zwei Tage, dann ist "nach Muster 5 +3 %" eine Aussage ueber das Fenster,
+       nicht ueber Muster 5. Deshalb steht in jeder Zelle der ABSTAND zur Grundrate
+       ueber alle bewerteten Kerzen, nicht nur der Rohwert.
+    2. Aufeinanderfolgende Kerzen sind kein unabhaengiger Beleg. Muster 5 haelt
+       typischerweise mehrere Kerzen an; 80 Kerzen koennen 9 Ereignisse sein. Deshalb
+       werden EPISODEN gezaehlt (zusammenhaengende Laeufe) und nicht nur Kerzen — und
+       die Mindestzahl gilt fuer die Episoden.
+    3. Ein einzelner Flush-Tag mit -12 % kippt einen Mittelwert. Kernzahl ist deshalb
+       der Median; der Mittelwert steht daneben, damit ein Auseinanderlaufen der
+       beiden sichtbar wird.
+
+    Rueckgabe: {muster: {"kerzen": int, "episoden": int,
+                         h: {"median", "mittel", "anteil_hoch", "n"}}}
+    """
+    from strategy_core import classify_pattern
+
+    hmax = max(horizonte)
+    out: dict = {}
+    vorher = None
+
+    def _eintrag(name: str) -> dict:
+        e = out.setdefault(name, {"kerzen": 0, "episoden": 0,
+                                  **{h: [] for h in horizonte}})
+        return e
+
+    for i, c in enumerate(candles):
+        if c.ts < start_ms:
+            continue
+        if i + hmax >= len(candles):
+            break                       # Nachlauf waere unvollstaendig -> nicht werten
+        name = classify_pattern(candles[:i + 1], flow[:i + 1]).name
+        e, alle = _eintrag(name), _eintrag("ALLE")
+        e["kerzen"] += 1
+        alle["kerzen"] += 1
+        if name != vorher:              # neue Episode nur beim Wechsel
+            e["episoden"] += 1
+        alle["episoden"] += 1           # bei ALLE ist jede Kerze eine eigene Beobachtung
+        vorher = name
+        for h in horizonte:
+            aend = (candles[i + h].close - c.close) / c.close
+            e[h].append(aend)
+            alle[h].append(aend)
+
+    for name, e in out.items():
+        for h in horizonte:
+            werte = e[h]
+            e[h] = {"median": _med(werte),
+                    "mittel": (sum(werte) / len(werte)) if werte else 0.0,
+                    "anteil_hoch": (sum(1 for v in werte if v > 0) / len(werte))
+                                   if werte else 0.0,
+                    "n": len(werte)}
+    return out
+
+
+def muster_abschnitt(stat: dict, horizonte: tuple = MUSTER_HORIZONTE) -> list:
+    """Baut den Berichtsabschnitt zu E38.1. Erwartet die Rueckgabe von muster_nachlauf."""
+    if not stat or "ALLE" not in stat:
+        return []
+    basis = stat["ALLE"]
+    kopf = " | ".join(f"+{h} Kerzen ({h * 4 / 24:.0f} Tg.)" for h in horizonte)
+    zeilen = ["", "## E38.1: Was passiert NACH einem Muster?", "",
+              "Kernzahl je Zelle: **Median der Kursaenderung** nach so vielen Kerzen, "
+              "dahinter der Abstand zur Grundrate und der Anteil der Faelle, die hoeher "
+              "schlossen. Die Grundrate ist der Median ueber ALLE bewerteten Kerzen — "
+              "ohne sie misst man nur, ob der Kurs im Fenster ohnehin stieg.", "",
+              f"| Muster | Kerzen | Episoden | {kopf} |",
+              "|---|---:|---:|" + "---|" * len(horizonte)]
+
+    def _zelle(e: dict, h: int, ist_basis: bool) -> str:
+        d = e[h]
+        roh = f"{d['median'] * 100:+.2f} %"
+        quote = f"{d['anteil_hoch']:.0%} hoeher"
+        if ist_basis:
+            return f"{roh}, {quote}"
+        ab = (d["median"] - basis[h]["median"]) * 100
+        return f"{roh} ({ab:+.2f} gg. Grundrate), {quote}"
+
+    for name in ["ALLE"] + sorted(k for k in stat if k != "ALLE"):
+        e = stat[name]
+        ist_basis = name == "ALLE"
+        titel = "**ALLE (Grundrate)**" if ist_basis else name
+        ep = "—" if ist_basis else str(e["episoden"])
+        zellen = " | ".join(_zelle(e, h, ist_basis) for h in horizonte)
+        zeilen.append(f"| {titel} | {e['kerzen']} | {ep} | {zellen} |")
+
+    m5 = stat.get("UNGESUNDER_ABVERKAUF")
+    zeilen += ["", "**Wie diese Tabelle zu lesen ist.**"]
+    if not m5:
+        zeilen.append("Muster 5 kam im Fenster **kein einziges Mal** vor. Damit ist die "
+                      "Frage Bremse-oder-Treibstoff mit diesen Daten nicht zu "
+                      "beantworten, und E38 endet hier.")
+        return zeilen
+    if m5["episoden"] < MUSTER_MIN_EPISODEN:
+        zeilen.append(
+            f"**Achtung, zu duenn.** Muster 5 hat nur **{m5['episoden']} "
+            f"{'Episode' if m5['episoden'] == 1 else 'Episoden'}** "
+            f"({m5['kerzen']} Kerzen). Unter {MUSTER_MIN_EPISODEN} Episoden ist jeder "
+            f"Unterschied zur Grundrate Rauschen — dieselbe Lehre wie bei "
+            f"`neustart_mit_rest`, das in acht Monaten nur dreimal griff. Ein Schalter "
+            f"auf dieser Grundlage waere nicht messbar, egal wie gut die Zahl aussieht.")
+    else:
+        zeilen.append(
+            f"Muster 5 hat **{m5['episoden']} Episoden** ({m5['kerzen']} Kerzen) — genug, "
+            f"um den Abstand zur Grundrate ernst zu nehmen. Entscheidend ist das "
+            f"VORZEICHEN dieses Abstands: negativ stuetzt die Bremse (der Kurs faellt "
+            f"nach Muster 5 staerker als sonst), positiv stuetzt die Treibstoff-Lesart.")
+    zeilen += ["",
+               "**Was diese Messung NICHT zeigt.** Sie misst den Kurs nach dem Muster, "
+               "nicht den Ertrag einer Regel. Ein Muster kann im Schnitt steigen und als "
+               "Schalter trotzdem Rendite kosten — das ist in diesem Projekt schon "
+               "zwoelfmal passiert. Erst E38.5 beantwortet die Ertragsfrage."]
+    return zeilen
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -1202,6 +1344,18 @@ def main():
     eff_start = max(START_MS, min(oi_map)) if oi_map else START_MS
     print(f"Voll-Daten-Fenster ab {to_date(eff_start).strftime('%d.%m.%Y')} "
           f"(OI vorhanden: {'ja' if oi_map else 'nein'}).")
+
+    # --- E38.1: Was passiert NACH einem Muster? (reine Messung, kein Schalter) -------
+    try:
+        _m5stat = muster_nachlauf(candles, flow, eff_start)
+        _m5 = _m5stat.get("UNGESUNDER_ABVERKAUF", {})
+        print(f"Muster-Nachlauf gemessen: Muster 5 in {_m5.get('kerzen', 0)} Kerzen / "
+              f"{_m5.get('episoden', 0)} Episoden.")
+    except Exception as exc:  # noqa: BLE001
+        _m5stat, _m5fehler = {}, str(exc)
+        print(f"Muster-Nachlauf nicht gerechnet ({exc}).")
+    else:
+        _m5fehler = ""
 
     results = []
     for cfg in GRID:
@@ -1985,6 +2139,10 @@ def main():
          "und der Qualitaet der Positionen, nicht daran, welche einzelnen Trades gut liefen. "
          "Wo zwei Varianten aehnliche Rendite haben, ist die mit dem kleineren Rueckgang die "
          "verlaesslichere Wahl — auch wenn ihre Platzierung schwankt."),
+    ] + abschnitt_oder_grund(
+        "E38.1: Was passiert NACH einem Muster?", _m5stat, _m5fehler,
+        lambda: muster_abschnitt(_m5stat),
+    ) + [
         "",
         "## Einschraenkungen",
         "",

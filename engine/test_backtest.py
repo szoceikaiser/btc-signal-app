@@ -801,3 +801,153 @@ def test_besser_in_beiden_haelften_behauptet_nichts_ohne_basis():
 def test_besser_in_beiden_haelften_nennt_alle_gewinner_nicht_nur_den_ersten():
     zeilen = [("heute", 5.0, 5.0), ("a", 6.0, 6.0), ("b", 7.0, 7.0)]
     assert sorted(backtest.besser_in_beiden_haelften(zeilen, "heute")) == ["a", "b"]
+
+
+# --------------------------------------------------- E38.1: Muster-Nachlauf (20.09.2026)
+
+_H4 = 4 * 3600 * 1000
+
+
+def _reihe(preise: list, ts0: int | None = None):
+    """Kerzen + neutraler Flow aus einer Preisliste. Flow so, dass classify_pattern
+    NEUTRAL liefert — die Musterzuordnung wird hier nicht getestet, nur die Auswertung."""
+    from strategy_core import FlowPoint
+    t0 = backtest.START_MS if ts0 is None else ts0
+    cs = [Candle(t0 + i * _H4, p, p, p, p) for i, p in enumerate(preise)]
+    fl = [FlowPoint(c.ts, 0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, 50.0) for c in cs]
+    return cs, fl
+
+
+def test_muster_nachlauf_grundrate_enthaelt_jede_bewertete_kerze():
+    """Ohne Grundrate ist jede Musterzeile wertlos: 'nach Muster 5 +3 %' sagt nichts,
+    wenn der Kurs im Fenster ohnehin 3 % je Horizont steigt."""
+    cs, fl = _reihe([100 + i for i in range(40)])
+    stat = backtest.muster_nachlauf(cs, fl, backtest.START_MS, horizonte=(6,))
+    ohne_alle = sum(v["kerzen"] for k, v in stat.items() if k != "ALLE")
+    assert stat["ALLE"]["kerzen"] == ohne_alle
+
+
+def test_muster_nachlauf_laesst_kerzen_ohne_vollen_nachlauf_aus():
+    """Die letzten Kerzen haben keinen vollstaendigen Nachlauf. Wer sie mitzaehlt,
+    vergleicht kurze mit langen Zeitraeumen — der Fehler faellt nicht auf."""
+    cs, fl = _reihe([100.0] * 30)
+    stat = backtest.muster_nachlauf(cs, fl, backtest.START_MS, horizonte=(6,))
+    assert stat["ALLE"]["kerzen"] == 30 - 6          # 6 Kerzen Nachlauf fehlen hinten
+
+
+def test_muster_nachlauf_alle_horizonte_teilen_dieselbe_stichprobe():
+    """Sonst waere der lange Horizont ueber weniger Kerzen gerechnet als der kurze
+    und die Spalten der Tabelle waeren nicht vergleichbar."""
+    cs, fl = _reihe([100.0 + i * 0.1 for i in range(60)])
+    stat = backtest.muster_nachlauf(cs, fl, backtest.START_MS, horizonte=(6, 12, 24))
+    ns = {stat["ALLE"][h]["n"] for h in (6, 12, 24)}
+    assert len(ns) == 1
+
+
+def test_muster_nachlauf_wertet_kerzen_vor_dem_start_nicht():
+    cs, fl = _reihe([100.0] * 40, ts0=backtest.START_MS - 20 * _H4)
+    stat = backtest.muster_nachlauf(cs, fl, backtest.START_MS, horizonte=(6,))
+    assert stat["ALLE"]["kerzen"] == 40 - 20 - 6
+
+
+def test_muster_nachlauf_zaehlt_episoden_nicht_kerzen():
+    """Aufeinanderfolgende Kerzen desselben Musters sind EIN Ereignis, kein Beleg je
+    Kerze. 80 Kerzen koennen 9 Ereignisse sein — die Fallzahl waere sonst erfunden."""
+    cs, fl = _reihe([100.0] * 40)
+    stat = backtest.muster_nachlauf(cs, fl, backtest.START_MS, horizonte=(6,))
+    neutral = stat["NEUTRAL"]
+    assert neutral["kerzen"] > 1
+    assert neutral["episoden"] == 1
+
+
+def test_muster_nachlauf_median_widersteht_einem_ausreisser():
+    """Ein einzelner Flush-Tag darf eine Musterzeile nicht kippen.
+
+    Der Einbruch bei Kerze 25 erzeugt ZWEI Ausreisser, nicht einen: die Kerze 6 davor
+    sieht -60 %, die Kerze selbst sieht +150 % (von 40 zurueck auf 100). Genau deshalb
+    ist der Mittelwert hier untauglich — er laeuft weg, der Median bleibt stehen."""
+    preise = [100.0] * 40
+    preise[25] = 40.0                                  # ein Einbruch mittendrin
+    cs, fl = _reihe(preise)
+    stat = backtest.muster_nachlauf(cs, fl, backtest.START_MS, horizonte=(6,))
+    d = stat["ALLE"][6]
+    assert abs(d["median"]) < 0.01                      # Median bleibt bei ~0
+    assert abs(d["mittel"]) > abs(d["median"]) + 0.01   # Mittelwert laeuft weg
+
+
+def test_muster_abschnitt_nennt_den_abstand_zur_grundrate():
+    stat = {"ALLE": {"kerzen": 100, "episoden": 100,
+                     6: {"median": 0.02, "mittel": 0.02, "anteil_hoch": 0.6, "n": 100}},
+            "UNGESUNDER_ABVERKAUF": {"kerzen": 30, "episoden": 25,
+                     6: {"median": 0.05, "mittel": 0.05, "anteil_hoch": 0.7, "n": 30}}}
+    text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
+    assert "+3.00 gg. Grundrate" in text                 # 5 % minus 2 % Grundrate
+    assert "Grundrate" in text
+
+
+def test_muster_abschnitt_warnt_bei_zu_wenigen_episoden():
+    """Der gefaehrlichste Fall: eine schoene Zahl auf drei Ereignissen."""
+    stat = {"ALLE": {"kerzen": 100, "episoden": 100,
+                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 100}},
+            "UNGESUNDER_ABVERKAUF": {"kerzen": 30, "episoden": 3,
+                     6: {"median": 0.09, "mittel": 0.09, "anteil_hoch": 1.0, "n": 30}}}
+    text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
+    assert "zu duenn" in text.lower()
+    assert "3 Episoden" in text
+
+
+def test_muster_abschnitt_sagt_es_wenn_muster5_gar_nicht_vorkam():
+    stat = {"ALLE": {"kerzen": 100, "episoden": 100,
+                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 100}}}
+    text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
+    assert "kein einziges Mal" in text
+
+
+def test_muster_abschnitt_warnt_nicht_bei_genug_episoden():
+    stat = {"ALLE": {"kerzen": 100, "episoden": 100,
+                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 100}},
+            "UNGESUNDER_ABVERKAUF": {"kerzen": 90, "episoden": 40,
+                     6: {"median": 0.01, "mittel": 0.01, "anteil_hoch": 0.6, "n": 90}}}
+    text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
+    assert "zu duenn" not in text.lower()
+    assert "VORZEICHEN" in text
+
+
+def test_muster_abschnitt_sagt_dass_es_keine_ertragsaussage_ist():
+    """Die Lehre aus zwoelf gemessenen Filtern: 'steigt danach' ist nicht 'verdient'."""
+    stat = {"ALLE": {"kerzen": 10, "episoden": 10,
+                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 10}},
+            "UNGESUNDER_ABVERKAUF": {"kerzen": 5, "episoden": 5,
+                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 5}}}
+    text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
+    assert "nicht den Ertrag" in text
+
+
+def test_muster_abschnitt_leer_bei_leerer_statistik():
+    assert backtest.muster_abschnitt({}) == []
+
+
+def test_muster_nachlauf_misst_nach_vorn_nicht_nach_hinten():
+    """Die gefaehrlichste denkbare Verwechslung in E38: Zeigt der Nachlauf nach hinten,
+    liest sich jede Bremse als Treibstoff und umgekehrt — die Zahlen saehen dabei
+    voellig normal aus. Deshalb eine Reihe, die EINDEUTIG steigt."""
+    cs, fl = _reihe([100.0 + i for i in range(40)])
+    stat = backtest.muster_nachlauf(cs, fl, backtest.START_MS, horizonte=(6,))
+    assert stat["ALLE"][6]["median"] > 0.03            # ~6 Punkte auf ~100 = ~+5 %
+    assert stat["ALLE"][6]["anteil_hoch"] == 1.0       # ausnahmslos hoeher
+
+
+def test_muster_nachlauf_misst_den_rueckgang_als_rueckgang():
+    """Gegenprobe zum Test darueber — eine fallende Reihe muss negativ herauskommen."""
+    cs, fl = _reihe([200.0 - i for i in range(40)])
+    stat = backtest.muster_nachlauf(cs, fl, backtest.START_MS, horizonte=(6,))
+    assert stat["ALLE"][6]["median"] < -0.01
+    assert stat["ALLE"][6]["anteil_hoch"] == 0.0
+
+
+def test_median_mittelt_bei_gerader_anzahl():
+    """Bei gerader Anzahl gibt es keinen mittleren Wert — wer einfach s[n//2] nimmt,
+    verschiebt jede Musterzeile systematisch nach oben."""
+    assert backtest._med([1.0, 2.0, 3.0, 4.0]) == 2.5
+    assert backtest._med([1.0, 2.0, 3.0]) == 2.0
+    assert backtest._med([]) == 0.0
