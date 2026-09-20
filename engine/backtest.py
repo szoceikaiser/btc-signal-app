@@ -1415,10 +1415,20 @@ def main():
     else:
         _gcfg = next((c for c in GRID if c.get("panel")), GRID[0])
         _fund_liste = sorted(fund_agg.items())
+        # E37.4, Nachbesserung 20.09.2026: Die Zeile "roh" tauscht Quelle UND Skala auf
+        # einmal — sie misst deshalb vor allem, dass `funding_hot` nicht mehr passt.
+        # Diese Zeile normiert die aggregierte Reihe auf die heutige Groessenordnung;
+        # erst sie misst die Aggregation allein. Der Faktor ist gemessen, nicht geraten.
+        _fk = derivate_bericht.get("funding_skala", {}).get("faktor")
+        _fund_norm = (sorted((t, v * _fk) for t, v in fund_agg.items())
+                      if isinstance(_fk, (int, float)) and _fk else None)
         _gz, _gerg = [], {}
         for name, fu, ls in (("heute (Kraken-Funding, Binance-Long-Short)", None, None),
-                             ("+Funding aggregiert", _fund_liste, None),
-                             ("+Funding +Long-Short aggregiert", _fund_liste, ls_agg)):
+                             ("+Funding aggregiert (rohe Skala)", _fund_liste, None),
+                             ("+Funding aggregiert, auf heutige Skala normiert",
+                              _fund_norm, None),
+                             ("+Funding normiert +Long-Short aggregiert",
+                              _fund_norm, ls_agg)):
             if name.startswith("+") and not fu:
                 continue
             _, _fl = build_series(raw, fu if fu is not None else funding,
@@ -1470,14 +1480,29 @@ def main():
              if _sk.get("gemeinsame_punkte") else
              f"Skalenvergleich nicht moeglich: {_sk.get('fehler', 'unbekannt')}."),
             "",
-            ((f"**Achtung, die Skalen weichen um Faktor {_f:.1f} ab.** Die Zeilen unten "
-              "tauschen die Quelle OHNE Umrechnung — die Schwelle `funding_hot` meint "
-              "damit etwas anderes als vorher. Wer diese Zeile je live schalten will, "
-              "muss die Schwelle mit umrechnen." if isinstance(_f, (int, float)) and (_f > 2 or _f < 0.5) else
+            # `:.1f` stand hier bis 20.09.2026 und machte aus Faktor 0,0146 die Anzeige
+            # "Faktor 0.0" — eine Warnung, die ihre eigene Zahl unkenntlich macht.
+            ((f"**Achtung, die Skalen weichen ab: Faktor {_f:.4g}** — die Coinalyze-Reihe "
+              f"ist rund {1 / _f:.0f}-mal so gross wie die von Kraken. Die Schwelle "
+              "`funding_hot = 0.0001` meint damit etwas voellig anderes: gemessen am "
+              "jeweiligen Median ist sie bei Kraken eine hohe Huerde und bei Coinalyze "
+              "fast immer ueberschritten. Deshalb steht unten eine zusaetzliche Zeile, "
+              "die die aggregierte Reihe auf die heutige Skala normiert — nur sie misst "
+              "die AGGREGATION, die Zeile darueber misst vor allem die Skala."
+              if isinstance(_f, (int, float)) and _f and (_f > 2 or _f < 0.5) else
               "**Die Skalen liegen nahe beieinander** — ein Quellentausch verschiebt die "
               "Schwelle `funding_hot` also nicht wesentlich.")
-             if isinstance(_f, (int, float)) else
+             if isinstance(_f, (int, float)) and _f else
              "**Ohne Skalenvergleich ist ein Quellentausch nicht zu beurteilen.**"),
+            "",
+            (f"**Und der ernstere Punkt: die Vorzeichen stimmen nur in "
+             f"{_sk.get('gleiches_vorzeichen_anteil', 0):.0%} der Faelle ueberein.** "
+             "Zwei Funding-Reihen auf denselben Markt sollten fast immer in dieselbe "
+             "Richtung zeigen. Tun sie es nicht, ist es nicht dieselbe Groesse — dann "
+             "hilft auch kein Umrechnungsfaktor, und der Quellentausch waere ein "
+             "Austausch der Bedeutung, nicht der Genauigkeit."
+             if _sk.get("gleiches_vorzeichen_anteil", 1.0) < 0.9 else
+             "Die Vorzeichen stimmen weitgehend ueberein — es ist dieselbe Groesse."),
             "",
             f"Alle Zeilen: Variante *{_gcfg['label']}*, dieselben Kerzen, derselbe "
             "Zeitraum. Der Unterschied sind allein die Daten.",
@@ -1485,6 +1510,11 @@ def main():
             "| Datenlage | Recall | Praez. | Rendite | max. Rueckgang | Signale |",
             "|---|---|---|---|---|---|",
             *_gz,
+            "",
+            "**So ist die Tabelle zu lesen:** Die Zeile *rohe Skala* vergleicht zwei "
+            "Dinge auf einmal — andere Boersen UND eine andere Groessenordnung. Was sie "
+            "misst, ist vor allem die verschobene Schwelle. Nur die Zeile *normiert* "
+            "haelt die Skala fest und zeigt damit die Wirkung der Aggregation allein.",
         ]
         print("E37.4 Gewichtet: " + " | ".join(
             f"{n}: {p['rendite_pct']:+.1f} % ({len(v)} Signale)"
