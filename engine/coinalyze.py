@@ -305,6 +305,7 @@ def _einheit_einschaetzen(v_letzte: float | None, kurs: float | None) -> str:
 
 
 SYMBOLE_JE_ABRUF = 6     # Blockgroesse; die Grenze von Coinalyze ist nicht dokumentiert
+PAUSE_JE_BLOCK = 1.6     # Sekunden zwischen Bloecken (Rate-Limit 40 Abrufe/Min)
 
 
 def _reihe_auswerten(eintrag: dict) -> dict:
@@ -335,7 +336,8 @@ AUSWAHL_TAGE = 30        # Fenster fuer die Rangfolge-Messung (siehe _hole_reihe
 
 
 def _hole_reihen_roh(api_key: str, symbole: list, endpoint: str = "ohlcv-history",
-                     tage: int = SPOT_REICHWEITE_TAGE, **kw) -> tuple:
+                     tage: int = SPOT_REICHWEITE_TAGE, pause: float | None = None,
+                     **kw) -> tuple:
     """Holt alle Symbole in Bloecken; gibt (rohe Eintraege, Blockprotokoll) zurueck.
 
     Coinalyze nimmt den Parameter `symbols` (Mehrzahl); der Lauf vom 19.09.2026 hat
@@ -349,11 +351,19 @@ def _hole_reihen_roh(api_key: str, symbole: list, endpoint: str = "ohlcv-history
     Mechanik bewusst: waeren es zwei Wege, koennte die Probe etwas bestaetigen, was
     der Produktionsweg anders macht.
     """
+    # Ein injizierter `opener` heisst: kein Netz, also auch kein Rate-Limit — dann
+    # nicht warten. Das ersetzt den frueheren Behelf "nicht warten, wenn kw leer ist",
+    # der im echten Lauf genau falsch herum wirkte.
+    _pause = (0.0 if "opener" in kw else PAUSE_JE_BLOCK) if pause is None else pause
     eintraege, bloecke = [], []
     for i in range(0, len(symbole), SYMBOLE_JE_ABRUF):
         teil = symbole[i:i + SYMBOLE_JE_ABRUF]
-        if i and not kw:                       # im Test nicht warten
-            time.sleep(1.6)
+        # FEHLER BIS 20.09.2026: Die Pause hing daran, ob `kw` leer ist. Gedacht war
+        # "im Test nicht warten" — im ECHTEN Lauf sind aber frm/to gesetzt, also war
+        # kw NICHT leer und es wurde NIE gewartet. Genau dort, wo das Rate-Limit
+        # (40/Min) greift, lief es ohne Pause. Jetzt explizit statt als Nebenwirkung.
+        if i and _pause:
+            time.sleep(_pause)
         try:
             roh = fetch_history(endpoint, api_key, symbol=",".join(teil),
                                 days=tage, **kw)
@@ -371,6 +381,28 @@ def _hole_reihen_roh(api_key: str, symbole: list, endpoint: str = "ohlcv-history
         neu = [e for e in roh if isinstance(e, dict)]
         eintraege.extend(neu)
         bloecke.append({"symbole": teil, "zurueck": len(neu)})
+        if len(teil) > 1:
+            # RUECKFALL (20.09.2026): Dass EIN Abruf mehrere Reihen liefert, ist nur
+            # fuer ohlcv-history belegt. Beim Open Interest kam nichts zurueck, und der
+            # ganze Vergleich fiel aus. Statt das als gegeben hinzunehmen: fehlende
+            # Symbole einzeln nachfragen.
+            #
+            # Hier stand zuerst zusaetzlich `len(neu) < len(teil)`. Das war ueberfluessig
+            # — `fehlt` ist ohnehin leer, wenn alles kam — und im Randfall schaedlich:
+            # liefert die Antwort eine Reihe doppelt oder eine fremde mit, stimmt die
+            # ANZAHL, aber ein Symbol fehlt trotzdem, und der Rueckfall bliebe aus.
+            # Massgeblich ist, welche Symbole da sind, nicht wie viele Reihen kamen.
+            fehlt = [s for s in teil
+                     if not any(e.get("symbol") == s for e in eintraege)]
+            for sym in fehlt:
+                if _pause:
+                    time.sleep(_pause)
+                nach, prot = _hole_reihen_roh(api_key, [sym], endpoint=endpoint,
+                                              tage=tage, pause=pause, **kw)
+                eintraege.extend(nach)
+                bloecke.append({"einzeln": sym, "zurueck": len(nach),
+                                "weil": "Mehrfachabruf lieferte diese Reihe nicht",
+                                "protokoll": prot})
     return eintraege, bloecke
 
 

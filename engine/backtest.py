@@ -1088,11 +1088,20 @@ def main():
             print(f"Coinalyze Derivate nicht verfuegbar ({exc}) -> Vergleich entfaellt.")
         else:
             if not oi_agg:
-                _m = list(derivate_bericht.get("maerkte", {})) or "keine"
+                _m = derivate_bericht.get("maerkte", {}) or "keine"
                 _b = derivate_bericht.get("oi", {})
+                # Der Grund steht im BLOCKPROTOKOLL, nicht im Fehlertext. Beim Lauf vom
+                # 20.09.2026, 10:07 UTC meldete der Bericht "keine einzige Reihe
+                # erhalten" — welcher HTTP-Fehler dahinter stand, blieb unsichtbar,
+                # weil ich nur das Feld 'fehler' ausgegeben habe. Eine Diagnose, die
+                # eine Ebene zu frueh aufhoert, ist keine.
+                _bl = "; ".join(
+                    str({k: v for k, v in b.items() if k != "protokoll"})
+                    for b in (_b.get("bloecke") or [])) or "kein Blockprotokoll"
                 derivate_fehler = (f"Abruf lief durch, lieferte aber keine OI-Punkte. "
                                    f"Gewaehlte Maerkte: {_m}. "
-                                   f"Bericht: {_b.get('fehler') or _b}")
+                                   f"Meldung: {_b.get('fehler') or _b}. "
+                                   f"Bloecke: {_bl}")
 
     candles, flow = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map)
     # Vergleichsreihe OHNE Futures-Daten: dieselben Kerzen, fut_cvd = 0. Damit laesst sich

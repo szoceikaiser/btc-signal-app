@@ -661,3 +661,79 @@ def test_auswahl_misst_nur_30_tage_die_datenabfrage_aber_das_volle_fenster():
     spannen.clear()
     coinalyze.spot_delta_aggregiert("KEY", ["BTCUSDT.A"], opener=messend)
     assert all(abs(t - coinalyze.SPOT_REICHWEITE_TAGE) < 1 for t in spannen), spannen
+
+
+# ---- E37.3, Nachbesserung 20.09.2026: Rueckfall auf Einzelabruf + echte Taktung
+
+def test_hole_reihen_faellt_auf_einzelabruf_zurueck():
+    """Dass EIN Abruf mehrere Reihen liefert, war nur fuer ohlcv-history belegt.
+
+    Beim Open Interest kam am 20.09.2026 nichts zurueck und der ganze Vergleich fiel
+    aus. Statt das hinzunehmen: fehlende Symbole einzeln nachfragen.
+    """
+    gefragt = []
+
+    def fake(req, timeout=0):
+        syms = req.full_url.split("symbols=")[1].split("&")[0]
+        gefragt.append(syms)
+        if "," in syms or "%2C" in syms:        # Mehrfachabruf -> leer
+            return _FakeResp(json.dumps([]).encode())
+        name = syms.replace("%2E", ".")
+        return _FakeResp(json.dumps(
+            [{"symbol": name, "history": [{"t": 1000, "c": 5.0}]}]).encode())
+
+    summe, b = coinalyze.oi_aggregiert("KEY", ["A.1", "B.2"], opener=fake, pause=0)
+    assert summe == {1000 * 1000: 10.0}, summe        # beide Reihen kamen einzeln an
+    assert len(gefragt) == 3, gefragt                 # 1 Mehrfach- + 2 Einzelabrufe
+    assert any(z.get("einzeln") for z in b["bloecke"]), b["bloecke"]
+
+
+def test_hole_reihen_fragt_nicht_einzeln_nach_wenn_alles_kam():
+    """Der Rueckfall darf nicht bei jedem Abruf mitlaufen — das waere doppelte Last."""
+    gefragt = []
+
+    def fake(req, timeout=0):
+        syms = req.full_url.split("symbols=")[1].split("&")[0]
+        gefragt.append(syms)
+        return _FakeResp(json.dumps(
+            [{"symbol": s, "history": [{"t": 1000, "c": 5.0}]}
+             for s in ("A.1", "B.2")]).encode())
+
+    coinalyze.oi_aggregiert("KEY", ["A.1", "B.2"], opener=fake, pause=0)
+    assert len(gefragt) == 1, gefragt
+
+
+def test_taktung_haengt_nicht_mehr_daran_ob_kw_leer_ist():
+    """DER Fehler vom 20.09.2026: Die Pause hing an `not kw`. Gedacht war 'im Test
+    nicht warten' — im echten Lauf sind aber frm/to gesetzt, also war kw NICHT leer
+    und es wurde NIE gewartet. Genau dort, wo das Rate-Limit greift.
+    """
+    import inspect
+    quelle = inspect.getsource(coinalyze._hole_reihen_roh)
+    assert "not kw" not in quelle, \
+        "Die Taktung haengt wieder an kw — im echten Lauf schaltet das die Pause ab."
+    assert "PAUSE_JE_BLOCK" in quelle, quelle
+    # Und ohne injizierten Opener (= echter Lauf) muss eine Pause herauskommen
+    assert coinalyze.PAUSE_JE_BLOCK > 0
+
+
+def test_rueckfall_greift_auch_wenn_die_ANZAHL_stimmt_aber_ein_symbol_fehlt():
+    """Randfall, der die erste Fassung ausgehebelt haette: Die Antwort enthaelt zwei
+    Reihen — aber eine davon ist ein Symbol, das gar nicht gefragt war. Die Anzahl
+    stimmt, das gesuchte Symbol fehlt trotzdem."""
+    gefragt = []
+
+    def fake(req, timeout=0):
+        syms = req.full_url.split("symbols=")[1].split("&")[0]
+        gefragt.append(syms)
+        if "," in syms or "%2C" in syms:
+            return _FakeResp(json.dumps([                 # zwei Reihen, aber B.2 fehlt
+                {"symbol": "A.1", "history": [{"t": 1000, "c": 5.0}]},
+                {"symbol": "FREMD.9", "history": [{"t": 1000, "c": 99.0}]}]).encode())
+        name = syms.replace("%2E", ".")
+        return _FakeResp(json.dumps(
+            [{"symbol": name, "history": [{"t": 1000, "c": 7.0}]}]).encode())
+
+    summe, b = coinalyze.oi_aggregiert("KEY", ["A.1", "B.2"], opener=fake, pause=0)
+    assert any(z.get("einzeln") == "B.2" for z in b["bloecke"]), b["bloecke"]
+    assert summe == {1000 * 1000: 12.0}, summe        # 5.0 (A.1) + 7.0 (B.2 einzeln)
