@@ -331,7 +331,8 @@ def _reihe_auswerten(eintrag: dict) -> dict:
     }
 
 
-def _hole_reihen_roh(api_key: str, symbole: list, **kw) -> tuple:
+def _hole_reihen_roh(api_key: str, symbole: list, endpoint: str = "ohlcv-history",
+                     **kw) -> tuple:
     """Holt alle Symbole in Bloecken; gibt (rohe Eintraege, Blockprotokoll) zurueck.
 
     Coinalyze nimmt den Parameter `symbols` (Mehrzahl); der Lauf vom 19.09.2026 hat
@@ -351,7 +352,7 @@ def _hole_reihen_roh(api_key: str, symbole: list, **kw) -> tuple:
         if i and not kw:                       # im Test nicht warten
             time.sleep(1.6)
         try:
-            roh = fetch_history("ohlcv-history", api_key, symbol=",".join(teil),
+            roh = fetch_history(endpoint, api_key, symbol=",".join(teil),
                                 days=SPOT_REICHWEITE_TAGE, **kw)
         except urllib.error.HTTPError as e:
             bloecke.append({"symbole": teil, "http_error": e.code,
@@ -421,6 +422,40 @@ def spot_symbole(api_key: str, wahl: str = SPOT_WAHL_GROESSTER, **kw) -> dict:
     return spot_auswahl(api_key, **kw).get(wahl, {})
 
 
+def _summiere_vollstaendig(je_symbol: dict, symbole: list, bloecke: list,
+                           einheit: str) -> tuple:
+    """Summiert je Zeitpunkt — aber NUR, wo alle gefragten Reihen einen Wert haben.
+
+    DIE Regel der ganzen Aggregation, absichtlich an EINER Stelle: Spot-CVD,
+    Futures-CVD, Open Interest und Liquidationen benutzen sie alle. Waere sie
+    viermal geschrieben, koennte sie dreimal richtig und einmal falsch sein.
+
+    Warum ueberhaupt: Fehlt an einem Zeitpunkt eine Boerse, entstuende sonst eine
+    Teilsumme, die wie eine volle aussieht. Beim Open Interest waere das ein
+    scheinbarer Einbruch um ein Drittel — also genau das Signal, auf das Muster 4
+    (Kapitulation) wartet. Ein Datenloch wuerde zum Kaufsignal.
+    """
+    fehlende = [s for s in symbole if s not in je_symbol]
+    vorhanden = [s for s in symbole if s in je_symbol]
+    if not vorhanden:
+        return {}, {"fehler": "keine einzige Reihe erhalten", "bloecke": bloecke}
+
+    alle_ts = set().union(*(set(je_symbol[s]) for s in vorhanden))
+    vollstaendig = set.intersection(*(set(je_symbol[s]) for s in vorhanden))
+    summe = {ts: sum(je_symbol[s][ts] for s in vorhanden) for ts in sorted(vollstaendig)}
+    bericht = {
+        "symbole": vorhanden,
+        "ohne_antwort": fehlende,
+        "punkte_gesamt": len(alle_ts),
+        "punkte_vollstaendig": len(summe),
+        "punkte_ausgelassen": len(alle_ts) - len(summe),
+        "je_symbol_punkte": {s: len(je_symbol[s]) for s in vorhanden},
+        "bloecke": bloecke,
+        "einheit": einheit,
+    }
+    return summe, bericht
+
+
 def spot_delta_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
     """{Open-Time_ms: Summe der Taker-Deltas} ueber mehrere Boersen, plus Bericht.
 
@@ -449,25 +484,165 @@ def spot_delta_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
                 deltas[int(p["t"]) * 1000] = 2.0 * float(p["bv"]) - float(p["v"])
         je_symbol[sym] = deltas
 
-    fehlende = [s for s in symbole if s not in je_symbol]
-    vorhanden = [s for s in symbole if s in je_symbol]
-    if not vorhanden:
-        return {}, {"fehler": "keine einzige Reihe erhalten", "bloecke": bloecke}
+    return _summiere_vollstaendig(
+        je_symbol, symbole, bloecke,
+        "BTC (Basiswert) — NICHT mit dem USD-Spot-CVD aus Binance-Vision mischen")
 
-    alle_ts = set().union(*(set(je_symbol[s]) for s in vorhanden))
-    vollstaendig = set.intersection(*(set(je_symbol[s]) for s in vorhanden))
-    summe = {ts: sum(je_symbol[s][ts] for s in vorhanden) for ts in sorted(vollstaendig)}
-    bericht = {
-        "symbole": vorhanden,
-        "ohne_antwort": fehlende,
-        "punkte_gesamt": len(alle_ts),
-        "punkte_vollstaendig": len(summe),
-        "punkte_ausgelassen": len(alle_ts) - len(summe),
-        "je_symbol_punkte": {s: len(je_symbol[s]) for s in vorhanden},
-        "bloecke": bloecke,
-        "einheit": "BTC (Basiswert) — NICHT mit dem USD-Spot-CVD aus Binance-Vision mischen",
-    }
-    return summe, bericht
+
+# -------------------------- E37.3: Open Interest, Liquidationen, Futures-CVD aggregiert
+# Furkan im Seminar zur Futures-Seite: "bei den Futures schauen wir uns die Perps von
+# Binance, Bybit, OKX, [Bitget], Hyperliquid an" — dazu jeweils die USD-Perps. Von
+# diesen fuehrt Coinalyze vier (Bitget fehlt in der Boersenliste).
+PERP_BOERSEN = {"A": "Binance", "6": "Bybit", "3": "OKX", "H": "Hyperliquid"}
+PERP_QUOTES = ("USDT", "USD", "USDC")     # Stablecoin- UND USD-Perps, wie bei ihm
+
+# EINHEITEN — der gefaehrlichste Punkt dieser Etappe, per Probe 19.09.2026 geklaert:
+#   open-interest-history und liquidation-history laufen mit convert_to_usd=true und
+#   kommen in USD zurueck. USD ist ueber Boersen hinweg dieselbe Einheit -> summierbar.
+#   ohlcv-history ignoriert convert_to_usd: 'v'/'bv' kommen in der Denominierung des
+#   Marktes (Feld oi_lq_vol_denominated_in, bei BTCUSDT_PERP.A "BASE_ASSET" = BTC).
+#   Ein inverser Kontrakt rechnet dagegen in USD/Kontrakten. Wer beides summiert,
+#   bekommt eine voellig normal aussehende Zahl, die Unsinn ist. Deshalb wird das
+#   Futures-CVD NUR ueber Maerkte derselben Denominierung gebildet; alle anderen
+#   werden gemeldet statt stillschweigend weggelassen.
+DENOM_FELD = "oi_lq_vol_denominated_in"
+
+
+def _perp_ablehnungsgrund(e, codes) -> str | None:
+    """Warum dieser Perp-Markt nicht in Frage kommt — oder None, wenn er passt."""
+    if not isinstance(e, dict):
+        return "kein Eintrag"
+    if e.get("base_asset") != "BTC":
+        return f"Basiswert ist {e.get('base_asset')!r}, nicht BTC"
+    if e.get("exchange") not in codes:
+        return f"Boerse {e.get('exchange')!r} gehoert nicht zu den gesuchten"
+    if not e.get("is_perpetual"):
+        return "kein Perpetual (Termin-Kontrakt laeuft aus)"
+    if e.get("quote_asset") not in PERP_QUOTES:
+        return f"Gegenwaehrung {e.get('quote_asset')!r} ist kein Dollar"
+    if not e.get("has_ohlcv_data"):
+        return "keine OHLCV-Daten (kein Futures-CVD moeglich)"
+    return None
+
+
+def _perp_kandidaten_je_boerse(maerkte: list, codes=PERP_BOERSEN) -> dict:
+    """Alle passenden Perp-Maerkte je Boerse."""
+    out: dict = {}
+    for e in maerkte:
+        if _perp_ablehnungsgrund(e, codes) is None:
+            out.setdefault(e["exchange"], []).append(e)
+    return out
+
+
+def perp_auswahl(api_key: str, **kw) -> dict:
+    """Je Boerse der groesste BTC-Perp-Markt, nach gemessenem Volumen — wie bei E37.1.
+
+    Gibt zusaetzlich die Denominierung je gewaehltem Markt zurueck, weil davon
+    abhaengt, welche Maerkte beim Futures-CVD ueberhaupt zusammengerechnet werden
+    duerfen.
+    """
+    maerkte = get_json("future-markets", {}, api_key, **kw)
+    kandidaten = _perp_kandidaten_je_boerse(maerkte if isinstance(maerkte, list) else [])
+    alle = [e["symbol"] for liste in kandidaten.values() for e in liste if e.get("symbol")]
+    if not alle:
+        return {"gewaehlt": {}, "kandidaten": {}, "abgelehnt": {}}
+    reihen = _pruefe_symbole(api_key, alle, **kw).get("je_symbol", {})
+    gewaehlt = _groesster_je_boerse(kandidaten, reihen, codes=PERP_BOERSEN)
+    denom = {e["symbol"]: e.get(DENOM_FELD)
+             for liste in kandidaten.values() for e in liste if e.get("symbol")}
+    for code, d in gewaehlt.items():
+        d["denominierung"] = denom.get(d["symbol"])
+    abgelehnt: dict = {}
+    for e in maerkte if isinstance(maerkte, list) else []:
+        if not isinstance(e, dict) or e.get("exchange") not in PERP_BOERSEN:
+            continue
+        if e.get("base_asset") != "BTC":
+            continue
+        grund = _perp_ablehnungsgrund(e, PERP_BOERSEN)
+        if grund:
+            abgelehnt.setdefault(e["exchange"], []).append(
+                {"symbol": e.get("symbol"), "grund": grund})
+    # Die Einheiten-Trennung gehoert hierher, nicht in den Backtest: wer die Maerkte
+    # waehlt, muss auch sagen, welche davon zusammengerechnet werden duerfen.
+    cvd_symbole, cvd_ausgeschlossen = _nach_denominierung(gewaehlt)
+    return {"gewaehlt": gewaehlt, "kandidaten": kandidaten, "abgelehnt": abgelehnt,
+            "alle_symbole": [d["symbol"] for d in gewaehlt.values()],
+            "cvd_symbole": cvd_symbole, "cvd_ausgeschlossen": cvd_ausgeschlossen}
+
+
+def _nach_denominierung(gewaehlt: dict) -> tuple:
+    """Teilt die gewaehlten Maerkte in die groesste Denominierungs-Gruppe und den Rest.
+
+    Zurueck: (Symbole derselben Denominierung, Liste der ausgeschlossenen mit Grund).
+    Gewinnt die Gruppe mit dem meisten Volumen — nicht die mit den meisten Maerkten:
+    zwei Zwergboersen duerfen Binance nicht ueberstimmen.
+    """
+    gruppen: dict = {}
+    for d in gewaehlt.values():
+        gruppen.setdefault(d.get("denominierung"), []).append(d)
+    if not gruppen:
+        return [], []
+    beste = max(gruppen, key=lambda k: sum(d.get("summe_v", 0.0) for d in gruppen[k]))
+    drin = [d["symbol"] for d in gruppen[beste]]
+    raus = [{"symbol": d["symbol"], "boerse": d.get("boerse"),
+             "denominierung": d.get("denominierung"),
+             "grund": f"rechnet in {d.get('denominierung')!r}, die Mehrheit in {beste!r} "
+                      "— summieren wuerde zwei Einheiten mischen"}
+            for k, liste in gruppen.items() if k != beste for d in liste]
+    return drin, raus
+
+
+def fut_delta_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
+    """Futures-CVD ueber mehrere Perp-Maerkte. NUR gleiche Denominierung (siehe oben)."""
+    if not symbole:
+        return {}, {"fehler": "keine Symbole"}
+    eintraege, bloecke = _hole_reihen_roh(api_key, symbole, **kw)
+    je_symbol: dict = {}
+    for e in eintraege:
+        deltas = {}
+        for p in e.get("history") or []:
+            if isinstance(p, dict) and "t" in p and "v" in p and "bv" in p:
+                deltas[int(p["t"]) * 1000] = 2.0 * float(p["bv"]) - float(p["v"])
+        je_symbol[e.get("symbol", "?")] = deltas
+    return _summiere_vollstaendig(
+        je_symbol, symbole, bloecke,
+        "Denominierung des Marktes (meist BTC) — NICHT mit USD-Reihen mischen")
+
+
+def oi_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
+    """Open Interest ueber mehrere Perp-Maerkte, in USD (convert_to_usd=true)."""
+    if not symbole:
+        return {}, {"fehler": "keine Symbole"}
+    eintraege, bloecke = _hole_reihen_roh(api_key, symbole,
+                                          endpoint="open-interest-history", **kw)
+    je_symbol = {
+        e.get("symbol", "?"): {int(p["t"]) * 1000: float(p["c"])
+                               for p in e.get("history") or []
+                               if isinstance(p, dict) and "t" in p and "c" in p}
+        for e in eintraege}
+    return _summiere_vollstaendig(je_symbol, symbole, bloecke, "USD (convert_to_usd)")
+
+
+def liq_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
+    """Liquidationen ueber mehrere Perp-Maerkte: {ts: (Long_USD, Short_USD)}.
+
+    Long und Short werden getrennt summiert, aber ueber DIESELBE
+    Vollstaendigkeitspruefung — sonst koennte ein Zeitpunkt bei Long vollstaendig und
+    bei Short unvollstaendig sein und die beiden Reihen liefen auseinander.
+    """
+    if not symbole:
+        return {}, {"fehler": "keine Symbole"}
+    eintraege, bloecke = _hole_reihen_roh(api_key, symbole,
+                                          endpoint="liquidation-history", **kw)
+    lang, kurz = {}, {}
+    for e in eintraege:
+        sym = e.get("symbol", "?")
+        pkte = [p for p in e.get("history") or [] if isinstance(p, dict) and "t" in p]
+        lang[sym] = {int(p["t"]) * 1000: float(p.get("l", 0.0)) for p in pkte}
+        kurz[sym] = {int(p["t"]) * 1000: float(p.get("s", 0.0)) for p in pkte}
+    s_lang, bericht = _summiere_vollstaendig(lang, symbole, bloecke, "USD (convert_to_usd)")
+    s_kurz, _ = _summiere_vollstaendig(kurz, symbole, bloecke, "USD (convert_to_usd)")
+    return {ts: (v, s_kurz.get(ts, 0.0)) for ts, v in s_lang.items()}, bericht
 
 
 def spot_probe(api_key: str, **kw) -> dict:

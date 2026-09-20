@@ -1030,6 +1030,36 @@ def main():
             except Exception as exc:  # noqa: BLE001
                 print(f"Coinalyze Spot ({wahl}) nicht verfuegbar ({exc}) -> Zeile entfaellt.")
 
+    # E37.3: Open Interest, Liquidationen und Futures-CVD ueber mehrere Perp-Maerkte.
+    # Wieder nur fuer den Vergleich — die Hauptreihe bleibt auf Binance.
+    oi_agg, liq_agg, fut_agg, derivate_bericht = {}, {}, {}, {}
+    if api_key:
+        try:
+            pa = coinalyze.perp_auswahl(api_key)
+            gewaehlt = pa["gewaehlt"]
+            # Fuer OI und Liquidationen (USD) duerfen ALLE Maerkte zusammen; fuers
+            # Futures-CVD nur die mit gleicher Denominierung — die Trennung trifft
+            # perp_auswahl(), nicht der Backtest.
+            alle_syms = pa["alle_symbole"]
+            cvd_syms, ausgeschlossen = pa["cvd_symbole"], pa["cvd_ausgeschlossen"]
+            zeitraum = {"frm": WARMUP_MS // 1000, "to": END_MS // 1000}
+            oi_agg, b_oi = coinalyze.oi_aggregiert(api_key, alle_syms, **zeitraum)
+            liq_agg, b_liq = coinalyze.liq_aggregiert(api_key, alle_syms, **zeitraum)
+            fut_agg, b_fut = coinalyze.fut_delta_aggregiert(api_key, cvd_syms, **zeitraum)
+            derivate_bericht = {
+                "maerkte": {d["boerse"]: d["symbol"] for d in gewaehlt.values()},
+                "cvd_maerkte": cvd_syms, "cvd_ausgeschlossen": ausgeschlossen,
+                "oi": b_oi, "liq": b_liq, "fut": b_fut,
+            }
+            print(f"Coinalyze Derivate: {len(alle_syms)} Perp-Maerkte "
+                  f"({', '.join(derivate_bericht['maerkte'])}), OI {len(oi_agg)} Punkte, "
+                  f"Liq {len(liq_agg)}, Futures-CVD {len(fut_agg)} ueber "
+                  f"{len(cvd_syms)} Maerkte gleicher Denominierung"
+                  + (f", {len(ausgeschlossen)} wegen abweichender Einheit ausgeschlossen"
+                     if ausgeschlossen else ""))
+        except Exception as exc:  # noqa: BLE001
+            print(f"Coinalyze Derivate nicht verfuegbar ({exc}) -> Vergleich entfaellt.")
+
     candles, flow = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map)
     # Vergleichsreihe OHNE Futures-Daten: dieselben Kerzen, fut_cvd = 0. Damit laesst sich
     # die Wirkung der neuen Daten sauber isolieren (gleiche Variante, nur andere Daten).
@@ -1220,6 +1250,75 @@ def main():
         print("E37.2 Spot-CVD: " + " | ".join(
             f"{n}: {p['rendite_pct']:+.1f} % ({len(v)} Signale)"
             for n, (v, p, _) in _ergebnisse.items()))
+
+    # --- E37.3: Wirkung der aggregierten Derivate-Daten isolieren --------------------
+    # Open Interest, Liquidationen und Futures-CVD stehen direkt in den Bedingungen
+    # aller fuenf Muster (OI-Wipeout 5 %, Liquidations-Kaskade, Futures-CVD gegen Spot).
+    # Anders als beim Spot-CVD, das nur ueber zwei Steigungsvergleiche eingeht.
+    derivate_zeilen = []
+    if oi_agg:
+        _dcfg = next((c for c in GRID if c.get("panel")), GRID[0])
+        _dz, _derg = [], {}
+        for name, o, l, f in (("heute (nur Binance)", None, None, None),
+                              ("+OI aggregiert", oi_agg, None, None),
+                              ("+OI +Liquidationen aggregiert", oi_agg, liq_agg, None),
+                              ("+alle drei aggregiert", oi_agg, liq_agg, fut_agg)):
+            if name != "heute (nur Binance)" and not o:
+                continue
+            _, _fl = build_series(raw, funding,
+                                  o if o is not None else oi_map,
+                                  l if l is not None else liq_map,
+                                  f if f is not None else fut_map, ls_map)
+            _v = run_backtest(candles, _fl, _dcfg, start_ms=eff_start)
+            _p = simulate(_v, candles, start_ms=eff_start)
+            _s = score(_v, start_ms=eff_start)
+            _derg[name] = (_v, _p, _s)
+            h = "**" if o is not None else ""
+            _dz.append(f"| {h}{name}{h} | {_s['recall']:.0%} | {_s['precision']:.0%} | "
+                       f"{h}{_p['rendite_pct']:+.1f} %{h} | "
+                       f"{_p['max_drawdown_pct']:.1f} % | {len(_v)} |")
+        _n0 = len(_derg["heute (nur Binance)"][0])
+        _aus = derivate_bericht.get("cvd_ausgeschlossen") or []
+        derivate_zeilen = [
+            "",
+            "## Aggregierte Derivate-Daten: was bringen sie?",
+            "",
+            "Open Interest, Liquidationen und Futures-CVD stehen **direkt** in den "
+            "Bedingungen aller fuenf Muster — ein OI-Wipeout von 5 %, eine "
+            "Liquidations-Kaskade, Futures-CVD gegen Spot. Das Spot-CVD (Abschnitt "
+            "darueber) geht dagegen nur ueber zwei Steigungsvergleiche ein. Wenn "
+            "Aggregation irgendwo wirkt, dann hier.",
+            "",
+            f"Perp-Maerkte: {', '.join(f'{b} ({s})' for b, s in derivate_bericht.get('maerkte', {}).items())}. "
+            f"OI {derivate_bericht.get('oi', {}).get('punkte_vollstaendig', 0)} Punkte, "
+            f"Liquidationen {derivate_bericht.get('liq', {}).get('punkte_vollstaendig', 0)}, "
+            f"Futures-CVD {derivate_bericht.get('fut', {}).get('punkte_vollstaendig', 0)}.",
+            "",
+            ("**Einheiten:** OI und Liquidationen kommen in USD zurueck "
+             "(`convert_to_usd`) und sind ueber Boersen hinweg summierbar. Das "
+             "Futures-CVD dagegen kommt in der Denominierung des jeweiligen Marktes — "
+             "deshalb werden dafuer nur Maerkte derselben Einheit zusammengerechnet."
+             + (f" Ausgeschlossen: {', '.join(a['symbol'] for a in _aus)}." if _aus
+                else " Alle gewaehlten Maerkte rechnen in derselben Einheit.")),
+            "",
+            f"Alle Zeilen: Variante *{_dcfg['label']}*, dieselben Kerzen, derselbe "
+            "Zeitraum. Der Unterschied sind allein die Daten.",
+            "",
+            "| Datenlage | Recall | Praez. | Rendite | max. Rueckgang | Signale |",
+            "|---|---|---|---|---|---|",
+            *_dz,
+            "",
+            ("**Keine Zeile aendert die Signalzahl** — die Muster feuern mit mehreren "
+             "Boersen an denselben Stellen wie mit Binance allein. Damit ist die Frage "
+             "beantwortet: 'wir sehen nur eine Boerse' ist sachlich richtig und "
+             "praktisch folgenlos."
+             if all(len(v) == _n0 for v, _, _ in _derg.values()) else
+             "**Die Signalzahl aendert sich** — mehrere Boersen fuehren zu anderen "
+             "Entscheidungen. Ob das hilft, sagt die Rendite-Spalte."),
+        ]
+        print("E37.3 Derivate: " + " | ".join(
+            f"{n}: {p['rendite_pct']:+.1f} % ({len(v)} Signale)"
+            for n, (v, p, _) in _derg.items()))
 
     # --- E11: Robustheitspruefung, Fenster halbiert ---------------------------------
     mid_ms = eff_start + (END_MS - eff_start) // 2
@@ -1509,6 +1608,7 @@ def main():
         *vorab_zeilen,
         *fut_zeilen,
         *spot_zeilen,
+        *derivate_zeilen,
         *furkan_zeilen,
         "",
         "## Robustheitspruefung: Fenster halbiert",

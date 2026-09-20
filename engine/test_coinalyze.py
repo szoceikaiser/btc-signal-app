@@ -469,3 +469,169 @@ def test_spot_auswahl_holt_die_marktliste_nur_EINMAL():
     assert zaehler["markt"] == 1, zaehler
     assert a[coinalyze.SPOT_WAHL_GROESSTER] == {"A": ["BTCUSDT.A"]}, a
     assert sorted(a[coinalyze.SPOT_WAHL_ALLE]["A"]) == ["BTCFDUSD.A", "BTCUSDT.A"], a
+
+
+# ------------- E37.3: Open Interest, Liquidationen, Futures-CVD ueber mehrere Boersen
+
+def _perp(sym, ex, quote="USDT", perp=True, ohlcv=True, denom="BASE_ASSET"):
+    return {"symbol": sym, "exchange": ex, "symbol_on_exchange": sym.split("_")[0],
+            "base_asset": "BTC", "quote_asset": quote, "is_perpetual": perp,
+            "has_ohlcv_data": ohlcv, "oi_lq_vol_denominated_in": denom}
+
+
+def test_perp_ablehnungsgrund_nennt_den_grund():
+    c = coinalyze.PERP_BOERSEN
+    assert coinalyze._perp_ablehnungsgrund(_perp("BTCUSDT_PERP.A", "A"), c) is None
+    g = coinalyze._perp_ablehnungsgrund(_perp("BTCUSDT_1231.A", "A", perp=False), c)
+    assert g and "Perpetual" in g, g
+    g = coinalyze._perp_ablehnungsgrund(_perp("BTCEUR_PERP.A", "A", quote="EUR"), c)
+    assert g and "Gegenwaehrung" in g, g
+    g = coinalyze._perp_ablehnungsgrund(_perp("BTCUSDT_PERP.K", "K"), c)
+    assert g and "Boerse" in g, g
+    g = coinalyze._perp_ablehnungsgrund(_perp("BTCUSDT_PERP.A", "A", ohlcv=False), c)
+    assert g and "OHLCV" in g, g
+    e = _perp("ETHUSDT_PERP.A", "A"); e["base_asset"] = "ETH"
+    g = coinalyze._perp_ablehnungsgrund(e, c)
+    assert g and "Basiswert" in g, g
+
+
+def test_nach_denominierung_trennt_einheiten_und_das_volumen_entscheidet():
+    """DIE Falle dieser Etappe: BTC-Mengen und USD-Kontrakte zusammenzuzaehlen ergibt
+    eine voellig normal aussehende Zahl, die Unsinn ist.
+
+    Zwei Zwergboersen duerfen Binance nicht ueberstimmen — deshalb gewinnt die Gruppe
+    mit dem meisten Volumen, nicht die mit den meisten Maerkten.
+    """
+    gewaehlt = {
+        "A": {"symbol": "BTCUSDT_PERP.A", "boerse": "Binance",
+              "denominierung": "BASE_ASSET", "summe_v": 1_000_000.0},
+        "3": {"symbol": "BTCUSD_PERP.3", "boerse": "OKX",
+              "denominierung": "QUOTE_ASSET", "summe_v": 5.0},
+        "6": {"symbol": "BTCUSD_PERP.6", "boerse": "Bybit",
+              "denominierung": "QUOTE_ASSET", "summe_v": 4.0},
+    }
+    drin, raus = coinalyze._nach_denominierung(gewaehlt)
+    assert drin == ["BTCUSDT_PERP.A"], drin          # Volumen schlaegt Mehrheit (2:1)
+    assert {r["symbol"] for r in raus} == {"BTCUSD_PERP.3", "BTCUSD_PERP.6"}, raus
+    assert all("mischen" in r["grund"] for r in raus), raus
+
+
+def test_nach_denominierung_laesst_alle_drin_wenn_die_einheit_gleich_ist():
+    gewaehlt = {c: {"symbol": f"S.{c}", "boerse": c, "denominierung": "BASE_ASSET",
+                    "summe_v": 10.0} for c in ("A", "6", "3")}
+    drin, raus = coinalyze._nach_denominierung(gewaehlt)
+    assert sorted(drin) == ["S.3", "S.6", "S.A"], drin
+    assert raus == [], raus
+
+
+def _hist_opener(je_symbol, maerkte=None, endpoint=None):
+    """Opener fuer future-markets + History-Endpunkte.
+
+    `endpoint` gesetzt = NUR dieser Endpunkt liefert Daten, jeder andere eine leere
+    Antwort. Ohne diese Schaerfe faellt nicht auf, wenn eine Funktion den falschen
+    Endpunkt abfragt — sie bekaeme trotzdem plausible Zahlen.
+    """
+    def fake(req, timeout=0):
+        if "future-markets" in req.full_url:
+            return _FakeResp(json.dumps(maerkte or []).encode())
+        if endpoint and endpoint not in req.full_url:
+            return _FakeResp(json.dumps([]).encode())
+        gefragt = req.full_url.split("symbols=")[1].split("&")[0]
+        raus = [{"symbol": s, "history": h} for s, h in je_symbol.items()
+                if s.replace(".", "%2E") in gefragt or s in gefragt]
+        return _FakeResp(json.dumps(raus).encode())
+    return fake
+
+
+def test_oi_aggregiert_summiert_und_laesst_luecken_aus():
+    """Beim Open Interest ist die Luecken-Regel besonders wichtig: eine Teilsumme
+    saehe aus wie ein OI-Wipeout — also genau das Signal fuer Muster 4."""
+    # 'o' bewusst weit weg von 'c': sonst faellt nicht auf, wenn jemand den
+    # Eroeffnungs- statt den Schlusswert nimmt.
+    je = {
+        "A.1": [{"t": 1000, "o": 1.0, "c": 60.0}, {"t": 2000, "o": 2.0, "c": 61.0},
+                {"t": 3000, "o": 3.0, "c": 62.0}],
+        "B.2": [{"t": 1000, "o": 4.0, "c": 30.0},
+                {"t": 3000, "o": 5.0, "c": 31.0}],
+    }
+    summe, b = coinalyze.oi_aggregiert(
+        "KEY", ["A.1", "B.2"],
+        opener=_hist_opener(je, endpoint="open-interest-history"))
+    assert summe == {1000 * 1000: 90.0, 3000 * 1000: 93.0}, summe
+    assert 2000 * 1000 not in summe, "unvollstaendiger Zeitpunkt waere ein Schein-Wipeout"
+    assert b["punkte_ausgelassen"] == 1, b
+    assert "USD" in b["einheit"], b
+
+
+def test_liq_aggregiert_haelt_long_und_short_auf_denselben_zeitpunkten():
+    """Liefen die beiden Reihen auseinander, stuende an einem Zeitpunkt eine volle
+    Long-Summe neben einer halben Short-Summe — und die Kaskaden-Erkennung kippt."""
+    je = {
+        "A.1": [{"t": 1000, "l": 5.0, "s": 2.0}, {"t": 2000, "l": 7.0, "s": 1.0}],
+        "B.2": [{"t": 1000, "l": 3.0, "s": 4.0}],
+    }
+    summe, b = coinalyze.liq_aggregiert(
+        "KEY", ["A.1", "B.2"],
+        opener=_hist_opener(je, endpoint="liquidation-history"))
+    assert summe == {1000 * 1000: (8.0, 6.0)}, summe
+    assert 2000 * 1000 not in summe, summe
+    assert b["punkte_ausgelassen"] == 1, b
+
+
+def test_fut_delta_aggregiert_rechnet_wie_das_spot_delta():
+    je = {"A.1": [_pkt(1000, 10.0, 7.0)],       # +4
+          "B.2": [_pkt(1000, 20.0, 5.0)]}       # -10
+    summe, b = coinalyze.fut_delta_aggregiert("KEY", ["A.1", "B.2"],
+                                              opener=_hist_opener(je))
+    assert summe == {1000 * 1000: -6.0}, summe
+    assert "Denominierung" in b["einheit"], b
+
+
+def test_perp_auswahl_waehlt_nach_volumen_und_gibt_die_denominierung_mit():
+    # Der groesste Markt steht bewusst NICHT an erster Stelle — sonst wuerde
+    # "nimm den ersten" dasselbe Ergebnis liefern wie "nimm den groessten".
+    maerkte = [_perp("BTCUSDC_PERP.A", "A", quote="USDC"),
+               _perp("BTCUSDT_PERP.A", "A", quote="USDT"),
+               _perp("BTCUSD_PERP.3", "3", quote="USD", denom="QUOTE_ASSET"),
+               _perp("BTCUSDT_1231.A", "A", perp=False)]          # Termin -> raus
+    je = {"BTCUSDT_PERP.A": _punkte(3, v=100.0),
+          "BTCUSDC_PERP.A": _punkte(3, v=5.0),
+          "BTCUSD_PERP.3":  _punkte(3, v=50.0)}
+    pa = coinalyze.perp_auswahl("KEY", opener=_hist_opener(je, maerkte))
+    g = pa["gewaehlt"]
+    assert g["A"]["symbol"] == "BTCUSDT_PERP.A", g               # Volumen entscheidet
+    assert g["A"]["denominierung"] == "BASE_ASSET", g
+    assert g["3"]["denominierung"] == "QUOTE_ASSET", g
+    gruende = {z["symbol"]: z["grund"] for z in pa["abgelehnt"].get("A", [])}
+    assert "Perpetual" in gruende["BTCUSDT_1231.A"], gruende
+
+
+def test_summiere_vollstaendig_ist_die_EINE_regel_fuer_alle_vier_werte():
+    """Waere sie viermal geschrieben, koennte sie dreimal richtig und einmal falsch sein.
+
+    Deshalb hier direkt: unvollstaendige Zeitpunkte raus, gezaehlt, Rest summiert.
+    """
+    je = {"X": {1: 1.0, 2: 2.0, 3: 3.0}, "Y": {1: 10.0, 3: 30.0}}
+    summe, b = coinalyze._summiere_vollstaendig(je, ["X", "Y"], [], "Testeinheit")
+    assert summe == {1: 11.0, 3: 33.0}, summe
+    assert b["punkte_gesamt"] == 3 and b["punkte_ausgelassen"] == 1, b
+    assert b["einheit"] == "Testeinheit", b
+    # Gar keine Reihe -> klare Fehlermeldung statt leerer Erfolg
+    leer, b2 = coinalyze._summiere_vollstaendig({}, ["X"], [], "Testeinheit")
+    assert leer == {} and "fehler" in b2, b2
+
+
+def test_perp_auswahl_liefert_die_einheiten_trennung_gleich_mit():
+    """Wer die Maerkte waehlt, muss auch sagen, welche summiert werden duerfen —
+    sonst muss jeder Aufrufer die Regel selbst kennen und einer macht es falsch."""
+    maerkte = [_perp("BTCUSDT_PERP.A", "A", quote="USDT", denom="BASE_ASSET"),
+               _perp("BTCUSD_PERP.3", "3", quote="USD", denom="QUOTE_ASSET")]
+    je = {"BTCUSDT_PERP.A": _punkte(3, v=1000.0),
+          "BTCUSD_PERP.3":  _punkte(3, v=5.0)}
+    pa = coinalyze.perp_auswahl("KEY", opener=_hist_opener(je, maerkte))
+    assert sorted(pa["alle_symbole"]) == ["BTCUSDT_PERP.A", "BTCUSD_PERP.3"], pa
+    # Fuers Futures-CVD nur die Mehrheits-Denominierung (nach Volumen: Binance)
+    assert pa["cvd_symbole"] == ["BTCUSDT_PERP.A"], pa
+    assert [a["symbol"] for a in pa["cvd_ausgeschlossen"]] == ["BTCUSD_PERP.3"], pa
+    # OI und Liquidationen dagegen duerfen ALLE — die stehen in alle_symbole
+    assert len(pa["alle_symbole"]) > len(pa["cvd_symbole"]), pa
