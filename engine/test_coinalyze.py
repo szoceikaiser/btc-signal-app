@@ -285,13 +285,23 @@ def test_pruefe_symbole_teilt_in_bloecke_und_sammelt_alle_reihen():
 
 
 def test_pruefe_symbole_ein_kaputter_block_reisst_den_rest_nicht_mit():
-    """Ein sichtbarer Ausfall ist besser als ein stiller Totalverlust."""
+    """Ein sichtbarer Ausfall ist besser als ein stiller Totalverlust.
+
+    Seit dem 429-Befund (20.09.2026) wird nach einem gescheiterten Block ZUSAETZLICH
+    einzeln nachgefragt: Ein einzelnes Symbol kostet weniger Kontingent und kommt oft
+    durch, wo vier zusammen scheitern. Vorher fiel der ganze Block ersatzlos aus.
+    """
     symbole = [f"BTC{i}.A" for i in range(10)]
     je = {s: _punkte(3) for s in symbole}
-    # Der zweite Block enthaelt BTC9.A -> gezielt scheitern lassen
-    r = coinalyze._pruefe_symbole("KEY", symbole, opener=_opener([], je, fehler_bei="BTC9"))
-    assert r["zurueck"] == 6, r                         # erster Block kam durch
+    # Der Sammelabruf des zweiten Blocks enthaelt BTC9.A -> gezielt scheitern lassen.
+    # Die Einzelabrufe danach fragen je ein Symbol und kommen durch (ausser BTC9.A).
+    r = coinalyze._pruefe_symbole("KEY", symbole,
+                                  opener=_opener([], je, fehler_bei="BTC9"))
     assert any("http_error" in b for b in r["bloecke"]), r["bloecke"]
+    # Erster Block (6) + Einzelabrufe des zweiten, die durchkamen (3 von 4)
+    assert r["zurueck"] == 9, r
+    assert "BTC9.A" not in r["je_symbol"], r["je_symbol"].keys()
+    assert any(b.get("einzeln") for b in r["bloecke"]), r["bloecke"]
 
 
 def test_spot_probe_waehlt_nach_volumen_und_nennt_fehlende_boersen():
@@ -737,3 +747,125 @@ def test_rueckfall_greift_auch_wenn_die_ANZAHL_stimmt_aber_ein_symbol_fehlt():
     summe, b = coinalyze.oi_aggregiert("KEY", ["A.1", "B.2"], opener=fake, pause=0)
     assert any(z.get("einzeln") == "B.2" for z in b["bloecke"]), b["bloecke"]
     assert summe == {1000 * 1000: 12.0}, summe        # 5.0 (A.1) + 7.0 (B.2 einzeln)
+
+
+# ---- E37.3, dritter Befund: HTTP 429. Der Lauf vom 20.09.2026, 10:52 UTC meldete
+# `Too Many Requests. See the "Retry-After" header.` — und bis dahin haben wir genau
+# diesen Hinweis ignoriert und den ganzen Vergleich fallengelassen.
+
+def _http429(retry_after=None):
+    import urllib.error
+    kopf = {"Retry-After": retry_after} if retry_after else {}
+    return urllib.error.HTTPError("http://x", 429, "Too Many Requests", kopf,
+                                  io.BytesIO(b'{"message":"Too Many Requests."}'))
+
+
+def test_wiederholt_bei_429_und_haelt_sich_an_retry_after():
+    gewartet, versuche = [], {"n": 0}
+    orig_sleep = coinalyze.time.sleep
+    coinalyze.time.sleep = gewartet.append
+    try:
+        def hole():
+            versuche["n"] += 1
+            if versuche["n"] < 3:
+                raise _http429("7")
+            return "da"
+        assert coinalyze._mit_wiederholung(hole, "test") == "da"
+    finally:
+        coinalyze.time.sleep = orig_sleep
+    assert versuche["n"] == 3, versuche
+    assert gewartet == [7.0, 7.0], gewartet          # genau so lange wie verlangt
+
+
+def test_ohne_retry_after_wird_die_wartezeit_verdoppelt():
+    gewartet = []
+    orig_sleep = coinalyze.time.sleep
+    coinalyze.time.sleep = gewartet.append
+    try:
+        n = {"i": 0}
+
+        def hole():
+            n["i"] += 1
+            if n["i"] < 4:
+                raise _http429()                      # kein Header
+            return "da"
+        coinalyze._mit_wiederholung(hole, "test")
+    finally:
+        coinalyze.time.sleep = orig_sleep
+    assert gewartet == [1.6, 3.2, 6.4], gewartet
+
+
+def test_wartezeit_wird_gedeckelt_und_andere_fehler_fliegen_sofort():
+    """Ein Server, der 'in einer Stunde' sagt, darf den Lauf nicht anhalten.
+    Und ein 404 ist kein Ueberlast-Problem — da hilft Warten nichts."""
+    gewartet = []
+    orig_sleep = coinalyze.time.sleep
+    coinalyze.time.sleep = gewartet.append
+    try:
+        n = {"i": 0}
+
+        def hole():
+            n["i"] += 1
+            if n["i"] < 2:
+                raise _http429("3600")
+            return "da"
+        coinalyze._mit_wiederholung(hole, "test")
+        assert gewartet == [coinalyze.MAX_WARTE], gewartet
+
+        import urllib.error
+
+        def vierhundertvier():
+            raise urllib.error.HTTPError("http://x", 404, "Not Found", {},
+                                         io.BytesIO(b"{}"))
+        try:
+            coinalyze._mit_wiederholung(vierhundertvier, "test")
+            raise AssertionError("404 haette sofort durchschlagen muessen")
+        except urllib.error.HTTPError as e:
+            assert e.code == 404
+        assert gewartet == [coinalyze.MAX_WARTE], "bei 404 darf nicht gewartet werden"
+    finally:
+        coinalyze.time.sleep = orig_sleep
+
+
+def test_gibt_nach_MAX_VERSUCHEN_auf_statt_ewig_zu_warten():
+    orig_sleep = coinalyze.time.sleep
+    coinalyze.time.sleep = lambda *_: None
+    try:
+        n = {"i": 0}
+
+        def immer429():
+            n["i"] += 1
+            raise _http429("1")
+        try:
+            coinalyze._mit_wiederholung(immer429, "test")
+            raise AssertionError("haette aufgeben muessen")
+        except Exception as e:
+            assert getattr(e, "code", None) == 429, e
+    finally:
+        coinalyze.time.sleep = orig_sleep
+    assert n["i"] == coinalyze.MAX_VERSUCHE, n
+
+
+def test_der_echte_abruf_benutzt_die_wiederholung_auch_wirklich():
+    """Die Wiederholung kann fehlerfrei gebaut und trotzdem nirgends verdrahtet sein.
+
+    Genau das war der Fall beim Auswahl-Fenster: Parameter da, kam nie an. Hier also
+    nicht die Funktion testen, sondern den WEG durch _hole_reihen_roh.
+    """
+    versuche = {"n": 0}
+    orig_sleep = coinalyze.time.sleep
+    coinalyze.time.sleep = lambda *_: None
+    try:
+        def fake(req, timeout=0):
+            versuche["n"] += 1
+            if versuche["n"] == 1:
+                raise _http429("1")                   # erster Abruf: ueberlastet
+            return _FakeResp(json.dumps(
+                [{"symbol": "A.1", "history": [{"t": 1000, "c": 5.0}]}]).encode())
+
+        summe, b = coinalyze.oi_aggregiert("KEY", ["A.1"], opener=fake, pause=0)
+    finally:
+        coinalyze.time.sleep = orig_sleep
+    assert versuche["n"] == 2, versuche               # einmal gescheitert, einmal geklappt
+    assert summe == {1000 * 1000: 5.0}, summe
+    assert not any("http_error" in z for z in b["bloecke"]), b["bloecke"]

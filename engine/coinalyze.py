@@ -306,6 +306,38 @@ def _einheit_einschaetzen(v_letzte: float | None, kurs: float | None) -> str:
 
 SYMBOLE_JE_ABRUF = 6     # Blockgroesse; die Grenze von Coinalyze ist nicht dokumentiert
 PAUSE_JE_BLOCK = 1.6     # Sekunden zwischen Bloecken (Rate-Limit 40 Abrufe/Min)
+MAX_VERSUCHE = 4         # Wiederholungen bei HTTP 429
+MAX_WARTE = 30.0         # Sekunden, laenger wird nicht gewartet
+
+
+def _mit_wiederholung(hole, was: str):
+    """Fuehrt `hole()` aus und wiederholt bei HTTP 429, wie die Antwort es verlangt.
+
+    BEFUND 20.09.2026, 10:52 UTC: Der Derivate-Vergleich fiel mit
+    `429 Too Many Requests. See the "Retry-After" header.` aus. Die Doku nennt
+    40 Abrufe je Minute, und so viele waren es nicht — aber offenbar zaehlt Coinalyze
+    je SYMBOL, nicht je Anfrage: Bis zu diesem Punkt hatte der Lauf rund 39 Symbole
+    abgefragt, und die naechsten vier kippten ihn.
+
+    Die Antwort sagt selbst, was zu tun ist. Bis 20.09. wurde dieser Hinweis ignoriert
+    und der ganze Vergleich stattdessen fallengelassen.
+    """
+    for versuch in range(MAX_VERSUCHE):
+        try:
+            return hole()
+        except urllib.error.HTTPError as e:
+            if e.code != 429 or versuch == MAX_VERSUCHE - 1:
+                raise
+            kopf = e.headers.get("Retry-After") if e.headers else None
+            try:
+                warte = float(kopf)
+            except (TypeError, ValueError):
+                warte = PAUSE_JE_BLOCK * (2 ** versuch)     # sonst: verdoppeln
+            warte = min(max(warte, PAUSE_JE_BLOCK), MAX_WARTE)
+            print(f"  Coinalyze 429 bei {was} — warte {warte:.1f}s "
+                  f"(Versuch {versuch + 2}/{MAX_VERSUCHE})")
+            time.sleep(warte)
+    raise RuntimeError("unerreichbar")
 
 
 def _reihe_auswerten(eintrag: dict) -> dict:
@@ -365,11 +397,27 @@ def _hole_reihen_roh(api_key: str, symbole: list, endpoint: str = "ohlcv-history
         if i and _pause:
             time.sleep(_pause)
         try:
-            roh = fetch_history(endpoint, api_key, symbol=",".join(teil),
-                                days=tage, **kw)
+            roh = _mit_wiederholung(
+                lambda: fetch_history(endpoint, api_key, symbol=",".join(teil),
+                                      days=tage, **kw),
+                f"{endpoint} ({len(teil)} Symbole)")
         except urllib.error.HTTPError as e:
             bloecke.append({"symbole": teil, "http_error": e.code,
                             "body": e.read().decode(errors="replace")[:200]})
+            # Auch NACH einem Fehler einzeln nachfragen: Bis 20.09.2026 sprang der
+            # Rueckfall nur an, wenn die Antwort unvollstaendig war — bei einem
+            # HTTP-Fehler fiel der ganze Block ersatzlos aus. Ein einzelnes Symbol
+            # kostet weniger Kontingent und kommt oft durch, wo vier scheitern.
+            if len(teil) > 1:
+                for sym in teil:
+                    if _pause:
+                        time.sleep(_pause)
+                    nach, prot = _hole_reihen_roh(api_key, [sym], endpoint=endpoint,
+                                                  tage=tage, pause=pause, **kw)
+                    eintraege.extend(nach)
+                    bloecke.append({"einzeln": sym, "zurueck": len(nach),
+                                    "weil": f"Block scheiterte mit HTTP {e.code}",
+                                    "protokoll": prot})
             continue
         except Exception as e:  # noqa: BLE001
             bloecke.append({"symbole": teil, "error": f"{type(e).__name__}: {str(e)[:200]}"})
