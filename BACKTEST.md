@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 12.01.2026-20.09.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2440 4h-Kerzen geladen · Stand: 2026-09-20 14:21 UTC
+**Voll-Daten-Fenster: 12.01.2026-20.09.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2440 4h-Kerzen geladen · Stand: 2026-09-20 15:18 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -22,7 +22,7 @@ waerts | Ab-
 waerts |
 |---|---|---|---|---|---|---|---|---|---|
 | nur Long (Basis) | 50% | 36% | +9.5 % | -7.8 % | 100 % | 101 | 2 | 37 % | 16 % |
-| +Kaufleiter | 50% | 33% | +14.7 % | -8.7 % | 100 % | 122 | 2 | 48 % | 16 % |
+| +Kaufleiter | 50% | 33% | +14.7 % | -8.7 % | 100 % | 122 | 2 | 47 % | 16 % |
 | +Flush core | 56% | 27% | +19.4 % | -14.7 % | 100 % | 180 | 2 | 59 % | 18 % |
 | LIVE: nur Long +Kaufleiter +Flush core | 56% | 26% | +23.9 % | -15.5 % | 100 % | 205 | 2 | 67 % | 17 % |
 | +Kaufleiter +Bed.Stop | 50% | 33% | +12.9 % | -9.6 % | 100 % | 133 | 2 | 44 % | 15 % |
@@ -34,7 +34,7 @@ waerts |
 | LIVE +Stop +Liq beides | 72% | 30% | +14.9 % | -12.6 % | 100 % | 294 | 25 | 45 % | 13 % |
 | MEINE Einstellung ohne Flush | 56% | 40% | +16.2 % | -9.4 % | 100 % | 217 | 0 | 32 % | 0 % |
 | LIVE +Stop +Liq-Konfluenz aufstocken | 61% | 29% | +23.5 % | -15.7 % | 100 % | 257 | 4 | 65 % | 16 % |
-| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | 56% | 30% | +20.9 % | -15.4 % | 100 % | 191 | 1 | 68 % | 22 % |
+| LIVE +Stop +nur bei Liq-Konfluenz einsteigen | 56% | 30% | +20.9 % | -15.4 % | 100 % | 191 | 1 | 67 % | 22 % |
 | LIVE +Stop +Verkauf am letzten Hoch | 72% | 30% | +19.6 % | -13.3 % | 100 % | 270 | 17 | 51 % | 11 % |
 | LIVE +Stop +Verkauf am schwachen Hoch | 67% | 30% | +19.9 % | -13.3 % | 100 % | 256 | 8 | 52 % | 11 % |
 | LIVE +Stop, 60 % Einsatz (40 % Reserve) | 61% | 28% | +14.3 % | -9.9 % | 60 % | 212 | 2 | 41 % | 11 % |
@@ -54,19 +54,19 @@ waerts |
 | NEU-LIVE +Ziele festhalten | 56% | 36% | +29.2 % | -9.2 % | 100 % | 202 | 16 | 48 % | -6 % |
 | NEU-LIVE +kein Gegengeschaeft +Ziele festhalten | 50% | 32% | +26.0 % | -9.5 % | 100 % | 203 | 0 | 45 % | -4 % |
 | NEU-LIVE +Mindest-Bein 5 % | 61% | 36% | +26.3 % | -9.4 % | 100 % | 234 | 17 | 47 % | -3 % |
-| NEU-LIVE +groesstes Bein | 28% | 75% | +8.7 % | -12.2 % | 100 % | 106 | 3 | 8 % | -10 % |
-| NEU-LIVE +Mindest-Bein 5 % +groesstes Bein | 28% | 75% | +8.7 % | -12.2 % | 100 % | 106 | 3 | 8 % | -10 % |
+| NEU-LIVE +groesstes Bein | 28% | 75% | +8.9 % | -12.2 % | 100 % | 106 | 3 | 8 % | -10 % |
+| NEU-LIVE +Mindest-Bein 5 % +groesstes Bein | 28% | 75% | +8.9 % | -12.2 % | 100 % | 106 | 3 | 8 % | -10 % |
 | NEU-LIVE +Bein in Handelsrichtung | 50% | 32% | +27.6 % | -9.9 % | 100 % | 229 | 16 | 59 % | 5 % |
-| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | 39% | 31% | +32.6 % | -9.9 % | 100 % | 234 | 16 | 43 % | -15 % **<-- beste** |
+| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | 39% | 31% | +32.8 % | -9.9 % | 100 % | 234 | 16 | 43 % | -15 % **<-- beste** |
 | NEU-LIVE +Break-even im Plus | 50% | 30% | +15.2 % | -8.0 % | 100 % | 213 | 26 | 28 % | -3 % |
-| NEU-LIVE +Bein-Wahl +Break-even im Plus | 28% | 71% | +8.8 % | -11.1 % | 100 % | 161 | 17 | 10 % | -8 % |
+| NEU-LIVE +Bein-Wahl +Break-even im Plus | 28% | 71% | +8.9 % | -11.1 % | 100 % | 161 | 17 | 10 % | -8 % |
 | LIVE +Widerstand des Gegen-Beins | 61% | 37% | +22.6 % | -8.7 % | 100 % | 261 | 17 | 42 % | -1 % |
-| LIVE +Widerstand statt Verkauf am letzten Hoch | 56% | 35% | +23.6 % | -9.0 % | 100 % | 219 | 4 | 46 % | 0 % |
+| LIVE +Widerstand statt Verkauf am letzten Hoch | 56% | 35% | +23.6 % | -9.0 % | 100 % | 219 | 4 | 45 % | 0 % |
 | LIVE +Rest halten | 33% | 50% | +14.4 % | -9.4 % | 100 % | 77 | 4 | 25 % | -3 % |
-| LIVE +Rest halten +Neustart mit Rest | 61% | 35% | +28.6 % | -9.4 % | 100 % | 230 | 16 | 52 % | -2 % |
+| LIVE +Rest halten +Neustart mit Rest | 61% | 35% | +28.6 % | -9.4 % | 100 % | 230 | 16 | 51 % | -2 % |
 | LIVE +Neustart mit Rest (ohne Halten) | 61% | 36% | +26.4 % | -9.4 % | 100 % | 233 | 15 | 47 % | -3 % |
-| NEU-LIVE +1D-Ebene als zweiter Zonensatz | 39% | 22% | +15.7 % | -18.5 % | 100 % | 256 | 17 | 55 % | 21 % |
-| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | 39% | 25% | +17.2 % | -19.0 % | 100 % | 231 | 17 | 61 % | 22 % |
+| NEU-LIVE +1D-Ebene als zweiter Zonensatz | 39% | 22% | +15.9 % | -18.5 % | 100 % | 256 | 17 | 55 % | 21 % |
+| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | 39% | 25% | +17.4 % | -19.0 % | 100 % | 231 | 17 | 61 % | 22 % |
 | NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft | 56% | 32% | +24.3 % | -9.4 % | 100 % | 233 | 0 | 41 % | -5 % |
 | NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft +Ziele festhalten | 56% | 32% | +15.4 % | -9.4 % | 100 % | 213 | 0 | 31 % | 0 % |
 | LIVE-heute +Neustart mit Rest | 56% | 32% | +24.4 % | -9.4 % | 100 % | 232 | 0 | 41 % | -5 % |
@@ -74,7 +74,7 @@ waerts |
 | LIVE-heute +Trendfilter EMA200 | 11% | 20% | -5.7 % | -9.0 % | 100 % | 36 | 0 | -1 % | 10 % |
 | LIVE-heute +Trendfilter EMA50 | 17% | 38% | +5.3 % | -10.6 % | 100 % | 110 | 0 | 5 % | -5 % |
 | LIVE-heute +1D-Ebene grob (n=8) | 56% | 31% | -0.5 % | -22.9 % | 100 % | 236 | 0 | 49 % | 40 % |
-| LIVE-heute +1D-Ebene fein (n=5, Gegenprobe zu E23) | 39% | 24% | +18.0 % | -18.6 % | 100 % | 261 | 0 | 59 % | 20 % |
+| LIVE-heute +1D-Ebene fein (n=5, Gegenprobe zu E23) | 39% | 24% | +18.2 % | -18.6 % | 100 % | 261 | 0 | 59 % | 20 % |
 | LIVE-heute +1D-Ebene sehr grob (n=12) | 61% | 31% | -0.0 % | -22.0 % | 100 % | 253 | 0 | 42 % | 34 % |
 | LIVE-heute +Ampel klein bei unguenstig | 56% | 32% | +18.8 % | -7.6 % | 100 % | 238 | 0 | 37 % | 0 % |
 | LIVE-heute +Ampel UMGEKEHRT (Gegenprobe) | 56% | 32% | +24.2 % | -9.3 % | 100 % | 238 | 0 | 43 % | -3 % |
@@ -91,7 +91,7 @@ waerts |
 
 ## P&L-Simulation (beste Kombination) — getrennt nach Richtung
 
-Start 10.000 € -> **13,257 €** (+32.6 %) · Buy&Hold im Fenster: -11.7 % · Gebuehr 0.1 %/Order, kein Hebel.
+Start 10.000 € -> **13,277 €** (+32.8 %) · Buy&Hold im Fenster: -11.5 % · Gebuehr 0.1 %/Order, kein Hebel.
 
 - **LONG-Trades:** +3,047 € · 87 Abschluesse, 59 im Gewinn
 - **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
@@ -134,9 +134,9 @@ Dieselben Monate, jetzt neben der Bitcoin-Bewegung. **Aufwaerts-Beteiligung** = 
 | 2026-06 | -20.4 % | -0.5 % | — |
 | 2026-07 | +7.3 % | +2.9 % | 40 % |
 | 2026-08 | +24.9 % | +2.4 % | 10 % |
-| 2026-09 | +2.6 % | -0.8 % | -31 % |
+| 2026-09 | +2.8 % | -0.8 % | -28 % |
 
-**Aufwaerts-Beteiligung: 42 %** — in den 5 steigenden Monaten legte Bitcoin zusammen +48.6 % zu, die Engine +20.5 %.
+**Aufwaerts-Beteiligung: 42 %** — in den 5 steigenden Monaten legte Bitcoin zusammen +48.8 % zu, die Engine +20.5 %.
 
 **Abwaerts-Beteiligung: -3 %** — in den 4 fallenden Monaten verlor Bitcoin zusammen -52.6 %, die Engine +1.4 %.
 
@@ -239,6 +239,26 @@ Alle Zeilen: Variante *LIVE-heute +Zonen nachziehen*, dieselben Kerzen, derselbe
 
 **So ist die Tabelle zu lesen:** Die Zeile *rohe Skala* vergleicht zwei Dinge auf einmal — andere Boersen UND eine andere Groessenordnung. Was sie misst, ist vor allem die verschobene Schwelle. Nur die Zeile *normiert* haelt die Skala fest und zeigt damit die Wirkung der Aggregation allein.
 
+## Robustheitspruefung der Datenvarianten (E37.5)
+
+Die Halbierung weiter unten prueft das Parameter-Gitter. Die Datenzeilen aus den Abschnitten darueber standen bisher **ohne jede Robustheitspruefung** im Bericht — obwohl fuer sie genau dasselbe gilt: Die beste von vielen sieht immer besser aus als sie ist.
+
+Haelfte 1 bis 18.05.2026, Haelfte 2 danach. Variante *LIVE-heute +Zonen nachziehen*, nur die Datenquelle unterscheidet sich.
+
+| Datenvariante | Rendite H1 | Platz H1 | Rendite H2 | Platz H2 |
+|---|---|---|---|---|
+| **heute (Binance/Kraken)** | +18.7 % | 1. | +4.0 % | 7. |
+| Spot-CVD aggregiert | +14.3 % | 6. | +5.8 % | 1. |
+| Spot-CVD, alle Dollar-Maerkte | +14.4 % | 5. | +5.6 % | 2. |
+| OI aggregiert | +18.7 % | 2. | +5.0 % | 3. |
+| OI +Liquidationen | +17.7 % | 3. | +4.7 % | 5. |
+| OI +Liq +Futures-CVD | +17.6 % | 4. | +4.8 % | 4. |
+| Funding normiert | +13.5 % | 7. | +3.4 % | 8. |
+| Funding normiert +Long-Short | +13.5 % | 8. | +3.4 % | 9. |
+| ALLES aggregiert | +12.0 % | 9. | +4.6 % | 6. |
+
+**In BEIDEN Haelften besser als der heutige Stand: keine einzige Variante.** Damit ist jeder Vorsprung, den eine Datenzeile im Vollfenster zeigte, mindestens fragwuerdig — und die Richtung 'mehr Boersen' als Ganzes nicht belegt.
+
 ## Furkans eigene Termine gegen die Engine
 
 Kaisers Trigger-Listen dienten bisher nur als Aehnlichkeits-Massstab (Recall). Hier laufen sie erstmals durch dieselbe P&L-Rechnung wie die Engine — gleiche Kurse, gleiche Gebuehr (0.1 %/Order), 10.000 € Start, offene Position am Ende zum Schlusskurs bewertet.
@@ -275,8 +295,8 @@ Haelfte 1: 12.01.2026–18.05.2026 · Haelfte 2: 18.05.2026–20.09.2026. Jede H
 | LIVE +Stop nachziehen | +25.0 % | 3. | -2.2 % | 47. |
 | LIVE +Stop nachziehen +Rest-Freigabe | +21.4 % | 17. | -3.6 % | 54. |
 | LIVE +Stop +Liq-Kaskade | +19.8 % | 21. | -3.1 % | 53. |
-| LIVE +Stop +Liq-Zonen | +18.3 % | 30. | -3.0 % | 51. |
-| LIVE +Stop +Liq beides | +18.4 % | 28. | -3.0 % | 50. |
+| LIVE +Stop +Liq-Zonen | +18.3 % | 30. | -3.0 % | 52. |
+| LIVE +Stop +Liq beides | +18.4 % | 28. | -3.0 % | 51. |
 | MEINE Einstellung ohne Flush | +13.1 % | 49. | +2.8 % | 29. |
 | LIVE +Stop +Liq-Konfluenz aufstocken | +24.7 % | 4. | -0.9 % | 37. |
 | LIVE +Stop +nur bei Liq-Konfluenz einsteigen | +22.2 % | 11. | -1.1 % | 40. |
@@ -299,19 +319,19 @@ Haelfte 1: 12.01.2026–18.05.2026 · Haelfte 2: 18.05.2026–20.09.2026. Jede H
 | NEU-LIVE +Ziele festhalten | +22.5 % | 9. | +5.5 % | 17. |
 | NEU-LIVE +kein Gegengeschaeft +Ziele festhalten | +20.2 % | 19. | +4.8 % | 20. |
 | NEU-LIVE +Mindest-Bein 5 % | +19.6 % | 22. | +5.6 % | 16. |
-| NEU-LIVE +groesstes Bein | +15.5 % | 41. | -5.9 % | 57. |
-| NEU-LIVE +Mindest-Bein 5 % +groesstes Bein | +15.5 % | 42. | -5.9 % | 58. |
+| NEU-LIVE +groesstes Bein | +15.5 % | 41. | -5.7 % | 57. |
+| NEU-LIVE +Mindest-Bein 5 % +groesstes Bein | +15.5 % | 42. | -5.7 % | 58. |
 | NEU-LIVE +Bein in Handelsrichtung | +19.2 % | 24. | +7.0 % | 6. |
-| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | +22.6 % | 7. | +8.1 % | 4. |
+| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | +22.6 % | 7. | +8.3 % | 4. |
 | NEU-LIVE +Break-even im Plus | +12.3 % | 52. | +2.5 % | 30. |
-| NEU-LIVE +Bein-Wahl +Break-even im Plus | +14.1 % | 46. | -4.7 % | 56. |
+| NEU-LIVE +Bein-Wahl +Break-even im Plus | +14.1 % | 46. | -4.5 % | 56. |
 | LIVE +Widerstand des Gegen-Beins | +15.4 % | 43. | +6.3 % | 11. |
 | LIVE +Widerstand statt Verkauf am letzten Hoch | +16.2 % | 38. | +6.4 % | 10. |
 | LIVE +Rest halten | +3.3 % | 58. | +10.8 % | 1. |
 | LIVE +Rest halten +Neustart mit Rest | +16.2 % | 37. | +10.6 % | 2. |
 | LIVE +Neustart mit Rest (ohne Halten) | +19.6 % | 23. | +5.7 % | 14. |
-| NEU-LIVE +1D-Ebene als zweiter Zonensatz | +18.6 % | 27. | -2.1 % | 45. |
-| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | +17.3 % | 33. | +0.2 % | 34. |
+| NEU-LIVE +1D-Ebene als zweiter Zonensatz | +18.6 % | 27. | -2.0 % | 45. |
+| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | +17.3 % | 33. | +0.3 % | 34. |
 | NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft | +17.7 % | 31. | +5.6 % | 15. |
 | NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft +Ziele festhalten | +12.7 % | 51. | +2.5 % | 31. |
 | LIVE-heute +Neustart mit Rest | +17.7 % | 32. | +5.7 % | 13. |
@@ -319,7 +339,7 @@ Haelfte 1: 12.01.2026–18.05.2026 · Haelfte 2: 18.05.2026–20.09.2026. Jede H
 | LIVE-heute +Trendfilter EMA200 | -5.1 % | 60. | -0.6 % | 35. |
 | LIVE-heute +Trendfilter EMA50 | +6.3 % | 55. | -1.0 % | 39. |
 | LIVE-heute +1D-Ebene grob (n=8) | +12.7 % | 50. | -11.7 % | 59. |
-| LIVE-heute +1D-Ebene fein (n=5, Gegenprobe zu E23) | +22.1 % | 14. | -3.1 % | 52. |
+| LIVE-heute +1D-Ebene fein (n=5, Gegenprobe zu E23) | +22.1 % | 14. | -2.9 % | 50. |
 | LIVE-heute +1D-Ebene sehr grob (n=12) | +15.0 % | 44. | -12.7 % | 60. |
 | LIVE-heute +Ampel klein bei unguenstig | +16.3 % | 36. | +2.2 % | 32. |
 | LIVE-heute +Ampel UMGEKEHRT (Gegenprobe) | +15.9 % | 40. | +6.7 % | 8. |
