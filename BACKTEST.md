@@ -1,6 +1,6 @@
 # Backtest-Bericht: Engine vs. Kaisers notierte Furkan-Trigger
 
-**Voll-Daten-Fenster: 12.01.2026-20.09.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2440 4h-Kerzen geladen · Stand: 2026-09-20 13:54 UTC
+**Voll-Daten-Fenster: 12.01.2026-20.09.2026** (nur wo alle Order-Flow-Daten inkl. echtem OI vorliegen — E9.6, Kaisers Vorgabe) · 2440 4h-Kerzen geladen · Stand: 2026-09-20 14:21 UTC
 
 Toleranz ±1 Tag. Kauf-Handlung = Long kaufen/nachkaufen oder Short decken; Verkauf-Handlung = Long verkaufen/Stop oder Short eroeffnen.
 
@@ -40,16 +40,16 @@ waerts |
 | LIVE +Stop, 60 % Einsatz (40 % Reserve) | 61% | 28% | +14.3 % | -9.9 % | 60 % | 212 | 2 | 41 % | 11 % |
 | LIVE +Stop, 50 % Einsatz (50 % Reserve) | 61% | 28% | +11.9 % | -8.3 % | 50 % | 212 | 2 | 34 % | 9 % |
 | LIVE +Stop +Warnlicht (kein Kauf in ungesunden Abverkauf) | 61% | 28% | +20.9 % | -15.1 % | 100 % | 210 | 2 | 63 % | 18 % |
-| LIVE +Stop +Flow-Pruefung am 0.5-Level | 56% | 28% | +24.8 % | -14.9 % | 100 % | 197 | 1 | 69 % | 17 % |
+| LIVE +Stop +Flow-Pruefung am 0.5-Level | 56% | 28% | +24.8 % | -14.9 % | 100 % | 197 | 1 | 68 % | 17 % |
 | LIVE +Stop +Sperre 48 h nach Stop | 56% | 29% | +25.9 % | -11.9 % | 100 % | 181 | 2 | 64 % | 11 % |
 | LIVE +Stop +Mindest-Stopabstand 2 % | 44% | 30% | +26.6 % | -10.5 % | 100 % | 133 | 0 | 58 % | 6 % |
 | LIVE +Stop +Sperre 48 h +Mindestabstand 2 % | 44% | 33% | +20.1 % | -10.5 % | 100 % | 124 | 0 | 47 % | 6 % |
 | LIVE +Stop +alle vier neuen Hebel | 39% | 32% | +16.1 % | -10.5 % | 100 % | 115 | 0 | 37 % | 4 % |
 | LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz | 44% | 32% | +29.4 % | -10.9 % | 100 % | 162 | 1 | 62 % | 5 % |
-| LIVE +Stop +Sperre 48 h +Liq-Konfluenz | 56% | 28% | +28.6 % | -12.6 % | 100 % | 218 | 4 | 69 % | 11 % |
+| LIVE +Stop +Sperre 48 h +Liq-Konfluenz | 56% | 28% | +28.6 % | -12.6 % | 100 % | 218 | 4 | 68 % | 11 % |
 | NEU-LIVE +Verkauf unter dem letzten Hoch | 56% | 35% | +30.6 % | -9.2 % | 100 % | 198 | 16 | 60 % | 2 % |
 | NEU-LIVE +Verkauf an den Liquidations-Niveaus | 56% | 33% | +23.8 % | -11.1 % | 100 % | 208 | 17 | 55 % | 8 % |
-| NEU-LIVE +Verkauf unter dem Hoch +an den Liq-Niveaus | 56% | 34% | +21.5 % | -9.4 % | 100 % | 244 | 24 | 48 % | 5 % |
+| NEU-LIVE +Verkauf unter dem Hoch +an den Liq-Niveaus | 56% | 34% | +21.5 % | -9.4 % | 100 % | 244 | 24 | 47 % | 5 % |
 | NEU-LIVE +kein Gegengeschaeft je Kerze | 50% | 32% | +26.5 % | -9.5 % | 100 % | 196 | 0 | 53 % | 2 % |
 | NEU-LIVE +Ziele festhalten | 56% | 36% | +29.2 % | -9.2 % | 100 % | 202 | 16 | 48 % | -6 % |
 | NEU-LIVE +kein Gegengeschaeft +Ziele festhalten | 50% | 32% | +26.0 % | -9.5 % | 100 % | 203 | 0 | 45 % | -4 % |
@@ -57,16 +57,16 @@ waerts |
 | NEU-LIVE +groesstes Bein | 28% | 75% | +8.7 % | -12.2 % | 100 % | 106 | 3 | 8 % | -10 % |
 | NEU-LIVE +Mindest-Bein 5 % +groesstes Bein | 28% | 75% | +8.7 % | -12.2 % | 100 % | 106 | 3 | 8 % | -10 % |
 | NEU-LIVE +Bein in Handelsrichtung | 50% | 32% | +27.6 % | -9.9 % | 100 % | 229 | 16 | 59 % | 5 % |
-| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | 39% | 31% | +32.5 % | -9.9 % | 100 % | 234 | 16 | 43 % | -15 % **<-- beste** |
+| NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 % | 39% | 31% | +32.6 % | -9.9 % | 100 % | 234 | 16 | 43 % | -15 % **<-- beste** |
 | NEU-LIVE +Break-even im Plus | 50% | 30% | +15.2 % | -8.0 % | 100 % | 213 | 26 | 28 % | -3 % |
-| NEU-LIVE +Bein-Wahl +Break-even im Plus | 28% | 71% | +8.7 % | -11.1 % | 100 % | 161 | 17 | 10 % | -8 % |
+| NEU-LIVE +Bein-Wahl +Break-even im Plus | 28% | 71% | +8.8 % | -11.1 % | 100 % | 161 | 17 | 10 % | -8 % |
 | LIVE +Widerstand des Gegen-Beins | 61% | 37% | +22.6 % | -8.7 % | 100 % | 261 | 17 | 42 % | -1 % |
 | LIVE +Widerstand statt Verkauf am letzten Hoch | 56% | 35% | +23.6 % | -9.0 % | 100 % | 219 | 4 | 46 % | 0 % |
 | LIVE +Rest halten | 33% | 50% | +14.4 % | -9.4 % | 100 % | 77 | 4 | 25 % | -3 % |
 | LIVE +Rest halten +Neustart mit Rest | 61% | 35% | +28.6 % | -9.4 % | 100 % | 230 | 16 | 52 % | -2 % |
 | LIVE +Neustart mit Rest (ohne Halten) | 61% | 36% | +26.4 % | -9.4 % | 100 % | 233 | 15 | 47 % | -3 % |
 | NEU-LIVE +1D-Ebene als zweiter Zonensatz | 39% | 22% | +15.7 % | -18.5 % | 100 % | 256 | 17 | 55 % | 21 % |
-| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | 39% | 25% | +17.1 % | -19.0 % | 100 % | 231 | 17 | 61 % | 22 % |
+| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | 39% | 25% | +17.2 % | -19.0 % | 100 % | 231 | 17 | 61 % | 22 % |
 | NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft | 56% | 32% | +24.3 % | -9.4 % | 100 % | 233 | 0 | 41 % | -5 % |
 | NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft +Ziele festhalten | 56% | 32% | +15.4 % | -9.4 % | 100 % | 213 | 0 | 31 % | 0 % |
 | LIVE-heute +Neustart mit Rest | 56% | 32% | +24.4 % | -9.4 % | 100 % | 232 | 0 | 41 % | -5 % |
@@ -91,7 +91,7 @@ waerts |
 
 ## P&L-Simulation (beste Kombination) — getrennt nach Richtung
 
-Start 10.000 € -> **13,252 €** (+32.5 %) · Buy&Hold im Fenster: -11.8 % · Gebuehr 0.1 %/Order, kein Hebel.
+Start 10.000 € -> **13,257 €** (+32.6 %) · Buy&Hold im Fenster: -11.7 % · Gebuehr 0.1 %/Order, kein Hebel.
 
 - **LONG-Trades:** +3,047 € · 87 Abschluesse, 59 im Gewinn
 - **SHORT-Trades:** +0 € · 0 Abschluesse, 0 im Gewinn
@@ -134,9 +134,9 @@ Dieselben Monate, jetzt neben der Bitcoin-Bewegung. **Aufwaerts-Beteiligung** = 
 | 2026-06 | -20.4 % | -0.5 % | — |
 | 2026-07 | +7.3 % | +2.9 % | 40 % |
 | 2026-08 | +24.9 % | +2.4 % | 10 % |
-| 2026-09 | +2.5 % | -0.8 % | -32 % |
+| 2026-09 | +2.6 % | -0.8 % | -31 % |
 
-**Aufwaerts-Beteiligung: 42 %** — in den 5 steigenden Monaten legte Bitcoin zusammen +48.5 % zu, die Engine +20.5 %.
+**Aufwaerts-Beteiligung: 42 %** — in den 5 steigenden Monaten legte Bitcoin zusammen +48.6 % zu, die Engine +20.5 %.
 
 **Abwaerts-Beteiligung: -3 %** — in den 4 fallenden Monaten verlor Bitcoin zusammen -52.6 %, die Engine +1.4 %.
 
@@ -224,15 +224,20 @@ Das Funding der Engine kommt bis heute von **Kraken** (`relativeFundingRate * 8`
 
 Gemessen an 1497 gemeinsamen Zeitpunkten: Median-Betrag Kraken 3.805e-05, Coinalyze 2.613e-03 — **Faktor 0.01**. Gleiches Vorzeichen in 71% der Faelle.
 
-**Achtung, die Skalen weichen um Faktor 0.0 ab.** Die Zeilen unten tauschen die Quelle OHNE Umrechnung — die Schwelle `funding_hot` meint damit etwas anderes als vorher. Wer diese Zeile je live schalten will, muss die Schwelle mit umrechnen.
+**Achtung, die Skalen weichen ab: Faktor 0.01457** — die Coinalyze-Reihe ist rund 69-mal so gross wie die von Kraken. Die Schwelle `funding_hot = 0.0001` meint damit etwas voellig anderes: gemessen am jeweiligen Median ist sie bei Kraken eine hohe Huerde und bei Coinalyze fast immer ueberschritten. Deshalb steht unten eine zusaetzliche Zeile, die die aggregierte Reihe auf die heutige Skala normiert — nur sie misst die AGGREGATION, die Zeile darueber misst vor allem die Skala.
+
+**Und der ernstere Punkt: die Vorzeichen stimmen nur in 71% der Faelle ueberein.** Zwei Funding-Reihen auf denselben Markt sollten fast immer in dieselbe Richtung zeigen. Tun sie es nicht, ist es nicht dieselbe Groesse — dann hilft auch kein Umrechnungsfaktor, und der Quellentausch waere ein Austausch der Bedeutung, nicht der Genauigkeit.
 
 Alle Zeilen: Variante *LIVE-heute +Zonen nachziehen*, dieselben Kerzen, derselbe Zeitraum. Der Unterschied sind allein die Daten.
 
 | Datenlage | Recall | Praez. | Rendite | max. Rueckgang | Signale |
 |---|---|---|---|---|---|
 | heute (Kraken-Funding, Binance-Long-Short) | 56% | 32% | +23.5 % | -9.4 % | 238 |
-| **+Funding aggregiert** | 56% | 30% | **+19.0 %** | -11.8 % | 260 |
-| **+Funding +Long-Short aggregiert** | 56% | 30% | **+19.0 %** | -11.8 % | 260 |
+| **+Funding aggregiert (rohe Skala)** | 56% | 30% | **+19.0 %** | -11.8 % | 260 |
+| **+Funding aggregiert, auf heutige Skala normiert** | 56% | 30% | **+17.4 %** | -11.8 % | 241 |
+| **+Funding normiert +Long-Short aggregiert** | 56% | 30% | **+17.4 %** | -11.8 % | 241 |
+
+**So ist die Tabelle zu lesen:** Die Zeile *rohe Skala* vergleicht zwei Dinge auf einmal — andere Boersen UND eine andere Groessenordnung. Was sie misst, ist vor allem die verschobene Schwelle. Nur die Zeile *normiert* haelt die Skala fest und zeigt damit die Wirkung der Aggregation allein.
 
 ## Furkans eigene Termine gegen die Engine
 
@@ -263,7 +268,7 @@ Haelfte 1: 12.01.2026–18.05.2026 · Haelfte 2: 18.05.2026–20.09.2026. Jede H
 |---|---|---|---|---|
 | nur Long (Basis) | +4.3 % | 57. | +4.9 % | 19. |
 | +Kaufleiter | +9.1 % | 54. | +5.2 % | 18. |
-| +Flush core | +22.0 % | 15. | -2.2 % | 45. |
+| +Flush core | +22.0 % | 15. | -2.2 % | 46. |
 | LIVE: nur Long +Kaufleiter +Flush core | +26.3 % | 1. | -1.9 % | 43. |
 | +Kaufleiter +Bed.Stop | +5.9 % | 56. | +6.6 % | 9. |
 | LIVE +Rest-Freigabe | +21.4 % | 16. | -4.1 % | 55. |
@@ -305,8 +310,8 @@ Haelfte 1: 12.01.2026–18.05.2026 · Haelfte 2: 18.05.2026–20.09.2026. Jede H
 | LIVE +Rest halten | +3.3 % | 58. | +10.8 % | 1. |
 | LIVE +Rest halten +Neustart mit Rest | +16.2 % | 37. | +10.6 % | 2. |
 | LIVE +Neustart mit Rest (ohne Halten) | +19.6 % | 23. | +5.7 % | 14. |
-| NEU-LIVE +1D-Ebene als zweiter Zonensatz | +18.6 % | 27. | -2.2 % | 46. |
-| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | +17.3 % | 33. | +0.1 % | 34. |
+| NEU-LIVE +1D-Ebene als zweiter Zonensatz | +18.6 % | 27. | -2.1 % | 45. |
+| NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe) | +17.3 % | 33. | +0.2 % | 34. |
 | NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft | +17.7 % | 31. | +5.6 % | 15. |
 | NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft +Ziele festhalten | +12.7 % | 51. | +2.5 % | 31. |
 | LIVE-heute +Neustart mit Rest | +17.7 % | 32. | +5.7 % | 13. |
