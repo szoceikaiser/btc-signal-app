@@ -62,9 +62,20 @@ def _lage_zeilen(lage: dict | None) -> list[str]:
         # nennt das aktuelle Bein bereits in ihrer Kopfzeile - nicht doppelt schreiben.
         if feld == "struktur_text" and lage.get("struktur") == "neu":
             continue
-        if wert:
-            vorsatz = "Muster: " if feld == "muster_text" else ""
-            zeilen.append(("Lage:  " if not zeilen else "       ") + vorsatz + wert)
+        if not wert:
+            continue
+        if feld != "muster_text":
+            zeilen.append(("Lage:  " if not zeilen else "       ") + wert)
+            continue
+        # E38: Der Muster-Text ist seit dem 21.09.2026 eine Beschreibung statt eines
+        # Schlagworts (gut 110 Zeichen) - ungebrochen waere er auf dem Handy dreimal
+        # umgebrochen. Nur diese Zeilen werden umbrochen, der Rest bleibt wie gewohnt.
+        # Breite minus Vorsatz ("Lage:  " bzw. 7 Leerzeichen), damit die fertige Zeile
+        # die Handybreite nicht ueberschreitet.
+        for t in _umbruch("Muster: " + wert, breite=ZEILE_MAX - 7):
+            zeilen.append(("Lage:  " if not zeilen else "       ") + t)
+        if lage.get("muster_hinweis"):
+            zeilen += _umbruch(lage["muster_hinweis"], einzug="         ")
     return ["", *zeilen] if zeilen else []
 
 
@@ -333,8 +344,11 @@ PFEIL = {"steigt": "\u2191", "faellt": "\u2193", "flach": "\u2192"}
 def _umbruch(text: str, breite: int = ZEILE_MAX, einzug: str = "") -> list[str]:
     """Bricht Fliesstext auf `breite` Zeichen um. Nur Standardbibliothek."""
     import textwrap
+    # break_on_hyphens=False (E38, 21.09.2026): Sonst trennt textwrap zusammengesetzte
+    # Woerter am Bindestrich - aus "Short-Wetten" wurde "Short-" am Zeilenende und
+    # "Wetten" darunter, aus "Spot-Nachfrage" ebenso. Ein Wort bleibt jetzt ganz.
     return textwrap.wrap(text, width=breite, initial_indent=einzug,
-                         subsequent_indent=einzug) or [""]
+                         subsequent_indent=einzug, break_on_hyphens=False) or [""]
 
 
 def _orderflow_zeilen(zeilen: list | None, fenster_h: int | None) -> list[str]:
@@ -374,6 +388,8 @@ def _lage_kurz(lage: dict | None) -> list[str]:
         if wert:
             vorsatz = "Muster: " if feld == "muster_text" else ""
             out += _umbruch(vorsatz + wert)
+            if feld == "muster_text" and lage.get("muster_hinweis"):
+                out += _umbruch(lage["muster_hinweis"], einzug="  ")
     return out if len(out) > 3 else []
 
 

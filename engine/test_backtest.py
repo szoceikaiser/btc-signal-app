@@ -1060,3 +1060,195 @@ def test_gegenprobe_zeile_steht_im_gitter_und_heisst_wie_erwartet():
     assert "LIVE-heute +Muster 5 sperrt Kaeufe (Bremse, Gegenprobe)" in labels
     for lab in _E38_ZEILEN:
         assert lab in labels, f"E38-Gitterzeile fehlt oder wurde umbenannt: {lab}"
+
+
+# ------------------------------------ E39: Was passiert nach einem Stop? (21.09.2026)
+
+def _stopreihe(preise, tiefs=None):
+    """Kerzen mit frei waehlbarem Tief - der tiefste Punkt nach dem Stop ist ja gerade
+    die Groesse, um die es in E39 geht."""
+    from strategy_core import FlowPoint
+    cs = []
+    for i, p in enumerate(preise):
+        lo = tiefs[i] if tiefs and tiefs[i] is not None else p
+        cs.append(Candle(backtest.START_MS + i * _H4, p, p, lo, p))
+    fl = [FlowPoint(c.ts, 0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, 50.0) for c in cs]
+    return cs, fl
+
+
+def _stop(cs, i, reason="Kerzenschluss unter Invalidierung 95"):
+    return {"ts": cs[i].ts, "type": "STOPLOSS", "price": cs[i].close, "reason": reason}
+
+
+def test_stop_nachlauf_misst_ab_dem_stop_preis_nach_vorn():
+    """Steigt der Kurs nach dem Stop, muss das positiv herauskommen - die Richtung ist
+    hier die ganze Aussage (vgl. die Vorzeichen-Sabotage aus E38.1)."""
+    cs, fl = _stopreihe([100.0] * 5 + [100.0 + i for i in range(1, 31)])
+    st = backtest.stop_nachlauf(cs, fl, [_stop(cs, 4)], horizonte=(6,))
+    d = st["gruppen"]["ALLE"][6]
+    assert abs(d["median"] - 0.06) < 1e-9               # 100 -> 106
+    assert d["wieder_drueber"] == 1.0
+
+
+def test_stop_nachlauf_tiefster_punkt_ist_das_minimum_bis_zum_horizont():
+    """Der Grund fuer diese Messung: Was musste man aushalten, bevor es zurueckkam?"""
+    preise = [100.0] * 5 + [100.0] * 30
+    tiefs = [None] * 35
+    tiefs[7] = 88.0                                      # Docht nach unten, 3 Kerzen spaeter
+    cs, fl = _stopreihe(preise, tiefs)
+    st = backtest.stop_nachlauf(cs, fl, [_stop(cs, 4)], horizonte=(6,))
+    d = st["gruppen"]["ALLE"][6]
+    assert abs(d["tief_median"] - (-0.12)) < 1e-9
+    assert abs(d["tief_schlimmst"] - (-0.12)) < 1e-9
+    assert d["median"] == 0.0                            # Schluss wieder bei 100
+
+
+def test_stop_nachlauf_schaut_nicht_auf_die_stop_kerze_selbst():
+    """Das Tief DER Stop-Kerze ist schon passiert - wer weitermacht, sitzt nur aus,
+    was DANACH kommt. Sonst waere jeder tiefste Punkt kuenstlich schlimmer."""
+    preise = [100.0] * 35
+    tiefs = [None] * 35
+    tiefs[4] = 50.0                                      # Tief IN der Stop-Kerze
+    cs, fl = _stopreihe(preise, tiefs)
+    st = backtest.stop_nachlauf(cs, fl, [_stop(cs, 4)], horizonte=(6,))
+    assert st["gruppen"]["ALLE"][6]["tief_median"] == 0.0
+
+
+def test_stop_nachlauf_zaehlt_nur_stops():
+    cs, fl = _stopreihe([100.0] * 40)
+    sigs = [_stop(cs, 4),
+            {"ts": cs[6].ts, "type": "VERKAUF_REST", "price": 100.0, "reason": ""},
+            {"ts": cs[8].ts, "type": "TEILVERKAUF_1", "price": 100.0, "reason": ""},
+            {"ts": cs[9].ts, "type": "KAUF_1", "price": 100.0, "reason": ""}]
+    st = backtest.stop_nachlauf(cs, fl, sigs, horizonte=(6,))
+    assert st["gruppen"]["ALLE"]["n"] == 1
+
+
+def test_stop_nachlauf_trennt_invalidierung_und_nachgezogenen_stop():
+    """Kaisers Fall ist der urspruengliche Stop an der Invalidierung. Ein nach
+    Teilgewinnen nachgezogener Stop ist eine andere Lage - da ist schon Gewinn
+    gesichert. Beide in einen Topf zu werfen, verwischt genau den Unterschied."""
+    cs, fl = _stopreihe([100.0] * 40)
+    sigs = [_stop(cs, 4),
+            _stop(cs, 10, reason="Nachgezogener Stop (Einstand) 100 — Kerzenschluss unter, "
+                                  "Gewinn gesichert")]
+    g = backtest.stop_nachlauf(cs, fl, sigs, horizonte=(6,))["gruppen"]
+    assert g["art:Invalidierung"]["n"] == 1
+    assert g["art:nachgezogen"]["n"] == 1
+    assert g["ALLE"]["n"] == 2
+
+
+def test_stop_nachlauf_ordnet_nach_dem_muster_in_der_stop_kerze():
+    cs, fl = _stopreihe([100.0] * 40)
+    g = backtest.stop_nachlauf(cs, fl, [_stop(cs, 20)], horizonte=(6,))["gruppen"]
+    muster = [k for k in g if k.startswith("muster:")]
+    assert muster == ["muster:NEUTRAL"]
+
+
+def test_stop_nachlauf_stops_am_fensterende_zaehlen_nicht_mit_aber_nicht_still():
+    cs, fl = _stopreihe([100.0] * 30)
+    st = backtest.stop_nachlauf(cs, fl, [_stop(cs, 4), _stop(cs, 27)], horizonte=(6,))
+    assert st["gruppen"]["ALLE"]["n"] == 1
+    assert st["ohne_nachlauf"] == 1
+
+
+def test_stop_nachlauf_alle_horizonte_teilen_dieselbe_stichprobe():
+    """Ein Stop, der fuer 1 Tag Nachlauf hat, fuer 4 Tage aber nicht, faellt ganz raus -
+    sonst stuenden in den Spalten verschiedene Stops."""
+    cs, fl = _stopreihe([100.0] * 30)
+    st = backtest.stop_nachlauf(cs, fl, [_stop(cs, 4), _stop(cs, 15)], horizonte=(6, 12, 24))
+    assert st["gruppen"]["ALLE"]["n"] == 1               # nur der erste hat 24 Kerzen Platz
+    assert st["ohne_nachlauf"] == 1
+
+
+def test_stop_nachlauf_ohne_stops_liefert_keine_gruppe():
+    cs, fl = _stopreihe([100.0] * 40)
+    st = backtest.stop_nachlauf(cs, fl, [], horizonte=(6,))
+    assert st["gruppen"] == {}
+    assert backtest.stop_abschnitt(st) == []
+
+
+def _stopstat(n=25, med=0.02, drueber=0.6, tief=-0.03, schlimmst=-0.09, gruppen=None):
+    e = lambda n_: {"n": n_, 6: {"median": med, "wieder_drueber": drueber,
+                                 "tief_median": tief, "tief_schlimmst": schlimmst}}
+    g = {"ALLE": e(n)}
+    for k, n_ in (gruppen or {}).items():
+        g[k] = e(n_)
+    return {"ohne_nachlauf": 0, "gruppen": g}
+
+
+def test_stop_abschnitt_zeigt_den_tiefsten_punkt_in_jeder_zelle():
+    text = "\n".join(backtest.stop_abschnitt(_stopstat(), horizonte=(6,)))
+    assert "tief -3.0 % (-9.0 %)" in text
+    assert "60% drueber" in text
+
+
+def test_stop_abschnitt_markiert_duenne_gruppen():
+    st = _stopstat(gruppen={"muster:UNGESUNDER_ABVERKAUF": 3, "art:Invalidierung": 20})
+    text = "\n".join(backtest.stop_abschnitt(st, horizonte=(6,)))
+    assert "Muster: UNGESUNDER_ABVERKAUF *(zu wenige)*" in text
+    assert "Art: Invalidierung *(zu wenige)*" not in text
+
+
+def test_stop_abschnitt_warnt_bei_zu_wenigen_stops_insgesamt():
+    text = "\n".join(backtest.stop_abschnitt(_stopstat(n=4), horizonte=(6,)))
+    assert "zu duenn" in text and "nur 4 Stops" in text
+
+
+def test_stop_abschnitt_sagt_was_wieder_drueber_nicht_heisst():
+    """Der gefaehrlichste Lesefehler dieser Tabelle: 'stand wieder drueber' als
+    'Weitermachen hat sich gelohnt' zu lesen."""
+    text = "\n".join(backtest.stop_abschnitt(_stopstat(), horizonte=(6,)))
+    assert "nicht, dass" in text and "Weitermachen sich gelohnt" in text
+    assert "Einstand" in text and "tiefsten Punkt" in text
+
+
+def test_stop_abschnitt_nennt_die_grundrate_wenn_vorhanden():
+    grund = {6: {"median": 0.0001, "mittel": 0.0, "anteil_hoch": 0.5, "n": 100}}
+    text = "\n".join(backtest.stop_abschnitt(_stopstat(), grund=grund, horizonte=(6,)))
+    assert "Grundrate" in text and "+0.01 %" in text and "50% hoeher" in text
+    ohne = "\n".join(backtest.stop_abschnitt(_stopstat(), horizonte=(6,)))
+    assert "Grundrate" not in ohne
+
+
+def test_stop_abschnitt_nennt_keinen_namen():
+    """Kaiser, 21.09.2026: kein 'Furkan' in den Texten."""
+    text = "\n".join(backtest.stop_abschnitt(_stopstat(), horizonte=(6,)))
+    assert "furkan" not in text.lower()
+
+
+def test_e39_misst_die_live_einstellung_und_nicht_die_beste_variante():
+    """Kaisers Frage betrifft die Stops, die er wirklich bekommt - die der
+    Live-Einstellung (panel=True). Die rendite-beste Gitterzeile ist eine Variante,
+    die nicht gefahren wird. main() braucht das Netz, deshalb wird die Verdrahtung
+    im Quelltext geprueft."""
+    import inspect
+    quelle = inspect.getsource(backtest.main)
+    assert "stop_nachlauf(candles, flow, _psigs)" in quelle
+    i_panel = quelle.index("panel_cfg, _psigs, panel_sc, panel_pnl = panel_r")
+    assert quelle.index("stop_nachlauf(candles, flow, _psigs)") > i_panel
+
+
+def test_stop_nachlauf_schlimmster_fall_ist_das_minimum_ueber_alle_stops():
+    """Der Median verdeckt genau den Fall, vor dem die Spalte warnen soll: den einen
+    Stop, nach dem es erst richtig abwaerts ging."""
+    preise = [100.0] * 60
+    tiefs = [None] * 60
+    tiefs[6] = 97.0                                      # nach Stop 1: -3 %
+    tiefs[16] = 98.0                                     # nach Stop 2: -2 %
+    tiefs[26] = 80.0                                     # nach Stop 3: -20 %
+    cs, fl = _stopreihe(preise, tiefs)
+    st = backtest.stop_nachlauf(cs, fl, [_stop(cs, 4), _stop(cs, 14), _stop(cs, 24)],
+                                horizonte=(6,))
+    d = st["gruppen"]["ALLE"][6]
+    assert abs(d["tief_median"] - (-0.03)) < 1e-9
+    assert abs(d["tief_schlimmst"] - (-0.20)) < 1e-9
+
+
+def test_stop_nachlauf_gleichstand_ist_nicht_wieder_drueber():
+    """Schliesst der Kurs genau auf dem Stop-Preis, ist er nicht 'wieder drueber' -
+    sonst zaehlt jede Seitwaertsphase als Erholung."""
+    cs, fl = _stopreihe([100.0] * 40)
+    st = backtest.stop_nachlauf(cs, fl, [_stop(cs, 4)], horizonte=(6,))
+    assert st["gruppen"]["ALLE"][6]["median"] == 0.0
+    assert st["gruppen"]["ALLE"][6]["wieder_drueber"] == 0.0

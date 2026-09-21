@@ -139,7 +139,9 @@ def test_ampel_steht_in_den_nachrichten_mit_dem_schlusssatz():
             "stop": {"preis": 75546.0, "grund": "Invalidierung"},
             "lage": lage, "ampel": ampel(lage)}
     txt = format_plan(plan)
-    assert "Ampel (fuer LONG): UNGUENSTIG" in txt and "1 von 4" in txt
+    # Seit E38 (21.09.2026) zaehlt Muster 5 NEUTRAL: 1 dafuer (Struktur), 2 dagegen
+    # (Trend, Spot) - also "1 von 3" statt vorher "1 von 4".
+    assert "Ampel (fuer LONG): UNGUENSTIG" in txt and "1 von 3" in txt
     assert "dafuer:  Struktur" in txt and "Spot-Nachfrage" in txt
     assert AMPEL_SCHLUSSSATZ in txt
     # die Ampel steht UNTER der Lage, nicht davor
@@ -164,3 +166,41 @@ def test_ampel_steht_in_den_nachrichten_mit_dem_schlusssatz():
     # ohne Ampel (zu duenne Lage) faellt der Block ganz weg, statt leer dazustehen
     ohne = dict(plan); ohne.pop("ampel")
     assert "Ampel" not in format_plan(ohne)
+
+
+def _lage_m5():
+    from strategy_core import MUSTER_KLARTEXT, MUSTER_HINWEIS
+    return {"trend": "ueber", "trend_text": "Uebergeordnet: Kurs ueber EMA200",
+            "spot": "schwach", "spot_text": "Spot-Nachfrage schwach",
+            "muster": "UNGESUNDER_ABVERKAUF",
+            "muster_text": MUSTER_KLARTEXT["UNGESUNDER_ABVERKAUF"],
+            "muster_hinweis": MUSTER_HINWEIS["UNGESUNDER_ABVERKAUF"]}
+
+
+def test_lage_abruf_zeigt_muster_5_mit_hinweis_und_handytauglich():
+    """E38 (Kaiser 21.09.2026): Im Abruf steht, was passiert, und darunter, was danach
+    gemessen wurde - jede Zeile unter der Handybreite."""
+    from telegram_notify import format_lage
+    l = {"kurs": 76000.0, "bein": None, "orderflow": [], "fenster_h": 48,
+         "lage": _lage_m5(), "ampel": None}
+    txt = format_lage(l, 1_700_000_000_000)
+    assert "Short-Wetten" in txt and "Gegenbewegung" in txt
+    assert txt.index("Short-Wetten") < txt.index("Gegenbewegung")
+    zu_lang = [z for z in txt.splitlines() if len(z) > 38]
+    assert not zu_lang, zu_lang
+
+
+def test_plan_und_vorschau_zeigen_muster_5_umbrochen_mit_hinweis():
+    """Plan und Vorschau behalten ihr Format - nur die Muster-Zeilen werden umbrochen,
+    weil der neue Text sonst eine Zeile von gut 110 Zeichen waere."""
+    from telegram_notify import _lage_zeilen
+    zeilen = _lage_zeilen(_lage_m5())
+    text = "\n".join(zeilen)
+    assert "Short-Wetten" in text and "Gegenbewegung" in text
+    muster = [z for z in zeilen if "Muster:" in z or "Wetten" in z or "Liquidation" in z]
+    assert muster and all(len(z) <= 38 for z in muster), muster
+    # Ein Wort bleibt ganz - "Short-" am Zeilenende und "Wetten" darunter war der
+    # erste Entwurf, und er las sich wie ein Tippfehler.
+    assert not any(z.rstrip().endswith("-") for z in zeilen), zeilen
+    # die uebrigen Zeilen bleiben unveraendert im gewohnten Format
+    assert "Lage:  Uebergeordnet: Kurs ueber EMA200" in zeilen

@@ -1238,6 +1238,145 @@ def muster_abschnitt(stat: dict, horizonte: tuple = MUSTER_HORIZONTE) -> list:
     return zeilen
 
 
+# --------------------------------------- E39: Was passiert NACH einem Stop der Engine?
+
+STOP_MIN_FAELLE = 10                  # darunter ist eine Gruppe Anekdote, keine Messung
+
+
+def stop_nachlauf(candles, flow, sigs: list, horizonte: tuple = MUSTER_HORIZONTE) -> dict:
+    """E39: Was machte der Kurs NACH einem Stop - getrennt nach Stop-Art und Muster?
+
+    Kaisers Frage (17.09. und 21.09.2026): Die Engine ist ausgestoppt, er laesst seinen
+    Trade aber weiterlaufen. Was ist in dieser Lage frueher passiert?
+
+    Gemessen ab dem STOP-PREIS (Kerzenschluss, zu dem die Engine ausgestiegen ist),
+    nicht ab dem Einstand - denn das ist der Preis, zu dem die Frage "raus oder
+    weiter?" gestellt wird.
+
+    Je Gruppe und Horizont:
+      median           Kursaenderung ab Stop-Preis
+      wieder_drueber   Anteil, in dem der Kurs nach h Kerzen UEBER dem Stop-Preis stand
+      tief_median      tiefster Kurs in diesen h Kerzen, relativ zum Stop-Preis (Median)
+      tief_schlimmst   derselbe Wert im schlimmsten Fall
+
+    Die beiden tief-Spalten sind der Grund, warum es diese Messung gibt und nicht nur
+    den Nachlauf: "Stand nach zwei Tagen wieder drueber" sagt nichts darueber, was man
+    bis dahin aushalten musste. Wer weitermacht, sitzt den tiefsten Punkt aus.
+
+    Gruppen: "ALLE", "art:Invalidierung" / "art:nachgezogen" (der urspruengliche Stop
+    gegen einen nach Teilgewinnen nachgezogenen), "muster:<NAME>" (was classify_pattern
+    in der Stop-Kerze sah - dasselbe, was die Engine in diesem Moment sah).
+
+    Stops ohne vollstaendigen Nachlauf (die letzten Kerzen des Fensters) zaehlen nicht
+    mit, damit alle Horizonte dieselbe Stichprobe haben - sie werden aber als
+    "ohne_nachlauf" ausgewiesen, statt still zu verschwinden.
+    """
+    from strategy_core import classify_pattern
+
+    hmax = max(horizonte)
+    idx = {c.ts: i for i, c in enumerate(candles)}
+    roh: dict = {}
+    ohne_nachlauf = 0
+
+    for s in sigs:
+        if s.get("type") != "STOPLOSS":
+            continue
+        i = idx.get(s.get("ts"))
+        preis = float(s.get("price") or 0.0)
+        if i is None or preis <= 0:
+            continue
+        if i + hmax >= len(candles):
+            ohne_nachlauf += 1
+            continue
+        muster = (classify_pattern(candles[:i + 1], flow[:i + 1]).name
+                  if flow else "NEUTRAL")
+        art = ("nachgezogen" if str(s.get("reason", "")).startswith("Nachgezogener")
+               else "Invalidierung")
+        for key in ("ALLE", "art:" + art, "muster:" + muster):
+            g = roh.setdefault(key, {"n": 0, **{h: {"aend": [], "tief": []}
+                                                for h in horizonte}})
+            g["n"] += 1
+            for h in horizonte:
+                g[h]["aend"].append((candles[i + h].close - preis) / preis)
+                tief = min(c.low for c in candles[i + 1:i + h + 1])
+                g[h]["tief"].append((tief - preis) / preis)
+
+    out: dict = {"ohne_nachlauf": ohne_nachlauf, "gruppen": {}}
+    for key, g in roh.items():
+        e = {"n": g["n"]}
+        for h in horizonte:
+            a, t = g[h]["aend"], g[h]["tief"]
+            e[h] = {"median": _med(a),
+                    "wieder_drueber": sum(1 for v in a if v > 0) / len(a),
+                    "tief_median": _med(t),
+                    "tief_schlimmst": min(t)}
+        out["gruppen"][key] = e
+    return out
+
+
+def stop_abschnitt(stat: dict, grund: dict | None = None,
+                   horizonte: tuple = MUSTER_HORIZONTE) -> list:
+    """Berichtsabschnitt zu E39. `grund` = muster_nachlauf(...)["ALLE"] (optional)."""
+    gr = (stat or {}).get("gruppen") or {}
+    if "ALLE" not in gr:
+        return []
+    kopf = " | ".join(f"+{h} Kerzen ({h * 4 / 24:.0f} Tg.)" for h in horizonte)
+    z = ["", "## E39: Was passiert nach einem Stop?", "",
+         "Kaisers Frage: Die Engine ist ausgestoppt, der eigene Trade laeuft weiter. "
+         "Was hat der Kurs nach den Stops der **Live-Einstellung** getan?", "",
+         "Gemessen ab dem **Stop-Preis** (dem Kerzenschluss, zu dem die Engine ausstieg). "
+         "Je Zelle: Median der Kursaenderung · Anteil, in dem der Kurs danach wieder "
+         "**ueber** dem Stop-Preis stand · **tiefster Punkt** bis dahin (Median, in "
+         "Klammern der schlimmste Fall).", "",
+         f"| Gruppe | Stops | {kopf} |",
+         "|---|---:|" + "---|" * len(horizonte)]
+
+    def _zelle(e: dict, h: int) -> str:
+        d = e[h]
+        return (f"{d['median'] * 100:+.2f} %, {d['wieder_drueber']:.0%} drueber, "
+                f"tief {d['tief_median'] * 100:+.1f} % ({d['tief_schlimmst'] * 100:+.1f} %)")
+
+    def _reihenfolge(k: str) -> tuple:
+        return (0 if k == "ALLE" else 1 if k.startswith("art:") else 2, k)
+
+    for key in sorted(gr, key=_reihenfolge):
+        e = gr[key]
+        name = ("**ALLE Stops**" if key == "ALLE"
+                else "Art: " + key[4:] if key.startswith("art:")
+                else "Muster: " + key[7:])
+        if key != "ALLE" and e["n"] < STOP_MIN_FAELLE:
+            name += " *(zu wenige)*"
+        zellen = " | ".join(_zelle(e, h) for h in horizonte)
+        z.append(f"| {name} | {e['n']} | {zellen} |")
+
+    alle = gr["ALLE"]
+    if stat.get("ohne_nachlauf"):
+        z += ["", f"{stat['ohne_nachlauf']} Stop(s) am Fensterende ohne vollstaendigen "
+                  "Nachlauf sind nicht mitgezaehlt."]
+    if grund:
+        h0 = horizonte[0]
+        z += ["", f"**Zum Vergleich die Grundrate** (alle Kerzen, nicht nur Stops): "
+                  f"{grund[h0]['median'] * 100:+.2f} % nach {h0} Kerzen, "
+                  f"{grund[h0]['anteil_hoch']:.0%} hoeher. Liegen die Stops deutlich "
+                  f"darueber, drehte der Kurs nach Stops oefter als sonst; liegen sie "
+                  f"darunter, war der Stop im Schnitt der richtige Ausstieg."]
+    if alle["n"] < STOP_MIN_FAELLE:
+        z += ["", f"**Achtung, zu duenn:** nur {alle['n']} Stops insgesamt. Unter "
+                  f"{STOP_MIN_FAELLE} ist jede Zeile eine Anekdote."]
+    z += ["",
+          "**Wie diese Tabelle NICHT zu lesen ist.** *Wieder drueber* heisst nicht, dass "
+          "Weitermachen sich gelohnt haette: Gemessen wird ab dem Stop-Preis, nicht ab dem "
+          "eigenen Einstand - eine Position kann ueber dem Stop-Preis stehen und trotzdem "
+          "im Minus sein. Und wer weitermacht, sitzt den **tiefsten Punkt** aus, bevor "
+          "irgendetwas zurueckkommt. Die Spalte steht deshalb in jeder Zelle. Ruhig "
+          "weitermachen kann nur, wessen Position schon im Plus abgesichert ist - dann ist "
+          "der tiefste Punkt ein entgangener Gewinn und kein Verlust.",
+          "",
+          "Gruppen mit *(zu wenige)* sind Einzelfaelle. Sie stehen da, damit man sieht, "
+          "dass es sie gibt - nicht, damit man aus ihnen etwas ableitet."]
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -1903,6 +2042,17 @@ def main():
     panel_r = next((r for r in results if r[0].get("panel")), best)
     panel_cfg, _psigs, panel_sc, panel_pnl = panel_r
 
+    # --- E39: Was passiert nach einem Stop der Live-Einstellung? (reine Messung) -------
+    try:
+        _stopstat = stop_nachlauf(candles, flow, _psigs)
+        _stfehler = "" if (_stopstat.get("gruppen") or {}).get("ALLE") else (
+            "die Live-Einstellung hat im Fenster keinen Stop mit vollstaendigem Nachlauf")
+        print(f"Stop-Nachlauf gemessen: "
+              f"{(_stopstat.get('gruppen') or {}).get('ALLE', {}).get('n', 0)} Stops.")
+    except Exception as exc:  # noqa: BLE001
+        _stopstat, _stfehler = {}, str(exc)
+        print(f"Stop-Nachlauf nicht gerechnet ({exc}).")
+
     # --- Monatsuebersicht: Live-Einstellung gegen "ohne Flush" (Kaisers Frage) -------
     _of = next((r for r in results if r[0]["label"] == "MEINE Einstellung ohne Flush"), None)
     m_live = {m["monat"]: m for m in panel_pnl.get("monate", [])}
@@ -2230,6 +2380,10 @@ def main():
     ] + abschnitt_oder_grund(
         "E38.1: Was passiert NACH einem Muster?", _m5stat, _m5fehler,
         lambda: muster_abschnitt(_m5stat),
+    ) + abschnitt_oder_grund(
+        "E39: Was passiert nach einem Stop?",
+        (_stopstat.get("gruppen") or {}).get("ALLE"), _stfehler,
+        lambda: stop_abschnitt(_stopstat, grund=(_m5stat or {}).get("ALLE")),
     ) + [
         "",
         "## Einschraenkungen",

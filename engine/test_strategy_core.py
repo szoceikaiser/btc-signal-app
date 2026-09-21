@@ -1769,7 +1769,10 @@ def test_lage_muster_wird_uebersetzt():
     f = _flow_cvd([0, 10, 20, 30, 40, 50, 60])
     l = lage_bericht([], f, pattern=Pattern.UNGESUNDER_ABVERKAUF)
     assert l["muster"] == "UNGESUNDER_ABVERKAUF"
-    assert "Dip wird nicht gekauft" in l["muster_text"]
+    # E38 (21.09.2026): beschreibt, WAS passiert - keine Wertung mehr ("ungesund").
+    assert "Short-Wetten" in l["muster_text"] and "Liquidationswelle" in l["muster_text"]
+    assert "ungesund" not in l["muster_text"].lower()
+    assert "Gegenbewegung" in l["muster_hinweis"] and "nicht immer" in l["muster_hinweis"]
     # NEUTRAL ist keine Aussage und wird weggelassen
     assert "muster" not in lage_bericht([], f, pattern=Pattern.NEUTRAL)
     # jedes Muster hat einen Klartext
@@ -2044,7 +2047,18 @@ def test_ampel_spiegelt_fuer_short_aber_nicht_die_struktur():
 
 
 def e34_signale(cs, fl, **kw):
-    """Wie e13_lauf, gibt aber die Signal-Objekte zurueck - fuer die Tranchen."""
+    """Wie e13_lauf, gibt aber die Signal-Objekte zurueck - fuer die Tranchen.
+
+    trend_ema=5 (E38, 21.09.2026): Bis dahin kam die UNGUENSTIGE Ampel in diesem
+    Szenario aus Spot-Nachfrage + Muster 5. Seit E38 zaehlt Muster 5 neutral - dann
+    sagte nur noch EIN Kriterium etwas, die Ampel schwieg, und die Ampel-Filter-Tests
+    prueften ploetzlich nichts mehr. Mit einer kurzen EMA spricht der Trend (Kurs
+    faellt -> "unter"), und die Ampel ist wieder UNGUENSTIG - diesmal aus Trend +
+    Spot, ohne sich auf Muster 5 zu stuetzen. trend_ema wirkt nur auf die Lage (und
+    auf trend_filter, der hier aus ist); Basis- und Vergleichslauf bekommen denselben
+    Wert, der Vergleich bleibt einer mit genau einem Unterschied.
+    """
+    kw.setdefault("trend_ema", 5)
     pos = Position()
     raus = []
     for i in range(len(cs)):
@@ -2157,9 +2171,12 @@ def test_ampel_filter_gegenprobe_und_nullhypothese():
     unguenstig ist. 'immer' halbiert ohne jede Ampel, also auch hier.
     """
     cs, fl = e13_szenario()
-    # nachweislich unguenstig - sonst waere dieser Test still gegenstandslos
+    # nachweislich unguenstig - sonst waere dieser Test still gegenstandslos.
+    # trend_period=5 wie in e34_signale: seit E38 zaehlt Muster 5 neutral, die
+    # unguenstige Stufe kommt jetzt aus Trend + Spot. (Diese Vorprobe hat die Aenderung
+    # als einzige der Ampel-Filter-Tests sofort gemeldet - genau dafuer steht sie da.)
     assert ampel(lage_bericht(cs, fl, pattern=classify_pattern(cs, fl),
-                              trend_period=200))["stufe"] == "unguenstig"
+                              trend_period=5))["stufe"] == "unguenstig"
     voll = [t for _s, t in _tranchen(e34_signale(cs, fl))]
     klein = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="klein"))]
     gross = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="gross"))]
@@ -2595,3 +2612,54 @@ def test_muster5_halten_behandelt_beide_ziele_gleich():
         "Genau zwei Stellen sind geplante Ziele (Extension 1.0 und 1.618) — "
         "alles andere sind Zwischenverkaeufe")
     assert "if pos.state == PosState.TP1 and _darf_teilverkaufen(ziel=True):" in quelle
+
+
+# ------------------------------- E38: Muster 5 in Lage-Abruf und Ampel (21.09.2026)
+
+def test_ampel_zaehlt_muster_5_fuer_keine_seite():
+    """Kaisers Wahl: neutral. Die Messung widerspricht 'dagegen', aber Kursverlauf ist
+    nicht Ertrag - deshalb auch nicht 'dafuer'. Neutral heisst: auch fuer einen Short
+    zaehlt es nicht (die Spiegelung darf es nicht durch die Hintertuer zu 'dafuer'
+    machen)."""
+    from strategy_core import _AMPEL_DAFUER, _AMPEL_DAGEGEN
+    assert "UNGESUNDER_ABVERKAUF" not in _AMPEL_DAFUER["muster"]
+    assert "UNGESUNDER_ABVERKAUF" not in _AMPEL_DAGEGEN["muster"]
+    lage = {"trend": "ueber", "spot": "stabil", "muster": "UNGESUNDER_ABVERKAUF"}
+    for seite in (True, False):
+        a = ampel(lage, long_side=seite)
+        assert "Muster" not in a["dafuer"] and "Muster" not in a["dagegen"], seite
+
+
+def test_ampel_behaelt_die_uebrigen_muster_wie_bisher():
+    """Nur Muster 5 wurde gemessen und umgestellt - die anderen bleiben, wo sie waren."""
+    from strategy_core import _AMPEL_DAFUER, _AMPEL_DAGEGEN
+    assert _AMPEL_DAFUER["muster"] == {"GESUNDER_TREND", "CAPITULATION_RESET"}
+    assert _AMPEL_DAGEGEN["muster"] == {"DERIVATE_PUMP", "SHORT_COVERING"}
+
+
+def test_muster_hinweis_nur_wo_gemessen_und_ohne_namen():
+    """Ein Hinweis nur fuer Muster 5 - fuer die anderen gibt es keine Messung, also
+    auch keinen Satz. Und kein Name im Text (Kaiser, 21.09.2026)."""
+    from strategy_core import MUSTER_HINWEIS
+    assert set(MUSTER_HINWEIS) == {"UNGESUNDER_ABVERKAUF"}
+    for text in list(MUSTER_HINWEIS.values()) + list(MUSTER_KLARTEXT.values()):
+        assert "furkan" not in text.lower(), text
+
+
+def test_muster_hinweis_nennt_den_zeitraum_der_messung_fest():
+    """'Seit Januar' wuerde in einem Jahr etwas behaupten, das niemand geprueft hat.
+    Die Messung ist eine Momentaufnahme - der Zeitraum steht deshalb fest im Text."""
+    from strategy_core import MUSTER_HINWEIS
+    h = MUSTER_HINWEIS["UNGESUNDER_ABVERKAUF"]
+    assert "2026" in h and "nicht immer" in h
+    assert "seit" not in h.lower()
+
+
+def test_lage_ohne_muster_5_hat_keinen_hinweis():
+    f = _flow_cvd([0, 10, 20, 30, 40, 50, 60])
+    for m in Pattern:
+        l = lage_bericht([], f, pattern=m)
+        if m == Pattern.UNGESUNDER_ABVERKAUF:
+            assert "muster_hinweis" in l
+        else:
+            assert "muster_hinweis" not in l, m

@@ -470,8 +470,28 @@ MUSTER_KLARTEXT = {
     "DERIVATE_PUMP": "Derivate-Pump (Hebel treibt, Spot fehlt)",
     "SHORT_COVERING": "Short-Covering (Shorts decken sich ein)",
     "CAPITULATION_RESET": "Kapitulation (der Markt ist ausgeraeumt)",
-    "UNGESUNDER_ABVERKAUF": "ungesunder Abverkauf (der Dip wird nicht gekauft)",
+    # E38 (21.09.2026, Kaisers Wahl): Der alte Text "ungesunder Abverkauf (der Dip wird
+    # nicht gekauft)" klang nach Warnung - gemessen folgte auf diese Lage aber meist eine
+    # Gegenbewegung nach OBEN. Jetzt steht da, WAS passiert, ohne Wertung. "haelt oder
+    # steigt" statt nur "steigt": classify_pattern verlangt oi_chg >= -1 %, nicht mehr.
+    "UNGESUNDER_ABVERKAUF": ("Abverkauf mit neuen Short-Wetten - Kurs faellt, Spot wird "
+                             "verkauft, Open Interest haelt oder steigt, noch keine "
+                             "Liquidationswelle"),
     "NEUTRAL": "neutral",
+}
+
+# E38 (21.09.2026): Was nach einem Muster GEMESSEN wurde - in Worten, ohne Bruchzahlen
+# (Kaiser: "20 von 26 Faellen" ist schlecht). Nur dort, wo es eine Messung gibt; die
+# anderen Muster bekommen keinen Hinweis, statt einen erfundenen.
+#   Der Zeitraum steht BEWUSST fest im Text: Die Messung ist eine Momentaufnahme
+# (E38.1, Fenster 13.01.-21.09.2026) und wird nicht laufend nachgerechnet. "Seit Januar"
+# wuerde in einem Jahr etwas behaupten, das niemand geprueft hat.
+#   Grundlage (je Episode, 26 Faelle): 1 Tag 77 %, 2 Tage 69 %, 4 Tage 58 % hoeher;
+# Median +1,2 Punkte ueber dem Fensterdurchschnitt. "meist" und "nicht immer" sind
+# beide wahr - das zweite ist der Grund, warum die Ampel das Muster NEUTRAL zaehlt.
+MUSTER_HINWEIS = {
+    "UNGESUNDER_ABVERKAUF": ("Jan-Sep 2026 folgte darauf meist eine Gegenbewegung nach "
+                             "oben (1-4 Tage) - nicht immer."),
 }
 
 SPOT_FENSTER = 3          # Kerzen je Vergleichsfenster (3 x 4h = 12 Stunden)
@@ -779,6 +799,8 @@ def lage_bericht(candles: list[Candle], flow: list[FlowPoint],
     if pattern is not None and pattern != Pattern.NEUTRAL:
         lage["muster"] = pattern.name
         lage["muster_text"] = MUSTER_KLARTEXT.get(pattern.name, pattern.name)
+        if pattern.name in MUSTER_HINWEIS:
+            lage["muster_hinweis"] = MUSTER_HINWEIS[pattern.name]
 
     return lage
 
@@ -805,7 +827,13 @@ _AMPEL_DAGEGEN = {
     "trend":    {"unter"},
     "struktur": {"gebrochen"},
     "spot":     {"nachgelassen", "schwach"},
-    "muster":   {"DERIVATE_PUMP", "SHORT_COVERING", "UNGESUNDER_ABVERKAUF"},
+    # UNGESUNDER_ABVERKAUF steht seit E38 (21.09.2026, Kaisers Wahl) NICHT mehr hier.
+    # Die Ampel zaehlte es gegen den Long - gemessen folgte darauf aber meist eine
+    # Gegenbewegung nach oben. Bewusst NEUTRAL statt "dafuer": Kursverlauf ist nicht
+    # Ertrag (derselbe Lauf zeigte Muster 4 mit dem schlechtesten Nachlauf und trotzdem
+    # profitabel), und 26 Ereignisse sind wenig. Neutral heisst: es zaehlt fuer keine
+    # Seite, auch nicht fuer einen Short.
+    "muster":   {"DERIVATE_PUMP", "SHORT_COVERING"},
 }
 # Kriterien, die NICHT gespiegelt werden, weil sie schon in der Richtung der Position
 # sprechen. "Struktur intakt" kommt aus trend_intakt() und heisst: das Bein der Position
