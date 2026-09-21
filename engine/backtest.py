@@ -77,6 +77,7 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop",
              "liq_exit", "high_exit", "liq_entry",
              "block_unhealthy", "muster5_entry", "muster5_halten",
+             "stop_puffer_pct", "stop_rueckeroberung", "stop_auf_docht",
              "confirm_t1", "cooldown_h", "min_stop_pct",
              "no_flip", "freeze_targets",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
@@ -94,6 +95,7 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
              trail_stop=False, liq_exit="off", high_exit="off", liq_entry="off",
              block_unhealthy=False, muster5_entry=False, muster5_halten="off",
+             stop_puffer_pct=0.0, stop_rueckeroberung=0, stop_auf_docht=False,
              confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0,
              no_flip=False, freeze_targets=False,
              min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
@@ -489,6 +491,31 @@ GRID = [
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
       muster5_entry=True, muster5_halten="leiter"),
+    # ---------------------------------------------------------------- E41 (21.09.2026)
+    # Wie empfindlich der urspruengliche Stop ausloest. Je GENAU EIN Unterschied zur
+    # panel=True-Zeile. Werte VOR der Messung festgelegt (docs/PLAN-E41-STOP.md): ein
+    # Pufferwert, zwei Kerzenzahlen fuer Kaisers Rueckeroberungs-Regel (die zweite ist
+    # die Robustheitspruefung der ersten), und die strengere Richtung als Gegenprobe.
+    V("LIVE-heute +Stop-Puffer 0,5 %",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      stop_puffer_pct=0.005),
+    V("LIVE-heute +Stop erst ohne Rueckeroberung (1 Kerze)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      stop_rueckeroberung=1),
+    V("LIVE-heute +Stop erst ohne Rueckeroberung (3 Kerzen)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      stop_rueckeroberung=3),
+    V("LIVE-heute +Stop schon beim Docht (Gegenprobe)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      stop_auf_docht=True),
     V("Long+Short (Ref)"),
 ]
 
@@ -1377,28 +1404,25 @@ def stop_abschnitt(stat: dict, grund: dict | None = None,
     return z
 
 
-# ------------------------------ E40.0: Gibt es eine freie STH-Datenquelle? (Probe)
+# ------------------------------ E40.1: STH-Kostenbasis - Gegenpruefung und Vorfrage
 
-# Zwei Kandidaten aus der Recherche vom 21.09.2026 - beide laut Doku kostenlos, beide
-# aus der Arbeitsumgebung NICHT pruefbar (Proxy 403). Geprueft wird deshalb dort, wo
-# es zaehlt: im GitHub-Lauf, der spaeter auch die Daten holen muesste.
-#   bitcoin-data.com (BGeometrics): Gratis-Plan 10 Abrufe/Stunde, 15/Tag JE IP - und
-# GitHub-Runner teilen sich IPs. Deshalb hoechstens ZWEI Abrufe: die zweite Pfadform
-# nur, wenn die erste nicht antwortet. Seit 09/2026 sind die letzten 7 Tage laut
-# Changelog nur im Abo abrufbar - der letzte Datenpunkt zeigt, ob das stimmt.
-#   bitview.space (Bitcoin Research Kit, Open Source): laut README ohne Konto und
-# ohne Limit, rechnet aus der eigenen Blockchain. Der Serienname ist unbekannt -
-# erst suchen, dann die gefundene Reihe holen. Achtung: BRK zaehlt Coins unter 150
-# Tagen als Short-Term-Holder, Glassnode/Bitbo unter 155 - leicht andere Werte.
-STH_BGEOMETRICS = ("https://bitcoin-data.com/v1/sth-realized-price",
-                   "https://bitcoin-data.com/api/v1/sth-realized-price")
-STH_BITVIEW_SUCHE = "https://bitview.space/api/series/search?q=sth"
-STH_BITVIEW_REIHE = "https://bitview.space/api/series/{name}/day1"
-STH_ROH_MAX = 600                     # Zeichen Rohantwort im Bericht
+# Beide Quellen haben am 21.09.2026 aus GitHub Actions geantwortet (E40.0, Probe).
+#   bitview.space (Bitcoin Research Kit): Hauptquelle - ab 2009, tagesaktuell, ohne
+# Abrufgrenze. Reine Werteliste OHNE Datum; Index 0 = 01.01.2009 (hergeleitet aus drei
+# Ankern: erster Wert 0.0 am 03.01.2009 = Genesis, naechster am 09.01.2009 = erster
+# Block danach, letzter Index = Abruftag). STH = Coins juenger als 150 Tage.
+#   bitcoin-data.com (BGeometrics): Gegenpruefung - Datum steht in jedem Punkt, aber
+# 15 Abrufe/Tag je IP (GitHub teilt IPs) und 7 Tage Verzug. Deshalb GENAU EIN Abruf.
+# STH = juenger als 155 Tage - leicht andere Werte sind also normal.
+STH_BITVIEW = "https://bitview.space/api/series/sth_realized_price/day1"
+STH_BITVIEW_TAG0 = date(2009, 1, 1)
+STH_BGEOMETRICS = "https://bitcoin-data.com/v1/sth-realized-price"
+STH_VERSAETZE = range(-3, 4)          # Tage - wird die Datumszuordnung geprueft
+STH_ABGLEICH_MAX = 0.02               # Median-Abweichung, ab der die Zuordnung zweifelhaft ist
 
 
 def _sth_holen(url: str) -> tuple:
-    """(status, text, fehler). Wirft nie - eine Probe, die abstuerzt, sagt nichts."""
+    """(status, text, fehler). Wirft nie - ein Abruf, der abstuerzt, sagt nichts."""
     import urllib.error
     req = urllib.request.Request(url, headers={
         "User-Agent": "btc-signal-app-backtest (github actions)",
@@ -1407,117 +1431,350 @@ def _sth_holen(url: str) -> tuple:
         with urllib.request.urlopen(req, timeout=25) as r:
             return r.status, r.read().decode("utf-8", "replace"), ""
     except urllib.error.HTTPError as e:
-        try:
-            body = e.read().decode("utf-8", "replace")
-        except Exception:  # noqa: BLE001
-            body = ""
-        return e.code, body, f"HTTP {e.code}"
+        return e.code, "", f"HTTP {e.code}"
     except Exception as e:  # noqa: BLE001
         return None, "", f"{type(e).__name__}: {e}"
 
 
-def _sth_auswerten(text: str) -> dict:
-    """Was steckt in der Antwort? Zahl der Punkte, Felder, erster und letzter Punkt."""
+def sth_bitview(holen=_sth_holen) -> tuple:
+    """{datum: wert}, fehler. Datum aus dem Index; leere und Null-Werte fallen weg."""
+    status, text, fehler = holen(STH_BITVIEW)
+    if status != 200 or not text:
+        return {}, fehler or f"Status {status}"
     try:
         d = json.loads(text)
-    except Exception:  # noqa: BLE001
-        zeilen = [z for z in text.splitlines() if z.strip()]
-        if len(zeilen) > 1 and "," in zeilen[0]:
-            return {"format": "csv", "punkte": len(zeilen) - 1, "kopf": zeilen[0][:120],
-                    "erster": zeilen[1][:120], "letzter": zeilen[-1][:120]}
-        return {"format": "unbekannt"}
-    liste = d if isinstance(d, list) else None
-    if isinstance(d, dict):
-        liste = next((v for v in d.values() if isinstance(v, list)), None)
-    info = {"format": "json", "typ": type(d).__name__}
-    if isinstance(liste, list) and liste:
-        info["punkte"] = len(liste)
-        info["erster"], info["letzter"] = liste[0], liste[-1]
-        if isinstance(liste[0], dict):
-            info["felder"] = sorted(liste[0])
-    return info
+        werte = d["data"] if isinstance(d, dict) else d
+        start = int(d.get("start", 0)) if isinstance(d, dict) else 0
+    except Exception as exc:  # noqa: BLE001
+        return {}, f"Antwort nicht lesbar ({exc})"
+    out = {}
+    for i, v in enumerate(werte):
+        if isinstance(v, (int, float)) and v > 0:
+            out[STH_BITVIEW_TAG0 + timedelta(days=start + i)] = float(v)
+    return out, ("" if out else "keine Werte in der Antwort")
 
 
-def _sth_namen(d, fund: list) -> list:
-    """Alle Zeichenketten in der Suchantwort, die nach einer STH-Preisreihe klingen."""
-    if isinstance(d, str):
-        t = d.lower()
-        if "sth" in t and ("price" in t or "realized" in t):
-            fund.append(d)
-    elif isinstance(d, dict):
-        for k, v in d.items():
-            _sth_namen(k, fund)
-            _sth_namen(v, fund)
-    elif isinstance(d, list):
-        for v in d:
-            _sth_namen(v, fund)
-    return fund
+def sth_bgeometrics(holen=_sth_holen) -> tuple:
+    """{datum: wert}, fehler. Die Zahlen kommen dort als TEXT - umgewandelt, sonst
+    vergleicht man "71262.19" mit 71262.19 und bekommt nie eine Uebereinstimmung."""
+    status, text, fehler = holen(STH_BGEOMETRICS)
+    if status != 200 or not text:
+        return {}, fehler or f"Status {status}"
+    try:
+        liste = json.loads(text)
+        out = {date.fromisoformat(p["d"]): float(p["sthRealizedPrice"])
+               for p in liste if p.get("sthRealizedPrice") not in (None, "")}
+    except Exception as exc:  # noqa: BLE001
+        return {}, f"Antwort nicht lesbar ({exc})"
+    return {k: v for k, v in out.items() if v > 0}, ""
 
 
-def sth_probe(holen=_sth_holen) -> dict:
-    """E40.0: Fragt die beiden Kandidaten ab und haelt fest, was zurueckkommt.
+def sth_abgleich(a: dict, b: dict, versaetze=STH_VERSAETZE) -> dict:
+    """Stimmen zwei STH-Reihen ueberein - und bei welchem Tagesversatz am besten?
 
-    Hoechstens vier Abrufe insgesamt, hoechstens zwei bei BGeometrics. Kein Abruf
-    beeinflusst den Backtest; die Probe schreibt nur einen Berichtsabschnitt.
+    Liegt der beste Versatz NICHT bei 0, ist die Datumszuordnung einer Reihe falsch
+    (bei bitview haengt sie an einer hergeleiteten Annahme). Die Lehre aus E37: zwei
+    Quellen, die dasselbe zu messen scheinen, stimmten beim Funding nur zu 71 % ueberein.
     """
-    abrufe = []
-
-    def _merke(quelle: str, url: str) -> dict:
-        status, text, fehler = holen(url)
-        e = {"quelle": quelle, "url": url, "status": status, "fehler": fehler,
-             "roh": (text or "")[:STH_ROH_MAX]}
-        if status == 200 and text:
-            e["inhalt"] = _sth_auswerten(text)
-        abrufe.append(e)
-        return e | {"_text": text}
-
-    for url in STH_BGEOMETRICS:
-        if _merke("bitcoin-data.com", url)["status"] == 200:
-            break                                   # zweite Pfadform nur bei Bedarf
-
-    such = _merke("bitview.space (Suche)", STH_BITVIEW_SUCHE)
-    namen = []
-    if such["status"] == 200:
-        try:
-            namen = _sth_namen(json.loads(such["_text"]), [])
-        except Exception:  # noqa: BLE001
-            namen = []
-    abrufe[-1]["namen"] = namen[:12]
-    if namen:
-        import urllib.parse
-        _merke("bitview.space (Reihe)",
-               STH_BITVIEW_REIHE.format(name=urllib.parse.quote(namen[0], safe="")))
-    return {"abrufe": abrufe}
+    je = {}
+    for k in versaetze:
+        abw = [abs(a[t] - b[t + timedelta(days=k)]) / b[t + timedelta(days=k)]
+               for t in a if (t + timedelta(days=k)) in b]
+        if abw:
+            je[k] = {"n": len(abw), "median": _med(abw)}
+    if not je:
+        return {"n": 0}
+    bester = min(je, key=lambda k: je[k]["median"])
+    null = je.get(0, {"n": 0, "median": None})
+    return {"n": null["n"], "median_0": null["median"], "bester_versatz": bester,
+            "median_bester": je[bester]["median"], "je_versatz": je}
 
 
-def sth_probe_abschnitt(probe: dict) -> list:
-    """Berichtsabschnitt zu E40.0."""
-    abrufe = (probe or {}).get("abrufe") or []
-    if not abrufe:
-        return []
-    z = ["", "## E40.0: Gibt es eine freie STH-Datenquelle? (Probe)", "",
-         "Reine Probe, kein Einfluss auf den Backtest. Gesucht: eine kostenlose Reihe der "
-         "**Short-Term-Holder-Kostenbasis**, taeglich, mindestens ab Januar 2026. Fuer den "
-         "Backtest zaehlt die **Laenge**, fuer den Lage-Abruf, wie **aktuell** der letzte "
-         "Punkt ist.", ""]
-    for e in abrufe:
-        z.append(f"**{e['quelle']}** — `{e['url']}`")
-        if e.get("status") == 200 and e.get("inhalt"):
-            i = e["inhalt"]
-            z.append(f"- Antwort 200, Format {i.get('format')}, "
-                     f"{i.get('punkte', '?')} Punkte")
-            if i.get("felder"):
-                z.append(f"- Felder: {', '.join(map(str, i['felder']))}")
-            if "erster" in i:
-                z.append(f"- erster Punkt: `{json.dumps(i['erster'])[:160]}`")
-                z.append(f"- letzter Punkt: `{json.dumps(i['letzter'])[:160]}`")
+def sth_je_kerze(candles, sth: dict) -> dict:
+    """{kerzen_ts: sth} - IMMER der Wert des VORTAGS.
+
+    Der Tageswert fuer Tag D steht erst am Ende von D fest. Wer ihn fuer eine Kerze
+    am Vormittag von D benutzt, kennt die Zukunft - der Backtest saehe besser aus, als
+    es live je sein koennte.
+    """
+    out = {}
+    for c in candles:
+        v = sth.get(to_date(c.ts) - timedelta(days=1))
+        if v is not None:
+            out[c.ts] = v
+    return out
+
+
+_STH_EINSTIEGE = ("KAUF_1", "KAUF_2", "NACHKAUF")
+
+
+def sth_vorfrage(candles, sth_k: dict, sigs: list, start_ms: int,
+                 horizonte: tuple = MUSTER_HORIZONTE) -> dict:
+    """E40.1: Wie oft liegt der Kurs an einem Entscheidungszeitpunkt unter der STH-
+    Kostenbasis - und was passierte danach, getrennt nach unter / ueber?
+
+    Die Vorfrage aus der Lehre von E38: Ein Signal, das fast nie auf einen
+    Entscheidungszeitpunkt der Engine trifft, kann keinen Schalter tragen - egal wie
+    gut es ist. Deshalb zuerst zaehlen, dann bauen.
+
+    Drei Blickwinkel:
+      kerzen     alle bewerteten Kerzen: Anteil unter STH, Nachlauf je Gruppe, und wie
+                 oft der Zustand WECHSELT (wenige Wechsel = lange Phasen = die Kerzen
+                 sind kein unabhaengiger Beleg, sondern wenige grosse Bloecke)
+      einstiege  Einstiege der Live-Einstellung: wie viele unter / ueber, Nachlauf ab
+                 Einstiegspreis (das ist die Frage hinter E40.3, dem Verstaerker)
+      stops      Stops der Live-Einstellung: wie viele unter / ueber
+    """
+    hmax = max(horizonte)
+    idx = {c.ts: i for i, c in enumerate(candles)}
+
+    def _gruppe():
+        return {"n": 0, **{h: [] for h in horizonte}}
+
+    kerzen = {"unter": _gruppe(), "ueber": _gruppe()}
+    wechsel, vorher, ohne_sth = 0, None, 0
+    for i, c in enumerate(candles):
+        if c.ts < start_ms or i + hmax >= len(candles):
+            continue
+        s = sth_k.get(c.ts)
+        if s is None:
+            ohne_sth += 1
+            continue
+        g = "unter" if c.close < s else "ueber"
+        if vorher is not None and g != vorher:
+            wechsel += 1
+        vorher = g
+        kerzen[g]["n"] += 1
+        for h in horizonte:
+            kerzen[g][h].append((candles[i + h].close - c.close) / c.close)
+
+    einstiege = {"unter": _gruppe(), "ueber": _gruppe()}
+    stops = {"unter": 0, "ueber": 0}
+    ohne_nachlauf = 0
+    for sg in sigs:
+        i = idx.get(sg.get("ts"))
+        s = sth_k.get(sg.get("ts"))
+        preis = float(sg.get("price") or 0.0)
+        if i is None or s is None or preis <= 0:
+            continue
+        g = "unter" if preis < s else "ueber"
+        if sg.get("type") == "STOPLOSS":
+            stops[g] += 1
+        elif sg.get("type") in _STH_EINSTIEGE:
+            if i + hmax >= len(candles):
+                ohne_nachlauf += 1
+                continue
+            einstiege[g]["n"] += 1
+            for h in horizonte:
+                einstiege[g][h].append((candles[i + h].close - preis) / preis)
+
+    def _fertig(gr: dict) -> dict:
+        for g in gr.values():
+            for h in horizonte:
+                w = g[h]
+                g[h] = {"median": _med(w),
+                        "anteil_hoch": (sum(1 for v in w if v > 0) / len(w)) if w else 0.0}
+        return gr
+
+    return {"kerzen": _fertig(kerzen), "wechsel": wechsel, "ohne_sth": ohne_sth,
+            "einstiege": _fertig(einstiege), "stops": stops,
+            "einstiege_ohne_nachlauf": ohne_nachlauf}
+
+
+def sth_abschnitt(quellen: dict, abgleich: dict, vorfrage: dict | None,
+                  horizonte: tuple = MUSTER_HORIZONTE) -> list:
+    """Berichtsabschnitt zu E40.1. `quellen` = {name: {"punkte", "von", "bis", "fehler"}}."""
+    z = ["", "## E40.1: STH-Kostenbasis - Gegenpruefung und Vorfrage", "",
+         "Reine Messung, kein Einfluss auf die Signale. Die STH-Kostenbasis ist der "
+         "durchschnittliche Einstand der Coins, die juenger als ~5 Monate sind. Fuer jede "
+         "Kerze gilt der Wert des **Vortags** - der Tageswert steht erst am Tagesende fest.",
+         "", "### Die beiden Quellen", "",
+         "| Quelle | Punkte | von | bis | Fehler |", "|---|---:|---|---|---|"]
+    for name, q in quellen.items():
+        z.append(f"| {name} | {q.get('punkte', 0)} | {q.get('von') or '—'} | "
+                 f"{q.get('bis') or '—'} | {q.get('fehler') or '—'} |")
+    if abgleich.get("n"):
+        med0 = abgleich["median_0"]
+        z += ["", f"**Gegenpruefung** auf {abgleich['n']} gemeinsamen Tagen: mittlere "
+                  f"Abweichung {med0 * 100:.2f} % bei Versatz 0; bester Versatz "
+                  f"{abgleich['bester_versatz']:+d} Tag(e) "
+                  f"({abgleich['median_bester'] * 100:.2f} %)."]
+        if abgleich["bester_versatz"] != 0 or med0 > STH_ABGLEICH_MAX:
+            z += ["", "**Achtung: Die Datumszuordnung ist zweifelhaft.** Gemessen wird "
+                      "deshalb mit bitcoin-data.com (dort steht das Datum in jedem Punkt)."]
         else:
-            z.append(f"- **keine brauchbare Antwort:** {e.get('fehler') or 'Status ' + str(e.get('status'))}")
-        if e.get("namen") is not None:
-            z.append(f"- gefundene Reihen: {', '.join(e['namen']) or 'keine'}")
-        if e.get("roh"):
-            z += ["", "```", e["roh"].replace("```", "'''"), "```"]
+            z += ["", "Die Zuordnung stimmt: Beide Reihen decken sich am besten ohne "
+                      "Versatz. Der kleine Rest erklaert sich aus der Definition "
+                      "(150 gegen 155 Tage)."]
+    else:
+        z += ["", "**Keine Gegenpruefung moeglich** - es fehlt eine der beiden Reihen. "
+                  "Die Datumszuordnung von bitview ist damit nur hergeleitet, nicht belegt."]
+    if not vorfrage:
+        return z
+
+    k, e, st = vorfrage["kerzen"], vorfrage["einstiege"], vorfrage["stops"]
+    n_k = k["unter"]["n"] + k["ueber"]["n"]
+    n_e = e["unter"]["n"] + e["ueber"]["n"]
+    kopf = " | ".join(f"+{h} Kerzen ({h * 4 / 24:.0f} Tg.)" for h in horizonte)
+
+    def _zeile(name: str, g: dict) -> str:
+        zellen = " | ".join(f"{g[h]['median'] * 100:+.2f} %, {g[h]['anteil_hoch']:.0%} hoeher"
+                            for h in horizonte)
+        return f"| {name} | {g['n']} | {zellen} |"
+
+    z += ["", "### Vorfrage: Wie oft trifft der Zustand auf eine Entscheidung?", "",
+          f"- **Kerzen:** {k['unter']['n']} von {n_k} unter der STH-Kostenbasis "
+          f"({(k['unter']['n'] / n_k if n_k else 0):.0%}). Der Zustand wechselte "
+          f"**{vorfrage['wechsel']}-mal** - {'wenige lange Phasen: die Kerzenzahlen sind kein unabhaengiger Beleg' if vorfrage['wechsel'] < 20 else 'oft genug fuer einen Vergleich'}.",
+          f"- **Einstiege der Live-Einstellung:** {e['unter']['n']} von {n_e} unter der "
+          f"STH-Kostenbasis.",
+          f"- **Stops der Live-Einstellung:** {st['unter']} unter, {st['ueber']} ueber.", "",
+          "**Nachlauf aller Kerzen**, getrennt nach Lage zur STH-Kostenbasis:", "",
+          f"| Lage | Kerzen | {kopf} |", "|---|---:|" + "---|" * len(horizonte),
+          _zeile("unter STH", k["unter"]), _zeile("ueber STH", k["ueber"]), "",
+          "**Nachlauf ab Einstiegspreis** (die Frage hinter dem Verstaerker, E40.3):", "",
+          f"| Einstieg | Anzahl | {kopf} |", "|---|---:|" + "---|" * len(horizonte),
+          _zeile("unter STH", e["unter"]), _zeile("ueber STH", e["ueber"])]
+    if vorfrage.get("einstiege_ohne_nachlauf"):
+        z += ["", f"{vorfrage['einstiege_ohne_nachlauf']} Einstieg(e) am Fensterende ohne "
+                  "vollstaendigen Nachlauf sind nicht mitgezaehlt."]
+    duenn = [g for g in ("unter", "ueber") if e[g]["n"] < STOP_MIN_FAELLE]
+    if duenn:
+        z += ["", f"**Achtung, zu duenn:** Einstiege {' und '.join(duenn)} STH haben weniger "
+                  f"als {STOP_MIN_FAELLE} Faelle. Dort ist jede Zahl eine Anekdote - ein "
+                  "Schalter, der nur dort wirkt, waere nicht messbar."]
+    z += ["", "**Was diese Messung NICHT zeigt:** ob ein Schalter verdient. Nachlauf ist "
+              "nicht Ertrag - `CAPITULATION_RESET` hatte in E38 den schlechtesten Nachlauf "
+              "im Feld und traegt trotzdem die Rendite. Die Vorfrage entscheidet nur, ob "
+              "E40.2 und E40.3 ueberhaupt genug Faelle haetten, um etwas zu messen."]
+    return z
+
+
+# -------------------------------- E41: Stop mit Puffer / Rueckeroberung / Docht
+
+E41_ZEILEN = {                        # Gitterzeile -> Kurzname im Bericht
+    "LIVE-heute +Stop-Puffer 0,5 %": "A · Puffer 0,5 %",
+    "LIVE-heute +Stop erst ohne Rueckeroberung (1 Kerze)": "B1 · Rueckeroberung 1 Kerze",
+    "LIVE-heute +Stop erst ohne Rueckeroberung (3 Kerzen)": "B3 · Rueckeroberung 3 Kerzen",
+    "LIVE-heute +Stop schon beim Docht (Gegenprobe)": "C · Docht (Gegenprobe)",
+}
+E41_DD_TOLERANZ = 1.0                 # Punkte, um die der Rueckgang schlechter sein darf
+
+
+def _stops(sigs: list) -> list:
+    return [s for s in sigs if s.get("type") == "STOPLOSS"]
+
+
+def e41_urteil(basis: dict, v: dict) -> dict:
+    """Die drei Bedingungen aus docs/PLAN-E41-STOP.md - VOR der Messung festgelegt.
+
+    basis/v: {"h1", "h2", "dd", "stops"} (dd negativ, z. B. -9.4).
+    Alle drei muessen erfuellt sein; eine bessere Rendite allein zaehlt nicht.
+    """
+    beide = v["h1"] > basis["h1"] and v["h2"] > basis["h2"]
+    dd_ok = v["dd"] >= basis["dd"] - E41_DD_TOLERANZ
+    weniger = v["stops"] < basis["stops"]
+    return {"beide_haelften": beide, "rueckgang_ok": dd_ok, "weniger_stops": weniger,
+            "besteht": beide and dd_ok and weniger}
+
+
+def _naechster_ausstieg(sigs: list, ab_ts: int) -> dict | None:
+    for s in sigs:
+        if s.get("ts", 0) >= ab_ts and s.get("type") in ("STOPLOSS", "VERKAUF_REST"):
+            return s
+    return None
+
+
+def e41_abschnitt(results: list, halves: list, basis_label: str) -> list:
+    """Berichtsabschnitt zu E41: Kennzahlen, Urteil nach Regel, und was aus den
+    Positionen wurde, deren Stop in einer Variante ausblieb."""
+    voll = {r[0]["label"]: r for r in results}
+    halb = {h[0]["label"]: (h[1], h[2]) for h in halves}
+    if basis_label not in voll or basis_label not in halb:
+        return []
+
+    def _kz(label: str) -> dict:
+        _cfg, sigs, _sc, p = voll[label]
+        h1, h2 = halb[label]
+        return {"rendite": p["rendite_pct"], "dd": p.get("max_drawdown_pct", 0.0),
+                "h1": h1["rendite_pct"], "h2": h2["rendite_pct"],
+                "stops": len(_stops(sigs)), "sigs": sigs}
+
+    basis = _kz(basis_label)
+    zeilen = [(lab, kurz) for lab, kurz in E41_ZEILEN.items() if lab in voll and lab in halb]
+    if not zeilen:
+        return []
+    z = ["", "## E41: Stop mit Puffer, Rueckeroberung oder Docht", "",
+         "Jede Zeile unterscheidet sich von der Live-Einstellung in **genau einem** Punkt. "
+         "Die Entscheidungsregel stand vor der Messung fest (`docs/PLAN-E41-STOP.md`): "
+         "besser in **beiden** Fensterhaelften, Rueckgang hoechstens "
+         f"{E41_DD_TOLERANZ:.0f} Punkt schlechter, und die Zahl der Stops muss "
+         "tatsaechlich sinken.", "",
+         "| Variante | Rendite | Rueckgang | H1 | H2 | Stops | beide Haelften | Rueckgang ok | weniger Stops | **besteht** |",
+         "|---|---:|---:|---:|---:|---:|---|---|---|---|",
+         f"| **Live (Basis)** | {basis['rendite']:+.1f} % | {basis['dd']:.1f} % | "
+         f"{basis['h1']:+.1f} % | {basis['h2']:+.1f} % | {basis['stops']} | — | — | — | — |"]
+    urteile = {}
+    ja = lambda b: "ja" if b else "**nein**"
+    for lab, kurz in zeilen:
+        v = _kz(lab)
+        u = e41_urteil(basis, v)
+        urteile[kurz] = (u, v)
+        z.append(f"| {kurz} | {v['rendite']:+.1f} % | {v['dd']:.1f} % | {v['h1']:+.1f} % | "
+                 f"{v['h2']:+.1f} % | {v['stops']} | {ja(u['beide_haelften'])} | "
+                 f"{ja(u['rueckgang_ok'])} | {ja(u['weniger_stops'])} | "
+                 f"{'**JA**' if u['besteht'] else 'nein'} |")
+
+    b1 = urteile.get("B1 · Rueckeroberung 1 Kerze", ({}, {}))[0].get("besteht")
+    b3 = urteile.get("B3 · Rueckeroberung 3 Kerzen", ({}, {}))[0].get("besteht")
+    c = urteile.get("C · Docht (Gegenprobe)", ({}, {}))[0].get("besteht")
+    z += ["", "**Urteil nach der Regel:**", ""]
+    if b1 is not None and b3 is not None:
+        if b1 and b3:
+            z.append("- **Rueckeroberung (Kaisers Regel): besteht** - mit 1 UND mit 3 Kerzen. "
+                     "Das Ergebnis haengt nicht an der Kerzenzahl.")
+        elif b1 or b3:
+            z.append("- **Rueckeroberung: nicht robust.** Nur eine der beiden Kerzenzahlen "
+                     "besteht - das Ergebnis haengt an der Wahl, also am Zufall.")
+        else:
+            z.append("- **Rueckeroberung: durchgefallen** - mit 1 und mit 3 Kerzen.")
+    if c:
+        z.append("- **Achtung: die Gegenprobe besteht.** Der strengere Stop schlaegt die "
+                 "Live-Einstellung - dann war die Idee, den Stop zu lockern, falsch herum.")
+    z.append("- Ein Schalter, der nicht besteht, bleibt aus - auch wenn seine Rendite "
+             "besser aussieht.")
+
+    # --- Was wurde aus den Positionen, deren Stop ausblieb? ----------------------------
+    b_stops = _stops(basis["sigs"])
+    z += ["", "### Was wurde aus den Positionen, deren Stop ausblieb?", "",
+          "Fuer jeden Stop der Live-Einstellung: Hat die Variante an derselben Kerze "
+          "gestoppt? Wenn nicht - wie endete die Position dort (naechster Stop oder "
+          "Restverkauf) und zu welchem Preis, verglichen mit dem Live-Stop?", ""]
+    for lab, kurz in zeilen:
+        if kurz.startswith("C"):
+            continue                                 # Gegenprobe stoppt frueher, nicht spaeter
+        v = urteile[kurz][1]
+        vt = {s["ts"] for s in _stops(v["sigs"])}
+        z += [f"**{kurz}**", ""]
+        for s in b_stops:
+            tag = to_date(s["ts"]).strftime("%d.%m.%Y")
+            if s["ts"] in vt:
+                z.append(f"- {tag} {s['price']:,.0f} $ — gleich gestoppt".replace(",", "."))
+                continue
+            n = _naechster_ausstieg(v["sigs"], s["ts"])
+            if n is None:
+                z.append(f"- {tag} {s['price']:,.0f} $ — kein Ausstieg bis Fensterende"
+                         .replace(",", "."))
+                continue
+            diff = (n["price"] - s["price"]) / s["price"] * 100
+            wie = "Stop" if n["type"] == "STOPLOSS" else "Restverkauf"
+            z.append((f"- {tag} {s['price']:,.0f} $ — stattdessen {wie} am "
+                      f"{to_date(n['ts']).strftime('%d.%m.%Y')} bei {n['price']:,.0f} $ "
+                      f"({diff:+.1f} % gegen den Live-Stop)").replace(",", "."))
         z.append("")
+    z += ["Die Liste zeigt nur, wie die Position **endete**. Zwischendurch gab es in der "
+          "Variante womoeglich Teilverkaeufe oder einen tieferen Buchverlust - dafuer steht "
+          "die Spalte *Rueckgang* oben."]
     return z
 
 
@@ -2186,13 +2443,30 @@ def main():
     panel_r = next((r for r in results if r[0].get("panel")), best)
     panel_cfg, _psigs, panel_sc, panel_pnl = panel_r
 
-    # --- E40.0: STH-Datenquelle pruefen (reine Probe, wirft nie) ------------------------
+    # --- E40.1: STH-Kostenbasis - Gegenpruefung und Vorfrage (reine Messung) ----------
+    _sthquellen, _sthabgl, _sthvor, _sthfehler = {}, {}, None, ""
     try:
-        _sthprobe, _sthfehler = sth_probe(), ""
-        print("STH-Probe: " + ", ".join(f"{e['quelle']} -> {e.get('status') or e.get('fehler')}"
-                                         for e in _sthprobe["abrufe"]))
+        _bv, _bvf = sth_bitview()
+        _bg, _bgf = sth_bgeometrics()            # GENAU EIN Abruf - 15 am Tag je IP
+        for _n, _r, _f in (("bitview.space", _bv, _bvf), ("bitcoin-data.com", _bg, _bgf)):
+            _sthquellen[_n] = {"punkte": len(_r), "fehler": _f,
+                               "von": min(_r).strftime("%d.%m.%Y") if _r else None,
+                               "bis": max(_r).strftime("%d.%m.%Y") if _r else None}
+        _sthabgl = sth_abgleich(_bv, _bg) if (_bv and _bg) else {"n": 0}
+        # Hauptquelle bitview - es sei denn, die Gegenpruefung stellt die hergeleitete
+        # Datumszuordnung in Frage. Die Regel stand vor dem ersten Lauf fest.
+        _zweifel = bool(_sthabgl.get("n")) and (
+            _sthabgl["bester_versatz"] != 0 or _sthabgl["median_0"] > STH_ABGLEICH_MAX)
+        _sth = _bg if (_zweifel or not _bv) else _bv
+        if _sth:
+            _sthvor = sth_vorfrage(candles, sth_je_kerze(candles, _sth), _psigs, eff_start)
+        else:
+            _sthfehler = f"keine Reihe erhalten (bitview: {_bvf}; bitcoin-data: {_bgf})"
+        print(f"STH: bitview {len(_bv)} / bitcoin-data {len(_bg)} Tage, Abgleich "
+              f"{_sthabgl.get('median_0')}, Versatz {_sthabgl.get('bester_versatz')}.")
     except Exception as exc:  # noqa: BLE001
-        _sthprobe, _sthfehler = {}, str(exc)
+        _sthfehler = str(exc)
+        print(f"STH nicht gerechnet ({exc}).")
 
     # --- E39: Was passiert nach einem Stop der Live-Einstellung? (reine Messung) -------
     try:
@@ -2537,9 +2811,14 @@ def main():
         (_stopstat.get("gruppen") or {}).get("ALLE"), _stfehler,
         lambda: stop_abschnitt(_stopstat, grund=(_m5stat or {}).get("ALLE")),
     ) + abschnitt_oder_grund(
-        "E40.0: Gibt es eine freie STH-Datenquelle? (Probe)",
-        (_sthprobe or {}).get("abrufe"), _sthfehler,
-        lambda: sth_probe_abschnitt(_sthprobe),
+        "E40.1: STH-Kostenbasis - Gegenpruefung und Vorfrage",
+        _sthquellen, _sthfehler,
+        lambda: sth_abschnitt(_sthquellen, _sthabgl, _sthvor),
+    ) + abschnitt_oder_grund(
+        "E41: Stop mit Puffer, Rueckeroberung oder Docht",
+        [h for h in halves if h[0]["label"] in E41_ZEILEN], 
+        "die E41-Zeilen fehlen im Gitter oder in der Halbierung",
+        lambda: e41_abschnitt(results, halves, panel_cfg["label"]),
     ) + [
         "",
         "## Einschraenkungen",

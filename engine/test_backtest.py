@@ -1254,100 +1254,294 @@ def test_stop_nachlauf_gleichstand_ist_nicht_wieder_drueber():
     assert st["gruppen"]["ALLE"][6]["wieder_drueber"] == 0.0
 
 
-# ---------------------------------- E40.0: STH-Probe, offline geprueft (21.09.2026)
+# -------------------------- E40.1: STH-Kostenbasis, offline geprueft (21.09.2026)
 
 import json as _json
+from datetime import date as _date, timedelta as _td
 
 
-def _falsch_holen(antworten: dict):
+def _holen(antworten: dict):
     """Ersetzt das Netz: url -> (status, text, fehler). Merkt sich jeden Abruf."""
     gefragt = []
 
     def holen(url):
         gefragt.append(url)
-        for anfang, antwort in antworten.items():
-            if url.startswith(anfang):
-                return antwort
-        return (404, "not found", "HTTP 404")
+        return antworten.get(url, (404, "", "HTTP 404"))
     holen.gefragt = gefragt
     return holen
 
 
-_BG = [{"d": "2025-01-01", "unixTs": 1735689600, "sthRealizedPrice": 91000.0},
-       {"d": "2026-09-14", "unixTs": 1789344000, "sthRealizedPrice": 71200.0}]
+def _bitview_antwort(werte, start=0):
+    return (200, _json.dumps({"index": "day1", "type": "Dollars", "start": start,
+                              "end": start + len(werte), "data": werte}), "")
 
 
-def test_sth_probe_fragt_bgeometrics_hoechstens_zweimal():
-    """15 Abrufe am Tag je IP, und GitHub-Runner teilen sich IPs. Jeder unnoetige
-    Abruf kann den naechsten Lauf blind machen."""
-    h = _falsch_holen({})
-    backtest.sth_probe(holen=h)
-    assert sum(1 for u in h.gefragt if "bitcoin-data.com" in u) == 2
-    assert len(h.gefragt) <= 4
+def test_sth_bitview_index_null_ist_der_1_januar_2009():
+    """Die Datumszuordnung ist hergeleitet (Genesis-Block am 03.01.2009 = erster Wert).
+    Rutscht sie um einen Tag, misst alles Weitere den falschen Tag."""
+    werte = [None, None, 0.0, 5.0, 6.0]
+    r, f = backtest.sth_bitview(_holen({backtest.STH_BITVIEW: _bitview_antwort(werte)}))
+    assert f == ""
+    assert r == {_date(2009, 1, 4): 5.0, _date(2009, 1, 5): 6.0}   # 0.0 und None fallen weg
 
 
-def test_sth_probe_zweite_pfadform_nur_wenn_die_erste_scheitert():
-    h = _falsch_holen({backtest.STH_BGEOMETRICS[0]: (200, _json.dumps(_BG), "")})
-    backtest.sth_probe(holen=h)
-    assert backtest.STH_BGEOMETRICS[1] not in h.gefragt
+def test_sth_bitview_beachtet_den_startindex():
+    r, _ = backtest.sth_bitview(_holen({backtest.STH_BITVIEW: _bitview_antwort([7.0], start=10)}))
+    assert r == {_date(2009, 1, 11): 7.0}
 
 
-def test_sth_probe_liest_punkte_felder_und_letzten_wert():
-    h = _falsch_holen({backtest.STH_BGEOMETRICS[0]: (200, _json.dumps(_BG), "")})
-    p = backtest.sth_probe(holen=h)
-    i = p["abrufe"][0]["inhalt"]
-    assert i["punkte"] == 2 and "sthRealizedPrice" in i["felder"]
-    assert i["letzter"]["d"] == "2026-09-14"             # zeigt, wie aktuell die Reihe ist
+def test_sth_bgeometrics_wandelt_text_in_zahlen():
+    """Die Werte kommen dort als Text. Ungewandelt stimmt kein Vergleich je ueberein."""
+    liste = [{"d": "2026-09-14", "unixTs": "1789344000", "sthRealizedPrice": "71262.19"},
+             {"d": "2026-09-13", "unixTs": "1789257600", "sthRealizedPrice": ""}]
+    r, f = backtest.sth_bgeometrics(_holen({backtest.STH_BGEOMETRICS: (200, _json.dumps(liste), "")}))
+    assert f == "" and r == {_date(2026, 9, 14): 71262.19}
 
 
-def test_sth_probe_folgt_der_bitview_suche_zur_reihe():
-    suche = {"results": ["price_close", "sth_realized_price", "lth_realized_price"]}
-    h = _falsch_holen({
-        backtest.STH_BITVIEW_SUCHE: (200, _json.dumps(suche), ""),
-        "https://bitview.space/api/series/sth_realized_price/day1":
-            (200, _json.dumps([70000.0, 71000.0]), "")})
-    p = backtest.sth_probe(holen=h)
-    such = [e for e in p["abrufe"] if e["quelle"].endswith("(Suche)")][0]
-    assert such["namen"] == ["sth_realized_price"]      # lth_... gehoert nicht dazu
-    reihe = [e for e in p["abrufe"] if e["quelle"].endswith("(Reihe)")][0]
-    assert reihe["status"] == 200 and reihe["inhalt"]["punkte"] == 2
+def test_sth_quellen_halten_fehler_fest_statt_abzustuerzen():
+    for fn in (backtest.sth_bitview, backtest.sth_bgeometrics):
+        r, f = fn(_holen({}))
+        assert r == {} and "404" in f
+        r, f = fn(_holen({backtest.STH_BITVIEW: (200, "kaputt", ""),
+                          backtest.STH_BGEOMETRICS: (200, "kaputt", "")}))
+        assert r == {} and "nicht lesbar" in f
 
 
-def test_sth_probe_ohne_suchtreffer_keine_geratene_reihe():
-    """Keinen Seriennamen erfinden - ohne Treffer bleibt es bei der Suche."""
-    h = _falsch_holen({backtest.STH_BITVIEW_SUCHE: (200, _json.dumps({"results": []}), "")})
-    p = backtest.sth_probe(holen=h)
-    assert not any(e["quelle"].endswith("(Reihe)") for e in p["abrufe"])
+def test_sth_bgeometrics_wird_genau_einmal_gefragt():
+    """15 Abrufe am Tag je IP, und GitHub-Runner teilen sich IPs."""
+    h = _holen({})
+    backtest.sth_bgeometrics(h)
+    assert h.gefragt == [backtest.STH_BGEOMETRICS]
 
 
-def test_sth_probe_haelt_fehler_fest_statt_abzustuerzen():
-    h = _falsch_holen({"https://bitcoin-data.com": (403, "Forbidden", "HTTP 403"),
-                       "https://bitview.space": (None, "", "URLError: timeout")})
-    p = backtest.sth_probe(holen=h)
-    assert all(e["fehler"] for e in p["abrufe"])
-    text = "\n".join(backtest.sth_probe_abschnitt(p))
-    assert "HTTP 403" in text and "timeout" in text
+def _reihe_sth(tage=60, anfang=_date(2026, 1, 1)):
+    return {anfang + _td(days=i): 70000.0 + i * 100 for i in range(tage)}
 
 
-def test_sth_probe_abschnitt_zeigt_roh_gekuerzt_und_ohne_codeblock_bruch():
-    # Die Backticks VORN: am Ende stehend fielen sie der Kuerzung zum Opfer, und der
-    # Test pruefte den Codeblock-Bruch gar nicht (die Sabotage lief durch).
-    lang = "```" + "x" * 5000
-    h = _falsch_holen({backtest.STH_BGEOMETRICS[0]: (200, lang, "")})
-    p = backtest.sth_probe(holen=h)
-    assert len(p["abrufe"][0]["roh"]) <= backtest.STH_ROH_MAX
-    text = "\n".join(backtest.sth_probe_abschnitt(p))
-    assert text.count("```") % 2 == 0                   # jeder Codeblock schliesst
+def test_sth_abgleich_findet_versatz_null_bei_gleichen_reihen():
+    a = _reihe_sth()
+    g = backtest.sth_abgleich(a, dict(a))
+    assert g["bester_versatz"] == 0 and g["median_0"] == 0.0 and g["n"] == 60
 
 
-def test_sth_probe_erkennt_csv():
-    csv = "date,sth_realized_price\n2026-01-01,80000\n2026-09-14,71200\n"
-    i = backtest._sth_auswerten(csv)
-    assert i["format"] == "csv" and i["punkte"] == 2
-    assert i["letzter"].startswith("2026-09-14")
+def test_sth_abgleich_erkennt_einen_verschobenen_tag():
+    """Genau dafuer gibt es den Abgleich: Ist bitview um einen Tag verrutscht, muss
+    der beste Versatz das zeigen - und nicht 0."""
+    a = _reihe_sth()
+    b = {t + _td(days=1): v for t, v in a.items()}          # b einen Tag spaeter
+    g = backtest.sth_abgleich(a, b)
+    assert g["bester_versatz"] == 1
+    assert g["median_0"] > 0
 
 
-def test_sth_probe_ist_im_bericht_verdrahtet():
+def test_sth_abgleich_ohne_gemeinsame_tage():
+    assert backtest.sth_abgleich({_date(2026, 1, 1): 1.0}, {_date(2020, 1, 1): 1.0})["n"] == 0
+
+
+def test_sth_je_kerze_nimmt_den_wert_des_vortags():
+    """Der Tageswert steht erst am Tagesende fest. Wer ihn am selben Tag benutzt,
+    kennt die Zukunft - der Backtest saehe besser aus, als es live je sein koennte."""
+    from datetime import datetime, timezone
+    ts = int(datetime(2026, 3, 10, 8, tzinfo=timezone.utc).timestamp() * 1000)
+    c = Candle(ts, 1, 1, 1, 1)
+    sth = {_date(2026, 3, 9): 111.0, _date(2026, 3, 10): 222.0}
+    assert backtest.sth_je_kerze([c], sth) == {ts: 111.0}
+
+
+def _stufen_kerzen(preise):
+    return [Candle(backtest.START_MS + i * _H4, p, p, p, p) for i, p in enumerate(preise)]
+
+
+def test_sth_vorfrage_trennt_unter_und_ueber():
+    cs = _stufen_kerzen([90.0] * 20 + [110.0] * 40)
+    sth_k = {c.ts: 100.0 for c in cs}
+    v = backtest.sth_vorfrage(cs, sth_k, [], backtest.START_MS, horizonte=(6,))
+    assert v["kerzen"]["unter"]["n"] == 20
+    assert v["kerzen"]["ueber"]["n"] == 60 - 20 - 6          # Nachlauf hinten fehlt
+    assert v["wechsel"] == 1
+
+
+def test_sth_vorfrage_misst_einstiege_ab_einstiegspreis_nach_vorn():
+    cs = _stufen_kerzen([100.0 + i for i in range(40)])
+    sth_k = {c.ts: 105.0 for c in cs}
+    sigs = [{"ts": cs[2].ts, "type": "KAUF_1", "price": 102.0},
+            {"ts": cs[20].ts, "type": "NACHKAUF", "price": 120.0},
+            {"ts": cs[21].ts, "type": "TEILVERKAUF_1", "price": 121.0},
+            {"ts": cs[22].ts, "type": "STOPLOSS", "price": 122.0}]
+    v = backtest.sth_vorfrage(cs, sth_k, sigs, backtest.START_MS, horizonte=(6,))
+    e = v["einstiege"]
+    assert e["unter"]["n"] == 1 and e["ueber"]["n"] == 1     # Teilverkauf zaehlt nicht
+    assert abs(e["unter"][6]["median"] - (108.0 - 102.0) / 102.0) < 1e-9
+    assert v["stops"] == {"unter": 0, "ueber": 1}
+
+
+def test_sth_vorfrage_ohne_sth_wert_kein_raten():
+    cs = _stufen_kerzen([100.0] * 30)
+    v = backtest.sth_vorfrage(cs, {}, [], backtest.START_MS, horizonte=(6,))
+    assert v["kerzen"]["unter"]["n"] == 0 and v["kerzen"]["ueber"]["n"] == 0
+    assert v["ohne_sth"] == 30 - 6
+
+
+def test_sth_abschnitt_warnt_bei_zweifelhafter_zuordnung():
+    q = {"bitview.space": {"punkte": 10}, "bitcoin-data.com": {"punkte": 10}}
+    schief = {"n": 50, "median_0": 0.05, "bester_versatz": 1, "median_bester": 0.001}
+    text = "\n".join(backtest.sth_abschnitt(q, schief, None))
+    assert "zweifelhaft" in text and "bitcoin-data.com" in text
+    gut = {"n": 50, "median_0": 0.003, "bester_versatz": 0, "median_bester": 0.003}
+    assert "zweifelhaft" not in "\n".join(backtest.sth_abschnitt(q, gut, None))
+
+
+def test_sth_abschnitt_ohne_gegenpruefung_sagt_es():
+    text = "\n".join(backtest.sth_abschnitt({"bitview.space": {"punkte": 5}}, {"n": 0}, None))
+    assert "Keine Gegenpruefung" in text
+
+
+def test_sth_abschnitt_nennt_vortag_und_warnt_bei_duennen_gruppen():
+    cs = _stufen_kerzen([90.0] * 10 + [110.0] * 40)
+    sth_k = {c.ts: 100.0 for c in cs}
+    sigs = [{"ts": cs[i].ts, "type": "KAUF_1", "price": cs[i].close} for i in (2, 15, 16)]
+    v = backtest.sth_vorfrage(cs, sth_k, sigs, backtest.START_MS, horizonte=(6,))
+    text = "\n".join(backtest.sth_abschnitt({"bitview.space": {"punkte": 5}}, {"n": 0}, v,
+                                             horizonte=(6,)))
+    assert "Vortags" in text
+    assert "zu duenn" in text
+    assert "Nachlauf ist nicht Ertrag" in text
+    assert "Was diese Messung NICHT zeigt" in text
+
+
+def test_sth_vorfrage_einstiege_am_fensterende_zaehlen_nicht_still_mit():
+    """Ein Einstieg ohne vollen Nachlauf hat keine vergleichbare Zahl. Er faellt raus -
+    aber sichtbar, nicht still."""
+    cs = _stufen_kerzen([100.0] * 30)
+    sth_k = {c.ts: 105.0 for c in cs}
+    sigs = [{"ts": cs[3].ts, "type": "KAUF_1", "price": 100.0},
+            {"ts": cs[27].ts, "type": "KAUF_2", "price": 100.0}]
+    v = backtest.sth_vorfrage(cs, sth_k, sigs, backtest.START_MS, horizonte=(6,))
+    assert v["einstiege"]["unter"]["n"] == 1
+    assert v["einstiege_ohne_nachlauf"] == 1
+
+
+def test_sth_ist_im_bericht_verdrahtet_und_die_probe_weg():
     import inspect
     q = inspect.getsource(backtest.main)
-    assert "sth_probe()" in q and "sth_probe_abschnitt(_sthprobe)" in q
+    assert "sth_bitview()" in q and "sth_bgeometrics()" in q
+    assert "sth_vorfrage(" in q and "sth_je_kerze(" in q
+    assert "sth_probe" not in q                               # E40.0 ist ersetzt
+    assert not hasattr(backtest, "sth_probe")
+
+
+def test_sth_vorfrage_nutzt_die_live_einstellung():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    i_panel = q.index("panel_cfg, _psigs, panel_sc, panel_pnl = panel_r")
+    assert q.index("sth_je_kerze(candles, _sth), _psigs, eff_start)") > i_panel
+
+
+# ------------------------------------------- E41: Gitterzeilen und Urteil (21.09.2026)
+
+_E41 = {
+    "LIVE-heute +Stop-Puffer 0,5 %": ("stop_puffer_pct", 0.005),
+    "LIVE-heute +Stop erst ohne Rueckeroberung (1 Kerze)": ("stop_rueckeroberung", 1),
+    "LIVE-heute +Stop erst ohne Rueckeroberung (3 Kerzen)": ("stop_rueckeroberung", 3),
+    "LIVE-heute +Stop schon beim Docht (Gegenprobe)": ("stop_auf_docht", True),
+}
+
+
+def test_e41_zeilen_unterscheiden_sich_in_genau_einem_punkt_und_mit_dem_vorab_wert():
+    panel = [v for v in backtest.GRID if v.get("panel")][0]
+    basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
+    for label, (schluessel, wert) in _E41.items():
+        z = _zeile(label)
+        hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+        abw = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+        assert abw == {schluessel}, (label, abw)
+        assert z[schluessel] == wert, (label, z[schluessel])
+
+
+def test_e41_labels_stimmen_mit_dem_bericht_ueberein():
+    """Der Berichtsabschnitt sucht die Zeilen ueber ihren Namen. Weicht einer ab,
+    fehlt die Zeile im Urteil - still."""
+    assert set(backtest.E41_ZEILEN) == set(_E41)
+    labels = [v["label"] for v in backtest.GRID]
+    for lab in _E41:
+        assert lab in labels
+
+
+def test_e41_schalter_kommen_an():
+    for k, v in (("stop_puffer_pct", 0.0), ("stop_rueckeroberung", 0), ("stop_auf_docht", False)):
+        assert k in backtest.EVAL_KEYS and backtest._BASE[k] == v
+
+
+def _kz(h1=10.0, h2=5.0, dd=-9.0, stops=10):
+    return {"h1": h1, "h2": h2, "dd": dd, "stops": stops}
+
+
+def test_e41_urteil_verlangt_alle_drei_bedingungen():
+    b = _kz()
+    assert backtest.e41_urteil(b, _kz(11, 6, -9.5, 8))["besteht"] is True
+    assert backtest.e41_urteil(b, _kz(11, 4, -9.5, 8))["besteht"] is False   # nur eine Haelfte
+    assert backtest.e41_urteil(b, _kz(11, 6, -10.5, 8))["besteht"] is False  # Rueckgang
+    assert backtest.e41_urteil(b, _kz(11, 6, -9.5, 10))["besteht"] is False  # nicht gegriffen
+
+
+def test_e41_urteil_rueckgang_genau_an_der_grenze_zaehlt_noch():
+    assert backtest.e41_urteil(_kz(), _kz(11, 6, -10.0, 8))["rueckgang_ok"] is True
+
+
+def _e41_results():
+    """Kuenstliche Ergebnisse: Basis, und die vier E41-Zeilen."""
+    from datetime import datetime, timezone
+    t = lambda d: int(datetime(2026, 3, d, tzinfo=timezone.utc).timestamp() * 1000)
+    live_sigs = [{"ts": t(1), "type": "STOPLOSS", "price": 100.0},
+                 {"ts": t(10), "type": "STOPLOSS", "price": 90.0}]
+    b1_sigs = [{"ts": t(1), "type": "STOPLOSS", "price": 100.0},
+               {"ts": t(12), "type": "VERKAUF_REST", "price": 99.0}]
+    def r(label, sigs, rend, dd):
+        return ({"label": label}, sigs, {}, {"rendite_pct": rend, "max_drawdown_pct": dd})
+    labels = list(backtest.E41_ZEILEN)
+    results = [r("LIVE", live_sigs, 20.0, -9.0), r(labels[0], live_sigs, 20.0, -9.0),
+               r(labels[1], b1_sigs, 22.0, -9.5), r(labels[2], b1_sigs, 22.5, -9.6),
+               r(labels[3], live_sigs + [{"ts": t(5), "type": "STOPLOSS", "price": 95.0}],
+                 18.0, -8.0)]
+    halves = [({"label": "LIVE"}, {"rendite_pct": 10.0}, {"rendite_pct": 5.0}),
+              ({"label": labels[0]}, {"rendite_pct": 10.0}, {"rendite_pct": 5.0}),
+              ({"label": labels[1]}, {"rendite_pct": 11.0}, {"rendite_pct": 6.0}),
+              ({"label": labels[2]}, {"rendite_pct": 11.0}, {"rendite_pct": 4.0}),
+              ({"label": labels[3]}, {"rendite_pct": 9.0}, {"rendite_pct": 4.0})]
+    return results, halves
+
+
+def test_e41_abschnitt_meldet_nicht_robust_wenn_nur_eine_kerzenzahl_besteht():
+    results, halves = _e41_results()
+    text = "\n".join(backtest.e41_abschnitt(results, halves, "LIVE"))
+    assert "nicht robust" in text                      # B1 besteht, B3 nicht (H2)
+
+
+def test_e41_abschnitt_zeigt_was_aus_der_position_wurde():
+    results, halves = _e41_results()
+    text = "\n".join(backtest.e41_abschnitt(results, halves, "LIVE"))
+    assert "01.03.2026 100 $ — gleich gestoppt" in text
+    assert "stattdessen Restverkauf am 12.03.2026 bei 99 $ (+10.0 % gegen den Live-Stop)" in text
+
+
+def test_e41_abschnitt_meldet_wenn_die_gegenprobe_gewinnt():
+    results, halves = _e41_results()
+    labels = list(backtest.E41_ZEILEN)
+    results = [r for r in results if r[0]["label"] != labels[3]] + [
+        ({"label": labels[3]}, [{"ts": 1, "type": "STOPLOSS", "price": 1.0}], {},
+         {"rendite_pct": 30.0, "max_drawdown_pct": -8.0})]
+    halves = [h for h in halves if h[0]["label"] != labels[3]] + [
+        ({"label": labels[3]}, {"rendite_pct": 12.0}, {"rendite_pct": 7.0})]
+    text = "\n".join(backtest.e41_abschnitt(results, halves, "LIVE"))
+    assert "Gegenprobe besteht" in text
+
+
+def test_e41_abschnitt_leer_ohne_basis():
+    results, halves = _e41_results()
+    assert backtest.e41_abschnitt(results, halves, "GIBT ES NICHT") == []
+
+
+def test_e41_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    assert 'e41_abschnitt(results, halves, panel_cfg["label"])' in q

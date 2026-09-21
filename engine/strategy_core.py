@@ -1020,6 +1020,13 @@ class Position:
     ziel_extrem: Optional[float] = None      # eingefrorene Zielreferenz nach dem 1. Teilgewinn (E18.3)
     be_aktiv: bool = False                   # Break-even-Stop scharf, seit die Position im Plus war (E19.3)
     widerstand_exits: int = 0                # Anzahl Teilverkaeufe an Widerstaenden des Gegen-Beins (E20)
+    # E41 (Kaisers Rueckeroberungs-Regel): wie viele Kerzen in Folge unter der
+    # Invalidierung geschlossen haben, ohne dass gestoppt wurde - und an WELCHER Marke.
+    stop_wartet: int = 0
+    stop_wartet_inv: Optional[float] = None
+    # Die Invalidierung, die schon einmal unterschritten UND zurueckerobert wurde. Sie
+    # gilt als geprueft: der naechste Schluss darunter ist ein echter Bruch.
+    stop_geprueft: Optional[float] = None
     # Zeitpunkt des letzten Stops (E13, cooldown_h). Gehoert BEWUSST NICHT in
     # _reset_position: Er ist die Erinnerung ZWISCHEN zwei Positionen und muss den
     # Positions-Reset ueberleben, sonst wuesste die Sperre nach dem Stop nichts mehr.
@@ -1040,6 +1047,9 @@ def _reset_position(pos: "Position") -> None:
     pos.ziel_extrem = None
     pos.be_aktiv = False
     pos.widerstand_exits = 0
+    pos.stop_wartet = 0
+    pos.stop_wartet_inv = None
+    pos.stop_geprueft = None
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
@@ -1205,6 +1215,74 @@ def in_liq_zone(price: float, levels: list[tuple[float, float]],
     return None
 
 
+def stop_entscheidung(pos: "Position", cur: "Candle", inv: float, long_side: bool,
+                      puffer_pct: float = 0.0, rueckeroberung: int = 0,
+                      auf_docht: bool = False) -> tuple:
+    """E41: Loest der URSPRUENGLICHE Stop an der Invalidierung in dieser Kerze aus?
+
+    Rueckgabe (stop, preis, grund). `grund` ist None, wenn der uebliche Text gilt.
+    Wird nur aufgerufen, wenn mindestens einer der drei Schalter an ist; ein nach
+    Teilgewinnen nachgezogener Stop kommt hier nie an (dort ist Gewinn gesichert).
+
+    Auf Modulebene statt in evaluate() - die Lehre aus E34: Die Faelle (Schluss knapp
+    darunter, Rueckeroberung, zweiter Bruch, harter Boden) lassen sich so einzeln
+    pruefen, statt sie muehsam ueber ganze Kursverlaeufe herbeizufuehren.
+
+    Die drei Varianten (docs/PLAN-E41-STOP.md):
+      puffer_pct     Stop erst, wenn der Schluss mehr als puffer_pct jenseits liegt.
+      rueckeroberung Kaisers Regel. Erster Schluss jenseits -> noch kein Stop. Wird die
+                     Marke binnen `rueckeroberung` Kerzen zurueckerobert, gilt sie als
+                     GEPRUEFT; der naechste Schluss jenseits stoppt sofort. Wird sie nicht
+                     zurueckerobert -> Stop. Liegt der Schluss mehr als DIP_FLOOR_PCT
+                     jenseits -> sofort Stop (der harte Boden aus E9.3, nicht neu gewaehlt).
+      auf_docht      Gegenprobe, die STRENGERE Richtung: Stop schon, wenn das Kerzentief
+                     die Marke beruehrt. Ausstieg zum Stopkurs, bei einer Luecke zum
+                     Eroeffnungskurs - der Schlusskurs waere hier geschoent.
+    """
+    def jenseits(preis: float, abstand: float = 0.0) -> bool:
+        if long_side:
+            return preis < inv * (1 - abstand)
+        return preis > inv * (1 + abstand)
+
+    if auf_docht:
+        if jenseits(cur.low if long_side else cur.high):
+            fill = min(cur.open, inv) if long_side else max(cur.open, inv)
+            return True, fill, "Kerzen{} {} Invalidierung {:.0f} (Docht) - Ausstieg zum Stopkurs".format(
+                "tief" if long_side else "hoch", "unter" if long_side else "ueber", inv)
+        return False, cur.close, None
+
+    unter = jenseits(cur.close, puffer_pct)
+    if rueckeroberung <= 0:
+        grund = None
+        if unter and puffer_pct > 0:
+            grund = "Kerzenschluss mehr als {:.1f} % {} Invalidierung {:.0f} (Puffer)".format(
+                puffer_pct * 100, "unter" if long_side else "ueber", inv).replace(".", ",", 1)
+        return unter, cur.close, grund
+
+    # --- Rueckeroberung ---------------------------------------------------------------
+    if pos.stop_wartet and pos.stop_wartet_inv != inv:
+        pos.stop_wartet = 0                      # neue Marke (Zonen nachgezogen): neu zaehlen
+    if not unter:
+        if pos.stop_wartet > 0:
+            pos.stop_geprueft = inv              # zurueckerobert -> Marke ist geprueft
+        pos.stop_wartet, pos.stop_wartet_inv = 0, None
+        return False, cur.close, None
+    seite = "unter" if long_side else "ueber"
+    if pos.stop_geprueft == inv:
+        return True, cur.close, ("Kerzenschluss {} Invalidierung {:.0f} - die Marke war schon "
+                                 "einmal unterschritten und zurueckerobert, jetzt echter Bruch"
+                                 ).format(seite, inv)
+    if jenseits(cur.close, DIP_FLOOR_PCT):
+        return True, cur.close, ("Kerzenschluss mehr als {} % {} Invalidierung {:.0f} - harter "
+                                 "Boden, kein Warten").format(int(DIP_FLOOR_PCT * 100), seite, inv)
+    pos.stop_wartet += 1
+    pos.stop_wartet_inv = inv
+    if pos.stop_wartet > rueckeroberung:
+        return True, cur.close, ("Kerzenschluss {} Invalidierung {:.0f} - nach {} Kerze(n) nicht "
+                                 "zurueckerobert").format(seite, inv, rueckeroberung)
+    return False, cur.close, None
+
+
 def muster5_haelt_zurueck(modus: str, pattern: "Pattern", richtung: str,
                           ziel: bool) -> bool:
     """E38.3: Haelt Muster 5 diesen Teilverkauf zurueck? (Default "off" = nie.)
@@ -1242,6 +1320,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              liq_exit: str = "off", high_exit: str = "off",
              liq_entry: str = "off", block_unhealthy: bool = False,
              muster5_entry: bool = False, muster5_halten: str = "off",
+             stop_puffer_pct: float = 0.0, stop_rueckeroberung: int = 0,
+             stop_auf_docht: bool = False,
              confirm_t1: bool = False, cooldown_h: float = 0.0,
              min_stop_pct: float = 0.0,
              no_flip: bool = False, freeze_targets: bool = False,
@@ -1330,6 +1410,16 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     #   Ob der Schalter ueberhaupt greift, zeigt die Spalte "Signale" im Gitter: gleiche
     #   Signalzahl wie die Basis heisst, er hat nie gegriffen (Lehre aus neustart_mit_rest,
     #   das in acht Monaten dreimal ansprang und deshalb nicht messbar war).
+    # ---------------------------------------------------------------- E41 (Default aus)
+    # Wie empfindlich der URSPRUENGLICHE Stop an der Invalidierung ausloest. Befund aus
+    # E39: zehn Stops in acht Monaten, der Schluss lag im Median nur 0,28 % unter der
+    # Marke, zwei Tage spaeter stand der Kurs in neun von zehn Faellen wieder darueber.
+    # stop_puffer_pct:     Stop erst, wenn der Schluss mehr als diesen Anteil darunter liegt.
+    # stop_rueckeroberung: Kaisers Regel (21.09.2026). Anzahl Kerzen, die fuer die
+    #   Rueckeroberung bleiben (0 = aus). Zurueckerobert -> Marke geprueft -> der naechste
+    #   Schluss darunter stoppt sofort. Waehrend des Wartens wird NICHT nachgekauft.
+    # stop_auf_docht:      Gegenprobe - Stop schon beim Kerzentief.
+    # Alle drei lassen den nachgezogenen Stop unberuehrt. Einzelheiten: stop_entscheidung().
     # confirm_t1: verlangt auch fuer den 0.5-Level-Einstieg eine Order-Flow-Bestaetigung.
     #   Dieser Zweig hatte bisher als einziger KEINE — er feuerte allein auf Preisberuehrung.
     # cooldown_h: Sperrfrist in Stunden nach einem Stop (0 = aus). Gegen die Saegeblatt-
@@ -1404,9 +1494,17 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         return []
 
     signals: list[Signal] = []
+    # E41: in dieser Kerze kein Aufstocken, weil auf eine Rueckeroberung gewartet wird
+    # oder gerade zurueckerobert wurde. Wird im Stop-Block gesetzt.
+    _e41_sperre = False
 
     def _darf_aufstocken() -> bool:
-        """E18.2: Nach einem Teilgewinn in derselben Kerze wird nicht nachgelegt."""
+        """E18.2: Nach einem Teilgewinn in derselben Kerze wird nicht nachgelegt.
+        E41: Waehrend auf eine Rueckeroberung gewartet wird, auch nicht - ein Nachkauf
+        unter der Invalidierung waere der durchgefallene conditional_stop (E9.3) durch
+        die Hintertuer."""
+        if _e41_sperre:
+            return False
         return not (no_flip and any(x.type in _TEILVERKAUF_TYPES for x in signals))
 
     def _darf_teilverkaufen(ziel: bool = False) -> bool:
@@ -1685,6 +1783,17 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     cands.append((min(highs), "Struktur-Hoch"))
                 stop_level, trail_note = min(cands, key=lambda x: x[0])
         stop_hit = (cur.close < stop_level) if long_side else (cur.close > stop_level)
+        stop_preis, stop_grund = cur.close, None
+        # E41: nur der URSPRUENGLICHE Stop - ein nachgezogener sichert Gewinn und bleibt.
+        if trail_note in ("", "Invalidierung") and (
+                stop_puffer_pct > 0 or stop_rueckeroberung > 0 or stop_auf_docht):
+            _wartete = pos.stop_wartet > 0
+            stop_hit, stop_preis, stop_grund = stop_entscheidung(
+                pos, cur, z.invalidation, long_side, puffer_pct=stop_puffer_pct,
+                rueckeroberung=stop_rueckeroberung, auf_docht=stop_auf_docht)
+            # Gesperrt in der Wartekerze UND in der Kerze der Rueckeroberung: Die
+            # Bestaetigung steht erst mit deren Schluss fest.
+            _e41_sperre = _wartete or pos.stop_wartet > 0
         # Bedingter Stop (E9.3): bei Verlust nachkaufen statt stoppen, solange der
         # Order-Flow den Trend weiter bestaetigt (Furkan) — aber nur bis zum harten
         # Boden (DIP_FLOOR_PCT) und hoechstens MAX_DIP_BUYS mal.
@@ -1710,11 +1819,13 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 reason = ("Nachgezogener Stop ({}) {:.0f} — Kerzenschluss {}, "
                           "Gewinn gesichert".format(trail_note, stop_level,
                                                     'darunter' if long_side else 'darueber'))
+            elif stop_grund:
+                reason = stop_grund                          # E41: warum genau jetzt
             else:
                 reason = ("Kerzenschluss {} Invalidierung {:.0f}".format(
                     'unter' if long_side else 'ueber', z.invalidation)
                     + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
-            signals.append(Signal(cur.ts, st, cur.close, 100, reason))
+            signals.append(Signal(cur.ts, st, stop_preis, 100, reason))
             # BUGFIX 2026-07-27: hier stand eine handgeschriebene Teil-Ruecksetzung, die
             # entry_ref/entry_pct/liq_exits/high_exits/liq_entries VERGESSEN hat. Folge:
             # (1) entry_pct wuchs ueber alle gestoppten Positionen hinweg immer weiter, der
@@ -1860,7 +1971,17 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 touch = (cur.low <= z.level_0786) if long_side else (cur.high >= z.level_0786)
                 if touch:
                     nk = SignalType.NACHKAUF if long_side else SignalType.SHORT_NACHLEGEN
-                    signals.append(Signal(cur.ts, nk, z.level_0786, TRANCHEN["FULL"],
+                    # E41: Nach einer Rueckeroberung kommt der Kurs von UNTEN an die
+                    # 0.786-Zone. Eine Limit-Order dort waere zum Eroeffnungskurs gefuellt
+                    # worden, nicht zum Levelpreis - der Levelpreis waere teurer als
+                    # alles, was erreichbar war. Nur wenn E41 eine Marke als geprueft
+                    # gefuehrt hat; ohne E41 ist stop_geprueft immer None und nichts aendert
+                    # sich (die Live-Zahlen bleiben dieselben).
+                    preis_nk = z.level_0786
+                    if pos.stop_geprueft is not None:
+                        preis_nk = (min(preis_nk, cur.open) if long_side
+                                    else max(preis_nk, cur.open))
+                    signals.append(Signal(cur.ts, nk, preis_nk, TRANCHEN["FULL"],
                                           "0.786-Zone erreicht, Struktur intakt",
                                           stop_ref=z.invalidation))
                     pos.state = PosState.FULL

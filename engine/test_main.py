@@ -969,3 +969,16 @@ def test_kurze_spot_ebene_nutzt_dasselbe_fenster_wie_die_lage_zeile():
     quelle = inspect.getsource(orderflow_detail)
     assert "_of_reihe([p.spot_cvd for p in flow], SPOT_FENSTER)" in quelle, \
         "die Zusatzzeile rechnet nicht mit SPOT_FENSTER"
+
+
+def test_e41_warten_ueberlebt_den_neustart_der_live_engine():
+    """Die Live-Engine ist bei jedem Lauf ein neuer Prozess. Ginge der Wartezaehler
+    verloren, fing das Warten bei jedem Lauf neu an - der Stop kaeme nie. Im Backtest
+    faellt das nicht auf, weil der am Stueck rechnet."""
+    from strategy_core import Position
+    pos = Position()
+    pos.stop_wartet, pos.stop_wartet_inv, pos.stop_geprueft = 2, 97.6, 95.0
+    rt = pos_from_state(pos_to_state(pos))
+    assert (rt.stop_wartet, rt.stop_wartet_inv, rt.stop_geprueft) == (2, 97.6, 95.0)
+    alt = pos_from_state({"pos_state": "FLAT"})          # Altbestand ohne die Felder
+    assert (alt.stop_wartet, alt.stop_wartet_inv, alt.stop_geprueft) == (0, None, None)

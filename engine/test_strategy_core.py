@@ -2663,3 +2663,222 @@ def test_lage_ohne_muster_5_hat_keinen_hinweis():
             assert "muster_hinweis" in l
         else:
             assert "muster_hinweis" not in l, m
+
+
+# ------------------------------------ E41: Stop mit Puffer / Rueckeroberung / Docht
+
+from strategy_core import stop_entscheidung, DIP_FLOOR_PCT, _reset_position
+
+_INV = 100.0
+
+
+def _k(close, low=None, high=None, open_=None):
+    o = close if open_ is None else open_
+    return Candle(1, o, high if high is not None else max(o, close),
+                  low if low is not None else min(o, close), close)
+
+
+def test_stop_puffer_ignoriert_knappe_schluesse():
+    pos = Position()
+    hit, _, _ = stop_entscheidung(pos, _k(99.7), _INV, True, puffer_pct=0.005)
+    assert hit is False                                  # 0,3 % darunter: kein Stop
+    hit, preis, grund = stop_entscheidung(pos, _k(99.4), _INV, True, puffer_pct=0.005)
+    assert hit is True and preis == 99.4 and "Puffer" in grund
+
+
+def test_rueckeroberung_1_stoppt_bei_zweitem_schluss_darunter():
+    pos = Position()
+    assert stop_entscheidung(pos, _k(99.7), _INV, True, rueckeroberung=1)[0] is False
+    assert pos.stop_wartet == 1
+    hit, _, grund = stop_entscheidung(pos, _k(99.5), _INV, True, rueckeroberung=1)
+    assert hit is True and "nicht zurueckerobert" in grund
+
+
+def test_rueckeroberung_3_gibt_drei_kerzen_zeit():
+    pos = Position()
+    for _ in range(3):
+        assert stop_entscheidung(pos, _k(99.6), _INV, True, rueckeroberung=3)[0] is False
+    assert stop_entscheidung(pos, _k(99.6), _INV, True, rueckeroberung=3)[0] is True
+
+
+def test_rueckeroberung_macht_die_marke_geprueft_und_der_naechste_bruch_stoppt_sofort():
+    """Kaisers Regel im Kern: Die Schonfrist gibt es genau EINMAL. Ist die Marke einmal
+    unterschritten und zurueckerobert, ist der naechste Schluss darunter echt."""
+    pos = Position()
+    assert stop_entscheidung(pos, _k(99.7), _INV, True, rueckeroberung=3)[0] is False
+    assert stop_entscheidung(pos, _k(100.5), _INV, True, rueckeroberung=3)[0] is False
+    assert pos.stop_geprueft == _INV and pos.stop_wartet == 0
+    hit, _, grund = stop_entscheidung(pos, _k(99.8), _INV, True, rueckeroberung=3)
+    assert hit is True and "schon einmal" in grund       # trotz 3 Kerzen Zeit: sofort
+
+
+def test_ohne_vorheriges_unterschreiten_ist_die_marke_nicht_geprueft():
+    pos = Position()
+    stop_entscheidung(pos, _k(105.0), _INV, True, rueckeroberung=1)
+    assert pos.stop_geprueft is None
+
+
+def test_rueckeroberung_harter_boden_stoppt_sofort():
+    """Ein Schluss mehr als 5 % darunter ist kein Stich, sondern ein Bruch."""
+    pos = Position()
+    tief = _INV * (1 - DIP_FLOOR_PCT) - 0.1
+    hit, _, grund = stop_entscheidung(pos, _k(tief), _INV, True, rueckeroberung=3)
+    assert hit is True and "harter" in grund
+
+
+def test_rueckeroberung_neue_marke_zaehlt_neu():
+    """Werden die Zonen nachgezogen, gehoert das Warten zur alten Marke."""
+    pos = Position()
+    stop_entscheidung(pos, _k(99.7), _INV, True, rueckeroberung=1)
+    assert stop_entscheidung(pos, _k(100.7), 101.0, True, rueckeroberung=1)[0] is False
+    assert pos.stop_wartet == 1 and pos.stop_wartet_inv == 101.0
+
+
+def test_rueckeroberung_gilt_fuer_short_spiegelbildlich():
+    pos = Position()
+    assert stop_entscheidung(pos, _k(100.3), _INV, False, rueckeroberung=1)[0] is False
+    assert stop_entscheidung(pos, _k(99.5), _INV, False, rueckeroberung=1)[0] is False
+    assert pos.stop_geprueft == _INV
+    assert stop_entscheidung(pos, _k(100.2), _INV, False, rueckeroberung=1)[0] is True
+
+
+def test_docht_stoppt_schon_beim_kerzentief_zum_stopkurs():
+    pos = Position()
+    hit, preis, grund = stop_entscheidung(pos, _k(101.0, low=99.0, open_=102.0), _INV, True,
+                                          auf_docht=True)
+    assert hit is True and preis == _INV and "Docht" in grund
+    hit, preis, _ = stop_entscheidung(pos, _k(97.0, low=96.0, open_=98.0), _INV, True,
+                                      auf_docht=True)
+    assert preis == 98.0                                 # Luecke: zum Eroeffnungskurs
+    assert stop_entscheidung(pos, _k(101.0, low=100.1), _INV, True, auf_docht=True)[0] is False
+
+
+def test_reset_raeumt_die_e41_merker_ab():
+    """Die Lehre aus E18: Zaehler, die einen Stop ueberleben, schalten spaeter still
+    etwas ab oder an."""
+    pos = Position()
+    pos.stop_wartet, pos.stop_wartet_inv, pos.stop_geprueft = 2, 100.0, 100.0
+    _reset_position(pos)
+    assert (pos.stop_wartet, pos.stop_wartet_inv, pos.stop_geprueft) == (0, None, None)
+
+
+# --- durch evaluate(): das Szenario muss wirklich einen knappen Stop erzeugen -------
+
+def _e41_szenario(schluesse):
+    """e13_szenario (KAUF_1 an der 0.5, Invalidierung 97,608), danach frei waehlbare
+    Schlusskurse - Hoch/Tief 0,1 % um Eroeffnung und Schluss."""
+    cs, fl = e13_szenario()
+    cs, fl = list(cs), list(fl)
+    for v in schluesse:
+        ts, o = cs[-1].ts + H4_MS, cs[-1].close
+        cs.append(Candle(ts, o, max(o, v) * 1.001, min(o, v) * 0.999, v))
+        f = fl[-1]
+        fl.append(FlowPoint(ts, f.spot_cvd - 30, 0.0, f.oi + 1e6, f.funding))
+    return cs, fl
+
+
+def _e41_lauf(cs, fl, **kw):
+    pos = Position()
+    out = []
+    for i in range(len(cs)):
+        out += [(i, s) for s in evaluate(cs[:i + 1], fl[:i + 1], pos, bias_short=False,
+                                         pivot_n=2, **kw)]
+    return out, pos
+
+
+_KNAPP_ZURUECK_WIEDER = [110, 106, 102, 99, 97.4, 98.5, 100, 99, 97.3, 96, 95]
+
+
+def test_e41_szenario_hat_einen_knappen_live_stop():
+    """DIE Vorprobe: ohne knappen Stop pruefen die Tests darunter nichts."""
+    cs, fl = _e41_szenario(_KNAPP_ZURUECK_WIEDER)
+    stops = [(i, s) for i, s in _e41_lauf(cs, fl)[0] if s.type == SignalType.STOPLOSS]
+    assert len(stops) == 1
+    assert 0 < (97.608 - stops[0][1].price) / 97.608 < 0.005   # weniger als 0,5 % darunter
+
+
+def test_e41_im_default_aus_exakt_dieselben_signale():
+    cs, fl = _e41_szenario(_KNAPP_ZURUECK_WIEDER)
+    fass = lambda o: [(i, s.type, round(s.price, 6), s.tranche_pct, s.reason) for i, s in o]
+    basis = fass(_e41_lauf(cs, fl)[0])
+    assert basis
+    assert fass(_e41_lauf(cs, fl, stop_puffer_pct=0.0, stop_rueckeroberung=0,
+                          stop_auf_docht=False)[0]) == basis
+
+
+def test_e41_rueckeroberung_ueberlebt_den_stich_und_stoppt_beim_zweiten_bruch():
+    cs, fl = _e41_szenario(_KNAPP_ZURUECK_WIEDER)
+    live = [i for i, s in _e41_lauf(cs, fl)[0] if s.type == SignalType.STOPLOSS]
+    b1 = [(i, s) for i, s in _e41_lauf(cs, fl, stop_rueckeroberung=1)[0]
+          if s.type == SignalType.STOPLOSS]
+    assert len(b1) == 1 and b1[0][0] > live[0]
+    assert "schon einmal" in b1[0][1].reason
+
+
+def test_e41_position_bleibt_bei_langsamem_abverkauf_nicht_haengen():
+    """Die gefaehrlichste Folge einer Schonfrist: jede Kerze schliesst nur ein wenig
+    tiefer, keine zurueck - dann muss der Stop trotzdem kommen."""
+    cs, fl = _e41_szenario([110, 106, 102, 99, 97.5, 97.4, 97.3, 97.2, 97.1, 97.0, 96.9])
+    for n in (1, 3):
+        stops = [i for i, s in _e41_lauf(cs, fl, stop_rueckeroberung=n)[0]
+                 if s.type == SignalType.STOPLOSS]
+        assert stops, f"Position haengt bei stop_rueckeroberung={n}"
+
+
+def test_e41_kein_nachkauf_waehrend_des_wartens_und_der_rueckeroberung():
+    """Ohne Sperre kaeme in der Wartekerze der 0.786-Nachkauf - ein Nachkauf unter der
+    Invalidierung, also der durchgefallene conditional_stop durch die Hintertuer."""
+    cs, fl = _e41_szenario([110, 97.4, 100, 101])
+    sig, _pos = _e41_lauf(cs, fl, stop_rueckeroberung=1)
+    warte, zurueck = 27, 28
+    assert not [s for i, s in sig if i in (warte, zurueck) and s.type in (
+        SignalType.NACHKAUF, SignalType.KAUF_2)]
+    assert any(s.type == SignalType.STOPLOSS for i, s in _e41_lauf(cs, fl)[0] if i == warte)
+
+
+def test_e41_nachkauf_nach_rueckeroberung_zum_erreichbaren_preis():
+    """Nach der Rueckeroberung kommt der Kurs von unten an die 0.786-Zone. Gebucht wird
+    der Eroeffnungskurs, nicht der teurere Levelpreis."""
+    cs, fl = _e41_szenario([110, 97.4, 100, 101])
+    sig, _ = _e41_lauf(cs, fl, stop_rueckeroberung=1)
+    nk = [(i, s) for i, s in sig if s.type == SignalType.NACHKAUF]
+    assert nk, "Szenario erzeugt keinen Nachkauf nach der Rueckeroberung"
+    i, s = nk[0]
+    assert s.price == cs[i].open and s.price < 104.0
+
+
+def test_e41_laesst_den_nachgezogenen_stop_unberuehrt():
+    cs, fl = _m5_lage()
+    def _stop(**kw):
+        return [(t, s.price, s.reason) for t, s in _signale(cs, fl, trail_stop=True, **kw)
+                if s.type == SignalType.STOPLOSS]
+    basis = _stop()
+    assert basis and basis[0][2].startswith("Nachgezogener"), "Vorprobe: kein nachgezogener Stop"
+    for kw in ({"stop_puffer_pct": 0.005}, {"stop_rueckeroberung": 1},
+               {"stop_rueckeroberung": 3}, {"stop_auf_docht": True}):
+        assert _stop(**kw) == basis, kw
+
+
+def test_e41_docht_stoppt_frueher_als_live():
+    cs, fl = _e41_szenario(_KNAPP_ZURUECK_WIEDER)
+    live = [i for i, s in _e41_lauf(cs, fl)[0] if s.type == SignalType.STOPLOSS]
+    doc = [(i, s) for i, s in _e41_lauf(cs, fl, stop_auf_docht=True)[0]
+           if s.type == SignalType.STOPLOSS]
+    assert doc and doc[0][0] <= live[0]
+    assert abs(doc[0][1].price - 97.608) < 1e-6 or doc[0][1].price == cs[doc[0][0]].open
+
+
+def test_e41_preiskorrektur_aendert_ohne_e41_nichts():
+    """Die Live-Zahlen duerfen sich durch E41 nicht bewegen. Oeffnet eine Kerze schon
+    unter der 0.786-Zone, bucht die Engine heute zum Levelpreis - und dabei bleibt es,
+    solange E41 aus ist."""
+    cs, fl = e13_szenario()
+    cs, fl = list(cs), list(fl)
+    ts = cs[-1].ts + H4_MS
+    cs.append(Candle(ts, 103.0, 103.5, 102.0, 103.0))    # oeffnet UNTER der 0.786 (104,65)
+    f = fl[-1]
+    fl.append(FlowPoint(ts, f.spot_cvd - 30, 0.0, f.oi + 1e6, f.funding))
+    sig, _ = _e41_lauf(cs, fl)
+    nk = [s for i, s in sig if s.type == SignalType.NACHKAUF]
+    assert nk, "Vorprobe: kein 0.786-Nachkauf im Szenario"
+    assert abs(nk[0].price - 104.65) < 0.01              # Levelpreis, nicht Eroeffnung 103

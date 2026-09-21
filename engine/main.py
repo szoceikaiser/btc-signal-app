@@ -245,6 +245,8 @@ EVAL_DEFAULTS = {
     "block_unhealthy": False,
     # E38 (20.09.2026), beide Default aus — siehe strategy_core.evaluate.
     "muster5_entry": False, "muster5_halten": "off",
+    # E41 (21.09.2026), alle Default aus - siehe strategy_core.evaluate.
+    "stop_puffer_pct": 0.0, "stop_rueckeroberung": 0, "stop_auf_docht": False,
     "confirm_t1": False,
     "cooldown_h": 0.0, "min_stop_pct": 0.0,
     "no_flip": False, "freeze_targets": False,
@@ -294,6 +296,11 @@ def pos_to_state(pos: Position) -> dict:
          "high_exits": pos.high_exits, "liq_entries": pos.liq_entries,
          "last_stop_ts": pos.last_stop_ts, "ziel_extrem": pos.ziel_extrem,
          "be_aktiv": pos.be_aktiv,
+         # E41: Die Live-Engine ist bei jedem Lauf ein neuer Prozess. Ohne diese drei
+         # Felder finge das Warten auf die Rueckeroberung bei JEDEM Lauf neu an - der
+         # Stop kaeme nie, und im Backtest fiele es nicht auf (der rechnet am Stueck).
+         "stop_wartet": pos.stop_wartet, "stop_wartet_inv": pos.stop_wartet_inv,
+         "stop_geprueft": pos.stop_geprueft,
          "zones": None}
     if pos.zones:
         z = pos.zones
@@ -333,6 +340,9 @@ def pos_from_state(d: dict) -> Position:
     pos.last_stop_ts = d.get("last_stop_ts", -1)
     pos.ziel_extrem = d.get("ziel_extrem")
     pos.be_aktiv = bool(d.get("be_aktiv", False))
+    pos.stop_wartet = int(d.get("stop_wartet", 0) or 0)
+    pos.stop_wartet_inv = d.get("stop_wartet_inv")
+    pos.stop_geprueft = d.get("stop_geprueft")
     z = d.get("zones")
     if z and "impuls_start" in z:
         imp = Impulse(
