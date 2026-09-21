@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1789920000000,
+ "last_signal_ts": 1789934400000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -17,13 +17,13 @@
  "zones": null,
  "widerstand": {
   "richtung": "LONG",
-  "bein_start": 79600.0,
-  "bein_ende": 74967.97,
-  "level_05": 77283.985,
-  "gp_von": 77830.56454,
-  "gp_bis": 77978.7895,
-  "level_0786": 78608.74558,
-  "ausbruch": 79600.0
+  "bein_start": 81951.0,
+  "bein_ende": 80126.04,
+  "level_05": 81038.51999999999,
+  "gp_von": 81253.86528,
+  "gp_bis": 81312.264,
+  "level_0786": 81560.45856,
+  "ausbruch": 81951.0
  },
  "plan": null,
  "config": {
@@ -62,17 +62,17 @@
   "trend_ema": 200,
   "ampel_filter": "off"
  },
- "updated_at": "2026-09-20T22:08:39Z",
- "last_close": 81177.32,
+ "updated_at": "2026-09-21T00:02:24Z",
+ "last_close": 81178.0,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 81.177 $ ueber EMA200 (70.510 $)",
+   "trend_text": "Uebergeordnet: Kurs 81.178 $ ueber EMA200 (70.510 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 74.968 $ -> 81.951 $",
-   "spot": "zurueckgekehrt",
-   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)"
+   "spot": "stabil",
+   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)"
   },
   "ampel": {
    "stufe": "guenstig",
