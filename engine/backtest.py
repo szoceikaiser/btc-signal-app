@@ -1377,6 +1377,150 @@ def stop_abschnitt(stat: dict, grund: dict | None = None,
     return z
 
 
+# ------------------------------ E40.0: Gibt es eine freie STH-Datenquelle? (Probe)
+
+# Zwei Kandidaten aus der Recherche vom 21.09.2026 - beide laut Doku kostenlos, beide
+# aus der Arbeitsumgebung NICHT pruefbar (Proxy 403). Geprueft wird deshalb dort, wo
+# es zaehlt: im GitHub-Lauf, der spaeter auch die Daten holen muesste.
+#   bitcoin-data.com (BGeometrics): Gratis-Plan 10 Abrufe/Stunde, 15/Tag JE IP - und
+# GitHub-Runner teilen sich IPs. Deshalb hoechstens ZWEI Abrufe: die zweite Pfadform
+# nur, wenn die erste nicht antwortet. Seit 09/2026 sind die letzten 7 Tage laut
+# Changelog nur im Abo abrufbar - der letzte Datenpunkt zeigt, ob das stimmt.
+#   bitview.space (Bitcoin Research Kit, Open Source): laut README ohne Konto und
+# ohne Limit, rechnet aus der eigenen Blockchain. Der Serienname ist unbekannt -
+# erst suchen, dann die gefundene Reihe holen. Achtung: BRK zaehlt Coins unter 150
+# Tagen als Short-Term-Holder, Glassnode/Bitbo unter 155 - leicht andere Werte.
+STH_BGEOMETRICS = ("https://bitcoin-data.com/v1/sth-realized-price",
+                   "https://bitcoin-data.com/api/v1/sth-realized-price")
+STH_BITVIEW_SUCHE = "https://bitview.space/api/series/search?q=sth"
+STH_BITVIEW_REIHE = "https://bitview.space/api/series/{name}/day1"
+STH_ROH_MAX = 600                     # Zeichen Rohantwort im Bericht
+
+
+def _sth_holen(url: str) -> tuple:
+    """(status, text, fehler). Wirft nie - eine Probe, die abstuerzt, sagt nichts."""
+    import urllib.error
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "btc-signal-app-backtest (github actions)",
+        "Accept": "application/json, text/csv, */*"})
+    try:
+        with urllib.request.urlopen(req, timeout=25) as r:
+            return r.status, r.read().decode("utf-8", "replace"), ""
+    except urllib.error.HTTPError as e:
+        try:
+            body = e.read().decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001
+            body = ""
+        return e.code, body, f"HTTP {e.code}"
+    except Exception as e:  # noqa: BLE001
+        return None, "", f"{type(e).__name__}: {e}"
+
+
+def _sth_auswerten(text: str) -> dict:
+    """Was steckt in der Antwort? Zahl der Punkte, Felder, erster und letzter Punkt."""
+    try:
+        d = json.loads(text)
+    except Exception:  # noqa: BLE001
+        zeilen = [z for z in text.splitlines() if z.strip()]
+        if len(zeilen) > 1 and "," in zeilen[0]:
+            return {"format": "csv", "punkte": len(zeilen) - 1, "kopf": zeilen[0][:120],
+                    "erster": zeilen[1][:120], "letzter": zeilen[-1][:120]}
+        return {"format": "unbekannt"}
+    liste = d if isinstance(d, list) else None
+    if isinstance(d, dict):
+        liste = next((v for v in d.values() if isinstance(v, list)), None)
+    info = {"format": "json", "typ": type(d).__name__}
+    if isinstance(liste, list) and liste:
+        info["punkte"] = len(liste)
+        info["erster"], info["letzter"] = liste[0], liste[-1]
+        if isinstance(liste[0], dict):
+            info["felder"] = sorted(liste[0])
+    return info
+
+
+def _sth_namen(d, fund: list) -> list:
+    """Alle Zeichenketten in der Suchantwort, die nach einer STH-Preisreihe klingen."""
+    if isinstance(d, str):
+        t = d.lower()
+        if "sth" in t and ("price" in t or "realized" in t):
+            fund.append(d)
+    elif isinstance(d, dict):
+        for k, v in d.items():
+            _sth_namen(k, fund)
+            _sth_namen(v, fund)
+    elif isinstance(d, list):
+        for v in d:
+            _sth_namen(v, fund)
+    return fund
+
+
+def sth_probe(holen=_sth_holen) -> dict:
+    """E40.0: Fragt die beiden Kandidaten ab und haelt fest, was zurueckkommt.
+
+    Hoechstens vier Abrufe insgesamt, hoechstens zwei bei BGeometrics. Kein Abruf
+    beeinflusst den Backtest; die Probe schreibt nur einen Berichtsabschnitt.
+    """
+    abrufe = []
+
+    def _merke(quelle: str, url: str) -> dict:
+        status, text, fehler = holen(url)
+        e = {"quelle": quelle, "url": url, "status": status, "fehler": fehler,
+             "roh": (text or "")[:STH_ROH_MAX]}
+        if status == 200 and text:
+            e["inhalt"] = _sth_auswerten(text)
+        abrufe.append(e)
+        return e | {"_text": text}
+
+    for url in STH_BGEOMETRICS:
+        if _merke("bitcoin-data.com", url)["status"] == 200:
+            break                                   # zweite Pfadform nur bei Bedarf
+
+    such = _merke("bitview.space (Suche)", STH_BITVIEW_SUCHE)
+    namen = []
+    if such["status"] == 200:
+        try:
+            namen = _sth_namen(json.loads(such["_text"]), [])
+        except Exception:  # noqa: BLE001
+            namen = []
+    abrufe[-1]["namen"] = namen[:12]
+    if namen:
+        import urllib.parse
+        _merke("bitview.space (Reihe)",
+               STH_BITVIEW_REIHE.format(name=urllib.parse.quote(namen[0], safe="")))
+    return {"abrufe": abrufe}
+
+
+def sth_probe_abschnitt(probe: dict) -> list:
+    """Berichtsabschnitt zu E40.0."""
+    abrufe = (probe or {}).get("abrufe") or []
+    if not abrufe:
+        return []
+    z = ["", "## E40.0: Gibt es eine freie STH-Datenquelle? (Probe)", "",
+         "Reine Probe, kein Einfluss auf den Backtest. Gesucht: eine kostenlose Reihe der "
+         "**Short-Term-Holder-Kostenbasis**, taeglich, mindestens ab Januar 2026. Fuer den "
+         "Backtest zaehlt die **Laenge**, fuer den Lage-Abruf, wie **aktuell** der letzte "
+         "Punkt ist.", ""]
+    for e in abrufe:
+        z.append(f"**{e['quelle']}** — `{e['url']}`")
+        if e.get("status") == 200 and e.get("inhalt"):
+            i = e["inhalt"]
+            z.append(f"- Antwort 200, Format {i.get('format')}, "
+                     f"{i.get('punkte', '?')} Punkte")
+            if i.get("felder"):
+                z.append(f"- Felder: {', '.join(map(str, i['felder']))}")
+            if "erster" in i:
+                z.append(f"- erster Punkt: `{json.dumps(i['erster'])[:160]}`")
+                z.append(f"- letzter Punkt: `{json.dumps(i['letzter'])[:160]}`")
+        else:
+            z.append(f"- **keine brauchbare Antwort:** {e.get('fehler') or 'Status ' + str(e.get('status'))}")
+        if e.get("namen") is not None:
+            z.append(f"- gefundene Reihen: {', '.join(e['namen']) or 'keine'}")
+        if e.get("roh"):
+            z += ["", "```", e["roh"].replace("```", "'''"), "```"]
+        z.append("")
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -2042,6 +2186,14 @@ def main():
     panel_r = next((r for r in results if r[0].get("panel")), best)
     panel_cfg, _psigs, panel_sc, panel_pnl = panel_r
 
+    # --- E40.0: STH-Datenquelle pruefen (reine Probe, wirft nie) ------------------------
+    try:
+        _sthprobe, _sthfehler = sth_probe(), ""
+        print("STH-Probe: " + ", ".join(f"{e['quelle']} -> {e.get('status') or e.get('fehler')}"
+                                         for e in _sthprobe["abrufe"]))
+    except Exception as exc:  # noqa: BLE001
+        _sthprobe, _sthfehler = {}, str(exc)
+
     # --- E39: Was passiert nach einem Stop der Live-Einstellung? (reine Messung) -------
     try:
         _stopstat = stop_nachlauf(candles, flow, _psigs)
@@ -2384,6 +2536,10 @@ def main():
         "E39: Was passiert nach einem Stop?",
         (_stopstat.get("gruppen") or {}).get("ALLE"), _stfehler,
         lambda: stop_abschnitt(_stopstat, grund=(_m5stat or {}).get("ALLE")),
+    ) + abschnitt_oder_grund(
+        "E40.0: Gibt es eine freie STH-Datenquelle? (Probe)",
+        (_sthprobe or {}).get("abrufe"), _sthfehler,
+        lambda: sth_probe_abschnitt(_sthprobe),
     ) + [
         "",
         "## Einschraenkungen",

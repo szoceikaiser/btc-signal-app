@@ -1252,3 +1252,102 @@ def test_stop_nachlauf_gleichstand_ist_nicht_wieder_drueber():
     st = backtest.stop_nachlauf(cs, fl, [_stop(cs, 4)], horizonte=(6,))
     assert st["gruppen"]["ALLE"][6]["median"] == 0.0
     assert st["gruppen"]["ALLE"][6]["wieder_drueber"] == 0.0
+
+
+# ---------------------------------- E40.0: STH-Probe, offline geprueft (21.09.2026)
+
+import json as _json
+
+
+def _falsch_holen(antworten: dict):
+    """Ersetzt das Netz: url -> (status, text, fehler). Merkt sich jeden Abruf."""
+    gefragt = []
+
+    def holen(url):
+        gefragt.append(url)
+        for anfang, antwort in antworten.items():
+            if url.startswith(anfang):
+                return antwort
+        return (404, "not found", "HTTP 404")
+    holen.gefragt = gefragt
+    return holen
+
+
+_BG = [{"d": "2025-01-01", "unixTs": 1735689600, "sthRealizedPrice": 91000.0},
+       {"d": "2026-09-14", "unixTs": 1789344000, "sthRealizedPrice": 71200.0}]
+
+
+def test_sth_probe_fragt_bgeometrics_hoechstens_zweimal():
+    """15 Abrufe am Tag je IP, und GitHub-Runner teilen sich IPs. Jeder unnoetige
+    Abruf kann den naechsten Lauf blind machen."""
+    h = _falsch_holen({})
+    backtest.sth_probe(holen=h)
+    assert sum(1 for u in h.gefragt if "bitcoin-data.com" in u) == 2
+    assert len(h.gefragt) <= 4
+
+
+def test_sth_probe_zweite_pfadform_nur_wenn_die_erste_scheitert():
+    h = _falsch_holen({backtest.STH_BGEOMETRICS[0]: (200, _json.dumps(_BG), "")})
+    backtest.sth_probe(holen=h)
+    assert backtest.STH_BGEOMETRICS[1] not in h.gefragt
+
+
+def test_sth_probe_liest_punkte_felder_und_letzten_wert():
+    h = _falsch_holen({backtest.STH_BGEOMETRICS[0]: (200, _json.dumps(_BG), "")})
+    p = backtest.sth_probe(holen=h)
+    i = p["abrufe"][0]["inhalt"]
+    assert i["punkte"] == 2 and "sthRealizedPrice" in i["felder"]
+    assert i["letzter"]["d"] == "2026-09-14"             # zeigt, wie aktuell die Reihe ist
+
+
+def test_sth_probe_folgt_der_bitview_suche_zur_reihe():
+    suche = {"results": ["price_close", "sth_realized_price", "lth_realized_price"]}
+    h = _falsch_holen({
+        backtest.STH_BITVIEW_SUCHE: (200, _json.dumps(suche), ""),
+        "https://bitview.space/api/series/sth_realized_price/day1":
+            (200, _json.dumps([70000.0, 71000.0]), "")})
+    p = backtest.sth_probe(holen=h)
+    such = [e for e in p["abrufe"] if e["quelle"].endswith("(Suche)")][0]
+    assert such["namen"] == ["sth_realized_price"]      # lth_... gehoert nicht dazu
+    reihe = [e for e in p["abrufe"] if e["quelle"].endswith("(Reihe)")][0]
+    assert reihe["status"] == 200 and reihe["inhalt"]["punkte"] == 2
+
+
+def test_sth_probe_ohne_suchtreffer_keine_geratene_reihe():
+    """Keinen Seriennamen erfinden - ohne Treffer bleibt es bei der Suche."""
+    h = _falsch_holen({backtest.STH_BITVIEW_SUCHE: (200, _json.dumps({"results": []}), "")})
+    p = backtest.sth_probe(holen=h)
+    assert not any(e["quelle"].endswith("(Reihe)") for e in p["abrufe"])
+
+
+def test_sth_probe_haelt_fehler_fest_statt_abzustuerzen():
+    h = _falsch_holen({"https://bitcoin-data.com": (403, "Forbidden", "HTTP 403"),
+                       "https://bitview.space": (None, "", "URLError: timeout")})
+    p = backtest.sth_probe(holen=h)
+    assert all(e["fehler"] for e in p["abrufe"])
+    text = "\n".join(backtest.sth_probe_abschnitt(p))
+    assert "HTTP 403" in text and "timeout" in text
+
+
+def test_sth_probe_abschnitt_zeigt_roh_gekuerzt_und_ohne_codeblock_bruch():
+    # Die Backticks VORN: am Ende stehend fielen sie der Kuerzung zum Opfer, und der
+    # Test pruefte den Codeblock-Bruch gar nicht (die Sabotage lief durch).
+    lang = "```" + "x" * 5000
+    h = _falsch_holen({backtest.STH_BGEOMETRICS[0]: (200, lang, "")})
+    p = backtest.sth_probe(holen=h)
+    assert len(p["abrufe"][0]["roh"]) <= backtest.STH_ROH_MAX
+    text = "\n".join(backtest.sth_probe_abschnitt(p))
+    assert text.count("```") % 2 == 0                   # jeder Codeblock schliesst
+
+
+def test_sth_probe_erkennt_csv():
+    csv = "date,sth_realized_price\n2026-01-01,80000\n2026-09-14,71200\n"
+    i = backtest._sth_auswerten(csv)
+    assert i["format"] == "csv" and i["punkte"] == 2
+    assert i["letzter"].startswith("2026-09-14")
+
+
+def test_sth_probe_ist_im_bericht_verdrahtet():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    assert "sth_probe()" in q and "sth_probe_abschnitt(_sthprobe)" in q
