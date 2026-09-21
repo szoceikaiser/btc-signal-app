@@ -818,6 +818,26 @@ def _reihe(preise: list, ts0: int | None = None):
     return cs, fl
 
 
+def _stat(median_alle=0.0, quote_alle=0.5, m5=None, horizont=6):
+    """Baut eine muster_nachlauf-Struktur von Hand — inkl. der Episoden-Ebene "ep".
+
+    Ohne "ep" waere jeder Test hier blind fuer die Gegenprobe-Tabelle, und die ist
+    genau die Stelle, an der ein aufgeblasener Befund auffallen soll.
+    """
+    def _k(med, quote, n):
+        return {"median": med, "mittel": med, "anteil_hoch": quote, "n": n}
+    stat = {"ALLE": {"kerzen": 100, "episoden": 100,
+                     horizont: _k(median_alle, quote_alle, 100),
+                     "ep": {horizont: _k(median_alle, quote_alle, 100)}}}
+    if m5 is not None:
+        med, quote, kerzen, episoden = m5
+        stat["UNGESUNDER_ABVERKAUF"] = {
+            "kerzen": kerzen, "episoden": episoden,
+            horizont: _k(med, quote, kerzen),
+            "ep": {horizont: _k(med, quote, episoden)}}
+    return stat
+
+
 def test_muster_nachlauf_grundrate_enthaelt_jede_bewertete_kerze():
     """Ohne Grundrate ist jede Musterzeile wertlos: 'nach Muster 5 +3 %' sagt nichts,
     wenn der Kurs im Fenster ohnehin 3 % je Horizont steigt."""
@@ -876,10 +896,7 @@ def test_muster_nachlauf_median_widersteht_einem_ausreisser():
 
 
 def test_muster_abschnitt_nennt_den_abstand_zur_grundrate():
-    stat = {"ALLE": {"kerzen": 100, "episoden": 100,
-                     6: {"median": 0.02, "mittel": 0.02, "anteil_hoch": 0.6, "n": 100}},
-            "UNGESUNDER_ABVERKAUF": {"kerzen": 30, "episoden": 25,
-                     6: {"median": 0.05, "mittel": 0.05, "anteil_hoch": 0.7, "n": 30}}}
+    stat = _stat(median_alle=0.02, quote_alle=0.6, m5=(0.05, 0.7, 30, 25))
     text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
     assert "+3.00 gg. Grundrate" in text                 # 5 % minus 2 % Grundrate
     assert "Grundrate" in text
@@ -887,27 +904,20 @@ def test_muster_abschnitt_nennt_den_abstand_zur_grundrate():
 
 def test_muster_abschnitt_warnt_bei_zu_wenigen_episoden():
     """Der gefaehrlichste Fall: eine schoene Zahl auf drei Ereignissen."""
-    stat = {"ALLE": {"kerzen": 100, "episoden": 100,
-                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 100}},
-            "UNGESUNDER_ABVERKAUF": {"kerzen": 30, "episoden": 3,
-                     6: {"median": 0.09, "mittel": 0.09, "anteil_hoch": 1.0, "n": 30}}}
+    stat = _stat(m5=(0.09, 1.0, 30, 3))
     text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
     assert "zu duenn" in text.lower()
     assert "3 Episoden" in text
 
 
 def test_muster_abschnitt_sagt_es_wenn_muster5_gar_nicht_vorkam():
-    stat = {"ALLE": {"kerzen": 100, "episoden": 100,
-                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 100}}}
+    stat = _stat()
     text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
     assert "kein einziges Mal" in text
 
 
 def test_muster_abschnitt_warnt_nicht_bei_genug_episoden():
-    stat = {"ALLE": {"kerzen": 100, "episoden": 100,
-                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 100}},
-            "UNGESUNDER_ABVERKAUF": {"kerzen": 90, "episoden": 40,
-                     6: {"median": 0.01, "mittel": 0.01, "anteil_hoch": 0.6, "n": 90}}}
+    stat = _stat(m5=(0.01, 0.6, 90, 40))
     text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
     assert "zu duenn" not in text.lower()
     assert "VORZEICHEN" in text
@@ -915,10 +925,7 @@ def test_muster_abschnitt_warnt_nicht_bei_genug_episoden():
 
 def test_muster_abschnitt_sagt_dass_es_keine_ertragsaussage_ist():
     """Die Lehre aus zwoelf gemessenen Filtern: 'steigt danach' ist nicht 'verdient'."""
-    stat = {"ALLE": {"kerzen": 10, "episoden": 10,
-                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 10}},
-            "UNGESUNDER_ABVERKAUF": {"kerzen": 5, "episoden": 5,
-                     6: {"median": 0.0, "mittel": 0.0, "anteil_hoch": 0.5, "n": 5}}}
+    stat = _stat(m5=(0.0, 0.5, 5, 5))
     text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
     assert "nicht den Ertrag" in text
 
@@ -951,3 +958,105 @@ def test_median_mittelt_bei_gerader_anzahl():
     assert backtest._med([1.0, 2.0, 3.0, 4.0]) == 2.5
     assert backtest._med([1.0, 2.0, 3.0]) == 2.0
     assert backtest._med([]) == 0.0
+
+
+# ------------------------------------------- E38: die neuen Gitterzeilen (20.09.2026)
+
+_E38_ZEILEN = {
+    "LIVE-heute +Muster 5 als Kauf-Bestaetigung": {"muster5_entry"},
+    "LIVE-heute +Muster 5 haelt Zwischenverkaeufe": {"muster5_halten"},
+    "LIVE-heute +Muster 5 haelt ALLE Teilverkaeufe": {"muster5_halten"},
+    "LIVE-heute +Muster 5 sperrt Kaeufe (Bremse, Gegenprobe)": {"block_unhealthy"},
+}
+
+
+def _zeile(label: str) -> dict:
+    treffer = [v for v in backtest.GRID if v["label"] == label]
+    assert len(treffer) == 1, f"Gitterzeile fehlt oder ist doppelt: {label}"
+    return treffer[0]
+
+
+def test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live():
+    """Die Lehre aus confirm_t1/cooldown_h, die dieses Projekt schon einmal teuer
+    bezahlt hat: Ein Messergebnis gilt nur gegen die Basis, gegen die gemessen wurde.
+    Wandert die Live-Zeile und diese Zeilen nicht mit, misst man zwei Unterschiede und
+    schreibt einen davon auf."""
+    panel = [v for v in backtest.GRID if v.get("panel")]
+    assert len(panel) == 1
+    basis = {k: panel[0][k] for k in backtest.EVAL_KEYS if k in panel[0]}
+    for label, erwartet in _E38_ZEILEN.items():
+        z = _zeile(label)
+        hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+        abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+        assert abweichend == erwartet, f"{label}: erwartet {erwartet}, ist {abweichend}"
+
+
+def test_e38_die_beiden_halten_zeilen_messen_wirklich_verschiedenes():
+    """Zwei Gitterzeilen mit demselben Wert waeren zwei Zeilen, die aussehen wie eine
+    Bestaetigung — und in Wahrheit derselbe Lauf sind."""
+    a = _zeile("LIVE-heute +Muster 5 haelt Zwischenverkaeufe")["muster5_halten"]
+    b = _zeile("LIVE-heute +Muster 5 haelt ALLE Teilverkaeufe")["muster5_halten"]
+    assert {a, b} == {"leiter", "alle"}
+
+
+def test_e38_gegenprobe_bremse_ist_im_gitter():
+    """Ohne die Gegenprobe bliebe offen, ob Muster 5 ueberhaupt etwas ueber den Ertrag
+    sagt oder nur die eine Richtung nie geprueft wurde. block_unhealthy wurde in E13
+    verworfen — aber gegen eine ANDERE Basis."""
+    assert _zeile("LIVE-heute +Muster 5 sperrt Kaeufe (Bremse, Gegenprobe)"
+                  )["block_unhealthy"] is True
+
+
+def test_e38_schalter_stehen_in_eval_keys_und_kommen_so_ueberhaupt_an():
+    """Ein Schalter, der nicht in EVAL_KEYS steht, wird von run_backtest stillschweigend
+    nicht durchgereicht: Die Gitterzeile laeuft dann als exakte Kopie der Basis — und
+    der Bericht zeigt eine Variante, die es nie gab."""
+    for k in ("muster5_entry", "muster5_halten"):
+        assert k in backtest.EVAL_KEYS, k
+        assert k in backtest._BASE, k
+    assert backtest._BASE["muster5_entry"] is False
+    assert backtest._BASE["muster5_halten"] == "off"
+
+
+def test_gegenprobe_zaehlt_nur_episodenbeginne():
+    """Der Zweck der Gegenprobe ist, die Ueberlappung herauszurechnen. Nimmt sie doch
+    alle Kerzen, ist sie eine zweite Kopie der Haupttabelle — und bestaetigt einen
+    aufgeblasenen Befund, statt ihn aufzudecken."""
+    cs, fl = _reihe([100.0] * 40)
+    stat = backtest.muster_nachlauf(cs, fl, backtest.START_MS, horizonte=(6,))
+    e = stat["NEUTRAL"]
+    assert e["kerzen"] > 1, "Szenario ohne Serie — der Test pruefte nichts"
+    assert e["ep"][6]["n"] == e["episoden"], "Gegenprobe zaehlt nicht je Episode"
+    assert e["ep"][6]["n"] < e[6]["n"], "Gegenprobe ist so gross wie die Haupttabelle"
+
+
+def test_gegenprobe_tabelle_nennt_die_episodenzahl_nicht_die_kerzenzahl():
+    """Steht dort die Kerzenzahl, sieht die unabhaengige Stichprobe groesser aus, als
+    sie ist — genau der Irrtum, den diese Tabelle ausraeumen soll."""
+    stat = _stat(m5=(0.05, 0.7, 45, 26))
+    text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
+    gegenprobe = text.split("### Gegenprobe je Episode")[1]
+    assert "| UNGESUNDER_ABVERKAUF | 26 |" in gegenprobe, gegenprobe[:400]
+    assert "| UNGESUNDER_ABVERKAUF | 45 |" not in gegenprobe
+
+
+def test_gegenprobe_vergleicht_gegen_dieselbe_grundrate_wie_oben():
+    """Bewusste Festlegung: Der Fenster-Durchschnitt wird nicht dadurch ein anderer,
+    dass man die Musterzeilen auf Episodenbeginne einschraenkt. Zwei verschiedene
+    Bezugsgroessen haetten die beiden Tabellen unvergleichbar gemacht."""
+    stat = _stat(median_alle=0.02, quote_alle=0.6, m5=(0.05, 0.7, 45, 26))
+    text = "\n".join(backtest.muster_abschnitt(stat, horizonte=(6,)))
+    haupt, gegen = text.split("### Gegenprobe je Episode")
+    assert "+3.00 gg. Grundrate" in haupt          # 5 % minus 2 % Grundrate
+    assert "+3.00 gg. Grundrate" in gegen          # dieselbe Bezugsgroesse
+
+
+def test_gegenprobe_zeile_steht_im_gitter_und_heisst_wie_erwartet():
+    """Die Gegenprobe (Bremse) ist der Grund, warum E38 ueberhaupt eine Aussage
+    zulaesst: Ohne sie bliebe offen, ob Muster 5 etwas ueber den Ertrag sagt oder nur
+    die eine Richtung nie geprueft wurde. Verschwindet die Zeile oder wird sie
+    umbenannt, faellt das sonst niemandem auf."""
+    labels = [v["label"] for v in backtest.GRID]
+    assert "LIVE-heute +Muster 5 sperrt Kaeufe (Bremse, Gegenprobe)" in labels
+    for lab in _E38_ZEILEN:
+        assert lab in labels, f"E38-Gitterzeile fehlt oder wurde umbenannt: {lab}"

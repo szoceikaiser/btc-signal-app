@@ -1177,6 +1177,32 @@ def in_liq_zone(price: float, levels: list[tuple[float, float]],
     return None
 
 
+def muster5_haelt_zurueck(modus: str, pattern: "Pattern", richtung: str,
+                          ziel: bool) -> bool:
+    """E38.3: Haelt Muster 5 diesen Teilverkauf zurueck? (Default "off" = nie.)
+
+    Eigene Funktion auf Modulebene, nicht innerhalb von evaluate() — die Lehre aus
+    E34: Eine Regel, deren Faelle sich im laufenden System nur muehsam herbeifuehren
+    lassen (hier: Muster 5 UND gleichzeitig ein faelliger Teilverkauf), wird sonst nie
+    vollstaendig geprueft. So laesst sich jede Kombination direkt pruefen.
+
+    `ziel=True` meint die geplanten Ziele an 1.0 und 1.618, `ziel=False` die
+    Zwischenverkaeufe (Leiter, letztes Hoch, Liquidations- und Widerstandszone).
+
+    NICHT hier abgefangen, weil sie an dieser Pruefung ohnehin vorbeilaufen: STOPLOSS
+    und VERKAUF_REST. Ein vollstaendiger Ausstieg darf nie unterdrueckt werden — das
+    waere der gefaehrlichste denkbare Fehler dieses Ausbaus (die Position bliebe im
+    fallenden Markt liegen, weil ein Muster gerade "halten" sagt).
+    """
+    if modus == "off" or pattern != Pattern.UNGESUNDER_ABVERKAUF:
+        return False
+    if richtung != "LONG":
+        # Bei einem Short ist Liquiditaet oberhalb ein Grund, EHER zu decken, nicht
+        # spaeter — die Treibstoff-Lesart wirkt fuer den Short in die Gegenrichtung.
+        return False
+    return modus == "alle" or not ziel
+
+
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
              pivot_n: int = 5, k_atr: float = 2.0,
@@ -1187,6 +1213,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              release_stale_rest: bool = False, trail_stop: bool = False,
              liq_exit: str = "off", high_exit: str = "off",
              liq_entry: str = "off", block_unhealthy: bool = False,
+             muster5_entry: bool = False, muster5_halten: str = "off",
              confirm_t1: bool = False, cooldown_h: float = 0.0,
              min_stop_pct: float = 0.0,
              no_flip: bool = False, freeze_targets: bool = False,
@@ -1250,6 +1277,31 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # block_unhealthy: sperrt Einstiege UND Nachkaeufe, solange der Order-Flow gegen die
     #   Richtung laeuft — Long bei Muster 5 (ungesunder Abverkauf), Short bei Muster 1
     #   (gesunder Trend, also echte Spot-Nachfrage; in die shortet Furkan nicht).
+    # ---------------------------------------------------------------- E38 (Default aus)
+    # Muster 5 (UNGESUNDER_ABVERKAUF) hat heute KEINE Wirkung: der einzige Schalter daran
+    # war block_unhealthy, und der ist seit E13 aus. E38.1 (20.09.2026) hat gemessen, was
+    # nach dem Muster passiert: auf 1-2 Tage +1,03 bzw. +1,02 Punkte ueber der Grundrate
+    # bei 76 % / 71 % hoeher geschlossenen Faellen (Grundrate 50 %), 26 Episoden. Nach 4
+    # Tagen dreht es unter die Grundrate — ein KURZFRISTIGES Signal.
+    #   Der Anlass ist Furkans Lesart (Video 13.09.2026, 15:44): neue aggressive Shorts
+    # sind die Liquiditaet, die den Kurs spaeter nach oben zieht. Die Engine kennt den
+    # Zustand bisher nur als Warnung.
+    #   WICHTIGE WARNUNG AUS DERSELBEN MESSUNG: CAPITULATION_RESET hat den SCHLECHTESTEN
+    # Nachlauf im ganzen Feld (-1,61 gegen Grundrate) — und genau darauf kauft die Engine
+    # live und profitabel. Die Engine kauft eben nicht zum Musterzeitpunkt, sondern an der
+    # Fib-Zone mit Stop. Ein Nachlauf-Median ist ein Hinweis, wo zu suchen ist, und NIE
+    # ein Beleg, dass ein Schalter verdient. Deshalb stehen beide hier auf Default aus.
+    # muster5_entry: Muster 5 zaehlt in _confirm_long() als starke Bestaetigung, genau wie
+    #   Muster 4. Kein eigener Trigger — der Einstieg bleibt an die Fib-Zone gebunden.
+    # muster5_halten: "off" | "leiter" | "alle". Bei Muster 5 werden Teilverkaeufe
+    #   zurueckgehalten. "leiter" nur die Zwischenverkaeufe (Leiter, letztes Hoch,
+    #   Liquidations- und Widerstandszone), "alle" auch die Ziel-Teilverkaeufe an 1.0/1.272.
+    #   NUR bei Long: Bei einem Short ist Liquiditaet oberhalb ein Grund, EHER zu decken.
+    #   NIE der Stop und nie ein vollstaendiger Ausstieg — die laufen an _darf_teilverkaufen()
+    #   ohnehin vorbei (siehe _TEILVERKAUF_TYPES).
+    #   Ob der Schalter ueberhaupt greift, zeigt die Spalte "Signale" im Gitter: gleiche
+    #   Signalzahl wie die Basis heisst, er hat nie gegriffen (Lehre aus neustart_mit_rest,
+    #   das in acht Monaten dreimal ansprang und deshalb nicht messbar war).
     # confirm_t1: verlangt auch fuer den 0.5-Level-Einstieg eine Order-Flow-Bestaetigung.
     #   Dieser Zweig hatte bisher als einziger KEINE — er feuerte allein auf Preisberuehrung.
     # cooldown_h: Sperrfrist in Stunden nach einem Stop (0 = aus). Gegen die Saegeblatt-
@@ -1329,9 +1381,19 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         """E18.2: Nach einem Teilgewinn in derselben Kerze wird nicht nachgelegt."""
         return not (no_flip and any(x.type in _TEILVERKAUF_TYPES for x in signals))
 
-    def _darf_teilverkaufen() -> bool:
-        """E18.2: Nach einem Nachkauf in derselben Kerze wird nicht teilverkauft."""
-        return not (no_flip and any(x.type in _AUFBAU_TYPES for x in signals))
+    def _darf_teilverkaufen(ziel: bool = False) -> bool:
+        """E18.2: Nach einem Nachkauf in derselben Kerze wird nicht teilverkauft.
+        E38.3: Bei Muster 5 werden Teilverkaeufe zurueckgehalten (Default aus).
+
+        Der Waechter sitzt VOR dem Erzeugen des Signals. Das ist der Grund, warum E38.3
+        hier ansetzt und nicht hinterher aufraeumt: Wer ein fertiges Teilverkauf-Signal
+        wieder entfernt, muss tp_rungs, high_exits, liq_exits, widerstand_exits UND
+        pos.state zurueckdrehen — jeder vergessene Zaehler waere ein stiller Fehler
+        (eine Leiterstufe gilt als verbraucht, ohne dass verkauft wurde).
+        """
+        if no_flip and any(x.type in _AUFBAU_TYPES for x in signals):
+            return False
+        return not muster5_haelt_zurueck(muster5_halten, pattern, pos.direction, ziel)
 
     pattern = classify_pattern(candles, flow) if flow else Pattern.NEUTRAL
     pivots = find_pivots(candles, n=pivot_n)
@@ -1393,7 +1455,11 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         return lo <= price <= hi
 
     def _confirm_long() -> bool:
-        strong = pattern == Pattern.CAPITULATION_RESET
+        # E38.2: Muster 5 wird zur starken Bestaetigung wie Muster 4 — nicht zu einem
+        # eigenen Trigger. Der Einstieg bleibt an die Fib-Zone gebunden, sonst kauft die
+        # Engine im Nichts.
+        strong = pattern == Pattern.CAPITULATION_RESET or (
+            muster5_entry and pattern == Pattern.UNGESUNDER_ABVERKAUF)
         cvd_up = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
         fund_ok = bool(flow) and flow[-1].funding <= 0
         return strong or (cvd_up and fund_ok) if strict_confirm else strong or fund_ok or cvd_up
@@ -1781,16 +1847,17 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     signals.append(Signal(cur.ts, lt, rung_ext, LADDER_TRANCHE,
                                           f"Leiter-Teilgewinn an Extension {LADDER_FACTORS[pos.tp_rungs]:.1f} ({rung_ext:.0f})"))
                     pos.tp_rungs += 1
-            # Teilgewinne an Extensions
+            # Teilgewinne an Extensions. ziel=True: das sind die geplanten Ziele, nicht
+            # die Zwischenverkaeufe — muster5_halten="leiter" laesst sie durch.
             if pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
-                    and _darf_teilverkaufen():
+                    and _darf_teilverkaufen(ziel=True):
                 hit1 = (cur.high >= ext1) if long_side else (cur.low <= ext1)
                 if hit1:
                     tp = SignalType.TEILVERKAUF_1 if long_side else SignalType.SHORT_TP_1
                     signals.append(Signal(cur.ts, tp, ext1, TRANCHEN["TP1"],
                                           f"Extension 1.0 erreicht ({ext1:.0f})"))
                     pos.state = PosState.TP1
-            if pos.state == PosState.TP1 and _darf_teilverkaufen():
+            if pos.state == PosState.TP1 and _darf_teilverkaufen(ziel=True):
                 hit2 = (cur.high >= ext2) if long_side else (cur.low <= ext2)
                 if hit2:
                     tp = SignalType.TEILVERKAUF_2 if long_side else SignalType.SHORT_TP_2

@@ -76,7 +76,8 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "tp_ladder", "trend_filter", "trend_ema", "strict_confirm", "confluence",
              "conditional_stop", "buy_ladder", "release_stale_rest", "trail_stop",
              "liq_exit", "high_exit", "liq_entry",
-             "block_unhealthy", "confirm_t1", "cooldown_h", "min_stop_pct",
+             "block_unhealthy", "muster5_entry", "muster5_halten",
+             "confirm_t1", "cooldown_h", "min_stop_pct",
              "no_flip", "freeze_targets",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
              "rest_halten", "neustart_mit_rest", "zonen_1d",
@@ -92,7 +93,8 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              trend_filter=False, trend_ema=200, strict_confirm=False, confluence=False,
              conditional_stop=False, buy_ladder=False, release_stale_rest=False,
              trail_stop=False, liq_exit="off", high_exit="off", liq_entry="off",
-             block_unhealthy=False, confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0,
+             block_unhealthy=False, muster5_entry=False, muster5_halten="off",
+             confirm_t1=False, cooldown_h=0.0, min_stop_pct=0.0,
              no_flip=False, freeze_targets=False,
              min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
              bein_richtung="auto", widerstand_exit="off",
@@ -450,6 +452,43 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, rest_halten=True, neustart_mit_rest=True),
+    # ---------------------------------------------------------------- E38 (20.09.2026)
+    # Muster 5 als Treibstoff statt als Warnung. Jede Zeile unterscheidet sich von der
+    # panel=True-Zeile in GENAU EINEM Punkt — die Lehre aus confirm_t1/cooldown_h: ein
+    # Messergebnis gilt nur gegen die Basis, gegen die gemessen wurde.
+    #   Greift ein Schalter ueberhaupt? Das sagt die Spalte "Signale": dieselbe Zahl wie
+    # die Live-Zeile heisst, er ist nie angesprungen und damit nicht messbar.
+    V("LIVE-heute +Muster 5 als Kauf-Bestaetigung",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      muster5_entry=True),
+    V("LIVE-heute +Muster 5 haelt Zwischenverkaeufe",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      muster5_halten="leiter"),
+    V("LIVE-heute +Muster 5 haelt ALLE Teilverkaeufe",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      muster5_halten="alle"),
+    # Gegenprobe zur Treibstoff-Lesart: die BREMSE, also genau die umgekehrte Deutung.
+    # Sie wurde in E13 schon einmal verworfen — aber gegen eine andere Basis. Gewinnt
+    # sie hier, war die Treibstoff-Idee von Anfang an falsch herum; verlieren beide,
+    # sagt Muster 5 ueber den Ertrag schlicht nichts.
+    V("LIVE-heute +Muster 5 sperrt Kaeufe (Bremse, Gegenprobe)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      block_unhealthy=True),
+    # Beide Treibstoff-Hebel zusammen — nur als Zusatz, nicht als Beleg: eine Zeile mit
+    # zwei Unterschieden sagt nicht, welcher der beiden gewirkt hat.
+    V("LIVE-heute +Muster 5 Kauf UND Halten (zwei Unterschiede)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      muster5_entry=True, muster5_halten="leiter"),
     V("Long+Short (Ref)"),
 ]
 
@@ -1057,8 +1096,13 @@ def muster_nachlauf(candles, flow, start_ms: int,
     vorher = None
 
     def _eintrag(name: str) -> dict:
+        # "ep" haelt dieselben Horizonte, aber nur mit der ERSTEN Kerze jeder Episode.
+        # Das ist die unabhaengige Stichprobe: benachbarte Kerzen einer Episode teilen
+        # fast den ganzen Nachlauf (bei Horizont 6 sind 5 von 6 Kerzen dieselben), ihre
+        # Trefferquote ist also kein zweiter Beleg, sondern derselbe nochmal.
         e = out.setdefault(name, {"kerzen": 0, "episoden": 0,
-                                  **{h: [] for h in horizonte}})
+                                  **{h: [] for h in horizonte},
+                                  "ep": {h: [] for h in horizonte}})
         return e
 
     for i, c in enumerate(candles):
@@ -1070,7 +1114,8 @@ def muster_nachlauf(candles, flow, start_ms: int,
         e, alle = _eintrag(name), _eintrag("ALLE")
         e["kerzen"] += 1
         alle["kerzen"] += 1
-        if name != vorher:              # neue Episode nur beim Wechsel
+        neu_begonnen = name != vorher   # neue Episode nur beim Wechsel
+        if neu_begonnen:
             e["episoden"] += 1
         alle["episoden"] += 1           # bei ALLE ist jede Kerze eine eigene Beobachtung
         vorher = name
@@ -1078,15 +1123,20 @@ def muster_nachlauf(candles, flow, start_ms: int,
             aend = (candles[i + h].close - c.close) / c.close
             e[h].append(aend)
             alle[h].append(aend)
+            if neu_begonnen:
+                e["ep"][h].append(aend)
+
+    def _kennzahlen(werte: list) -> dict:
+        return {"median": _med(werte),
+                "mittel": (sum(werte) / len(werte)) if werte else 0.0,
+                "anteil_hoch": (sum(1 for v in werte if v > 0) / len(werte))
+                               if werte else 0.0,
+                "n": len(werte)}
 
     for name, e in out.items():
         for h in horizonte:
-            werte = e[h]
-            e[h] = {"median": _med(werte),
-                    "mittel": (sum(werte) / len(werte)) if werte else 0.0,
-                    "anteil_hoch": (sum(1 for v in werte if v > 0) / len(werte))
-                                   if werte else 0.0,
-                    "n": len(werte)}
+            e["ep"][h] = _kennzahlen(e["ep"][h])
+            e[h] = _kennzahlen(e[h])
     return out
 
 
@@ -1103,6 +1153,20 @@ def muster_abschnitt(stat: dict, horizonte: tuple = MUSTER_HORIZONTE) -> list:
               "ohne sie misst man nur, ob der Kurs im Fenster ohnehin stieg.", "",
               f"| Muster | Kerzen | Episoden | {kopf} |",
               "|---|---:|---:|" + "---|" * len(horizonte)]
+
+    def _zelle_ep(e: dict, h: int, ist_basis: bool) -> str:
+        d = e[h]
+        roh = f"{d['median'] * 100:+.2f} %"
+        quote = f"{d['anteil_hoch']:.0%} hoeher"
+        if ist_basis:
+            return f"{roh}, {quote}"
+        # BEWUSST dieselbe Grundrate wie in der Haupttabelle: Der Fenster-Durchschnitt
+        # ist der Fenster-Durchschnitt — er wird nicht dadurch ein anderer, dass man die
+        # Musterzeilen auf Episodenbeginne einschraenkt. Zwei verschiedene Bezugsgroessen
+        # haetten die beiden Tabellen unvergleichbar gemacht, und genau der Vergleich ist
+        # der Zweck der Gegenprobe.
+        ab = (d["median"] - basis[h]["median"]) * 100
+        return f"{roh} ({ab:+.2f} gg. Grundrate), {quote}"
 
     def _zelle(e: dict, h: int, ist_basis: bool) -> str:
         d = e[h]
@@ -1142,11 +1206,35 @@ def muster_abschnitt(stat: dict, horizonte: tuple = MUSTER_HORIZONTE) -> list:
             f"um den Abstand zur Grundrate ernst zu nehmen. Entscheidend ist das "
             f"VORZEICHEN dieses Abstands: negativ stuetzt die Bremse (der Kurs faellt "
             f"nach Muster 5 staerker als sonst), positiv stuetzt die Treibstoff-Lesart.")
+    # --- Gegenprobe: dieselbe Rechnung, aber nur die ERSTE Kerze jeder Episode -------
+    zeilen += ["", "### Gegenprobe je Episode (nur die erste Kerze)", "",
+               "Benachbarte Kerzen einer Episode teilen fast den ganzen Nachlauf — bei "
+               "Horizont 6 sind 5 von 6 Kerzen dieselben. Ihre Trefferquote ist deshalb "
+               "kein zweiter Beleg, sondern derselbe nochmal. Diese Tabelle zaehlt jede "
+               "Episode genau einmal. **Bleibt der Abstand zur Grundrate hier stehen, "
+               "war er echt; bricht er ein, hat die Ueberlappung ihn aufgeblasen.** "
+               "Verglichen wird gegen dieselbe Grundrate wie oben — der Fenster-"
+               "Durchschnitt aendert sich nicht dadurch, dass man die Musterzeilen "
+               "ausduennt.", "",
+               f"| Muster | Episoden | {kopf} |",
+               "|---|---:|" + "---|" * len(horizonte)]
+    for name in sorted(k for k in stat if k != "ALLE"):
+        e = stat[name]["ep"]
+        zellen = " | ".join(_zelle_ep(e, h, False) for h in horizonte)
+        zeilen.append(f"| {name} | {e[horizonte[0]]['n']} | {zellen} |")
+
     zeilen += ["",
                "**Was diese Messung NICHT zeigt.** Sie misst den Kurs nach dem Muster, "
                "nicht den Ertrag einer Regel. Ein Muster kann im Schnitt steigen und als "
                "Schalter trotzdem Rendite kosten — das ist in diesem Projekt schon "
-               "zwoelfmal passiert. Erst E38.5 beantwortet die Ertragsfrage."]
+               "zwoelfmal passiert. Erst E38.5 beantwortet die Ertragsfrage.",
+               "",
+               "**Der Gegenbeweis steht in dieser Tabelle selbst:** `CAPITULATION_RESET` "
+               "ist das Muster, auf das die Engine live kauft (`flush_entry: core`, seit "
+               "E9.1, der Hebel hinter der Rendite) — und sein Nachlauf gehoert zu den "
+               "schlechtesten im Feld. Die Engine kauft eben nicht zum Musterzeitpunkt, "
+               "sondern an der Fib-Zone mit Stop. Wer nach dieser Tabelle handelte, "
+               "muesste `flush_entry` abschalten, und das waere nachweislich falsch."]
     return zeilen
 
 

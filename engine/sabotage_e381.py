@@ -50,9 +50,8 @@ SABOTAGEN = [
 
     # --- Episoden gegen Kerzen ---------------------------------------------------------
     ("Episoden zaehlen jede Kerze einzeln (Fallzahl erfunden)", "backtest.py",
-     '        if name != vorher:              # neue Episode nur beim Wechsel\n'
-     '            e["episoden"] += 1',
-     '        if True:\n            e["episoden"] += 1'),
+     '        neu_begonnen = name != vorher   # neue Episode nur beim Wechsel',
+     '        neu_begonnen = True'),
 
     ("Der Muster-Merker wird nie fortgeschrieben", "backtest.py",
      '        vorher = name\n        for h in horizonte:',
@@ -60,8 +59,8 @@ SABOTAGEN = [
 
     # --- Median gegen Mittelwert -------------------------------------------------------
     ("Kernzahl ist der Mittelwert (ein Flush-Tag kippt die Zeile)", "backtest.py",
-     '            e[h] = {"median": _med(werte),',
-     '            e[h] = {"median": (sum(werte) / len(werte)) if werte else 0.0,'),
+     '        return {"median": _med(werte),',
+     '        return {"median": (sum(werte) / len(werte)) if werte else 0.0,'),
 
     ("Median nimmt bei gerader Anzahl den falschen Wert", "backtest.py",
      '    return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2.0',

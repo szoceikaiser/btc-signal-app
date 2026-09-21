@@ -2356,3 +2356,242 @@ def test_orderflow_detail_ist_reine_anzeige():
     from strategy_core import evaluate
     quelle = inspect.getsource(evaluate)
     assert "orderflow_detail" not in quelle
+
+
+# ------------------------------------------ E38: Muster 5 als Treibstoff (20.09.2026)
+
+from strategy_core import muster5_haelt_zurueck as _m5halt
+
+
+def test_muster5_halten_ist_im_default_aus_immer_wirkungslos():
+    """Ein Schalter, der auch ausgeschaltet wirkt, macht jede Vergleichszeile wertlos."""
+    for pat in Pattern:
+        for richtung in ("LONG", "SHORT", "NONE"):
+            for ziel in (True, False):
+                assert _m5halt("off", pat, richtung, ziel) is False
+
+
+def test_muster5_halten_greift_nur_bei_muster_5():
+    for pat in Pattern:
+        erwartet = pat == Pattern.UNGESUNDER_ABVERKAUF
+        assert _m5halt("leiter", pat, "LONG", False) is erwartet
+
+
+def test_muster5_halten_greift_nicht_beim_short():
+    """Beim Short ist Liquiditaet oberhalb ein Grund, EHER zu decken — die
+    Treibstoff-Lesart wirkt fuer den Short in die Gegenrichtung."""
+    assert _m5halt("leiter", Pattern.UNGESUNDER_ABVERKAUF, "SHORT", False) is False
+    assert _m5halt("alle", Pattern.UNGESUNDER_ABVERKAUF, "SHORT", True) is False
+    assert _m5halt("leiter", Pattern.UNGESUNDER_ABVERKAUF, "LONG", False) is True
+
+
+def test_muster5_halten_leiter_laesst_die_geplanten_ziele_durch():
+    """'leiter' haelt die Zwischenverkaeufe zurueck, nicht den Plan. Furkan verkauft
+    nicht NIE — er verkauft gerade jetzt nicht."""
+    m5 = Pattern.UNGESUNDER_ABVERKAUF
+    assert _m5halt("leiter", m5, "LONG", ziel=False) is True     # Leiter: zurueckhalten
+    assert _m5halt("leiter", m5, "LONG", ziel=True) is False     # 1.0/1.618: durchlassen
+
+
+def test_muster5_halten_alle_haelt_auch_die_ziele():
+    m5 = Pattern.UNGESUNDER_ABVERKAUF
+    assert _m5halt("alle", m5, "LONG", ziel=False) is True
+    assert _m5halt("alle", m5, "LONG", ziel=True) is True
+
+
+def test_muster5_halten_unterscheidet_leiter_und_alle_wirklich():
+    """Gegen den stillsten Fehler: zwei Gittervarianten, die dasselbe tun. Dann
+    sieht man zwei Zeilen und haelt sie fuer eine Bestaetigung."""
+    m5 = Pattern.UNGESUNDER_ABVERKAUF
+    assert _m5halt("leiter", m5, "LONG", True) != _m5halt("alle", m5, "LONG", True)
+
+
+def _m5_lage():
+    """Ein Szenario, in dem Muster 5 gilt UND die Engine wirklich handelt.
+
+    Der Trick ist der hohe DOCHT auf zwei Kerzen: Das 12-Kerzen-Fenster von
+    classify_pattern sieht weiter einen Rueckgang (Muster 5 bleibt stehen), aber
+    cur.high erreicht die Leiter-Extensions. Ohne ihn erzeugt ein Muster-5-Szenario
+    gar keine Teilverkaeufe — fallender Preis und faellige Gewinnmitnahme schliessen
+    sich sonst aus.
+
+    Erzeugt (Stand 20.09.2026): KAUF_1, zweimal TEILVERKAUF_LADDER und einmal
+    TEILVERKAUF_1 — also Einstieg, Zwischenverkauf UND geplantes Ziel, alle bei
+    Muster 5. Genau die drei Faelle, die E38.2 und E38.3 auseinanderhalten muessen.
+    """
+    ms = 4 * 3600 * 1000
+    preise = ([100.0] * 8 + [100.0 + 50.0 * (i + 1) / 22 for i in range(22)]
+              + [150.0 - 38.0 * (i + 1) / 26 for i in range(26)] + [112.0] * 6)
+    cs, fl = [], []
+    for i, pr in enumerate(preise):
+        hi = pr * 1.5 if i in (50, 52) else pr * 1.004
+        cs.append(Candle(1_600_000_000_000 + i * ms, pr, hi, pr * 0.996, pr))
+        cvd = 1000.0 + i * 30.0 if i < 30 else 1000.0 + 900.0 - (i - 30) * 90.0
+        fl.append(FlowPoint(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
+    return cs, fl
+
+
+def _signale(cs, fl, **kw):
+    pos = Position()
+    raus = []
+    for i in range(len(cs)):
+        raus += [(cs[i].ts, s) for s in evaluate(cs[:i + 1], fl[:i + 1], pos,
+                                                 bias_short=False, high_exit="on", **kw)]
+    return raus
+
+
+def test_m5_szenario_handelt_ueberhaupt_und_zwar_bei_muster_5():
+    """DIE Vorprobe. Ohne sie vergleichen die Tests darunter zwei leere Listen und
+    sind gruen, egal was der Code tut — derselbe Fehlertyp wie in E34, und mir ist er
+    beim Bauen von E38 genau einmal passiert: Die erste Fassung dieses Szenarios
+    erzeugte NULL Signale, und drei Tests bestaetigten froehlich gar nichts.
+    """
+    cs, fl = _m5_lage()
+    sigs = _signale(cs, fl)
+    assert len(sigs) >= 3, f"Szenario handelt kaum: {[s.type.name for _, s in sigs]}"
+    typen = {s.type for _, s in sigs}
+    assert SignalType.TEILVERKAUF_LADDER in typen, "kein Zwischenverkauf im Szenario"
+    assert SignalType.TEILVERKAUF_1 in typen, "kein geplantes Ziel im Szenario"
+    # ... und all das muss bei Muster 5 passieren, sonst prueft E38 nichts.
+    ts_m5 = {cs[i].ts for i in range(len(cs))
+             if classify_pattern(cs[:i + 1], fl[:i + 1]) == Pattern.UNGESUNDER_ABVERKAUF}
+    assert all(t in ts_m5 for t, _ in sigs), "Signale fallen nicht in die Muster-5-Phase"
+
+
+def test_muster5_schalter_im_default_aendern_kein_einziges_signal():
+    """Die Grundbedingung jeder Gitterzeile: ausgeschaltet = heutiges Verhalten."""
+    cs, fl = _m5_lage()
+    fass = lambda sg: [(t, s.type, round(s.price, 6), s.tranche_pct) for t, s in sg]
+    basis = fass(_signale(cs, fl))
+    assert basis, "leere Basis — der Vergleich wuerde nichts pruefen"
+    for kw in ({"muster5_entry": False}, {"muster5_halten": "off"},
+               {"muster5_entry": False, "muster5_halten": "off"}):
+        assert fass(_signale(cs, fl, **kw)) == basis, kw
+
+
+def test_muster5_halten_leiter_entfernt_den_zwischenverkauf_nicht_das_ziel():
+    cs, fl = _m5_lage()
+    ohne = [s.type for _, s in _signale(cs, fl)]
+    mit = [s.type for _, s in _signale(cs, fl, muster5_halten="leiter")]
+    assert SignalType.TEILVERKAUF_LADDER in ohne
+    assert SignalType.TEILVERKAUF_LADDER not in mit, "Zwischenverkauf nicht zurueckgehalten"
+    assert SignalType.TEILVERKAUF_1 in mit, "das geplante Ziel darf 'leiter' nicht sperren"
+
+
+def test_muster5_halten_alle_entfernt_auch_das_ziel():
+    cs, fl = _m5_lage()
+    mit = [s.type for _, s in _signale(cs, fl, muster5_halten="alle")]
+    assert SignalType.TEILVERKAUF_LADDER not in mit
+    assert SignalType.TEILVERKAUF_1 not in mit
+
+
+def test_muster5_halten_verbraucht_keine_leiterstufe_beim_zurueckhalten():
+    """Der stillste denkbare Fehler: Das Signal wird unterdrueckt, aber tp_rungs zaehlt
+    hoch — die Leiterstufe gilt als verkauft, ohne dass verkauft wurde. Genau deshalb
+    sitzt E38.3 VOR dem Erzeugen des Signals und nicht im Aufraeumen danach."""
+    cs, fl = _m5_lage()
+    for modus, erwartet_rungs in (("off", True), ("alle", False)):
+        pos = Position()
+        for i in range(len(cs)):
+            evaluate(cs[:i + 1], fl[:i + 1], pos, bias_short=False, high_exit="on",
+                     muster5_halten=modus)
+        assert (pos.tp_rungs > 0) is erwartet_rungs, (modus, pos.tp_rungs)
+
+
+def _m5_absturz():
+    """Wie _m5_lage, aber OHNE Docht und mit einem Einbruch am Ende.
+
+    Ohne Docht gibt es keine Teilverkaeufe — die Position steht in allen drei Modi im
+    selben Zustand, wenn der Kurs unter die Invalidierung faellt. Nur so laesst sich
+    der Stop ueberhaupt sauber vergleichen."""
+    ms = 4 * 3600 * 1000
+    preise = ([100.0] * 8 + [100.0 + 50.0 * (i + 1) / 22 for i in range(22)]
+              + [150.0 - 38.0 * (i + 1) / 26 for i in range(26)]
+              + [112.0 - 14.0 * (i + 1) for i in range(6)])     # Absturz unter alles
+    cs, fl = [], []
+    for i, pr in enumerate(preise):
+        pr = max(pr, 1.0)
+        cs.append(Candle(1_600_000_000_000 + i * ms, pr, pr * 1.004, pr * 0.996, pr))
+        cvd = 1000.0 + i * 30.0 if i < 30 else 1000.0 + 900.0 - (i - 30) * 90.0
+        fl.append(FlowPoint(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
+    return cs, fl
+
+
+def test_muster5_halten_unterdrueckt_niemals_den_stop():
+    """Der gefaehrlichste denkbare Fehler dieses Ausbaus: Die Position bleibt im
+    fallenden Markt liegen, weil ein Muster gerade 'halten' sagt.
+
+    Geprueft bei GLEICHEM Positionszustand (Szenario ohne Teilverkaeufe) — sonst
+    vergleicht man zwei verschiedene Positionen und nicht den Schalter."""
+    cs, fl = _m5_absturz()
+    def _stops(modus):
+        return [s.type for _, s in _signale(cs, fl, muster5_halten=modus)
+                if s.type in (SignalType.STOPLOSS, SignalType.VERKAUF_REST)]
+    assert _stops("off"), "Szenario loest gar keinen Stop aus — der Test pruefte nichts"
+    for modus in ("leiter", "alle"):
+        assert _stops(modus) == _stops("off"), modus
+
+
+def test_stop_zweige_fragen_den_teilverkauf_waechter_gar_nicht_erst():
+    """Strukturell abgesichert: STOPLOSS und VERKAUF_REST stehen nicht in
+    _TEILVERKAUF_TYPES und laufen an _darf_teilverkaufen() vorbei. Waere das je
+    anders, koennte muster5_halten einen vollstaendigen Ausstieg verhindern."""
+    from strategy_core import _TEILVERKAUF_TYPES
+    for t in (SignalType.STOPLOSS, SignalType.VERKAUF_REST,
+              SignalType.SHORT_STOPLOSS, SignalType.SHORT_COVER_REST):
+        assert t not in _TEILVERKAUF_TYPES, t
+
+
+def test_muster5_halten_alle_verhindert_den_stop_nachzug_BEKANNTE_FOLGE():
+    """Kein Fehler, sondern eine Eigenschaft — und der Grund, warum "alle" riskanter
+    ist als "leiter": Ohne realisierten Teilgewinn zieht trail_stop den Stop nicht
+    nach. Die Position laeuft mit dem urspruenglichen, weiter entfernten Stop weiter.
+
+    Dieser Test haelt die Folge fest, damit sie beim Auswerten der Gitterzeilen nicht
+    als ueberraschend gute Rendite missverstanden wird: "alle" traegt mehr Risiko, und
+    zwar an einer Stelle, die die Renditespalte allein nicht zeigt."""
+    cs, fl = _m5_lage()
+    typen = lambda m: [s.type for _, s in _signale(cs, fl, muster5_halten=m,
+                                                   trail_stop=True)]
+    assert SignalType.TEILVERKAUF_1 in typen("off")
+    assert SignalType.TEILVERKAUF_1 not in typen("alle")
+    assert SignalType.STOPLOSS in typen("off")
+    assert SignalType.STOPLOSS not in typen("alle")   # weil der Stop nicht nachgezogen wurde
+
+
+def test_muster5_entry_macht_muster_5_zur_starken_bestaetigung():
+    """E38.2 baut die Vorlage von Muster 4 nach: _confirm_long() erhaelt eine zweite
+    starke Bestaetigung. Kein eigener Trigger — der Einstieg bleibt an die Fib-Zone
+    gebunden, sonst kaufte die Engine im Nichts."""
+    import inspect
+    quelle = inspect.getsource(evaluate)
+    assert "muster5_entry and pattern == Pattern.UNGESUNDER_ABVERKAUF" in quelle
+    assert "strong = pattern == Pattern.CAPITULATION_RESET or (" in quelle
+
+
+def test_muster5_entry_erzeugt_nie_mehr_einstiege_als_ohne_fib_zone_moeglich():
+    """Gegenprobe zur Sorge 'die Engine kauft im Nichts': muster5_entry darf nur
+    Einstiege BESTAETIGEN, die die Zonenlogik ohnehin anbietet. Die Zahl der
+    Einstiege darf also hoechstens steigen, und jeder muss einen Stop-Bezug haben."""
+    cs, fl = _m5_lage()
+    _EINSTIEGE = {SignalType.KAUF_1, SignalType.KAUF_2, SignalType.NACHKAUF}
+    mit = [s for _, s in _signale(cs, fl, muster5_entry=True) if s.type in _EINSTIEGE]
+    for s in mit:
+        assert s.stop_ref is not None, f"Einstieg ohne Stop-Bezug: {s.type}"
+
+
+def test_muster5_halten_behandelt_beide_ziele_gleich():
+    """Das 1.618-Ziel darf nicht anders eingestuft sein als das 1.0-Ziel.
+
+    Warum als Quelltext-Pruefung: Ein Szenario, das bis TP2 laeuft, braucht einen
+    zweiten Aufwaertsschub NACH dem ersten Teilgewinn, waehrend das 12-Kerzen-Fenster
+    weiter Muster 5 zeigt — konstruierbar, aber so fragil, dass der Test bei jeder
+    Schwellenaenderung still durchfallen wuerde, ohne dass jemand es merkt. Die
+    Einstufung selbst ist eine strukturelle Aussage, also wird sie strukturell geprueft.
+    """
+    import inspect
+    quelle = inspect.getsource(evaluate)
+    assert quelle.count("_darf_teilverkaufen(ziel=True)") == 2, (
+        "Genau zwei Stellen sind geplante Ziele (Extension 1.0 und 1.618) — "
+        "alles andere sind Zwischenverkaeufe")
+    assert "if pos.state == PosState.TP1 and _darf_teilverkaufen(ziel=True):" in quelle

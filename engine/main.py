@@ -242,7 +242,10 @@ EVAL_DEFAULTS = {
     "conditional_stop": False, "buy_ladder": True,
     "release_stale_rest": False, "trail_stop": False,
     "liq_exit": "off", "high_exit": "off", "liq_entry": "off",
-    "block_unhealthy": False, "confirm_t1": False,
+    "block_unhealthy": False,
+    # E38 (20.09.2026), beide Default aus — siehe strategy_core.evaluate.
+    "muster5_entry": False, "muster5_halten": "off",
+    "confirm_t1": False,
     "cooldown_h": 0.0, "min_stop_pct": 0.0,
     "no_flip": False, "freeze_targets": False,
     "min_bein_pct": 0.0, "bein_wahl": "juengstes", "be_im_plus": False,
