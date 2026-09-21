@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-21T06:24:58Z",
+ "generated_at": "2026-09-21T07:16:03Z",
  "zeitraum": "13.01.2026-21.09.2026",
  "variante": "LIVE-heute +Zonen nachziehen",
  "params": {
@@ -48,7 +48,7 @@
   "start": 10000.0,
   "ende": 12347.97,
   "rendite_pct": 23.48,
-  "buyhold_pct": -14.36,
+  "buyhold_pct": -14.45,
   "trades": 95,
   "gewinn_trades": 66,
   "long_profit": 2347.97,
@@ -122,13 +122,13 @@
     "ende": 12347.97,
     "gewinn": -99.93,
     "rendite_pct": -0.8,
-    "btc_pct": 3.98
+    "btc_pct": 3.88
    }
   ],
   "beteiligung": {
    "auf_monate": 5,
    "ab_monate": 4,
-   "auf_btc": 50.0,
+   "auf_btc": 49.9,
    "auf_engine": 20.5,
    "ab_btc": -56.3,
    "ab_engine": 1.4,
@@ -142,7 +142,7 @@
   "start": 10000.0,
   "ende": 11620.95,
   "rendite_pct": 16.21,
-  "buyhold_pct": -14.36,
+  "buyhold_pct": -14.45,
   "trades": 86,
   "gewinn_trades": 59,
   "long_profit": 1620.95,
@@ -216,13 +216,13 @@
     "ende": 11620.95,
     "gewinn": -94.04,
     "rendite_pct": -0.8,
-    "btc_pct": 3.98
+    "btc_pct": 3.88
    }
   ],
   "beteiligung": {
    "auf_monate": 5,
    "ab_monate": 4,
-   "auf_btc": 50.0,
+   "auf_btc": 49.9,
    "auf_engine": 15.6,
    "ab_btc": -56.3,
    "ab_engine": -0.1,
