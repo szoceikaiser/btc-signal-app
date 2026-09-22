@@ -1,7 +1,7 @@
 {
  "direction": "NONE",
  "pos_state": "FLAT",
- "last_signal_ts": 1790078400000,
+ "last_signal_ts": 1790092800000,
  "retrace_extreme": null,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -65,15 +65,15 @@
   "trend_ema": 200,
   "ampel_filter": "off"
  },
- "updated_at": "2026-09-22T19:48:56Z",
- "last_close": 86413.12,
+ "updated_at": "2026-09-22T20:02:24Z",
+ "last_close": 86192.44,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 86.413 $ ueber EMA200 (70.551 $)",
+   "trend_text": "Uebergeordnet: Kurs 86.192 $ ueber EMA200 (70.548 $)",
    "struktur": "neu",
-   "struktur_text": "Aktuelles Bein 74.968 $ -> 81.951 $",
+   "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
    "spot": "schwach",
    "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
@@ -89,15 +89,15 @@
    "gezaehlt": 2,
    "text": "GEMISCHT \u2014 1 von 2 spricht dafuer"
   },
-  "impuls_start": 74967.97,
-  "impuls_ende": 81951.0,
-  "impuls_start_ts": 1789488000000,
-  "impuls_ende_ts": 1789819200000,
-  "level_05": 78459.485,
-  "gp_upper": 77635.48746,
-  "gp_lower": 77412.0305,
-  "level_0786": 76462.33842,
-  "invalidation": 74967.97,
-  "abstand_pct": 3.44
+  "impuls_start": 80126.04,
+  "impuls_ende": 87395.67,
+  "impuls_start_ts": 1789862400000,
+  "impuls_ende_ts": 1790020800000,
+  "level_05": 83760.855,
+  "gp_upper": 82903.03865999999,
+  "gp_lower": 82670.4105,
+  "level_0786": 81681.74081999999,
+  "invalidation": 80126.04,
+  "abstand_pct": 3.35
  }
 }
