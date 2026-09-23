@@ -63,9 +63,10 @@
   "zonen_nachziehen": true,
   "trend_filter": false,
   "trend_ema": 200,
-  "ampel_filter": "off"
+  "ampel_filter": "off",
+  "stop_rueckeroberung": 1
  },
- "updated_at": "2026-09-23T16:02:24Z",
+ "updated_at": "2026-09-23T19:33:20Z",
  "last_close": 83996.01,
  "zonen_vorschau": {
   "richtung": "LONG",
