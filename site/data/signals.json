@@ -364,6 +364,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "STOPLOSS"
+  },
+  {
+   "ts": 1790179200000,
+   "type": "KAUF_1",
+   "price": 83760.855,
+   "tranche_pct": 25,
+   "reason": "0.5-Retracement des Impulses 80126->87396",
+   "stop_ref": 80126.04,
+   "tag": "",
+   "label": "KAUF 1 (Teilposition am 0.5-Level)"
   }
  ]
 }
