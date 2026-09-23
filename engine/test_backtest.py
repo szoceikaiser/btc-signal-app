@@ -1437,34 +1437,51 @@ def test_sth_vorfrage_nutzt_die_live_einstellung():
     assert q.index("sth_je_kerze(candles, _sth), _psigs, eff_start)") > i_panel
 
 
-# ------------------------------------------- E41: Gitterzeilen und Urteil (21.09.2026)
+# ------------------------------------------- E41: live seit 21.09.2026 (Kaisers Regel)
 
-_E41 = {
-    "LIVE-heute +Stop-Puffer 0,5 %": ("stop_puffer_pct", 0.005),
-    "LIVE-heute +Stop erst ohne Rueckeroberung (1 Kerze)": ("stop_rueckeroberung", 1),
-    "LIVE-heute +Stop erst ohne Rueckeroberung (3 Kerzen)": ("stop_rueckeroberung", 3),
-    "LIVE-heute +Stop schon beim Docht (Gegenprobe)": ("stop_auf_docht", True),
-}
+def test_e41_rueckeroberung_ist_live_und_das_panel_ist_mitgewandert():
+    """Kaiser hat am 21.09.2026 B1 live geschaltet. Die Panel-Zeile muss genau diese
+    Einstellung tragen - sonst zeigt die Webseite die Rendite des alten Stops."""
+    panel = [v for v in backtest.GRID if v.get("panel")]
+    assert len(panel) == 1
+    assert panel[0]["stop_rueckeroberung"] == 1
+    assert panel[0]["stop_puffer_pct"] == 0.0 and panel[0]["stop_auf_docht"] is False
 
 
-def test_e41_zeilen_unterscheiden_sich_in_genau_einem_punkt_und_mit_dem_vorab_wert():
+def test_e41_alter_stop_und_b3_unterscheiden_sich_in_genau_einem_punkt():
+    """Die Ausschalt-Probe ist nur deutbar, wenn der alte Stop sich von live in GENAU
+    dem Schalter unterscheidet, der umgelegt wurde."""
     panel = [v for v in backtest.GRID if v.get("panel")][0]
     basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
-    for label, (schluessel, wert) in _E41.items():
+    for label, wert in ((backtest.E41_ALTER_STOP, 0), (backtest.E41_B3, 3)):
         z = _zeile(label)
         hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
         abw = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
-        assert abw == {schluessel}, (label, abw)
-        assert z[schluessel] == wert, (label, z[schluessel])
+        assert abw == {"stop_rueckeroberung"}, (label, abw)
+        assert z["stop_rueckeroberung"] == wert, (label, z["stop_rueckeroberung"])
 
 
 def test_e41_labels_stimmen_mit_dem_bericht_ueberein():
     """Der Berichtsabschnitt sucht die Zeilen ueber ihren Namen. Weicht einer ab,
-    fehlt die Zeile im Urteil - still."""
-    assert set(backtest.E41_ZEILEN) == set(_E41)
+    fehlt der Abschnitt - still."""
     labels = [v["label"] for v in backtest.GRID]
-    for lab in _E41:
-        assert lab in labels
+    assert set(backtest.E41_ZEILEN) == {backtest.E41_ALTER_STOP, backtest.E41_B3}
+    for lab in backtest.E41_ZEILEN:
+        assert labels.count(lab) == 1, lab
+
+
+def test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter():
+    """Die Lehre aus confirm_t1/cooldown_h: Eine Zeile "LIVE-heute + X" misst X nur,
+    solange sie die Live-Einstellung wirklich enthaelt. Nach dem Umschalten muss jede
+    dieser Zeilen die Rueckeroberung tragen - ausser B3, die sie absichtlich anders
+    setzt. (Die beiden aelteren Neustart-Zeilen messen gegen eine andere, feste Basis.)"""
+    ausnahmen = {backtest.E41_B3, "LIVE-heute +Neustart mit Rest",
+                 "LIVE-heute +Rest halten +Neustart mit Rest"}
+    fehlt = [v["label"] for v in backtest.GRID
+             if v["label"].startswith("LIVE-heute") and v["label"] not in ausnahmen
+             and v["stop_rueckeroberung"] != 1]
+    assert not fehlt, fehlt
+    assert _zeile("MEINE Einstellung ohne Flush")["stop_rueckeroberung"] == 1
 
 
 def test_e41_schalter_kommen_an():
@@ -1476,69 +1493,135 @@ def _kz(h1=10.0, h2=5.0, dd=-9.0, stops=10):
     return {"h1": h1, "h2": h2, "dd": dd, "stops": stops}
 
 
-def test_e41_urteil_verlangt_alle_drei_bedingungen():
-    b = _kz()
-    assert backtest.e41_urteil(b, _kz(11, 6, -9.5, 8))["besteht"] is True
-    assert backtest.e41_urteil(b, _kz(11, 4, -9.5, 8))["besteht"] is False   # nur eine Haelfte
-    assert backtest.e41_urteil(b, _kz(11, 6, -10.5, 8))["besteht"] is False  # Rueckgang
-    assert backtest.e41_urteil(b, _kz(11, 6, -9.5, 10))["besteht"] is False  # nicht gegriffen
+def test_e41_ausschalten_bleibt_an_bei_den_zahlen_vom_umschalttag():
+    """Die Zahlen vom 21.09.2026: live (B1) H1 +21,3 / H2 +4,2 / Rueckgang -10,3 /
+    9 Stops, alter Stop +18,7 / +4,0 / -9,4 / 10. Nach der eigenen Regel darf der
+    Schalter damit nicht sofort wieder ausgehen."""
+    u = backtest.e41_ausschalten(_kz(21.3, 4.2, -10.3, 9), _kz(18.7, 4.0, -9.4, 10))
+    assert u == {"alt_klar_besser": False, "rueckgang_zu_tief": False, "greift": True,
+                 "ausschalten": False}
 
 
-def test_e41_urteil_rueckgang_genau_an_der_grenze_zaehlt_noch():
-    assert backtest.e41_urteil(_kz(), _kz(11, 6, -10.0, 8))["rueckgang_ok"] is True
+def test_e41_ausschalten_alter_stop_muss_in_beiden_haelften_klar_besser_sein():
+    live = _kz(10.0, 5.0)
+    assert backtest.e41_ausschalten(live, _kz(11.0, 6.0))["ausschalten"] is True   # genau 1,0
+    assert backtest.e41_ausschalten(live, _kz(11.0, 5.9))["ausschalten"] is False  # H2 Rauschen
+    assert backtest.e41_ausschalten(live, _kz(10.9, 9.0))["ausschalten"] is False  # H1 Rauschen
+    assert backtest.e41_ausschalten(live, _kz(9.0, 4.0))["ausschalten"] is False   # schlechter
 
 
-def _e41_results():
-    """Kuenstliche Ergebnisse: Basis, und die vier E41-Zeilen."""
+def test_e41_ausschalten_bei_zu_tiefem_rueckgang():
+    alt = _kz(dd=-9.0)
+    assert backtest.e41_ausschalten(_kz(dd=-10.0), alt)["rueckgang_zu_tief"] is False  # Grenze
+    u = backtest.e41_ausschalten(_kz(dd=-10.1), alt)
+    assert u["rueckgang_zu_tief"] is True and u["ausschalten"] is True
+    # ein FLACHERER Rueckgang live ist nie ein Ausschaltgrund
+    assert backtest.e41_ausschalten(_kz(dd=-5.0), alt)["ausschalten"] is False
+
+
+def test_e41_greift_nicht_ist_kein_ausschaltgrund():
+    u = backtest.e41_ausschalten(_kz(stops=10), _kz(stops=10))
+    assert u["greift"] is False and u["ausschalten"] is False
+
+
+def _t(tag, stunde=0):
     from datetime import datetime, timezone
-    t = lambda d: int(datetime(2026, 3, d, tzinfo=timezone.utc).timestamp() * 1000)
-    live_sigs = [{"ts": t(1), "type": "STOPLOSS", "price": 100.0},
-                 {"ts": t(10), "type": "STOPLOSS", "price": 90.0}]
-    b1_sigs = [{"ts": t(1), "type": "STOPLOSS", "price": 100.0},
-               {"ts": t(12), "type": "VERKAUF_REST", "price": 99.0}]
+    return int(datetime(2026, 3, tag, stunde, tzinfo=timezone.utc).timestamp() * 1000)
+
+
+def _e41_results(alt_h=(9.0, 4.0), alt_dd=-9.0):
+    """Kuenstliche Ergebnisse: Live (B1), der alte Stop und B3."""
+    alt_sigs = [{"ts": _t(1), "type": "STOPLOSS", "price": 100.0},
+                {"ts": _t(8), "type": "STOPLOSS", "price": 90.0},
+                {"ts": _t(8, 8), "type": "KAUF_2", "price": 92.16},
+                {"ts": _t(20), "type": "STOPLOSS", "price": 80.0}]
+    live_sigs = [{"ts": _t(1), "type": "STOPLOSS", "price": 100.0},
+                 {"ts": _t(12), "type": "VERKAUF_REST", "price": 99.0}]
     def r(label, sigs, rend, dd):
         return ({"label": label}, sigs, {}, {"rendite_pct": rend, "max_drawdown_pct": dd})
-    labels = list(backtest.E41_ZEILEN)
-    results = [r("LIVE", live_sigs, 20.0, -9.0), r(labels[0], live_sigs, 20.0, -9.0),
-               r(labels[1], b1_sigs, 22.0, -9.5), r(labels[2], b1_sigs, 22.5, -9.6),
-               r(labels[3], live_sigs + [{"ts": t(5), "type": "STOPLOSS", "price": 95.0}],
-                 18.0, -8.0)]
+    results = [r("LIVE", live_sigs, 20.0, -9.5), r(backtest.E41_ALTER_STOP, alt_sigs, 18.0, alt_dd),
+               r(backtest.E41_B3, live_sigs, 21.0, -9.6)]
     halves = [({"label": "LIVE"}, {"rendite_pct": 10.0}, {"rendite_pct": 5.0}),
-              ({"label": labels[0]}, {"rendite_pct": 10.0}, {"rendite_pct": 5.0}),
-              ({"label": labels[1]}, {"rendite_pct": 11.0}, {"rendite_pct": 6.0}),
-              ({"label": labels[2]}, {"rendite_pct": 11.0}, {"rendite_pct": 4.0}),
-              ({"label": labels[3]}, {"rendite_pct": 9.0}, {"rendite_pct": 4.0})]
+              ({"label": backtest.E41_ALTER_STOP}, {"rendite_pct": alt_h[0]},
+               {"rendite_pct": alt_h[1]}),
+              ({"label": backtest.E41_B3}, {"rendite_pct": 11.0}, {"rendite_pct": 4.0})]
     return results, halves
 
 
-def test_e41_abschnitt_meldet_nicht_robust_wenn_nur_eine_kerzenzahl_besteht():
+def _e41_text(**kw):
+    results, halves = _e41_results(**kw)
+    return "\n".join(backtest.e41_abschnitt(results, halves, "LIVE"))
+
+
+def test_e41_abschnitt_vorprobe_die_zeilen_sind_da():
+    """Vorprobe: Der Abschnitt muss ueberhaupt Zeilen erzeugen - sonst pruefen die
+    Tests darunter leere Texte (der Fehler aus E38)."""
+    text = _e41_text()
+    assert "| **Live: Rueckeroberung, 1 Kerze** | +20.0 % |" in text
+    assert "| Alter Stop (bis 21.09.) | +18.0 % |" in text
+    assert "| B3 · 3 statt 1 Kerze | +21.0 % |" in text
+
+
+def test_e41_abschnitt_bleibt_an_und_sagt_warum():
+    text = _e41_text()
+    assert "**Bleibt an.**" in text and "AUSSCHALTEN" not in text
+    assert "(H1 -1.0, H2 -1.0 Punkte gegen live)" in text
+    assert "(-0.5 Punkte gegen den alten Stop)" in text
+
+
+def test_e41_abschnitt_meldet_ausschalten_bei_klar_besserem_alten_stop():
+    text = _e41_text(alt_h=(11.0, 6.0))
+    assert "**AUSSCHALTEN.**" in text and "**Bleibt an.**" not in text
+    assert "`stop_rueckeroberung` auf 0" in text
+
+
+def test_e41_abschnitt_meldet_ausschalten_bei_zu_tiefem_rueckgang():
+    text = _e41_text(alt_dd=-8.0)                    # live -9,5 -> 1,5 Punkte tiefer
+    assert "**AUSSCHALTEN.**" in text
+
+
+def test_e41_abschnitt_zeigt_was_aus_der_position_wurde_samt_wiedereinstieg():
+    text = _e41_text()
+    assert "- 01.03.2026 100 $ — live gleich gestoppt" in text
+    # 08.03.: live hielt, endete am 12.03. per Restverkauf; der alte Stop kaufte
+    # acht Stunden spaeter 2,4 % hoeher wieder ein (das Muster vom 08.03.2026)
+    assert ("- 08.03.2026 90 $ — live stattdessen Restverkauf am 12.03.2026 bei 99 $ "
+            "(+10.0 % gegen den alten Stop); der alte Stop kaufte am 08.03.2026 bei 92 $ "
+            "wieder ein (+2.4 % gegen seinen Stop)") in text
+
+
+def test_e41_abschnitt_wiedereinstieg_nach_dem_live_ausstieg_zaehlt_nicht():
+    """Kauft der alte Stop erst wieder ein, nachdem live die Position schon beendet
+    hat, ist das keine Folge des Stops mehr - und gehoert nicht in dieselbe Zeile."""
     results, halves = _e41_results()
+    alt = results[1][1]
+    alt[2] = {"ts": _t(13), "type": "KAUF_2", "price": 95.0}  # nach dem Live-Ausstieg 12.03.
     text = "\n".join(backtest.e41_abschnitt(results, halves, "LIVE"))
-    assert "nicht robust" in text                      # B1 besteht, B3 nicht (H2)
+    assert "live stattdessen Restverkauf am 12.03.2026 bei 99 $ (+10.0 % gegen den alten Stop)\n" in text + "\n"
+    assert "der alte Stop kaufte am" not in text
 
 
-def test_e41_abschnitt_zeigt_was_aus_der_position_wurde():
+def test_e41_abschnitt_kein_ausstieg_bis_fensterende():
+    text = _e41_text()
+    assert "- 20.03.2026 80 $ — live kein Ausstieg bis Fensterende" in text
+
+
+def test_e41_abschnitt_hinweis_wenn_die_regel_nicht_greift():
     results, halves = _e41_results()
+    lv = results[0][1]
+    results[0] = (results[0][0], lv + [{"ts": _t(25), "type": "STOPLOSS", "price": 1.0},
+                                       {"ts": _t(26), "type": "STOPLOSS", "price": 1.0}],
+                  {}, results[0][3])
     text = "\n".join(backtest.e41_abschnitt(results, halves, "LIVE"))
-    assert "01.03.2026 100 $ — gleich gestoppt" in text
-    assert "stattdessen Restverkauf am 12.03.2026 bei 99 $ (+10.0 % gegen den Live-Stop)" in text
+    assert "nicht seltener" in text
+    assert "nicht seltener" not in _e41_text()
 
 
-def test_e41_abschnitt_meldet_wenn_die_gegenprobe_gewinnt():
-    results, halves = _e41_results()
-    labels = list(backtest.E41_ZEILEN)
-    results = [r for r in results if r[0]["label"] != labels[3]] + [
-        ({"label": labels[3]}, [{"ts": 1, "type": "STOPLOSS", "price": 1.0}], {},
-         {"rendite_pct": 30.0, "max_drawdown_pct": -8.0})]
-    halves = [h for h in halves if h[0]["label"] != labels[3]] + [
-        ({"label": labels[3]}, {"rendite_pct": 12.0}, {"rendite_pct": 7.0})]
-    text = "\n".join(backtest.e41_abschnitt(results, halves, "LIVE"))
-    assert "Gegenprobe besteht" in text
-
-
-def test_e41_abschnitt_leer_ohne_basis():
+def test_e41_abschnitt_leer_ohne_basis_oder_ohne_alten_stop():
     results, halves = _e41_results()
     assert backtest.e41_abschnitt(results, halves, "GIBT ES NICHT") == []
+    ohne = [r for r in results if r[0]["label"] != backtest.E41_ALTER_STOP]
+    assert backtest.e41_abschnitt(ohne, halves, "LIVE") == []
 
 
 def test_e41_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():

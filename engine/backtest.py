@@ -166,7 +166,7 @@ GRID = [
     V("MEINE Einstellung ohne Flush", bias_short=False, flush_entry="off",
       buy_ladder=True, trail_stop=True, min_stop_pct=0.02, liq_entry="boost",
       high_exit="on", min_bein_pct=0.05, no_flip=True, neustart_mit_rest=True,
-      zonen_nachziehen=True),
+      zonen_nachziehen=True, stop_rueckeroberung=1),
     # E10.3 (Furkan-Update B, 18:27): Liquidationszonen auf der EINSTIEGS-Seite. Nach dem
     # Befund aus E10.2 (Verkaufsseite kostet durchgehend Rendite) ist das die Seite, auf
     # der noch etwas zu holen sein koennte. "boost" = zusaetzlich aufstocken bei Konfluenz,
@@ -382,10 +382,11 @@ GRID = [
     # intakt ist (hoeheres Tief UND hoeheres Hoch). Genau EIN Unterschied zur Live-Zeile.
     # Anlass: Kaiser "wenn sich eine neue Struktur ergibt, dann duerften diese nicht
     # festgefahren bleiben". Siehe docs/PLAN-E30-ZONEN-NACHZIEHEN.md.
-    V("LIVE-heute +Zonen nachziehen", panel=True,           # LIVE seit 05.09.2026 (E30)
+    V("LIVE-heute +Rueckeroberung vor dem Stop (1 Kerze)", panel=True,  # LIVE seit 21.09.2026 (E41)
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True),
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      stop_rueckeroberung=1),
     # E32.3 (13.09.2026): Die 1D-Ebene mit EIGENER Swing-Weite. E23 rief sie mit
     # pivot_n=5 auf - der Weite fuer 4h-Kerzen. Auf Tageskerzen ist das so fein, dass
     # wieder nur kleine, junge Beine herauskommen; die "1D-Ebene" war damit gar nicht
@@ -404,27 +405,27 @@ GRID = [
     V("LIVE-heute +Trendfilter EMA200",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       trend_filter=True, trend_ema=200),
     V("LIVE-heute +Trendfilter EMA50",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       trend_filter=True, trend_ema=50),
     V("LIVE-heute +1D-Ebene grob (n=8)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       zonen_1d=True, pivot_n_1d=8),
     V("LIVE-heute +1D-Ebene fein (n=5, Gegenprobe zu E23)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       zonen_1d=True, pivot_n_1d=0),
     V("LIVE-heute +1D-Ebene sehr grob (n=12)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       zonen_1d=True, pivot_n_1d=12),
     # E34 (13.09.2026): Die Ampel als FILTER - Kaisers Frage, ob bei unguenstiger Lage
     # kleinere Tranchen besser gewesen waeren. Die Ampel selbst ist eine Anzeige und
@@ -438,17 +439,17 @@ GRID = [
     V("LIVE-heute +Ampel klein bei unguenstig",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       ampel_filter="klein"),
     V("LIVE-heute +Ampel UMGEKEHRT (Gegenprobe)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       ampel_filter="gross"),
     V("LIVE-heute +immer halbe Tranche (Nullhypothese)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       ampel_filter="immer"),
     V("LIVE-heute +Rest halten +Neustart mit Rest",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
@@ -463,17 +464,17 @@ GRID = [
     V("LIVE-heute +Muster 5 als Kauf-Bestaetigung",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       muster5_entry=True),
     V("LIVE-heute +Muster 5 haelt Zwischenverkaeufe",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       muster5_halten="leiter"),
     V("LIVE-heute +Muster 5 haelt ALLE Teilverkaeufe",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       muster5_halten="alle"),
     # Gegenprobe zur Treibstoff-Lesart: die BREMSE, also genau die umgekehrte Deutung.
     # Sie wurde in E13 schon einmal verworfen — aber gegen eine andere Basis. Gewinnt
@@ -482,40 +483,33 @@ GRID = [
     V("LIVE-heute +Muster 5 sperrt Kaeufe (Bremse, Gegenprobe)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       block_unhealthy=True),
     # Beide Treibstoff-Hebel zusammen — nur als Zusatz, nicht als Beleg: eine Zeile mit
     # zwei Unterschieden sagt nicht, welcher der beiden gewirkt hat.
     V("LIVE-heute +Muster 5 Kauf UND Halten (zwei Unterschiede)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       muster5_entry=True, muster5_halten="leiter"),
     # ---------------------------------------------------------------- E41 (21.09.2026)
-    # Wie empfindlich der urspruengliche Stop ausloest. Je GENAU EIN Unterschied zur
-    # panel=True-Zeile. Werte VOR der Messung festgelegt (docs/PLAN-E41-STOP.md): ein
-    # Pufferwert, zwei Kerzenzahlen fuer Kaisers Rueckeroberungs-Regel (die zweite ist
-    # die Robustheitspruefung der ersten), und die strengere Richtung als Gegenprobe.
-    V("LIVE-heute +Stop-Puffer 0,5 %",
+    # Kaisers Rueckeroberungs-Regel ist seit 21.09.2026 LIVE (Zeile mit panel=True oben).
+    # Gemessen wurde vorher gegen vier Zeilen (A Puffer, B1, B3, C Docht) - Ergebnis in
+    # docs/PLAN-E41-STOP.md. A und C sind danach aus dem Gitter genommen: gemessen, keine
+    # Entscheidung haengt mehr an ihnen. Geblieben sind zwei Zeilen, je GENAU EIN
+    # Unterschied zur Live-Zeile:
+    #   - der ALTE Stop (Rueckeroberung aus): die Ausschalt-Probe. Die Regel dazu steht
+    #     VOR der ersten Messung fest (e41_ausschalten) - sonst sucht man sich hinterher
+    #     aus, ob ein Unterschied "reicht".
+    #   - drei statt einer Kerze: die Robustheitspruefung laeuft weiter mit.
+    V("LIVE bis 21.09.2026 (Stop ohne Rueckeroberung)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
-      stop_puffer_pct=0.005),
-    V("LIVE-heute +Stop erst ohne Rueckeroberung (1 Kerze)",
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=0),
+    V("LIVE-heute +Rueckeroberung 3 statt 1 Kerze (Robustheit)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
-      stop_rueckeroberung=1),
-    V("LIVE-heute +Stop erst ohne Rueckeroberung (3 Kerzen)",
-      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
-      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
-      stop_rueckeroberung=3),
-    V("LIVE-heute +Stop schon beim Docht (Gegenprobe)",
-      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
-      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
-      stop_auf_docht=True),
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=3),
     V("Long+Short (Ref)"),
 ]
 
@@ -1414,59 +1408,14 @@ def stop_abschnitt(stat: dict, grund: dict | None = None,
 #   bitcoin-data.com (BGeometrics): Gegenpruefung - Datum steht in jedem Punkt, aber
 # 15 Abrufe/Tag je IP (GitHub teilt IPs) und 7 Tage Verzug. Deshalb GENAU EIN Abruf.
 # STH = juenger als 155 Tage - leicht andere Werte sind also normal.
-STH_BITVIEW = "https://bitview.space/api/series/sth_realized_price/day1"
-STH_BITVIEW_TAG0 = date(2009, 1, 1)
-STH_BGEOMETRICS = "https://bitcoin-data.com/v1/sth-realized-price"
+# Abruf und Einlesen der beiden Reihen stehen seit dem 21.09.2026 in main.py - der
+# Lage-Abruf braucht dieselben Funktionen, und zwei Abschriften liefen irgendwann
+# auseinander. Hier nur noch, was allein der Backtest braucht.
+from main import (STH_BGEOMETRICS, STH_BITVIEW, STH_BITVIEW_TAG0,  # noqa: E402
+                  _sth_holen, sth_bgeometrics, sth_bitview)
+
 STH_VERSAETZE = range(-3, 4)          # Tage - wird die Datumszuordnung geprueft
 STH_ABGLEICH_MAX = 0.02               # Median-Abweichung, ab der die Zuordnung zweifelhaft ist
-
-
-def _sth_holen(url: str) -> tuple:
-    """(status, text, fehler). Wirft nie - ein Abruf, der abstuerzt, sagt nichts."""
-    import urllib.error
-    req = urllib.request.Request(url, headers={
-        "User-Agent": "btc-signal-app-backtest (github actions)",
-        "Accept": "application/json, text/csv, */*"})
-    try:
-        with urllib.request.urlopen(req, timeout=25) as r:
-            return r.status, r.read().decode("utf-8", "replace"), ""
-    except urllib.error.HTTPError as e:
-        return e.code, "", f"HTTP {e.code}"
-    except Exception as e:  # noqa: BLE001
-        return None, "", f"{type(e).__name__}: {e}"
-
-
-def sth_bitview(holen=_sth_holen) -> tuple:
-    """{datum: wert}, fehler. Datum aus dem Index; leere und Null-Werte fallen weg."""
-    status, text, fehler = holen(STH_BITVIEW)
-    if status != 200 or not text:
-        return {}, fehler or f"Status {status}"
-    try:
-        d = json.loads(text)
-        werte = d["data"] if isinstance(d, dict) else d
-        start = int(d.get("start", 0)) if isinstance(d, dict) else 0
-    except Exception as exc:  # noqa: BLE001
-        return {}, f"Antwort nicht lesbar ({exc})"
-    out = {}
-    for i, v in enumerate(werte):
-        if isinstance(v, (int, float)) and v > 0:
-            out[STH_BITVIEW_TAG0 + timedelta(days=start + i)] = float(v)
-    return out, ("" if out else "keine Werte in der Antwort")
-
-
-def sth_bgeometrics(holen=_sth_holen) -> tuple:
-    """{datum: wert}, fehler. Die Zahlen kommen dort als TEXT - umgewandelt, sonst
-    vergleicht man "71262.19" mit 71262.19 und bekommt nie eine Uebereinstimmung."""
-    status, text, fehler = holen(STH_BGEOMETRICS)
-    if status != 200 or not text:
-        return {}, fehler or f"Status {status}"
-    try:
-        liste = json.loads(text)
-        out = {date.fromisoformat(p["d"]): float(p["sthRealizedPrice"])
-               for p in liste if p.get("sthRealizedPrice") not in (None, "")}
-    except Exception as exc:  # noqa: BLE001
-        return {}, f"Antwort nicht lesbar ({exc})"
-    return {k: v for k, v in out.items() if v > 0}, ""
 
 
 def sth_abgleich(a: dict, b: dict, versaetze=STH_VERSAETZE) -> dict:
@@ -1650,47 +1599,71 @@ def sth_abschnitt(quellen: dict, abgleich: dict, vorfrage: dict | None,
     return z
 
 
-# -------------------------------- E41: Stop mit Puffer / Rueckeroberung / Docht
+# -------------------------------- E41: Stop mit Rueckeroberung (LIVE seit 21.09.2026)
 
+E41_LIVE_SEIT = "21.09.2026"
+E41_ALTER_STOP = "LIVE bis 21.09.2026 (Stop ohne Rueckeroberung)"
+E41_B3 = "LIVE-heute +Rueckeroberung 3 statt 1 Kerze (Robustheit)"
 E41_ZEILEN = {                        # Gitterzeile -> Kurzname im Bericht
-    "LIVE-heute +Stop-Puffer 0,5 %": "A · Puffer 0,5 %",
-    "LIVE-heute +Stop erst ohne Rueckeroberung (1 Kerze)": "B1 · Rueckeroberung 1 Kerze",
-    "LIVE-heute +Stop erst ohne Rueckeroberung (3 Kerzen)": "B3 · Rueckeroberung 3 Kerzen",
-    "LIVE-heute +Stop schon beim Docht (Gegenprobe)": "C · Docht (Gegenprobe)",
+    E41_ALTER_STOP: "Alter Stop (bis 21.09.)",
+    E41_B3: "B3 · 3 statt 1 Kerze",
 }
-E41_DD_TOLERANZ = 1.0                 # Punkte, um die der Rueckgang schlechter sein darf
+E41_DD_TOLERANZ = 1.0                 # dieselbe Grenze wie beim Einschalten
+E41_RAUSCHGRENZE = 1.0                # 06.09.2026: ein Tag mehr Daten drehte 1,0 Punkte um
+
+_AUSSTIEGE = ("STOPLOSS", "VERKAUF_REST")
+_KAEUFE = ("KAUF_1", "KAUF_2", "NACHKAUF")
 
 
 def _stops(sigs: list) -> list:
     return [s for s in sigs if s.get("type") == "STOPLOSS"]
 
 
-def e41_urteil(basis: dict, v: dict) -> dict:
-    """Die drei Bedingungen aus docs/PLAN-E41-STOP.md - VOR der Messung festgelegt.
+def e41_ausschalten(live: dict, alt: dict) -> dict:
+    """Die Ausschalt-Regel fuer die Rueckeroberung - festgelegt am 21.09.2026, VOR der
+    ersten Messung nach dem Umschalten (docs/PLAN-E41-STOP.md).
 
-    basis/v: {"h1", "h2", "dd", "stops"} (dd negativ, z. B. -9.4).
-    Alle drei muessen erfuellt sein; eine bessere Rendite allein zaehlt nicht.
+    live/alt: {"h1", "h2", "dd", "stops"} (dd negativ, z. B. -10.3).
+    Ausschalten, wenn EINES von beiden gilt:
+      1. Der alte Stop ist in BEIDEN Haelften um mindestens E41_RAUSCHGRENZE Punkte
+         besser. "Besser" allein genuegt nicht: Beim Einschalten lag die Regel in
+         Haelfte 2 nur 0,2 Punkte vorn - ein gleich kleiner Rueckstand waere genauso
+         Rauschen.
+      2. Der Rueckgang live ist um MEHR als E41_DD_TOLERANZ Punkte tiefer als beim
+         alten Stop. Das war beim Einschalten eine der drei Bedingungen; sie muss auch
+         danach halten, denn ein spaeterer Stop heisst bei einem echten Bruch mehr
+         Verlust.
+    `greift` ist KEIN Ausschaltgrund, nur ein Hinweis: Stoppt live nicht seltener als
+    der alte Stop, hat die Regel im Fenster nichts bewirkt.
     """
-    beide = v["h1"] > basis["h1"] and v["h2"] > basis["h2"]
-    dd_ok = v["dd"] >= basis["dd"] - E41_DD_TOLERANZ
-    weniger = v["stops"] < basis["stops"]
-    return {"beide_haelften": beide, "rueckgang_ok": dd_ok, "weniger_stops": weniger,
-            "besteht": beide and dd_ok and weniger}
+    klar_besser = (alt["h1"] - live["h1"] >= E41_RAUSCHGRENZE
+                   and alt["h2"] - live["h2"] >= E41_RAUSCHGRENZE)
+    zu_tief = live["dd"] < alt["dd"] - E41_DD_TOLERANZ
+    return {"alt_klar_besser": klar_besser, "rueckgang_zu_tief": zu_tief,
+            "greift": live["stops"] < alt["stops"],
+            "ausschalten": klar_besser or zu_tief}
 
 
-def _naechster_ausstieg(sigs: list, ab_ts: int) -> dict | None:
+def _naechstes(sigs: list, ab_ts: int, typen: tuple) -> dict | None:
     for s in sigs:
-        if s.get("ts", 0) >= ab_ts and s.get("type") in ("STOPLOSS", "VERKAUF_REST"):
+        if s.get("ts", 0) >= ab_ts and s.get("type") in typen:
             return s
     return None
 
 
+def _datum(ts: int) -> str:
+    return to_date(ts).strftime("%d.%m.%Y")
+
+
 def e41_abschnitt(results: list, halves: list, basis_label: str) -> list:
-    """Berichtsabschnitt zu E41: Kennzahlen, Urteil nach Regel, und was aus den
-    Positionen wurde, deren Stop in einer Variante ausblieb."""
+    """Berichtsabschnitt zu E41 nach dem Umschalten: Live gegen den alten Stop, das
+    Urteil nach der vorab festgelegten Ausschalt-Regel, und was aus den Positionen
+    wurde, deren Stop live ausblieb."""
     voll = {r[0]["label"]: r for r in results}
     halb = {h[0]["label"]: (h[1], h[2]) for h in halves}
     if basis_label not in voll or basis_label not in halb:
+        return []
+    if E41_ALTER_STOP not in voll or E41_ALTER_STOP not in halb:
         return []
 
     def _kz(label: str) -> dict:
@@ -1700,81 +1673,83 @@ def e41_abschnitt(results: list, halves: list, basis_label: str) -> list:
                 "h1": h1["rendite_pct"], "h2": h2["rendite_pct"],
                 "stops": len(_stops(sigs)), "sigs": sigs}
 
-    basis = _kz(basis_label)
-    zeilen = [(lab, kurz) for lab, kurz in E41_ZEILEN.items() if lab in voll and lab in halb]
-    if not zeilen:
-        return []
-    z = ["", "## E41: Stop mit Puffer, Rueckeroberung oder Docht", "",
-         "Jede Zeile unterscheidet sich von der Live-Einstellung in **genau einem** Punkt. "
-         "Die Entscheidungsregel stand vor der Messung fest (`docs/PLAN-E41-STOP.md`): "
-         "besser in **beiden** Fensterhaelften, Rueckgang hoechstens "
-         f"{E41_DD_TOLERANZ:.0f} Punkt schlechter, und die Zahl der Stops muss "
-         "tatsaechlich sinken.", "",
-         "| Variante | Rendite | Rueckgang | H1 | H2 | Stops | beide Haelften | Rueckgang ok | weniger Stops | **besteht** |",
-         "|---|---:|---:|---:|---:|---:|---|---|---|---|",
-         f"| **Live (Basis)** | {basis['rendite']:+.1f} % | {basis['dd']:.1f} % | "
-         f"{basis['h1']:+.1f} % | {basis['h2']:+.1f} % | {basis['stops']} | — | — | — | — |"]
-    urteile = {}
-    ja = lambda b: "ja" if b else "**nein**"
-    for lab, kurz in zeilen:
-        v = _kz(lab)
-        u = e41_urteil(basis, v)
-        urteile[kurz] = (u, v)
-        z.append(f"| {kurz} | {v['rendite']:+.1f} % | {v['dd']:.1f} % | {v['h1']:+.1f} % | "
-                 f"{v['h2']:+.1f} % | {v['stops']} | {ja(u['beide_haelften'])} | "
-                 f"{ja(u['rueckgang_ok'])} | {ja(u['weniger_stops'])} | "
-                 f"{'**JA**' if u['besteht'] else 'nein'} |")
+    live, alt = _kz(basis_label), _kz(E41_ALTER_STOP)
+    b3 = _kz(E41_B3) if E41_B3 in voll and E41_B3 in halb else None
+    u = e41_ausschalten(live, alt)
 
-    b1 = urteile.get("B1 · Rueckeroberung 1 Kerze", ({}, {}))[0].get("besteht")
-    b3 = urteile.get("B3 · Rueckeroberung 3 Kerzen", ({}, {}))[0].get("besteht")
-    c = urteile.get("C · Docht (Gegenprobe)", ({}, {}))[0].get("besteht")
-    z += ["", "**Urteil nach der Regel:**", ""]
-    if b1 is not None and b3 is not None:
-        if b1 and b3:
-            z.append("- **Rueckeroberung (Kaisers Regel): besteht** - mit 1 UND mit 3 Kerzen. "
-                     "Das Ergebnis haengt nicht an der Kerzenzahl.")
-        elif b1 or b3:
-            z.append("- **Rueckeroberung: nicht robust.** Nur eine der beiden Kerzenzahlen "
-                     "besteht - das Ergebnis haengt an der Wahl, also am Zufall.")
+    def _zeile(name: str, v: dict) -> str:
+        return (f"| {name} | {v['rendite']:+.1f} % | {v['dd']:.1f} % | {v['h1']:+.1f} % | "
+                f"{v['h2']:+.1f} % | {v['stops']} |")
+
+    z = ["", f"## E41: Stop mit Rueckeroberung - live seit {E41_LIVE_SEIT}", "",
+         "Seit dem Umschalten stoppt die Engine nicht mehr beim ersten Schluss unter der "
+         "Invalidierung: Sie wartet **eine** Kerze, ob die Marke zurueckerobert wird "
+         "(Kaisers Regel). Der alte Stop laeuft hier als Gegenprobe mit. Die Regel zum "
+         "Ausschalten stand **vor** der ersten Messung fest (`docs/PLAN-E41-STOP.md`): "
+         f"ausschalten, wenn der alte Stop in **beiden** Haelften um mindestens "
+         f"{E41_RAUSCHGRENZE:.0f} Punkt besser ist, **oder** wenn der Rueckgang live um mehr "
+         f"als {E41_DD_TOLERANZ:.0f} Punkt tiefer liegt als beim alten Stop.", "",
+         "| Variante | Rendite | Rueckgang | H1 | H2 | Stops |",
+         "|---|---:|---:|---:|---:|---:|",
+         _zeile("**Live: Rueckeroberung, 1 Kerze**", live),
+         _zeile(E41_ZEILEN[E41_ALTER_STOP], alt)]
+    if b3:
+        z.append(_zeile(E41_ZEILEN[E41_B3], b3))
+
+    ja = lambda b: "**ja**" if b else "nein"
+    z += ["", "**Urteil nach der Ausschalt-Regel:**", "",
+          f"- Alter Stop in beiden Haelften mindestens {E41_RAUSCHGRENZE:.0f} Punkt besser: "
+          f"{ja(u['alt_klar_besser'])} (H1 {alt['h1'] - live['h1']:+.1f}, "
+          f"H2 {alt['h2'] - live['h2']:+.1f} Punkte gegen live)",
+          f"- Rueckgang live mehr als {E41_DD_TOLERANZ:.0f} Punkt tiefer: "
+          f"{ja(u['rueckgang_zu_tief'])} ({live['dd'] - alt['dd']:+.1f} Punkte gegen den "
+          "alten Stop)"]
+    if u["ausschalten"]:
+        z.append("- **AUSSCHALTEN.** In `site/data/config.json` `stop_rueckeroberung` auf 0 "
+                 "setzen. Die Regel war vorab festgelegt; ein Nachverhandeln waere genau die "
+                 "nachtraegliche Auswahl, vor der der Plan warnt.")
+    else:
+        z.append("- **Bleibt an.**")
+    if not u["greift"]:
+        z.append("- Hinweis: Live stoppt **nicht seltener** als der alte Stop - die Regel "
+                 "hat im Fenster nichts bewirkt. Das ist kein Ausschaltgrund, aber jeder "
+                 "Unterschied oben ist dann Zufall.")
+    if b3:
+        z.append("- B3 zeigt nur, ob das Ergebnis an der Kerzenzahl haengt. Keine "
+                 "Entscheidung haengt daran: 3 Kerzen zu nehmen, weil die Zahl besser "
+                 "aussieht, waere die nachtraegliche Auswahl, vor der der Plan warnt.")
+
+    # --- Was wurde aus den Positionen, deren Stop live ausblieb? --------------------------
+    lv = {s["ts"] for s in _stops(live["sigs"])}
+    z += ["", "### Die Stops, die live ausblieben", "",
+          "Fuer jeden Stop des alten Stops: Hat live an derselben Kerze gestoppt? Wenn "
+          "nicht - wie endete die Position live, und **kaufte der alte Stop danach wieder "
+          "ein**? Erst beide Zahlen zusammen zeigen, was der alte Stop gekostet oder "
+          "gebracht hat (Lehre vom 21.09.: Beim Stop vom 08.03.2026 stieg die Engine acht "
+          "Stunden spaeter 2,4 % hoeher wieder ein).", ""]
+    for s in _stops(alt["sigs"]):
+        kopf = f"- {_datum(s['ts'])} {s['price']:,.0f} $ — ".replace(",", ".")
+        if s["ts"] in lv:
+            z.append(kopf + "live gleich gestoppt")
+            continue
+        n = _naechstes(live["sigs"], s["ts"], _AUSSTIEGE)
+        if n is None:
+            teil = "live kein Ausstieg bis Fensterende"
         else:
-            z.append("- **Rueckeroberung: durchgefallen** - mit 1 und mit 3 Kerzen.")
-    if c:
-        z.append("- **Achtung: die Gegenprobe besteht.** Der strengere Stop schlaegt die "
-                 "Live-Einstellung - dann war die Idee, den Stop zu lockern, falsch herum.")
-    z.append("- Ein Schalter, der nicht besteht, bleibt aus - auch wenn seine Rendite "
-             "besser aussieht.")
-
-    # --- Was wurde aus den Positionen, deren Stop ausblieb? ----------------------------
-    b_stops = _stops(basis["sigs"])
-    z += ["", "### Was wurde aus den Positionen, deren Stop ausblieb?", "",
-          "Fuer jeden Stop der Live-Einstellung: Hat die Variante an derselben Kerze "
-          "gestoppt? Wenn nicht - wie endete die Position dort (naechster Stop oder "
-          "Restverkauf) und zu welchem Preis, verglichen mit dem Live-Stop?", ""]
-    for lab, kurz in zeilen:
-        if kurz.startswith("C"):
-            continue                                 # Gegenprobe stoppt frueher, nicht spaeter
-        v = urteile[kurz][1]
-        vt = {s["ts"] for s in _stops(v["sigs"])}
-        z += [f"**{kurz}**", ""]
-        for s in b_stops:
-            tag = to_date(s["ts"]).strftime("%d.%m.%Y")
-            if s["ts"] in vt:
-                z.append(f"- {tag} {s['price']:,.0f} $ — gleich gestoppt".replace(",", "."))
-                continue
-            n = _naechster_ausstieg(v["sigs"], s["ts"])
-            if n is None:
-                z.append(f"- {tag} {s['price']:,.0f} $ — kein Ausstieg bis Fensterende"
-                         .replace(",", "."))
-                continue
-            diff = (n["price"] - s["price"]) / s["price"] * 100
             wie = "Stop" if n["type"] == "STOPLOSS" else "Restverkauf"
-            z.append((f"- {tag} {s['price']:,.0f} $ — stattdessen {wie} am "
-                      f"{to_date(n['ts']).strftime('%d.%m.%Y')} bei {n['price']:,.0f} $ "
-                      f"({diff:+.1f} % gegen den Live-Stop)").replace(",", "."))
-        z.append("")
-    z += ["Die Liste zeigt nur, wie die Position **endete**. Zwischendurch gab es in der "
-          "Variante womoeglich Teilverkaeufe oder einen tieferen Buchverlust - dafuer steht "
-          "die Spalte *Rueckgang* oben."]
+            diff = (n["price"] - s["price"]) / s["price"] * 100
+            teil = (f"live stattdessen {wie} am {_datum(n['ts'])} bei {n['price']:,.0f} $ "
+                    f"({diff:+.1f} % gegen den alten Stop)").replace(",", ".")
+        w = _naechstes(alt["sigs"], s["ts"] + 1, _KAEUFE)
+        if w is not None and (n is None or w["ts"] <= n["ts"]):
+            wd = (w["price"] - s["price"]) / s["price"] * 100
+            teil += (f"; der alte Stop kaufte am {_datum(w['ts'])} bei {w['price']:,.0f} $ "
+                     f"wieder ein ({wd:+.1f} % gegen seinen Stop)").replace(",", ".")
+        z.append(kopf + teil)
+    z += ["", "Die Liste zeigt nur, wie die Positionen **endeten**. Zwischendurch gab es "
+          "womoeglich Teilverkaeufe oder einen tieferen Buchverlust - dafuer steht die "
+          "Spalte *Rueckgang* oben. Der Renditeunterschied insgesamt ist das Netto aus "
+          "vielen verschobenen Positionen und laesst sich keinem einzelnen Fall zuschreiben."]
     return z
 
 
@@ -2815,9 +2790,9 @@ def main():
         _sthquellen, _sthfehler,
         lambda: sth_abschnitt(_sthquellen, _sthabgl, _sthvor),
     ) + abschnitt_oder_grund(
-        "E41: Stop mit Puffer, Rueckeroberung oder Docht",
-        [h for h in halves if h[0]["label"] in E41_ZEILEN], 
-        "die E41-Zeilen fehlen im Gitter oder in der Halbierung",
+        "E41: Stop mit Rueckeroberung - live seit " + E41_LIVE_SEIT,
+        [h for h in halves if h[0]["label"] == E41_ALTER_STOP],
+        "die Zeile mit dem alten Stop fehlt im Gitter oder in der Halbierung",
         lambda: e41_abschnitt(results, halves, panel_cfg["label"]),
     ) + [
         "",

@@ -204,3 +204,127 @@ def test_plan_und_vorschau_zeigen_muster_5_umbrochen_mit_hinweis():
     assert not any(z.rstrip().endswith("-") for z in zeilen), zeilen
     # die uebrigen Zeilen bleiben unveraendert im gewohnten Format
     assert "Lage:  Uebergeordnet: Kurs ueber EMA200" in zeilen
+
+
+# ------------------------------------------ E41: Rueckeroberungs-Regel live (21.09.2026)
+
+def _e41_m(art="wartet", lang=True, noch=1):
+    if art == "wartet":
+        marke = 97608.0 if lang else 102000.0
+        return {"art": "wartet", "ts": 1_768_766_400_000, "lang": lang, "marke": marke,
+                "kurs": 97400.0 if lang else 102204.0, "kerze_nr": 1, "von": noch,
+                "noch": noch, "boden": marke * (0.95 if lang else 1.05)}
+    return {"art": "zurueck", "ts": 1_768_766_400_000, "kurs": 98500.0, "marke": 97608.0,
+            "lang": lang}
+
+
+def test_stop_wartet_nachricht_sagt_was_passiert_und_was_als_naechstes():
+    from telegram_notify import format_stop_rueckeroberung
+    txt = format_stop_rueckeroberung(_e41_m())
+    assert txt.startswith("⏳ STOP WARTET")
+    assert "BTC 97.400 $" in txt
+    einzeilig = " ".join(txt.split())
+    assert "Kerzenschluss 0,2 % unter der Invalidierung 97.608 $." in einzeilig
+    assert "Schliesst die naechste Kerze wieder ueber 97.608 $, hat die Marke gehalten." in einzeilig
+    assert "Sonst kommt der Stop." in einzeilig
+    assert "Bis dahin kein Nachkauf." in einzeilig
+
+
+def test_stop_wartet_nennt_den_harten_boden_nur_wenn_er_noch_zaehlt():
+    """Bei EINER Kerze Wartezeit stoppt die naechste Kerze unter der Marke ohnehin - der
+    harte Boden waere dort eine Zahl ohne Bedeutung, die verwirrt."""
+    from telegram_notify import format_stop_rueckeroberung
+    assert "92.728" not in format_stop_rueckeroberung(_e41_m(noch=1))
+    drei = " ".join(format_stop_rueckeroberung(_e41_m(noch=3)).split())
+    assert "Schluss unter 92.728 $: sofort Stop." in drei
+    assert "eine der naechsten 3 Kerzen" in drei
+
+
+def test_marke_zurueckerobert_nachricht():
+    from telegram_notify import format_stop_rueckeroberung
+    txt = " ".join(format_stop_rueckeroberung(_e41_m("zurueck")).split())
+    assert "MARKE ZURUECKEROBERT" in txt
+    assert "Schluss wieder ueber 97.608 $." in txt
+    assert "naechste Kerzenschluss unter 97.608 $ loest den Stop sofort aus" in txt
+
+
+def test_e41_nachrichten_short_spiegelbildlich():
+    from telegram_notify import format_stop_rueckeroberung
+    txt = " ".join(format_stop_rueckeroberung(_e41_m(lang=False)).split())
+    assert "0,2 % ueber der Invalidierung 102.000 $" in txt
+    assert "wieder unter 102.000 $" in txt
+    z = " ".join(format_stop_rueckeroberung({**_e41_m("zurueck"), "lang": False}).split())
+    assert "Schluss wieder unter 97.608 $." in z and "Kerzenschluss ueber 97.608 $" in z
+
+
+def test_e41_nachrichten_sind_handybreit():
+    from telegram_notify import ZEILE_MAX, format_stop_rueckeroberung
+    for m in (_e41_m(), _e41_m(noch=3), _e41_m("zurueck"), _e41_m(lang=False)):
+        txt = format_stop_rueckeroberung(m)
+        zu_lang = [z for z in txt.splitlines() if len(z) > ZEILE_MAX]
+        assert not zu_lang, zu_lang
+
+
+def _e41_plan(**stop):
+    return {"richtung": "LONG", "anteil_pct": 40, "einstand": 99000.0, "kurs": 98000.0,
+            "stop": {"preis": 97608.0, "grund": "Invalidierung", **stop}}
+
+
+def test_plan_stop_zeile_folgt_der_rueckeroberungs_regel():
+    """Der Plan sagt "diese Preise kannst du hinterlegen". Stuende dort weiter "Stop bei
+    Kerzenschluss darunter", widerspraeche er der Engine."""
+    from telegram_notify import format_plan
+    alt = format_plan(_e41_plan())
+    assert "Stop 97.608 $ — Invalidierung, bei Kerzenschluss darunter" in alt
+    neu = format_plan(_e41_plan(rueckeroberung=1, boden=92727.6, geprueft=False, wartet=0))
+    assert ("Stop 97.608 $ — Invalidierung. Ein Kerzenschluss darunter loest noch nicht "
+            "aus: Stop erst, wenn auch die naechste Kerze darunter schliesst — ab "
+            "92.728 $ sofort") in neu
+    assert "bei Kerzenschluss darunter" not in neu and "Achtung" not in neu
+
+
+def test_plan_warnt_wenn_die_engine_gerade_wartet():
+    from telegram_notify import format_plan
+    txt = format_plan(_e41_plan(rueckeroberung=1, boden=92727.6, geprueft=False, wartet=1))
+    assert "Achtung: Die letzte Kerze schloss schon darunter" in txt
+
+
+def test_plan_nennt_die_gepruefte_marke():
+    from telegram_notify import format_plan
+    txt = format_plan(_e41_plan(rueckeroberung=1, boden=92727.6, geprueft=True, wartet=0))
+    assert "schon einmal zurueckerobert: naechster Kerzenschluss darunter = Stop" in txt
+    assert "loest noch nicht aus" not in txt
+
+
+# ----------------------------- E40: STH-Kostenbasis als Zeile im Lage-Abruf (21.09.2026)
+
+def _lage_mit_sth(kurs, sth):
+    return {"kurs": kurs, "bein": None, "orderflow": [], "fenster_h": 48,
+            "lage": None, "ampel": None, "sth": sth}
+
+
+def test_lage_abruf_zeigt_die_sth_kostenbasis_mit_abstand_und_stand():
+    from telegram_notify import format_lage
+    sth = {"wert": 71262.19, "datum": "2026-09-14", "quelle": "bitview.space"}
+    txt = format_lage(_lage_mit_sth(76000.0, sth), 1_700_000_000_000)
+    zeilen = txt.splitlines()
+    assert "STH-Kostenbasis: 71.262 $" in zeilen
+    assert "Kurs 6,6 % darueber" in zeilen
+    einzeilig = " ".join(txt.split())
+    assert "Stand 14.09.2026" in einzeilig and "Nur Anzeige, keine Regel." in einzeilig
+    unter = format_lage(_lage_mit_sth(70000.0, sth), 1_700_000_000_000)
+    assert "Kurs 1,8 % darunter" in unter.splitlines()
+
+
+def test_lage_abruf_ohne_sth_hat_keine_leere_zeile_dafuer():
+    from telegram_notify import format_lage
+    for sth in (None, {}, {"wert": 0, "datum": "2026-09-14"}):
+        assert "STH" not in format_lage(_lage_mit_sth(76000.0, sth), 1_700_000_000_000)
+
+
+def test_sth_zeile_ist_handybreit():
+    from telegram_notify import ZEILE_MAX, format_lage
+    sth = {"wert": 171262.19, "datum": "2026-09-14", "quelle": "bitview.space"}
+    txt = format_lage(_lage_mit_sth(176000.0, sth), 1_700_000_000_000)
+    zu_lang = [z for z in txt.splitlines() if len(z) > ZEILE_MAX]
+    assert not zu_lang, zu_lang

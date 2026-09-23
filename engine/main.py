@@ -24,7 +24,7 @@ import os
 import sys
 import time
 import urllib.request
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import coinalyze
@@ -32,11 +32,11 @@ from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCH
                            Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots, gegen_zonen,
                            ampel, ampel_richtung, classify_pattern, lage_bericht,
-                           orderflow_detail, OF_FENSTER,
+                           orderflow_detail, OF_FENSTER, DIP_FLOOR_PCT, SignalType,
                            last_significant_impulse, liq_levels, next_pivot_beyond)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
-                             send_lage, send_plan, send_signals, send_text,
-                             send_vorschau)
+                             format_stop_rueckeroberung, send_lage, send_plan,
+                             send_signals, send_text, send_vorschau)
 
 ROOT = Path(__file__).resolve().parent.parent          # Repo-Wurzel (signal-app/)
 DATA = ROOT / "site" / "data"
@@ -73,6 +73,88 @@ def _get_json(url: str, tries: int = 3):
             last = exc
             time.sleep(2 * (i + 1))
     raise RuntimeError(f"Abruf fehlgeschlagen: {url} ({last})")
+
+
+# ------------------------------------------------ STH-Kostenbasis (E40, 21.09.2026)
+# Beide Quellen haben am 21.09.2026 aus GitHub Actions geantwortet. Diese Funktionen
+# nutzen der Backtest (E40.1) UND der Lage-Abruf - deshalb stehen sie hier.
+#   bitview.space (Bitcoin Research Kit): ab 2009, tagesaktuell, ohne Abrufgrenze.
+# Reine Werteliste OHNE Datum; Index 0 = 01.01.2009 (hergeleitet aus drei Ankern: erster
+# Wert 0.0 am 03.01.2009 = Genesis, naechster am 09.01.2009 = erster Block danach,
+# letzter Index = Abruftag). STH = Coins juenger als 150 Tage.
+#   bitcoin-data.com (BGeometrics): Datum in jedem Punkt, aber 15 Abrufe/Tag je IP
+# (GitHub teilt IPs) und 7 Tage Verzug. STH = juenger als 155 Tage.
+STH_BITVIEW = "https://bitview.space/api/series/sth_realized_price/day1"
+STH_BITVIEW_TAG0 = date(2009, 1, 1)
+STH_BGEOMETRICS = "https://bitcoin-data.com/v1/sth-realized-price"
+
+
+def _sth_holen(url: str) -> tuple:
+    """(status, text, fehler). Wirft nie - ein Abruf, der abstuerzt, sagt nichts."""
+    import urllib.error
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "btc-signal-app-backtest (github actions)",
+        "Accept": "application/json, text/csv, */*"})
+    try:
+        with urllib.request.urlopen(req, timeout=25) as r:
+            return r.status, r.read().decode("utf-8", "replace"), ""
+    except urllib.error.HTTPError as e:
+        return e.code, "", f"HTTP {e.code}"
+    except Exception as e:  # noqa: BLE001
+        return None, "", f"{type(e).__name__}: {e}"
+
+
+def sth_bitview(holen=_sth_holen) -> tuple:
+    """{datum: wert}, fehler. Datum aus dem Index; leere und Null-Werte fallen weg."""
+    status, text, fehler = holen(STH_BITVIEW)
+    if status != 200 or not text:
+        return {}, fehler or f"Status {status}"
+    try:
+        d = json.loads(text)
+        werte = d["data"] if isinstance(d, dict) else d
+        start = int(d.get("start", 0)) if isinstance(d, dict) else 0
+    except Exception as exc:  # noqa: BLE001
+        return {}, f"Antwort nicht lesbar ({exc})"
+    out = {}
+    for i, v in enumerate(werte):
+        if isinstance(v, (int, float)) and v > 0:
+            out[STH_BITVIEW_TAG0 + timedelta(days=start + i)] = float(v)
+    return out, ("" if out else "keine Werte in der Antwort")
+
+
+def sth_bgeometrics(holen=_sth_holen) -> tuple:
+    """{datum: wert}, fehler. Die Zahlen kommen dort als TEXT - umgewandelt, sonst
+    vergleicht man "71262.19" mit 71262.19 und bekommt nie eine Uebereinstimmung."""
+    status, text, fehler = holen(STH_BGEOMETRICS)
+    if status != 200 or not text:
+        return {}, fehler or f"Status {status}"
+    try:
+        liste = json.loads(text)
+        out = {date.fromisoformat(p["d"]): float(p["sthRealizedPrice"])
+               for p in liste if p.get("sthRealizedPrice") not in (None, "")}
+    except Exception as exc:  # noqa: BLE001
+        return {}, f"Antwort nicht lesbar ({exc})"
+    return {k: v for k, v in out.items() if v > 0}, ""
+
+
+def sth_kostenbasis(holen=_sth_holen) -> dict | None:
+    """Der juengste Wert der STH-Kostenbasis fuer den Lage-Abruf (Kaiser 21.09.2026).
+
+    Erst bitview.space (tagesaktuell), sonst bitcoin-data.com (7 Tage Verzug) - das
+    Datum wird deshalb immer mitgegeben. Reine Anzeige: E40.1 hat gezeigt, dass die
+    Marke im Messfenster keine Entscheidung der Engine unterscheiden kann.
+    Wirft nie. Ohne Wert gibt es keine Zeile, statt einer falschen.
+    """
+    for quelle, abruf in (("bitview.space", sth_bitview),
+                          ("bitcoin-data.com", sth_bgeometrics)):
+        try:
+            werte, _fehler = abruf(holen)
+        except Exception:  # noqa: BLE001
+            werte = {}
+        if werte:
+            tag = max(werte)
+            return {"wert": werte[tag], "datum": tag.isoformat(), "quelle": quelle}
+    return None
 
 
 def fetch_spot(limit: int = LIMIT) -> list:
@@ -562,6 +644,17 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
                               else (x.get("preis") or x["zone"][0]))
     plan["teilgewinn"] = sorted(raus, key=lambda x: (x.get("preis") or x["zone"][0]) * (1 if lang else -1))
     plan["stop"] = {"preis": stop, "grund": grund}
+    # E41 (live seit 21.09.2026, Kaisers Rueckeroberungs-Regel): Die Plan-Nachricht sagt
+    # "diese Preise kannst du hinterlegen". Stuende dort weiter "Stop bei Kerzenschluss
+    # darunter", widerspraeche der Plan der Engine - sie stoppt beim ersten Schluss
+    # darunter eben NICHT mehr. Nur fuer den urspruenglichen Stop an der Invalidierung.
+    n = int(par.get("stop_rueckeroberung", 0) or 0)
+    if n > 0 and grund == "Invalidierung":
+        plan["stop"].update({
+            "rueckeroberung": n,
+            "boden": stop * (1 - DIP_FLOOR_PCT) if lang else stop * (1 + DIP_FLOOR_PCT),
+            "geprueft": pos.stop_geprueft == stop,
+            "wartet": pos.stop_wartet})
     return plan
 
 
@@ -697,7 +790,7 @@ def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
 # ------------------------------------------------------------ Orchestrierung
 
 def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
-               dry_run: bool = False) -> dict | None:
+               dry_run: bool = False, sth=sth_kostenbasis) -> dict | None:
     """Die Lage auf Knopfdruck — unter der Annahme einer LONG-Position (E35).
 
     Anlass (Kaiser 17.09.2026): *"Zuletzt wurde der Plan ausgestoppt ... Ich habe aber
@@ -750,7 +843,13 @@ def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
         "lage": lage or None,
         # Die Annahme ist Long — deshalb hier fest, nicht ueber den Bias.
         "ampel": ampel(lage, long_side=True) if lage else None,
+        # E40 (Kaiser 21.09.2026): STH-Kostenbasis als Zeile - Anzeige, keine Regel.
+        "sth": None,
     }
+    try:
+        out["sth"] = sth()
+    except Exception as exc:  # noqa: BLE001
+        print(f"STH-Kostenbasis nicht abrufbar ({exc}) - Zeile entfaellt.")
     if imp is not None:
         z = fib_zones(imp)
         out.update({
@@ -760,6 +859,37 @@ def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
         })
     send_lage(out, candles[-1].ts, dry_run=dry_run)
     return out
+
+
+def e41_meldung(pos: Position, wartete_vorher: int, sigs: list, kerze: Candle,
+                rueckeroberung: int, marke_vorher: float | None = None) -> dict | None:
+    """E41: Was hat die Rueckeroberungs-Regel in dieser Kerze getan? (fuer Telegram)
+
+    Ohne diese Meldung sieht man bei einem knappen Schluss unter der Marke: nichts. Kein
+    Stop, keine Nachricht - und wuesste nicht, ob die Engine wartet oder etwas uebersehen
+    hat. Zwei Faelle werden gemeldet:
+      "wartet"  Schluss unter der Marke, noch kein Stop.
+      "zurueck" Die Marke wurde zurueckerobert und gilt ab jetzt als geprueft.
+    Der Stop selbst braucht keine eigene Meldung - seine Signalnachricht nennt den Grund.
+    `marke_vorher` ist die Marke, auf deren Rueckeroberung gewartet wurde: Nur wenn
+    GENAU sie jetzt als geprueft gilt, war es eine Rueckeroberung - nicht, wenn das
+    Warten nur endete, weil die Zonen nachgezogen wurden.
+    """
+    if any(s.type in (SignalType.STOPLOSS, SignalType.SHORT_STOPLOSS) for s in sigs):
+        return None
+    lang = pos.direction != "SHORT"
+    if pos.stop_wartet > wartete_vorher and pos.stop_wartet_inv:
+        marke = pos.stop_wartet_inv
+        return {"art": "wartet", "ts": kerze.ts, "kurs": kerze.close, "marke": marke,
+                "lang": lang, "kerze_nr": pos.stop_wartet, "von": rueckeroberung,
+                "noch": rueckeroberung - pos.stop_wartet + 1,
+                "boden": marke * (1 - DIP_FLOOR_PCT) if lang else marke * (1 + DIP_FLOOR_PCT)}
+    if (wartete_vorher > 0 and pos.stop_wartet == 0 and pos.state != PosState.FLAT
+            and pos.stop_geprueft is not None
+            and (marke_vorher is None or pos.stop_geprueft == marke_vorher)):
+        return {"art": "zurueck", "ts": kerze.ts, "kurs": kerze.close,
+                "marke": pos.stop_geprueft, "lang": lang}
+    return None
 
 
 def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
@@ -799,11 +929,17 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     new_signals: list[dict] = []
     params = eval_params(cfg)
     # Nachholen: alle Kerzen, die neuer sind als der letzte verarbeitete Stand
+    e41_meldungen: list[dict] = []
     for i, c in enumerate(candles):
         if c.ts <= pos.last_signal_ts:
             continue
+        _wartete, _marke = pos.stop_wartet, pos.stop_wartet_inv
         sigs = evaluate(candles[:i + 1], flow[:i + 1], pos, **params)
         new_signals += [s.to_dict() for s in sigs]
+        m = e41_meldung(pos, _wartete, sigs, c, int(params.get("stop_rueckeroberung", 0)),
+                        marke_vorher=_marke)
+        if m:
+            e41_meldungen.append(m)
 
     # Historie fortschreiben
     hist = {"signals": []}
@@ -869,6 +1005,10 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
             watch_path.write_text(json.dumps(w, indent=1), encoding="utf-8")
             print(f"Flush-Warnung aufgeloest: {'bestaetigt' if bestaetigt else 'nicht bestaetigt'}")
 
+    # E41: VOR den Signalen - holt ein Lauf mehrere Kerzen nach, steht die Wartemeldung
+    # vor dem Stop, der ihr folgt.
+    for m in e41_meldungen:
+        send_text(format_stop_rueckeroberung(m), dry_run=dry_run)
     if new_signals:
         send_signals(new_signals, dry_run=dry_run)
     print(f"Lauf ok: {len(candles)} Kerzen, {len(new_signals)} neue Signale, "

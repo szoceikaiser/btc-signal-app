@@ -694,13 +694,13 @@ def _lage_kerzen(auf: bool = True):
     return cs, fl
 
 
-def _lage_lauf(cs, fl, cfg=None):
+def _lage_lauf(cs, fl, cfg=None, sth=lambda: None):
     with tempfile.TemporaryDirectory() as d:
         ordner = Path(d)
         (ordner / "config.json").write_text(
             json.dumps(cfg or {"pivot_n": 2, "bias_short": False}), encoding="utf-8")
         out = main.lage_abruf(fetch=lambda oi=None: (cs, fl, []),
-                              data_dir=ordner, dry_run=True)
+                              data_dir=ordner, dry_run=True, sth=sth)
         dateien = sorted(p.name for p in ordner.iterdir())
     return out, dateien
 
@@ -982,3 +982,200 @@ def test_e41_warten_ueberlebt_den_neustart_der_live_engine():
     assert (rt.stop_wartet, rt.stop_wartet_inv, rt.stop_geprueft) == (2, 97.6, 95.0)
     alt = pos_from_state({"pos_state": "FLAT"})          # Altbestand ohne die Felder
     assert (alt.stop_wartet, alt.stop_wartet_inv, alt.stop_geprueft) == (0, None, None)
+
+
+# ------------------------------------ E41 live (21.09.2026): Meldungen der Live-Engine
+
+def _e41_engine(n: int, schrittweise: bool):
+    """Die Live-Engine ueber das E41-Szenario aus test_strategy_core: knapper Schluss
+    unter der Invalidierung, Rueckeroberung, zweiter Bruch.
+
+    schrittweise=True bildet die Wirklichkeit ab: Jede Kerze ist ein EIGENER Lauf, der
+    die Position aus state.json liest (neuer Prozess alle vier Stunden).
+    Gibt (Ereignisse, Signale) zurueck; Ereignisse in der Reihenfolge des Versands."""
+    import test_strategy_core as tsc
+    cs, fl = tsc._e41_szenario(tsc._KNAPP_ZURUECK_WIEDER)
+    ereignisse, signale = [], []
+    alt = (main.send_text, main.send_signals, main.send_plan, main.send_vorschau)
+    main.send_text = lambda t, dry_run=False: ereignisse.append(t.splitlines()[0])
+    main.send_signals = lambda s, dry_run=False: (
+        ereignisse.extend("SIGNAL " + x["type"] for x in s), signale.extend(s))
+    main.send_plan = main.send_vorschau = lambda *a, **k: None
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            (d / "config.json").write_text(json.dumps(
+                {"bias_short": False, "pivot_n": 2, "stop_rueckeroberung": n}))
+            for k in (range(20, len(cs) + 1) if schrittweise else [len(cs)]):
+                main.run_engine(fetch=lambda oi=None, k=k: (cs[:k], fl[:k], []),
+                                data_dir=d, dry_run=True)
+    finally:
+        main.send_text, main.send_signals, main.send_plan, main.send_vorschau = alt
+    return ereignisse, signale
+
+
+def test_e41_live_vorprobe_ohne_regel_kommt_der_knappe_stop():
+    """Vorprobe: Ohne die Regel stoppt die Engine im Szenario beim ersten Schluss
+    darunter - und meldet nichts von Warten. Sonst pruefen die Tests darunter nichts."""
+    ereignisse, signale = _e41_engine(0, schrittweise=True)
+    assert [s["type"] for s in signale] == ["KAUF_1", "NACHKAUF", "STOPLOSS"]
+    assert not any("WARTET" in e or "ZURUECKEROBERT" in e for e in ereignisse)
+
+
+def test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch():
+    ereignisse, signale = _e41_engine(1, schrittweise=True)
+    assert [s["type"] for s in signale] == ["KAUF_1", "NACHKAUF", "STOPLOSS"]
+    assert "schon einmal" in signale[-1]["reason"]
+    e41 = [e for e in ereignisse if "WARTET" in e or "ZURUECKEROBERT" in e or "STOPLOSS" in e]
+    assert e41 == ["⏳ STOP WARTET", "✅ MARKE ZURUECKEROBERT", "SIGNAL STOPLOSS"]
+
+
+def test_e41_live_stop_kommt_spaeter_als_ohne_regel():
+    _e, ohne = _e41_engine(0, schrittweise=True)
+    _e, mit = _e41_engine(1, schrittweise=True)
+    assert mit[-1]["ts"] > ohne[-1]["ts"]
+
+
+def test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze():
+    """Der Kern der Live-Tauglichkeit: Die Engine muss dasselbe tun, ob sie alle Kerzen
+    in einem Lauf nachholt oder jede einzeln in einem neuen Prozess sieht. Ginge der
+    Wartezaehler zwischen zwei Laeufen verloren, stoppte sie nie."""
+    e1, s1 = _e41_engine(1, schrittweise=False)
+    e2, s2 = _e41_engine(1, schrittweise=True)
+    fass = lambda s: [(x["ts"], x["type"], round(x["price"], 6), x["reason"]) for x in s]
+    assert fass(s1) == fass(s2)
+    nur = lambda e: [x for x in e if "WARTET" in x or "ZURUECKEROBERT" in x]
+    assert nur(e1) == nur(e2) == ["⏳ STOP WARTET", "✅ MARKE ZURUECKEROBERT"]
+
+
+def test_e41_live_wartemeldung_steht_vor_dem_stop_wenn_ein_lauf_nachholt():
+    """Holt ein Lauf mehrere Kerzen nach (z. B. nach einem Ausfall), muss die
+    Wartemeldung VOR dem Stop ankommen, dem sie vorausging."""
+    ereignisse, _s = _e41_engine(1, schrittweise=False)
+    assert ereignisse.index("⏳ STOP WARTET") < ereignisse.index("SIGNAL STOPLOSS")
+
+
+def _e41_pos(wartet=0, inv=None, geprueft=None, state=None):
+    from strategy_core import PosState, Position
+    p = Position(direction="LONG", state=state or PosState.CORE)
+    p.stop_wartet, p.stop_wartet_inv, p.stop_geprueft = wartet, inv, geprueft
+    return p
+
+
+def test_e41_meldung_wartet():
+    kerze = _c(1, 98.0, 98.2, 97.3, 97.4)
+    m = main.e41_meldung(_e41_pos(1, 97.608), 0, [], kerze, 1)
+    assert m["art"] == "wartet" and m["marke"] == 97.608 and m["kurs"] == 97.4
+    assert m["noch"] == 1 and m["lang"] is True
+    assert abs(m["boden"] - 97.608 * 0.95) < 1e-9
+
+
+def test_e41_meldung_zaehlt_bei_drei_kerzen_herunter():
+    kerze = _c(1, 98.0, 98.2, 97.3, 97.4)
+    assert main.e41_meldung(_e41_pos(1, 97.608), 0, [], kerze, 3)["noch"] == 3
+    assert main.e41_meldung(_e41_pos(2, 97.608), 1, [], kerze, 3)["noch"] == 2
+
+
+def test_e41_meldung_zurueckerobert_nur_fuer_genau_diese_marke():
+    kerze = _c(2, 97.4, 98.6, 97.4, 98.5)
+    m = main.e41_meldung(_e41_pos(0, None, 97.608), 1, [], kerze, 1, marke_vorher=97.608)
+    assert m == {"art": "zurueck", "ts": kerze.ts, "kurs": 98.5, "marke": 97.608, "lang": True}
+    # Endete das Warten nur, weil eine NEUE Marke gilt, ist das keine Rueckeroberung
+    assert main.e41_meldung(_e41_pos(0, None, 90.0), 1, [], kerze, 1,
+                            marke_vorher=97.608) is None
+
+
+def test_e41_meldung_schweigt_beim_stop_ohne_warten_und_ohne_position():
+    from strategy_core import PosState, Signal, SignalType
+    kerze = _c(2, 97.4, 97.5, 96.0, 96.2)
+    stop = [Signal(kerze.ts, SignalType.STOPLOSS, 96.2, 100, "x")]
+    assert main.e41_meldung(_e41_pos(2, 97.608), 1, stop, kerze, 1) is None
+    assert main.e41_meldung(_e41_pos(0), 0, [], kerze, 1) is None
+    assert main.e41_meldung(_e41_pos(0, None, 97.608, PosState.FLAT), 1, [], kerze, 1,
+                            marke_vorher=97.608) is None
+
+
+def test_plan_fuehrt_die_rueckeroberung_nur_wenn_sie_an_ist():
+    cs, fl, pos = _plan_szenario()
+    aus = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0}, pos)
+    assert "rueckeroberung" not in aus["stop"]
+    an = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0, "stop_rueckeroberung": 1}, pos)
+    assert an["stop"]["grund"] == "Invalidierung"
+    assert an["stop"]["rueckeroberung"] == 1 and an["stop"]["geprueft"] is False
+    assert abs(an["stop"]["boden"] - 98.0 * 0.95) < 1e-9
+    pos.stop_geprueft = 98.0
+    assert main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0, "stop_rueckeroberung": 1},
+                               pos)["stop"]["geprueft"] is True
+
+
+# ----------------------------- E40: STH-Kostenbasis als Zeile im Lage-Abruf (21.09.2026)
+
+_STH = {"wert": 71262.19, "datum": "2026-09-14", "quelle": "bitview.space"}
+
+
+def test_lage_abruf_uebernimmt_die_sth_kostenbasis():
+    cs, fl = _lage_kerzen()
+    out, dateien = _lage_lauf(cs, fl, sth=lambda: dict(_STH))
+    assert out["sth"] == _STH
+    assert dateien == ["config.json"]                   # weiterhin nichts veraendert
+
+
+def test_lage_abruf_ueberlebt_einen_sth_fehler():
+    """Die Quelle ist fremd und kann ausfallen. Dann fehlt eine Zeile - der Abruf
+    selbst muss trotzdem kommen."""
+    def kaputt():
+        raise RuntimeError("Quelle weg")
+    cs, fl = _lage_kerzen()
+    out, _ = _lage_lauf(cs, fl, sth=kaputt)
+    assert out is not None and out["sth"] is None and out["kurs"] == cs[-1].close
+
+
+def test_lage_abruf_holt_die_sth_im_normalfall_selbst():
+    """Ohne Angabe holt der Abruf die Marke selbst - sonst stuende die Zeile in keiner
+    echten Nachricht, nur in den Tests."""
+    import inspect
+    assert inspect.signature(main.lage_abruf).parameters["sth"].default is main.sth_kostenbasis
+
+
+def _sth_quellen(bitview=None, bgeo=None):
+    def holen(url):
+        if url == main.STH_BITVIEW:
+            if isinstance(bitview, Exception):
+                raise bitview
+            return (200, json.dumps(bitview), "") if bitview is not None else (503, "", "HTTP 503")
+        if url == main.STH_BGEOMETRICS:
+            return (200, json.dumps(bgeo), "") if bgeo is not None else (429, "", "HTTP 429")
+        raise AssertionError(url)
+    return holen
+
+
+def test_sth_kostenbasis_nimmt_den_juengsten_wert():
+    from datetime import date
+    start = (date(2026, 9, 18) - main.STH_BITVIEW_TAG0).days
+    s = main.sth_kostenbasis(_sth_quellen({"start": start, "data": [70000.0, 71000.0, 71262.19]}))
+    assert s == {"wert": 71262.19, "datum": "2026-09-20", "quelle": "bitview.space"}
+
+
+def test_sth_kostenbasis_faellt_auf_die_zweite_quelle_zurueck():
+    bgeo = [{"d": "2026-09-13", "sthRealizedPrice": "71100.5"},
+            {"d": "2026-09-14", "sthRealizedPrice": "71262.19"}]
+    for bitview in (None, RuntimeError("Netz weg"), {"start": 0, "data": []}):
+        s = main.sth_kostenbasis(_sth_quellen(bitview, bgeo))
+        assert s == {"wert": 71262.19, "datum": "2026-09-14", "quelle": "bitcoin-data.com"}, bitview
+
+
+def test_sth_kostenbasis_ohne_quelle_ist_none():
+    assert main.sth_kostenbasis(_sth_quellen(None, None)) is None
+
+
+def test_plan_nachgezogener_stop_bleibt_ohne_rueckeroberung():
+    """Die Regel gilt nur fuer den urspruenglichen Stop an der Invalidierung. Ein nach
+    Teilgewinnen nachgezogener Stop sichert Gewinn - der Plan darf dort keine Schonfrist
+    versprechen, die die Engine gar nicht gewaehrt."""
+    from strategy_core import PosState
+    cs, fl, pos = _plan_szenario()
+    pos.state, pos.tp_rungs = PosState.TP1, 1
+    p = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0, "trail_stop": True,
+                                     "stop_rueckeroberung": 1}, pos)
+    assert p["stop"]["grund"] == "Einstand (nachgezogen)"        # Vorprobe
+    assert "rueckeroberung" not in p["stop"]

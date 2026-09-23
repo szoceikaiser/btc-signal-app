@@ -1,4 +1,7 @@
-"""Sabotage-Probe fuer E40.1 (STH-Kostenbasis: Gegenpruefung und Vorfrage, 21.09.2026).
+"""Sabotage-Probe fuer E40.1 (STH-Kostenbasis: Gegenpruefung und Vorfrage, 21.09.2026)
+und die STH-Zeile im Lage-Abruf (ebenfalls 21.09.2026).
+
+Die Abruf-Funktionen stehen seit der Lage-Zeile in main.py (Backtest UND Abruf nutzen sie).
 
 Projektregel: Ein Test, den keine Sabotage rot faerbt, prueft nichts. Jede Zeile hier
 ist ein Fehler, den man beim Bauen wirklich machen koennte — und der die Engine still
@@ -14,19 +17,19 @@ from pathlib import Path
 ENG = Path(__file__).resolve().parent
 
 SABOTAGEN = [
-    ("bitview um einen Tag verschoben", "backtest.py",
+    ("bitview um einen Tag verschoben", "main.py",
      'STH_BITVIEW_TAG0 = date(2009, 1, 1)',
      'STH_BITVIEW_TAG0 = date(2009, 1, 2)'),
-    ("bitview ignoriert den Startindex", "backtest.py",
+    ("bitview ignoriert den Startindex", "main.py",
      '            out[STH_BITVIEW_TAG0 + timedelta(days=start + i)] = float(v)',
      '            out[STH_BITVIEW_TAG0 + timedelta(days=i)] = float(v)'),
-    ("bitview behaelt Nullwerte", "backtest.py",
+    ("bitview behaelt Nullwerte", "main.py",
      '        if isinstance(v, (int, float)) and v > 0:',
      '        if isinstance(v, (int, float)):'),
-    ("bitcoin-data: Text wird nicht in Zahlen gewandelt", "backtest.py",
+    ("bitcoin-data: Text wird nicht in Zahlen gewandelt", "main.py",
      '        out = {date.fromisoformat(p["d"]): float(p["sthRealizedPrice"])',
      '        out = {date.fromisoformat(p["d"]): p["sthRealizedPrice"]'),
-    ("bitcoin-data wird zweimal gefragt (Tageslimit)", "backtest.py",
+    ("bitcoin-data wird zweimal gefragt (Tageslimit)", "main.py",
      '    status, text, fehler = holen(STH_BGEOMETRICS)',
      '    holen(STH_BGEOMETRICS)\n    status, text, fehler = holen(STH_BGEOMETRICS)'),
     ("STH des selben Tages (kennt die Zukunft)", "backtest.py",
@@ -67,6 +70,38 @@ SABOTAGEN = [
     ("Vorfrage misst die beste Variante statt live", "backtest.py",
      '            _sthvor = sth_vorfrage(candles, sth_je_kerze(candles, _sth), _psigs, eff_start)',
      '            _sthvor = sth_vorfrage(candles, sth_je_kerze(candles, _sth), sigs, eff_start)'),
+    # --- STH-Kostenbasis als Zeile im Lage-Abruf (Kaiser 21.09.2026) --------------------
+    ("Abruf: nimmt den AELTESTEN statt den juengsten Wert", "main.py",
+     '            tag = max(werte)',
+     '            tag = min(werte)'),
+    ("Abruf: keine zweite Quelle", "main.py",
+     '    for quelle, abruf in (("bitview.space", sth_bitview),\n'
+     '                          ("bitcoin-data.com", sth_bgeometrics)):',
+     '    for quelle, abruf in (("bitview.space", sth_bitview),):'),
+    ("Abruf: Ausfall der ersten Quelle reisst alles mit", "main.py",
+     '        try:\n            werte, _fehler = abruf(holen)\n        except Exception:  # noqa: BLE001\n            werte = {}',
+     '        if True:\n            werte, _fehler = abruf(holen)\n        if False:\n            werte = {}'),
+    ("Lage-Abruf: STH-Fehler bricht den ganzen Abruf ab", "main.py",
+     '    try:\n        out["sth"] = sth()\n',
+     '    out["sth"] = sth()\n    try:\n        pass\n'),
+    ("Lage-Abruf: STH wird nie eingetragen", "main.py",
+     '        out["sth"] = sth()\n',
+     '        out["sth"] = None\n'),
+    ("Lage-Abruf: holt die STH im Normalfall nicht", "main.py",
+     '               dry_run: bool = False, sth=sth_kostenbasis) -> dict | None:',
+     '               dry_run: bool = False, sth=lambda: None) -> dict | None:'),
+    ("Nachricht: STH-Zeile fehlt", "telegram_notify.py",
+     '    zeilen += _sth_zeilen(l.get("sth"), l["kurs"])\n',
+     ''),
+    ("Nachricht: darueber und darunter vertauscht", "telegram_notify.py",
+     '    seite = "darueber" if abstand >= 0 else "darunter"',
+     '    seite = "darunter" if abstand >= 0 else "darueber"'),
+    ("Nachricht: Abstand gegen den Kurs statt gegen die Marke", "telegram_notify.py",
+     '    abstand = (kurs - w) / w * 100',
+     '    abstand = (kurs - w) / kurs * 100'),
+    ("Nachricht: leere STH zeigt eine Zeile", "telegram_notify.py",
+     '    if not sth or not sth.get("wert"):\n        return []',
+     '    if not sth:\n        return []'),
 ]
 
 def lauf():

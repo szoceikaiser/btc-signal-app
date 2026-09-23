@@ -12,7 +12,7 @@ import json
 import os
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 # E34: EINE Quelle fuer den Schlusssatz der Ampel. Bewusst importiert statt abgetippt -
 # ein zweiter Wortlaut, der irgendwann von diesem abweicht, waere genau der Satz, der
@@ -181,8 +181,26 @@ def format_plan(p: dict) -> str:
     _block("Nachkaufen:", p.get("nachkauf"))
     _block("Teilgewinne:", p.get("teilgewinn"))
     zeilen.append("")
-    zeilen.append(f"Stop {_fmt_usd(p['stop']['preis'])} — {p['stop']['grund']}, "
-                  f"bei Kerzenschluss {'darunter' if lang else 'darueber'}")
+    st = p["stop"]
+    seite = "darunter" if lang else "darueber"
+    if st.get("rueckeroberung") and st.get("geprueft"):
+        # E41: Die Marke wurde schon einmal unterschritten und zurueckerobert.
+        zeilen.append(f"Stop {_fmt_usd(st['preis'])} — {st['grund']}, schon einmal "
+                      f"zurueckerobert: naechster Kerzenschluss {seite} = Stop")
+    elif st.get("rueckeroberung"):
+        # E41 (live seit 21.09.2026): Der erste Schluss jenseits loest NICHT aus.
+        n = st["rueckeroberung"]
+        zeilen.append(f"Stop {_fmt_usd(st['preis'])} — {st['grund']}. Ein Kerzenschluss "
+                      f"{seite} loest noch nicht aus: Stop erst, wenn "
+                      f"{'auch die naechste Kerze' if n == 1 else f'{n} weitere Kerzen'} "
+                      f"{seite} schliess{'t' if n == 1 else 'en'} — ab "
+                      f"{_fmt_usd(st['boden'])} sofort")
+        if st.get("wartet"):
+            zeilen.append(f"  Achtung: Die letzte Kerze schloss schon {seite} — die Engine "
+                          f"wartet auf die Rueckeroberung.")
+    else:
+        zeilen.append(f"Stop {_fmt_usd(st['preis'])} — {st['grund']}, "
+                      f"bei Kerzenschluss {seite}")
     zeilen += _lage_zeilen(p.get("lage"))
     zeilen += _ampel_zeilen(p.get("ampel"))
     zeilen.append("")
@@ -288,6 +306,45 @@ def format_flush_aufloesung(w: dict, bestaetigt: bool) -> str:
         "Nichts zu tun. Die Warnung hat ihren Zweck erfuellt: hinschauen, abwarten,",
         "kein Geld riskiert.",
     ])
+
+
+def format_stop_rueckeroberung(m: dict) -> str:
+    """E41 (live seit 21.09.2026): Meldung der Rueckeroberungs-Regel.
+
+    "wartet":  Schluss jenseits der Marke, die Engine stoppt noch nicht.
+    "zurueck": Die Marke ist zurueckerobert und gilt jetzt als geprueft.
+    Ohne diese Nachricht saehe man bei einem knappen Schluss unter der Marke: nichts -
+    und wuesste nicht, ob die Engine wartet oder etwas uebersehen hat.
+    Handybreit (ZEILE_MAX), wie der Lage-Abruf.
+    """
+    lang = m.get("lang", True)
+    seite, gegen = ("unter", "ueber") if lang else ("ueber", "unter")
+    marke = _fmt_usd(m["marke"])
+    if m["art"] == "wartet":
+        abstand = f"{abs(m['kurs'] - m['marke']) / m['marke'] * 100:.1f}".replace(".", ",")
+        noch = m.get("noch", 1)
+        naechste = "die naechste Kerze" if noch == 1 else f"eine der naechsten {noch} Kerzen"
+        zeilen = ["\u23f3 STOP WARTET", f"BTC {_fmt_usd(m['kurs'])}", ""]
+        zeilen += _umbruch(f"Kerzenschluss {abstand} % {seite} der Invalidierung {marke}.")
+        zeilen += [""]
+        zeilen += _umbruch("Nach der Rueckeroberungs-Regel noch kein Stop:")
+        zeilen += _umbruch(f"- Schliesst {naechste} wieder {gegen} {marke}, hat die "
+                           "Marke gehalten.")
+        zeilen += _umbruch("- Sonst kommt der Stop.")
+        if noch > 1:
+            # Bei einer Kerze Wartezeit ist der harte Boden hier schon vorbei: Die
+            # naechste Kerze jenseits der Marke stoppt ohnehin.
+            zeilen += _umbruch(f"- Schluss {seite} {_fmt_usd(m['boden'])}: sofort Stop.")
+        zeilen += _umbruch("- Bis dahin kein Nachkauf.")
+    else:
+        zeilen = ["\u2705 MARKE ZURUECKEROBERT", f"BTC {_fmt_usd(m['kurs'])}", ""]
+        zeilen += _umbruch(f"Schluss wieder {gegen} {marke}. Die Marke hat gehalten.")
+        zeilen += [""]
+        zeilen += _umbruch(f"Ab jetzt gilt sie als geprueft: Der naechste Kerzenschluss "
+                           f"{seite} {marke} loest den Stop sofort aus.")
+    zeilen += ["", _fmt_ts(m["ts"]), ""]
+    zeilen += _umbruch("Kein Trade-Auto-Pilot: selbst pruefen.")
+    return "\n".join(zeilen)
 
 
 def send_text(text: str, dry_run: bool = False) -> str:
@@ -407,6 +464,29 @@ def _ampel_kurz(ampel: dict | None) -> list[str]:
     return out
 
 
+def _sth_zeilen(sth: dict | None, kurs: float) -> list[str]:
+    """E40 (Kaiser 21.09.2026): die STH-Kostenbasis als Zeile im Lage-Abruf.
+
+    Der durchschnittliche Einstand aller Coins, die juenger als rund 150 Tage sind -
+    eine Marke, die Furkan nennt. Reine Anzeige: Als Regel war sie im Messfenster nicht
+    pruefbar (84 % der Kerzen darunter, nur 7 Wechsel). Ohne Wert keine Zeile.
+    """
+    if not sth or not sth.get("wert"):
+        return []
+    w = float(sth["wert"])
+    abstand = (kurs - w) / w * 100
+    seite = "darueber" if abstand >= 0 else "darunter"
+    try:
+        stand = date.fromisoformat(sth["datum"]).strftime("%d.%m.%Y")
+    except Exception:  # noqa: BLE001
+        stand = "?"
+    zeilen = ["", f"STH-Kostenbasis: {_fmt_usd(w)}",
+              f"Kurs {abs(abstand):.1f} % {seite}".replace(".", ",")]
+    zeilen += _umbruch(f"(Einstand der kurzfristigen Halter, Stand {stand}. Nur "
+                       "Anzeige, keine Regel.)")
+    return zeilen
+
+
 def format_lage(l: dict, ts_ms: int) -> str:
     """Die Lage auf Abruf (E35, Kaiser 17.09.2026).
 
@@ -441,6 +521,7 @@ def format_lage(l: dict, ts_ms: int) -> str:
                    f"0.786-Zone: {_fmt_usd(l['level_0786'])}",
                    f"Ungueltig ab: {_fmt_usd(l['invalidation'])}"]
 
+    zeilen += _sth_zeilen(l.get("sth"), l["kurs"])
     zeilen += _orderflow_zeilen(l.get("orderflow"), l.get("fenster_h"))
     zeilen += _lage_kurz(l.get("lage"))
     zeilen += _ampel_kurz(l.get("ampel"))
