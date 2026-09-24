@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1790179200000,
+ "last_signal_ts": 1790193600000,
  "retrace_extreme": 83500.01,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -46,14 +46,14 @@
   "richtung": "LONG",
   "anteil_pct": 25,
   "einstand": 83760.855,
-  "kurs": 84518.0,
+  "kurs": 84397.6,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.518 $ ueber EMA200 (70.750 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.398 $ ueber EMA200 (70.748 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
-   "spot": "nachgelassen",
-   "spot_text": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)"
+   "spot": "schwach",
+   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
   "ampel": {
    "stufe": "guenstig",
@@ -174,17 +174,17 @@
   "ampel_filter": "off",
   "stop_rueckeroberung": 1
  },
- "updated_at": "2026-09-23T22:38:51Z",
- "last_close": 84518.0,
+ "updated_at": "2026-09-24T00:02:24Z",
+ "last_close": 84397.6,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.518 $ ueber EMA200 (70.750 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.398 $ ueber EMA200 (70.748 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
-   "spot": "nachgelassen",
-   "spot_text": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)"
+   "spot": "schwach",
+   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
   "ampel": {
    "stufe": "gemischt",
