@@ -374,6 +374,16 @@
    "stop_ref": 80126.04,
    "tag": "",
    "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1790308800000,
+   "type": "NACHKAUF",
+   "price": 84043.96,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 83864 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 80126.04,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   }
  ]
 }
