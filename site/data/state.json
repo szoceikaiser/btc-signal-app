@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1790308800000,
+ "last_signal_ts": 1790323200000,
  "retrace_extreme": 82874.93,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -46,27 +46,27 @@
   "richtung": "LONG",
   "anteil_pct": 45,
   "einstand": 83886.67944444445,
-  "kurs": 84043.96,
+  "kurs": 84582.64,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.044 $ ueber EMA200 (71.130 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.583 $ ueber EMA200 (71.130 $)",
    "struktur": "gebrochen",
    "struktur_text": "Struktur gebrochen - neues Bein 87.396 $ -> 82.875 $ setzt den Trend nicht fort",
-   "spot": "schwach",
-   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
+   "spot": "zurueckgekehrt",
+   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)"
   },
   "ampel": {
-   "stufe": "unguenstig",
+   "stufe": "guenstig",
    "richtung": "LONG",
    "dafuer": [
-    "Trend"
-   ],
-   "dagegen": [
-    "Struktur",
+    "Trend",
     "Spot-Nachfrage"
    ],
+   "dagegen": [
+    "Struktur"
+   ],
    "gezaehlt": 3,
-   "text": "UNGUENSTIG \u2014 1 von 3 spricht dafuer"
+   "text": "GUENSTIG \u2014 2 von 3 sprechen dafuer"
   },
   "nachkauf": [
    {
@@ -174,29 +174,28 @@
   "ampel_filter": "off",
   "stop_rueckeroberung": 1
  },
- "updated_at": "2026-09-25T09:19:31Z",
- "last_close": 84043.96,
+ "updated_at": "2026-09-25T12:02:23Z",
+ "last_close": 84582.64,
  "zonen_vorschau": {
   "richtung": "SHORT",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.044 $ ueber EMA200 (71.130 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.583 $ ueber EMA200 (71.130 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 87.396 $ -> 82.875 $",
-   "spot": "schwach",
-   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
+   "spot": "zurueckgekehrt",
+   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)"
   },
   "ampel": {
-   "stufe": "gemischt",
+   "stufe": "guenstig",
    "richtung": "LONG",
    "dafuer": [
-    "Trend"
-   ],
-   "dagegen": [
+    "Trend",
     "Spot-Nachfrage"
    ],
+   "dagegen": [],
    "gezaehlt": 2,
-   "text": "GEMISCHT \u2014 1 von 2 spricht dafuer"
+   "text": "GUENSTIG \u2014 2 von 2 sprechen dafuer"
   },
   "impuls_start": 87395.67,
   "impuls_ende": 82874.93,
