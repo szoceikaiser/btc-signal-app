@@ -1951,3 +1951,117 @@ def test_e434_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():
     q = inspect.getsource(backtest.main)
     assert 'e434_abschnitt(results, halves, panel_cfg["label"], _e434)' in q
     assert "e434_umklassifiziert(candles, flow, eff_start, oi_map)" in q
+
+
+# ------------------------- E43.6: Nachmessung mit genau einem Unterschied ------------
+
+_E436_ZEILEN = {
+    backtest.E436_REST: "rest_halten",
+    backtest.E436_STRICT: "strict_confirm",
+    backtest.E436_T1: "confirm_t1",
+    backtest.E436_COOLDOWN: "cooldown_h",
+}
+
+
+def test_e436_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live():
+    """Jede der vier E43.6-Zeilen hat GENAU EINEN Unterschied zur Panel-Zeile (Vorbild
+    test_e43_bein_richtung_ist_live_und_das_panel_ist_mitgewandert)."""
+    panel = [v for v in backtest.GRID if v.get("panel")][0]
+    basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
+    for label, key in _E436_ZEILEN.items():
+        z = _zeile(label)
+        hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+        abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+        assert abweichend == {key}, (label, abweichend)
+
+
+def test_e436_zeilen_setzen_die_geplanten_werte():
+    assert _zeile(backtest.E436_REST)["rest_halten"] is True
+    assert _zeile(backtest.E436_STRICT)["strict_confirm"] is True
+    assert _zeile(backtest.E436_T1)["confirm_t1"] is True
+    assert _zeile(backtest.E436_T1)["strict_confirm"] is False   # bewusst NICHT kombiniert
+    assert _zeile(backtest.E436_COOLDOWN)["cooldown_h"] == 48.0
+
+
+def test_e436_einschalten_nur_wenn_beide_haelften_klar_besser():
+    live = _hz(10.0, 5.0)
+    assert backtest.e436_einschalten(live, _hz(11.0, 6.0))["einschalten"] is True   # genau 1,0
+    assert backtest.e436_einschalten(live, _hz(11.0, 5.9))["einschalten"] is False  # H2 Rauschen
+    assert backtest.e436_einschalten(live, _hz(10.9, 9.0))["einschalten"] is False  # H1 Rauschen
+    assert backtest.e436_einschalten(live, _hz(9.0, 4.0))["einschalten"] is False   # schlechter
+
+
+def test_e436_einschalten_nicht_bei_zu_tiefem_rueckgang():
+    live = _hz(dd=-9.0)
+    gut = dict(h1=12.0, h2=7.0)
+    assert backtest.e436_einschalten(live, _hz(dd=-10.0, **gut))["einschalten"] is True  # Grenze
+    u = backtest.e436_einschalten(live, _hz(dd=-10.1, **gut))
+    assert u["rueckgang_ok"] is False and u["einschalten"] is False
+
+
+def _e436_sig(ts, typ, reason=""):
+    from strategy_core import Signal
+    return Signal(ts, typ, 0.0, 0, reason)
+
+
+def test_e436_rest_halten_zaehlen_zaehlt_nur_das_gegen_muster_signal():
+    from strategy_core import SignalType
+    sigs = [
+        _e436_sig(1, SignalType.KAUF_2, "Golden Pocket"),
+        _e436_sig(2, SignalType.VERKAUF_REST, "Gegen-Muster am Ziel: DERIVATE_PUMP"),
+        _e436_sig(3, SignalType.TEILVERKAUF_1, "Extension 1.0 erreicht"),
+        _e436_sig(4, SignalType.SHORT_COVER_REST, "Gegen-Muster am Ziel: CAPITULATION_RESET"),
+        _e436_sig(5, SignalType.STOPLOSS, "Kerzenschluss unter Invalidierung"),
+    ]
+    assert backtest.e436_rest_halten_zaehlen(sigs) == 2
+    assert backtest.e436_rest_halten_zaehlen([]) == 0
+
+
+def test_e436_cooldown_zaehlen_zaehlt_nur_einstiege_kurz_nach_einem_stop():
+    from strategy_core import SignalType
+    h = 3600 * 1000
+    sigs = [
+        _e436_sig(0, SignalType.KAUF_2),
+        _e436_sig(10 * h, SignalType.STOPLOSS),
+        _e436_sig(10 * h + 24 * h, SignalType.KAUF_1),     # 24h nach Stop -> Treffer
+        _e436_sig(10 * h + 60 * h, SignalType.KAUF_2),      # 60h nach Stop -> kein Treffer
+        _e436_sig(10 * h + 70 * h, SignalType.SHORT_STOPLOSS),
+        _e436_sig(10 * h + 90 * h, SignalType.SHORT_1),     # 20h nach dem 2. Stop -> Treffer
+    ]
+    assert backtest.e436_cooldown_zaehlen(sigs, cooldown_h=48.0) == 2
+    assert backtest.e436_cooldown_zaehlen(sigs, cooldown_h=0.0) == 0
+    assert backtest.e436_cooldown_zaehlen([], cooldown_h=48.0) == 0
+
+
+def test_e436_abschnitt_meldet_urteil_und_kein_urteil_ohne_treffer():
+    def r(label, rendite, dd, n=5):
+        return ({"label": label}, [{}] * n, {}, {"rendite_pct": rendite,
+                                                  "max_drawdown_pct": dd})
+
+    def h(label, h1, h2):
+        return ({"label": label}, {"rendite_pct": h1}, {"rendite_pct": h2})
+
+    labels = ["LIVE", backtest.E436_REST, backtest.E436_STRICT,
+              backtest.E436_T1, backtest.E436_COOLDOWN]
+    res = [r(labels[0], 25.0, -9.9)] + [r(lb, 28.0, -10.2) for lb in labels[1:]]
+    hal = [h(labels[0], 20.0, 5.0)] + [h(lb, 21.5, 6.2) for lb in labels[1:]]
+    strict_p = {"kerzen": 50, "lockerer_waer_wahr": 4}
+    t1_p = {"ersteinstiege": 10, "ohne_bestaetigung": 3}
+    text = "\n".join(backtest.e436_abschnitt(res, hal, "LIVE", 2, strict_p, t1_p, 1))
+    assert text.count("Regel erfuellt") == 4
+
+    text = "\n".join(backtest.e436_abschnitt(res, hal, "LIVE", 0, strict_p, t1_p, 1))
+    abschnitt_rest = text.split("### `strict_confirm`")[0]
+    assert "Kein Urteil" in abschnitt_rest and "Regel erfuellt" not in abschnitt_rest
+
+
+def test_e436_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    assert ('e436_abschnitt(results, halves, panel_cfg["label"],\n'
+            '                               _e436_rest, _e436_strict, _e436_t1, '
+            '_e436_cooldown)' in q) or "e436_abschnitt(results, halves" in q
+    assert "e436_rest_halten_zaehlen(_panel_sigs)" in q
+    assert "e436_strict_confirm_zaehlen(candles, flow, eff_start)" in q
+    assert "e436_confirm_t1_zaehlen(_panel_sigs, candles, flow)" in q
+    assert "e436_cooldown_zaehlen(_panel_sigs)" in q

@@ -125,6 +125,10 @@ def V(label, panel=False, **kw):
 # evaluate-Defaults muss dieses Flag mitwandern.
 E433_USD = "LIVE-heute +Muster 2 in Dollar (E43.3)"
 E434_BTC = "LIVE-heute +OI in Kontrakten (E43.4)"
+E436_REST = "LIVE-heute +Rest halten (E43.6)"
+E436_STRICT = "LIVE-heute +Strenge Bestaetigung (E43.6)"
+E436_T1 = "LIVE-heute +Bestaetigung am 0.5-Level (E43.6)"
+E436_COOLDOWN = "LIVE-heute +Sperrfrist nach Stop 48h (E43.6)"
 GRID = [
     V("nur Long (Basis)", bias_short=False),
     V("+Kaufleiter", bias_short=False, buy_ladder=True),
@@ -573,6 +577,33 @@ GRID = [
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       bein_richtung="bias", muster_oi="btc"),
+    # ---------------------------------------------------------------- E43.6 (26.09.2026)
+    # Nachmessung vier laengst gebauter, aber nie mit genau einem Unterschied gegen die
+    # heutige Live-Zeile gemessener Schalter (Pruefbericht Teil C). Entscheidungsregel
+    # VOR der Messung (docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md, E43.6) - dieselbe wie bei
+    # E41/E43.2/E43.3/E43.4: live nur, wenn in BEIDEN Fensterhaelften mind. 1 Punkt
+    # besser UND Rueckgang nicht mehr als 1 Punkt tiefer. Jede Zeile hat GENAU EINEN
+    # Unterschied zur Panel-Zeile. Der Bericht prueft das selbst (e436_abschnitt).
+    V(E436_REST,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", rest_halten=True),
+    V(E436_STRICT,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", strict_confirm=True),
+    V(E436_T1,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", confirm_t1=True),
+    V(E436_COOLDOWN,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", cooldown_h=48.0),
     V("Long+Short (Ref)"),
 ]
 
@@ -2125,6 +2156,199 @@ def e434_abschnitt(results: list, halves: list, basis_label: str, umkl: dict) ->
     return z
 
 
+# ---------------------------------------------------------------- E43.6 (26.09.2026)
+# Nachmessung von vier Schaltern, die im Code schon existieren und rechnen, aber nie mit
+# GENAU EINEM Unterschied gegen die heutige Live-Zeile gemessen wurden (Pruefbericht
+# Teil C). Entscheidungsregel VOR der Messung (docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md,
+# E43.6) - dieselbe wie bei E41/E43.2/E43.3/E43.4.
+E436_RAUSCHGRENZE = 1.0
+E436_DD_TOLERANZ = 1.0
+
+
+def e436_einschalten(live: dict, x: dict) -> dict:
+    """Entscheidungsregel fuer alle vier E43.6-Schalter, festgelegt VOR der Messung.
+
+    live/x: {"h1", "h2", "dd"} (dd negativ). Einschalten nur, wenn BEIDES gilt:
+      1. "x" ist in BEIDEN Fensterhaelften um mindestens E436_RAUSCHGRENZE Punkte besser.
+      2. Der Rueckgang liegt mit "x" um NICHT mehr als E436_DD_TOLERANZ Punkte tiefer.
+    """
+    beide = (x["h1"] - live["h1"] >= E436_RAUSCHGRENZE
+             and x["h2"] - live["h2"] >= E436_RAUSCHGRENZE)
+    dd_ok = x["dd"] >= live["dd"] - E436_DD_TOLERANZ
+    return {"beide_haelften_besser": beide, "rueckgang_ok": dd_ok,
+            "einschalten": beide and dd_ok}
+
+
+def e436_rest_halten_zaehlen(sigs: list) -> int:
+    """Vorprobe fuer `rest_halten`: wie oft haette die Regel 'Rest schliessen bei
+    Gegen-Muster' (strategy_core.py: `exit_pat and not rest_halten`) im Fenster
+    ueberhaupt ausgeloest - gezaehlt an den tatsaechlichen Panel-Signalen (rest_halten
+    ist dort aus, wie live). Genau diese Ereignisse veraendert der Schalter: der Rest
+    liefe dann bis zum Stop statt sofort verkauft zu werden. 0 Treffer -> die Zeile
+    misst nichts."""
+    return sum(1 for s in sigs if s.reason.startswith("Gegen-Muster am Ziel"))
+
+
+def e436_strict_confirm_zaehlen(candles: list, flow: list, start_ms: int) -> dict:
+    """Vorprobe fuer `strict_confirm`: an wie vielen Kerzen im Fenster waeren
+    `_confirm_long()`/`_confirm_short()` beim heutigen (lockeren) Massstab wahr, beim
+    strengen (`cvd_up UND fund_ok` statt ODER, ohne 'starke' Bestaetigung durch
+    Muster 4/DERIVATE_PUMP/Muster 5) aber falsch? Das sind die Einstiege, die
+    `strict_confirm` verhindern wuerde. Formel woertlich aus strategy_core._confirm_long/
+    _confirm_short uebernommen (muster5_entry=False wie in der Panel-Zeile).
+    classify_pattern liest nur die letzten 12 Kerzen - ein 12er-Ausschnitt genuegt."""
+    from strategy_core import Pattern, classify_pattern
+    out = {"kerzen": 0, "lockerer_waer_wahr": 0}
+    for i, c in enumerate(candles):
+        if c.ts < start_ms or i < 11:
+            continue
+        cs, fl = candles[i - 11:i + 1], flow[i - 11:i + 1]
+        pattern = classify_pattern(cs, fl)
+        out["kerzen"] += 1
+        cvd_up = len(fl) >= 3 and fl[-1].spot_cvd > fl[-3].spot_cvd
+        fund_ok = bool(fl) and fl[-1].funding <= 0
+        strong_long = pattern == Pattern.CAPITULATION_RESET
+        locker_long, streng_long = (strong_long or fund_ok or cvd_up,
+                                     strong_long or (cvd_up and fund_ok))
+        cvd_dn = len(fl) >= 3 and fl[-1].spot_cvd < fl[-3].spot_cvd
+        fund_hot = bool(fl) and fl[-1].funding > 0
+        strong_short = pattern == Pattern.DERIVATE_PUMP
+        locker_short, streng_short = (strong_short or fund_hot or cvd_dn,
+                                       strong_short or (cvd_dn and fund_hot))
+        out["lockerer_waer_wahr"] += (locker_long and not streng_long)
+        out["lockerer_waer_wahr"] += (locker_short and not streng_short)
+    return out
+
+
+def e436_confirm_t1_zaehlen(sigs: list, candles: list, flow: list) -> dict:
+    """Vorprobe fuer `confirm_t1`: wie viele Ersteinstiege am 0,5-Level (KAUF_1/SHORT_1)
+    haetten im Fenster heute GANZ OHNE Order-Flow-Bestaetigung ausgeloest - der heutige
+    (lockere) Massstab aus `_confirm_long`/`_confirm_short` waere dort `False`. Genau
+    diese Zahl wuerde `confirm_t1` blockieren."""
+    from strategy_core import Pattern, SignalType, classify_pattern
+    ts_index = {c.ts: i for i, c in enumerate(candles)}
+    out = {"ersteinstiege": 0, "ohne_bestaetigung": 0}
+    for s in sigs:
+        if s.type not in (SignalType.KAUF_1, SignalType.SHORT_1):
+            continue
+        i = ts_index.get(s.ts)
+        if i is None or i < 11:
+            continue
+        out["ersteinstiege"] += 1
+        cs, fl = candles[i - 11:i + 1], flow[i - 11:i + 1]
+        pattern = classify_pattern(cs, fl)
+        if s.type == SignalType.KAUF_1:
+            cvd_up = len(fl) >= 3 and fl[-1].spot_cvd > fl[-3].spot_cvd
+            fund_ok = bool(fl) and fl[-1].funding <= 0
+            bestaetigt = pattern == Pattern.CAPITULATION_RESET or fund_ok or cvd_up
+        else:
+            cvd_dn = len(fl) >= 3 and fl[-1].spot_cvd < fl[-3].spot_cvd
+            fund_hot = bool(fl) and fl[-1].funding > 0
+            bestaetigt = pattern == Pattern.DERIVATE_PUMP or fund_hot or cvd_dn
+        out["ohne_bestaetigung"] += not bestaetigt
+    return out
+
+
+def e436_cooldown_zaehlen(sigs: list, cooldown_h: float = 48.0) -> int:
+    """Vorprobe fuer `cooldown_h`: an wie vielen Stellen im Fenster waere ein neuer
+    Einstieg innerhalb von `cooldown_h` Stunden nach einem Stop erfolgt? Nur diese
+    Faelle veraendert der Schalter."""
+    from strategy_core import SignalType
+    entry_types = {SignalType.KAUF_1, SignalType.KAUF_2, SignalType.SHORT_1, SignalType.SHORT_2}
+    stop_types = {SignalType.STOPLOSS, SignalType.SHORT_STOPLOSS}
+    grenze_ms = cooldown_h * 3600 * 1000
+    last_stop_ts, n = -1, 0
+    for s in sorted(sigs, key=lambda x: x.ts):
+        if s.type in stop_types:
+            last_stop_ts = s.ts
+        elif (s.type in entry_types and last_stop_ts >= 0
+              and (s.ts - last_stop_ts) < grenze_ms):
+            n += 1
+    return n
+
+
+def e436_abschnitt(results: list, halves: list, basis_label: str,
+                    rest_n: int, strict_p: dict, t1_p: dict, cooldown_n: int) -> list:
+    """Berichtsabschnitt E43.6: alle vier Zeilen gegen die Live-Zeile, je Vorprobe und
+    Urteil nach der vorab festgelegten Entscheidungsregel (Vorbild e433_abschnitt)."""
+    voll = {r[0]["label"]: r for r in results}
+    halb = {h[0]["label"]: (h[1], h[2]) for h in halves}
+    labels = (E436_REST, E436_STRICT, E436_T1, E436_COOLDOWN)
+    if any(x not in voll or x not in halb for x in (basis_label,) + labels):
+        return []
+
+    def _kz(label: str) -> dict:
+        _cfg, sigs, _sc, p = voll[label]
+        h1, h2 = halb[label]
+        return {"rendite": p["rendite_pct"], "dd": p.get("max_drawdown_pct", 0.0),
+                "h1": h1["rendite_pct"], "h2": h2["rendite_pct"], "n": len(sigs)}
+
+    live = _kz(basis_label)
+
+    def _zeile(name: str, v: dict) -> str:
+        return (f"| {name} | {v['rendite']:+.1f} % | {v['dd']:.1f} % | {v['h1']:+.1f} % | "
+                f"{v['h2']:+.1f} % | {v['n']} |")
+
+    ja = lambda b: "**ja**" if b else "nein"
+
+    z = ["", "## E43.6: Nachmessung mit genau einem Unterschied", "",
+         "Pruefbericht Teil C: vier Schalter, die im Code schon existieren und rechnen, "
+         "aber nie mit genau einem Unterschied gegen die heutige Live-Zeile gemessen "
+         "wurden. Entscheidungsregel wie bei E41/E43.2/E43.3/E43.4: live nur, wenn in "
+         "BEIDEN Fensterhaelften mindestens 1 Punkt besser UND der Rueckgang nicht mehr "
+         "als 1 Punkt tiefer liegt.", "",
+         "| Variante | Rendite | Rueckgang | H1 | H2 | Signale |",
+         "|---|---:|---:|---:|---:|---:|", _zeile("**Live**", live)]
+
+    def _urteil(label: str, treffer: int, vorprobe_text: str) -> None:
+        nonlocal z
+        v = _kz(label)
+        z.append(_zeile(label, v))
+        z += ["", f"**Vorprobe im Datensatz:** {vorprobe_text}"]
+        if not treffer:
+            z += ["", "**Kein Urteil:** Die Vorprobe zaehlt 0 Ereignisse - der Schalter "
+                  "aendert im Fenster nichts, die Zeile ist eine Kopie der Live-Zeile.", ""]
+            return
+        u = e436_einschalten(live, v)
+        z += ["", "Urteil nach der Entscheidungsregel (vorab festgelegt):",
+              f"- In beiden Haelften mindestens {E436_RAUSCHGRENZE:.0f} Punkt besser: "
+              f"{ja(u['beide_haelften_besser'])} (H1 {v['h1'] - live['h1']:+.1f}, "
+              f"H2 {v['h2'] - live['h2']:+.1f} Punkte gegen live)",
+              f"- Rueckgang nicht mehr als {E436_DD_TOLERANZ:.0f} Punkt tiefer: "
+              f"{ja(u['rueckgang_ok'])} ({v['dd'] - live['dd']:+.1f} Punkte gegen live)"]
+        if u["einschalten"]:
+            z.append("- **Regel erfuellt.** Der Schalter darf nach Kaisers Go live gehen; "
+                      "dann wandert `panel=True` auf diese Zeile, die alte Rechnung bleibt "
+                      "als Ausschalt-Probe im Gitter.")
+        else:
+            z.append("- **Regel nicht erfuellt - der Schalter bleibt aus.**")
+        z.append("")
+
+    z += ["", "### `rest_halten`", ""]
+    _urteil(E436_REST, rest_n,
+            f"{rest_n} abgeschlossene Positionen im Fenster, an denen 'Rest schliessen "
+            "bei Gegen-Muster' (`exit_pat and not rest_halten`) ausgeloest hat.")
+
+    z += ["", "### `strict_confirm`", ""]
+    sc_n = strict_p.get("lockerer_waer_wahr", 0)
+    _urteil(E436_STRICT, sc_n,
+            f"{sc_n} von {strict_p.get('kerzen', 0)} Kerzen im Fenster, an denen der "
+            "heutige (lockere) Massstab wahr waere, der strenge aber falsch.")
+
+    z += ["", "### `confirm_t1`", ""]
+    t1_n = t1_p.get("ohne_bestaetigung", 0)
+    _urteil(E436_T1, t1_n,
+            f"{t1_n} von {t1_p.get('ersteinstiege', 0)} Ersteinstiegen am 0,5-Level im "
+            "Fenster ganz ohne Order-Flow-Bestaetigung.")
+
+    z += ["", "### `cooldown_h`", ""]
+    _urteil(E436_COOLDOWN, cooldown_n,
+            f"{cooldown_n} neue Einstiege im Fenster innerhalb von 48 Stunden nach einem "
+            "Stop.")
+
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -2800,6 +3024,24 @@ def main():
         _e434, _e434fehler = {}, f"Vorprobe nicht gerechnet ({exc})"
         print(f"E43.4: {_e434fehler}")
 
+    # --- E43.6: Vorproben im Datensatz (rest_halten, strict_confirm, confirm_t1,
+    # cooldown_h - aendern die vier Schalter im Fenster ueberhaupt etwas?) --------------
+    try:
+        _panel_sigs = next((r[1] for r in results if r[0].get("panel")), [])
+        _e436_rest = e436_rest_halten_zaehlen(_panel_sigs)
+        _e436_strict = e436_strict_confirm_zaehlen(candles, flow, eff_start)
+        _e436_t1 = e436_confirm_t1_zaehlen(_panel_sigs, candles, flow)
+        _e436_cooldown = e436_cooldown_zaehlen(_panel_sigs)
+        _e436fehler = ""
+        print(f"E43.6: rest_halten {_e436_rest} Treffer, strict_confirm "
+              f"{_e436_strict['lockerer_waer_wahr']}/{_e436_strict['kerzen']}, confirm_t1 "
+              f"{_e436_t1['ohne_bestaetigung']}/{_e436_t1['ersteinstiege']}, cooldown_h "
+              f"{_e436_cooldown} Treffer.")
+    except Exception as exc:  # noqa: BLE001
+        _e436_rest, _e436_strict, _e436_t1, _e436_cooldown = 0, {}, {}, 0
+        _e436fehler = f"Vorprobe nicht gerechnet ({exc})"
+        print(f"E43.6: {_e436fehler}")
+
     # Auswahl: primaer Rendite (das Geld-Maß), dann Recall, dann Praezision
     best = max(results, key=lambda r: (r[3]["rendite_pct"], r[2]["recall"], r[2]["precision"]))
     best_cfg, sigs, sc, pnl = best
@@ -3195,6 +3437,13 @@ def main():
         _e434 and [h for h in halves if h[0]["label"] == E434_BTC], _e434fehler
         or "die Zeile mit muster_oi=btc fehlt im Gitter oder in der Halbierung",
         lambda: e434_abschnitt(results, halves, panel_cfg["label"], _e434),
+    ) + abschnitt_oder_grund(
+        "E43.6: Nachmessung mit genau einem Unterschied",
+        not _e436fehler and [h for h in halves if h[0]["label"] in
+                             (E436_REST, E436_STRICT, E436_T1, E436_COOLDOWN)] or None,
+        _e436fehler or "eine der vier E43.6-Zeilen fehlt im Gitter oder in der Halbierung",
+        lambda: e436_abschnitt(results, halves, panel_cfg["label"],
+                               _e436_rest, _e436_strict, _e436_t1, _e436_cooldown),
     ) + [
         "",
         "## Einschraenkungen",

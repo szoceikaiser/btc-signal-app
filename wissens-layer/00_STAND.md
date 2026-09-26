@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (10)**
+> Stand: **26.09.2026 (11)**
 
 ## Lage
 
@@ -22,6 +22,13 @@
   Fensterhälften ≥ 1 Punkt besser, Rückgang 1,0 Punkt flacher statt tiefer) und ist seit
   26.09.2026 live (`site/data/config.json`, Panel-Zeile in `backtest.py` mitgewandert).
   Einzelheiten und Messwerte: `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`.
+- **E43.6 gebaut (Arbeitszweig `claude/e43-6-gitterzeilen-eo6mzb`), noch NICHT
+  gemessen:** vier Gitterzeilen mit je genau einem Unterschied zur Live-Zeile
+  (`rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`) plus Vorproben und
+  Berichtsabschnitt in `engine/backtest.py`, **501 Tests grün** auf dem Zweig. Diese
+  Sitzung hatte keinen Netzzugriff auf Binance/Coinalyze — der echte
+  `python3 backtest.py`-Lauf mit den vier Zeilen steht noch aus. Alle vier Schalter
+  bleiben bis dahin aus. Einzelheiten: `02_status/UEBERGABE.md` (16).
 - Letzte Live-Änderung am Handelsverhalten davor: **E41, Kaisers Rückeroberungs-Regel**
   (`stop_rueckeroberung: 1`), live seit 21.09.2026.
 - **Streitpunkt dazu (erledigt 26.09.2026, siehe oben):** Die Ausschalt-Regel für E41

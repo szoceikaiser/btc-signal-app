@@ -18,7 +18,7 @@
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 210 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"usd"`. Seit 26.09.2026 in `main` (Kaisers Go), 488 Tests, `sabotage_e434.py` 37/37 |
 | E43.4b | OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar (A3 in der Anzeige) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main`), 493 Tests, `sabotage_e434b.py` 9/9 |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
-| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **BAUPLAN GESCHRIEBEN** 26.09.2026, Muster-5-Wiederholung bewusst zurückgestellt (siehe Abschnitt E43.6) — wartet auf Kaisers Go zum Bauen |
+| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **GEBAUT** 26.09.2026 (Arbeitszweig `claude/e43-6-gitterzeilen-eo6mzb`), 501 Tests grün. **NOCH NICHT GEMESSEN** — kein Netzzugriff in der bauenden Sitzung, echter `python3 backtest.py`-Lauf steht noch aus (siehe Abschnitt E43.6) |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
 
 ### Aufwand je Etappe (Kaisers Wunsch 26.09.2026: Tokens sparen, wo es geht)
@@ -749,8 +749,21 @@ zweiten Zeile, und der Pfeil gehört sichtbar zu den Kontrakten.
 ## E43.6 — Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`,
 `confirm_t1`, `cooldown_h`
 
-**Noch nicht gebaut.** Dieser Abschnitt ist der Bauplan — Kaiser sieht ihn, bevor etwas
-gebaut wird (Vorbild E43.3/E43.4: erst der Plan, dann sein „Ja").
+**GEBAUT 26.09.2026** (Arbeitszweig `claude/e43-6-gitterzeilen-eo6mzb`): die vier
+Gitterzeilen, die vier Vorproben und der Berichtsabschnitt `e436_abschnitt` stehen in
+`engine/backtest.py`, verdrahtet wie `e433_abschnitt`/`e434_abschnitt`. **501 Tests
+grün** (Ausgangsbasis 493, 8 neue: je ein Test „genau ein Unterschied zur Panel-Zeile"
+für alle vier Zeilen, die Entscheidungsregel, zwei Zähl-Funktionen mit synthetischen
+Signal-Listen, der Berichtsabschnitt und die Verdrahtung in `main()`). Keine eigene
+Sabotage-Datei, wie geplant.
+
+**NOCH NICHT GEMESSEN:** Die bauende Sitzung hatte keinen Netzzugriff auf
+Binance/Coinalyze (`fetch_candles_range` scheitert am Tunnel), ein echter
+`python3 backtest.py`-Lauf gegen den realen Datensatz war deshalb nicht möglich. Die vier
+Schalter bleiben bis zur echten Messung **aus**. Nächster Schritt: in einer Sitzung mit
+Netzzugriff `python3 backtest.py` laufen lassen, Abschnitt „E43.6" im Bericht lesen, hier
+je Schalter „Messung E43.6" mit Ergebnis nachtragen (Vorbild „Messung E43.3“/„Messung
+E43.4“ oben in der Tabelle).
 
 **Warum diese vier:** Teil C des Prüfberichts (`docs/PRUEFUNG-2026-09-26-GESAMT.md`)
 listet sie als „gebaut, aber nie mit genau einem Unterschied gegen die heutige Live-Zeile

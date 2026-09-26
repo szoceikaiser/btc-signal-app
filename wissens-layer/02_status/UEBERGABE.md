@@ -8,6 +8,43 @@
 
 ---
 
+## 26.09.2026 (16) — E43.6 gebaut, Messung in dieser Sitzung nicht ausführbar (kein Netz)
+
+Bauplan-Abschnitt „E43.6" (`docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md`) umgesetzt in
+`engine/backtest.py`: vier neue Gitterzeilen, je **genau ein** Unterschied zur
+Panel-Zeile (`E436_REST` mit `rest_halten=True`, `E436_STRICT` mit `strict_confirm=True`,
+`E436_T1` mit `confirm_t1=True`, `E436_COOLDOWN` mit `cooldown_h=48.0`), vier
+Vorproben-Funktionen (`e436_rest_halten_zaehlen`, `e436_strict_confirm_zaehlen`,
+`e436_confirm_t1_zaehlen`, `e436_cooldown_zaehlen`) und der Berichtsabschnitt
+„E43.6" (`e436_abschnitt`, dieselbe Entscheidungsregel und dasselbe „misst nichts"-Gate
+wie E43.3/E43.4). Verdrahtet in `main()` analog zu `_umkl`/`_e434`.
+
+**Tests:** 8 neue, **501 grün** (`cd engine && python3 run_tests.py`, Ausgangsbasis
+493). Je ein Test für „genau ein Unterschied zur Panel-Zeile" (alle vier Zeilen in
+einem Test), die gesetzten Werte, die Entscheidungsregel (`e436_einschalten`, zwei
+Tests wie bei E43.3/E43.4), die beiden einfachen Zählfunktionen (`rest_halten`,
+`cooldown_h`) mit synthetischen Signal-Listen, den Berichtsabschnitt (Urteil/Kein
+Urteil) und die Verdrahtung in `main()`. Keine eigene Sabotage-Datei — wie im Bauplan
+vermerkt entsteht kein neuer Rechenweg, nur neue Auswertung.
+
+**WICHTIG — noch KEIN Messergebnis:** Diese Sitzung hat **keinen Netzzugriff** auf
+Binance/Coinalyze (`fetch_candles_range` scheitert mit „Tunnel connection failed: 403
+Forbidden"). Ein echter `python3 backtest.py`-Lauf mit den vier neuen Zeilen gegen den
+echten Datensatz konnte deshalb **nicht ausgeführt** werden — anders als bei E43.3/E43.4,
+deren Messung in einer früheren Sitzung mit Netzzugriff lief. Die vier Vorproben und die
+Entscheidungsregel sind fertig und durch synthetische Tests belegt, aber es gibt noch
+**keine echte Zahl und kein Urteil** für `rest_halten`, `strict_confirm`, `confirm_t1`
+oder `cooldown_h`. Alle vier Schalter bleiben bis zur echten Messung **aus**
+(unveränderter Default in `config.json`/`evaluate`).
+
+**Nächster Schritt:** In einer Sitzung mit Netzzugriff (oder von Kaiser lokal)
+`cd engine && python3 backtest.py` laufen lassen, den Abschnitt „E43.6" im erzeugten
+Bericht lesen und je Schalter das Urteil eintragen (hier und im Bauplan-Dokument
+nachtragen, analog „Messung E43.3"/„Messung E43.4"). Danach E43.7 (Wissens-Layer-Text
+berichtigen: `be_im_plus`, E37-Satz, Funding-Einheit) und A5 aus der Gesamtprüfung.
+
+---
+
 ## 26.09.2026 (15) — E43.6-Bauplan geschrieben, wartet auf Kaisers Go zum Bauen
 
 Auftrag Kaiser: erst den Bauplan-Abschnitt E43.6 schreiben und zeigen, noch nicht bauen.
