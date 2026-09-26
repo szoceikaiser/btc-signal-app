@@ -25,7 +25,9 @@ Bericht: `docs\PRUEFUNG-2026-09-26-GESAMT.md` (Teil E). Nichts davon ist gebaut.
    „Messung E43.6". Als Nächstes: `block_unhealthy`/Muster 5 einmal wiederholen,
    sobald `muster_cvd`/`muster_oi` tatsächlich wechseln (siehe Abschnitt E43.6).
 7. **Wissens-Layer berichtigen:** `be_im_plus`-Urteil, E37-Satz („keine einzige
-   Variante“), „Faktor 69“ beim Funding = Prozent-Einheit.
+   Variante“), „Faktor 69“ beim Funding = Prozent-Einheit. **Erledigt 26.09.2026 als
+   E43.7** (in `main`). Rest: `_hinweis_be_im_plus` in `config.json` mit der nächsten
+   Code-Änderung berichtigen.
 8. **A5 — GEMESSEN und ENTSCHIEDEN 26.09.2026.** „Teilgewinn am letzten Hoch“
    (`high_exit`, live) hing von der geladenen Historie ab: `next_pivot_beyond()` nahm
    das nächste Pivot-Hoch über dem Kurs aus **allen** geladenen Kerzen, live sind das

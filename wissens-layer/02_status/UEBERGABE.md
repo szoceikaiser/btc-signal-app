@@ -8,6 +8,32 @@
 
 ---
 
+## 26.09.2026 (19) — E43.7 in main nachgetragen, E43 abgeschlossen
+
+**Kaiser:** *„43.7 und 43.8 müssten schon erledigt sein.“* Stimmt: E43.8 war in `main`.
+E43.7 war um 13:44 Uhr in einem **parallelen Chat** erledigt worden (Zweig
+`claude/e43-6-gitterzeilen-eo6mzb`, Commit `5bc1030`), der E43.6 ein zweites Mal gebaut
+hatte. Nach `main` kam die E43.6-Fassung des anderen Zweigs, E43.7 blieb liegen.
+
+**Getan (reine Unterlagen, direkt in `main`, Kaisers „Ja, leg los“):** die drei
+Korrekturen neu eingetragen, nicht kopiert (der Doppel-Zweig hatte leicht andere Zahlen):
+E37-Satz, `be_im_plus`-Urteil (Lesefehler, mit E43.8-Zahlen; Randvermerk auch in
+`docs/ETAPPENPLAN.md` E19 und `docs/FURKAN-UPDATE-2026-08-03.md` §3), Funding-„Faktor 69“
+(= Einheit). Abschnitt „nie entschieden“ in `GEMESSEN-UND-ENTSCHIEDEN.md` mit allen sechs
+Messungen geschlossen, Vorbehalt oben um E43.4 ergänzt. Zwei Lehren in
+`BEKANNTE-PROBLEME.md`: Fixtures im echten Datenformat bauen; nicht zwei Chats parallel.
+`STARTPROMPT.md` auf 527 Tests und E43-abgeschlossen gebracht. **Code unberührt, 527
+Tests grün.**
+
+**Offen, klein:** `_hinweis_be_im_plus` in `site/data/config.json` zitiert Furkan ohne die
+Vorbedingung — mit der nächsten Code-Änderung auf einem Arbeitszweig berichtigen. Der
+Doppel-Zweig `claude/e43-6-gitterzeilen-eo6mzb` ist überholt; löschen macht Kaiser.
+
+**Nächster Schritt (Kaisers Auftrag):** Kombinations-Analyse — welche einzeln gemessenen
+Mechanismen und Indikatoren sich sinnvoll kombinieren lassen, mit Furkans Transkripten.
+
+---
+
 ## 26.09.2026 (18) — E43.8 gemessen: be_im_plus und release_stale_rest bleiben aus
 
 **Auftrag Kaiser:** „be_im_plus und release_stale_rest jetzt auch messen" — die

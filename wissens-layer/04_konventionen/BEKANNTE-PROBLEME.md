@@ -53,9 +53,25 @@ Abschnitt Git). Kaisers Rechner ist nur noch eine Kopie; er holt den Stand mit
   rot, und die Ursache stand nicht im Code, sondern im abgebrochenen Werkzeug. Im
   Hintergrund mit Protokoll laufen lassen und danach prüfen, dass jede Vorlage wieder
   im Code steht.
+- **Testfixtures, die ein anderes Datenformat bauen als der echte Code, decken den
+  Fehler nicht auf** (gefunden 26.09.2026 in einem parallelen E43.6-Bau). `run_backtest()`
+  liefert Signale als `dict` (`Signal.to_dict()`), nicht als `Signal`-Objekte. Drei neue
+  Zählfunktionen griffen per Attribut zu (`s.reason`) statt per Schlüssel (`s["reason"]`);
+  die Tests bauten von Hand `Signal`-Objekte und liefen grün, der echte Backtest-Lauf
+  krachte. Lehre: Fixtures aus der echten Erzeugerfunktion bauen, nicht daneben.
 - **Doppelte Dateien laufen mit.** Eine Kopie `coinalyze-1.py` samt Testdatei lag
   einmal im `engine`-Ordner und wurde vom Läufer mitgenommen — ein Test schlug an, der
   gar nicht zum Code gehörte.
+
+## Fallen bei der Zusammenarbeit mehrerer Chats
+
+- **Zwei Chats gleichzeitig am selben Repo bauen doppelt.** Am 26.09.2026 bauten zwei
+  Sitzungen E43.6 unabhängig voneinander auf zwei Zweigen. Nach `main` kam nur eine
+  Fassung; E43.7, das die andere Sitzung danach erledigt hatte, blieb auf dem nicht
+  übernommenen Zweig liegen und galt in `main` weiter als „offen“. **Vor Beginn:**
+  `git fetch` und `git branch -r --sort=-committerdate` — liegt ein Zweig vorn, der nicht
+  in `main` ist (`git log origin/main..origin/<zweig>`), zuerst klären, was darauf steht.
+  Und möglichst nur einen Chat zur Zeit arbeiten lassen.
 
 ## Fallen bei den Daten
 

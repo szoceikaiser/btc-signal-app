@@ -9,7 +9,8 @@
 > `wissens-layer\`). Das private Repo `260729-btc-trading-backup` ist nur noch ein
 > Backup von Kaisers Rechner und nicht maßgeblich.
 > Prüfe vor dem Einfügen nur eines: Stimmt die Testzahl unten noch? Stand 26.09.2026:
-> `main` 493 (E43.4 und E43.4b nach Kaisers Go gemerged). Kein offener Arbeitszweig.
+> `main` 527 (E43 abgeschlossen, E43.7 und E43.8 in `main`). Kein offener Arbeitszweig
+> mit ungemergter Arbeit außer dem überholten Doppel-Zweig `claude/e43-6-gitterzeilen-eo6mzb`.
 
 ---
 
@@ -48,19 +49,16 @@ STAND: Letzte Live-Aenderungen am Handelsverhalten: E41 (Rueckeroberungs-Regel,
 live seit 26.09.2026, Entscheidungsregel erfuellt). Die Ausschalt-Regel zu E41, die am
 23.09.2026 angeschlagen hatte, schlaegt auf der neuen Live-Basis NICHT mehr an
 (Backtest 26.09.2026: "Bleibt an", docs\PLAN-E41-STOP.md, "Nachmessung 26.09.2026").
-Gesamtpruefung docs\PRUEFUNG-2026-09-26-GESAMT.md (Befunde A1-A4): A1 live (E43.1),
-A4 repariert (E43.5), A2 gebaut und gemessen (E43.3, Schalter muster_cvd): nur 2 von
-1.504 Kerzen anders, Rendite identisch, bleibt "alt". A3 gebaut und gemessen (E43.4,
-Schalter muster_oi, OI in Kontrakten): 210 von 1.504 Kerzen anders, Rendite identisch,
-bleibt "usd" - A3 ist aber echt (die Haelfte der Pump-Treffer beim OI kam nur vom Kurs).
-Neuer Nebenbefund A5 (Teilgewinn am letzten Hoch haengt von der Laenge der Historie ab),
-nicht gemessen, OFFENE-PUNKTE Punkt 8. Anzeige-Frage A2/A3 entschieden: keine getrennte
-Muster-Anzeige, stattdessen zeigt die OI-Zeile im Lage-Abruf die Kontrakte neben den
-Dollar (E43.4b, live seit 26.09.2026, reine Anzeige). **Naechster Schritt: E43.6**
-(Nachmessungen rest_halten, strict_confirm, confirm_t1, cooldown_h; danach Muster 5):
-zuerst den Bauplan-Abschnitt in docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md schreiben. Vor jeder Arbeit
-an Order-Flow-Mustern zuerst den Gesamtpruefungs-Bericht und den jeweiligen
-Bauplan-Abschnitt lesen.
+Gesamtpruefung docs\PRUEFUNG-2026-09-26-GESAMT.md: ABGEARBEITET als E43 (E43.1 bis
+E43.8 und A5, docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md). Live wurden nur E43.1 (Anzeige),
+E43.2 (bein_richtung) und E43.4b (Anzeige). Alle anderen Schalter gemessen und aus,
+darunter die sechs seit Monaten offenen (rest_halten, strict_confirm, confirm_t1,
+cooldown_h, be_im_plus, release_stale_rest). be_im_plus ist NICHT Furkans Regel
+(Vorbedingung "Gewinne schon realisiert" fehlt; seine Regel ist trail_stop, live).
+Naechster Schritt: steht in wissens-layer\00_STAND.md unter "Was als Naechstes offen
+liegt".
+Vor jeder Arbeit an Order-Flow-Mustern zuerst den Gesamtpruefungs-Bericht und den
+jeweiligen Bauplan-Abschnitt lesen.
 
 ICH: Kaiser, nicht IT-affin. Antworte auf Deutsch, kurz, mit einem konkreten naechsten
 Schritt. Befehle als fertige Bloecke, einer nach dem anderen, und warte auf meine
@@ -84,7 +82,7 @@ DIE FUENF REGELN, DIE HIER GELTEN:
     zuerst, warum er nicht unter diese Diagnose fällt. Eine Beobachtung, die als Regel
     nichts bringt, wird ANGEZEIGT statt gehandelt - das ist hier ein etablierter Weg.
 
-TESTS: cd engine && python3 run_tests.py -> in main 493 Tests, alle gruen.
+TESTS: cd engine && python3 run_tests.py -> in main 527 Tests, alle gruen.
 Nenne die Zahl in deiner Antwort. Meldet der Laeufer WENIGER Tests und trotzdem
 "0 failed", hat sich eine Datei still uebersprungen. Auf Windows vorher
 PYTHONIOENCODING=utf-8 setzen. Eine Sabotage-Probe niemals mitten im Lauf abbrechen -

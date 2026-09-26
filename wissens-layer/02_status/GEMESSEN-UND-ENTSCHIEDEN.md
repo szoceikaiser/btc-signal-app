@@ -17,6 +17,14 @@
 > **Nachtrag 26.09.2026 (E43.3 gemessen):** Der erste der beiden Messfehler (A2, Startpunkt
 > der CVD-Summe) ändert im Datensatz nur 2 von 1.504 Kerzen und kein Ergebnis. Der
 > Vorbehalt hängt damit im Wesentlichen noch an A3 (OI in Dollar, E43.4).
+> **Nachtrag 26.09.2026 (E43.4 gemessen):** A3 ist echt (210 von 1.504 Kerzen anders
+> erkannt, die Hälfte der OI-Pump-Treffer kam nur vom Kurs), ändert an der Rendite der
+> Live-Zeile aber nichts; `muster_oi` bleibt `"usd"`. Rendite-Urteile halten damit.
+> Vorläufig bleiben nur Aussagen über **Musterzahlen** (z. B. wie oft Muster 5 gilt:
+> 47 in Dollar, 97 in Kontrakten) — die Muster-5-Wiederholung ist zurückgestellt, bis
+> `muster_cvd` oder `muster_oi` tatsächlich wechselt.
+> **E43.7 (26.09.2026):** Die drei Textfehler aus der Gesamtprüfung (Teil E, Punkt 7)
+> sind unten berichtigt — E37-Satz, `be_im_plus`-Urteil, Funding-„Faktor 69“.
 
 ## Wie diese Tabelle zu lesen ist
 
@@ -89,27 +97,48 @@ Rückgang (beide Male −9,7 %) und die Beteiligungspaare (Aufwärts 52 gegen 51
 | **Muster 5 als Treibstoff** (E38, 21.09.2026) — `muster5_entry`, `muster5_halten` (leiter/alle), Gegenprobe `block_unhealthy` | **Durchgefallen — aber weil die Schalter kaum greifen, nicht weil das Signal falsch ist.** `muster5_halten` griff in acht Monaten **nie** (238 Signale wie die Basis). `muster5_entry` griff fünfmal, +1,4 Punkte, nur in Hälfte 2. Die Bremse: ein Signal weniger. Das Signal selbst hält der Episoden-Gegenprobe stand (+1,2 Punkte über Grundrate, 77 % höher) — die Engine entscheidet nur fast nie, während es gilt | `docs\PLAN-E38-MUSTER5.md` |
 | **STH-Kostenbasis als Regel** (E40.2/E40.3, 21.09.2026) — Filter „nur über STH" und Verstärker „unter STH" | **Nicht gebaut, weil die Vorfrage es ausschließt.** Jan–Sep 2026 lag der Kurs zu 84 % unter der STH-Kostenbasis, 90 von 108 Einstiegen darunter, nur 7 Wechsel im ganzen Fenster. Der Filter strich 83 % der Einstiege (wie EMA200), der Verstärker wäre eine allgemeine Positionsvergrößerung. Urteil über das Fenster, nicht über den Indikator. Quellen: bitview.space und bitcoin-data.com, beide frei, Abweichung 0,6 % | `docs\PLAN-E39-E40.md` |
 | **Stop-Puffer 0,5 % und Stop beim Docht** (E41, 21.09.2026) — `stop_puffer_pct`, `stop_auf_docht` | **Docht (die strengere Richtung): durchgefallen** (+23,9 %, Hälfte 2 schlechter, 12 statt 10 Stops). **Puffer: formal bestanden, trotzdem nicht genommen** — der Wert 0,5 % lag nahe an den zehn Stops, die vorher angesehen wurden; das Risiko „auf genau diese Stops hin eingestellt" war im Plan benannt. Beide seit der Live-Schaltung der Rückeroberung aus dem Gitter | `docs\PLAN-E41-STOP.md` |
-| **Aggregation über mehrere Börsen** (E37, 20.09.2026) — Spot-CVD, Open Interest, Liquidationen, Futures-CVD, Funding, Long-Short | **Durchgefallen, und zwar in der Robustheitsprüfung.** Im Vollfenster sah manches gut aus (OI +1,1 Punkte, Trefferquote 56→61 % Recall und 32→35 % Präzision bei 21 Signalen weniger). In der Halbierung ist **keine einzige** der neun Datenvarianten in BEIDEN Hälften besser als der heutige Stand. Die Rangfolge kippt lehrbuchmäßig: heutiger Stand Platz 1 in H1 und Platz 7 in H2; aggregiertes Spot-CVD genau umgekehrt. Funding aggregiert ist ein klares Nein (−6,1 Punkte auch nach Skalen-Normierung) | `docs\PLAN-E37-AGGREGATION.md` |
+| **Aggregation über mehrere Börsen** (E37, 20.09.2026) — Spot-CVD, Open Interest, Liquidationen, Futures-CVD, Funding, Long-Short | **Durchgefallen, und zwar in der Robustheitsprüfung.** Im Vollfenster sah manches gut aus (OI +1,1 Punkte, Trefferquote 56→61 % Recall und 32→35 % Präzision bei 21 Signalen weniger). In der Halbierung ist keine der neun Datenvarianten in beiden Hälften **um mindestens 1 Punkt** besser als der heutige Stand. **Berichtigt 26.09.2026 (E43.7):** Hier stand früher „keine einzige Variante in BEIDEN Hälften besser“ — für den Lauf vom 23.09. falsch: „OI aggregiert“ war dort in beiden Hälften besser (H1 +0,6, H2 +1,0), in H1 aber unter der 1-Punkt-Rauschgrenze. Das Urteil hält, die Begründung war ungenau. Die Rangfolge kippt sonst lehrbuchmäßig: heutiger Stand Platz 1 in H1 und Platz 7 in H2; aggregiertes Spot-CVD genau umgekehrt. Funding aggregiert ist ein klares Nein (−6,1 Punkte auch nach Skalen-Normierung) | `docs\PLAN-E37-AGGREGATION.md` |
 | `muster_cvd: usd` — Muster 2 vergleicht Dollar-Beträge im Fenster (E43.3, Befund A2, 26.09.2026) | **Misst fast nichts.** Nur **2 von 1.504** Kerzen anders erkannt; Rendite, Rückgang, beide Hälften und 244 Signale identisch. Entscheidungsregel nicht erfüllt → bleibt `alt`. Live gegen Backtest wich mit `alt` an 1 von 1.175 Kerzen ab, mit `usd` an 0: A2 ist echt, aber im Datensatz klein | `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md` |
 
-## Gemessen, aber nie entschieden — offene Baustelle
+## Lange nie entschieden — seit 26.09.2026 gemessen (E43.6, E43.8)
 
-Diese vier Schalter wurden im Gitter gemessen und stehen seither auf „erst nach
-Backtest-Messung einschalten". Sie sind **nicht verworfen** — es wurde nur nie
-entschieden. Zwei davon sahen auf ihrer damaligen Basis sogar besser aus:
+Diese sechs Schalter standen seit Monaten auf „erst nach Backtest-Messung einschalten“:
+im Gitter irgendwann gemessen, aber nie mit **genau einem** Unterschied zur heutigen
+Live-Zeile. Am 26.09.2026 ist das nachgeholt worden, nach der vorab festgelegten Regel
+(beide Fensterhälften ≥ 1 Punkt besser, Rückgang nicht mehr als 1 Punkt tiefer).
+**Alle sechs verfehlen sie, alle sechs bleiben aus.** Fenster 18.01.–26.09.2026,
+Läufe 36249824852 (E43.6) und 36250880529 (E43.8).
 
-| Schalter | Gemessen (alte Basis: *LIVE +Stop nachziehen*, +33,3 %) | Stand |
-|---|---|---|
-| `confirm_t1` — Order-Flow-Prüfung auch am 0.5-Level | heute im Gitter **+36,1 %** gegen Basis +33,3 % — aber 07/2026 mit **−4,6 Punkten** verworfen | aus |
-| `cooldown_h: 48` — Sperrfrist nach einem Stop | heute **+36,5 %** gegen Basis +33,3 % — 07/2026 als „wirkt, kippt aber zwischen den Hälften" verworfen | aus |
-| `be_im_plus` — Stop auf Einstand, sobald einmal im Plus | in der Fensterhalbierung auf Platz 48 und 52 von 52 — deutlich schlechter | aus |
-| `release_stale_rest` — Rest freigeben bei veralteter Struktur | durch `trail_stop` und `neustart_mit_rest` praktisch ersetzt | aus |
+| Schalter | Rendite | H1 gegen live | H2 gegen live | Signale | Stand |
+|---|---:|---:|---:|---:|---|
+| **Live (Basis)** | +35,3 % | — | — | 244 | — |
+| `rest_halten` — Restposition nie verkaufen | +34,5 % | −4,3 | +3,2 | 236 | aus |
+| `strict_confirm` — strengere Order-Flow-Bestätigung | +28,5 % | +2,4 | −7,6 | 206 | aus |
+| `confirm_t1` — Order-Flow-Prüfung auch am 0.5-Level | +34,9 % | −0,8 | +0,9 | 240 | aus |
+| `cooldown_h: 48` — Sperrfrist nach einem Stop | +33,4 % | −1,8 | +0,0 | 244 | aus |
+| `be_im_plus` — Stop auf Einstand, sobald einmal im Plus | **+18,0 %** | **−15,5** | +0,5 | 348 | aus |
+| `release_stale_rest` — Rest freigeben bei veralteter Struktur | +34,6 % | −1,1 | +0,0 | 244 | aus |
 
-**Wichtig und ehrlich — hier widersprechen sich zwei Quellen.** Zu `confirm_t1` und
-`cooldown_h` gibt es je zwei Zahlen: eine aus dem heutigen Gitter (beide besser als
-ihre Basis) und eine aus `ANLEITUNG-EINSTELLUNGEN.md` vom 28.07.2026 (beide verworfen).
-Beide können stimmen — sie wurden gegen verschiedene Basisvarianten gemessen. Auf der
-heutigen Live-Zeile mit genau einem Unterschied wurde keiner der beiden je gemessen.
+Einzelheiten: `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitte „Messung E43.6“ und
+„Messung E43.8“.
+
+**Damit aufgelöst:** Zu `confirm_t1` und `cooldown_h` gab es früher zwei sich
+widersprechende Zahlen (im alten Gitter besser als ihre Basis, in
+`ANLEITUNG-EINSTELLUNGEN.md` vom 28.07.2026 verworfen). Beide stammten von anderen
+Basisvarianten. Gegen die heutige Live-Zeile ist keiner der beiden ein Befund.
+
+**`be_im_plus` — Urteil berichtigt (E43.7, Gesamtprüfung Teil B Punkt 7).** Bis
+26.09.2026 stand hier und in der Chronik, `be_im_plus` sei „Furkans ausdrückliche Regel
+und der teuerste Hebel des Projekts“. Das war ein **Lesefehler**: Furkans Regel hat
+eine Vorbedingung — erst wenn *Gewinne schon realisiert* sind, zieht er den Stop über
+den Einstand, und bei einer Aufstockung auf das neue Entry (27.07. 17:01–18:27;
+02.08. 16:11–16:25; 13.09. 17:34–17:57). Diese Regel entspricht `trail_stop`, und das ist
+live. `be_im_plus` lässt die Vorbedingung weg und zieht den Stop schon, sobald eine
+**frische** Position einmal im Plus stand. Gemessen ist also nicht Furkans Regel,
+sondern eine strengere Abwandlung — und die kostet auf der heutigen Basis 17,3 Punkte.
+Der Hinweistext `_hinweis_be_im_plus` in `site\data\config.json` zitiert Furkan noch
+ohne die Vorbedingung; er wird mit der nächsten Code-Änderung auf einem Arbeitszweig
+berichtigt (config.json ist eine Live-Datei).
 
 Damit gilt hier dieselbe Lehre, die im Projekt schon einmal teuer war: **Ein
 Messergebnis gilt nur gegen die Basis, gegen die gemessen wurde. Nach jeder
@@ -264,7 +293,11 @@ führte das Funding selbst falsch unter Coinalyze.)
 - **71 % Vorzeichen-Übereinstimmung** zwischen Kraken- und Coinalyze-Funding. In fast
   jedem dritten Zeitpunkt widersprechen sich die beiden Reihen. Solange das nicht
   erklärt ist, wäre ein Quellentausch ein Austausch der Bedeutung, nicht der
-  Genauigkeit. Die Skalen unterscheiden sich zusätzlich um Faktor ~69.
+  Genauigkeit. **Berichtigt 26.09.2026 (E43.7):** Hier stand, die Skalen unterschieden
+  sich zusätzlich um „Faktor ~69“. Das ist im Kern keine Diskrepanz, sondern eine
+  **Einheit**: Coinalyze liefert Funding in Prozent (0,01 = 0,01 %), Kraken als Bruch.
+  Umgerechnet ist der Niveauunterschied klein (Median 3,8e-5 gegen 2,6e-5 als Bruch;
+  Gesamtprüfung Teil B Punkt 13). Die Vorzeichen-Frage (71 %) bleibt davon unberührt.
 - Ob die Schwelle `funding_hot = 0.0001` zur Kraken-Reihe überhaupt passt. Sie wurde
   nie gegen diese Skala geprüft.
 - **OKX hat bei Coinalyze keinen Spotmarkt** (belegt: Binance 49 abgelehnte

@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (13)**
+> Stand: **26.09.2026 (14)**
 
 ## Lage
 
@@ -14,7 +14,7 @@
   `signal-app\...` meinen jetzt die Repo-Wurzel. Einzelheiten: `START-HIER.md`.
 - Die Engine **läuft live** und handelt nicht selbst: sie sendet Telegram-Signale,
   Kaiser platziert die Orders. Webseite: `szoceikaiser.github.io/btc-signal-app`.
-- **Tests:** in `main` **493**, alle grün (`cd engine && python3 run_tests.py`).
+- **Tests:** in `main` **527**, alle grün (`cd engine && python3 run_tests.py`).
   Sabotage-Proben: fünf ältere (151 Sabotagen) plus `sabotage_e43.py` (7), alle gefangen.
 - **Kaisers Go 26.09.2026: E43.1 und E43.2 live.** Arbeitszweig nach `main` gemerged.
   E43.1 (Futures-CVD im Lage-Abruf jetzt in Dollar) ist reine Anzeige. E43.2
@@ -62,7 +62,13 @@
   (Rendite +35,3 % → +18,0 %, +104 Signale) — reiht sich bei den zwölf zuvor
   gemessenen Filtern ein. `release_stale_rest` ändert kaum etwas. **527 Tests grün.**
   Damit sind alle sechs seit Monaten unentschiedenen Schalter gemessen. Einzelheiten:
-  `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „Messung E43.8“.
+  `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „Messung E43.8“. **In `main`.**
+- **E43.7 fertig und in `main` (26.09.2026, reine Unterlagen):** E37-Satz,
+  `be_im_plus`-Urteil (Lesefehler: nicht Furkans Regel) und Funding-„Faktor 69“
+  (= Einheit) berichtigt; Abschnitt „nie entschieden“ in `GEMESSEN-UND-ENTSCHIEDEN.md`
+  mit allen sechs Messungen geschlossen. E43.7 war schon einmal auf dem Zweig
+  `claude/e43-6-gitterzeilen-eo6mzb` erledigt, aber nie nach `main` gekommen (zwei Chats
+  parallel, siehe `04_konventionen\BEKANNTE-PROBLEME.md`). **Damit ist E43 abgeschlossen.**
 
 ## Was als Nächstes offen liegt (Reihenfolge = Nutzwert)
 
@@ -79,7 +85,9 @@
    `strict_confirm`, `confirm_t1`, `cooldown_h`, `be_im_plus`, `release_stale_rest` —
    alle sechs Regeln nicht erfüllt, alle bleiben aus; Muster-5-Wiederholung weiterhin
    zurückgestellt, da `muster_cvd`/`muster_oi` beide auf dem alten Wert blieben).
-   **Als Nächstes E43.7** (Texte). A5 ist gemessen und entschieden (siehe oben).
+   **E43.7 fertig** (siehe oben). A5 ist gemessen und entschieden. **E43 ist damit
+   abgeschlossen.** Rest: `_hinweis_be_im_plus` in `config.json` mit der nächsten
+   Code-Änderung berichtigen.
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
    Ausschalt-Regel schlägt auf der neuen Live-Basis nicht mehr an.

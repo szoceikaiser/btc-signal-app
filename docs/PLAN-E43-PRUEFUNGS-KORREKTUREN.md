@@ -20,7 +20,7 @@
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **GEMESSEN** 26.09.2026: alle vier Regeln nicht erfüllt, alle vier Schalter bleiben aus (Details „Messung E43.6"). Muster-5-Wiederholung weiterhin zurückgestellt |
 | E43.8 | Nachmessung mit genau einem Unterschied: `be_im_plus`, `release_stale_rest` | Messung | **niedrig** | **GEMESSEN** 26.09.2026: beide Regeln nicht erfüllt, beide bleiben aus. `be_im_plus` ist ein echter, großer Befund (−17,3 Punkte Rendite, +104 Signale), `release_stale_rest` ändert kaum etwas (Details „Messung E43.8") |
-| E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
+| E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | **FERTIG** 26.09.2026, in `main` (reine Unterlagen, Code unberührt, 527 Tests). Einzelheiten Abschnitt „E43.7“ |
 | A5 | `next_pivot_beyond()` (Teilgewinn am letzten Hoch) haengt von der Historielaenge ab | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 53 von 1.177 Kerzen anders erkannt, Rendite/Haelften/Rueckgang identisch, Regel nicht erfuellt → bleibt `"voll"` (Arbeitszweig) |
 
 ### Aufwand je Etappe (Kaisers Wunsch 26.09.2026: Tokens sparen, wo es geht)
@@ -914,9 +914,34 @@ geschätzt **4 bis 8 neue Tests** (vier Zeilen-Tests plus ggf. je ein Vorprobe-T
 
 ## E43.7
 
-Noch nicht als Bauplan ausgeschrieben (Text-Etappe: `be_im_plus`-Urteil im Wissens-Layer
-berichtigen, E37-Satz korrigieren, Funding-Einheit richtigstellen — Prüfbericht Teil E,
-Punkt 7). Wird ergänzt, wenn E43.6 gebaut und entschieden ist.
+**FERTIG 26.09.2026, in `main`.** Reine Text-Etappe (Prüfbericht Teil E, Punkt 7).
+
+**Vorgeschichte:** E43.7 war schon einmal erledigt — am 26.09.2026 um 13:44 Uhr auf dem
+Zweig `claude/e43-6-gitterzeilen-eo6mzb` (Commit `5bc1030`). An dem Tag liefen zwei Chats
+parallel und bauten E43.6 doppelt; nach `main` kam die Fassung vom Zweig
+`claude/e43-6-nachmessung-vier-schalter`. E43.7 blieb auf dem anderen Zweig liegen. Es ist
+deshalb **neu eingetragen**, nicht kopiert: Der andere Chat hatte leicht andere Zahlen
+gemessen (z. B. `confirm_t1` +35,0 gegen +35,4 statt +34,9 gegen +35,3).
+
+**Berichtigt:**
+
+1. **E37-Satz** („keine einzige Variante in beiden Hälften besser“) — für den Lauf vom
+   23.09. falsch („OI aggregiert“ H1 +0,6, H2 +1,0; H1 unter der Rauschgrenze). Urteil
+   hält, Begründung berichtigt (`GEMESSEN-UND-ENTSCHIEDEN.md`, Zeile E37).
+2. **`be_im_plus`-Urteil** — war als „Furkans ausdrückliche Regel, teuerster Hebel“
+   verbucht; Furkans Regel hat die Vorbedingung „Gewinne schon realisiert“ und entspricht
+   `trail_stop`. Berichtigt in `GEMESSEN-UND-ENTSCHIEDEN.md` (mit den E43.8-Zahlen) und als
+   Randvermerk in `docs\ETAPPENPLAN.md` (E19) und `docs\FURKAN-UPDATE-2026-08-03.md` §3.
+   **Noch offen:** `_hinweis_be_im_plus` in `site\data\config.json` zitiert Furkan ohne
+   die Vorbedingung — Live-Datei, deshalb mit der nächsten Code-Änderung auf einem
+   Arbeitszweig.
+3. **Funding-„Faktor 69“** — ist im Kern eine Einheit (Coinalyze Prozent, Kraken Bruch).
+   Berichtigt in `GEMESSEN-UND-ENTSCHIEDEN.md`, Abschnitt „Offen, ausdrücklich nicht
+   entschieden“. Die Vorzeichen-Frage (71 %) bleibt offen.
+
+**Dazu:** Der Abschnitt „Gemessen, aber nie entschieden“ in `GEMESSEN-UND-ENTSCHIEDEN.md`
+ist geschlossen — alle sechs Schalter mit E43.6/E43.8-Zahlen. Die Lehre des anderen Chats
+zu Test-Fixtures steht jetzt in `04_konventionen\BEKANNTE-PROBLEME.md`.
 
 ## A5 — Teilgewinn am letzten Hoch hängt von der Historielänge ab (26.09.2026)
 

@@ -67,6 +67,8 @@ Positionen im Monat). Unsere Engine handelt das Vierfache; bei ihr schneidet die
 die Gewinner ab, bevor sie laufen. **Bleibt aus — aber der Grund gehört notiert, damit die
 Regel nicht ein viertes Mal als „neue Idee" auftaucht.**
 
+> **Berichtigt 26.09.2026 (E43.7, Gesamtprüfung Teil B Punkt 7):** Lesefehler. `be_im_plus` ist **nicht** Furkans Regel — ihm fehlt die Vorbedingung „Gewinne schon realisiert“. Furkans Regel entspricht `trail_stop` (live). Auf der heutigen Live-Basis gemessen (E43.8): `be_im_plus` +18,0 % gegen +35,3 %. Siehe `wissens-layer\02_status\GEMESSEN-UND-ENTSCHIEDEN.md`.
+
 ## 4. Nichts Neues, aber bestätigt
 
 - Nachkaufzone weiterhin 61.300–61.000 (unverändert gegenüber dem 02.08.) — das Golden

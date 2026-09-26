@@ -898,6 +898,8 @@ Das ist bemerkenswert, weil es Furkans ausdrückliche Regel ist und die Verlust-
 nicht: Positionen, die im Plus standen und zurückfallen, werden sofort geschlossen — die
 Runner sterben, bevor sie laufen. **Erwartung widerlegt, Schalter bleibt aus.**
 
+> **Berichtigt 26.09.2026 (E43.7, Gesamtprüfung Teil B Punkt 7):** Lesefehler. `be_im_plus` ist **nicht** Furkans Regel — ihm fehlt die Vorbedingung „Gewinne schon realisiert“. Furkans Regel entspricht `trail_stop` (live). Auf der heutigen Live-Basis gemessen (E43.8): `be_im_plus` +18,0 % gegen +35,3 %. Siehe `wissens-layer\02_status\GEMESSEN-UND-ENTSCHIEDEN.md`.
+
 **5. Robustheit: 0 von 40 Varianten in beiden Hälften unter den besten 5**
 (Zufallserwartung 0,6). Die Rangfolge trägt in diesem Lauf wieder nichts. Wer
 `min_bein_pct` einschaltet, tut das NICHT wegen der Tabelle, sondern wegen der Mechanik:
