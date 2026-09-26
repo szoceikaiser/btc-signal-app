@@ -8,6 +8,39 @@
 
 ---
 
+## 26.09.2026 (4) — E43.1 und E43.2 gebaut (Arbeitszweig)
+
+Nach Kaisers „Go“ zum Umzug (in `main` zusammengeführt) weiter nach Plan
+`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`:
+
+- **E43.1 fertig:** Futures-CVD im Lage-Abruf jetzt in Dollar (je Kerze mit deren
+  Schlusskurs umgerechnet). Reine Anzeige, kein Signal ändert sich.
+- **E43.2 gebaut:** Gitterzeile „LIVE-heute +Bein in Handelsrichtung“ mit genau einem
+  Unterschied zur Live-Zeile. Entscheidungsregel vorab im Plan. Backtest auf dem
+  Arbeitszweig angestoßen.
+- **447 Tests grün**, `sabotage_e43.py` 7 von 7 gefangen.
+
+**Offen:** Ergebnis des Backtests auswerten; Kaisers „Go“ für `main`.
+
+**ZWISCHENSTAND 26.09.2026, 08:20 UTC** (für den Fall eines Abbruchs):
+- Zweig: `claude/dazzling-noether-1w087b`. `main` enthält den Umzug der Unterlagen,
+  **nicht** E43.1/E43.2.
+- Läuft: Backtest auf dem Zweig, GitHub-Lauf **36229181185** (angestoßen 08:14 UTC). Er
+  committet `BACKTEST.md` auf den Zweig.
+- Nächster Schritt (Aufwand **niedrig**): `git pull` auf dem Zweig, in `BACKTEST.md` die
+  Zeile „LIVE-heute +Bein in Handelsrichtung“ gegen „LIVE-heute +Rueckeroberung vor dem
+  Stop (1 Kerze)“ nach der Regel im Plan E43.2 prüfen (Hälftentabelle „Robustheitspruefung:
+  Fenster halbiert“ und Spalte max. Rückgang). Ergebnis in Plan und hier eintragen,
+  Kaiser berichten, um „Go“ bitten.
+- Neu seit 26.09.: Regel „Zwischenstände sichern und Aufwand vorschlagen“
+  (`ARBEITSREGELN.md`, Abschnitt Budget).
+- Neu seit 26.09.: Reine Unterlagen dürfen direkt in `main`; am Ende jedes Schritts
+  bekommt Kaiser den fertigen Prompt für den neuen Chat, den Aufwand und den Hinweis,
+  ob er den Aufwand ändern soll. Die automatische Rückmeldung zum Backtest im alten Chat
+  ist abgesagt: Die Auswertung macht ein neuer Chat (Aufwand niedrig).
+
+---
+
 ## 26.09.2026 (3) — Umzug: Unterlagen ins Code-Repo, KI committet selbst
 
 **Kaisers Wunsch:** *„Kannst du nicht alles so umbauen, dass du auf github commitest?“* —

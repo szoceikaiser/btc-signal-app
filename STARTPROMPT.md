@@ -8,7 +8,7 @@
 > **Seit 26.09.2026 liegen Code UND Unterlagen in diesem einen Repo** (`docs\`,
 > `wissens-layer\`). Das private Repo `260729-btc-trading-backup` ist nur noch ein
 > Backup von Kaisers Rechner und nicht maßgeblich.
-> Prüfe vor dem Einfügen nur eines: Stimmt die Testzahl unten noch (444)?
+> Prüfe vor dem Einfügen nur eines: Stimmt die Testzahl unten noch (main 444, Arbeitszweig 447)?
 
 ---
 
@@ -19,6 +19,11 @@ Du arbeitest an meiner BTC-Signal-Engine. Repo: github.com/szoceikaiser/btc-sign
 - darin liegen Code UND Unterlagen (docs\, wissens-layer\). Das Repo ist OEFFENTLICH:
 keine Zugangsdaten, keine privaten Notizen, keine kompletten Video-Transkripte hinein.
 Webseite: szoceikaiser.github.io/btc-signal-app
+
+VOR ALLEM ANDEREN: Der letzte Arbeitsstand liegt oft NICHT in main, sondern auf dem
+juengsten Zweig claude/... (git fetch; git branch -r --sort=-committerdate). Ist ein
+claude-Zweig neuer als main, lies die Dateien unten VON DIESEM ZWEIG und arbeite dort
+weiter. Dort steht in wissens-layer\02_status\UEBERGABE.md, was zuletzt lief.
 
 LIES ZUERST, IN DIESER REIHENFOLGE:
 1. wissens-layer\00_STAND.md                      (Kurzstand, halbe Minute)
@@ -69,7 +74,8 @@ DIE FUENF REGELN, DIE HIER GELTEN:
     zuerst, warum er nicht unter diese Diagnose fällt. Eine Beobachtung, die als Regel
     nichts bringt, wird ANGEZEIGT statt gehandelt - das ist hier ein etablierter Weg.
 
-TESTS: cd engine && python3 run_tests.py -> 444 Tests, alle gruen.
+TESTS: cd engine && python3 run_tests.py -> in main 444 Tests, auf dem Arbeitszweig mit
+E43.1/E43.2 447 Tests (bis zu meinem Go), alle gruen.
 Nenne die Zahl in deiner Antwort. Meldet der Laeufer WENIGER Tests und trotzdem
 "0 failed", hat sich eine Datei still uebersprungen. Auf Windows vorher
 PYTHONIOENCODING=utf-8 setzen. Eine Sabotage-Probe niemals mitten im Lauf abbrechen -
@@ -81,8 +87,10 @@ sonst tut der Backtest etwas, das live nie passiert. Pruefweg: dieselbe Kursfolg
 einmal am Stueck und einmal Kerze fuer Kerze in getrennten Laeufen; Signale UND
 Telegram-Meldungen muessen gleich sein.
 
-HOCHLADEN UND MESSEN (seit 26.09.2026): DU committest und pushst selbst - aber NUR
-auf einen eigenen Arbeitszweig (claude/...), nie direkt auf main. main ist die
+HOCHLADEN UND MESSEN (seit 26.09.2026): DU committest und pushst selbst. CODE nur auf
+einen eigenen Arbeitszweig (claude/...), nie direkt auf main. REINE UNTERLAGEN
+(wissens-layer\, docs\, STARTPROMPT.md, PRUEFPROMPT.md) darfst du direkt in main
+schreiben (mein Einverstaendnis vom 26.09.2026), damit der letzte Stand immer dort liegt. main ist die
 Live-Fassung: Die Engine laeuft von dort. Auf den Zweig kommt erst, was fertig und
 getestet ist; die Tests laufen bei jedem Push automatisch (Actions -> Tests). Den
 Backtest (Actions -> Backtest, rund 6 Minuten) darfst du AUF DEINEM ZWEIG selbst
@@ -91,6 +99,16 @@ ausdruecklichen "Go". Vor jedem Push den neuesten Stand von main holen: Die Engi
 committet alle 4 Stunden selbst. Ich hole mir den Stand auf den PC mit
 stand-holen.bat nur, wenn ich dort etwas lesen will. Boersen-APIs sind aus
 Arbeitsumgebungen meist gesperrt - eigene Messungen gehen nur ueber den Backtest.
+
+ZWISCHENSTAENDE UND AUFWAND: Mein Budget kann jederzeit enden. Halte deshalb nach jeder
+Etappe, vor jedem langen Lauf und nach jedem groesseren Schritt den Stand fest
+(UEBERGABE.md, Bauplan-Status) und pushe ihn auf deinen Arbeitszweig. Nenne zu jedem
+vorgeschlagenen Schritt den noetigen Aufwand (niedrig/mittel/hoch/maximal, siehe
+ARBEITSREGELN.md, Abschnitt Budget), damit ich Tokens sparen kann.
+
+AM ENDE JEDES SCHRITTS gibst du mir IMMER: (1) den fertigen Prompt fuer den neuen Chat
+mit dem naechsten Schritt, (2) den noetigen Aufwand (Modell und Denkaufwand), (3) einen
+ausdruecklichen Hinweis, WENN ich den Aufwand gegenueber jetzt aendern soll.
 
 ARBEITSWEISE BEI GROESSEREN VORHABEN: erst einen Bauplan als docs\PLAN-E<nr>-<name>.md
 schreiben (Problem mit meinem Zitat, Regel, Schwellen, betroffene Dateien, "bewusst
@@ -105,6 +123,25 @@ vorschlaegst. Fang nicht an zu bauen, bevor ich zugestimmt habe.
 ```
 
 ---
+
+## Kurzprompt für eine Fortsetzung (spart Tokens)
+
+Für einen Folgeschritt mit Aufwand **niedrig** oder **mittel** reicht dieser kurze Prompt
+statt des langen oben. Die KI füllt die Zeile `AUFGABE` am Ende jedes Schritts selbst aus
+und gibt Kaiser den fertigen Text.
+
+```
+Du arbeitest an meiner BTC-Signal-Engine, Repo github.com/szoceikaiser/btc-signal-app
+(oeffentlich). Antworte auf Deutsch, kurz, ich bin nicht IT-affin. Keine Anlageberatung.
+Lies NUR: wissens-layer\00_STAND.md, den juengsten Abschnitt von
+wissens-layer\02_status\UEBERGABE.md und den genannten Bauplan. Nicht mehr.
+Arbeitszweig: <ZWEIG>. Code nur dort, main erst nach meinem Go; reine Unterlagen
+darfst du direkt in main schreiben. Tests: cd engine && python3 run_tests.py (<ZAHL>).
+Halte den Zwischenstand fest und pushe ihn (UEBERGABE.md, Bauplan-Status).
+Am Ende: fertiger Prompt fuer den naechsten Chat + noetiger Aufwand + Hinweis, ob ich
+den Aufwand aendern soll.
+AUFGABE: <SCHRITT, mit Verweis auf den Bauplan>
+```
 
 ## Wenn die neue KI **keinen** Zugriff auf das Repo hat
 
