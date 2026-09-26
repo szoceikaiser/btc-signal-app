@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 
 import backtest
-from strategy_core import Candle
+from strategy_core import Candle, FlowPoint
 
 
 def _ts(iso: str) -> int:
@@ -2079,3 +2079,150 @@ def test_a5_ist_im_bericht_verdrahtet():
     q = inspect.getsource(backtest.main)
     assert "a5_next_pivot_beyond(candles, eff_start)" in q
     assert 'a5_abschnitt(_a5, results, halves, panel_cfg["label"])' in q
+
+
+# ------------------------------------------ E43.6: Nachmessung mit genau einem Unterschied
+
+def test_e436_vier_zeilen_haben_genau_einen_unterschied_zur_panel_zeile():
+    panel = [v for v in backtest.GRID if v.get("panel")][0]
+    basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
+    for label, key, wert in ((backtest.E436_REST, "rest_halten", True),
+                             (backtest.E436_STRICT, "strict_confirm", True),
+                             (backtest.E436_CONFIRM_T1, "confirm_t1", True),
+                             (backtest.E436_COOLDOWN, "cooldown_h", 48.0)):
+        z = _zeile(label)
+        hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+        abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+        assert abweichend == {key}, (label, abweichend)
+        assert hier[key] == wert
+
+
+def test_e436_rest_halten_vorprobe_zaehlt_gegen_muster_verkaeufe():
+    sigs = [{"ts": 1, "type": "VERKAUF_REST",
+             "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP"},
+            {"ts": 2, "type": "SHORT_COVER_REST",
+             "reason": "Gegen-Muster am Ziel: GESUNDER_TREND"},
+            {"ts": 3, "type": "STOPLOSS", "reason": "Kerzenschluss unter Invalidierung 100"}]
+    assert backtest.e436_rest_halten_vorprobe(sigs) == {"treffer": 2}
+    assert backtest.e436_rest_halten_vorprobe([]) == {"treffer": 0}
+
+
+def _e436_flach(n: int = 24, spot_step: float = 1000.0, funding: float = 0.0002) -> tuple:
+    """Flache Kerzen (kein Muster ausser NEUTRAL), steigendes Spot-CVD, positives
+    Funding: `_confirm_long()` ist beim heutigen Massstab wahr (cvd_up), beim strengen
+    Massstab falsch (fund_ok fehlt, da Funding > 0)."""
+    cs = [Candle(i, 100.0, 100.0, 100.0, 100.0) for i in range(n)]
+    fl = [FlowPoint(i, spot_step * i, 0.0, 100.0, funding) for i in range(n)]
+    return cs, fl
+
+
+def test_e436_strict_confirm_vorprobe_findet_den_unterschied():
+    cs, fl = _e436_flach()
+    u = backtest.e436_strict_confirm_vorprobe(cs, fl, cs[0].ts)
+    assert u["kerzen"] == len(cs) - 11
+    assert u["treffer"] > 0, u
+
+
+def test_e436_strict_confirm_vorprobe_ohne_unterschied_bei_negativem_funding():
+    """Negatives Funding erfuellt fund_ok auch im strengen Massstab -> kein Treffer."""
+    cs, fl = _e436_flach(funding=-0.0002)
+    u = backtest.e436_strict_confirm_vorprobe(cs, fl, cs[0].ts)
+    assert u["treffer"] == 0, u
+
+
+def test_e436_confirm_t1_vorprobe_zaehlt_einstiege_ohne_bestaetigung():
+    cs, fl = _e436_flach()
+    sigs = [{"ts": cs[-1].ts, "type": "KAUF_1", "reason": "0.5-Retracement"}]
+    u = backtest.e436_confirm_t1_vorprobe(sigs, cs, fl)
+    assert u["einstiege"] == 1
+    # Beim lockeren Massstab ist cvd_up wahr -> confirm_ok() ist WAHR -> kein Treffer
+    assert u["treffer"] == 0, u
+
+
+def test_e436_confirm_t1_vorprobe_zaehlt_nur_0_5_level_einstiege():
+    cs, fl = _e436_flach()
+    sigs = [{"ts": cs[-1].ts, "type": "KAUF_2", "reason": "Golden Pocket"}]
+    u = backtest.e436_confirm_t1_vorprobe(sigs, cs, fl)
+    assert u == {"einstiege": 0, "treffer": 0}
+
+
+def test_e436_cooldown_vorprobe_zaehlt_einstiege_kurz_nach_einem_stop():
+    h = 3600 * 1000
+    sigs = [{"ts": 0, "type": "STOPLOSS", "reason": ""},
+            {"ts": 10 * h, "type": "KAUF_1", "reason": ""},        # 10h nach Stop -> Treffer
+            {"ts": 60 * h, "type": "SHORT_1", "reason": ""},       # 60h nach Stop -> kein Treffer
+            {"ts": 61 * h, "type": "NACHKAUF", "reason": ""}]      # keine "neue" Einstiegsart
+    u = backtest.e436_cooldown_vorprobe(sigs)
+    assert u == {"treffer": 1}
+
+
+def test_e436_cooldown_vorprobe_ohne_vorherigen_stop_kein_treffer():
+    h = 3600 * 1000
+    sigs = [{"ts": 5 * h, "type": "KAUF_1", "reason": ""}]
+    assert backtest.e436_cooldown_vorprobe(sigs) == {"treffer": 0}
+
+
+def test_e436_einschalten_folgt_derselben_regel_wie_e43():
+    live = _hz(10.0, 5.0)
+    assert backtest.e436_einschalten(live, _hz(11.0, 6.0))["einschalten"] is True
+    assert backtest.e436_einschalten(live, _hz(11.0, 5.9))["einschalten"] is False
+    assert backtest.e436_einschalten(live, _hz(9.0, 4.0))["einschalten"] is False
+
+
+def _e436_grid_daten(zeile_label: str, rendite=28.0, dd=-10.2, h1=21.5, h2=6.2):
+    def r(label, rendite, dd, n=5):
+        return ({"label": label}, [{}] * n, {}, {"rendite_pct": rendite,
+                                                  "max_drawdown_pct": dd})
+
+    def h(label, h1, h2):
+        return ({"label": label}, {"rendite_pct": h1}, {"rendite_pct": h2})
+
+    res = [r("LIVE", 25.0, -9.9), r(zeile_label, rendite, dd)]
+    hal = [h("LIVE", 20.0, 5.0), h(zeile_label, h1, h2)]
+    return res, hal
+
+
+def test_e436_abschnitt_ohne_treffer_meldet_kein_urteil():
+    vorproben = {"rest_halten": {"treffer": 0},
+                 "strict_confirm": {"kerzen": 500, "treffer": 0},
+                 "confirm_t1": {"einstiege": 3, "treffer": 0},
+                 "cooldown_h": {"treffer": 0}}
+    res, hal = _e436_grid_daten(backtest.E436_REST)
+    text = "\n".join(backtest.e436_abschnitt(res, hal, "LIVE", vorproben))
+    assert text.count("Kein Urteil") == 4
+    assert "Regel erfuellt" not in text and "bleibt aus" not in text
+
+
+def test_e436_abschnitt_meldet_urteil_je_zeile():
+    res_rh, hal_rh = _e436_grid_daten(backtest.E436_REST, rendite=28.0, dd=-10.2,
+                                      h1=21.5, h2=6.2)
+    vorproben = {"rest_halten": {"treffer": 4},
+                 "strict_confirm": {"kerzen": 500, "treffer": 0},
+                 "confirm_t1": {"einstiege": 3, "treffer": 0},
+                 "cooldown_h": {"treffer": 0}}
+    text = "\n".join(backtest.e436_abschnitt(res_rh, hal_rh, "LIVE", vorproben))
+    assert "Regel erfuellt" in text                    # rest_halten: H1+3,5/H2+2,2, dd besser
+    assert text.count("Kein Urteil") == 3               # die drei anderen ohne Treffer
+
+    vorproben2 = dict(vorproben, strict_confirm={"kerzen": 500, "treffer": 12})
+    res_sc, hal_sc = _e436_grid_daten(backtest.E436_STRICT, rendite=25.3, dd=-9.9,
+                                      h1=20.2, h2=5.1)
+    res = res_rh + [res_sc[1]]
+    hal = hal_rh + [hal_sc[1]]
+    text2 = "\n".join(backtest.e436_abschnitt(res, hal, "LIVE", vorproben2))
+    assert "bleibt aus" in text2                        # strict_confirm: kein Vorsprung
+
+
+def test_e436_abschnitt_ohne_panel_zeile_kein_urteil():
+    text = "\n".join(backtest.e436_abschnitt([], [], "GIBT ES NICHT", {}))
+    assert "Kein Urteil" in text
+
+
+def test_e436_ist_im_bericht_verdrahtet():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    assert "e436_rest_halten_vorprobe(_psigs)" in q
+    assert "e436_strict_confirm_vorprobe(candles, flow, eff_start)" in q
+    assert "e436_confirm_t1_vorprobe(_psigs, candles, flow)" in q
+    assert "e436_cooldown_vorprobe(_psigs)" in q
+    assert 'e436_abschnitt(results, halves, panel_cfg["label"], _e436)' in q

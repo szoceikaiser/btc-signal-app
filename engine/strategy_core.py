@@ -1303,6 +1303,25 @@ MAX_LIQ_ENTRIES = 2        # hoechstens so viele Konfluenz-Nachkaeufe je Positio
 LIQ_ENTRY_TRANCHE = 20     # Tranche je Konfluenz-Nachkauf in %
 
 
+def confirm_ok(pattern: "Pattern", flow: list[FlowPoint], long_side: bool,
+               strict_confirm: bool = False, muster5_entry: bool = False) -> bool:
+    """Order-Flow-Bestaetigung fuer einen Einstieg (E8.4/E38.2) - einzige Rechenstelle.
+
+    evaluate() (Handel) UND die E43.6-Vorproben in backtest.py (Messung) lesen von hier,
+    damit Messung nie eine andere Bestaetigung sieht als der Handel.
+    """
+    if long_side:
+        strong = pattern == Pattern.CAPITULATION_RESET or (
+            muster5_entry and pattern == Pattern.UNGESUNDER_ABVERKAUF)
+        cvd_up = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
+        fund_ok = bool(flow) and flow[-1].funding <= 0
+        return strong or (cvd_up and fund_ok) if strict_confirm else strong or fund_ok or cvd_up
+    strong = pattern == Pattern.DERIVATE_PUMP
+    cvd_dn = len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd
+    fund_hot = bool(flow) and flow[-1].funding > 0
+    return strong or (cvd_dn and fund_hot) if strict_confirm else strong or fund_hot or cvd_dn
+
+
 def next_pivot_beyond(pivots: list[Pivot], price: float, long_side: bool) -> Optional[float]:
     """Naechstes bestaetigtes Pivot-Hoch UEBER dem Preis (long) bzw. Pivot-Tief darunter."""
     if long_side:
@@ -1747,18 +1766,11 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     def _confirm_long() -> bool:
         # E38.2: Muster 5 wird zur starken Bestaetigung wie Muster 4 — nicht zu einem
         # eigenen Trigger. Der Einstieg bleibt an die Fib-Zone gebunden, sonst kauft die
-        # Engine im Nichts.
-        strong = pattern == Pattern.CAPITULATION_RESET or (
-            muster5_entry and pattern == Pattern.UNGESUNDER_ABVERKAUF)
-        cvd_up = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
-        fund_ok = bool(flow) and flow[-1].funding <= 0
-        return strong or (cvd_up and fund_ok) if strict_confirm else strong or fund_ok or cvd_up
+        # Engine im Nichts. Rechnung: confirm_ok() (einzige Rechenstelle, E43.6).
+        return confirm_ok(pattern, flow, True, strict_confirm, muster5_entry)
 
     def _confirm_short() -> bool:
-        strong = pattern == Pattern.DERIVATE_PUMP
-        cvd_dn = len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd
-        fund_hot = bool(flow) and flow[-1].funding > 0
-        return strong or (cvd_dn and fund_hot) if strict_confirm else strong or fund_hot or cvd_dn
+        return confirm_ok(pattern, flow, False, strict_confirm, muster5_entry)
 
     # --- E13-Helfer -----------------------------------------------------------------
     def _healthy(long_side: bool) -> bool:

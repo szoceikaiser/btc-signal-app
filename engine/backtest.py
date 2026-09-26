@@ -127,6 +127,10 @@ def V(label, panel=False, **kw):
 E433_USD = "LIVE-heute +Muster 2 in Dollar (E43.3)"
 E434_BTC = "LIVE-heute +OI in Kontrakten (E43.4)"
 A5_LIVE = "LIVE-heute +Pivot-Hoch nur letzte 1.300 Kerzen (A5)"
+E436_REST = "LIVE-heute +Rest halten (E43.6)"
+E436_STRICT = "LIVE-heute +Strenge Bestaetigung (E43.6)"
+E436_CONFIRM_T1 = "LIVE-heute +Bestaetigung am 0.5-Level (E43.6)"
+E436_COOLDOWN = "LIVE-heute +Sperrfrist nach Stop 48h (E43.6)"
 GRID = [
     V("nur Long (Basis)", bias_short=False),
     V("+Kaufleiter", bias_short=False, buy_ladder=True),
@@ -588,6 +592,30 @@ GRID = [
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       bein_richtung="bias", high_exit_hist="live"),
+    # ---------------------------------------------------------------- E43.6 (26.09.2026)
+    # Nachmessung der vier seit Monaten unentschiedenen Schalter, jeder mit GENAU EINEM
+    # Unterschied zur Panel-Zeile. Vorbild E43.2/E43.3/E43.4, Bauplan
+    # docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md Abschnitt "E43.6".
+    V(E436_REST,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", rest_halten=True),
+    V(E436_STRICT,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", strict_confirm=True),
+    V(E436_CONFIRM_T1,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", confirm_t1=True),
+    V(E436_COOLDOWN,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", cooldown_h=48.0),
     V("Long+Short (Ref)"),
 ]
 
@@ -2257,6 +2285,186 @@ def a5_abschnitt(umkl: dict, results: list | None = None, halves: list | None = 
     return z
 
 
+# ---------------------------------------------------------------- E43.6 (26.09.2026)
+# Nachmessung von vier seit Monaten unentschiedenen Schaltern (`02_status/
+# OFFENE-PUNKTE.md`, docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md Abschnitt "E43.6"):
+# rest_halten, strict_confirm, confirm_t1, cooldown_h. Alle vier existieren im Code
+# bereits und rechnen richtig, es fehlte nur die faire Messzeile gegen die heutige
+# Live-Zeile - kein Eingriff in strategy_core.py ausser der Vorbereitung fuer
+# strict_confirm/confirm_t1 (confirm_ok(), einzige Rechenstelle statt Duplikat hier).
+E436_RAUSCHGRENZE = 1.0         # dieselbe Regel wie E41/E43.2/E43.3/E43.4/A5
+E436_DD_TOLERANZ = 1.0
+E436_COOLDOWN_H = 48.0          # Wert aus dem Wissens-Layer-Hinweis, keine neue Zahl
+
+
+def e436_einschalten(live: dict, var: dict) -> dict:
+    """Entscheidungsregel fuer die vier E43.6-Zeilen, festgelegt VOR der Messung
+    (dieselbe wie E41/E43.2/E43.3/E43.4/A5)."""
+    beide = (var["h1"] - live["h1"] >= E436_RAUSCHGRENZE
+             and var["h2"] - live["h2"] >= E436_RAUSCHGRENZE)
+    dd_ok = var["dd"] >= live["dd"] - E436_DD_TOLERANZ
+    return {"beide_haelften_besser": beide, "rueckgang_ok": dd_ok,
+            "einschalten": beide and dd_ok}
+
+
+def e436_rest_halten_vorprobe(sigs_live: list) -> dict:
+    """Zaehlt, an wie vielen abgeschlossenen Positionen im Live-Lauf die Regel "Rest
+    schliessen bei Gegen-Muster" (strategy_core.py: `exit_pat and not rest_halten`)
+    ueberhaupt ausgeloest hat - genau die Ereignisse, die rest_halten veraendert (der
+    Rest liefe dann bis zum Stop statt sofort verkauft zu werden)."""
+    treffer = sum(1 for s in sigs_live if s["reason"].startswith("Gegen-Muster am Ziel:"))
+    return {"treffer": treffer}
+
+
+def e436_strict_confirm_vorprobe(candles: list, flow: list, start_ms: int) -> dict:
+    """Zaehlt Kerzen im Fenster, an denen die Order-Flow-Bestaetigung (`confirm_ok`)
+    beim heutigen (lockeren) Massstab wahr waere, beim strengen (`strict_confirm`)
+    aber falsch - long und short zusammen. Das sind die Einstiege, die
+    `strict_confirm` verhindern wuerde. `classify_pattern` liest nur die letzten 12
+    Kerzen - deshalb genuegt ein 12er-Ausschnitt (Vorbild e433/e434)."""
+    from strategy_core import classify_pattern, confirm_ok
+    out = {"kerzen": 0, "treffer": 0}
+    for i, c in enumerate(candles):
+        if c.ts < start_ms or i < 11:
+            continue
+        cs, fl = candles[i - 11:i + 1], flow[i - 11:i + 1]
+        pattern = classify_pattern(cs, fl)
+        out["kerzen"] += 1
+        for long_side in (True, False):
+            locker = confirm_ok(pattern, fl, long_side, strict_confirm=False)
+            streng = confirm_ok(pattern, fl, long_side, strict_confirm=True)
+            out["treffer"] += locker and not streng
+    return out
+
+
+def e436_confirm_t1_vorprobe(sigs_live: list, candles: list, flow: list) -> dict:
+    """Zaehlt die Ersteinstiege am 0.5-Level (KAUF_1/SHORT_1) im Live-Lauf, die heute
+    (`confirm_t1` aus) OHNE Order-Flow-Bestaetigung ausgeloest haben - das sind die
+    Einstiege, die `confirm_t1` blockieren wuerde."""
+    from strategy_core import classify_pattern, confirm_ok
+    idx = {c.ts: i for i, c in enumerate(candles)}
+    out = {"einstiege": 0, "treffer": 0}
+    for s in sigs_live:
+        if s["type"] not in ("KAUF_1", "SHORT_1"):
+            continue
+        i = idx.get(s["ts"])
+        if i is None or i < 11:
+            continue
+        cs, fl = candles[i - 11:i + 1], flow[i - 11:i + 1]
+        pattern = classify_pattern(cs, fl)
+        out["einstiege"] += 1
+        ok = confirm_ok(pattern, fl, s["type"] == "KAUF_1", strict_confirm=False)
+        out["treffer"] += not ok
+    return out
+
+
+_E436_NEUE_EINSTIEGE = ("KAUF_1", "KAUF_2", "SHORT_1", "SHORT_2")
+_E436_STOPS = ("STOPLOSS", "SHORT_STOPLOSS")
+
+
+def e436_cooldown_vorprobe(sigs_live: list, cooldown_h: float = E436_COOLDOWN_H) -> dict:
+    """Zaehlt, an wie vielen Stellen im Live-Lauf ein neuer Einstieg (KAUF_1/KAUF_2/
+    SHORT_1/SHORT_2 - aus FLAT oder nach `neustart_mit_rest`, genau die von
+    `_cooldown_ok()` bewachten Zweige) innerhalb von `cooldown_h` Stunden nach einem
+    Stop erfolgt ist - nur diese Faelle veraendert `cooldown_h`."""
+    stops = sorted(s["ts"] for s in sigs_live if s["type"] in _E436_STOPS)
+    out = {"treffer": 0}
+    for s in sigs_live:
+        if s["type"] not in _E436_NEUE_EINSTIEGE:
+            continue
+        letzter = max((t for t in stops if t < s["ts"]), default=None)
+        if letzter is not None and (s["ts"] - letzter) < cooldown_h * 3600 * 1000:
+            out["treffer"] += 1
+    return out
+
+
+def e436_abschnitt(results: list, halves: list, basis_label: str, vorproben: dict) -> list:
+    """Berichtsabschnitt E43.6: vier Zeilen, je eine Vorprobe und ein Urteil nach der
+    vorab festgelegten Entscheidungsregel (Vorbild e433_abschnitt/e434_abschnitt)."""
+    voll = {r[0]["label"]: r for r in results}
+    halb = {h[0]["label"]: (h[1], h[2]) for h in halves}
+
+    def _kz(label: str) -> dict:
+        _cfg, sigs, _sc, p = voll[label]
+        h1, h2 = halb[label]
+        return {"rendite": p["rendite_pct"], "dd": p.get("max_drawdown_pct", 0.0),
+                "h1": h1["rendite_pct"], "h2": h2["rendite_pct"], "n": len(sigs)}
+
+    def _zeile(name: str, v: dict) -> str:
+        return (f"| {name} | {v['rendite']:+.1f} % | {v['dd']:.1f} % | {v['h1']:+.1f} % | "
+                f"{v['h2']:+.1f} % | {v['n']} |")
+
+    ja = lambda b: "**ja**" if b else "nein"
+
+    if basis_label not in voll or basis_label not in halb:
+        return ["", "## E43.6: Nachmessung mit genau einem Unterschied", "",
+                "**Kein Urteil:** die Panel-Zeile fehlt im Gitter oder in der "
+                "Halbierung."]
+
+    live = _kz(basis_label)
+    z = ["", "## E43.6: Nachmessung mit genau einem Unterschied "
+         "(rest_halten, strict_confirm, confirm_t1, cooldown_h)", "",
+         "Vier seit Monaten unentschiedene Schalter (`02_status/OFFENE-PUNKTE.md`), "
+         "jeder mit GENAU EINEM Unterschied zur heutigen Panel-Zeile. Alle vier "
+         "existieren im Code bereits, es fehlte nur die faire Messzeile."]
+
+    def _teil(titel: str, label: str, vorprobe_text: str, vorprobe_leer: bool) -> None:
+        z.extend(["", f"### {titel}", "", vorprobe_text])
+        if vorprobe_leer:
+            z.append("")
+            z.append("**Kein Urteil:** der Schalter aendert im Fenster nichts - die "
+                     "Zeile ist eine Kopie der Live-Zeile.")
+            return
+        if label not in voll or label not in halb:
+            z.append("")
+            z.append("**Nicht gemessen:** die Zeile fehlt im Gitter oder in der "
+                     "Halbierung.")
+            return
+        var = _kz(label)
+        u = e436_einschalten(live, var)
+        z.extend(["", "| Variante | Rendite | Rueckgang | H1 | H2 | Signale |",
+                  "|---|---:|---:|---:|---:|---:|",
+                  _zeile("**Live**", live), _zeile(label, var), "",
+                  "**Urteil nach der Entscheidungsregel (vorab festgelegt):**", "",
+                  f"- In beiden Haelften mindestens {E436_RAUSCHGRENZE:.0f} Punkt "
+                  f"besser: {ja(u['beide_haelften_besser'])} "
+                  f"(H1 {var['h1'] - live['h1']:+.1f}, "
+                  f"H2 {var['h2'] - live['h2']:+.1f} Punkte gegen live)",
+                  f"- Rueckgang nicht mehr als {E436_DD_TOLERANZ:.0f} Punkt tiefer: "
+                  f"{ja(u['rueckgang_ok'])} ({var['dd'] - live['dd']:+.1f} Punkte "
+                  "gegen live)"])
+        if u["einschalten"]:
+            z.append("- **Regel erfuellt.** Der Schalter darf nach Kaisers Go an.")
+        else:
+            z.append("- **Regel nicht erfuellt - bleibt aus.**")
+
+    rh = vorproben["rest_halten"]
+    _teil("`rest_halten`", E436_REST,
+          f"**Vorprobe im Datensatz:** {rh['treffer']} Positionen im Live-Lauf hat "
+          "die Regel \"Rest schliessen bei Gegen-Muster\" beendet - genau die "
+          "Faelle, die `rest_halten` veraendert.", rh["treffer"] == 0)
+
+    sc = vorproben["strict_confirm"]
+    _teil("`strict_confirm`", E436_STRICT,
+          f"**Vorprobe im Datensatz:** Kerzen im Fenster: {sc['kerzen']}. Davon mit "
+          f"lockerer Bestaetigung wahr, strenger falsch (long + short): "
+          f"**{sc['treffer']}**.", sc["treffer"] == 0)
+
+    ct = vorproben["confirm_t1"]
+    _teil("`confirm_t1`", E436_CONFIRM_T1,
+          f"**Vorprobe im Datensatz:** Ersteinstiege am 0.5-Level im Live-Lauf: "
+          f"{ct['einstiege']}. Davon ganz ohne Order-Flow-Bestaetigung: "
+          f"**{ct['treffer']}**.", ct["treffer"] == 0)
+
+    cd = vorproben["cooldown_h"]
+    _teil(f"`cooldown_h` ({E436_COOLDOWN_H:.0f}h)", E436_COOLDOWN,
+          f"**Vorprobe im Datensatz:** Neue Einstiege innerhalb von "
+          f"{E436_COOLDOWN_H:.0f}h nach einem Stop im Live-Lauf: **{cd['treffer']}**.",
+          cd["treffer"] == 0)
+
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -2950,6 +3158,23 @@ def main():
     panel_r = next((r for r in results if r[0].get("panel")), best)
     panel_cfg, _psigs, panel_sc, panel_pnl = panel_r
 
+    # --- E43.6: vier Vorproben gegen den Live-Lauf (_psigs) --------------------------
+    try:
+        _e436 = {
+            "rest_halten": e436_rest_halten_vorprobe(_psigs),
+            "strict_confirm": e436_strict_confirm_vorprobe(candles, flow, eff_start),
+            "confirm_t1": e436_confirm_t1_vorprobe(_psigs, candles, flow),
+            "cooldown_h": e436_cooldown_vorprobe(_psigs),
+        }
+        _e436fehler = ""
+        print(f"E43.6: rest_halten {_e436['rest_halten']['treffer']}, strict_confirm "
+              f"{_e436['strict_confirm']['treffer']}, confirm_t1 "
+              f"{_e436['confirm_t1']['treffer']}, cooldown_h "
+              f"{_e436['cooldown_h']['treffer']} Treffer.")
+    except Exception as exc:  # noqa: BLE001
+        _e436, _e436fehler = {}, f"Vorproben nicht gerechnet ({exc})"
+        print(f"E43.6: {_e436fehler}")
+
     # --- E40.1: STH-Kostenbasis - Gegenpruefung und Vorfrage (reine Messung) ----------
     _sthquellen, _sthabgl, _sthvor, _sthfehler = {}, {}, None, ""
     try:
@@ -3340,6 +3565,10 @@ def main():
         "A5: next_pivot_beyond haengt von der Historie ab",
         _a5, _a5fehler,
         lambda: a5_abschnitt(_a5, results, halves, panel_cfg["label"]),
+    ) + abschnitt_oder_grund(
+        "E43.6: Nachmessung mit genau einem Unterschied",
+        _e436, _e436fehler,
+        lambda: e436_abschnitt(results, halves, panel_cfg["label"], _e436),
     ) + [
         "",
         "## Einschraenkungen",

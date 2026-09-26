@@ -17,8 +17,13 @@ Bericht: `docs\PRUEFUNG-2026-09-26-GESAMT.md` (Teil E). Nichts davon ist gebaut.
 4. **A3 als Schalter:** OI durch den Kurs teilen (Kontrakte statt Dollar).
 5. **A4:** Test summiert ab Fensteranfang neu, Vorprobe auf den Muster-2-Zweig. **Erledigt
    26.09.2026 als E43.5** (Arbeitszweig).
-6. **Nachmessung mit genau einem Unterschied:** `rest_halten`, `strict_confirm`,
-   `confirm_t1`, `cooldown_h`; danach `block_unhealthy`/Muster 5 einmal wiederholen.
+6. **Nachmessung mit genau einem Unterschied — GEMESSEN 26.09.2026 als E43.6:**
+   `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` — alle vier Regeln
+   nicht erfüllt (keine Zeile in beiden Fensterhälften ≥ 1 Punkt besser), alle vier
+   bleiben aus. `strict_confirm` sah in H1 sogar besser aus, drehte in H2 aber um
+   7,6 Punkte. Einzelheiten: `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt
+   „Messung E43.6". Als Nächstes: `block_unhealthy`/Muster 5 einmal wiederholen,
+   sobald `muster_cvd`/`muster_oi` tatsächlich wechseln (siehe Abschnitt E43.6).
 7. **Wissens-Layer berichtigen:** `be_im_plus`-Urteil, E37-Satz („keine einzige
    Variante“), „Faktor 69“ beim Funding = Prozent-Einheit.
 8. **A5 — GEMESSEN und ENTSCHIEDEN 26.09.2026.** „Teilgewinn am letzten Hoch“
@@ -100,12 +105,14 @@ Zahl „erst mal belassen").
   das ist ein Argument dafür, die teure Lösung zu prüfen, aber **kein** Argument dafür,
   sie ungemessen live zu schalten. Wer sie angeht, braucht zuerst eine Antwort auf die
   Prüfbarkeitsfrage, nicht auf die Bau-Frage.
-- **Vier Schalter hängen unentschieden in der Luft:** `confirm_t1`, `cooldown_h`,
-  `be_im_plus`, `release_stale_rest`. Sie stehen seit Monaten auf „erst nach
-  Backtest-Messung einschalten". `confirm_t1` (+36,1 %) und `cooldown_h` (+36,5 %)
-  sahen auf ihrer damaligen Basis (+33,3 %) sogar deutlich besser aus — aber diese
-  Basis gibt es nicht mehr, und auf der heutigen wurden sie nie mit genau einem
-  Unterschied gemessen. Zwei saubere Gitterzeilen würden das klären.
+- **`confirm_t1` und `cooldown_h` — GEMESSEN 26.09.2026 (siehe Punkt 6 oben).** Auf
+  ihrer damaligen Basis (+33,3 %) sahen sie deutlich besser aus (+36,1 % bzw. +36,5 %)
+  — diese Basis gibt es nicht mehr. Auf der heutigen Live-Zeile mit genau einem
+  Unterschied gemessen: beide Regeln nicht erfüllt, beide bleiben aus.
+- **Zwei Schalter hängen weiterhin unentschieden in der Luft:** `be_im_plus`,
+  `release_stale_rest`. Stehen seit Monaten auf „erst nach Backtest-Messung
+  einschalten", nie mit genau einem Unterschied gegen die heutige Live-Zeile
+  gemessen. Zwei saubere Gitterzeilen würden das klären (Vorbild E43.6).
 - **E32.2 — Meldung, wenn die Spot-Nachfrage kippt**, während eine Position offen ist.
   Schaltbar, Default aus. Seit E32.1 steht die Lage in Plan und Vorschau, seit E34 auch
   die Ampel; was fehlt, ist die aktive Meldung bei einem **Wechsel** — heute muss Kaiser
