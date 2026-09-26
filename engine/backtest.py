@@ -550,6 +550,8 @@ GRID = [
     # Entscheidungsregel VOR der Messung (docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md, E43.3):
     # live nur, wenn in BEIDEN Fensterhaelften mind. 1 Punkt besser UND Rueckgang nicht
     # mehr als 1 Punkt tiefer. Der Bericht prueft das selbst (e433_abschnitt).
+    # GEMESSEN 26.09.2026: 2 von 1504 Kerzen anders erkannt, Rendite/Haelften/Rueckgang
+    # identisch - Regel nicht erfuellt, bleibt "alt". Die Zeile laeuft weiter mit.
     V(E433_USD,
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,

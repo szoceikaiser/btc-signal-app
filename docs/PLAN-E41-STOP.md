@@ -1,6 +1,6 @@
 # E41 — Ein Stop, der nicht auf jeden knappen Schluss reagiert
 
-> Angelegt 21.09.2026, ergänzt um Kaisers Regel am selben Tag. Status: **LIVE seit 21.09.2026 — B1 (Rückeroberung, 1 Kerze), Kaisers Entscheidung.** Die Ausschalt-Regel hat am **23.09.2026 angeschlagen** und wurde von Kaiser **bewusst überstimmt** — siehe „Nachmessung 23.09.2026" am Ende.
+> Angelegt 21.09.2026, ergänzt um Kaisers Regel am selben Tag. Status: **LIVE seit 21.09.2026 — B1 (Rückeroberung, 1 Kerze), Kaisers Entscheidung.** Die Ausschalt-Regel hat am **23.09.2026 angeschlagen** und wurde von Kaiser **bewusst überstimmt** — siehe „Nachmessung 23.09.2026". **Auf der neuen Live-Basis (26.09.2026) schlägt sie nicht mehr an** — siehe „Nachmessung 26.09.2026" am Ende.
 > Anlass: der Befund aus E39 (`docs\PLAN-E39-E40.md`).
 
 ## Worum es geht, in einem Absatz
@@ -446,3 +446,29 @@ teuer ist — oder ob nur die Kapitalkurve anders verläuft.
 **444 Tests grün.** Der Bericht nennt die Überstimmung nur, wenn die Regel anschlägt,
 und die Ausschalt-Meldung bleibt daneben stehen — zwei Sabotagen sichern beides ab
 (`sabotage_e41.py`, jetzt 58 Sabotagen, alle gefangen).
+
+## Nachmessung 26.09.2026 — auf der neuen Live-Basis schlägt die Regel nicht mehr an
+
+Erster Backtest nach dem Wechsel auf `bein_richtung: "bias"` (E43.2, live seit
+26.09.2026), GitHub-Lauf 36233723729 auf dem Arbeitszweig, Fenster 18.01.–26.09.2026.
+Beide Vergleichszeilen tragen `bein_richtung: "bias"`, unterscheiden sich also weiter in
+genau einem Punkt.
+
+| Variante | Rendite | Rückgang | H1 | H2 | Stops |
+|---|---:|---:|---:|---:|---:|
+| **Live: Rückeroberung, 1 Kerze** | +35,3 % | −9,9 % | +23,6 % | +9,5 % | 9 |
+| Alter Stop (bis 21.09.) | +30,8 % | −9,9 % | +19,6 % | +9,3 % | 10 |
+| B3 · 3 statt 1 Kerze | +34,2 % | −9,9 % | +21,9 % | +9,7 % | 9 |
+
+**Urteil nach der unveränderten Ausschalt-Regel:** alter Stop in beiden Hälften ≥ 1 Punkt
+besser: nein (H1 −4,0, H2 −0,2). Rückgang live mehr als 1 Punkt tiefer: nein (gleich,
+−9,9 % gegen −9,9 %). **Der Bericht meldet „Bleibt an.“** Der offene Streitpunkt vom
+23.09.2026 hat sich damit auf der heutigen Basis erledigt, **ohne** dass die Regel
+geändert wurde.
+
+Zur Einordnung: Der Rückgang, an dem die Regel am 23.09. anschlug (1,5 Punkte), ist hier
+in beiden Zeilen gleich. Die Regel reagiert auf den Pfad, das war das Argument für die
+Überstimmung. Es bleibt richtig, dass ein Rückgangsvergleich zwischen zwei Varianten
+pfadabhängig ist; E41.6 (ein pfadunabhängiges Risikomaß) bleibt deshalb sinnvoll, ist
+aber nicht mehr dringend. Die Regel läuft bei jedem Backtest weiter mit.
+

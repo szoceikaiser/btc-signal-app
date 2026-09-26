@@ -8,7 +8,7 @@
 
 ---
 
-## 26.09.2026 (7) — E43.5 und E43.3 gebaut (Arbeitszweig)
+## 26.09.2026 (7) — E43.5 und E43.3 gebaut und gemessen (Arbeitszweig)
 
 **Kaisers Auftrag:** *„Ja, bau E43.5 und E43.3"*. Zweig:
 `claude/btc-signal-engine-start-hyiqny`. **`main` ist unverändert.**
@@ -41,14 +41,27 @@ E43.3“):
   (Korrektur nur in der Anzeige, Handel bleibt `"alt"`) hieße, dass Anzeige und Handel
   auseinanderlaufen. Nicht gebaut, bis Kaiser das will.
 
-**Nächster Schritt:** Backtest auf dem Arbeitszweig auswerten: Abschnitt „E43.3“ in
-`BACKTEST.md` lesen (Urteil steht dort), dazu den E41-Abschnitt auf der neuen
-Live-Basis (`bein_richtung: "bias"`). Aufwand **niedrig**.
+**Backtest gemessen** (GitHub-Lauf 36233723729, Fenster 18.01.–26.09.2026):
+- **E43.3:** Nur **2 von 1.504** Kerzen anders erkannt. Rendite (+35,3 %), beide Hälften,
+  Rückgang und 244 Signale identisch. **Regel nicht erfüllt, `muster_cvd` bleibt
+  `"alt"`.** Live gegen Backtest wich mit `"alt"` an 1 von 1.175 Kerzen ab, mit `"usd"`
+  an 0: A2 ist echt, aber klein. Der größere offene Hebel der Mustererkennung ist A3
+  (E43.4).
+- **E41 auf der neuen Live-Basis:** Die Ausschalt-Regel **schlägt nicht mehr an**
+  (Rückgang gleich −9,9 %, H1 +4,0, H2 +0,2 Punkte für live). Der Bericht meldet
+  „Bleibt an“. Der Streitpunkt vom 23.09. ist damit erledigt, ohne dass die Regel
+  geändert wurde (`docs\PLAN-E41-STOP.md`, „Nachmessung 26.09.2026“).
+- **E43.2-Ausschalt-Probe hält:** `auto` H1 +20,0 / H2 +4,3 gegen `bias` +23,6 / +9,5.
 
-**ZWISCHENSTAND 26.09.2026, 09:46 UTC** (für den Fall eines Abbruchs): Backtest auf dem
-Zweig läuft, GitHub-Lauf **36233723729** (angestoßen 09:45 UTC, Stand `c0678ce`). Er
-committet `BACKTEST.md` auf den Zweig. Danach: `git pull` auf dem Zweig, in
-`BACKTEST.md` nach „## E43.3“ und „## E41“ suchen (nicht die ganze Datei lesen).
+**Offen für Kaiser:**
+1. „Go“, den Arbeitszweig nach `main` zu übernehmen? Am Handelsverhalten ändert sich
+   **nichts** (`muster_cvd` bleibt `"alt"`). Es kämen: die besseren Tests (E43.5), der
+   Schalter samt Gitterzeile und Berichtsabschnitt, die Unterlagen.
+2. Sonderregel (Anzeige-Korrektur nur im Lage-Abruf): nicht bauen, bis E43.4 gemessen
+   ist. Empfehlung der KI: danach Anzeige und Handel gemeinsam entscheiden.
+
+**Nächster Schritt nach dem Go:** E43.4 (OI in Kontrakten statt Dollar, Befund A3):
+zuerst den Bauplan-Abschnitt schreiben, dann bauen. Aufwand **hoch**.
 
 ---
 

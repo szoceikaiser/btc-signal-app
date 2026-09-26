@@ -14,7 +14,7 @@
 |---|---|---|---|---|
 | E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main` gemerged) |
 | E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **LIVE** seit 26.09.2026 (`bein_richtung: "bias"`, Entscheidungsregel erfüllt, Kaisers Go) |
-| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **GEBAUT** 26.09.2026 (Arbeitszweig), Messung OFFEN |
+| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 2 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"alt"` (Arbeitszweig) |
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **mittel bis hoch** | OFFEN |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
@@ -300,6 +300,32 @@ wird nur genauer:
 - **Sabotage:** `sabotage_e433.py`, 29 Sabotagen. Beim ersten Lauf blieb eine
   ungefangen („Futures steigt“ fehlt bei `"usd"`). Dafür kam der Test
   `test_e433_fallende_futures_sind_kein_pump` dazu, danach war auch sie gefangen.
+
+### Messung E43.3 (26.09.2026, GitHub-Lauf 36233723729, Fenster 18.01.–26.09.2026)
+
+| Variante | Rendite | Rückgang | H1 | H2 | Signale |
+|---|---:|---:|---:|---:|---:|
+| **Live (`alt`)** | +35,3 % | −9,9 % | +23,6 % | +9,5 % | 244 |
+| Muster 2 in Dollar (`usd`) | +35,3 % | −9,9 % | +23,6 % | +9,5 % | 244 |
+
+- **Vorprobe im Datensatz:** 1.504 Kerzen im Fenster. Derivate-Pump mit `alt` an 96,
+  mit `usd` an 94 Kerzen. **Verschieden erkannt: 2 Kerzen.** Die Zeile misst also etwas,
+  nur fast nichts.
+- **Live gegen Backtest** (1.175 nachstellbare Kerzen): Mit `alt` hätte die Live-Engine
+  an **1** Kerze ein anderes Muster gesehen als der Backtest, mit `usd` an **0**.
+  Befund A2 ist im echten Datensatz also bestätigt, aber klein.
+- **Urteil nach der vorab festgelegten Regel:** in beiden Hälften ≥ 1 Punkt besser:
+  **nein** (H1 ±0,0, H2 ±0,0). Rückgang: gleich. **Regel nicht erfüllt, `muster_cvd`
+  bleibt auf `"alt"`.**
+- **Einordnung:** Kein Renditebefund, weder dafür noch dagegen. Die Sorge aus dem
+  Prüfbericht („Dieselbe Lage ergibt Furkans bestes Muster oder sein Warnmuster“) stimmt
+  im Prinzip, betrifft in acht Monaten aber nur zwei Kerzen und kein einziges Signal
+  im Ergebnis. Die bisherigen Urteile, die an Muster 2 hängen, verlieren durch A2 also
+  praktisch nichts. **A3 (OI in Dollar, E43.4) ist damit der größere offene Hebel** der
+  Mustererkennung.
+- **Offen für Kaiser — Sonderregel (Prüfbericht Teil E):** die Korrektur nur in der
+  Anzeige übernehmen. Das bräuchte einen eigenen Anzeige-Schlüssel. Anzeige und Handel
+  würden dann an wenigen Kerzen (hier 2 von 1.504) verschieden erkennen.
 
 ## E43.5 — Der Test „mehr Historie“ summiert je Ladefenster neu und erreicht Muster 2 (Befund A4)
 

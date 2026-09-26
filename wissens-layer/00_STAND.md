@@ -24,10 +24,9 @@
   Einzelheiten und Messwerte: `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`.
 - Letzte Live-Änderung am Handelsverhalten davor: **E41, Kaisers Rückeroberungs-Regel**
   (`stop_rueckeroberung: 1`), live seit 21.09.2026.
-- **Offener Streitpunkt dazu:** Die vorab festgelegte Ausschalt-Regel für E41 hat am
-  23.09.2026 angeschlagen (Rückgang 1,5 Punkte tiefer als erlaubt 1,0). Kaiser hat sie
-  **bewusst überstimmt**; der Bericht meldet weiter „AUSSCHALTEN". Beim nächsten
-  Backtest neu ansehen. Begründung: `docs\PLAN-E41-STOP.md`, Abschnitt „Nachmessung
+- **Streitpunkt dazu (erledigt 26.09.2026, siehe oben):** Die Ausschalt-Regel für E41
+  hatte am 23.09.2026 angeschlagen (Rückgang 1,5 Punkte tiefer als erlaubt 1,0); Kaiser
+  hatte sie bewusst überstimmt. Begründung: `docs\PLAN-E41-STOP.md`, Abschnitt „Nachmessung
   23.09.2026".
 - Letzte Anzeige-Änderung: **STH-Kostenbasis im Lage-Abruf** (E40, 21.09.2026).
 - **Gesamtprüfung 26.09.2026** (`docs\PRUEFUNG-2026-09-26-GESAMT.md`): Grundgerüst
@@ -40,22 +39,26 @@
   `bein_richtung: bias` (Furkans zwei Raster).
 
 - **Auf dem Arbeitszweig `claude/btc-signal-engine-start-hyiqny` (nicht in `main`):**
-  E43.5 fertig (Test „mehr Historie“ erreicht jetzt Muster 2), **E43.3 gebaut**
-  (Schalter `muster_cvd`, Default `"alt"`, Gitterzeile und Berichtsabschnitt mit
-  Entscheidungsregel), **467 Tests grün**. Die Messung steht aus. Neuer, ungemessener Nebenbefund **A5**: „Teilgewinn am letzten Hoch“
+  E43.5 fertig (Test „mehr Historie“ erreicht jetzt Muster 2), **E43.3 gebaut und
+  gemessen**: nur 2 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt,
+  `muster_cvd` bleibt `"alt"`. **467 Tests grün.** Wartet auf Kaisers „Go“ für `main`
+  (ändert kein Handelsverhalten).
+- **E41-Streitpunkt erledigt (26.09.2026):** Auf der neuen Live-Basis
+  (`bein_richtung: "bias"`) schlägt die Ausschalt-Regel nicht mehr an, der Bericht
+  meldet „Bleibt an“ (`docs\PLAN-E41-STOP.md`, „Nachmessung 26.09.2026“). Neuer, ungemessener Nebenbefund **A5**: „Teilgewinn am letzten Hoch“
   hängt von der Länge der geladenen Historie ab (`OFFENE-PUNKTE.md`, Punkt 8).
 
 ## Was als Nächstes offen liegt (Reihenfolge = Nutzwert)
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
-   E43.1 und E43.2 sind seit 26.09.2026 live (Kaisers Go, siehe oben). **E43.3** (Muster 2
-   „Derivate-Pump“ in Dollar statt Anteile an einer willkürlichen Summe, Befund A2) hat
-   seit 26.09.2026 einen fertigen Bauplan (Regel, Schalter `muster_cvd`, betroffene
-   Dateien, Entscheidungsregel — Abschnitt „E43.3“ im Plan), **gebaut ist er noch nicht**.
-   Danach E43.4 (OI als Schalter), E43.5 (Test erreicht den Muster-2-Zweig, Voraussetzung
-   für eine saubere E43.3-Messung).
-1. **E41.6** — ein pfadunabhängiges Risikomaß je Position, damit die Ausschalt-Regel auf
-   belastbarem Grund steht (Bauplan-Abschnitt in `docs\PLAN-E41-STOP.md`, nicht gebaut).
+   E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 auf dem Arbeitszweig gebaut und
+   gemessen (E43.3 bleibt `"alt"`), warten auf Kaisers „Go“ für `main`. **Als Nächstes
+   E43.4** (Open Interest in Kontrakten statt Dollar, Befund A3): zuerst den
+   Bauplan-Abschnitt schreiben. Danach E43.6 (Nachmessungen), E43.7 (Texte), A5
+   (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
+1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
+   `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
+   Ausschalt-Regel schlägt auf der neuen Live-Basis nicht mehr an.
 2. **E42** — Kaisers zweite Regel: Ausbruch über das letzte Hoch mit Rücktest
    (zurückkaufen oder Rest halten). Vorgemerkt in `02_status/OFFENE-PUNKTE.md`.
 3. Alles weitere: `02_status/OFFENE-PUNKTE.md`, nach Nutzwert sortiert.

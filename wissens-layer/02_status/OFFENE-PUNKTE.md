@@ -12,8 +12,8 @@ Bericht: `docs\PRUEFUNG-2026-09-26-GESAMT.md` (Teil E). Nichts davon ist gebaut.
 2. **Gitterzeile „LIVE-heute +Bein in Handelsrichtung“** (`bein_richtung: bias`), genau ein
    Unterschied. Kein neuer Code. **Erledigt: gemessen, live seit 26.09.2026 (E43.2).**
 3. **A2 als Schalter:** Muster 2 vergleicht Dollar-Beträge statt Anteile an einer
-   willkürlichen Summe. Behebt zugleich live ≠ Backtest. **Gebaut 26.09.2026 als E43.3**
-   (Arbeitszweig, `muster_cvd`, Default `"alt"`). Messung offen.
+   willkürlichen Summe. Behebt zugleich live ≠ Backtest. **Gebaut und gemessen 26.09.2026
+   als E43.3:** nur 2 von 1.504 Kerzen anders, Rendite identisch, bleibt `"alt"`.
 4. **A3 als Schalter:** OI durch den Kurs teilen (Kontrakte statt Dollar).
 5. **A4:** Test summiert ab Fensteranfang neu, Vorprobe auf den Muster-2-Zweig. **Erledigt
    26.09.2026 als E43.5** (Arbeitszweig).
