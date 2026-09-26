@@ -20,6 +20,7 @@
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **BAUPLAN GESCHRIEBEN** 26.09.2026, Muster-5-Wiederholung bewusst zurückgestellt (siehe Abschnitt E43.6) — wartet auf Kaisers Go zum Bauen |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
+| A5 | `next_pivot_beyond()` (Teilgewinn am letzten Hoch) haengt von der Historielaenge ab | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 53 von 1.177 Kerzen anders erkannt, Rendite/Haelften/Rueckgang identisch, Regel nicht erfuellt → bleibt `"voll"` (Arbeitszweig) |
 
 ### Aufwand je Etappe (Kaisers Wunsch 26.09.2026: Tokens sparen, wo es geht)
 
@@ -885,3 +886,49 @@ geschätzt **4 bis 8 neue Tests** (vier Zeilen-Tests plus ggf. je ein Vorprobe-T
 Noch nicht als Bauplan ausgeschrieben (Text-Etappe: `be_im_plus`-Urteil im Wissens-Layer
 berichtigen, E37-Satz korrigieren, Funding-Einheit richtigstellen — Prüfbericht Teil E,
 Punkt 7). Wird ergänzt, wenn E43.6 gebaut und entschieden ist.
+
+## A5 — Teilgewinn am letzten Hoch hängt von der Historielänge ab (26.09.2026)
+
+**Befund beim Bau von E43.5** (`OFFENE-PUNKTE.md` Punkt 8): `next_pivot_beyond()`
+(Teilgewinn am letzten Hoch, `high_exit`, live) sucht das nächste Pivot über ALLEN
+geladenen Kerzen. Live lädt `main.py` `main.LIMIT_HAUPT` (1.300) Spotkerzen — ein
+gleitendes Fenster. Der Backtest rechnet ab Datenbeginn (10.08.2025) — ein wachsendes
+Fenster. Dieselbe Fehlerklasse wie A2/A3 (live ≠ Backtest).
+
+**Auftrag Kaiser (per Prompt):** erst zählen, an wie vielen Kerzen im Fenster das
+nächste Pivot-Hoch mit der Live-Historie (1.300 Kerzen) ein anderes wäre als mit der
+Backtest-Historie. Bei 0 Treffern nur dokumentieren, sonst eine Gitterzeile mit genau
+einem Unterschied bauen.
+
+**Gemessen 26.09.2026 (GitHub-Actions-Lauf 36247317191, Fenster 18.01.–26.09.2026):**
+
+- **Vorprobe im Datensatz:** 1.177 Kerzen mit 1.300 nachstellbaren Kerzen davor. Davon
+  an **53** Kerzen ein anderes nächstes Pivot (long oder short) — Treffer > 0, also
+  weiter wie im Auftrag beschrieben.
+- **Umsetzung:** neuer Parameter `evaluate(high_exit_hist="voll"|"live")`. `"live"`
+  beschränkt die Pivotsuche NUR für den `high_exit`-Teilverkauf auf die letzten
+  `HIGH_EXIT_LIVE_KERZEN` (= `main.LIMIT_HAUPT`, 1.300) Kerzen — kein Eingriff in die
+  übrigen Pivot-Verwender (Impuls, Gegenzonen, 1D-Ebene). Default `"voll"` = bisheriges
+  Verhalten; `main.py` lädt ohnehin nur 1.300 Kerzen, dort also folgenlos. Gitterzeile
+  „LIVE-heute +Pivot-Hoch nur letzte 1.300 Kerzen (A5)“, genau ein Unterschied zur
+  Panel-Zeile.
+- **Messung (GitHub-Actions-Lauf 36248384303):**
+
+  | Variante | Rendite | Rückgang | H1 | H2 | Signale |
+  |---|---:|---:|---:|---:|---:|
+  | **Live (voll)** | +35,3 % | −9,9 % | +23,6 % | +9,4 % | 244 |
+  | Pivot-Hoch nur letzte 1.300 Kerzen (live) | +35,3 % | −9,9 % | +23,6 % | +9,4 % | 244 |
+
+- **Urteil nach der vorab festgelegten Entscheidungsregel** (wie E41/E43.2/E43.3/E43.4,
+  in beiden Hälften ≥ 1 Punkt besser UND Rückgang nicht mehr als 1 Punkt tiefer):
+  in beiden Hälften besser: **nein** (H1 ±0,0, H2 ±0,0). Rückgang: gleich. **Regel
+  nicht erfüllt, `high_exit_hist` bleibt auf `"voll"`.**
+- **Einordnung:** dieselbe Lehre wie bei A2/E43.3 — der Fehler ist im Prinzip echt (53
+  von 1.177 Kerzen sehen ein anderes Pivot), wirkt sich aber auf kein einziges Signal
+  im Ergebnis aus. Kein Renditebefund, weder dafür noch dagegen.
+- **Betroffene Dateien:** `engine/strategy_core.py` (Parameter, `HIGH_EXIT_LIVE_KERZEN`),
+  `engine/backtest.py` (`a5_next_pivot_beyond`, `a5_einschalten`, `a5_abschnitt`,
+  Gitterzeile), `engine/main.py`/`site/data/config.json` (Default `"voll"` +
+  `_hinweis_high_exit_hist`), `engine/test_strategy_core.py`/`engine/test_backtest.py`
+  (8 neue Tests). **507 Tests grün.** Keine eigene Sabotage-Datei (wie E43.2/E43.6 —
+  kein neuer Rechenweg außerhalb des bekannten `next_pivot_beyond`).

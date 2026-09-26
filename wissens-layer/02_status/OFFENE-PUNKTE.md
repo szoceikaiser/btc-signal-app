@@ -21,16 +21,19 @@ Bericht: `docs\PRUEFUNG-2026-09-26-GESAMT.md` (Teil E). Nichts davon ist gebaut.
    `confirm_t1`, `cooldown_h`; danach `block_unhealthy`/Muster 5 einmal wiederholen.
 7. **Wissens-Layer berichtigen:** `be_im_plus`-Urteil, E37-Satz („keine einzige
    Variante“), „Faktor 69“ beim Funding = Prozent-Einheit.
-8. **A5 (neu 26.09.2026, beim Bau von E43.5 gefunden, NICHT gemessen):** „Teilgewinn am
-   letzten Hoch“ (`high_exit`, live) hängt von der geladenen Historie ab.
-   `next_pivot_beyond()` nimmt das nächste Pivot-Hoch über dem Kurs aus **allen**
-   geladenen Kerzen. Ein längeres Fenster kann ein älteres, näher liegendes Hoch
-   dazuholen: Im Test-Szenario verkauft die Engine mit 1.200 Kerzen an 131.281, mit 400
-   erst an 135.282. Live lädt 1.300 Kerzen, der Backtest rechnet ab 10.08.2025. Das ist
-   dieselbe Fehlerklasse wie A2 (live ≠ Backtest). Erst messen: Zählt der Backtest
-   Kerzen, an denen das Hoch mit 1.300 Kerzen Historie ein anderes wäre? Erst danach
-   über einen Schalter reden. Einzelheiten: `docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md`,
-   Abschnitt E43.5.
+8. **A5 — GEMESSEN und ENTSCHIEDEN 26.09.2026.** „Teilgewinn am letzten Hoch“
+   (`high_exit`, live) hing von der geladenen Historie ab: `next_pivot_beyond()` nahm
+   das nächste Pivot-Hoch über dem Kurs aus **allen** geladenen Kerzen, live sind das
+   nur `main.LIMIT_HAUPT` (1.300) Kerzen (gleitendes Fenster), der Backtest rechnete ab
+   10.08.2025 (wachsendes Fenster) — dieselbe Fehlerklasse wie A2/A3 (live ≠ Backtest).
+   **Zählung:** 53 von 1.177 nachstellbaren Kerzen hätten ein anderes nächstes Pivot
+   gesehen — Treffer > 0. **Gitterzeile gebaut** (`evaluate(high_exit_hist="live")`,
+   genau ein Unterschied zur Panel-Zeile, „LIVE-heute +Pivot-Hoch nur letzte 1.300
+   Kerzen (A5)“) und über GitHub Actions gemessen: Rendite/Hälften/Rückgang/Signale
+   identisch zur Live-Zeile (+35,3 %, −9,9 %, 244 Signale, beide Varianten gleich).
+   **Regel nicht erfüllt** (beide Hälften ≥ 1 Punkt besser: nein) — `high_exit_hist`
+   bleibt auf `"voll"`. Wie bei A2: der Fehler ist real, aber folgenlos fürs Ergebnis.
+   Einzelheiten: `docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „A5“.
 
 ## Am Wissens-Layer selbst
 
