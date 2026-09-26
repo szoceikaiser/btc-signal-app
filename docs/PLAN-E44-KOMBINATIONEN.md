@@ -1,6 +1,6 @@
 # Bauplan E44 — Welche Schalter und Indikatoren gehören zusammen?
 
-> **Status: Analyse fertig, E44.1 in Arbeit** (26.09.2026, siehe 9a). Handelsverhalten unverändert.
+> **Status: Analyse fertig, E44.1 und E44.2 gebaut** (26.09.2026, siehe 9a). Handelsverhalten unverändert.
 > Grundlage: Backtest-Lauf vom 26.09.2026 15:18 UTC (`BACKTEST.md`, Fenster 18.01.–26.09.2026,
 > 78 Gitterzeilen) und die Signalliste der Live-Einstellung (`site/data/backtest_signals.json`).
 > Keine neue Messung, alle Zahlen unten sind aus diesen beiden Dateien nachgezählt.
@@ -318,7 +318,7 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 | Etappe | Status |
 |---|---|
 | E44.1 Coinalyze-Archiv | **GEBAUT** 26.09.2026 auf Zweig `claude/blissful-maxwell-9uwt6x`, 535 Tests, `sabotage_e441.py` 8/8. **Wartet auf Kaisers Go für `main`**: Erst dann läuft der tägliche Workflow `archiv.yml`. Nach dem Go einmal von Hand anstoßen (Actions → Coinalyze-Archiv → Run workflow) |
-| E44.2 Wechselwirkungen + Monats-Probe im Bericht | IN ARBEIT (26.09.2026, selber Zweig) |
+| E44.2 Wechselwirkungen + Monats-Probe im Bericht | **GEBAUT** 26.09.2026 auf demselben Zweig, 545 Tests, `sabotage_e442.py` 8/8 gefangen. Findet im echten Gitter dieselben 16 Gruppen wie Abschnitt 2. Wirkt erst im nächsten Backtest-Lauf (neuer Berichtsabschnitt „E44“). **Wartet auf Kaisers Go** zusammen mit E44.1 |
 | E44.3 E42 Ausbruch mit Rücktest | OFFEN, wartet auf Kaisers Antwort zu Frage 1 |
 | E44.4 `verkauf_faktor` | OFFEN |
 | E44.5 2³-Gitter messen | OFFEN, braucht E44.2 bis E44.4 |

@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (15)**
+> Stand: **26.09.2026 (16)**
 
 ## Lage
 
@@ -77,8 +77,10 @@ nichts gebaut). Befund: Filter-Kombinationen schaden gemessen mehr als die Summe
 kommen nur aus Ergänzungen. Die Rendite geht in den Rallys verloren, nicht beim Einstieg
 und nicht bei den Stops. Vorschlag: E42 (Ausbruch mit Rücktest) als Partner von
 `high_exit`, gemessen in einem 2³-Gitter mit einer vorab benannten Hauptzeile. **Wartet
-auf Kaisers Antworten** (Abschnitt 10 im Plan). Sofort machbar: E44.1 Coinalyze-Archiv,
-E44.2 Wechselwirkungs-Tabelle im Bericht.
+auf Kaisers Antworten** (Abschnitt 10 im Plan). **E44.1 (Coinalyze-Archiv) und E44.2
+(Wechselwirkungen, Monats-Probe) sind gebaut** auf Zweig `claude/blissful-maxwell-9uwt6x`,
+545 Tests grün, beide Sabotage-Proben 8/8. **Warten auf Kaisers Go für `main`.** Danach
+E44.3 (E42), Startprompt je Etappe: Plan, Abschnitt 9a.
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
    E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 gebaut, gemessen und seit
