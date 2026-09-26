@@ -605,6 +605,31 @@ def _usd_kurz(v: float, vorzeichen: bool = True) -> str:
     return f"{vz}{a:.0f} $"
 
 
+def _fut_cvd_usd(candles: list[Candle], flow: list[FlowPoint]) -> list[float]:
+    """Das kumulierte Futures-Delta in DOLLAR (E43.1).
+
+    `FlowPoint.fut_cvd` ist in BTC (Coinalyze `ohlcv-history` liefert die Einheit des
+    Marktes und ignoriert `convert_to_usd`). Jedes Kerzen-Delta wird mit dem
+    Schlusskurs DERSELBEN Kerze umgerechnet und erst dann aufsummiert - ein einziger
+    Kurs fuer die ganze Reihe waere bei 10 % Kursbewegung im Fenster 10 % daneben.
+
+    Gibt [] zurueck, wenn zu einem Flow-Punkt keine Kerze existiert: lieber keine Zeile
+    als eine mit falschem Kurs gerechnete. Reine Anzeige - `classify_pattern` liest
+    weiterhin `fut_cvd` in BTC.
+    """
+    kurs = {c.ts: c.close for c in candles}
+    out: list[float] = []
+    summe = vorher = 0.0
+    for p in flow:
+        k = kurs.get(p.ts)
+        if k is None:
+            return []
+        summe += (p.fut_cvd - vorher) * k
+        vorher = p.fut_cvd
+        out.append(summe)
+    return out
+
+
 def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
                      fenster: int = OF_FENSTER) -> list[dict]:
     """Die Rohwerte, die Furkan im Video abliest - als Liste von Zeilen (E36).
@@ -664,11 +689,17 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
                 })
 
     # --- Futures-CVD: der gehebelte Flow
-    fu = _of_reihe([p.fut_cvd for p in flow], fenster)
+    # E43.1 (Gesamtpruefung 26.09.2026, Befund A1): fut_cvd kommt von Coinalyze in BTC,
+    # spot_cvd in Dollar. Bis dahin stand der BTC-Wert hier mit "$" - um den Faktor
+    # Kurs zu klein -, und der Anteil am Spot-Flow teilte BTC durch Dollar. Deshalb
+    # jetzt erst in Dollar umrechnen (_fut_cvd_usd), dann vergleichen.
+    fu = _of_reihe(_fut_cvd_usd(candles, flow), fenster)
     if fu:
-        # E36.2: Die Groessenordnung ist die eigentliche Aussage. "+7 Tsd $ steigt"
-        # neben "+177,7 Mio $" verdeckt, dass der Hebel praktisch keine Rolle spielt -
-        # und genau das ist Furkans "gesunder Trend" (Transkript 9:06).
+        # E36.2: Die Groessenordnung ist die eigentliche Aussage - das Verhaeltnis zum
+        # Spot sagt, ob der Hebel die Bewegung traegt (Transkript 9:00-9:31).
+        # KORREKTUR E43.1: Das Beispiel, mit dem E36.2 begruendet wurde ("+7 Tsd $"
+        # neben "+177,7 Mio $" = der Hebel spielt keine Rolle), war der Einheitenfehler
+        # selbst: 7.000 BTC waren rund 540 Mio $, also etwa das Dreifache des Spot-Flows.
         hinweis = "gehebelter Flow, oft kurzfristig"
         if sp and sp["aenderung"]:
             anteil = abs(fu["aenderung"]) / abs(sp["aenderung"]) * 100

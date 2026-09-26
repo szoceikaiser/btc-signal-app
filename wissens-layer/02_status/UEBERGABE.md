@@ -8,6 +8,22 @@
 
 ---
 
+## 26.09.2026 (4) — E43.1 und E43.2 gebaut (Arbeitszweig)
+
+Nach Kaisers „Go“ zum Umzug (in `main` zusammengeführt) weiter nach Plan
+`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`:
+
+- **E43.1 fertig:** Futures-CVD im Lage-Abruf jetzt in Dollar (je Kerze mit deren
+  Schlusskurs umgerechnet). Reine Anzeige, kein Signal ändert sich.
+- **E43.2 gebaut:** Gitterzeile „LIVE-heute +Bein in Handelsrichtung“ mit genau einem
+  Unterschied zur Live-Zeile. Entscheidungsregel vorab im Plan. Backtest auf dem
+  Arbeitszweig angestoßen.
+- **447 Tests grün**, `sabotage_e43.py` 7 von 7 gefangen.
+
+**Offen:** Ergebnis des Backtests auswerten; Kaisers „Go“ für `main`.
+
+---
+
 ## 26.09.2026 (3) — Umzug: Unterlagen ins Code-Repo, KI committet selbst
 
 **Kaisers Wunsch:** *„Kannst du nicht alles so umbauen, dass du auf github commitest?“* —

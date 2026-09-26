@@ -909,24 +909,70 @@ def test_spot_cvd_zeigt_beide_zeitebenen_wenn_sie_sich_unterscheiden():
 
 
 def test_futures_cvd_zeigt_das_verhaeltnis_zum_spot():
-    """E36.2: '+7 Tsd $ steigt' neben '+177,7 Mio $' verdeckt, dass der Hebel
-    praktisch keine Rolle spielt - und genau das ist Furkans 'gesunder Trend'."""
+    """E36.2, berichtigt in E43.1: Das Verhaeltnis zum Spot ist die Aussage - aber
+    gerechnet in DERSELBEN Einheit. fut_cvd ist BTC, spot_cvd Dollar.
+
+    Bis E43.1 hielt dieser Test den Fehler fest: 600 BTC je Kerze galten neben 15 Mio $
+    als "verschwindend". Bei 80.000 $ sind 600 BTC aber 48 Mio $ - mehr als das
+    Dreifache des Spot-Flows."""
     from strategy_core import orderflow_detail
+    ms = 4 * 3600 * 1000
+    cs = [Candle(1_700_000_000_000 + i * ms, 80000, 80300, 79700, 80000) for i in range(30)]
+
+    def _fu(btc_je_kerze):
+        fl = [FlowPoint(c.ts, float(i) * 15e6, float(i) * btc_je_kerze, 8e9, 0.0)
+              for i, c in enumerate(cs)]
+        zeilen = orderflow_detail(cs, fl)
+        assert "Futures-CVD" in [z["name"] for z in zeilen], "Szenario passt nicht"
+        return next(z for z in zeilen if z["name"] == "Futures-CVD")
+
+    # Der alte Fehlerfall: 600 BTC x 80.000 $ = 48 Mio $ je Kerze gegen 15 Mio $ Spot
+    fu = _fu(600.0)
+    assert fu["hinweis"] == "320 % des Spot-Flows", fu["hinweis"]
+    assert fu["wert"] == "+576,0 Mio $", f"Wert nicht in Dollar: {fu['wert']}"
+
+    # Wirklich verschwindend: 0,05 BTC = 4.000 $ je Kerze gegen 15 Mio $
+    assert _fu(0.05)["hinweis"] == "verschwindend gegen den Spot"
+
+    # Dazwischen: 37,5 BTC = 3 Mio $ je Kerze = 20 % des Spot-Flows
+    assert _fu(37.5)["hinweis"] == "20 % des Spot-Flows"
+
+
+def test_futures_cvd_rechnet_jede_kerze_mit_ihrem_eigenen_kurs():
+    """E43.1: Umgerechnet wird je Kerze mit deren Schlusskurs, nicht mit einem Kurs fuer
+    das ganze Fenster. Szenario: der Kurs verdoppelt sich im Fenster - ein einziger
+    Kurs laege dann um bis zu 50 % daneben."""
+    from strategy_core import orderflow_detail, OF_FENSTER, _fut_cvd_usd
+    ms = 4 * 3600 * 1000
+    kurse = [50000.0] * 20 + [50000.0 + (i + 1) * 50000.0 / OF_FENSTER
+                               for i in range(OF_FENSTER)]
+    cs = [Candle(1_700_000_000_000 + i * ms, k, k, k, k) for i, k in enumerate(kurse)]
+    fl = [FlowPoint(c.ts, float(i) * 1e6, float(i) * 12.0, 8e9, 0.0)
+          for i, c in enumerate(cs)]
+    # Vorprobe: der Kurs aendert sich im Fenster wirklich
+    assert kurse[-1] == 2 * kurse[-1 - OF_FENSTER], "Szenario passt nicht"
+
+    erwartet = sum(12.0 * k for k in kurse[-OF_FENSTER:])     # 12 BTC je Kerze
+    usd = _fut_cvd_usd(cs, fl)
+    assert abs((usd[-1] - usd[-1 - OF_FENSTER]) - erwartet) < 1e-3, \
+        f"{usd[-1] - usd[-1 - OF_FENSTER]:.0f} statt {erwartet:.0f}"
+    fu = next(z for z in orderflow_detail(cs, fl) if z["name"] == "Futures-CVD")
+    assert fu["wert"] == "+11,1 Mio $", fu["wert"]
+
+
+def test_futures_cvd_ohne_passende_kerze_entfaellt():
+    """E43.1: Gibt es zu einem Flow-Punkt keine Kerze, laesst sich nicht umrechnen.
+    Dann keine Zeile - eine mit falschem Kurs gerechnete waere schlimmer."""
+    from strategy_core import orderflow_detail, _fut_cvd_usd
     ms = 4 * 3600 * 1000
     cs = [Candle(1_700_000_000_000 + i * ms, 80000, 80300, 79700, 80000) for i in range(30)]
     fl = [FlowPoint(c.ts, float(i) * 15e6, float(i) * 600.0, 8e9, 0.0)
           for i, c in enumerate(cs)]
-    fu = next(z for z in orderflow_detail(cs, fl) if z["name"] == "Futures-CVD")
-    # 600 gegen 15 Mio je Kerze = 0,004 % -> unter 0,5 %, also der Klartext-Fall.
-    # "0,0 % des Spot-Flows" saehe nach einem Rechenfehler aus.
-    assert fu["hinweis"] == "verschwindend gegen den Spot", fu["hinweis"]
-
-    # Gegenprobe: bei spuerbarem Futures-Anteil steht das Verhaeltnis als Zahl da
-    fl2 = [FlowPoint(c.ts, float(i) * 15e6, float(i) * 3e6, 8e9, 0.0)
-           for i, c in enumerate(cs)]
-    fu2 = next(z for z in orderflow_detail(cs, fl2) if z["name"] == "Futures-CVD")
-    assert "% des Spot-Flows" in fu2["hinweis"], fu2["hinweis"]
-    assert "20" in fu2["hinweis"], f"Verhaeltnis falsch: {fu2['hinweis']}"
+    # Vorprobe: mit allen Kerzen erscheint die Zeile
+    assert "Futures-CVD" in [z["name"] for z in orderflow_detail(cs, fl)]
+    luecke = cs[:10] + cs[11:]
+    assert _fut_cvd_usd(luecke, fl) == []
+    assert "Futures-CVD" not in [z["name"] for z in orderflow_detail(luecke, fl)]
 
 
 def test_kurze_spot_ebene_zeigt_das_vorzeichen_nicht_den_massstab():

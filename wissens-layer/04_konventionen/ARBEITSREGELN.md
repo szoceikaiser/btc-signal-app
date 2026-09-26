@@ -154,7 +154,7 @@ Regel selbst wird dabei nicht abgeschwächt.
 
 Eine Aufgabe gilt erst dann als fertig, wenn:
 
-1. Alle Tests grün sind (`cd engine && python3 run_tests.py`, aktuell **444**) — und
+1. Alle Tests grün sind (`cd engine && python3 run_tests.py`, aktuell **447**) — und
    die Zahl **genannt** wird. Läuft der Läufer mit weniger Tests durch und meldet
    trotzdem „0 failed", hat sich eine Datei still übersprungen.
 2. Zu jedem neuen Test eine Sabotage gelaufen ist und gefangen wurde.

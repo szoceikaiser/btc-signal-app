@@ -510,6 +510,17 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=3),
+    # ---------------------------------------------------------------- E43.2 (26.09.2026)
+    # Gesamtpruefung: bein_richtung="bias" entspricht Furkans zwei Fib-Rastern (Standbild
+    # 02.08.2026 16:12 - Kaufzonen aus dem grossen Aufwaerts-Bein, Widerstand aus dem
+    # kleinen Abwaerts-Bein). Gemessen wurde es nur gegen die Live-Zeile vom 27.08.
+    # ("NEU-LIVE +Bein in Handelsrichtung ..."). Hier GENAU EIN Unterschied zur heutigen
+    # Live-Zeile. Entscheidungsregel VOR der Messung: docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md.
+    V("LIVE-heute +Bein in Handelsrichtung",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias"),
     V("Long+Short (Ref)"),
 ]
 

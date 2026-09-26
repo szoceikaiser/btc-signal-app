@@ -991,6 +991,25 @@ def test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live():
         assert abweichend == erwartet, f"{label}: erwartet {erwartet}, ist {abweichend}"
 
 
+def test_e43_bein_richtung_zeile_hat_genau_einen_unterschied_zur_live_zeile():
+    """E43.2 (Gesamtpruefung 26.09.2026): `bein_richtung` wurde nur gegen die Live-Zeile
+    vom 27.08. gemessen. Diese Zeile misst ihn gegen die HEUTIGE - und nur dann taugt
+    sie, wenn sie sich in genau diesem einen Schalter unterscheidet."""
+    panel = [v for v in backtest.GRID if v.get("panel")]
+    assert len(panel) == 1
+    basis = {k: panel[0][k] for k in backtest.EVAL_KEYS if k in panel[0]}
+    # Vorprobe: der Schalter wirkt nur, wenn genau EINE Richtung erlaubt ist
+    # (strategy_core.evaluate). Sonst waere die Zeile eine Kopie der Live-Zeile.
+    assert basis["bias_long"] != basis["bias_short"], \
+        "bein_richtung wirkt bei dieser Live-Einstellung gar nicht"
+    assert basis["bein_richtung"] == "auto"
+    z = _zeile("LIVE-heute +Bein in Handelsrichtung")
+    hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+    abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+    assert abweichend == {"bein_richtung"}, abweichend
+    assert hier["bein_richtung"] == "bias"
+
+
 def test_e38_die_beiden_halten_zeilen_messen_wirklich_verschiedenes():
     """Zwei Gitterzeilen mit demselben Wert waeren zwei Zeilen, die aussehen wie eine
     Bestaetigung — und in Wahrheit derselbe Lauf sind."""

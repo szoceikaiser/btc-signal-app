@@ -8,7 +8,7 @@
 > **Seit 26.09.2026 liegen Code UND Unterlagen in diesem einen Repo** (`docs\`,
 > `wissens-layer\`). Das private Repo `260729-btc-trading-backup` ist nur noch ein
 > Backup von Kaisers Rechner und nicht maßgeblich.
-> Prüfe vor dem Einfügen nur eines: Stimmt die Testzahl unten noch (444)?
+> Prüfe vor dem Einfügen nur eines: Stimmt die Testzahl unten noch (447)?
 
 ---
 
@@ -69,7 +69,7 @@ DIE FUENF REGELN, DIE HIER GELTEN:
     zuerst, warum er nicht unter diese Diagnose fällt. Eine Beobachtung, die als Regel
     nichts bringt, wird ANGEZEIGT statt gehandelt - das ist hier ein etablierter Weg.
 
-TESTS: cd engine && python3 run_tests.py -> 444 Tests, alle gruen.
+TESTS: cd engine && python3 run_tests.py -> 447 Tests, alle gruen.
 Nenne die Zahl in deiner Antwort. Meldet der Laeufer WENIGER Tests und trotzdem
 "0 failed", hat sich eine Datei still uebersprungen. Auf Windows vorher
 PYTHONIOENCODING=utf-8 setzen. Eine Sabotage-Probe niemals mitten im Lauf abbrechen -
