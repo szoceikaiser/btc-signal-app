@@ -56,6 +56,16 @@ Abschnitt Git). Kaisers Rechner ist nur noch eine Kopie; er holt den Stand mit
 - **Doppelte Dateien laufen mit.** Eine Kopie `coinalyze-1.py` samt Testdatei lag
   einmal im `engine`-Ordner und wurde vom Läufer mitgenommen — ein Test schlug an, der
   gar nicht zum Code gehörte.
+- **Testfixtures, die ein anderes Datenformat bauen als der echte Code, decken den
+  Fehler nicht auf.** `run_backtest()` liefert Signale seit jeher als `dict`
+  (`Signal.to_dict()`), nicht als `Signal`-Objekte. Beim Bau von E43.6 (26.09.2026)
+  griffen drei neue Zählfunktionen per Attribut zu (`s.reason`, `s.type`, `s.ts`) statt
+  per Schlüssel (`s["reason"]` usw.) — **die Tests bauten fälschlich `Signal`-Objekte
+  als Fixtures und liefen grün**, während der echte Backtest-Lauf auf GitHub mit
+  `'dict' object has no attribute 'reason'` krachte. Lehre: eine Fixture, die per Hand
+  ein Objekt statt das echte Ausgabeformat der Funktion baut (hier `.to_dict()`), prüft
+  nicht denselben Pfad wie die Produktion — im Zweifel die Fixture aus der echten
+  Erzeugerfunktion bauen, nicht danebenkonstruieren.
 
 ## Fallen bei den Daten
 
