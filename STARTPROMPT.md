@@ -9,9 +9,7 @@
 > `wissens-layer\`). Das private Repo `260729-btc-trading-backup` ist nur noch ein
 > Backup von Kaisers Rechner und nicht maßgeblich.
 > Prüfe vor dem Einfügen nur eines: Stimmt die Testzahl unten noch? Stand 26.09.2026:
-> `main` 448, Arbeitszweig `claude/btc-signal-engine-start-hyiqny` 467 (E43.5 und E43.3,
-> gemessen, wartet auf Kaisers „Go“; ändert kein Handelsverhalten). Nach dem Merge gilt
-> 467 auch für `main`.
+> `main` 467 (E43.5 und E43.3 nach Kaisers Go gemerged). Kein offener Arbeitszweig.
 
 ---
 
@@ -81,8 +79,7 @@ DIE FUENF REGELN, DIE HIER GELTEN:
     zuerst, warum er nicht unter diese Diagnose fällt. Eine Beobachtung, die als Regel
     nichts bringt, wird ANGEZEIGT statt gehandelt - das ist hier ein etablierter Weg.
 
-TESTS: cd engine && python3 run_tests.py -> in main 448 Tests (nach dem Merge des
-E43.3-Zweigs 467), alle gruen.
+TESTS: cd engine && python3 run_tests.py -> in main 467 Tests, alle gruen.
 Nenne die Zahl in deiner Antwort. Meldet der Laeufer WENIGER Tests und trotzdem
 "0 failed", hat sich eine Datei still uebersprungen. Auf Windows vorher
 PYTHONIOENCODING=utf-8 setzen. Eine Sabotage-Probe niemals mitten im Lauf abbrechen -

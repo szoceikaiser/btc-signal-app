@@ -8,6 +8,14 @@
 
 ---
 
+## 26.09.2026 (8) — Kaisers Go: E43.5 und E43.3 in main
+
+Kaiser: *„Go“*. Arbeitszweig `claude/btc-signal-engine-start-hyiqny` per Fast-Forward
+nach `main`. `muster_cvd` bleibt `"alt"`, das Handelsverhalten ändert sich nicht.
+**467 Tests grün in `main`.** Nächster Schritt: E43.4 (Bauplan zuerst), Aufwand hoch.
+
+---
+
 ## 26.09.2026 (7) — E43.5 und E43.3 gebaut und gemessen (Arbeitszweig)
 
 **Kaisers Auftrag:** *„Ja, bau E43.5 und E43.3"*. Zweig:

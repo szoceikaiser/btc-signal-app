@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (3)**
+> Stand: **26.09.2026 (4)**
 
 ## Lage
 
@@ -14,7 +14,7 @@
   `signal-app\...` meinen jetzt die Repo-Wurzel. Einzelheiten: `START-HIER.md`.
 - Die Engine **läuft live** und handelt nicht selbst: sie sendet Telegram-Signale,
   Kaiser platziert die Orders. Webseite: `szoceikaiser.github.io/btc-signal-app`.
-- **Tests:** in `main` **448**, alle grün (`cd engine && python3 run_tests.py`).
+- **Tests:** in `main` **467**, alle grün (`cd engine && python3 run_tests.py`).
   Sabotage-Proben: fünf ältere (151 Sabotagen) plus `sabotage_e43.py` (7), alle gefangen.
 - **Kaisers Go 26.09.2026: E43.1 und E43.2 live.** Arbeitszweig nach `main` gemerged.
   E43.1 (Futures-CVD im Lage-Abruf jetzt in Dollar) ist reine Anzeige. E43.2
@@ -38,11 +38,10 @@
   16 von 25 ausgeschalteten Schaltern nie gegen die heutige Live-Zeile gemessen, vorneweg
   `bein_richtung: bias` (Furkans zwei Raster).
 
-- **Auf dem Arbeitszweig `claude/btc-signal-engine-start-hyiqny` (nicht in `main`):**
+- **Kaisers Go 26.09.2026: E43.5 und E43.3 in `main`** (Handelsverhalten unverändert):
   E43.5 fertig (Test „mehr Historie“ erreicht jetzt Muster 2), **E43.3 gebaut und
   gemessen**: nur 2 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt,
-  `muster_cvd` bleibt `"alt"`. **467 Tests grün.** Wartet auf Kaisers „Go“ für `main`
-  (ändert kein Handelsverhalten).
+  `muster_cvd` bleibt `"alt"`. **467 Tests grün in `main`.**
 - **E41-Streitpunkt erledigt (26.09.2026):** Auf der neuen Live-Basis
   (`bein_richtung: "bias"`) schlägt die Ausschalt-Regel nicht mehr an, der Bericht
   meldet „Bleibt an“ (`docs\PLAN-E41-STOP.md`, „Nachmessung 26.09.2026“). Neuer, ungemessener Nebenbefund **A5**: „Teilgewinn am letzten Hoch“
@@ -51,8 +50,8 @@
 ## Was als Nächstes offen liegt (Reihenfolge = Nutzwert)
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
-   E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 auf dem Arbeitszweig gebaut und
-   gemessen (E43.3 bleibt `"alt"`), warten auf Kaisers „Go“ für `main`. **Als Nächstes
+   E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 gebaut, gemessen und seit
+   26.09.2026 in `main` (E43.3 bleibt `"alt"`). **Als Nächstes
    E43.4** (Open Interest in Kontrakten statt Dollar, Befund A3): zuerst den
    Bauplan-Abschnitt schreiben. Danach E43.6 (Nachmessungen), E43.7 (Texte), A5
    (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
