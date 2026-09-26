@@ -15,7 +15,7 @@
 | E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main` gemerged) |
 | E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **LIVE** seit 26.09.2026 (`bein_richtung: "bias"`, Entscheidungsregel erfüllt, Kaisers Go) |
 | E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 2 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"alt"` (Arbeitszweig) |
-| E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **GEBAUT** 26.09.2026 (Arbeitszweig), 488 Tests, `sabotage_e434.py` 37/37; Messung offen |
+| E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 210 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"usd"` (Arbeitszweig, 488 Tests, `sabotage_e434.py` 37/37) |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
@@ -386,9 +386,9 @@ Muster 2 unerreichbar).
 
 ## E43.4 — Open Interest in Kontrakten statt Dollar (Befund A3)
 
-**Gebaut 26.09.2026 auf dem Arbeitszweig, Messung offen.** Der Bauplan unten ist
-unverändert, so wie Kaiser ihm zugestimmt hat. Was beim Bau dazukam, steht in
-„Umsetzung E43.4“.
+**Gebaut und gemessen 26.09.2026 auf dem Arbeitszweig: Regel nicht erfüllt, bleibt
+`"usd"`** (siehe „Messung E43.4“). Der Bauplan unten ist unverändert, so wie Kaiser ihm
+zugestimmt hat. Was beim Bau dazukam, steht in „Umsetzung E43.4“.
 
 **Problem, genau lokalisiert** (`strategy_core.classify_pattern`):
 
@@ -625,6 +625,67 @@ Kaisers Zustimmung zum Bauplan: *„Ja“*. Gebaut wie oben, ohne Abweichung von
   Drei Vorlagen in `sabotage_e433.py` suchten Zeilen, die E43.4 geändert hat
   (`evaluate`-Aufruf, `EVAL_KEYS`, Anzeige-Aufruf). Sie sind auf den neuen Wortlaut
   nachgezogen, mit unveränderter Absicht.
+
+### Messung E43.4 (26.09.2026, GitHub-Lauf 36236645038, Fenster 18.01.–26.09.2026)
+
+| Variante | Rendite | Rückgang | H1 | H2 | Signale |
+|---|---:|---:|---:|---:|---:|
+| **Live (`usd`)** | +35,4 % | −9,9 % | +23,6 % | +9,6 % | 244 |
+| OI in Kontrakten (`btc`) | +35,4 % | −9,9 % | +23,6 % | +9,6 % | 227 |
+
+- **Vorprobe im Datensatz:** 1.504 Kerzen im Fenster, alle mit echtem OI-Punkt.
+  **Verschieden erkannt: 210 Kerzen (14 %).** Die Zeile misst also etwas, und zwar
+  viel mehr als E43.3 (2 Kerzen).
+
+  | Muster | Kerzen mit `usd` | Kerzen mit `btc` |
+  |---|---:|---:|
+  | Kapitulation (4) | 21 | 11 |
+  | Derivate-Pump (2) | 96 | 48 |
+  | Gesunder Trend (1) | 184 | 149 |
+  | Short-Covering (3) | 56 | 103 |
+  | Abverkauf mit neuen Shorts (5) | 47 | 97 |
+  | Neutral | 1.100 | 1.096 |
+
+- **A3 als Zahl** (unter der Kursbedingung des Musters: OI-Bedingung erfüllt in Dollar,
+  in Kontrakten, in beiden):
+
+  | Muster | Kerzen | in Dollar | in Kontrakten | in beiden |
+  |---|---:|---:|---:|---:|
+  | 4 Kapitulation (Kurs ≤ −4 %, OI ≤ −5 %) | 127 | 74 | 30 | 30 |
+  | 5 Abverkauf (Kurs ≤ −2 %, OI ≥ −1 %) | 334 | 95 | 209 | 95 |
+  | 3 Short-Covering (Kurs ≥ +2 %, OI ≤ −2 %) | 332 | 12 | 65 | 12 |
+  | 2 Derivate-Pump (Kurs > 0, OI ≥ +3 %) | 758 | 296 | 144 | 144 |
+  | 1 Gesunder Trend (Kurs > 0, OI 0 bis +10 %) | 758 | 474 | 359 | 322 |
+
+  **Befund A3 ist im echten Datensatz bestätigt, und er ist groß:** Die Pump-Bedingung
+  „OI ≥ +3 %“ war in Dollar 296-mal erfüllt, in Kontrakten nur 144-mal. Rund die Hälfte
+  kam also allein vom Kurs. Bei der Kapitulation waren es 44 von 74 (60 %). Umgekehrt
+  waren Short-Covering und Muster 5 in Dollar viel zu selten: 12 statt 65 bzw. 95 statt
+  209.
+- **Urteil nach der vorab festgelegten Regel:** in beiden Hälften ≥ 1 Punkt besser:
+  **nein** (H1 ±0,0, H2 ±0,0). Rückgang: gleich. **Regel nicht erfüllt, `muster_oi`
+  bleibt auf `"usd"`.**
+- **Die 17 Signale weniger** ändern weder Rendite noch Hälften noch Rückgang, auch nicht
+  in der ersten Nachkommastelle. Das passt nur zu Signalen ohne Tranche, also zu den
+  Warnungen „Derivate-Pump: anfällig für Long-Flush“ während einer offenen Position
+  (Derivate-Pump halbiert: 96 → 48 Kerzen). **Das ist ein Schluss, nicht gezählt:** Der
+  Bericht schlüsselt die Signalarten je Zeile nicht auf, und ohne Coinalyze-Key lässt
+  sich der Lauf nicht außerhalb von GitHub nachstellen.
+- **Einordnung:** Die Mustererkennung ändert sich an 14 % der Kerzen, der Handel in acht
+  Monaten praktisch nicht. Die Einstiege hängen an den Fib-Zonen, die Muster wirken nur
+  an wenigen Stellen (Sperre, Bestätigung, Restverkauf), und dort lagen beide Rechnungen
+  offenbar gleich. Die bisherigen Urteile, die an Mustern hängen, verlieren durch A3
+  deshalb für die Rendite nichts. Für die **Anzeige** gilt das nicht: Der Lage-Abruf nennt
+  an rund jeder siebten Kerze ein Muster, das zum Teil nur aus dem Kurs stammt.
+- **Offen für Kaiser — Anzeige-Frage für A2 und A3 gemeinsam** (vorab so festgelegt):
+  beide Handels-Schalter bleiben aus. Eine eigene Anzeige-Einstellung hieße, dass der
+  Lage-Abruf an rund 14 % der Kerzen ein anderes Muster nennt als das, nach dem die
+  Engine handelt. **Empfehlung der KI:** keine getrennte Muster-Anzeige, stattdessen der
+  kleine Anzeige-Schritt aus „Bewusst NICHT“: In der OI-Zeile steht die Kontrakt-Änderung
+  neben der Dollar-Änderung, und der Hinweis („neues Geld“ / „Positionen werden
+  geschlossen“) folgt den Kontrakten. Dann sieht Kaiser selbst, ob das OI wegen neuer
+  Positionen oder nur wegen des Kurses steigt, und Anzeige und Handel bleiben bei
+  derselben Mustererkennung.
 
 ## E43.6, E43.7
 

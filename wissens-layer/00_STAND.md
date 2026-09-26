@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (6)**
+> Stand: **26.09.2026 (7)**
 
 ## Lage
 
@@ -52,11 +52,12 @@
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
    E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 gebaut, gemessen und seit
    26.09.2026 in `main` (E43.3 bleibt `"alt"`). **Als Nächstes
-   E43.4** (Open Interest in Kontrakten statt Dollar, Befund A3): **gebaut**
-   (26.09.2026, Zweig `claude/e43-4-open-interest-9mmh0l`, 488 Tests grün,
-   `sabotage_e434.py` 37/37), `muster_oi` steht auf `"usd"`. Offen: Backtest-Messung,
-   Urteil nach der vorab festgelegten Regel, Kaisers Go. Danach E43.6 (Nachmessungen),
-   E43.7 (Texte), A5
+   E43.4** (Open Interest in Kontrakten statt Dollar, Befund A3): **gebaut und
+   gemessen** (26.09.2026, Zweig `claude/e43-4-open-interest-9mmh0l`, 488 Tests grün).
+   210 von 1.504 Kerzen anders erkannt, Rendite identisch, Regel nicht erfüllt,
+   `muster_oi` bleibt `"usd"`. A3 ist echt: Die Hälfte der Pump-Treffer beim OI kam nur
+   vom Kurs. Offen: Kaisers Go für `main`, Anzeige-Frage A2/A3. Danach E43.6
+   (Nachmessungen), E43.7 (Texte), A5
    (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die

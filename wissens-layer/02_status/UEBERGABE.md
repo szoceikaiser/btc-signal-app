@@ -8,6 +8,38 @@
 
 ---
 
+## 26.09.2026 (11) — E43.4 gemessen: bleibt `"usd"`, A3 ist echt und groß
+
+Backtest-Lauf 36236645038 (Arbeitszweig `claude/e43-4-open-interest-9mmh0l`, Fenster
+18.01.–26.09.2026). **`main` ist unverändert.**
+
+- **Rendite, beide Hälften und Rückgang identisch** (+35,4 %, H1 +23,6, H2 +9,6,
+  −9,9 %). **Regel nicht erfüllt, `muster_oi` bleibt `"usd"`.**
+- **Vorprobe:** 210 von 1.504 Kerzen anders erkannt (14 %). Derivate-Pump 96 → 48,
+  Kapitulation 21 → 11, Short-Covering 56 → 103, Muster 5 47 → 97.
+- **A3 als Zahl:** Die Pump-Bedingung „OI ≥ +3 %“ war in Dollar 296-mal erfüllt, in
+  Kontrakten 144-mal. Die Hälfte kam also allein vom Kurs. Bei der Kapitulation: 74
+  gegen 30.
+- **227 statt 244 Signale**, ohne jede Wirkung auf die Rendite. Das passt nur zu Signalen
+  ohne Tranche (Pump-Warnungen). **Schluss, nicht gezählt:** Der Bericht schlüsselt
+  Signalarten je Zeile nicht auf.
+- Nachgetragen: Plan „Messung E43.4“, `_hinweis_muster_oi`, Gitter-Kommentar. Die
+  E43.3-Sabotage „Rückgang zählt nicht“ hat eine eindeutige Vorlage bekommen (ihre Zeile
+  gibt es seit E43.4 zweimal), weiter 29/29 gefangen. **488 Tests grün.**
+
+**Offen für Kaiser:**
+1. „Go“, den Arbeitszweig nach `main` zu übernehmen? Am Handelsverhalten ändert sich
+   **nichts** (`muster_oi` bleibt `"usd"`).
+2. Anzeige-Frage für A2 und A3 gemeinsam. **Empfehlung der KI:** keine getrennte
+   Muster-Anzeige (Lage-Abruf und Handel würden an rund 14 % der Kerzen verschiedene
+   Muster nennen). Stattdessen ein kleiner Anzeige-Schritt: In der OI-Zeile steht die
+   Kontrakt-Änderung neben der Dollar-Änderung, und der Hinweis folgt den Kontrakten.
+
+**Danach:** E43.6 (Nachmessungen `rest_halten`, `strict_confirm`, `confirm_t1`,
+`cooldown_h`; danach Muster 5). Die Voraussetzung „nach A2/A3“ ist jetzt erfüllt.
+
+---
+
 ## 26.09.2026 (10) — E43.4 gebaut (Arbeitszweig), Messung läuft
 
 **Kaisers Auftrag:** *„Ja“* (zum Bauplan E43.4). Zweig:
