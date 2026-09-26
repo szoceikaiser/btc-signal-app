@@ -1,6 +1,6 @@
 # Bauplan E44 — Welche Schalter und Indikatoren gehören zusammen?
 
-> **Status: ANALYSE UND VORSCHLAG, nichts gebaut** (26.09.2026). Handelsverhalten unverändert.
+> **Status: Analyse fertig, E44.1 in Arbeit** (26.09.2026, siehe 9a). Handelsverhalten unverändert.
 > Grundlage: Backtest-Lauf vom 26.09.2026 15:18 UTC (`BACKTEST.md`, Fenster 18.01.–26.09.2026,
 > 78 Gitterzeilen) und die Signalliste der Live-Einstellung (`site/data/backtest_signals.json`).
 > Keine neue Messung, alle Zahlen unten sind aus diesen beiden Dateien nachgezählt.
@@ -311,7 +311,81 @@ selbst.
 
 E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 
+## 9a. Status je Etappe und Startpunkt für einen neuen Chat
+
+**Status (wird nach jeder Etappe fortgeschrieben):**
+
+| Etappe | Status |
+|---|---|
+| E44.1 Coinalyze-Archiv | IN ARBEIT (26.09.2026, Zweig `claude/blissful-maxwell-9uwt6x`) |
+| E44.2 Wechselwirkungen + Monats-Probe im Bericht | OFFEN |
+| E44.3 E42 Ausbruch mit Rücktest | OFFEN, wartet auf Kaisers Antwort zu Frage 1 |
+| E44.4 `verkauf_faktor` | OFFEN |
+| E44.5 2³-Gitter messen | OFFEN, braucht E44.2 bis E44.4 |
+| E44.6 Shorts im Abwärts-Regime | OFFEN, nur nach Kaisers Ja (Frage 2) |
+
+**So beginnt ein neuer Chat mit einer Etappe (spart Tokens):** Den Kurzprompt aus
+`STARTPROMPT.md` nehmen und als `AUFGABE` eine dieser Zeilen einsetzen. Die KI liest dann nur
+`00_STAND.md`, den jüngsten Abschnitt von `UEBERGABE.md` und diesen Plan.
+
+- **E44.1:** `E44.1 aus docs\PLAN-E44-KOMBINATIONEN.md fertigstellen (Abschnitt 9b). Zuerst den
+  Status in 9a und den juengsten UEBERGABE-Abschnitt lesen, dort steht, was schon gebaut ist.` Aufwand: mittel.
+- **E44.2:** `E44.2 aus docs\PLAN-E44-KOMBINATIONEN.md bauen (Abschnitt 9c).` Aufwand: mittel.
+- **E44.3:** `E44.3 (E42 Ausbruch mit Ruecktest) aus docs\PLAN-E44-KOMBINATIONEN.md bauen,
+  Abschnitt 6 K1, mit meinen Antworten aus Abschnitt 10.` Aufwand: **hoch**.
+- **E44.4:** `E44.4 (verkauf_faktor) aus docs\PLAN-E44-KOMBINATIONEN.md bauen, Abschnitt 6 K2.` Aufwand: mittel.
+- **E44.5:** `E44.5 aus docs\PLAN-E44-KOMBINATIONEN.md: 2^3-Gitter nach Abschnitt 8 bauen,
+  Backtest auf dem Zweig anstossen, Urteil nach der vorab festgelegten Regel.` Aufwand: niedrig bis mittel.
+- **E44.6:** nur nach Kaisers Ja, eigener Bauplan-Abschnitt zuerst. Aufwand: hoch.
+
+### 9b. E44.1 im Detail: Coinalyze-Archiv
+
+- **Problem:** Coinalyze liefert nur rund 1.500 bis 2.000 4h-Werte. Das Messfenster wandert
+  deshalb nach vorn (Juli: ab 18.11.2025, heute: ab 18.01.2026), ältere Daten gehen verloren.
+- **Lösung:** neues Modul `engine/archiv.py`. Es lädt OI, Liquidationen, Futures-Delta und
+  Long-Short von Coinalyze, übernimmt **nur abgeschlossene** 4h-Kerzen und mischt sie in
+  `site/data/archiv/coinalyze_4h.json`. Neue Werte überschreiben alte zum selben Zeitpunkt,
+  alte Zeitpunkte bleiben erhalten. Leeres oder fehlendes Archiv ist kein Fehler.
+- **Backtest:** mischt nach dem Coinalyze-Abruf das Archiv dazu (`archiv.zusammen`).
+  Solange das Archiv nicht älter ist als Coinalyze, ändert sich **keine Zahl**. Erst wenn
+  Coinalyze ältere Werte löscht, die das Archiv noch hat, wird das Fenster länger (bis
+  höchstens `START_MS` = 01.09.2025). Der Berichtskopf nennt das Fenster ohnehin.
+- **Täglich schreiben:** neuer Workflow `.github/workflows/archiv.yml` (einmal täglich
+  plus Knopf), ruft `python3 archiv.py` auf und committet nur die Archivdatei. Die
+  Live-Engine (`main.py`) wird **nicht** angefasst.
+- **Bewusst NICHT:** kein Eingriff in `main.py` oder `strategy_core.py`, kein neues
+  Handelsverhalten, keine Aggregation (nur die Reihen, die der Backtest heute nutzt).
+- **Tests:** Mischen (neu gewinnt, alt bleibt), nur abgeschlossene Kerzen, Speichern und
+  Laden mit Liquidations-Paaren, fehlende Datei, Backtest ruft das Mischen wirklich auf.
+  Sabotage-Probe `sabotage_e441.py`.
+- **Falls der Workflow nicht gepusht werden kann** (Workflow-Dateien sind in manchen
+  Umgebungen geschützt): Datei steht im Plan, Kaiser legt sie über GitHub von Hand an.
+
+### 9c. E44.2 im Detail: Wechselwirkungen und Monats-Probe im Bericht
+
+- **Wechselwirkungs-Tabelle:** Funktion `e442_vierergruppen(GRID)` findet alle Gruppen
+  Basis/A/B/A+B, in denen A und B sich von der Basis in je genau einem, verschiedenen Schalter
+  unterscheiden und A+B genau beide Änderungen trägt. `e442_wechselwirkung` rechnet
+  (A+B) − A − B + Basis für Gesamt, H1 und H2. Neuer Berichtsabschnitt „E44: Wechselwirkungen“.
+  Das ist Abschnitt 2 dieses Plans, als Code.
+- **Monats-Probe:** Funktion `monats_probe(monate_live, monate_var)`: Summe der monatlichen
+  Renditedifferenzen, und ob sie positiv bleibt, wenn ein beliebiger einzelner Monat
+  weggelassen wird. Im Bericht für jede Zeile „LIVE-heute +…“ gegen die Panel-Zeile.
+  Sie wird Teil der Entscheidungsregel ab E44.5 (Abschnitt 8).
+- **Bewusst NICHT:** keine neue Gitterzeile, kein Schalter, keine Änderung an bestehenden
+  Urteilen.
+- **Tests:** konstruierte Gitter mit bekannter Wechselwirkung, Gruppen mit zwei Unterschieden
+  werden nicht mitgezählt, Monats-Probe kippt bei einem einzelnen Ausreißermonat.
+  Sabotage-Probe `sabotage_e442.py`.
+
 ## 10. Offene Fragen an Kaiser
+
+**Antworten hier eintragen, sobald Kaiser sie gibt** (Datum und Wortlaut):
+
+- Frage 1: *(offen)*
+- Frage 2: *(offen)*
+- Frage 3: *(offen)*
+
 
 1. **E42-Werte:** Rücktest-Fenster 2 Tage, Rückkauf 25 %, Stop bei Schluss unter der Marke.
    Passt das zu dem, was du mit „Ausbruch mit Rücktest“ meinst?
