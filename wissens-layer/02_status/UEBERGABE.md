@@ -8,6 +8,37 @@
 
 ---
 
+## 26.09.2026 (20) — E44: Kombinations-Analyse, Bauplan geschrieben, nichts gebaut
+
+**Auftrag Kaiser:** *„welche dieser Tests und Indikatoren miteinander kombiniert und getestet
+werden können. Um am Ende mehr Rendite rauszuholen […] Insbesondere beachte Furkans
+Strategien.“* Ergebnis: `docs/PLAN-E44-KOMBINATIONEN.md`.
+
+**Grundlage:** keine neue Messung. Nachgerechnet aus `BACKTEST.md` (Lauf 26.09. 15:18) und
+`site/data/backtest_signals.json` (Nachbau endet bei 13.509 € gegen 13.532 € im Bericht).
+Befunde:
+- 16 saubere 2×2-Gruppen im Gitter: Filter × Filter bis −10,2 Punkte über die Summe hinaus,
+  Verstärker × Verstärker additiv, Ergänzungen bis +13,7. Eingetragen in
+  `GEMESSEN-UND-ENTSCHIEDEN.md`, Abschnitt „Wechselwirkungen“.
+- Live-Einstellung: 50 % der Zeit in einer Position, zeitgewichtet 35 % investiert, in einer
+  Position fast immer 100 %, Haltedauer Median 4 Tage. Rest-Verkauf bei Gegen-Muster zu
+  7 von 9 richtig, die 2 falschen sind die Rallys (07.04. +5,4 %, 19.08. +14,4 %). Die Stops
+  hielten die Engine aus beiden großen Abwärtsphasen heraus.
+- Furkan-Abgleich über die ausgewerteten Auszüge in `docs/`. **Die Rohabschriften im
+  Backup-Repo waren nicht lesbar** (Rechte-Prüfung der Arbeitsumgebung hat das Auflisten
+  blockiert), das steht als offene Frage im Plan.
+
+**Vorschlag:** E42 (Ausbruch mit Rücktest) als Partner von `high_exit`, `verkauf_faktor`
+0,67 und `rest_halten` im 2³-Gitter. Hauptzeile „LIVE-heute +E42“ entscheidet nach der
+bekannten Regel plus Monats-Probe, die übrigen Zeilen brauchen 2 Punkte in beiden Hälften.
+K4 (Shorts im Abwärts-Regime) nur nach Kaisers Grundsatz-Ja.
+
+**Offen für Kaiser:** die drei Fragen in Abschnitt 10 des Plans. **Sofort machbar ohne
+Antwort:** E44.1 (Coinalyze-Archiv) und E44.2 (Wechselwirkungs-Tabelle und Monats-Probe
+im Bericht), beide Aufwand mittel. Code unberührt, 527 Tests grün.
+
+---
+
 ## 26.09.2026 (19) — E43.7 in main nachgetragen, E43 abgeschlossen
 
 **Kaiser:** *„43.7 und 43.8 müssten schon erledigt sein.“* Stimmt: E43.8 war in `main`.

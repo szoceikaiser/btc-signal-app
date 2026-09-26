@@ -4,6 +4,18 @@
 > Erledigtes wandert hier raus und in die Chronik (`docs\ETAPPENPLAN.md`).
 > Kurzstand: `00_STAND.md` · was zuletzt lief: `UEBERGABE.md`.
 
+## NEU 26.09.2026 — E44: Kombinationen gezielt messen (höchster Nutzwert)
+
+Bauplan `docs\PLAN-E44-KOMBINATIONEN.md`, **nichts gebaut, wartet auf Kaisers Antworten**
+(Abschnitt 10 dort). Kern: Die Rendite geht in den Rallys verloren (7 von 9 Rest-Verkäufen
+richtig, die 2 falschen sind April +5,4 % und August +14,4 %). Vorschlag: **E42 „Ausbruch mit
+Rücktest“** als Partner des live geschalteten `high_exit`, dazu `verkauf_faktor` (Furkan:
+Verkaufs-Tranchen nach oben kleiner) und `rest_halten` in einem 2³-Gitter. **Eine vorab
+benannte Hauptzeile entscheidet** („LIVE-heute +E42“), die anderen erklären. Sofort machbar
+und unabhängig: E44.1 Coinalyze-Archiv (Fenster wächst statt wandert) und E44.2
+Wechselwirkungs-Tabelle und Monats-Probe im Bericht. Optional, nur nach Kaisers Ja: Shorts im
+Abwärts-Regime (K4).
+
 ## NEU 26.09.2026 — aus der Gesamtprüfung (höchster Nutzwert zuerst)
 
 Bericht: `docs\PRUEFUNG-2026-09-26-GESAMT.md` (Teil E). Nichts davon ist gebaut.

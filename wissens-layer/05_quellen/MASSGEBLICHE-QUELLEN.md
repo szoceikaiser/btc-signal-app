@@ -28,7 +28,7 @@
 `docs\PLAN-E*.md` — je Vorhaben ein Dokument mit Problemstellung (mit Kaisers
 wörtlichem Einwand), Soll-Zustand, betroffenen Dateien, Etappen, Messergebnis und einem
 Abschnitt „Bewusst NICHT gemacht". Vorhanden für **E18, E23, E24, E28, E30, E32, E33,
-E34, E35, E36, E37, E38, E39/E40 und E41**.
+E34, E35, E36, E37, E38, E39/E40, E41, E43 und E44**.
 
 Besonders ergiebig für eine neue Session:
 

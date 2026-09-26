@@ -330,6 +330,26 @@ Neubau. Dazu drei Regeln, die jetzt an EINER Stelle stehen und für alle Werte g
   jetzt an den `Retry-After`-Kopf und fragt nach einem gescheiterten Sammelabruf
   einzeln nach.
 
+## Wechselwirkungen: was passiert, wenn man Schalter kombiniert (E44-Analyse, 26.09.2026)
+
+Nachgerechnet aus 16 Vierergruppen im Gitter vom 26.09.2026 (Basis, A, B, A+B im selben
+Lauf). Wechselwirkung = (A+B) − A − B + Basis. Einzelheiten und Tabelle:
+`docs\PLAN-E44-KOMBINATIONEN.md`, Abschnitt 2.
+
+1. **Filter plus Filter schadet mehr als die Summe.** Sperrfrist 48 h × Mindest-Stopabstand
+   −10,2 Punkte, Ziele festhalten × Mindest-Bein −8,2. Vier Filter, einzeln −1,3 / +2,6 /
+   +3,7 / +4,6, zusammen −6,0 statt +9,6.
+2. **Zwei Verkaufsregeln zusammen schaden** (Verkauf am Hoch × an Liq-Niveaus −3,6).
+3. **Zwei Einstiegs-Verstärker addieren sich** (Kaufleiter × Flush −0,7, also fast genau die
+   Summe).
+4. **Gewinne aus Kombinationen kommen nur aus Ergänzungen**, wenn der eine Schalter den
+   Zustand schafft, den der andere braucht: Rest halten × Neustart mit Rest +13,7,
+   Mindest-Bein × Bein in Handelsrichtung +9,7 (als einzige in beiden Hälften positiv,
+   seit 26.09.2026 live).
+
+**Folgerung:** Indikatoren als Einstiegs-Filter zu kombinieren, ist gemessen die schlechteste
+Richtung. Kombinationen lohnen sich nur als Ergänzung.
+
 ## Die Kern-Diagnose (E26, weiterhin gültig)
 
 Die Engine ist im Mittel nur mit **29 % des Kapitals** investiert und an **58 % der

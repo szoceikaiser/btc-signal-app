@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (14)**
+> Stand: **26.09.2026 (15)**
 
 ## Lage
 
@@ -71,6 +71,14 @@
   parallel, siehe `04_konventionen\BEKANNTE-PROBLEME.md`). **Damit ist E43 abgeschlossen.**
 
 ## Was als Nächstes offen liegt (Reihenfolge = Nutzwert)
+
+**NEU: E44 — Kombinationen** (`docs\PLAN-E44-KOMBINATIONEN.md`, 26.09.2026, Analyse,
+nichts gebaut). Befund: Filter-Kombinationen schaden gemessen mehr als die Summe, Gewinne
+kommen nur aus Ergänzungen. Die Rendite geht in den Rallys verloren, nicht beim Einstieg
+und nicht bei den Stops. Vorschlag: E42 (Ausbruch mit Rücktest) als Partner von
+`high_exit`, gemessen in einem 2³-Gitter mit einer vorab benannten Hauptzeile. **Wartet
+auf Kaisers Antworten** (Abschnitt 10 im Plan). Sofort machbar: E44.1 Coinalyze-Archiv,
+E44.2 Wechselwirkungs-Tabelle im Bericht.
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
    E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 gebaut, gemessen und seit
