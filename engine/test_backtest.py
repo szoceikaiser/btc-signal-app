@@ -2001,7 +2001,7 @@ def test_e436_einschalten_nicht_bei_zu_tiefem_rueckgang():
 
 def _e436_sig(ts, typ, reason=""):
     from strategy_core import Signal
-    return Signal(ts, typ, 0.0, 0, reason)
+    return Signal(ts, typ, 0.0, 0, reason).to_dict()
 
 
 def test_e436_rest_halten_zaehlen_zaehlt_nur_das_gegen_muster_signal():

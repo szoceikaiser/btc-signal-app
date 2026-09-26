@@ -2186,7 +2186,7 @@ def e436_rest_halten_zaehlen(sigs: list) -> int:
     ist dort aus, wie live). Genau diese Ereignisse veraendert der Schalter: der Rest
     liefe dann bis zum Stop statt sofort verkauft zu werden. 0 Treffer -> die Zeile
     misst nichts."""
-    return sum(1 for s in sigs if s.reason.startswith("Gegen-Muster am Ziel"))
+    return sum(1 for s in sigs if s["reason"].startswith("Gegen-Muster am Ziel"))
 
 
 def e436_strict_confirm_zaehlen(candles: list, flow: list, start_ms: int) -> dict:
@@ -2229,15 +2229,15 @@ def e436_confirm_t1_zaehlen(sigs: list, candles: list, flow: list) -> dict:
     ts_index = {c.ts: i for i, c in enumerate(candles)}
     out = {"ersteinstiege": 0, "ohne_bestaetigung": 0}
     for s in sigs:
-        if s.type not in (SignalType.KAUF_1, SignalType.SHORT_1):
+        if s["type"] not in (SignalType.KAUF_1.name, SignalType.SHORT_1.name):
             continue
-        i = ts_index.get(s.ts)
+        i = ts_index.get(s["ts"])
         if i is None or i < 11:
             continue
         out["ersteinstiege"] += 1
         cs, fl = candles[i - 11:i + 1], flow[i - 11:i + 1]
         pattern = classify_pattern(cs, fl)
-        if s.type == SignalType.KAUF_1:
+        if s["type"] == SignalType.KAUF_1.name:
             cvd_up = len(fl) >= 3 and fl[-1].spot_cvd > fl[-3].spot_cvd
             fund_ok = bool(fl) and fl[-1].funding <= 0
             bestaetigt = pattern == Pattern.CAPITULATION_RESET or fund_ok or cvd_up
@@ -2254,15 +2254,16 @@ def e436_cooldown_zaehlen(sigs: list, cooldown_h: float = 48.0) -> int:
     Einstieg innerhalb von `cooldown_h` Stunden nach einem Stop erfolgt? Nur diese
     Faelle veraendert der Schalter."""
     from strategy_core import SignalType
-    entry_types = {SignalType.KAUF_1, SignalType.KAUF_2, SignalType.SHORT_1, SignalType.SHORT_2}
-    stop_types = {SignalType.STOPLOSS, SignalType.SHORT_STOPLOSS}
+    entry_types = {SignalType.KAUF_1.name, SignalType.KAUF_2.name,
+                   SignalType.SHORT_1.name, SignalType.SHORT_2.name}
+    stop_types = {SignalType.STOPLOSS.name, SignalType.SHORT_STOPLOSS.name}
     grenze_ms = cooldown_h * 3600 * 1000
     last_stop_ts, n = -1, 0
-    for s in sorted(sigs, key=lambda x: x.ts):
-        if s.type in stop_types:
-            last_stop_ts = s.ts
-        elif (s.type in entry_types and last_stop_ts >= 0
-              and (s.ts - last_stop_ts) < grenze_ms):
+    for s in sorted(sigs, key=lambda x: x["ts"]):
+        if s["type"] in stop_types:
+            last_stop_ts = s["ts"]
+        elif (s["type"] in entry_types and last_stop_ts >= 0
+              and (s["ts"] - last_stop_ts) < grenze_ms):
             n += 1
     return n
 
