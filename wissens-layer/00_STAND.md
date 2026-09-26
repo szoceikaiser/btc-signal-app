@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (16)**
+> Stand: **26.09.2026 (17)**
 
 ## Lage
 
@@ -14,7 +14,7 @@
   `signal-app\...` meinen jetzt die Repo-Wurzel. Einzelheiten: `START-HIER.md`.
 - Die Engine **läuft live** und handelt nicht selbst: sie sendet Telegram-Signale,
   Kaiser platziert die Orders. Webseite: `szoceikaiser.github.io/btc-signal-app`.
-- **Tests:** in `main` **527**, alle grün (`cd engine && python3 run_tests.py`).
+- **Tests:** in `main` **545**, alle grün (`cd engine && python3 run_tests.py`).
   Sabotage-Proben: fünf ältere (151 Sabotagen) plus `sabotage_e43.py` (7), alle gefangen.
 - **Kaisers Go 26.09.2026: E43.1 und E43.2 live.** Arbeitszweig nach `main` gemerged.
   E43.1 (Futures-CVD im Lage-Abruf jetzt in Dollar) ist reine Anzeige. E43.2
@@ -78,9 +78,10 @@ kommen nur aus Ergänzungen. Die Rendite geht in den Rallys verloren, nicht beim
 und nicht bei den Stops. Vorschlag: E42 (Ausbruch mit Rücktest) als Partner von
 `high_exit`, gemessen in einem 2³-Gitter mit einer vorab benannten Hauptzeile. **Wartet
 auf Kaisers Antworten** (Abschnitt 10 im Plan). **E44.1 (Coinalyze-Archiv) und E44.2
-(Wechselwirkungen, Monats-Probe) sind gebaut** auf Zweig `claude/blissful-maxwell-9uwt6x`,
-545 Tests grün, beide Sabotage-Proben 8/8. **Warten auf Kaisers Go für `main`.** Danach
-E44.3 (E42), Startprompt je Etappe: Plan, Abschnitt 9a.
+(Wechselwirkungen, Monats-Probe) sind seit 26.09.2026 in `main`** (Kaisers Go), 545 Tests
+grün. cron-job.org-Aufträge für Archiv und Flush-Wache: Anleitung Schritt 5, Kaiser richtet
+ein. Kaiser will Shorts im fallenden Markt (E44.6). E44.3 (E42) wartet auf seine Antwort zu
+Frage 1. Startprompt je Etappe: Plan, Abschnitt 9a.
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
    E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 gebaut, gemessen und seit

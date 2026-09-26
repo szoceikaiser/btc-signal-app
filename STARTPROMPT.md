@@ -9,8 +9,8 @@
 > `wissens-layer\`). Das private Repo `260729-btc-trading-backup` ist nur noch ein
 > Backup von Kaisers Rechner und nicht maßgeblich.
 > Prüfe vor dem Einfügen nur eines: Stimmt die Testzahl unten noch? Stand 26.09.2026:
-> `main` 527 (E43 abgeschlossen, E43.7 und E43.8 in `main`). Kein offener Arbeitszweig
-> mit ungemergter Arbeit außer dem überholten Doppel-Zweig `claude/e43-6-gitterzeilen-eo6mzb`.
+> `main` 545 (E43 abgeschlossen; E44.1 Archiv und E44.2 Wechselwirkungen in `main`). Laufendes
+> Vorhaben: E44, `docs\PLAN-E44-KOMBINATIONEN.md`, Startprompt je Etappe dort in Abschnitt 9a.
 
 ---
 
@@ -82,7 +82,7 @@ DIE FUENF REGELN, DIE HIER GELTEN:
     zuerst, warum er nicht unter diese Diagnose fällt. Eine Beobachtung, die als Regel
     nichts bringt, wird ANGEZEIGT statt gehandelt - das ist hier ein etablierter Weg.
 
-TESTS: cd engine && python3 run_tests.py -> in main 527 Tests, alle gruen.
+TESTS: cd engine && python3 run_tests.py -> in main 545 Tests, alle gruen.
 Nenne die Zahl in deiner Antwort. Meldet der Laeufer WENIGER Tests und trotzdem
 "0 failed", hat sich eine Datei still uebersprungen. Auf Windows vorher
 PYTHONIOENCODING=utf-8 setzen. Eine Sabotage-Probe niemals mitten im Lauf abbrechen -

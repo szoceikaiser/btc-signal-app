@@ -1,6 +1,6 @@
 # Bauplan E44 — Welche Schalter und Indikatoren gehören zusammen?
 
-> **Status: Analyse fertig, E44.1 und E44.2 gebaut** (26.09.2026, siehe 9a). Handelsverhalten unverändert.
+> **Status: E44.1 und E44.2 in `main`** (26.09.2026, siehe 9a). Handelsverhalten unverändert.
 > Grundlage: Backtest-Lauf vom 26.09.2026 15:18 UTC (`BACKTEST.md`, Fenster 18.01.–26.09.2026,
 > 78 Gitterzeilen) und die Signalliste der Live-Einstellung (`site/data/backtest_signals.json`).
 > Keine neue Messung, alle Zahlen unten sind aus diesen beiden Dateien nachgezählt.
@@ -317,12 +317,12 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 
 | Etappe | Status |
 |---|---|
-| E44.1 Coinalyze-Archiv | **GEBAUT** 26.09.2026 auf Zweig `claude/blissful-maxwell-9uwt6x`, 535 Tests, `sabotage_e441.py` 8/8. **Wartet auf Kaisers Go für `main`**: Erst dann läuft der tägliche Workflow `archiv.yml`. Nach dem Go einmal von Hand anstoßen (Actions → Coinalyze-Archiv → Run workflow) |
-| E44.2 Wechselwirkungen + Monats-Probe im Bericht | **GEBAUT** 26.09.2026 auf demselben Zweig, 545 Tests, `sabotage_e442.py` 8/8 gefangen. Findet im echten Gitter dieselben 16 Gruppen wie Abschnitt 2. Wirkt erst im nächsten Backtest-Lauf (neuer Berichtsabschnitt „E44“). **Wartet auf Kaisers Go** zusammen mit E44.1 |
-| E44.3 E42 Ausbruch mit Rücktest | OFFEN, wartet auf Kaisers Antwort zu Frage 1 |
+| E44.1 Coinalyze-Archiv | **GEBAUT** 26.09.2026 auf Zweig `claude/blissful-maxwell-9uwt6x`, 535 Tests, `sabotage_e441.py` 8/8. **IN `main` seit 26.09.2026** (Kaisers Go). Täglicher Anstoß über cron-job.org, Anleitung `ANLEITUNG-PUENKTLICHER-START.md` Schritt 5 (Kaiser richtet ein) |
+| E44.2 Wechselwirkungen + Monats-Probe im Bericht | **GEBAUT** 26.09.2026 auf demselben Zweig, 545 Tests, `sabotage_e442.py` 8/8 gefangen. Findet im echten Gitter dieselben 16 Gruppen wie Abschnitt 2. Wirkt erst im nächsten Backtest-Lauf (neuer Berichtsabschnitt „E44“). **IN `main` seit 26.09.2026** (Kaisers Go). Erscheint im nächsten Backtest |
+| E44.3 E42 Ausbruch mit Rücktest | OFFEN, wartet auf Kaisers Antwort zu Frage 1 (einfach erklärt in Abschnitt 10) |
 | E44.4 `verkauf_faktor` | OFFEN |
 | E44.5 2³-Gitter messen | OFFEN, braucht E44.2 bis E44.4 |
-| E44.6 Shorts im Abwärts-Regime | OFFEN, nur nach Kaisers Ja (Frage 2) |
+| E44.6 Shorts im Abwärts-Regime | OFFEN, **Kaisers Ja am 26.09.2026**. Zuerst eigener Bauplan-Abschnitt (Punkte a und b in Abschnitt 10) |
 
 **So beginnt ein neuer Chat mit einer Etappe (spart Tokens):** Den Kurzprompt aus
 `STARTPROMPT.md` nehmen und als `AUFGABE` eine dieser Zeilen einsetzen. Die KI liest dann nur
@@ -382,9 +382,37 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 
 **Antworten hier eintragen, sobald Kaiser sie gibt** (Datum und Wortlaut):
 
-- Frage 1: *(offen)*
-- Frage 2: *(offen)*
-- Frage 3: *(offen)*
+- **Frage 1 (E42-Werte), 26.09.2026:** Kaiser: *„E42 verstehe nicht was du von mir willst.“*
+  **Offen.** Die Frage wurde im Chat noch einmal mit einem Beispiel gestellt (siehe unten
+  „Frage 1 einfach erklärt“). Neuer Beleg für die Regel selbst: Furkan 02.08.2026 14:17
+  (`wissens-layer/05_quellen/260802_Transkript.txt`): *„die Bestätigung für den Bullenmarkt
+  kam dann immer, wenn der Breakout über die Costbasis kam, der Retest und dann ging es halt
+  eben halt hoch.“*
+- **Frage 2 (Shorts), 26.09.2026:** Kaiser: *„ja ich möchte short signale wenn der markt fällt.
+  Ich gehe davon aus, dass alle signale für long dafür genutzt werden, nur in die
+  entgegengesetzte richtung.“* **Ja → E44.6 wird gebaut.** Die gespiegelte Short-Logik gibt es
+  in der Engine schon (`bias_short`, Signale SHORT_1/SHORT_2/…, Telegram-Texte vorhanden).
+  Neu ist nur, **wann** Shorts erlaubt sind: im fallenden Markt (Vorschlag K4: Tagesschluss
+  unter Tages-EMA200). Zwei Punkte für den Bauplan-Abschnitt E44.6:
+  (a) `bein_richtung: "bias"` (live) wählt das Bein nach der EINEN erlaubten Richtung
+  (`main.py`: nur wenn `bias_long != bias_short`). Mit Regime-Shorts muss die Richtung je
+  Kerze aus dem Regime kommen, sonst fällt die Bein-Wahl still auf `auto` zurück.
+  (b) Furkan warnt 10.09.2026 19:40 davor, nach einem großen Fall noch Shorts aufzubauen
+  („ein bisschen spät“). Das ist ein Argument, die Regel nicht nachzuschärfen, bis sie
+  gemessen ist, und die Ausschalt-Regel ernst zu nehmen.
+- **Frage 3 (Transkripte), 26.09.2026:** Kaiser hat sie in `wissens-layer/05_quellen/`
+  abgelegt, Haupttranskript `ORderFLow-Transkript.md`, dazu 260727, 260802, 260803, 260910,
+  260913. **Achtung:** Das Repo ist öffentlich, die Arbeitsregeln verbieten vollständige
+  Transkripte darin (Hinweis an Kaiser gegeben, Entscheidung bei ihm).
+
+**Frage 1 einfach erklärt (für Kaiser):** Die Engine verkauft heute einen Teil kurz unter
+dem letzten Hoch. Beispiel: letztes Hoch 70.000, Verkauf bei 69.650. Steigt der Kurs danach
+trotzdem, schließt eine 4h-Kerze bei 70.800 (Ausbruch), fällt zurück bis 70.100 und schließt
+wieder darüber (Rücktest gehalten), dann kauft die Engine wieder ein. Dafür braucht sie drei
+Zahlen, die vorher festgelegt werden müssen: (1) wie lange sie nach dem Ausbruch auf den
+Rücktest wartet (Vorschlag 2 Tage), (2) wie viel sie zurückkauft (Vorschlag 25 % wie der
+erste Kauf), (3) wo der Stop liegt (Vorschlag: Schluss wieder unter 70.000). Antwort
+„ja“ genügt, oder andere Zahlen.
 
 
 1. **E42-Werte:** Rücktest-Fenster 2 Tage, Rückkauf 25 %, Stop bei Schluss unter der Marke.

@@ -8,6 +8,29 @@
 
 ---
 
+## 26.09.2026 (23) — Kaisers Go: E44.1 und E44.2 in main, Antworten auf die Fragen
+
+- **Go für `main`:** Zweig `claude/blissful-maxwell-9uwt6x` nach `main` gemerged (Commit
+  `db9b468`), **545 Tests grün**. Archiv und Wechselwirkungs-Abschnitt sind damit live
+  (Handelsverhalten unverändert).
+- **cron-job.org:** Kaiser will das Archiv nicht von Hand starten, und die Flush-Wache hatte
+  noch keinen externen Anstoß. Anleitung für beide Aufträge:
+  `ANLEITUNG-PUENKTLICHER-START.md`, **Schritt 5**. Einrichten muss Kaiser selbst (sein Konto,
+  sein Schlüssel). Offen, bis er „eingerichtet“ meldet.
+- **Frage 1 (E42):** nicht verstanden, im Plan (Abschnitt 10) mit Beispiel neu gestellt. Neuer
+  Furkan-Beleg für Ausbruch und Rücktest: 02.08. 14:17.
+- **Frage 2 (Shorts):** **Ja.** E44.6 wird gebaut, zuerst ein eigener Bauplan-Abschnitt. Zwei
+  Punkte dafür stehen im Plan (Bein-Wahl hängt heute an genau einer erlaubten Richtung; Furkans
+  Warnung vor späten Shorts 10.09. 19:40).
+- **Frage 3 (Transkripte):** liegen jetzt in `wissens-layer/05_quellen/`. **Hinweis an Kaiser:**
+  Das Repo ist öffentlich, vollständige Transkripte gehören laut Arbeitsregeln nicht hinein.
+  Nicht gelöscht, Entscheidung bei ihm.
+
+**Nächster Schritt:** E44.3 nach Kaisers Antwort auf Frage 1, oder der Bauplan-Abschnitt E44.6
+(Shorts). Startprompts: Plan, Abschnitt 9a.
+
+---
+
 ## 26.09.2026 (22) — E44.2 gebaut: Wechselwirkungen und Monats-Probe (Zweig, wartet auf Go)
 
 Auf Zweig `claude/blissful-maxwell-9uwt6x`, zusammen mit E44.1. In `backtest.py`:

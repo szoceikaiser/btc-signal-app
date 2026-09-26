@@ -115,6 +115,42 @@ den neuen Weg kamen.
 
 ---
 
+## Schritt 5 — zwei weitere Aufträge: Flush-Wache und Coinalyze-Archiv (26.09.2026)
+
+Derselbe Schlüssel aus Schritt 1 reicht, er darf alle Abläufe in `btc-signal-app` starten.
+Lege zwei weitere Aufträge an, **genau wie in Schritt 3**, nur mit anderem Titel, anderer URL
+und anderem Zeitplan. Methode `POST`, die drei Header und der Body `{"ref":"main"}` sind
+gleich. (Falls cron-job.org beim bestehenden Auftrag „Kopieren“ bzw. „Clone“ anbietet, geht
+es schneller: kopieren, dann nur Titel, URL und Zeitplan ändern.)
+
+**Auftrag A — Flush-Wache** (schaut alle 15 Minuten, ob gerade ein Flush läuft):
+
+- Titel: `BTC Flush-Wache`
+- URL:
+  ```
+  https://api.github.com/repos/szoceikaiser/btc-signal-app/actions/workflows/watch.yml/dispatches
+  ```
+- Zeitplan: **Custom**, Zeitzone **UTC**, alle Tage, alle Stunden, Minuten **8, 23, 38, 53**
+
+**Auftrag B — Coinalyze-Archiv** (speichert einmal täglich die Börsendaten):
+
+- Titel: `BTC Coinalyze-Archiv`
+- URL:
+  ```
+  https://api.github.com/repos/szoceikaiser/btc-signal-app/actions/workflows/archiv.yml/dispatches
+  ```
+- Zeitplan: **Custom**, Zeitzone **UTC**, alle Tage, Stunde **3**, Minute **47**
+
+Danach bei beiden **TEST RUN**: Antwort `204 No Content`, und unter Actions erscheint ein
+Lauf mit „Manually run“ ([Flush-Wache](https://github.com/szoceikaiser/btc-signal-app/actions/workflows/watch.yml),
+[Coinalyze-Archiv](https://github.com/szoceikaiser/btc-signal-app/actions/workflows/archiv.yml)).
+Beim Archiv entsteht danach ein Commit „Coinalyze-Archiv aktualisiert“.
+
+**Gut zu wissen:** Beide Abläufe haben zusätzlich einen GitHub-Zeitplan als Netz. Die
+Flush-Wache schickt nur dann eine Telegram-Nachricht, wenn sich wirklich ein Flush
+entwickelt, und höchstens einmal je 4h-Kerze. Mehr Läufe heißen also nicht mehr
+Nachrichten, nur dass keiner verpasst wird.
+
 ## Was sich damit ändert
 
 | | vorher | ab jetzt |
