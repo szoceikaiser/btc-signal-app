@@ -35,6 +35,8 @@ class FlowPoint:
     short_liq: float = 0.0  # Short-Liquidationen dieser Kerze (USD)
     long_pct: float = 0.0   # Anteil der Long-Positionierung in % (E16, Coinalyze);
                             # 0.0 = keine Daten. >50 = mehrheitlich long.
+    oi_btc: float = 0.0     # Open Interest in BTC = Kontrakte (E43.4, oi_in_btc);
+                            # 0.0 = keine Kontrakt-Reihe. `oi` bleibt in USD.
 
 
 class Pattern(Enum):
@@ -489,6 +491,42 @@ def _muster2_dollar(c: list[Candle], f: list[FlowPoint]) -> Optional[tuple[float
             return None
         fut += (p.fut_cvd - vorher.fut_cvd) * k
     return f[-1].spot_cvd - f[0].spot_cvd, fut
+
+
+def oi_in_btc(oi_usd: dict, kurs: dict) -> dict:
+    """{ts: Open Interest in BTC} aus {ts: Open Interest in USD} (E43.4, Befund A3).
+
+    Coinalyze liefert das OI mit convert_to_usd=true, also Kontrakte x Kurs. Ein
+    Dollar-OI steigt deshalb schon mit dem Kurs, auch wenn niemand eine Position
+    eroeffnet. Jeder OI-Punkt wird mit dem Schlusskurs DERSELBEN Kerze (gleiche ts,
+    `kurs` = {ts: close}) in BTC umgerechnet - beide gelten zum Kerzenschluss.
+
+    Umgerechnet wird HIER, am Datenpunkt, und erst danach aufgefuellt (live
+    main.fetch_market_data, im Backtest backtest.build_series - beide rufen diese
+    Funktion). Wer erst die Dollar-Werte auffuellt und dann durch den Kurs teilt, teilt
+    einen alten Wert durch einen neuen Kurs und erfindet eine OI-Bewegung in Hoehe der
+    Kursbewegung - genau den Fehler, den E43.4 beheben soll.
+
+    Punkte ohne Kerze gleicher ts entfallen: lieber kein Wert als einer mit falschem
+    Kurs (Haltung wie _fut_cvd_usd).
+    """
+    return {ts: v / kurs[ts] for ts, v in oi_usd.items() if kurs.get(ts)}
+
+
+def oi_aenderung(f: list[FlowPoint], muster_oi: str = "usd") -> float:
+    """Veraenderung des Open Interest im Fenster `f` als Anteil (0.03 = +3 %).
+
+    muster_oi (E43.4): "usd" (Default, bisheriges Verhalten) rechnet mit dem Dollar-OI,
+    "btc" mit den Kontrakten (FlowPoint.oi_btc). Die Formel ist dieselbe, nur die
+    Einheit wechselt. Ohne Reihe (Wert 0 am Rand des Fensters) ist die Aenderung 0 -
+    dieselbe neutrale Antwort, die "usd" ohne OI-Daten gibt.
+
+    "usd" rechnet Zeichen fuer Zeichen wie vor E43.4 (auch im Randfall OI am Ende 0).
+    """
+    if muster_oi == "btc":
+        a, b = f[0].oi_btc, f[-1].oi_btc
+        return (b - a) / a if a and b else 0.0
+    return (f[-1].oi - f[0].oi) / f[0].oi if f[0].oi else 0.0
 
 
 # ------------------------------------------------ E32: Lage-Bericht (reine Information)
@@ -987,13 +1025,19 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
                      sharp_move_pct: float = 0.04,
                      funding_hot: float = 0.0001,
                      liq_spike_mult: float = 3.0,
-                     muster_cvd: str = "alt") -> Pattern:
+                     muster_cvd: str = "alt",
+                     muster_oi: str = "usd") -> Pattern:
     """Ordnet die juengste Marktphase einem der 4 Kompass-Muster zu.
 
     muster_cvd (E43.3, Default "alt" = bisheriges Verhalten): "usd" ersetzt in Muster 2
     den Vergleich zweier relativer Slopes durch einen Vergleich zweier Dollar-Betraege
     im Fenster (_muster2_dollar). Nur Muster 2 aendert sich - die Vorzeichen-Pruefungen
     der anderen Muster haengen nicht vom Startwert der Summe ab.
+
+    muster_oi (E43.4, Default "usd" = bisheriges Verhalten): "btc" misst die
+    OI-Veraenderung in Kontrakten statt in Dollar (oi_aenderung). Das wirkt in ALLEN
+    Mustern, die das OI lesen (1 bis 5) - es gibt nur ein oi_chg, und zwei Einheiten in
+    derselben Einordnung waeren schlimmer als eine falsche. Die Schwellen bleiben.
 
     `window` = Anzahl Kerzen (12 x 4h = 2 Tage). Schwellen sind Startwerte.
     E9.1: echte Liquidationen (Coinalyze) verstaerken Muster 3/4 — eine Long-Liq-
@@ -1007,7 +1051,9 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
     price_chg = (c[-1].close - c[0].close) / c[0].close
     spot = _slope([p.spot_cvd for p in f])
     fut = _slope([p.fut_cvd for p in f])
-    oi_chg = (f[-1].oi - f[0].oi) / f[0].oi if f[0].oi else 0.0
+    # E43.4 (Befund A3): In Dollar steckt die Kursbewegung im OI - bei +3 % Kurs erfuellt
+    # schon ein unveraendertes OI die Pump-Schwelle. "btc" zaehlt Kontrakte.
+    oi_chg = oi_aenderung(f, muster_oi)
     funding_now = f[-1].funding
     funding_rising = f[-1].funding > f[0].funding
 
@@ -1409,7 +1455,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              zonen_nachziehen: bool = False,
              pivot_n_1d: int = 0,
              ampel_filter: str = "off",
-             muster_cvd: str = "alt") -> list[Signal]:
+             muster_cvd: str = "alt",
+             muster_oi: str = "usd") -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -1556,6 +1603,11 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     #   Muster 2 sperrt Einstiege und loest den Restverkauf aus - die Korrektur aendert
     #   also Signale. Default "alt", bis der Backtest gegen die Entscheidungsregel in
     #   docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md gemessen hat.
+    # muster_oi (E43.4, Befund A3 der Gesamtpruefung 26.09.2026): "usd" | "btc". Bei "btc"
+    #   misst die Mustererkennung die OI-Veraenderung in Kontrakten statt in Dollar - in
+    #   Dollar erfuellt schon die Kursbewegung die Schwellen von Muster 2 und 4. Wirkt
+    #   ueber die Muster auf Einstiegssperre (2), Bestaetigung (4) und Restverkauf (2, 3).
+    #   Default "usd", bis der Backtest gegen die Entscheidungsregel gemessen hat.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -1603,9 +1655,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             return False
         return not muster5_haelt_zurueck(muster5_halten, pattern, pos.direction, ziel)
 
-    # E43.3: muster_cvd MUSS hier ankommen - sonst misst die Gitterzeile die Live-Zeile.
-    pattern = classify_pattern(candles, flow, muster_cvd=muster_cvd) if flow \
-        else Pattern.NEUTRAL
+    # E43.3/E43.4: muster_cvd und muster_oi MUESSEN hier ankommen - sonst misst die
+    # Gitterzeile die Live-Zeile.
+    pattern = classify_pattern(candles, flow, muster_cvd=muster_cvd,
+                               muster_oi=muster_oi) if flow else Pattern.NEUTRAL
     pivots = find_pivots(candles, n=pivot_n)
     _nur_auf = None
     if bein_richtung == "bias" and bias_long != bias_short:

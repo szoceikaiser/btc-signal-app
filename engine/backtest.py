@@ -32,7 +32,7 @@ from pathlib import Path
 
 import coinalyze
 from main import _get_json, fetch_funding_8h
-from strategy_core import Candle, FlowPoint, LADDER_TRANCHE, Position, evaluate
+from strategy_core import Candle, FlowPoint, LADDER_TRANCHE, Position, evaluate, oi_in_btc
 
 ROOT = Path(__file__).resolve().parent.parent
 CANDLE_MS = 4 * 3600 * 1000
@@ -82,7 +82,7 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "no_flip", "freeze_targets",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
              "rest_halten", "neustart_mit_rest", "zonen_1d",
-             "zonen_nachziehen", "pivot_n_1d", "ampel_filter", "muster_cvd")
+             "zonen_nachziehen", "pivot_n_1d", "ampel_filter", "muster_cvd", "muster_oi")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              # E33 (13.09.2026) hob trend_ema von 50 auf 200 — in evaluate(),
@@ -102,7 +102,7 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              bein_richtung="auto", widerstand_exit="off",
              rest_halten=False, neustart_mit_rest=False, zonen_1d=False,
              zonen_nachziehen=False, pivot_n_1d=0, ampel_filter="off",
-             muster_cvd="alt")
+             muster_cvd="alt", muster_oi="usd")
 
 
 def V(label, panel=False, **kw):
@@ -124,6 +124,7 @@ def V(label, panel=False, **kw):
 # (Defaults in strategy_core.evaluate). Bei jeder Aenderung an config.json oder an den
 # evaluate-Defaults muss dieses Flag mitwandern.
 E433_USD = "LIVE-heute +Muster 2 in Dollar (E43.3)"
+E434_BTC = "LIVE-heute +OI in Kontrakten (E43.4)"
 GRID = [
     V("nur Long (Basis)", bias_short=False),
     V("+Kaufleiter", bias_short=False, buy_ladder=True),
@@ -557,6 +558,18 @@ GRID = [
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       bein_richtung="bias", muster_cvd="usd"),
+    # ---------------------------------------------------------------- E43.4 (26.09.2026)
+    # Befund A3: Das OI kommt in Dollar (Kontrakte x Kurs) - schon die Kursbewegung
+    # erfuellt die OI-Schwellen von Muster 2 und 4. muster_oi="btc" zaehlt Kontrakte.
+    # GENAU EIN Unterschied zur Panel-Zeile (muster_cvd bleibt "alt" wie live).
+    # Entscheidungsregel VOR der Messung (docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md, E43.4):
+    # live nur, wenn in BEIDEN Fensterhaelften mind. 1 Punkt besser UND Rueckgang nicht
+    # mehr als 1 Punkt tiefer. Der Bericht prueft das selbst (e434_abschnitt).
+    V(E434_BTC,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", muster_oi="btc"),
     V("Long+Short (Ref)"),
 ]
 
@@ -637,10 +650,18 @@ def build_series(raw: list, funding: list[tuple[int, float]],
     das sind, meldet der Bericht aus coinalyze.spot_delta_aggregiert().
     EINHEIT: spot_map rechnet in BTC, der Binance-Vision-Weg in USD. Beide gehen nur
     als relative Aenderung in classify_pattern ein — mischen darf man sie trotzdem nie,
-    deshalb ist es ein Entweder-oder und keine Summe."""
+    deshalb ist es ein Entweder-oder und keine Summe.
+
+    E43.4: Neben dem Dollar-OI entsteht die Reihe in Kontrakten (FlowPoint.oi_btc) -
+    jeder OI-Punkt mit dem Schlusskurs SEINER Kerze umgerechnet (oi_in_btc), erst dann
+    aufgefuellt, genau wie live in main.fetch_market_data. Ohne oi_map bleibt sie 0.0
+    (keine Daten), waehrend das Dollar-OI konstant 1.0 steht - beides neutral."""
     candles, flow, spot_cvd, fut_cvd = [], [], 0.0, 0.0
     oi_pairs = sorted(oi_map.items()) if oi_map else []
     first_oi = oi_pairs[0][1] if oi_pairs else 1.0
+    btc_pairs = sorted(oi_in_btc(oi_map, {int(k[0]): float(k[4]) for k in raw}).items()) \
+        if oi_map else []
+    first_btc = btc_pairs[0][1] if btc_pairs else 0.0
 
     def latest_leq(pairs, ts, default=0.0):
         val = default
@@ -663,7 +684,8 @@ def build_series(raw: list, funding: list[tuple[int, float]],
         fut_cvd += (fut_map.get(ts, 0.0) if fut_map else 0.0)
         flow.append(FlowPoint(ts, spot_cvd, fut_cvd, oi_val,
                               latest_leq(funding, ts + CANDLE_MS), long_liq, short_liq,
-                              (ls_map.get(ts, 0.0) if ls_map else 0.0)))
+                              (ls_map.get(ts, 0.0) if ls_map else 0.0),
+                              latest_leq(btc_pairs, ts, first_btc)))
     return candles, flow
 
 
@@ -1948,6 +1970,158 @@ def e433_abschnitt(results: list, halves: list, basis_label: str, umkl: dict) ->
     return z
 
 
+# ------------------------------------------------ E43.4: OI in Kontrakten (Befund A3)
+E434_RAUSCHGRENZE = 1.0         # dieselbe Regel wie E43.3, vorab festgelegt
+E434_DD_TOLERANZ = 1.0
+# Kurs- und OI-Bedingung je Muster, wie in classify_pattern (Stand 26.09.2026, mit den
+# Defaults sharp_move_pct=0.04 und oi_wipeout_pct=0.05) - in der Reihenfolge, in der
+# classify_pattern prueft. Nur fuer die Zaehlung "A3 als Zahl" im Bericht; die Muster
+# selbst kommen immer aus classify_pattern.
+E434_BEDINGUNGEN = (
+    ("4 Kapitulation", "Kurs <= -4 %", "OI <= -5 %",
+     lambda k: k <= -0.04, lambda o: o <= -0.05),
+    ("5 Abverkauf mit neuen Shorts", "Kurs <= -2 %", "OI >= -1 %",
+     lambda k: k <= -0.02, lambda o: o >= -0.01),
+    ("3 Short-Covering", "Kurs >= +2 %", "OI <= -2 %",
+     lambda k: k >= 0.02, lambda o: o <= -0.02),
+    ("2 Derivate-Pump", "Kurs > 0", "OI >= +3 %",
+     lambda k: k > 0, lambda o: o >= 0.03),
+    ("1 Gesunder Trend", "Kurs > 0", "OI 0 bis +10 %",
+     lambda k: k > 0, lambda o: 0 <= o <= 0.10),
+)
+
+
+def e434_einschalten(live: dict, btc: dict) -> dict:
+    """Entscheidungsregel fuer muster_oi="btc", festgelegt VOR der Messung.
+
+    live/btc: {"h1", "h2", "dd"} (dd negativ, z. B. -9.9). Einschalten nur, wenn BEIDES
+    gilt:
+      1. "btc" ist in BEIDEN Fensterhaelften um mindestens E434_RAUSCHGRENZE Punkte
+         besser. Ein Vorsprung in nur einer Haelfte ist nicht von Zufall zu trennen.
+      2. Der Rueckgang liegt mit "btc" um NICHT mehr als E434_DD_TOLERANZ Punkte tiefer.
+    """
+    beide = (btc["h1"] - live["h1"] >= E434_RAUSCHGRENZE
+             and btc["h2"] - live["h2"] >= E434_RAUSCHGRENZE)
+    dd_ok = btc["dd"] >= live["dd"] - E434_DD_TOLERANZ
+    return {"beide_haelften_besser": beide, "rueckgang_ok": dd_ok,
+            "einschalten": beide and dd_ok}
+
+
+def e434_umklassifiziert(candles: list, flow: list, start_ms: int,
+                         oi_map: dict | None = None) -> dict:
+    """Vorprobe im echten Datensatz: Aendert muster_oi="btc" ueberhaupt ein Muster?
+
+    Zaehlt je Kerze im Fenster:
+      - ob es zu ihr einen ECHTEN OI-Punkt gibt (ts in oi_map). Ohne OI-Daten rechnen
+        "usd" und "btc" beide neutral, die Gitterzeile misst dann nichts.
+      - ob "usd" und "btc" verschiedene Muster ergeben, und je Muster, wie oft es unter
+        beiden Einstellungen erkannt wird.
+      - A3 als Zahl: Unter der Kursbedingung eines Musters - wie oft ist die
+        OI-Bedingung in Dollar erfuellt, wie oft in Kontrakten, wie oft in beiden? Das
+        prueft die Aussage des Pruefberichts ("Muster 2 und 4 zu einem grossen Teil am
+        Kurs erkannt") am echten Datensatz statt an Kunstdaten.
+
+    muster_cvd bleibt auf dem Default "alt", wie live. classify_pattern liest nur die
+    letzten 12 Kerzen - deshalb genuegt ein 12er-Ausschnitt.
+    """
+    from strategy_core import classify_pattern, oi_aenderung
+    oi_ts = set(oi_map or ())
+    out = {"kerzen": 0, "oi_kerzen": 0, "verschieden": 0, "je_muster": {},
+           "a3": {b[0]: {"kurs": 0, "usd": 0, "btc": 0, "beide": 0}
+                  for b in E434_BEDINGUNGEN}}
+    for i, c in enumerate(candles):
+        if c.ts < start_ms or i < 11:
+            continue
+        cs, fl = candles[i - 11:i + 1], flow[i - 11:i + 1]
+        u = classify_pattern(cs, fl, muster_oi="usd")
+        b = classify_pattern(cs, fl, muster_oi="btc")
+        out["kerzen"] += 1
+        out["oi_kerzen"] += c.ts in oi_ts
+        out["verschieden"] += u != b
+        out["je_muster"].setdefault(u.name, [0, 0])[0] += 1
+        out["je_muster"].setdefault(b.name, [0, 0])[1] += 1
+        kurs = (cs[-1].close - cs[0].close) / cs[0].close
+        o_usd, o_btc = oi_aenderung(fl, "usd"), oi_aenderung(fl, "btc")
+        for name, _kt, _ot, kurs_ok, oi_ok in E434_BEDINGUNGEN:
+            if not kurs_ok(kurs):
+                continue
+            z = out["a3"][name]
+            z["kurs"] += 1
+            z["usd"] += oi_ok(o_usd)
+            z["btc"] += oi_ok(o_btc)
+            z["beide"] += oi_ok(o_usd) and oi_ok(o_btc)
+    return out
+
+
+def e434_abschnitt(results: list, halves: list, basis_label: str, umkl: dict) -> list:
+    """Berichtsabschnitt E43.4: Live gegen "btc", die Vorprobe im Datensatz und das
+    Urteil nach der vorab festgelegten Entscheidungsregel."""
+    voll = {r[0]["label"]: r for r in results}
+    halb = {h[0]["label"]: (h[1], h[2]) for h in halves}
+    if any(x not in voll or x not in halb for x in (basis_label, E434_BTC)):
+        return []
+
+    def _kz(label: str) -> dict:
+        _cfg, sigs, _sc, p = voll[label]
+        h1, h2 = halb[label]
+        return {"rendite": p["rendite_pct"], "dd": p.get("max_drawdown_pct", 0.0),
+                "h1": h1["rendite_pct"], "h2": h2["rendite_pct"], "n": len(sigs)}
+
+    live, btc = _kz(basis_label), _kz(E434_BTC)
+    u = e434_einschalten(live, btc)
+
+    def _zeile(name: str, v: dict) -> str:
+        return (f"| {name} | {v['rendite']:+.1f} % | {v['dd']:.1f} % | {v['h1']:+.1f} % | "
+                f"{v['h2']:+.1f} % | {v['n']} |")
+
+    ja = lambda b: "**ja**" if b else "nein"
+    z = ["", "## E43.4: Open Interest in Kontrakten (Schalter `muster_oi`, Default aus)", "",
+         "Befund A3 der Gesamtpruefung: Das Open Interest kommt in Dollar, also Kontrakte "
+         "mal Kurs. Schon die Kursbewegung erfuellt so die OI-Schwellen der Muster. `btc` "
+         "zaehlt Kontrakte: jeder OI-Punkt mit dem Kurs seiner eigenen Kerze umgerechnet, "
+         "in allen Mustern, Schwellen unveraendert. Die Zeile unten unterscheidet sich von "
+         "der Live-Zeile **nur** darin.", "",
+         "| Variante | Rendite | Rueckgang | H1 | H2 | Signale |",
+         "|---|---:|---:|---:|---:|---:|",
+         _zeile("**Live (usd)**", live), _zeile("OI in Kontrakten (btc)", btc), "",
+         "**Vorprobe im Datensatz:**", "",
+         f"- Kerzen im Fenster: {umkl['kerzen']}, davon mit echtem OI-Punkt: "
+         f"{umkl['oi_kerzen']}. **Verschieden erkannt: {umkl['verschieden']} Kerzen.**"]
+    if umkl["je_muster"]:
+        z += ["", "| Muster | Kerzen mit usd | Kerzen mit btc |", "|---|---:|---:|"]
+        z += [f"| {name} | {n[0]} | {n[1]} |"
+              for name, n in sorted(umkl["je_muster"].items())]
+    z += ["", "**A3 als Zahl** - unter der Kursbedingung des Musters: Wie oft ist die "
+          "OI-Bedingung in Dollar erfuellt, wie oft in Kontrakten?", "",
+          "| Muster | Kursbedingung | OI-Bedingung | Kerzen | in Dollar | in Kontrakten "
+          "| in beiden |", "|---|---|---|---:|---:|---:|---:|"]
+    for name, kt, ot, _k, _o in E434_BEDINGUNGEN:
+        a = umkl["a3"][name]
+        z.append(f"| {name} | {kt} | {ot} | {a['kurs']} | {a['usd']} | {a['btc']} | "
+                 f"{a['beide']} |")
+    if not umkl["oi_kerzen"] or not umkl["verschieden"]:
+        grund = ("Im Fenster gibt es keinen echten OI-Punkt" if not umkl["oi_kerzen"]
+                 else "Der Schalter aendert im Fenster kein einziges Muster")
+        z += ["", f"**Kein Urteil:** {grund}. Die Zeile ist dann eine Kopie der "
+              "Live-Zeile, sie misst nichts."]
+        return z
+    z += ["", "**Urteil nach der Entscheidungsregel (vorab festgelegt):**", "",
+          f"- In beiden Haelften mindestens {E434_RAUSCHGRENZE:.0f} Punkt besser: "
+          f"{ja(u['beide_haelften_besser'])} (H1 {btc['h1'] - live['h1']:+.1f}, "
+          f"H2 {btc['h2'] - live['h2']:+.1f} Punkte gegen live)",
+          f"- Rueckgang nicht mehr als {E434_DD_TOLERANZ:.0f} Punkt tiefer: "
+          f"{ja(u['rueckgang_ok'])} ({btc['dd'] - live['dd']:+.1f} Punkte gegen live)"]
+    if u["einschalten"]:
+        z.append("- **Regel erfuellt.** `muster_oi` darf nach Kaisers Go auf `btc`; dann "
+                 "wandert `panel=True` auf diese Zeile, die alte Rechnung bleibt als "
+                 "Ausschalt-Probe im Gitter, und die E37-Varianten mit aggregiertem OI "
+                 "werden vorher auf inverse Kontrakte geprueft.")
+    else:
+        z.append("- **Regel nicht erfuellt - der Schalter bleibt auf `usd`.** Offen fuer "
+                 "Kaiser: die Anzeige-Frage (Sonderregel Teil E) fuer A2 und A3 gemeinsam.")
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -2614,6 +2788,15 @@ def main():
         _umkl, _umklfehler = {}, f"Vorprobe nicht gerechnet ({exc})"
         print(f"E43.3: {_umklfehler}")
 
+    # --- E43.4: Vorprobe im Datensatz (aendert muster_oi="btc" ueberhaupt etwas?) --------
+    try:
+        _e434, _e434fehler = e434_umklassifiziert(candles, flow, eff_start, oi_map), ""
+        print(f"E43.4: {_e434['verschieden']} von {_e434['kerzen']} Kerzen mit btc anders "
+              f"erkannt; {_e434['oi_kerzen']} Kerzen mit echtem OI-Punkt.")
+    except Exception as exc:  # noqa: BLE001
+        _e434, _e434fehler = {}, f"Vorprobe nicht gerechnet ({exc})"
+        print(f"E43.4: {_e434fehler}")
+
     # Auswahl: primaer Rendite (das Geld-Maß), dann Recall, dann Praezision
     best = max(results, key=lambda r: (r[3]["rendite_pct"], r[2]["recall"], r[2]["precision"]))
     best_cfg, sigs, sc, pnl = best
@@ -3004,6 +3187,11 @@ def main():
         _umkl and [h for h in halves if h[0]["label"] == E433_USD], _umklfehler
         or "die Zeile mit muster_cvd=usd fehlt im Gitter oder in der Halbierung",
         lambda: e433_abschnitt(results, halves, panel_cfg["label"], _umkl),
+    ) + abschnitt_oder_grund(
+        "E43.4: Open Interest in Kontrakten (Schalter `muster_oi`, Default aus)",
+        _e434 and [h for h in halves if h[0]["label"] == E434_BTC], _e434fehler
+        or "die Zeile mit muster_oi=btc fehlt im Gitter oder in der Halbierung",
+        lambda: e434_abschnitt(results, halves, panel_cfg["label"], _e434),
     ) + [
         "",
         "## Einschraenkungen",

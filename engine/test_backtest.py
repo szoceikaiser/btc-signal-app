@@ -1792,3 +1792,162 @@ def test_e433_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():
     q = inspect.getsource(backtest.main)
     assert 'e433_abschnitt(results, halves, panel_cfg["label"], _umkl)' in q
     assert "e433_umklassifiziert(candles, flow, eff_start)" in q
+
+
+# ------------------------------------ E43.4: OI in Kontrakten statt Dollar (Befund A3)
+
+def _rohkerzen_kurs(closes, start=1_700_000_000_000):
+    """Binance-Kerzenformat mit wechselndem Kurs; Eroeffnung 5 $ unter dem Schluss,
+    damit auffaellt, wer mit dem falschen Kurs der Kerze rechnet."""
+    ms = 4 * 3600 * 1000
+    return [[start + i * ms, cl - 5.0, cl + 1.0, cl - 6.0, cl, 10.0,
+             start + (i + 1) * ms, 1000.0, 50, 0, 600.0] for i, cl in enumerate(closes)]
+
+
+def _e434_oi_mit_luecken(raw):
+    """OI-Punkte nur fuer Kerze 1 (10 BTC bei 110 $) und 3 (12 BTC bei 130 $): Kerze 0
+    liegt vor dem Datenbeginn, Kerze 2 ist eine Luecke, Kerze 4 (die juengste) hat noch
+    keinen Punkt - die drei Faelle, in denen aufgefuellt wird."""
+    ts = [int(k[0]) for k in raw]
+    return {ts[1]: 110.0 * 10, ts[3]: 130.0 * 12}
+
+
+def test_e434_build_series_rechnet_um_und_fuellt_dann_kontrakte_auf():
+    """Umrechnen am Datenpunkt, dann auffuellen: Wo ein Punkt fehlt, gelten die
+    Kontrakte des letzten (davor: des ersten) Punktes - nicht der alte Dollar-Wert
+    geteilt durch den neuen Kurs. Das wuerde eine OI-Bewegung in Hoehe der
+    Kursbewegung erfinden. Das Dollar-OI bleibt, wie es war."""
+    raw = _rohkerzen_kurs([100.0, 110.0, 120.0, 130.0, 140.0])
+    oi_map = _e434_oi_mit_luecken(raw)
+    _cs, flow = backtest.build_series(raw, [], oi_map)
+    assert [f.oi_btc for f in flow] == [10.0, 10.0, 10.0, 12.0, 12.0], flow
+    assert [f.oi for f in flow] == [1100.0, 1100.0, 1100.0, 1560.0, 1560.0]
+    # Vorprobe: der naive Weg (Dollar auffuellen, dann durch den Kurs der Kerze teilen)
+    # ergaebe hier andere Zahlen - der Test unterscheidet die beiden Wege also.
+    naiv = [f.oi / c.close for f, c in zip(flow, _cs)]
+    assert naiv[0] != 10.0 and naiv[2] != 10.0 and naiv[4] != 12.0, naiv
+
+
+def test_e434_build_series_ohne_oi_map_hat_keine_kontrakt_reihe():
+    """Ohne Coinalyze steht das Dollar-OI konstant auf 1.0 (neutral). Die Kontrakt-
+    Reihe bleibt 0.0 = keine Daten - 1.0 durch den Kurs geteilt waere eine erfundene
+    Reihe, die sich gegenlaeufig zum Kurs bewegt."""
+    raw = _rohkerzen_kurs([100.0, 110.0, 120.0])
+    _cs, flow = backtest.build_series(raw, [], None)
+    assert [f.oi for f in flow] == [1.0, 1.0, 1.0]
+    assert [f.oi_btc for f in flow] == [0.0, 0.0, 0.0]
+
+
+def test_e434_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live():
+    """Genau EIN Unterschied zur Panel-Zeile: muster_oi. Die Panel-Zeile rechnet noch
+    "usd" - sonst waere die Zeile eine Kopie der Live-Zeile. muster_cvd bleibt "alt"."""
+    assert "muster_oi" in backtest.EVAL_KEYS and backtest._BASE["muster_oi"] == "usd"
+    panel = [v for v in backtest.GRID if v.get("panel")][0]
+    basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
+    z = _zeile(backtest.E434_BTC)
+    hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+    abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+    assert abweichend == {"muster_oi"}, abweichend
+    assert hier["muster_oi"] == "btc" and basis["muster_oi"] == "usd"
+
+
+def test_e434_live_konfig_steht_auf_usd():
+    """Default AUS bis zur Messung und Kaisers Go (Projektregel 1)."""
+    import json
+    from pathlib import Path
+    cfg_datei = Path(__file__).resolve().parent.parent / "site" / "data" / "config.json"
+    if not cfg_datei.exists():
+        print("  UEBERSPRUNGEN: site/data/config.json fehlt - muster_oi ungeprueft!")
+        return
+    cfg = json.loads(cfg_datei.read_text(encoding="utf-8"))
+    assert cfg.get("muster_oi") == "usd"
+    assert "_hinweis_muster_oi" in cfg
+
+
+def test_e434_einschalten_nur_wenn_beide_haelften_klar_besser():
+    live = _hz(10.0, 5.0)
+    assert backtest.e434_einschalten(live, _hz(11.0, 6.0))["einschalten"] is True   # genau 1,0
+    assert backtest.e434_einschalten(live, _hz(11.0, 5.9))["einschalten"] is False  # H2 Rauschen
+    assert backtest.e434_einschalten(live, _hz(10.9, 9.0))["einschalten"] is False  # H1 Rauschen
+    assert backtest.e434_einschalten(live, _hz(9.0, 4.0))["einschalten"] is False   # schlechter
+
+
+def test_e434_einschalten_nicht_bei_zu_tiefem_rueckgang():
+    live = _hz(dd=-9.0)
+    gut = dict(h1=12.0, h2=7.0)
+    assert backtest.e434_einschalten(live, _hz(dd=-10.0, **gut))["einschalten"] is True  # Grenze
+    u = backtest.e434_einschalten(live, _hz(dd=-10.1, **gut))
+    assert u["rueckgang_ok"] is False and u["einschalten"] is False
+    assert backtest.e434_einschalten(live, _hz(dd=-5.0, **gut))["einschalten"] is True
+
+
+def test_e434_vorprobe_zaehlt_a3_je_muster():
+    """"A3 als Zahl": In der Lage aus dem Pruefbericht (Kontrakte gleich, nur der Kurs
+    bewegt sich) ist die OI-Bedingung in Dollar erfuellt, in Kontrakten nicht - fuer
+    den Derivate-Pump wie fuer die Kapitulation. Und die Muster unterscheiden sich."""
+    from test_strategy_core import _A3_KAPITULATION, _A3_PUMP, _oi_lage
+    for lage, name, u_erw, b_erw in ((_A3_PUMP, "2 Derivate-Pump", "DERIVATE_PUMP",
+                                      "GESUNDER_TREND"),
+                                     (_A3_KAPITULATION, "4 Kapitulation",
+                                      "CAPITULATION_RESET", "UNGESUNDER_ABVERKAUF")):
+        cs, fl = _oi_lage(*lage)
+        u = backtest.e434_umklassifiziert(cs, fl, cs[0].ts, {x.ts: x.oi for x in fl})
+        assert u["kerzen"] == 1 and u["oi_kerzen"] == 1 and u["verschieden"] == 1, u
+        assert u["a3"][name] == {"kurs": 1, "usd": 1, "btc": 0, "beide": 0}, u["a3"]
+        assert u["je_muster"] == {u_erw: [1, 0], b_erw: [0, 1]}, u["je_muster"]
+
+
+def test_e434_vorprobe_im_pump_szenario_findet_umklassifizierte_kerzen():
+    """Im E43.5-Pump-Szenario steigt das Dollar-OI in den Pump-Phasen mit dem Kurs.
+    Die Vorprobe muss dort umklassifizierte Kerzen finden, und jede Spalte der
+    Mustertabelle zaehlt jede Kerze genau einmal."""
+    from test_strategy_core import _mit_kontrakten
+    kerzen, flow = _pump_reihe(1900)
+    flow = _mit_kontrakten(kerzen, flow)
+    u = backtest.e434_umklassifiziert(kerzen, flow, kerzen[1300].ts,
+                                      {x.ts: x.oi for x in flow})
+    assert u["kerzen"] == 600 and u["oi_kerzen"] == 600 and u["verschieden"] > 0, u
+    assert sum(n[0] for n in u["je_muster"].values()) == 600
+    assert sum(n[1] for n in u["je_muster"].values()) == 600
+
+
+def test_e434_vorprobe_ohne_oi_daten_misst_nichts():
+    """Ohne OI-Daten (kein Coinalyze-Key) aendert der Schalter nichts, und die Vorprobe
+    sagt das: 0 Kerzen mit echtem OI-Punkt, 0 verschieden erkannt."""
+    raw = _rohkerzen_kurs([100.0 + (i % 7) * 3 for i in range(40)])
+    cs, flow = backtest.build_series(raw, [], None)
+    u = backtest.e434_umklassifiziert(cs, flow, cs[0].ts, None)
+    assert u["kerzen"] == 29 and u["oi_kerzen"] == 0 and u["verschieden"] == 0, u
+
+
+def test_e434_abschnitt_meldet_urteil_und_kein_urteil():
+    def r(label, rendite, dd, n=5):
+        return ({"label": label}, [{}] * n, {}, {"rendite_pct": rendite,
+                                                  "max_drawdown_pct": dd})
+
+    def h(label, h1, h2):
+        return ({"label": label}, {"rendite_pct": h1}, {"rendite_pct": h2})
+
+    res = [r("LIVE", 25.0, -9.9), r(backtest.E434_BTC, 28.0, -10.2)]
+    hal = [h("LIVE", 20.0, 5.0), h(backtest.E434_BTC, 21.5, 6.2)]
+    a3 = {b[0]: {"kurs": 9, "usd": 5, "btc": 2, "beide": 2}
+          for b in backtest.E434_BEDINGUNGEN}
+    umkl = {"kerzen": 100, "oi_kerzen": 100, "verschieden": 5, "a3": a3,
+            "je_muster": {"DERIVATE_PUMP": [7, 3], "NEUTRAL": [93, 97]}}
+    text = "\n".join(backtest.e434_abschnitt(res, hal, "LIVE", umkl))
+    assert "Regel erfuellt" in text and "Verschieden erkannt: 5 Kerzen" in text
+    assert "| DERIVATE_PUMP | 7 | 3 |" in text and "| 2 Derivate-Pump |" in text
+    hal[1] = h(backtest.E434_BTC, 21.5, 5.5)                       # H2 nur +0,5
+    text = "\n".join(backtest.e434_abschnitt(res, hal, "LIVE", umkl))
+    assert "bleibt auf `usd`" in text
+    for feld in ("verschieden", "oi_kerzen"):               # je fuer sich: kein Urteil
+        kaputt = dict(umkl, **{feld: 0})
+        text = "\n".join(backtest.e434_abschnitt(res, hal, "LIVE", kaputt))
+        assert "Kein Urteil" in text and "Regel" not in text.split("Kein Urteil")[1], feld
+
+
+def test_e434_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    assert 'e434_abschnitt(results, halves, panel_cfg["label"], _e434)' in q
+    assert "e434_umklassifiziert(candles, flow, eff_start, oi_map)" in q

@@ -1232,8 +1232,99 @@ def test_e433_anzeige_rechnet_muster2_wie_der_handel():
     demselben muster_cvd rechnen wie evaluate() - sonst steht in der Nachricht ein
     anderes Muster als das, nach dem die Engine gehandelt hat."""
     import inspect
+    import re
     q = inspect.getsource(main)
     aufrufe = q.count("classify_pattern(")
     assert aufrufe >= 3, "Vorprobe: die Anzeige-Aufrufe sind nicht mehr da"
-    assert q.count('classify_pattern(candles, flow, muster_cvd=par["muster_cvd"])') == aufrufe
+    assert len(re.findall(r'classify_pattern\(candles, flow, muster_cvd=par\["muster_cvd"\][,)]',
+                          q)) == aufrufe
     assert main.EVAL_DEFAULTS["muster_cvd"] == "alt"
+
+
+def test_e434_anzeige_rechnet_das_oi_wie_der_handel():
+    """Wie E43.3: Lage-Abruf, Vorschau und Plan muessen das Muster mit demselben
+    muster_oi rechnen wie evaluate() - sonst stuende in der Nachricht ein anderes
+    Muster als das, nach dem die Engine gehandelt hat."""
+    import inspect
+    import re
+    q = inspect.getsource(main)
+    aufrufe = q.count("classify_pattern(")
+    assert aufrufe >= 3, "Vorprobe: die Anzeige-Aufrufe sind nicht mehr da"
+    assert len(re.findall(r'classify_pattern\(candles, flow, muster_cvd=par\["muster_cvd"\],'
+                          r'\s*muster_oi=par\["muster_oi"\]\)', q)) == aufrufe
+    assert main.EVAL_DEFAULTS["muster_oi"] == "usd"
+
+
+class _Ersetzt:
+    """Ersetzt Modul-Attribute (Netzabrufe) fuer die Dauer eines with-Blocks und stellt
+    sie danach wieder her - auch wenn der Test scheitert."""
+
+    def __init__(self, *ziele, env=None):
+        self.ziele, self.env = ziele, env or {}
+
+    def __enter__(self):
+        import os
+        self.alt = [(m, n, getattr(m, n)) for m, n, _ in self.ziele]
+        self.alt_env = {k: os.environ.get(k) for k in self.env}
+        for m, n, neu in self.ziele:
+            setattr(m, n, neu)
+        for k, v in self.env.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+        return self
+
+    def __exit__(self, *_):
+        import os
+        for m, n, wert in self.alt:
+            setattr(m, n, wert)
+        for k, v in self.alt_env.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+
+def _e434_live_flow(raw, oi_map=None, api_key="test", kraken=None):
+    """main.fetch_market_data mit Attrappen statt Netz: Kerzen `raw`, Coinalyze-OI
+    `oi_map` (nur mit api_key), sonst ein Kraken-Snapshot `kraken` = (ts, usd)."""
+    import coinalyze
+    leer = lambda *a, **k: {}
+    with _Ersetzt((main, "fetch_spot", lambda limit=0: raw),
+                  (main, "fetch_funding_8h", lambda: []),
+                  (main, "fetch_oi_snapshot", lambda: kraken),
+                  (coinalyze, "oi_by_ts", lambda *a, **k: dict(oi_map or {})),
+                  (coinalyze, "liquidations_by_ts", leer),
+                  (coinalyze, "fut_delta_by_ts", leer),
+                  (coinalyze, "long_short_by_ts", leer),
+                  env={"COINALYZE_API_KEY": api_key}):
+        _cs, flow, _hist = main.fetch_market_data(oi_history=[], now_ms=raw[-1][6] + 1)
+    return flow
+
+
+def test_e434_live_und_backtest_rechnen_dieselben_kontrakte():
+    """Live = Backtest: Dieselben Rohdaten ergeben in main.fetch_market_data und in
+    backtest.build_series je Kerze dasselbe Dollar-OI UND dieselben Kontrakte - auch
+    vor dem ersten OI-Punkt, in einer Luecke und an der juengsten Kerze ohne Punkt.
+    Sonst misst der Backtest etwas, das live nie passiert (Projektregel 3)."""
+    import backtest
+    from test_backtest import _e434_oi_mit_luecken, _rohkerzen_kurs
+    raw = _rohkerzen_kurs([100.0, 110.0, 120.0, 130.0, 140.0])
+    oi_map = _e434_oi_mit_luecken(raw)
+    live = _e434_live_flow(raw, oi_map)
+    _cs, bt = backtest.build_series(raw, [], oi_map)
+    assert [f.oi_btc for f in live] == [f.oi_btc for f in bt] == [10.0, 10.0, 10.0,
+                                                                  12.0, 12.0]
+    assert [f.oi for f in live] == [f.oi for f in bt]
+
+
+def test_e434_kraken_rueckfall_hat_keine_kontrakt_reihe():
+    """Ohne Coinalyze greift der Kraken-Snapshot fuer das Dollar-OI. Eine Kontrakt-
+    Reihe gibt es dort nicht (0.0 = keine Daten, "btc" rechnet dann OI-neutral).
+    Vorprobe: Der Snapshot kommt an - das Dollar-OI ist gesetzt."""
+    from test_backtest import _rohkerzen_kurs
+    raw = _rohkerzen_kurs([100.0, 110.0, 120.0])
+    flow = _e434_live_flow(raw, api_key=None, kraken=(int(raw[0][0]), 5000.0))
+    assert all(f.oi == 5000.0 for f in flow), [f.oi for f in flow]
+    assert all(f.oi_btc == 0.0 for f in flow), [f.oi_btc for f in flow]

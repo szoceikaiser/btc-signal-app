@@ -69,11 +69,11 @@ SABOTAGEN = [
      '        if muster_cvd == "usd":\n            # E43.3',
      '        if muster_cvd == "USD":\n            # E43.3'),
     ("evaluate reicht muster_cvd nicht an classify_pattern weiter", "strategy_core.py",
-     "    pattern = classify_pattern(candles, flow, muster_cvd=muster_cvd) if flow",
-     "    pattern = classify_pattern(candles, flow) if flow"),
+     "    pattern = classify_pattern(candles, flow, muster_cvd=muster_cvd,\n",
+     "    pattern = classify_pattern(candles, flow,\n"),
     # --- E43.3: Verdrahtung Backtest, Konfig, Anzeige --------------------------------
     ("muster_cvd fehlt in EVAL_KEYS (Zeile laeuft still mit alt)", "backtest.py",
-     '"ampel_filter", "muster_cvd")', '"ampel_filter")'),
+     '"ampel_filter", "muster_cvd", "muster_oi")', '"ampel_filter", "muster_oi")'),
     ("Gitterzeile misst nichts (alt statt usd)", "backtest.py",
      'bein_richtung="bias", muster_cvd="usd"),', 'bein_richtung="bias", muster_cvd="alt"),'),
     ("Gitterzeile mit zweitem Unterschied (alter Stop)", "backtest.py",
@@ -82,11 +82,13 @@ SABOTAGEN = [
     ("usd still als Vorgabe (live eingeschaltet ohne Messung)", "main.py",
      '    "muster_cvd": "alt",', '    "muster_cvd": "usd",'),
     ("Anzeige rechnet Muster 2 anders als der Handel", "main.py",
-     'pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"])\n'
+     'pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"],\n'
+     '                                                  muster_oi=par["muster_oi"])\n'
      '                         if flow else None,\n'
      '                         trend_period=par.get("trend_ema", 200))\n'
      '    # E34: die Ampel',
-     'pattern=classify_pattern(candles, flow)\n'
+     'pattern=classify_pattern(candles, flow,\n'
+     '                                                  muster_oi=par["muster_oi"])\n'
      '                         if flow else None,\n'
      '                         trend_period=par.get("trend_ema", 200))\n'
      '    # E34: die Ampel'),

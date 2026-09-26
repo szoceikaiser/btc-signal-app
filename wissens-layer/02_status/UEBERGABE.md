@@ -8,6 +8,28 @@
 
 ---
 
+## 26.09.2026 (10) — E43.4 gebaut (Arbeitszweig), Messung läuft
+
+**Kaisers Auftrag:** *„Ja“* (zum Bauplan E43.4). Zweig:
+`claude/e43-4-open-interest-9mmh0l`. **`main` ist unverändert**, live ändert sich nichts:
+`muster_oi` steht auf `"usd"`.
+
+- Gebaut wie im Bauplan: `FlowPoint.oi_btc`, `oi_in_btc()` (Umrechnung am OI-Datenpunkt,
+  dann auffüllen, live und im Backtest dieselbe Funktion), `oi_aenderung()`, Schalter
+  `muster_oi` in `classify_pattern`/`evaluate`/`EVAL_DEFAULTS`/`EVAL_KEYS`/`_BASE`/
+  `config.json`, Anzeige rechnet wie der Handel, Gitterzeile „LIVE-heute +OI in
+  Kontrakten (E43.4)“, Berichtsabschnitt „E43.4“ (Vorprobe, A3 als Zahl, Urteil).
+- **488 Tests grün** (467 + 21). `sabotage_e434.py`: 37 von 37 gefangen, beim ersten
+  Lauf. Drei Vorlagen in `sabotage_e433.py` auf den neuen Wortlaut nachgezogen (E43.4
+  hat dieselben Zeilen geändert). Alle älteren Proben erneut gelaufen, alle Sabotagen
+  gefangen: E43.3 29, E43 7, E38 24, E38.1 17, E39 25, E40 27, E41 58.
+- Einzelheiten: `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, „Umsetzung E43.4“.
+
+**Offen:** Backtest auf GitHub (Workflow „Backtest“ auf dem Arbeitszweig), dann Urteil
+nach der vorab festgelegten Regel, dann Kaisers Go.
+
+---
+
 ## 26.09.2026 (9) — Bauplan E43.4 (Open Interest in Kontrakten)
 
 **Kaisers Auftrag:** zuerst den Bauplan-Abschnitt E43.4 schreiben und zeigen, dann bauen.

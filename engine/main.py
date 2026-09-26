@@ -33,7 +33,8 @@ from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCH
                            Position, evaluate, fib_zones, find_pivots, gegen_zonen,
                            ampel, ampel_richtung, classify_pattern, lage_bericht,
                            orderflow_detail, OF_FENSTER, DIP_FLOOR_PCT, SignalType,
-                           last_significant_impulse, liq_levels, next_pivot_beyond)
+                           last_significant_impulse, liq_levels, next_pivot_beyond,
+                           oi_in_btc)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
                              format_stop_rueckeroberung, send_lage, send_plan,
                              send_signals, send_text, send_vorschau)
@@ -280,6 +281,14 @@ def fetch_market_data(oi_history: list[list] | None = None,
     oi_pairs = sorted((int(t), float(v)) for t, v
                       in (cz_oi.items() if use_cz else oi_history))
     first_oi = oi_pairs[0][1] if oi_pairs else 0.0
+    # E43.4: OI in Kontrakten (BTC). Jeder Coinalyze-Punkt mit dem Schlusskurs SEINER
+    # Kerze umgerechnet, erst danach aufgefuellt - wie backtest.build_series. Der
+    # Kraken-Rueckfall bekommt keine Kontrakt-Reihe (0.0 = keine Daten): seine Historie
+    # ist lueckenhaft und im Backtest nicht nachstellbar.
+    kurs = {int(k[0]): float(k[4]) for k in spot_raw if int(k[6]) <= now_ms}
+    btc_pairs = sorted(oi_in_btc({int(t): float(v) for t, v in cz_oi.items()},
+                                 kurs).items()) if use_cz else []
+    first_btc = btc_pairs[0][1] if btc_pairs else 0.0
 
     candles: list[Candle] = []
     flow: list[FlowPoint] = []
@@ -299,7 +308,8 @@ def fetch_market_data(oi_history: list[list] | None = None,
         fut_cvd += cz_fut.get(c_ts, 0.0)               # ohne Daten bleibt es 0 = wie bisher
         flow.append(FlowPoint(c_ts, spot_cvd, fut_cvd, oi_val,
                               _latest_leq(funding, close_ts), long_liq, short_liq,
-                              cz_ls.get(c_ts, 0.0)))
+                              cz_ls.get(c_ts, 0.0),
+                              _latest_leq(btc_pairs, c_ts, default=first_btc)))
     return candles, flow, oi_history
 
 
@@ -341,6 +351,9 @@ EVAL_DEFAULTS = {
     # E43.3 (26.09.2026), Default "alt" = bisheriges Verhalten - siehe
     # strategy_core.classify_pattern.
     "muster_cvd": "alt",
+    # E43.4 (26.09.2026), Default "usd" = bisheriges Verhalten - siehe
+    # strategy_core.oi_aenderung.
+    "muster_oi": "usd",
 }
 
 
@@ -485,7 +498,8 @@ def zonen_vorschau(candles: list[Candle], cfg: dict | None = None,
     # Limit-Orders setzt. Ohne Position gibt es kein Vergleichsbein, also nur das
     # aktuelle Bein, die Spot-Nachfrage und das Muster.
     _lage = lage_bericht(candles, flow or [], imp=imp,
-                         pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"])
+                         pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"],
+                                                  muster_oi=par["muster_oi"])
                          if flow else None,
                          trend_period=par.get("trend_ema", 200))
     # E34: die Ampel fasst die Lage zu EINER Aussage zusammen. Richtung aus dem Bein,
@@ -575,7 +589,8 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
                                           bein_wahl=par["bein_wahl"], nur_auf=_nur_auf_p)
     _lage = lage_bericht(candles, flow, imp=_imp_jetzt,
                          pos_impulse=z.impulse,
-                         pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"])
+                         pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"],
+                                                  muster_oi=par["muster_oi"])
                          if flow else None,
                          trend_period=par.get("trend_ema", 200))
     if _lage:
@@ -835,7 +850,8 @@ def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
                                    min_bein_pct=par["min_bein_pct"],
                                    bein_wahl=par["bein_wahl"], nur_auf=True)
     lage = lage_bericht(candles, flow or [], imp=imp,
-                        pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"])
+                        pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"],
+                                                 muster_oi=par["muster_oi"])
                         if flow else None,
                         trend_period=par.get("trend_ema", 200))
     out = {

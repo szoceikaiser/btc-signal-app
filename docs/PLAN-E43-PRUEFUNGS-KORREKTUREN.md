@@ -15,7 +15,7 @@
 | E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main` gemerged) |
 | E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **LIVE** seit 26.09.2026 (`bein_richtung: "bias"`, Entscheidungsregel erfüllt, Kaisers Go) |
 | E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 2 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"alt"` (Arbeitszweig) |
-| E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **BAUPLAN** 26.09.2026 (Abschnitt „E43.4“), nicht gebaut |
+| E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **GEBAUT** 26.09.2026 (Arbeitszweig), 488 Tests, `sabotage_e434.py` 37/37; Messung offen |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
@@ -386,8 +386,9 @@ Muster 2 unerreichbar).
 
 ## E43.4 — Open Interest in Kontrakten statt Dollar (Befund A3)
 
-**Noch nicht gebaut.** Dieser Abschnitt ist der Bauplan (26.09.2026). Kaisers Auftrag:
-zuerst den Plan schreiben und zeigen, erst danach bauen.
+**Gebaut 26.09.2026 auf dem Arbeitszweig, Messung offen.** Der Bauplan unten ist
+unverändert, so wie Kaiser ihm zugestimmt hat. Was beim Bau dazukam, steht in
+„Umsetzung E43.4“.
 
 **Problem, genau lokalisiert** (`strategy_core.classify_pattern`):
 
@@ -588,6 +589,42 @@ OI-Bedingung.
 
 **Aufwand:** hoch (Mustererkennung; Live und Backtest müssen gleich rechnen; Vorprobe und
 Sabotage). Stand vor dem Bau: **467 Tests grün**. Geschätzt rund 20 neue Tests.
+
+### Umsetzung E43.4 (26.09.2026, Arbeitszweig, noch nicht gemessen)
+
+Kaisers Zustimmung zum Bauplan: *„Ja“*. Gebaut wie oben, ohne Abweichung von der Regel.
+
+- `strategy_core.py`: `FlowPoint.oi_btc` (letztes Feld, Default 0.0), `oi_in_btc(oi_usd,
+  kurs)`, `oi_aenderung(f, muster_oi)`. `classify_pattern(..., muster_oi="usd")` holt
+  `oi_chg` aus `oi_aenderung`, alle fünf Muster lesen denselben Wert.
+  `evaluate(..., muster_oi="usd")` reicht ihn durch. `"usd"` rechnet Zeichen für Zeichen
+  wie vorher (auch der Randfall „OI am Fensterende 0“ ergibt weiter −100 %). `"btc"` gibt
+  ohne Kontrakt-Reihe 0 zurück.
+- `main.py`: `fetch_market_data` rechnet die Coinalyze-Punkte mit dem Schlusskurs ihrer
+  Kerze um und füllt danach auf. Der Kraken-Rückfall bekommt `oi_btc = 0.0`.
+  `EVAL_DEFAULTS["muster_oi"] = "usd"`. Lage-Abruf, Vorschau und Plan rechnen das Muster
+  mit demselben Wert wie der Handel.
+- `backtest.py`: `build_series` genauso (dieselbe Hilfsfunktion), `muster_oi` in
+  `EVAL_KEYS` und `_BASE`, Gitterzeile „LIVE-heute +OI in Kontrakten (E43.4)“ mit genau
+  einem Unterschied, Berichtsabschnitt „E43.4“ mit `e434_umklassifiziert` (Vorprobe),
+  `e434_einschalten` (Regel) und `e434_abschnitt`.
+- **Genauer als im Plan:** „A3 als Zahl“ zählt je Muster nur Kerzen, an denen die
+  **Kursbedingung** des Musters erfüllt ist. Gezählt wird, ob die OI-Bedingung dort in
+  Dollar, in Kontrakten oder in beiden erfüllt ist. Ohne diese Einschränkung wäre z. B.
+  „OI ≥ −1 %“ (Muster 5) fast immer erfüllt und die Zahl sagte nichts. Muster 1 steht
+  mit in der Tabelle.
+- `site/data/config.json`: `"muster_oi": "usd"` plus `_hinweis_muster_oi`.
+- **Tests:** 21 neue, **488 grün**. Darunter die verdrahtete Vorprobe `demo_oi_usd`
+  (`usd`: CAPITULATION_RESET und DERIVATE_PUMP, `btc`: UNGESUNDER_ABVERKAUF und
+  GESUNDER_TREND) mit Gegenprobe, je Muster eine Lage für Muster 1, 3 und 5, der Weg
+  durch `evaluate()` und „Live = Backtest“: Dieselben Rohdaten ergeben in
+  `fetch_market_data` (mit Attrappen statt Netz) und in `build_series` dieselben
+  Kontrakte, auch vor dem ersten OI-Punkt, in einer Lücke und an der jüngsten Kerze ohne
+  Punkt.
+- **Sabotage:** `sabotage_e434.py`, 37 Sabotagen, alle beim ersten Lauf gefangen.
+  Drei Vorlagen in `sabotage_e433.py` suchten Zeilen, die E43.4 geändert hat
+  (`evaluate`-Aufruf, `EVAL_KEYS`, Anzeige-Aufruf). Sie sind auf den neuen Wortlaut
+  nachgezogen, mit unveränderter Absicht.
 
 ## E43.6, E43.7
 

@@ -2222,6 +2222,149 @@ def test_e433_muster_cvd_kommt_in_evaluate_an():
     assert lauf("alt") != lauf("usd")
 
 
+# ---------------------------------------- E43.4: OI in Kontrakten statt Dollar (Befund A3)
+
+def _oi_lage(kurs, kontrakte, spot_d, fut_d, funding, spot_dreht=False):
+    """12 Kerzen (2 Tage). Kurs und Zahl der Kontrakte aendern sich gleichmaessig um
+    `kurs` bzw. `kontrakte` (Anteile). Das OI steht in Dollar = Kontrakte x Kurs, wie
+    Coinalyze es liefert (demo_oi_usd.py aus dem Pruefbericht); `oi_btc` entsteht ueber
+    oi_in_btc, wie live und im Backtest."""
+    from dataclasses import replace
+    from strategy_core import oi_in_btc
+    cs, fl, sp, fu = [], [], -5e9, -20000.0
+    for i in range(12):
+        p = 60000 * (1 + kurs * i / 11)
+        cs.append(Candle(i, p, p * 1.002, p * 0.998, p))
+        d = spot_d / 11
+        if spot_dreht and i >= 10:
+            d = abs(d) * 3
+        sp += d if i else 0
+        fu += fut_d / 11 if i else 0
+        f = funding[i] if isinstance(funding, list) else funding
+        fl.append(FlowPoint(i, sp, fu, 100_000.0 * (1 + kontrakte * i / 11) * p, f))
+    btc = oi_in_btc({x.ts: x.oi for x in fl}, {x.ts: x.close for x in cs})
+    return cs, [replace(x, oi_btc=btc[x.ts]) for x in fl]
+
+
+_FUNDING_ZIEHT = [0.00002 + 1e-6 * i for i in range(12)]
+# (Kurs, Kontrakte, Spot-Delta $, Futures-Delta BTC, Funding, Spot dreht)
+_A3_KAPITULATION = (-0.05, 0.0, -300e6, -3000, 0.00002, True)
+_A3_PUMP = (0.035, 0.0, 5e6, 3000, _FUNDING_ZIEHT, False)
+
+
+def test_e434_vorprobe_demo_oi_usd_erkennt_am_kurs():
+    """Die Vorprobe aus dem Bauplan (Pruefbericht, demo_oi_usd.py): Die Zahl der
+    Kontrakte bleibt GLEICH, nur der Kurs bewegt sich. In Dollar erkennt die Engine
+    trotzdem eine Kapitulation ("OI-Wipeout") und einen Derivate-Pump ("neues Geld") -
+    das ist Befund A3. In Kontrakten erkennt sie beides nicht. Ohne den ersten Teil waere
+    nicht bewiesen, dass das Szenario den Fehler ueberhaupt enthaelt."""
+    kap, pump = _oi_lage(*_A3_KAPITULATION), _oi_lage(*_A3_PUMP)
+    assert classify_pattern(*kap, muster_oi="usd") == Pattern.CAPITULATION_RESET
+    assert classify_pattern(*pump, muster_oi="usd") == Pattern.DERIVATE_PUMP
+    assert classify_pattern(*kap, muster_oi="btc") == Pattern.UNGESUNDER_ABVERKAUF
+    assert classify_pattern(*pump, muster_oi="btc") == Pattern.GESUNDER_TREND
+
+
+def test_e434_btc_erkennt_echte_kontrakt_aenderung():
+    """Die Gegenprobe: Schliessen die Haendler wirklich Positionen (-6 %) oder eroeffnen
+    sie neue (+4 %), erkennt "btc" Kapitulation und Derivate-Pump weiter. Sonst waere
+    "btc" nur ein Weg, Muster 2 und 4 abzuschalten."""
+    k, _k, sd, fd, fu, dreht = _A3_KAPITULATION
+    assert classify_pattern(*_oi_lage(k, -0.06, sd, fd, fu, dreht), muster_oi="btc") \
+        == Pattern.CAPITULATION_RESET
+    k, _k, sd, fd, fu, dreht = _A3_PUMP
+    assert classify_pattern(*_oi_lage(k, 0.04, sd, fd, fu, dreht), muster_oi="btc") \
+        == Pattern.DERIVATE_PUMP
+
+
+def test_e434_btc_wirkt_in_allen_mustern_die_das_oi_lesen():
+    """Es gibt nur EIN oi_chg. Muster 1, 3 und 5 lesen es genauso wie 2 und 4 - wuerde
+    "btc" nur in einem Teil der Muster wirken, stuenden in derselben Einordnung zwei
+    Einheiten. Je Muster eine Lage, die nur in Kontrakten (oder nur in Dollar) passt:
+      - 5: Kurs -3 %, Kontrakte gleich -> Dollar-OI -3 %, zu tief fuer "OI haelt".
+      - 3: Kurs +3 %, Kontrakte -2,5 % -> in Dollar +0,4 %, kein Short-Covering.
+      - 1: Kurs +3 %, Kontrakte -1 % -> in Dollar +2 % (passt), in Kontrakten -1 %.
+    """
+    faelle = [
+        ((-0.03, 0.0, -300e6, -3000, 0.00002), Pattern.NEUTRAL,
+         Pattern.UNGESUNDER_ABVERKAUF),
+        ((0.03, -0.025, 200e6, 100, 0.00002), Pattern.GESUNDER_TREND,
+         Pattern.SHORT_COVERING),
+        ((0.03, -0.01, 200e6, 100, 0.00002), Pattern.GESUNDER_TREND, Pattern.NEUTRAL),
+    ]
+    for lage, usd, btc in faelle:
+        cs, fl = _oi_lage(*lage)
+        assert classify_pattern(cs, fl, muster_oi="usd") == usd, lage
+        assert classify_pattern(cs, fl, muster_oi="btc") == btc, lage
+
+
+def test_e434_oi_in_btc_rechnet_jeden_punkt_mit_dem_kurs_seiner_kerze():
+    """Jeder OI-Punkt geteilt durch den Schlusskurs DERSELBEN Kerze. Ein Punkt ohne
+    Kerze entfaellt - lieber kein Wert als einer mit falschem Kurs."""
+    from strategy_core import oi_in_btc
+    kurs = {0: 50_000.0, 1: 100_000.0}
+    assert oi_in_btc({0: 5e9, 1: 5e9, 2: 5e9}, kurs) == {0: 100_000.0, 1: 50_000.0}
+    assert oi_in_btc({}, kurs) == {}
+
+
+def test_e434_ohne_oi_daten_rechnen_usd_und_btc_gleich():
+    """Ohne OI-Daten steht das Dollar-OI konstant (Backtest: 1.0) und es gibt keine
+    Kontrakt-Reihe (oi_btc = 0). Beide Einstellungen muessen dann dasselbe sagen: keine
+    OI-Bewegung. Sonst erfaende "btc" aus fehlenden Daten ein Signal."""
+    from dataclasses import replace
+    from strategy_core import oi_aenderung
+    for lage in (_A3_KAPITULATION, _A3_PUMP, (0.03, -0.025, 200e6, 100, 0.00002, False)):
+        cs, fl = _oi_lage(*lage)
+        leer = [replace(x, oi=1.0, oi_btc=0.0) for x in fl]
+        assert oi_aenderung(leer, "btc") == 0.0 == oi_aenderung(leer, "usd")
+        assert classify_pattern(cs, leer, muster_oi="btc") == \
+            classify_pattern(cs, leer, muster_oi="usd"), lage
+
+
+def test_e434_usd_rechnet_wie_vor_e434():
+    """Default "usd" ist das bisherige Verhalten, Zeichen fuer Zeichen - auch im
+    Randfall, dass das OI am Fensterende 0 ist (live ohne jede OI-Quelle moeglich): dort
+    ergab die alte Formel -100 %, und dabei bleibt es."""
+    from strategy_core import oi_aenderung
+    fl = [FlowPoint(i, 0.0, 0.0, 1000.0 if i < 11 else 0.0, 0.0) for i in range(12)]
+    assert oi_aenderung(fl, "usd") == -1.0
+    fl = [FlowPoint(i, 0.0, 0.0, 1000.0 + 10 * i, 0.0) for i in range(12)]
+    assert oi_aenderung(fl, "usd") == (fl[-1].oi - fl[0].oi) / fl[0].oi
+
+
+def _mit_kontrakten(kerzen, flow):
+    """oi_btc zu einer Flow-Reihe, deren OI in Dollar steht - ueber oi_in_btc."""
+    from dataclasses import replace
+    from strategy_core import oi_in_btc
+    btc = oi_in_btc({x.ts: x.oi for x in flow}, {x.ts: x.close for x in kerzen})
+    return [replace(x, oi_btc=btc[x.ts]) for x in flow]
+
+
+def test_e434_muster_oi_kommt_in_evaluate_an():
+    """Der Weg DURCH evaluate(): Im Pump-Szenario steigt das Dollar-OI mit dem Kurs,
+    die Kontrakte kaum - "usd" und "btc" erkennen verschiedene Muster. Dann muessen sich
+    auch die Signale unterscheiden. Bliebe der Parameter in evaluate() haengen,
+    rechnete die Gitterzeile still mit "usd" - eine Kopie der Live-Zeile."""
+    kerzen, roh = _pump_szenario()
+    n = len(kerzen)
+    muster = {m: [classify_pattern(kerzen[i - 12:i],
+                                   _mit_kontrakten(kerzen[i - 12:i],
+                                                   _flow_ab(kerzen, roh, i - 12, i)),
+                                   muster_oi=m) for i in range(n - 60, n + 1)]
+              for m in ("usd", "btc")}
+    assert muster["usd"] != muster["btc"], "Vorprobe: der Schalter aendert kein Muster"
+
+    def lauf(muster_oi):
+        live = dict(_live_einstellung(), muster_oi=muster_oi)
+        pos, sigs = Position(), []
+        for i in range(n - 60, n + 1):
+            fl = _mit_kontrakten(kerzen[i - 400:i], _flow_ab(kerzen, roh, i - 400, i))
+            sigs += evaluate(kerzen[i - 400:i], fl, pos, **live)
+        return [(x.ts, x.type, x.reason) for x in sigs]
+
+    assert lauf("usd") != lauf("btc")
+
+
 def test_ema200_braucht_echte_historie():
     """Der stille Fehler, den E33 behebt: Mit 400 Kerzen (67 Tage) lieferte
     daily_trend(period=200) klaglos einen EMA67 und gab ihn als EMA200 aus."""
