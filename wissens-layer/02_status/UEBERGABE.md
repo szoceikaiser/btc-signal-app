@@ -8,6 +8,27 @@
 
 ---
 
+## 26.09.2026 (22) — E44.2 gebaut: Wechselwirkungen und Monats-Probe (Zweig, wartet auf Go)
+
+Auf Zweig `claude/blissful-maxwell-9uwt6x`, zusammen mit E44.1. In `backtest.py`:
+`e442_vierergruppen` (findet alle sauberen 2×2-Gruppen im Gitter, Basis = Ecke mit beiden
+Schaltern aus), `e442_wechselwirkung`, `monats_probe` (hält der Vorsprung ohne den
+günstigsten Monat?) und der neue Berichtsabschnitt „E44: Wechselwirkungen und
+Monats-Probe“. Gegen das echte Gitter geprüft: **dieselben 16 Gruppen** wie in der Analyse.
+Kein Schalter, keine Gitterzeile, kein Urteil geändert. 10 neue Tests, **545 grün**,
+`sabotage_e442.py` **8/8 gefangen**. Die Probe fand beim ersten Lauf eine echte Testlücke
+(beide Hälften hatten im Test dieselben Zahlen, eine vertauschte Hälfte fiel nicht auf),
+behoben.
+
+**Offen für Kaiser: ein Go für `main` deckt E44.1 und E44.2 ab.** Danach: Actions →
+Coinalyze-Archiv → Run workflow (einmal von Hand), und beim nächsten Backtest erscheint
+der Abschnitt „E44“ im Bericht.
+
+**Nächster Schritt danach:** E44.3 (E42 Ausbruch mit Rücktest), braucht Kaisers Antwort
+auf Frage 1 im Plan, Abschnitt 10. Aufwand hoch. Startprompt: Plan, Abschnitt 9a.
+
+---
+
 ## 26.09.2026 (21) — E44.1 gebaut: Coinalyze-Archiv (Zweig, wartet auf Go)
 
 Kaiser: *„Leg mir 44.1 und 44.2 los und bereite jede Etappe so vor, dass ich im neuen Chat

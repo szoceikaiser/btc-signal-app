@@ -2593,6 +2593,140 @@ def e438_abschnitt(results: list, halves: list, basis_label: str) -> list:
     return z
 
 
+# --- E44.2 (26.09.2026): Wechselwirkungen und Monats-Probe --------------------------
+# Bauplan docs/PLAN-E44-KOMBINATIONEN.md, Abschnitte 2, 8 und 9c. Reine Auswertung: kein
+# Schalter, keine Gitterzeile, kein Urteil wird dadurch geaendert.
+E442_OHNE = ("label", "panel")
+
+
+def _e442_cfg(v: dict) -> dict:
+    return {k: x for k, x in v.items() if k not in E442_OHNE}
+
+
+def e442_vierergruppen(grid: list) -> list:
+    """Alle sauberen 2x2-Gruppen im Gitter: A und B unterscheiden sich von der Basis in je
+    GENAU EINEM, verschiedenen Schalter, A+B traegt genau beide Aenderungen.
+
+    Ausrichtung: Die Basis ist die Ecke, in der beide Schalter auf ihrem Grundwert aus
+    `_BASE` stehen (also "aus"). Gibt es diese Ecke nicht, die im Gitter zuerst stehende.
+    Nur so hat das Vorzeichen der Wechselwirkung eine feste Bedeutung. Jede Gruppe wird
+    genau einmal geliefert: (Basis, A, B, A+B, Schalter A, Schalter B) als Labels."""
+    zeilen = [(v["label"], _e442_cfg(v)) for v in grid]
+    nach_cfg = {}
+    for lab, c in zeilen:
+        nach_cfg.setdefault(tuple(sorted(c.items(), key=lambda kv: kv[0])), lab)
+
+    def _diff(a: dict, b: dict) -> set:
+        return {k for k in set(a) | set(b) if a.get(k) != b.get(k)}
+
+    gesehen, out = set(), []
+    for bl, bc in zeilen:
+        for al, ac in zeilen:
+            da = _diff(bc, ac)
+            if len(da) != 1:
+                continue
+            for cl, cc in zeilen:
+                db = _diff(bc, cc)
+                if len(db) != 1 or db == da:
+                    continue
+                ka, kb = next(iter(da)), next(iter(db))
+                ziel = dict(bc)
+                ziel[ka], ziel[kb] = ac.get(ka), cc.get(kb)
+                abl = nach_cfg.get(tuple(sorted(ziel.items(), key=lambda kv: kv[0])))
+                if abl is None:
+                    continue
+                gruppe = frozenset((bl, al, cl, abl))
+                if gruppe in gesehen:
+                    continue
+                gesehen.add(gruppe)
+                # Ausrichtung auf die "aus"-Ecke
+                ecken = {bl: bc, al: ac, cl: cc, abl: ziel}
+                grund = [l for l, c in ecken.items()
+                         if c.get(ka) == _BASE.get(ka) and c.get(kb) == _BASE.get(kb)]
+                basis = grund[0] if grund else bl
+                bcfg = ecken[basis]
+                a_neu = next(l for l, c in ecken.items() if _diff(bcfg, c) == {ka})
+                b_neu = next(l for l, c in ecken.items() if _diff(bcfg, c) == {kb})
+                ab_neu = next(l for l, c in ecken.items() if _diff(bcfg, c) == {ka, kb})
+                out.append((basis, a_neu, b_neu, ab_neu, ka, kb))
+    return out
+
+
+def e442_wechselwirkung(basis: float, a: float, b: float, ab: float) -> float:
+    """(A+B) - A - B + Basis. Null = die Wirkungen addieren sich einfach."""
+    return round(ab - a - b + basis, 2)
+
+
+def monats_probe(monate_live: list, monate_var: list) -> dict:
+    """Haelt der Vorsprung, wenn man einen einzelnen Monat weglaesst, egal welchen?
+
+    Grundlage sind die Monatsrenditen aus simulate() (`monate`), addiert statt verkettet
+    (dieselbe Naeherung wie bei der Beteiligung). `haelt` ist nur wahr, wenn die Summe der
+    Differenzen auch ohne den guenstigsten Monat noch positiv ist - so faellt ein Vorsprung
+    auf, der aus einem einzigen Ereignis stammt (Lehre aus neustart_mit_rest)."""
+    live = {m["monat"]: m["rendite_pct"] for m in monate_live or []}
+    var = {m["monat"]: m["rendite_pct"] for m in monate_var or []}
+    gemeinsam = sorted(set(live) & set(var))
+    diffs = {m: var[m] - live[m] for m in gemeinsam}
+    summe = sum(diffs.values())
+    if not diffs:
+        return {"monate": 0, "summe": 0.0, "min_ohne_einen": 0.0,
+                "kritischer_monat": None, "haelt": False}
+    krit = max(diffs, key=lambda m: diffs[m])
+    ohne = summe - diffs[krit]
+    return {"monate": len(diffs), "summe": round(summe, 2),
+            "min_ohne_einen": round(ohne, 2), "kritischer_monat": krit,
+            "haelt": ohne > 0}
+
+
+def e442_abschnitt(results: list, halves: list, grid: list, basis_label: str) -> list:
+    """Berichtsabschnitt E44: Wechselwirkungen aller sauberen 2x2-Gruppen und die
+    Monats-Probe jeder Zeile "LIVE-heute +..." gegen die Panel-Zeile."""
+    voll = {r[0]["label"]: r[3] for r in results}
+    halb = {h[0]["label"]: (h[1]["rendite_pct"], h[2]["rendite_pct"]) for h in halves}
+    z = ["", "## E44: Wechselwirkungen und Monats-Probe", "",
+         "**Wechselwirkung** = (A+B) - A - B + Basis, alle Zeilen aus diesem Lauf. Null "
+         "heisst: Die Wirkungen addieren sich. Positiv: zusammen besser als die Summe. "
+         "Negativ: zusammen schlechter. Die Basis ist die Ecke, in der beide Schalter aus "
+         "sind. Die meisten Gruppen stehen auf aelteren Basen - es zaehlt das Muster, nicht "
+         "die einzelne Zahl (`docs/PLAN-E44-KOMBINATIONEN.md`, Abschnitt 2)."]
+    gruppen = [g for g in e442_vierergruppen(grid) if all(l in voll for l in g[:4])]
+    if not gruppen:
+        z.extend(["", "Keine saubere 2x2-Gruppe im Gitter."])
+    else:
+        z.extend(["", "| Schalter A | Schalter B | Basis | +A | +B | +A+B | "
+                  "Wechselwirkung | H1 | H2 |", "|---|---|---:|---:|---:|---:|---:|---:|---:|"])
+        for bl, al, cl, abl, ka, kb in gruppen:
+            r = [voll[l]["rendite_pct"] for l in (bl, al, cl, abl)]
+            ww = e442_wechselwirkung(*r)
+            if all(l in halb for l in (bl, al, cl, abl)):
+                h1 = e442_wechselwirkung(*[halb[l][0] for l in (bl, al, cl, abl)])
+                h2 = e442_wechselwirkung(*[halb[l][1] for l in (bl, al, cl, abl)])
+                hs = f"{h1:+.1f} | {h2:+.1f}"
+            else:
+                hs = "- | -"
+            z.append(f"| `{ka}` | `{kb}` | {r[0]:+.1f} | {r[1]:+.1f} | {r[2]:+.1f} | "
+                     f"{r[3]:+.1f} | **{ww:+.1f}** | {hs} |")
+    z.extend(["", "### Monats-Probe gegen die Live-Zeile", "",
+              "Haelt der Vorsprung (Summe der Monatsdifferenzen), wenn man den fuer die "
+              "Variante guenstigsten Monat weglaesst? Ab E44.5 Teil der Entscheidungsregel. "
+              "Monatsrenditen addiert statt verkettet (Naeherung)."])
+    if basis_label not in voll:
+        z.extend(["", "**Keine Probe:** die Panel-Zeile fehlt im Gitter."])
+        return z
+    z.extend(["", "| Variante | Summe Differenz | ohne guenstigsten Monat | Monat | haelt |",
+              "|---|---:|---:|---|---|"])
+    live_m = voll[basis_label].get("monate", [])
+    for r in results:
+        lab = r[0]["label"]
+        if not lab.startswith("LIVE-heute +"):
+            continue
+        mp = monats_probe(live_m, r[3].get("monate", []))
+        z.append(f"| {lab} | {mp['summe']:+.1f} | {mp['min_ohne_einen']:+.1f} | "
+                 f"{mp['kritischer_monat'] or '-'} | {'**ja**' if mp['haelt'] else 'nein'} |")
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -3710,6 +3844,10 @@ def main():
         "die Zeilen fuer be_im_plus/release_stale_rest fehlen im Gitter oder in der "
         "Halbierung",
         lambda: e438_abschnitt(results, halves, panel_cfg["label"]),
+    ) + abschnitt_oder_grund(
+        "E44: Wechselwirkungen und Monats-Probe", results,
+        "keine Gitterzeilen gerechnet",
+        lambda: e442_abschnitt(results, halves, GRID, panel_cfg["label"]),
     ) + [
         "",
         "## Einschraenkungen",
