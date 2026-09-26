@@ -1,0 +1,408 @@
+0:00
+0 Sekunden
+Während der Bitcoins immer noch über der 60.000 US-Dollar Marke hängt, scheint es im US-Finanzministerium ein Hauch von Panik zu geben, denn das erste Mal seit
+0:08
+8 Sekunden
+15 Jahren gibt es eine Währungsintervention zwischen USA und Japan und das, weil die USA vor allem Angst vor steigenden
+0:16
+16 Sekunden
+Zinsen haben im eigenen Markt. Genau diese Thematik gab es schon vor ein zwei Jahren, als wir über den Yen Carry Trade gesprochen haben. 2024 gab es da einen
+0:24
+24 Sekunden
+größeren Crash im US-Aktienmarkt. Die Situation ist heute aber bisschen anders. Deswegen werden wir im Detail darüber sprechen, welche Mechanik hier
+0:31
+31 Sekunden
+zwischen US-Dollar, Yen und vor allem den globalen Märkten vorherrscht. Das ist absolut relevant für die globalen Märkte. Das werden wir ganz genau
+0:39
+39 Sekunden
+besprechen. Darüber hinaus gibt es News aus Russland zu Krypto und eine Menge an Bitcoin, die bewegt worden ist an einem
+0:47
+47 Sekunden
+einzelnen Tag, wie seit dem FTX Crash nicht mehr. Auch darüber werden wir im Detail sprechen. Ich habe wichtige Onchain Daten für euch mitgebracht,
+0:54
+54 Sekunden
+Statistiken zum US Markt und vor allem werden wir natürlich auch hier auf Bitcoin blicken, wo liegen die nächsten Zielzon und was tue ich persönlich, all das mehr in diesem Update und jetzt viel
+1:02
+1 Minute, 2 Sekunden
+Spaß damit. Damit herzlich willkommen zu einem neuen Update hier auf meinem Kanal. Ich fasse immer für euch die aktuellen Geschehnisse und vor allem meine Einschätzung dazu. Kompakt und fundiert zusammen. Falls euch das ganze
+1:11
+1 Minute, 11 Sekunden
+hier Mehrwert liefert, ihr kennt das Spiel, lasst gerne unter dem Video direkt mal einen Daumen nach oben da.
+1:15
+1 Minute, 15 Sekunden
+Gerne auch das Video hypen, nachdem ihr geliked habt, wenn das möglich ist, wenn das YouTube euch zulässt. gerne auch ein Kommentar schreiben und vor allem den Kanal hier abonnieren und kostenfrei die
+1:23
+1 Minute, 23 Sekunden
+Glocke aktivieren, dann verpasst ihr auch keine weiteren Updates mehr. Schauen wir zunächst mal auf dem Markt.
+1:27
+1 Minute, 27 Sekunden
+Bitcoin steht aktuell bei 63 000 US-Dollar. Wir haben keinen weiteren Breakout gesehen, sind aber auch nicht weiter nach unten gefallen jetzt hier übers Wochenende. Zum Wochenstart könnte
+1:36
+1 Minute, 36 Sekunden
+es natürlich noch mal mehr Volatilität geben, weil es vor allem übers Wochenende einige Meldungen gab, die wir jetzt gleich auch besprechen werden.
+1:42
+1 Minute, 42 Sekunden
+Ethereum bei 1850$, BNB bei unter 600, der Markt im großen ganzen im grünen Bereich, aber es ist
+1:49
+1 Minute, 49 Sekunden
+nicht wirklich viel passiert jetzt in den letzten 2 d Tagen. Eine Meldung, die sehr spannend ist, kommt aus Russland, denn dort sind ja Kryptos verboten, der
+1:57
+1 Minute, 57 Sekunden
+Handel ist verboten. Was aber jetzt kommt, ist, dass die Bank of Russia, also die Zentralbank in Russland jetzt gerade festgelegt hat, dass es neue
+2:05
+2 Minuten, 5 Sekunden
+Rahmenbedingungen geben soll und ein eigener Kryptomarkt aufgebaut werden soll. Also eigener Kryptomarkt in dem Sinne, dass eigene Lizenzen, eigene
+2:13
+2 Minuten, 13 Sekunden
+Rahmenbedingung, eigene Gesetze erlassen werden sollen. Und das ist sehr interessant, wenn man ja bedenkt, dass in den letzten vier Jahren im Prinzip
+2:20
+2 Minuten, 20 Sekunden
+alles verboten war in Russland. Das hat natürlich auch bestimmte Gründe. Es geht vor allem um Sanktionen, die von der EU verhängt werden. Es gibt da auch eine
+2:28
+2 Minuten, 28 Sekunden
+eigene Plattform sozusagen, die es schon vorher gab, wo nach Chain Analysis zumindest 120 Milliarden US-Dollar
+2:36
+2 Minuten, 36 Sekunden
+bewegt worden sind. Jetzt möchte man hierhergehen und das zumindest ein bisschen lockern, dass vor allem auch beispielsweise Privatanleger investieren
+2:43
+2 Minuten, 43 Sekunden
+können, zumindest aber nur für eine kleinere Summe 300.000 1000 Rubel. Das bedeutet 3300 € pro Jahr dürfen Privatanleger investieren. Es gibt aber auch mehr.
+2:53
+2 Minuten, 53 Sekunden
+Wenn beispielsweise professionell ist, kann man die jeweiligen Lizenzen sich holen und dann auch mehr handeln.
+2:59
+2 Minuten, 59 Sekunden
+Interessant ist aber da wie immer, wenn man sich das Ganze anschaut, ist auch oft so passiert. Ja, wenn man das Ganze nicht braucht, dann verbietet man es,
+3:07
+3 Minuten, 7 Sekunden
+aber wenn man das Ganze dann braucht als Start, dann öffnet man sich dem ganzen Thema wieder. Es wird sehr spannend sein, wie sich das Ganze hier in Russland entwickelt. Natürlich erstmal
+3:15
+3 Minuten, 15 Sekunden
+positiv, wenn auch der russische Markt hier wieder zurück in den Kryptomarkt eindringen kann. Dann eine Sache, die auch wahrscheinlich viele von euch mitbekommen haben, eine Hardware Wallet.
+3:26
+3 Minuten, 26 Sekunden
+Die Cold Wallet wurde gehackt und zwar, weil ja die Seed, die erstellt worden ist, gar nicht so zufällig erstellt worden ist, wie angegeben. Und das hatte
+3:35
+3 Minuten, 35 Sekunden
+jetzt zufolge, dass in verschiedenen Angriffswellen die jeweiligen Bitcoin dann entwendet worden sind. Also ein worst case Szenario, man hat sich mit
+3:42
+3 Minuten, 42 Sekunden
+dem Thema beschäftigt, man hat eine Hardware Wallet sich ja geholt. Ich muss sagen, in Deutschland Cold Wallet ist nicht so geläufig, muss man sagen. Ich
+3:51
+3 Minuten, 51 Sekunden
+habe jetzt auch von der Community zum Glück nichts gehört, dass da irgendjemand eine Cold Wallet hat und dementsprechend da irgendwie gehackt
+3:58
+3 Minuten, 58 Sekunden
+worden ist. Was interessant ist, das hat natürlich jetzt zum Anlass äh geführt für viele ihre Bitcoin zu bewegen, zum Teil auch von anderen Wallets auf
+4:07
+4 Minuten, 7 Sekunden
+Exchanges. Ich glaube in Zukunft, das merkt man ja auch vor allem jetzt seitdem immer KI besser wird, gibt's immer mehr Hacks. Egal, ob es Deffi
+4:14
+4 Minuten, 14 Sekunden
+Protokolle sind, ob es irgendwelche Wallets sind, die irgendwelche Lücken haben, haben wir jetzt in den vergangenen Wochen und Monaten immer wieder gesehen. Ich glaube, die
+4:22
+4 Minuten, 22 Sekunden
+langfristige Lösung wird eine Diversifikation in der Aufbewahrung sein, weil ja, man möchte natürlich, glaube ich, auch kein Klumpenrisiko haben, vielleicht verschiedene Wallets
+4:31
+4 Minuten, 31 Sekunden
+benutzen, verschiedene Modelle nutzen, ein Teil vielleicht auch auf einer Börse liegen lassen. Es gibt keine hundertprozentige Sicherheit. Ich
+4:38
+4 Minuten, 38 Sekunden
+glaube, die großen Wallets, die haben sich auch ja darüber geäußert, sei es Treed, sei es Bitbox oder auch Ledger.
+4:47
+4 Minuten, 47 Sekunden
+Alle sagen: "Ja, wir machen das aber schon ordentlich." Was aber in der Zukunft passiert, je besser die KI wird, ja, das weiß natürlich keiner. Deswegen kann es
+4:55
+4 Minuten, 55 Sekunden
+vielleicht Sinn machen, da zu diversifizieren. Also auf jeden Fall eine sehr bittere Nachricht. Ich hoffe, von euch ist da keiner betroffen. Kommen wir jetzt mal zu dem Makroblick. Jetzt
+5:03
+5 Minuten, 3 Sekunden
+mal ganz kurz reingeschoben. Ich weiß, ihr könnt das auch alle nicht mehr hören. Es wird, glaube ich, auch wieder so ein bisschen volatiler, wenn der Markt dann zum Wochenstart dann losgeht
+5:12
+5 Minuten, 12 Sekunden
+heute Nacht. Denn übers Wochenende gab es wieder Meldungen und zwar, dass Trump Angriffe gegen den Iran in letzter Sekunde wieder mal gestoppt hat, weil es
+5:20
+5 Minuten, 20 Sekunden
+da Gesprächsbereitschaft gab, weil Iran zugesichert hat, dass die Straße von Mus geöffnet wird. Dann paar Stunden später kam wieder die Meldung: "Nee, haben wir
+5:28
+5 Minuten, 28 Sekunden
+nicht gesagt. Wir wollen die Straße von Homos nicht öffnen." Deswegen immer wieder das gleiche Spiel. Es geht hin und her, der Ölpreis schwankt hin und her, aber das ist jetzt der aktuelle
+5:36
+5 Minuten, 36 Sekunden
+Stand. Übers Wochenende gab's diese Meldungen, aber viel interessanter ist die eingangserwähnte Meldung. Und zwar geht's da um dieses Foto, was Reuters
+5:45
+5 Minuten, 45 Sekunden
+geknipst hat auf dem Platz von Scott Bessent, dem US Finanzminister, wo drauf steht: To japanische Yennen kaufen 5 bis
+5:52
+5 Minuten, 52 Sekunden
+10 Milliarden Dollar. Auf diesem Notizblog sieht irgendwie auch so ein bisschen platziert aus. Tatsächlich muss ich sagen. Also wer wer schreibt das so
+6:01
+6 Minuten, 1 Sekunde
+drauf als To-Do für sich persönlich als US-Finanzminister, aber sei mal erstmal dahingestellt. Viel wichtiger ist aber, was jetzt in den letzten Tagen passiert ist und was das vor allem auch für die
+6:09
+6 Minuten, 9 Sekunden
+globalen Märkte bedeutet. Und zwar geht's halt hier darum, dass zwischen Japan und den USA schon mal Intervention in der Währungspolitik stattgefunden
+6:18
+6 Minuten, 18 Sekunden
+hat. das letzte Mal aber halt vor 15 Jahren und der Zettel lag wie gesagt hier vor Scott Bessens Platz oder an
+6:25
+6 Minuten, 25 Sekunden
+Scott Bessons Platz wenige Stunden später verkaufte die New Yorker Notenbank in dessen Auftrag Euro und
+6:32
+6 Minuten, 32 Sekunden
+kaufte dafür Yen abgewickelt über Goldman Sex und morgen Stanley vorausgegangen war am Donnerstag eine Aktion die nach Berechnung von Bloomberg
+6:41
+6 Minuten, 41 Sekunden
+auf Basis der Notenbank konnten die Größe jemals erfasste ein Tagesintervention sein dürfte rund 8,45
+6:49
+6 Minuten, 49 Sekunden
+Billionen Yen umgerechnet 53 Milliarden US-Dollar an einem einzelnen Tag. Also es wirkt auf jeden Fall nach außen nach
+6:57
+6 Minuten, 57 Sekunden
+Panik. Das ist meine Einschätzung. Warum ist das so? Warum ist das überhaupt so relevant für die USA, was im japanischen
+7:04
+7 Minuten, 4 Sekunden
+Yen passiert? Da muss man noch mal zurückgehen und sich ja überlegen, welche ja Zusammenhänge gibt es da zwischen vor allem den Investoren aus
+7:12
+7 Minuten, 12 Sekunden
+Japan, also japanischen Investoren und US Aktienmarkt. Was ist in der Vergangenheit passiert, vor allem in den letzten 10 Jahren im großen und ganzen
+7:21
+7 Minuten, 21 Sekunden
+bis zum Yry Trade 2024? Man hatte niedrigzinsen in Japan, teilweise negative Zinsen. Japaner haben sich
+7:29
+7 Minuten, 29 Sekunden
+japanische Yennen geliehen, Kredit aufgenommen, haben diese Yen in Dollar umgetauscht und mit diesem Dollar US-Aktien gekauft. Warum war das aber so
+7:37
+7 Minuten, 37 Sekunden
+eine gute Strategie in den letzten Jahren? Ja, weil einfach die japanische Yen immer weiter abgewertet ist wegen den niedrigen Zinsen im Gegensatz zum
+7:45
+7 Minuten, 45 Sekunden
+US-Dollar. Und das hatte zufolge, dass der japanische Investor allein dadurch auch seine ja Kredite dann auch abgebaut hat, weil der US-Dollar immer stärker
+7:54
+7 Minuten, 54 Sekunden
+wurde. Also, man hat einfach US-Dollar genommen, US-Aktien reininestiert und wenn der US-Dollar steigt oder der japanische fällt, dann fällt natürlich
+8:03
+8 Minuten, 3 Sekunden
+auch real gesehen mein Kreditvolumen in japanischen Yen. Dann gab es 2024 ja den Yen Carry Trade. Ihr könnt euch
+8:11
+8 Minuten, 11 Sekunden
+vielleicht erinnern, da gab es einen ja kleineren größeren Crash beim S&P, nachdem überraschend die Zinsen angehoben worden sind in Japan, das
+8:18
+8 Minuten, 18 Sekunden
+erste Mal seit Jahren. Dann mussten eben halt japanische Investoren ihre US-Aktien verkaufen, um ihre eigenen Kredite zu bedienen und nicht Risiko zu
+8:27
+8 Minuten, 27 Sekunden
+laufen, dass sie dann noch mehr zahlen müssen, als sie vielleicht ja aufgenommen haben. Das war das große Problem. Aber warum ist das überhaupt
+8:34
+8 Minuten, 34 Sekunden
+relevant für den US Finanzminister? Und da schauen wir einmal auf die 30-jährigen Staatsanleihen bzw. auf die
+8:42
+8 Minuten, 42 Sekunden
+Renditen. Die Zinsen, die steigen immer weiter. Ich habe auch auf X von ein paar Tagen nach dem nach dem Zinscheid auch einen längeren Beitrag darüber
+8:50
+8 Minuten, 50 Sekunden
+geschrieben, dass der Markt halt weiter Vertrauensverlust aufzeigt gegenüber der US-Nopenbank. Die Zinsen wurden nicht angehoben, aber am langen Ende steigen
+8:59
+8 Minuten, 59 Sekunden
+die Zinsen und wir sind jetzt hier bei knapp 5,3%. Also Investoren, die den USA Geld leimen möchten, die möchten 5,3%
+9:08
+9 Minuten, 8 Sekunden
+Rendite dafür haben, weil sie einfach eine erhöhte Inflation für die nächsten Jahre einpreisen. Das ist der höchste Wert seit 2007. Das heißt, die Refinanzierung der eigenen Schulden,
+9:17
+9 Minuten, 17 Sekunden
+obwohl sie gar nicht mal mit so langen Laufzeiten aktuell arbeiten, wird immer teurer, weil auch natürlich auch die Zehnjährigen Anleihen ebenfalls gestiegen sind. Aber das große Problem
+9:26
+9 Minuten, 26 Sekunden
+ist, wenn der US-Finanzminister oder das US-Finanzministerium keine japanischen Yennen kauft, dann muss es die
+9:33
+9 Minuten, 33 Sekunden
+japanische Zentralbank tun. Und wo bekommen Sie ihr Geld her? Und das ist die primäre Sorge. Deswegen Panik im US-Finanzministerium im Intro genannt.
+9:42
+9 Minuten, 42 Sekunden
+Der größte Inhaber, ausländische Inhaber US-Staatsanleihen ist Japan. Und dann liegt's natürlich nah, dass wenn sie selber intervenieren
+9:51
+9 Minuten, 51 Sekunden
+möchten, dass sie dann US Staatsanleihen verkaufen und aus diesen Erlösen ihre eigene Währung stützen. Und das wollte
+9:59
+9 Minuten, 59 Sekunden
+das US-Finanzministerium nicht sehen. Und das hat er dann zufolge, dass wir genau das hier gesehen haben. Schaut euch mal, das ist jetzt hier kein Shitcoin auf Platz 5000,
+10:08
+10 Minuten, 8 Sekunden
+sondern das ist der US-Dollar zu Yen Chart. deutlich abgeschwächt der Jen, also steigender Chart bedeutet Yen
+10:14
+10 Minuten, 14 Sekunden
+schwächt weiter ab und man möchte hier intervenieren und dann kam jetzt die Intervention und zack ging der Kurs
+10:21
+10 Minuten, 21 Sekunden
+ordentlich nach unten. Aber genau diese Bewegung ist gefährlich für den US-Aktienmarkt, denn das bedeutet, der
+10:28
+10 Minuten, 28 Sekunden
+Yen wird stärker und dementsprechend diejenigen, die beispielsweise dann hier vielleicht sich ein Kredit gezogen haben und in US-Dollar getauscht haben, haben
+10:36
+10 Minuten, 36 Sekunden
+dann hier unten schon direkt ein Problem, weil sie jetzt hier 3 4% verloren haben, weil sie in US-Dollar getauscht haben. Also, das ist die
+10:45
+10 Minuten, 45 Sekunden
+Gesamtmeik, die damit einspielt. Es ist jetzt mal erstmal ein Punkt, wo das jetzt gemacht worden ist. Ich bin echt gespannt, wie es jetzt auch in der kommenden Woche handeln wird, aber genau
+10:53
+10 Minuten, 53 Sekunden
+diese Mechanik hat eben halt dazu geführt, dass wir 2024 einen größeren Crash gesehen haben. Es war sehr unerwartet, weil die Zinserhöhung damals
+11:02
+11 Minuten, 2 Sekunden
+aus dem Nichts kam. Diese Intervention kam eigentlich auch aus dem Nichts, aber die Lage war schon mehr oder weniger bekannt und die Intervention ist auch
+11:11
+11 Minuten, 11 Sekunden
+nicht die erste. Wie gesagt, von den USA die erste, aber wir haben auch schon jetzt von Tokyo selbst gesehen zwischen
+11:18
+11 Minuten, 18 Sekunden
+April und Ende Mai, dass sie 73 Milliarden US-Dollar da eingesetzt haben, verteilt aber über einen Monat und wie gesagt, jetzt hatten wir diese
+11:26
+11 Minuten, 26 Sekunden
+Summe von 53 Milliarden an einem einzelnen Tag. Also die Intervention wird größer und die USA machen damit.
+11:33
+11 Minuten, 33 Sekunden
+Das muss man auf jeden Fall meiner Meinung nach weiter beobachten, weil wie gesagt die US japanischen Investoren und vor allem natürlich die großen Bestände
+11:41
+11 Minuten, 41 Sekunden
+des japanischen Staates an US-AN ist natürlich dann auch eine Gefahr für die USA selbst, wenn die das abverkaufen, wie es beispielsweise China getan hat.
+11:51
+11 Minuten, 51 Sekunden
+Das ist hier dieser rote Grab komplett abgebaut ihre Bestände. Das würde ja bedeuten, dass die Staatsanleihen
+11:59
+11 Minuten, 59 Sekunden
+abverkauft werden und die Zinsen eben noch weiter steigen. Genau das möchte die US Notenbank nicht sehen. Das möchte das US-Finanzministerium nicht sehen und
+12:06
+12 Minuten, 6 Sekunden
+genau deshalb sehen wir diese Intervention und ich bin echt gespannt, ob da noch weitere Folgen werden. Kommen wir zum Abschluss noch mal kurz zu Bitcoin, zum aktuellen Stand. Wir stehen aktuell bei 63100.
+12:16
+12 Minuten, 16 Sekunden
+Was man anhand von Onchain Daten sehen kann, wenn man sich beispielsweise mal anschaut, wie viel Prozent des Supplies von Langzeitinvestoren ist gerade im
+12:24
+12 Minuten, 24 Sekunden
+Profit sind wir genau auf dem gleichen Niveau wie im letzten Bärenmarkt bei 16 000 und wie im vorletzten Bärenmarkt bei
+12:31
+12 Minuten, 31 Sekunden
+3000 US-Dollar. Ich habe ja vor allem im vorletzten Video ganz genau darüber gesprochen, was ich denn denke. Ja, was ist denn das Tief? Kommt es noch? Was
+12:38
+12 Minuten, 38 Sekunden
+ist mein Ansatz? Schaut euch das gerne noch mal im Detail an. Mein Ansatz ist ja sowieso dynamisch. Ich bin kein Fan davon, dass man monatelang exakt ein
+12:47
+12 Minuten, 47 Sekunden
+Niveau sich vorstellt und denkt, da kommt auf jeden Fall der Preis runter.
+12:51
+12 Minuten, 51 Sekunden
+Man ist sich 100% sicher. Noch mal zur Erinnerung, vor allem im letzten Bärenmarkt, als wir bei 16, 17 000 US-Dollar waren, waren sich alle sicher,
+12:58
+12 Minuten, 58 Sekunden
+dass der Kurs noch mal auf 12 000$ fällt und viele haben nicht investiert und deswegen bleibe ich bei meinem dynamischen Ansatz und Show auf Onchain
+13:06
+13 Minuten, 6 Sekunden
+Daten. Vor allem hier MV RV und die Standardabweichung davon, woraus sich dann hier die Valuezone ergibt, die ist für mich immer noch relevant. Und
+13:14
+13 Minuten, 14 Sekunden
+deswegen noch mal ein kurzes Update, wo die gerade liegt. Die liegt zwischen 55250$ bis runter auf 46700$.
+13:23
+13 Minuten, 23 Sekunden
+Sollten wir hier reinfallen, werde ich noch ein weiteres mal Spot kaufen. Ich bin aber auch bereit, sollten wir, wenn wirklich diese worst case Szenarien 20,
+13:30
+13 Minuten, 30 Sekunden
+30 000 kommen, ich bin bereit weiterz kaufen. Also nicht bitte falsch verstehen, dass ich sage, hier werde ich alles dann reinschießen und dann war's
+13:38
+13 Minuten, 38 Sekunden
+das. Wer hier mich schon länger verfolgt, weiß ja auch, ich mache immer weiter oder immer ja einzelne Tranchen, die ich dann immer dynamisch reinsetze
+13:46
+13 Minuten, 46 Sekunden
+und dann halte ich euch ja mal auf dem Laufen und teile euch das ja auch über X oder hier in den Videos mit. Ganz wichtig, was immer noch fehlt, ist, dass wir hier über die Kostbasis der
+13:55
+13 Minuten, 55 Sekunden
+kurzfristigen Investoren kommen. Die liegt aktuell bei über 67 000. Das haben wir nicht geschafft. Wir haben es ja einmal kurzzeitig geschafft, wurden
+14:02
+14 Minuten, 2 Sekunden
+abgelehnt und in dem vergangenen Bärenmerken hatten wir auch immer wieder solche äh Punkte, wo dann diese Ablehnung kam, immer wieder in die
+14:09
+14 Minuten, 9 Sekunden
+Valuezone reingelaufen und auch mal drunter gespiked. Also auch das ist natürlich kein harter Boden. Vor allem in den Spikes da drunter waren sehr
+14:17
+14 Minuten, 17 Sekunden
+attraktive Einstiegsmöglichkeiten und die Bestätigung für den Bullenmarkt kam dann immer, wenn der Breakout über die Costbasis kam, der Retest und dann ging
+14:25
+14 Minuten, 25 Sekunden
+es halt eben halt hoch. Das war zumindest in den letzten Bärenmärkten.
+14:30
+14 Minuten, 30 Sekunden
+Ich finde anhand von Onchain Daten kann man ziemlich gut ableiten. Wo liegt der innere Wert, wo liegt der Einstandskurs, wie oft oder wie stark weicht das davon
+14:38
+14 Minuten, 38 Sekunden
+ab und daraus mache ich zumindest meine Limit Order oder bzw. Bitcoin Spotkäufe.
+14:43
+14 Minuten, 43 Sekunden
+Kurzfristig gesehen, ich habe ja immer noch meine Position offen bei unter 60.000 US-Dollar. Zweimal schon Gewinne realisiert. Habe ich euch ja in den
+14:51
+14 Minuten, 51 Sekunden
+letzten Videos auch im Livestream gezeigt. Und hier noch mal die Position Entry 59696$
+14:59
+14 Minuten, 59 Sekunden
+ist der Entry und zweimal Gewinne realisiert, was mir immer noch nicht gefällt. Da wiederhole ich mich, ich weiß, aber die Situation ändert sich einfach nicht. Die Spot Nachfrage fehlt
+15:07
+15 Minuten, 7 Sekunden
+vor allem auch nachhaltig. Es gibt immer wieder kleine Spikes, aber wenn wir hier rauszoomen, sehen wir, dass wir mehr oder weniger seit jetzt ja mehreren
+15:15
+15 Minuten, 15 Sekunden
+Tagen hier flat sind. Da passiert nichts. Und wenn wir noch weiter rauszoomen, sind wir ganz kleine weiteren ja Abwärtstrend, wo Future CVD
+15:23
+15 Minuten, 23 Sekunden
+deutlich stärker hält als Spot CVD und das ist eben halt nicht nachhaltig. In den Bewegungen nach oben möchten wir vor allem, dass die Spot ähm Käufer
+15:32
+15 Minuten, 32 Sekunden
+dominieren und die Kurse lenken. Das passiert in der aktuellen Situation nicht und deswegen sollte man auch sein Risiko entsprechend steuern, zumal wir
+15:39
+15 Minuten, 39 Sekunden
+auch unter uns weiterhin die Liquidierungszonen haben. Also short Long Positionen, die liquidiert werden können hier genau unter uns, vor allem ab 61700 und geht hier runter bis 60500.
+15:51
+15 Minuten, 51 Sekunden
+Und das ist ja auch ungefähr der Bereich, wo ich meine Position noch mal skalieren würde, hochgehen würde. Und das ist hier das Tripetracement zwischen
+15:59
+15 Minuten, 59 Sekunden
+61300 und 61 000 US-Dollar. Wie gesagt, da liegt auch die Liquidung. Da würde ich noch mal reingehen, würde aber parallel
+16:07
+16 Minuten, 7 Sekunden
+auch vor allem auf die Orderflow Daten schauen, warum wir hier runterfallen.
+16:11
+16 Minuten, 11 Sekunden
+Das ist dann auch natürlich sehr, sehr relevant. Und dann würde ich, wenn ich dann hier die Order gefüllt bekomme, natürlich mein Stop dann entsprechend
+16:18
+16 Minuten, 18 Sekunden
+von hier, wo ich ja gerade mein Stop habe, über dem Durchschnittsentry würde ich dann hochsetzen auf das neue Entry.
+16:25
+16 Minuten, 25 Sekunden
+Das ist mein äh mein Plan. Also mit der Position möchte ich nicht mehr in Verlust gehen. Und bullish sieht leider
+16:33
+16 Minuten, 33 Sekunden
+nicht mehr so aus, wie es vielleicht vor einer Woche noch war. Da hatten wir eine saubere Struktur sind wir auch hochgelaufen auf knapp 67 000, aber haben eben halt dieses Hoch nicht
+16:41
+16 Minuten, 41 Sekunden
+rausgenommen. Das war ja auch wichtig und das fehlt aktuell und jetzt haben wir eine klare Abwärtsstruktur seit diesem Hoch. Wichtig wäre es, wie gesagt, dass wir hier diese Tiefs
+16:50
+16 Minuten, 50 Sekunden
+halten, idealerweise wirklich hier runter spiken, Stops auslösen, Liquidität auslösen und dann hier wieder hochmarschieren. Das wäre das Idealzenario natürlich dann auch für
+16:58
+16 Minuten, 58 Sekunden
+meinen Trade. Ob es wirklich so kommt, das werden wir dann in den nächsten Tagen sehen, aber das ist zumindest mein Plan. Ich mache das Ganze übrigens hier auf OKX mit dem Link unten in der
+17:06
+17 Minuten, 6 Sekunden
+Videobeschreibung ganz oben bekommt ihr 400 € je nachdem wie viel ihr handelt.
+17:11
+17 Minuten, 11 Sekunden
+Schaut mal da gerne rein. Übrigens auch für die VIP Trader von anderen Börsen.
+17:15
+17 Minuten, 15 Sekunden
+Wenn ihr auch bei OKX VIP Status bekommen möchtet, könnt ihr mir gerne privat schreiben und dann leite ich das gerne in die Wege. Das war das Update
+17:23
+17 Minuten, 23 Sekunden
+für heute. Ich hoffe, es hat dir gefallen und konnte dir Mehrwert liefern. Falls ja, lass gerne hier zum Abschluss noch einen Daumen nach oben da. Dort n eine Sekunde, aber hilft dir wirklich. gerne auch ein Kommentar
+17:30
+17 Minuten, 30 Sekunden
+schreiben, schau gerne auch in die Videobeschreibung rein. Da findest du beispielsweise auf meinem Kanal auch ja die Orderflow Tutorials, wie ich das Ganze eingestellt habe, alle
+17:39
+17 Minuten, 39 Sekunden
+Plattformen, die ich nutze und ansonsten sehen wir uns im nächsten Update wieder. Ciao. Ciao.
