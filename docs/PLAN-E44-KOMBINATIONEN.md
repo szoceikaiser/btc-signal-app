@@ -319,7 +319,7 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 |---|---|
 | E44.1 Coinalyze-Archiv | **GEBAUT** 26.09.2026 auf Zweig `claude/blissful-maxwell-9uwt6x`, 535 Tests, `sabotage_e441.py` 8/8. **IN `main` seit 26.09.2026** (Kaisers Go). Täglicher Anstoß über cron-job.org, Anleitung `ANLEITUNG-PUENKTLICHER-START.md` Schritt 5 (Kaiser richtet ein) |
 | E44.2 Wechselwirkungen + Monats-Probe im Bericht | **GEBAUT** 26.09.2026 auf demselben Zweig, 545 Tests, `sabotage_e442.py` 8/8 gefangen. Findet im echten Gitter dieselben 16 Gruppen wie Abschnitt 2. Wirkt erst im nächsten Backtest-Lauf (neuer Berichtsabschnitt „E44“). **IN `main` seit 26.09.2026** (Kaisers Go). Erscheint im nächsten Backtest |
-| E44.3 E42 Ausbruch mit Rücktest | OFFEN, wartet auf Kaisers Antwort zu Frage 1 (einfach erklärt in Abschnitt 10) |
+| E44.3 E42 Ausbruch mit Rücktest | **BEREIT ZUM BAU**: Kaiser hat die drei Werte am 26.09.2026 bestätigt (Abschnitt 10) |
 | E44.4 `verkauf_faktor` | OFFEN |
 | E44.5 2³-Gitter messen | OFFEN, braucht E44.2 bis E44.4 |
 | E44.6 Shorts im Abwärts-Regime | OFFEN, **Kaisers Ja am 26.09.2026**. Zuerst eigener Bauplan-Abschnitt (Punkte a und b in Abschnitt 10) |
@@ -383,8 +383,9 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 **Antworten hier eintragen, sobald Kaiser sie gibt** (Datum und Wortlaut):
 
 - **Frage 1 (E42-Werte), 26.09.2026:** Kaiser: *„E42 verstehe nicht was du von mir willst.“*
-  **Offen.** Die Frage wurde im Chat noch einmal mit einem Beispiel gestellt (siehe unten
-  „Frage 1 einfach erklärt“). Neuer Beleg für die Regel selbst: Furkan 02.08.2026 14:17
+  Nach der Erklärung mit Beispiel: **Kaiser 26.09.2026: „1=ja, 2=ja, 3=ja“.** Damit gelten die
+  Werte aus K1 unverändert: Rücktest-Fenster 12 Kerzen (2 Tage), Rückkauf 25 %, Stop bei
+  Schluss unter der Marke (mit Rückeroberung, 1 Kerze). **E44.3 kann gebaut werden.** Neuer Beleg für die Regel selbst: Furkan 02.08.2026 14:17
   (`wissens-layer/05_quellen/260802_Transkript.txt`): *„die Bestätigung für den Bullenmarkt
   kam dann immer, wenn der Breakout über die Costbasis kam, der Retest und dann ging es halt
   eben halt hoch.“*

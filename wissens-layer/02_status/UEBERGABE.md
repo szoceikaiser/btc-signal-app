@@ -26,8 +26,8 @@
   Das Repo ist öffentlich, vollständige Transkripte gehören laut Arbeitsregeln nicht hinein.
   Nicht gelöscht, Entscheidung bei ihm.
 
-**Nächster Schritt:** E44.3 nach Kaisers Antwort auf Frage 1, oder der Bauplan-Abschnitt E44.6
-(Shorts). Startprompts: Plan, Abschnitt 9a.
+**Nachtrag:** Kaiser hat die drei E42-Werte bestätigt („1=ja, 2=ja, 3=ja“). **Nächster Schritt:
+E44.3 bauen** (Aufwand hoch), danach der Bauplan-Abschnitt E44.6 (Shorts). Startprompts: Plan, Abschnitt 9a.
 
 ---
 

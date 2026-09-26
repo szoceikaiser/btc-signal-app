@@ -80,8 +80,8 @@ und nicht bei den Stops. Vorschlag: E42 (Ausbruch mit Rücktest) als Partner von
 auf Kaisers Antworten** (Abschnitt 10 im Plan). **E44.1 (Coinalyze-Archiv) und E44.2
 (Wechselwirkungen, Monats-Probe) sind seit 26.09.2026 in `main`** (Kaisers Go), 545 Tests
 grün. cron-job.org-Aufträge für Archiv und Flush-Wache: Anleitung Schritt 5, Kaiser richtet
-ein. Kaiser will Shorts im fallenden Markt (E44.6). E44.3 (E42) wartet auf seine Antwort zu
-Frage 1. Startprompt je Etappe: Plan, Abschnitt 9a.
+ein. Kaiser will Shorts im fallenden Markt (E44.6). E44.3 (E42): Kaiser hat die drei Werte bestätigt,
+**bereit zum Bau** (nächster Schritt). Startprompt je Etappe: Plan, Abschnitt 9a.
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
    E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 gebaut, gemessen und seit
