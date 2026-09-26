@@ -1,0 +1,37 @@
+name: Coinalyze-Archiv
+
+# E44.1 (26.09.2026): Speichert OI, Liquidationen, Futures-Delta und Long-Short taeglich
+# ins Repo (site/data/archiv/coinalyze_4h.json). Coinalyze haelt nur ~1.500-2.000
+# 4h-Werte vor; ohne Archiv wandert das Backtest-Fenster jeden Tag nach vorn. Die
+# Live-Engine (signal.yml) ist davon nicht betroffen.
+on:
+  schedule:
+    - cron: "47 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: coinalyze-archiv
+  cancel-in-progress: false
+
+jobs:
+  archiv:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Archiv auffrischen
+        env:
+          COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
+        run: cd engine && python3 archiv.py
+      - name: Archiv committen
+        run: |
+          git config user.name "archiv"
+          git config user.email "actions@users.noreply.github.com"
+          git add site/data/archiv/coinalyze_4h.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Coinalyze-Archiv aktualisiert"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 5; done
+          exit 1

@@ -30,6 +30,7 @@ import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+import archiv
 import coinalyze
 from main import _get_json, fetch_funding_8h
 from strategy_core import Candle, FlowPoint, LADDER_TRANCHE, Position, evaluate, oi_in_btc
@@ -651,6 +652,17 @@ def fetch_candles_range(start_ms: int, end_ms: int) -> list:
             break
         time.sleep(0.3)
     return out
+
+
+def archiv_mischen(oi_map: dict, liq_map: dict, fut_map: dict, ls_map: dict,
+                   archiv_daten: dict) -> tuple:
+    """E44.1: frische Coinalyze-Reihen mit dem Archiv mischen (neu gewinnt, alte
+    Zeitpunkte bleiben). Liefert die vier Karten und eine Zaehlung, wie viele OI-Punkte
+    NUR im Archiv stehen - daran sieht man im Lauf-Protokoll, ob das Archiv schon wirkt."""
+    frisch = {"oi": oi_map, "liq": liq_map, "fut": fut_map, "ls": ls_map}
+    m = archiv.mit_archiv(frisch, archiv_daten)
+    info = {"oi_nur_archiv": len(set(m["oi"]) - set(oi_map or {}))}
+    return m["oi"], m["liq"], m["fut"], m["ls"], info
 
 
 def besser_in_beiden_haelften(zeilen: list, basis: str) -> list:
@@ -2615,6 +2627,13 @@ def main():
         except Exception as exc:  # noqa: BLE001
             print(f"Coinalyze Futures/Long-Short nicht verfuegbar ({exc}) -> wie bisher.")
 
+    # E44.1: Archiv dazumischen, damit das Fenster waechst statt wandert. Solange das
+    # Archiv nicht aelter ist als Coinalyze, aendert sich dadurch keine einzige Zahl.
+    oi_map, liq_map, fut_map, ls_map, _archiv_info = archiv_mischen(
+        oi_map, liq_map, fut_map, ls_map, archiv.laden())
+    print(f"E44.1 Archiv: {_archiv_info['oi_nur_archiv']} OI-Punkte nur aus dem Archiv "
+          f"(aelter als Coinalyze oder dort geloescht).")
+
     # E37.2: aggregiertes Spot-CVD ueber Binance, Bybit und Coinbase (OKX hat bei
     # Coinalyze keinen Spot). Nur fuer den VERGLEICH geholt — die Hauptreihe `flow`
     # bleibt auf dem bisherigen Binance-Vision-Weg, damit alle Zahlen des Berichts
@@ -3702,6 +3721,9 @@ def main():
         (f"  (4h-Reichweite von Coinalyze deckt evtl. nicht bis Sep'25 zurueck; "
          f"aeltere Kerzen dann OI neutral.)" if oi_map else ""),
         "- Spot-CVD real (Binance Vision), Funding real (Kraken, sofern Historie reicht).",
+        (f"- E44.1 Archiv: **{_archiv_info['oi_nur_archiv']}** OI-Punkte stammen nur aus dem "
+         "Archiv (`site/data/archiv/coinalyze_4h.json`), weil Coinalyze sie nicht mehr "
+         "liefert. Bei 0 ist das Fenster noch genau das von Coinalyze."),
         "- Kaisers Liste enthielt Duplikate (laut Kaiser evtl. Versehen) -> dedupliziert.",
         "",
         f"Empfehlung: Variante '{best_cfg['label']}' schneidet nach Rendite am besten ab. "
