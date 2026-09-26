@@ -3132,11 +3132,12 @@ def test_muster5_halten_alle_verhindert_den_stop_nachzug_BEKANNTE_FOLGE():
 
 
 def test_muster5_entry_macht_muster_5_zur_starken_bestaetigung():
-    """E38.2 baut die Vorlage von Muster 4 nach: _confirm_long() erhaelt eine zweite
-    starke Bestaetigung. Kein eigener Trigger — der Einstieg bleibt an die Fib-Zone
-    gebunden, sonst kaufte die Engine im Nichts."""
+    """E38.2 baut die Vorlage von Muster 4 nach: confirm_ok() (einzige Rechenstelle,
+    E43.6) erhaelt eine zweite starke Bestaetigung. Kein eigener Trigger — der Einstieg
+    bleibt an die Fib-Zone gebunden, sonst kaufte die Engine im Nichts."""
     import inspect
-    quelle = inspect.getsource(evaluate)
+    from strategy_core import confirm_ok
+    quelle = inspect.getsource(confirm_ok)
     assert "muster5_entry and pattern == Pattern.UNGESUNDER_ABVERKAUF" in quelle
     assert "strong = pattern == Pattern.CAPITULATION_RESET or (" in quelle
 
