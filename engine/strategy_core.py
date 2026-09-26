@@ -1284,6 +1284,15 @@ MAX_WIDERSTAND_EXITS = 2   # hoechstens so viele Teilverkaeufe am Gegen-Bein je 
 MAX_HIGH_EXITS = 2         # hoechstens so viele Struktur-Teilverkaeufe je Position
 HIGH_EXIT_TOL = 0.005      # 0,5 % darunter reicht — vor der Masse raus
 
+# Befund A5 (26.09.2026, beim Bau von E43.5 gefunden): next_pivot_beyond() sucht ueber
+# ALLE geladenen Kerzen. Live laedt main.LIMIT_HAUPT (1.300) Spotkerzen (gleitendes
+# Fenster); der Backtest rechnet ab Datenbeginn (wachsendes Fenster) - dieselbe
+# Fehlerklasse wie A2/A3 (live != Backtest). high_exit_hist="live" bildet das gleitende
+# Fenster im Backtest nach, indem die Pivotsuche NUR fuer den high_exit-Teilverkauf auf
+# die letzten HIGH_EXIT_LIVE_KERZEN Kerzen beschraenkt wird - kein Eingriff in die
+# uebrigen Pivot-Verwender (Impuls, Gegenzonen, 1D-Ebene).
+HIGH_EXIT_LIVE_KERZEN = 1300   # main.LIMIT_HAUPT
+
 # Liquidationszonen fuer den EINSTIEG (E10.3, Furkan-Update 18:27: "unter uns liegt
 # deutlich mehr, viele Long-Positionen ab 61.700 runter bis 60.500 — HIER liegt dann auch
 # aktuell das Golden Pocket, wo ich die Position wieder aufstocken wuerde").
@@ -1473,7 +1482,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              pivot_n_1d: int = 0,
              ampel_filter: str = "off",
              muster_cvd: str = "alt",
-             muster_oi: str = "usd") -> list[Signal]:
+             muster_oi: str = "usd",
+             high_exit_hist: str = "voll") -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -2084,7 +2094,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
                     and _darf_teilverkaufen():
                 ref = candles[-2].close if len(candles) >= 2 else cur.open
-                lvl = next_pivot_beyond(pivots, ref, long_side)
+                piv_hx = pivots if high_exit_hist != "live" \
+                    else find_pivots(candles[-HIGH_EXIT_LIVE_KERZEN:], n=pivot_n)
+                lvl = next_pivot_beyond(piv_hx, ref, long_side)
                 if lvl is not None:
                     nah = (cur.high >= lvl * (1 - HIGH_EXIT_TOL)) if long_side \
                         else (cur.low <= lvl * (1 + HIGH_EXIT_TOL))

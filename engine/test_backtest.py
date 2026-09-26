@@ -2005,18 +2005,77 @@ def test_a5_abschnitt_meldet_null_treffer_als_kein_befund():
     text = "\n".join(backtest.a5_abschnitt({"kerzen": 1000, "anders": 0}))
     assert "0 Treffer -> kein Befund" in text
     assert "Kein Schalter, keine Gitterzeile" in text
-    assert "naechster Schritt" not in text.lower()
+    assert "Gitterzeile mit genau einem" not in text
 
 
-def test_a5_abschnitt_meldet_treffer_als_naechsten_schritt():
+def test_a5_abschnitt_meldet_treffer_ohne_gitter_als_nicht_gemessen():
     text = "\n".join(backtest.a5_abschnitt({"kerzen": 1000, "anders": 7}))
     assert "**7**" in text
-    assert "naechster schritt" in text.lower()
+    assert "nicht gemessen" in text
     assert "Kein Befund" not in text
+
+
+def _a5_grid_daten():
+    def r(label, rendite, dd, n=5):
+        return ({"label": label}, [{}] * n, {}, {"rendite_pct": rendite,
+                                                  "max_drawdown_pct": dd})
+
+    def h(label, h1, h2):
+        return ({"label": label}, {"rendite_pct": h1}, {"rendite_pct": h2})
+
+    res = [r("LIVE", 25.0, -9.9), r(backtest.A5_LIVE, 28.0, -10.2)]
+    hal = [h("LIVE", 20.0, 5.0), h(backtest.A5_LIVE, 21.5, 6.2)]
+    return res, hal
+
+
+def test_a5_abschnitt_meldet_urteil_und_kein_urteil():
+    res, hal = _a5_grid_daten()
+    umkl = {"kerzen": 1177, "anders": 53}
+    text = "\n".join(backtest.a5_abschnitt(umkl, res, hal, "LIVE"))
+    assert "Regel erfuellt" in text and "high_exit_hist=\"live\"" in text
+    hal2 = list(hal)
+    hal2[1] = ({"label": backtest.A5_LIVE}, {"rendite_pct": 21.5}, {"rendite_pct": 5.5})
+    text = "\n".join(backtest.a5_abschnitt(umkl, res, hal2, "LIVE"))
+    assert "bleibt auf `\"voll\"`" in text
+
+
+def test_a5_abschnitt_ohne_zeile_im_gitter_sagt_nicht_gemessen():
+    text = "\n".join(backtest.a5_abschnitt({"kerzen": 1000, "anders": 7}, [], [], "LIVE"))
+    assert "nicht gemessen" in text
+
+
+def test_a5_einschalten_folgt_derselben_regel_wie_e43():
+    live = _hz(10.0, 5.0)
+    assert backtest.a5_einschalten(live, _hz(11.0, 6.0))["einschalten"] is True
+    assert backtest.a5_einschalten(live, _hz(11.0, 5.9))["einschalten"] is False
+    assert backtest.a5_einschalten(live, _hz(9.0, 4.0))["einschalten"] is False
+
+
+def test_a5_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live():
+    assert "high_exit_hist" in backtest.EVAL_KEYS and backtest._BASE["high_exit_hist"] == "voll"
+    panel = [v for v in backtest.GRID if v.get("panel")][0]
+    basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
+    z = _zeile(backtest.A5_LIVE)
+    hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+    abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+    assert abweichend == {"high_exit_hist"}, abweichend
+    assert hier["high_exit_hist"] == "live"
+
+
+def test_a5_live_konfig_steht_auf_voll():
+    import json
+    from pathlib import Path
+    cfg_datei = Path(__file__).resolve().parent.parent / "site" / "data" / "config.json"
+    if not cfg_datei.exists():
+        print("  UEBERSPRUNGEN: site/data/config.json fehlt - high_exit_hist ungeprueft!")
+        return
+    cfg = json.loads(cfg_datei.read_text(encoding="utf-8"))
+    assert cfg.get("high_exit_hist") == "voll"
+    assert "_hinweis_high_exit_hist" in cfg
 
 
 def test_a5_ist_im_bericht_verdrahtet():
     import inspect
     q = inspect.getsource(backtest.main)
     assert "a5_next_pivot_beyond(candles, eff_start)" in q
-    assert "a5_abschnitt(_a5)" in q
+    assert 'a5_abschnitt(_a5, results, halves, panel_cfg["label"])' in q

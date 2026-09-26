@@ -783,6 +783,51 @@ def test_high_exit_weak_nur_ohne_spot_nachfrage():
     assert len(treffer) == 1 and "ohne Spot-Nachfrage" in treffer[0].reason
 
 
+def test_high_exit_hist_live_beschraenkt_die_pivotsuche_auf_die_live_historie():
+    """A5: high_exit_hist="live" bildet das main.py-Fenster (main.LIMIT_HAUPT Kerzen)
+    nach, statt wie "voll" ueber die ganze Historie zu suchen. Mit einer klein
+    gehaltenen Fenstergroesse (monkeypatch von HIGH_EXIT_LIVE_KERZEN) faellt das
+    Pivot-Hoch 110 aus dem Live-Fenster heraus -> der Teilverkauf am letzten Hoch
+    bleibt aus, obwohl "voll" (Default) an denselben Kerzen feuert."""
+    import strategy_core
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),      # KAUF 1
+                   c(9, 105.5, 109.6, 105.0, 109.4)]    # Anlauf an das Hoch 110
+    alt = strategy_core.HIGH_EXIT_LIVE_KERZEN
+    strategy_core.HIGH_EXIT_LIVE_KERZEN = 3    # Pivot-Hoch (idx 5) faellt aus candles[-3:]
+    try:
+        pos_voll = Position()
+        sigs_voll = run_incremental(path, neg_funding_flow(), pos_voll, pivot_n=2,
+                                    bias_short=False, tp_ladder=False, buy_ladder=False,
+                                    high_exit="on", high_exit_hist="voll")
+        pos_live = Position()
+        sigs_live = run_incremental(path, neg_funding_flow(), pos_live, pivot_n=2,
+                                    bias_short=False, tp_ladder=False, buy_ladder=False,
+                                    high_exit="on", high_exit_hist="live")
+    finally:
+        strategy_core.HIGH_EXIT_LIVE_KERZEN = alt
+    assert any("Teilgewinn am letzten Hoch" in s.reason for s in sigs_voll)
+    assert not any("Teilgewinn am letzten Hoch" in s.reason for s in sigs_live)
+
+
+def test_high_exit_hist_default_ist_voll_wie_bisher():
+    """Default AUS bis zur Messung und Kaisers Go (Projektregel 1) - ohne den
+    Parameter verhaelt sich evaluate() wie vor A5."""
+    base = zigzag_candles()
+    path = base + [c(8, 106, 106.5, 104.5, 105.5),
+                   c(9, 105.5, 109.6, 105.0, 109.4)]
+    pos_default = Position()
+    sigs_default = run_incremental(path, neg_funding_flow(), pos_default, pivot_n=2,
+                                   bias_short=False, tp_ladder=False, buy_ladder=False,
+                                   high_exit="on")
+    pos_voll = Position()
+    sigs_voll = run_incremental(path, neg_funding_flow(), pos_voll, pivot_n=2,
+                                bias_short=False, tp_ladder=False, buy_ladder=False,
+                                high_exit="on", high_exit_hist="voll")
+    assert [(s.ts, s.type, s.reason) for s in sigs_default] == \
+           [(s.ts, s.type, s.reason) for s in sigs_voll]
+
+
 def test_release_stale_rest_greift_nicht_vor_teilgewinn():
     """Beim Positionsaufbau (T1/CORE/FULL) darf die Freigabe NICHT feuern — dort ist
     der Stop zustaendig, sonst wuerde jede neue Pivot-Bestaetigung die Position werfen."""
