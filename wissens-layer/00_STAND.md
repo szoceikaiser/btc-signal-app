@@ -38,8 +38,9 @@
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
    E43.1 (Futures-CVD in $) und E43.2 (Gitterzeile „Bein in Handelsrichtung“) sind auf
-   dem Arbeitszweig gebaut, der Backtest dort läuft. Live erst nach Kaisers „Go“.
-   Danach E43.3/E43.4 (Muster 2 und OI als Schalter).
+   dem Arbeitszweig gebaut und ausgewertet: die vorab festgelegte Regel für E43.2 ist
+   **erfüllt**, der Schalter geht live. Wartet auf Kaisers „Go“ für `main`. Danach
+   E43.3/E43.4 (Muster 2 und OI als Schalter).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position, damit die Ausschalt-Regel auf
    belastbarem Grund steht (Bauplan-Abschnitt in `docs\PLAN-E41-STOP.md`, nicht gebaut).
 2. **E42** — Kaisers zweite Regel: Ausbruch über das letzte Hoch mit Rücktest

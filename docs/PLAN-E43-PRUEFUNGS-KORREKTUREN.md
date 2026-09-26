@@ -13,7 +13,7 @@
 | Etappe | Inhalt | Art | Aufwand | Status |
 |---|---|---|---|---|
 | E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **FERTIG** 26.09.2026 (Arbeitszweig), wartet auf „Go“ |
-| E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **GEBAUT** 26.09.2026, Backtest auf dem Arbeitszweig läuft |
+| E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **AUSGEWERTET** 26.09.2026: Regel erfüllt, geht live nach Kaisers „Go“ |
 | E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | OFFEN |
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **mittel bis hoch** | OFFEN |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | OFFEN |
@@ -93,6 +93,33 @@ Nachjustieren von `min_bein_pct`.
   der Schalter wirkt nur, wenn genau eine Richtung erlaubt ist).
 - Gitterzeile `LIVE-heute +Bein in Handelsrichtung` in `backtest.py`.
 - **447 Tests grün.** `sabotage_e43.py`: 7 Sabotagen, alle gefangen.
+
+## E43.2 — Auswertung des Backtests (26.09.2026, GitHub-Lauf 36229181185)
+
+**Gesamttabelle** (Fenster 15.01.–23.09.2026):
+
+| Variante | Rendite | max. Rückgang |
+|---|---:|---:|
+| LIVE-heute +Rueckeroberung vor dem Stop (1 Kerze) | +25,2 % | −10,9 % |
+| LIVE-heute +Bein in Handelsrichtung | +35,4 % | −9,9 % |
+
+**Hälftentabelle** (H1 bis 24.05.2026, H2 danach):
+
+| Variante | Rendite H1 | Rendite H2 |
+|---|---:|---:|
+| LIVE-heute +Rueckeroberung vor dem Stop (1 Kerze) | +20,0 % | +4,3 % |
+| LIVE-heute +Bein in Handelsrichtung | +23,6 % | +9,5 % |
+
+**Prüfung nach der vorab festgelegten Regel:**
+
+1. In beiden Hälften mindestens 1 Punkt besser: H1 +3,6 Punkte, H2 +5,2 Punkte — **ja**.
+2. Maximaler Rückgang nicht mehr als 1 Punkt tiefer: −9,9 % gegen −10,9 % ist **flacher**,
+   nicht tiefer — **ja**.
+
+**Ergebnis: Beide Bedingungen erfüllt. `bein_richtung: "bias"` geht live**, sobald Kaiser
+sein „Go“ gibt. Nachrichtlich zu E41 (nicht Teil dieser Regel): Der Bericht meldet dort
+weiterhin **AUSSCHALTEN** (Kaiser hält bewusst dagegen, siehe `docs\PLAN-E41-STOP.md`) —
+unverändert gegenüber der letzten Messung.
 
 ## E43.3 bis E43.7
 

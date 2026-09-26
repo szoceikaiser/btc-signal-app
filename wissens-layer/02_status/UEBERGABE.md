@@ -8,6 +8,29 @@
 
 ---
 
+## 26.09.2026 (5) — E43.2 ausgewertet: Regel erfüllt
+
+Backtest-Lauf `36229181185` auf `claude/dazzling-noether-1w087b` ist fertig (erfolgreich,
+08:14–08:23 UTC). In den eigenen Arbeitszweig gemergt (Fast-Forward), 447 Tests weiter grün.
+
+**Auswertung nach der vorab festgelegten Regel (Plan E43.2):**
+- Gesamttabelle: „LIVE-heute +Bein in Handelsrichtung“ +35,4 % / −9,9 % Rückgang gegen
+  Live-Zeile „LIVE-heute +Rueckeroberung vor dem Stop (1 Kerze)“ +25,2 % / −10,9 %.
+- Hälftentabelle: H1 +23,6 % gegen +20,0 % (+3,6 Punkte), H2 +9,5 % gegen +4,3 %
+  (+5,2 Punkte) — beide Hälften mindestens 1 Punkt besser.
+- Rückgang −9,9 % ist flacher als −10,9 %, also nicht „mehr als 1 Punkt tiefer“.
+- **Beide Bedingungen erfüllt → `bein_richtung: "bias"` geht live.** Eintrag in
+  `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „E43.2 — Auswertung“.
+
+**E41 nachrichtlich geprüft** (Abschnitt im Backtest-Bericht): meldet weiterhin
+**AUSSCHALTEN**, unverändert zur letzten Messung — Kaiser hält bewusst dagegen
+(`docs\PLAN-E41-STOP.md`). Keine neue Entscheidung nötig.
+
+**Offen:** Kaisers „Go“ für `main` — E43.1 (Anzeige) auf jeden Fall, E43.2 (Schalter live)
+weil die Regel erfüllt ist.
+
+---
+
 ## 26.09.2026 (4) — E43.1 und E43.2 gebaut (Arbeitszweig)
 
 Nach Kaisers „Go“ zum Umzug (in `main` zusammengeführt) weiter nach Plan
