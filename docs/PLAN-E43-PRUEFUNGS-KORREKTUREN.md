@@ -19,6 +19,7 @@
 | E43.4b | OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar (A3 in der Anzeige) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main`), 493 Tests, `sabotage_e434b.py` 9/9 |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **GEMESSEN** 26.09.2026: alle vier Regeln nicht erfüllt, alle vier Schalter bleiben aus (Details „Messung E43.6"). Muster-5-Wiederholung weiterhin zurückgestellt |
+| E43.8 | Nachmessung mit genau einem Unterschied: `be_im_plus`, `release_stale_rest` | Messung | **niedrig** | **GEBAUT** 26.09.2026, wartet auf den Backtest-Lauf (Details Abschnitt „E43.8") |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
 | A5 | `next_pivot_beyond()` (Teilgewinn am letzten Hoch) haengt von der Historielaenge ab | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 53 von 1.177 Kerzen anders erkannt, Rendite/Haelften/Rueckgang identisch, Regel nicht erfuellt → bleibt `"voll"` (Arbeitszweig) |
 
@@ -962,3 +963,37 @@ einem Unterschied bauen.
   `_hinweis_high_exit_hist`), `engine/test_strategy_core.py`/`engine/test_backtest.py`
   (8 neue Tests). **507 Tests grün.** Keine eigene Sabotage-Datei (wie E43.2/E43.6 —
   kein neuer Rechenweg außerhalb des bekannten `next_pivot_beyond`).
+
+## E43.8 — Nachmessung der letzten zwei unentschiedenen Schalter: `be_im_plus`,
+`release_stale_rest`
+
+**GEBAUT 26.09.2026 (Kaisers Auftrag), noch nicht gemessen.** Zwei Gitterzeilen mit
+genau einem Unterschied zur Panel-Zeile, Vorbild E43.6.
+
+**Warum diese zwei:** die letzten Einträge aus der Liste „seit Monaten unentschieden"
+(`02_status/OFFENE-PUNKTE.md`) — `confirm_t1`/`cooldown_h` sind mit E43.6 erledigt.
+Beide existieren im Code bereits (`be_im_plus` seit E19, `release_stale_rest` seit E21)
+und wirken nur zusammen mit `trail_stop`/`neustart_mit_rest`, die in der heutigen
+Panel-Zeile bereits an sind.
+
+**Unterschied zu E43.6:** `strict_confirm`/`confirm_t1` ließen sich per reiner
+Kerzen-Logik (Pattern + Order-Flow) zählen, ohne Positionen zu simulieren.
+`be_im_plus` (Break-even-Zeitpunkt) und `release_stale_rest` (Rest-Freigabe bei neuer
+Struktur) sind beide **zustandsabhängig** — ob sie greifen, hängt vom laufenden
+Positions-Status ab, den es nur in der vollen Simulation gibt. Die Vorprobe ist deshalb
+die aus E43.3/E43.4 bekannte Grundfrage verallgemeinert: **an wie vielen (Zeitpunkt,
+Signaltyp)-Paaren weicht die Gitterzeile überhaupt vom Live-Lauf ab** (statt an wie
+vielen Kerzen ein einzelnes Muster kippt) — 0 Treffer → die Zeile misst nichts
+(`e438_signale_verschieden`).
+
+**Entscheidungsregel, festgelegt VOR der Messung** (dieselbe wie E41/E43.2 bis
+E43.6/A5): live nur, wenn in BEIDEN Fensterhälften ≥ 1 Punkt besser UND der Rückgang
+nicht mehr als 1 Punkt tiefer liegt.
+
+**Betroffene Dateien:** `engine/backtest.py` (`e438_signale_verschieden`,
+`e438_einschalten`, `e438_abschnitt`, zwei Gitterzeilen `E438_BE_IM_PLUS`/
+`E438_RELEASE_STALE_REST`), `engine/test_backtest.py` (7 neue Tests). **527 Tests
+grün.** Keine Änderung an `strategy_core.py` (beide Schalter existieren und rechnen
+schon richtig), keine eigene Sabotage-Datei (kein neuer Rechenweg, wie E43.2/E43.6).
+
+Messung folgt über GitHub Actions (`backtest.yml`), Ergebnis wird hier ergänzt.
