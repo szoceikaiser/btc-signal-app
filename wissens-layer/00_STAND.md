@@ -42,9 +42,12 @@
 ## Was als Nächstes offen liegt (Reihenfolge = Nutzwert)
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
-   E43.1 (Futures-CVD in $) und E43.2 (Gitterzeile „Bein in Handelsrichtung“) sind auf
-   dem Arbeitszweig gebaut, der Backtest dort läuft. Live erst nach Kaisers „Go“.
-   Danach E43.3/E43.4 (Muster 2 und OI als Schalter).
+   E43.1 und E43.2 sind seit 26.09.2026 live (Kaisers Go, siehe oben). **E43.3** (Muster 2
+   „Derivate-Pump“ in Dollar statt Anteile an einer willkürlichen Summe, Befund A2) hat
+   seit 26.09.2026 einen fertigen Bauplan (Regel, Schalter `muster_cvd`, betroffene
+   Dateien, Entscheidungsregel — Abschnitt „E43.3“ im Plan), **gebaut ist er noch nicht**.
+   Danach E43.4 (OI als Schalter), E43.5 (Test erreicht den Muster-2-Zweig, Voraussetzung
+   für eine saubere E43.3-Messung).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position, damit die Ausschalt-Regel auf
    belastbarem Grund steht (Bauplan-Abschnitt in `docs\PLAN-E41-STOP.md`, nicht gebaut).
 2. **E42** — Kaisers zweite Regel: Ausbruch über das letzte Hoch mit Rücktest

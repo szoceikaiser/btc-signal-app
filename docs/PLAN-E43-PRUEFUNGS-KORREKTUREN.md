@@ -14,7 +14,7 @@
 |---|---|---|---|---|
 | E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main` gemerged) |
 | E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **LIVE** seit 26.09.2026 (`bein_richtung: "bias"`, Entscheidungsregel erfüllt, Kaisers Go) |
-| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | OFFEN |
+| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **BAUPLAN FERTIG** 26.09.2026, Bau OFFEN |
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **mittel bis hoch** | OFFEN |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | OFFEN |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
@@ -130,7 +130,119 @@ der Bericht prüft sie künftig selbst (wie bei E41).
 - **448 Tests grün** (444 in `main` vor dem Merge, 447 auf dem Arbeitszweig, +1 durch die
   Aufspaltung des E43.2-Tests). `sabotage_e43.py`: weiterhin 7 von 7 gefangen.
 
-## E43.3 bis E43.7
+## E43.3 — Muster 2 vergleicht Dollar-Beträge im Fenster statt Anteile an einer
+willkürlichen Summe (Befund A2)
+
+**Noch nicht gebaut.** Dieser Abschnitt ist der Bauplan (Regel, Schalter, betroffene
+Dateien, Entscheidungsregel) — Kaisers Zustimmung dazu ist eingeholt (26.09.2026: „Ja,
+bereite den Bauplan vor"), der Bau selbst noch nicht.
+
+**Problem, genau lokalisiert** (`strategy_core.classify_pattern`, Muster 2):
+
+```python
+spot = _slope([p.spot_cvd for p in f])   # f = flow[-window:], window = 12 Kerzen
+fut  = _slope([p.fut_cvd  for p in f])
+...
+if price_chg > 0 and fut > 0 and spot <= fut / 3 and oi_chg >= 0.03 and (...):
+    return Pattern.DERIVATE_PUMP
+```
+
+`_slope(vals) = (vals[-1] - vals[0]) / abs(vals[0])`. `spot_cvd`/`fut_cvd` sind
+**kumulierte** Reihen, die irgendwo weit vor dem 12-Kerzen-Fenster zu laufen begonnen
+haben (bei welchem Kerzenindex, hängt davon ab, wie weit `flow` zurückreicht — live seit
+Engine-Start, im Backtest seit Fensteranfang: **verschieden**). Der Zähler
+`vals[-1] - vals[0]` ist unabhängig von diesem Startpunkt (ein konstanter Offset kürzt
+sich heraus), die Division durch `abs(vals[0])` **zerstört genau diese Unabhängigkeit**:
+derselbe reale Geldfluss im Fenster ergibt, je nachdem wo die kumulierte Summe zu laufen
+begann, einen kleinen oder einen riesigen `_slope()`-Wert. Beleg (`demo_slope.py`,
+Anhang `docs/PRUEFUNG-2026-09-26-GESAMT.md`): identischer Verlauf von Kurs, OI und
+Funding, nur der Startwert der beiden kumulierten Reihen geändert →
+`GESUNDER_TREND, GESUNDER_TREND, DERIVATE_PUMP, DERIVATE_PUMP`. Zusatzfehler: `fut_cvd`
+kommt weiterhin in BTC (Coinalyze, Befund A1) — `classify_pattern` vergleicht also BTC
+mit Dollar, wenn auch nur über den ohnehin kaputten Umweg der relativen Slopes.
+
+**Regel:** neuer Schalter `muster_cvd`, Werte `"alt"` (Default, heutiges Verhalten
+unverändert) | `"usd"` (Korrektur, betrifft **nur Muster 2**):
+
+- `fut_delta_usd` = Summe der pro Kerze in Dollar umgerechneten Futures-Deltas
+  **innerhalb des Fensters** — dieselbe Umrechnung wie `_fut_cvd_usd()` (E43.1: jedes
+  Kerzen-Delta mit dem Schlusskurs derselben Kerze multiplizieren, dann erst
+  aufsummieren), aber fensterlokal statt über die ganze Historie.
+- `spot_delta_usd` = `f[-1].spot_cvd - f[0].spot_cvd` — `spot_cvd` ist laut
+  `FlowPoint`-Vertrag bereits in Dollar; statt der relativen `_slope()` zählt die
+  **absolute** Fenster-Differenz (offset-unabhängig, siehe oben).
+- Vergleich in Muster 2 bei `"usd"`: `spot_delta_usd <= fut_delta_usd / 3` — dieselbe
+  Verhältnis-Logik wie bisher, jetzt mit zwei tatsächlich vergleichbaren
+  Dollar-Größen statt zweier unabhängig-willkürlich skalierter Prozentwerte.
+- **Nur Muster 2 ändert sich.** Muster 1 (`spot > 0`) und Muster 5 (`spot < 0`) bleiben
+  unangetastet: Das Vorzeichen von `_slope()` stimmt immer mit dem Vorzeichen der
+  Fenster-Differenz überein (Division durch `abs(vals[0])` kann das Vorzeichen nicht
+  drehen) — betroffen ist ausschließlich der Magnituden-Vergleich `spot <= fut/3`.
+- Ohne Futures-Quelle (`has_fut == False`, US-Geo-Block-Zweig): unverändert: dort gibt
+  es keine Futures-Reihe umzurechnen, `muster_cvd` wirkt dort nicht.
+
+**Entscheidungsregel, festgelegt VOR der Messung (wie E41/E43.2):** `muster_cvd: "usd"`
+geht nur live (Default wechselt von `"alt"` auf `"usd"`), wenn die Zeile gegen die
+heutige Live-Zeile (`bein_richtung="bias"`, seit 26.09.2026 live)
+1. in **beiden** Fensterhälften um **mindestens 1 Punkt** besser ist, **und**
+2. der maximale Rückgang **nicht mehr als 1 Punkt** tiefer liegt.
+
+**Sonderregel für A2/A3 (Teil E des Prüfberichts, gilt auch hier):** Liefert `"usd"`
+**keine** bessere Rendite, wird die Korrektur trotzdem als **Anzeige-Korrektur**
+übernommen — die Musterzeile im Lage-Abruf soll dieselbe Definition benutzen wie
+`evaluate()`, unabhängig vom Handels-Ergebnis. Der Handels-Schalter (`muster_cvd`
+selbst) bleibt dann auf `"alt"`.
+
+**Vorprobe, vor der eigentlichen Gitter-Messung:** nachweisen, dass der Schalter im
+Datensatz überhaupt greift — `demo_slope.py` aus dem Prüfbericht-Anhang als echten,
+bleibenden Test verdrahten (zwei Szenarien mit identischem Kurs/OI/Funding-Verlauf,
+nur verschiedenem Startwert der kumulierten Reihen, müssen bei `"alt"` verschieden und
+bei `"usd"` gleich klassifizieren). Ohne diese Vorprobe wäre die Gitterzeile eine Kopie
+der Live-Zeile und die Messung bedeutungslos (dieselbe Lehre wie bei E43.2s
+`bias_long != bias_short`-Vorprobe).
+
+**Abhängigkeit zu E43.5 (A4):** `test_mehr_historie_aendert_die_signale_nicht` erreicht
+den Muster-2-Zweig laut Prüfbericht nie — das sollte vor oder zusammen mit E43.3
+repariert werden, sonst bleibt unklar, ob der Zweig im bestehenden Testfenster überhaupt
+je ausgelöst wird.
+
+**Betroffene Dateien (geplant):**
+
+- `engine/strategy_core.py` — `classify_pattern()` bekommt den Parameter
+  `muster_cvd: str = "alt"`; bei `"usd"` die neue fensterlokale Dollar-Rechnung für
+  Muster 2 (neue Hilfsfunktion, z. B. `_muster2_dollar(candles, flow, window)`, analog
+  zu `_fut_cvd_usd`, aber fensterlokal für beide Reihen). `evaluate()` muss den
+  Parameter zu jedem `classify_pattern()`-Aufruf durchreichen.
+- `engine/main.py` — `EVAL_DEFAULTS`: neuer Schlüssel `"muster_cvd": "alt"`.
+- `engine/backtest.py` — `EVAL_KEYS` ergänzen; neue Gitterzeile
+  `LIVE-heute +Muster 2 in Dollar (E43.3)`, geklont von der **aktuellen** Panel-Zeile
+  (also inklusive `bein_richtung="bias"`, `stop_rueckeroberung=1` usw.) plus **genau**
+  `muster_cvd="usd"` als einzigem Unterschied.
+- `engine/test_strategy_core.py` — Vorprobe-Test (siehe oben) und ein Test, der beweist,
+  dass `muster_cvd` bei `evaluate()` ankommt (Vorbild
+  `test_ampel_filter_kommt_im_backtest_ueberhaupt_an`).
+- `engine/test_backtest.py` — Gitterzeilen-Test „genau ein Unterschied zur Live-Zeile"
+  (Vorbild `test_e43_bein_richtung_ist_live_und_das_panel_ist_mitgewandert`).
+- Neue Sabotage-Datei `engine/sabotage_e433.py` (Vorbild `sabotage_e381.py`), mindestens:
+  Schalter fehlt in `EVAL_KEYS`/kommt nicht an; die `"usd"`-Rechnung rechnet doch nicht
+  mit dem Kerzenpreis (bleibt BTC); Vorzeichen-/Verhältnis-Fehler in der neuen
+  Vergleichslogik; Gitterzeile hat zwei Unterschiede statt einem; die Entscheidungsregel
+  selbst ist falsch herum oder eine Bedingung fehlt (Vorbild der acht
+  „Ausschalten:…"-Sabotagen in `sabotage_e41.py`).
+- `site/data/config.json` — neuer Schlüssel `"muster_cvd": "alt"` +
+  `_hinweis_muster_cvd` (Default AUS, „Erst nach Backtest-Messung einschalten").
+
+**Bewusst NICHT:**
+
+- keine Anpassung der bestehenden Schwellen (`oi_chg >= 0.03`, `funding_hot`,
+  `sharp_move_pct` …) über die Korrektur hinaus — das wäre Nachjustieren an der
+  Vergangenheit.
+- Muster 1, 3, 4, 5 bleiben unverändert.
+- der US-Geo-Block-Zweig (ohne Futures-Quelle) bleibt unverändert.
+- kein gleichzeitiges Anfassen von A3/OI (das ist E43.4) — ein Unterschied je Zeile,
+  sonst weiß man hinterher nicht, was gewirkt hat.
+
+## E43.4 bis E43.7
 
 Werden vor dem Bau hier ergänzt (Regel, Schwellen, betroffene Dateien, Entscheidungsregel).
 Stichpunkte stehen in `docs/PRUEFUNG-2026-09-26-GESAMT.md`, Teil E.

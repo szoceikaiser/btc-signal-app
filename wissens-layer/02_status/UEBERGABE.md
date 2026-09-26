@@ -8,6 +8,40 @@
 
 ---
 
+## 26.09.2026 (6) — Bauplan E43.3 (Muster 2 in Dollar)
+
+**Kaisers Auftrag:** *„Ja, bereite den Bauplan für E43.3 vor."* — reine Planung, **am
+Code wurde nichts geändert**, 448 Tests weiter grün.
+
+**Ergänzt in `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „E43.3“:**
+
+- Genaue Fehlerdiagnose: `_slope()` dividiert die (offset-unabhängige) Fenster-Differenz
+  der kumulierten CVD-Reihen durch ihren willkürlichen Startwert — dieselbe reale Lage
+  klassifiziert je nach Startwert der Summe verschieden (Beleg: `demo_slope.py`,
+  Prüfbericht-Anhang). Zusatzfehler: `fut_cvd` ist weiterhin BTC (A1), `classify_pattern`
+  vergleicht also nebenbei BTC mit Dollar.
+- Vorgeschlagene Regel: neuer Schalter `muster_cvd` (`"alt"`/`"usd"`, Default aus).
+  Bei `"usd"` ersetzt eine fensterlokale, in Dollar umgerechnete Differenz (wie E43.1s
+  `_fut_cvd_usd`, nur fensterlokal statt über die ganze Historie) den relativen
+  `_slope()`-Vergleich — **nur in Muster 2**, Muster 1/3/4/5 bleiben unangetastet
+  (ihr Vorzeichen-Vergleich ist von dem Fehler nicht betroffen).
+- Entscheidungsregel vor der Messung (wie E41/E43.2) plus die Sonderregel aus Teil E:
+  bringt „usd“ keine bessere Rendite, wird es trotzdem als Anzeige-Korrektur übernommen,
+  der Handels-Schalter bleibt dann aus.
+- Vorprobe vorgeschrieben (Vorbild E43.2s `bias_long != bias_short`): `demo_slope.py`
+  muss als echter, bleibender Test verdrahtet werden, sonst ist unbewiesen, dass der
+  Schalter im Datensatz überhaupt etwas ändert.
+- Abhängigkeit notiert: E43.5 (A4, „mehr Historie“-Test erreicht den Muster-2-Zweig nie)
+  sollte vor oder mit E43.3 repariert werden.
+- Betroffene Dateien, neue Sabotage-Datei (`sabotage_e433.py`, Vorbild `sabotage_e381.py`)
+  und „Bewusst NICHT“ vollständig aufgelistet — Einzelheiten im Plan, nicht hier
+  wiederholt.
+
+**Offen:** der eigentliche Bau (Aufwand **hoch** — stärkstes Modell, eigene Etappe),
+danach Gitter-Messung gegen die Entscheidungsregel, dann erst Kaisers Go für `main`.
+
+---
+
 ## 26.09.2026 (5) — Kaisers Go: E43.1 und E43.2 live in main
 
 **Kaisers Auftrag:** *„Ich gebe das Go für main: E43.1 und E43.2, falls Go. Führe den
