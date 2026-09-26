@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-09-23T18:40:49Z",
+ "generated_at": "2026-09-26T08:23:27Z",
  "variante": "LIVE-heute +Rueckeroberung vor dem Stop (1 Kerze)",
- "fenster": "15.01.2026-23.09.2026",
+ "fenster": "18.01.2026-26.09.2026",
  "signals": [
   {
    "ts": 1768766400000,
@@ -2382,6 +2382,26 @@
    "stop_ref": 80126.04,
    "tag": "",
    "label": "KAUF 1 (Teilposition am 0.5-Level)"
+  },
+  {
+   "ts": 1790308800000,
+   "type": "NACHKAUF",
+   "price": 84043.96,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 83864 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 80126.04,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1790337600000,
+   "type": "NACHKAUF",
+   "price": 83796.01,
+   "tranche_pct": 20,
+   "reason": "Konfluenz: Fib-Zone + Liquidationszone 82875 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 80126.04,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   }
  ]
 }
