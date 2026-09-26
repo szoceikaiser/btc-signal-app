@@ -12,8 +12,8 @@
 
 | Etappe | Inhalt | Art | Aufwand | Status |
 |---|---|---|---|---|
-| E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **FERTIG** 26.09.2026 (Arbeitszweig), wartet auf „Go“ |
-| E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **GEBAUT** 26.09.2026, Backtest auf dem Arbeitszweig läuft |
+| E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main` gemerged) |
+| E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **LIVE** seit 26.09.2026 (`bein_richtung: "bias"`, Entscheidungsregel erfüllt, Kaisers Go) |
 | E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | OFFEN |
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **mittel bis hoch** | OFFEN |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | OFFEN |
@@ -79,6 +79,22 @@ besseres Maß liefert — die Regel wird nicht nachträglich gelockert.
 **Bewusst NICHT:** keine Kombination mit anderen Schaltern in derselben Zeile; kein
 Nachjustieren von `min_bein_pct`.
 
+**Messung gegen die Entscheidungsregel (26.09.2026, Fenster 18.01.–26.09.2026):**
+
+| Bedingung | H1 (bis 24.05.) | H2 (danach) | Rückgang (Vollfenster) |
+|---|---:|---:|---:|
+| `bein_richtung="bias"` | +23,6 % | +9,5 % | −9,9 % |
+| Live-Zeile (`auto`) | +20,0 % | +4,3 % | −10,9 % |
+| Unterschied | **+3,6 Punkte** | **+5,2 Punkte** | **1,0 Punkt flacher** |
+
+Bedingung 1 (beide Hälften ≥ 1 Punkt besser) erfüllt, Bedingung 2 (Rückgang nicht mehr als
+1 Punkt tiefer) erfüllt — der Rückgang ist sogar flacher, nicht tiefer. **Kaisers Go
+26.09.2026: `bein_richtung: "bias"` LIVE seit 26.09.2026** (`site/data/config.json`,
+Panel-Zeile in `backtest.py` mitgewandert auf `LIVE-heute +Bein in Handelsrichtung`, alte
+Panel-Zeile ohne Namensänderung stehen gelassen, neue Ausschalt-Probe-Zeile
+`LIVE bis 26.09.2026 (ohne Bein-Richtung)` ergänzt). Ausschalt-Regel wie oben beschrieben,
+der Bericht prüft sie künftig selbst (wie bei E41).
+
 ## Umsetzung E43.1 und E43.2 (26.09.2026)
 
 - `strategy_core._fut_cvd_usd()` rechnet jedes Kerzen-Delta mit dem Schlusskurs derselben
@@ -93,6 +109,26 @@ Nachjustieren von `min_bein_pct`.
   der Schalter wirkt nur, wenn genau eine Richtung erlaubt ist).
 - Gitterzeile `LIVE-heute +Bein in Handelsrichtung` in `backtest.py`.
 - **447 Tests grün.** `sabotage_e43.py`: 7 Sabotagen, alle gefangen.
+
+## Go 26.09.2026: E43.1 und E43.2 in main, E43.2 live geschaltet
+
+- Arbeitszweig `claude/dazzling-noether-1w087b` per Fast-Forward nach `main` gemerged.
+- E43.1 ist reine Anzeige und lief sofort mit (kein Signal ändert sich).
+- E43.2: Entscheidungsregel erfüllt (Tabelle oben) → `bein_richtung: "bias"` in
+  `site/data/config.json` gesetzt (war `"auto"`), `panel=True` in `backtest.py` von der
+  Rückeroberungs-Zeile auf `LIVE-heute +Bein in Handelsrichtung` verschoben, neue
+  Ausschalt-Probe-Zeile `LIVE bis 26.09.2026 (ohne Bein-Richtung)` ergänzt.
+- Der vorab-Test `test_e43_bein_richtung_zeile_hat_genau_einen_unterschied_zur_live_zeile`
+  ist durch zwei Nach-Go-Tests ersetzt (Vorbild E41):
+  `test_e43_bein_richtung_ist_live_und_das_panel_ist_mitgewandert`,
+  `test_e43_alte_bein_richtung_unterscheidet_sich_in_genau_einem_punkt`.
+- Da `bein_richtung` jetzt Teil der Live-Basis ist, mussten alle bestehenden
+  „unterscheidet sich in genau einem Punkt von der Live-Zeile"-Gitterzeilen um
+  `bein_richtung="bias"` ergänzt werden (Ampel ×3, Muster 5 ×5, E41-Ausschalt-Probe,
+  E41-Robustheit, „MEINE Einstellung ohne Flush") — sonst hätten sie neu zwei
+  Unterschiede statt einem gemessen.
+- **448 Tests grün** (444 in `main` vor dem Merge, 447 auf dem Arbeitszweig, +1 durch die
+  Aufspaltung des E43.2-Tests). `sabotage_e43.py`: weiterhin 7 von 7 gefangen.
 
 ## E43.3 bis E43.7
 

@@ -8,6 +8,55 @@
 
 ---
 
+## 26.09.2026 (5) — Kaisers Go: E43.1 und E43.2 live in main
+
+**Kaisers Auftrag:** *„Ich gebe das Go für main: E43.1 und E43.2, falls Go. Führe den
+Merge/Cherry-Pick aus dem Arbeitszweig nach main aus, aktualisiere die
+Live-Konfiguration falls nötig, prüfe die 444 main-Tests, aktualisiere UEBERGABE.md und
+00_STAND.md, committe und pushe nach main."*
+
+**Gemacht:**
+
+- Arbeitszweig `claude/dazzling-noether-1w087b` per Fast-Forward nach `main` gemerged
+  (er enthielt bereits den ganzen main-Stand als Vorfahren, kein Cherry-Pick nötig).
+- **E43.1** ist reine Anzeige und lief damit sofort mit — kein Signal ändert sich.
+- **E43.2 — Entscheidungsregel geprüft** (Tabelle in
+  `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Fenster 18.01.–26.09.2026):
+  - H1: `bias` +23,6 % gegen `auto` +20,0 % → **+3,6 Punkte besser**
+  - H2: `bias` +9,5 % gegen `auto` +4,3 % → **+5,2 Punkte besser**
+  - Rückgang: `bias` −9,9 % gegen `auto` −10,9 % → **1,0 Punkt flacher**, nicht tiefer
+
+  Beide Bedingungen der vorab festgelegten Regel erfüllt → **`bein_richtung: "bias"`
+  seit 26.09.2026 LIVE.**
+- **Live-Konfiguration aktualisiert:** `site/data/config.json`, `bein_richtung`
+  `"auto"` → `"bias"` (Hinweistext mit der Messung ergänzt).
+- **Panel-Zeile in `backtest.py` mitgewandert:** `panel=True` von
+  „LIVE-heute +Rueckeroberung vor dem Stop (1 Kerze)" auf
+  „LIVE-heute +Bein in Handelsrichtung" verschoben. Neue Ausschalt-Probe-Zeile
+  „LIVE bis 26.09.2026 (ohne Bein-Richtung)" ergänzt (Ausschalt-Regel im Kommentar).
+- **Folgekorrektur, weil `bein_richtung` jetzt Teil der Live-Basis ist:** alle
+  bestehenden „unterscheidet sich in genau einem Punkt von der Live-Zeile"-Zeilen
+  brauchten `bein_richtung="bias"` dazu, sonst hätten sie ab jetzt zwei Unterschiede
+  statt einem gemessen — betroffen: die drei Ampel-Zeilen (E34), vier Muster-5-Zeilen
+  (E38), „MEINE Einstellung ohne Flush" und die beiden E41-Zeilen (Ausschalt-Probe,
+  Robustheit 3-Kerzen). Die Trendfilter- und 1D-Ebene-Zeilen sind NICHT betroffen (kein
+  Test hält für sie die Basis fest, absichtlich unverändert gelassen).
+- **Tests entsprechend angepasst** (Vorbild E41): der Vor-Go-Test
+  `test_e43_bein_richtung_zeile_hat_genau_einen_unterschied_zur_live_zeile` ist ersetzt
+  durch `test_e43_bein_richtung_ist_live_und_das_panel_ist_mitgewandert` und
+  `test_e43_alte_bein_richtung_unterscheidet_sich_in_genau_einem_punkt`.
+- **Sabotage-Proben nachgezogen:** `sabotage_e41.py` (5 Muster) und `sabotage_e38.py`
+  (1 Muster) suchten exakte Textstellen in `backtest.py`, die durch das Einfügen von
+  `bein_richtung="bias"` verschoben waren („Vorlage fehlt" — die Sabotage konnte nicht
+  greifen, ein stiller Ausfall). Muster an den neuen Text angepasst, dieselbe
+  Sabotage-Absicht beibehalten.
+- **448 Tests grün**, alle sechs Sabotage-Dateien (`sabotage_e38/e381/e39/e40/e41/e43`)
+  laufen wieder vollständig und fangen alles.
+
+**Offen:** E43.3 bis E43.7 (siehe Plan), sonst wie gehabt E41.6/E42.
+
+---
+
 ## 26.09.2026 (4) — E43.1 und E43.2 gebaut (Arbeitszweig)
 
 Nach Kaisers „Go“ zum Umzug (in `main` zusammengeführt) weiter nach Plan

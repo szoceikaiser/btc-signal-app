@@ -991,23 +991,29 @@ def test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live():
         assert abweichend == erwartet, f"{label}: erwartet {erwartet}, ist {abweichend}"
 
 
-def test_e43_bein_richtung_zeile_hat_genau_einen_unterschied_zur_live_zeile():
-    """E43.2 (Gesamtpruefung 26.09.2026): `bein_richtung` wurde nur gegen die Live-Zeile
-    vom 27.08. gemessen. Diese Zeile misst ihn gegen die HEUTIGE - und nur dann taugt
-    sie, wenn sie sich in genau diesem einen Schalter unterscheidet."""
+def test_e43_bein_richtung_ist_live_und_das_panel_ist_mitgewandert():
+    """Kaiser hat am 26.09.2026 bein_richtung="bias" live geschaltet (E43.2). Die
+    Panel-Zeile muss genau diese Einstellung tragen - sonst zeigt die Webseite die
+    Rendite der alten Einstellung."""
     panel = [v for v in backtest.GRID if v.get("panel")]
     assert len(panel) == 1
-    basis = {k: panel[0][k] for k in backtest.EVAL_KEYS if k in panel[0]}
+    assert panel[0]["bein_richtung"] == "bias"
     # Vorprobe: der Schalter wirkt nur, wenn genau EINE Richtung erlaubt ist
-    # (strategy_core.evaluate). Sonst waere die Zeile eine Kopie der Live-Zeile.
-    assert basis["bias_long"] != basis["bias_short"], \
+    # (strategy_core.evaluate). Sonst waere die Ausschalt-Probe eine Kopie der Live-Zeile.
+    assert panel[0]["bias_long"] != panel[0]["bias_short"], \
         "bein_richtung wirkt bei dieser Live-Einstellung gar nicht"
-    assert basis["bein_richtung"] == "auto"
-    z = _zeile("LIVE-heute +Bein in Handelsrichtung")
+
+
+def test_e43_alte_bein_richtung_unterscheidet_sich_in_genau_einem_punkt():
+    """Die Ausschalt-Probe ist nur deutbar, wenn sie sich von der Live-Zeile in GENAU
+    dem Schalter unterscheidet, der am 26.09.2026 umgelegt wurde."""
+    panel = [v for v in backtest.GRID if v.get("panel")][0]
+    basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
+    z = _zeile("LIVE bis 26.09.2026 (ohne Bein-Richtung)")
     hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
     abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
     assert abweichend == {"bein_richtung"}, abweichend
-    assert hier["bein_richtung"] == "bias"
+    assert hier["bein_richtung"] == "auto"
 
 
 def test_e38_die_beiden_halten_zeilen_messen_wirklich_verschiedenes():

@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026**
+> Stand: **26.09.2026 (2)**
 
 ## Lage
 
@@ -14,10 +14,15 @@
   `signal-app\...` meinen jetzt die Repo-Wurzel. Einzelheiten: `START-HIER.md`.
 - Die Engine **läuft live** und handelt nicht selbst: sie sendet Telegram-Signale,
   Kaiser platziert die Orders. Webseite: `szoceikaiser.github.io/btc-signal-app`.
-- **Tests:** in `main` **444**, auf dem Arbeitszweig mit E43.1/E43.2 **447**, alle grün
-  (`cd engine && python3 run_tests.py`). Sabotage-Proben: in `main` fünf (151
-  Sabotagen), auf dem Zweig zusätzlich `sabotage_e43.py` (7), alle gefangen.
-- Letzte Live-Änderung am Handelsverhalten: **E41, Kaisers Rückeroberungs-Regel**
+- **Tests:** in `main` **448**, alle grün (`cd engine && python3 run_tests.py`).
+  Sabotage-Proben: fünf ältere (151 Sabotagen) plus `sabotage_e43.py` (7), alle gefangen.
+- **Kaisers Go 26.09.2026: E43.1 und E43.2 live.** Arbeitszweig nach `main` gemerged.
+  E43.1 (Futures-CVD im Lage-Abruf jetzt in Dollar) ist reine Anzeige. E43.2
+  (`bein_richtung: "bias"`) hat die vorab festgelegte Entscheidungsregel erfüllt (beide
+  Fensterhälften ≥ 1 Punkt besser, Rückgang 1,0 Punkt flacher statt tiefer) und ist seit
+  26.09.2026 live (`site/data/config.json`, Panel-Zeile in `backtest.py` mitgewandert).
+  Einzelheiten und Messwerte: `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`.
+- Letzte Live-Änderung am Handelsverhalten davor: **E41, Kaisers Rückeroberungs-Regel**
   (`stop_rueckeroberung: 1`), live seit 21.09.2026.
 - **Offener Streitpunkt dazu:** Die vorab festgelegte Ausschalt-Regel für E41 hat am
   23.09.2026 angeschlagen (Rückgang 1,5 Punkte tiefer als erlaubt 1,0). Kaiser hat sie

@@ -112,8 +112,8 @@ SABOTAGEN = [
      '      bias_short=False, flush_entry="off",'),
 
     ("Beide Halten-Zeilen messen dasselbe", "backtest.py",
-     '      muster5_halten="alle"),',
-     '      muster5_halten="leiter"),'),
+     '      bein_richtung="bias", muster5_halten="alle"),',
+     '      bein_richtung="bias", muster5_halten="leiter"),'),
 
     ("Die Gegenprobe (Bremse) verschwindet aus dem Gitter", "backtest.py",
      'V("LIVE-heute +Muster 5 sperrt Kaeufe (Bremse, Gegenprobe)"',

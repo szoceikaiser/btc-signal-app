@@ -160,13 +160,13 @@ GRID = [
     # der panel=True-Zeile in GENAU EINEM Punkt unterscheiden: flush_entry. Sonst
     # vergleicht die Monatsuebersicht auf der Webseite nicht "mit gegen ohne Flush",
     # sondern ein Sammelsurium. Am 05.09.2026 war genau das der Fall: no_flip,
-    # neustart_mit_rest (beide live seit 28.08.) und zonen_nachziehen (seit 05.09.)
-    # fehlten hier - vier Unterschiede statt einem. Der Test
-    # test_ohne_flush_zeile_unterscheidet_sich_nur_im_flush haelt das jetzt fest.
+    # neustart_mit_rest (beide live seit 28.08.), zonen_nachziehen (seit 05.09.) und
+    # bein_richtung (seit 26.09., E43.2) fehlten hier - mehrere Unterschiede statt einem.
+    # Der Test test_ohne_flush_zeile_unterscheidet_sich_nur_im_flush haelt das jetzt fest.
     V("MEINE Einstellung ohne Flush", bias_short=False, flush_entry="off",
       buy_ladder=True, trail_stop=True, min_stop_pct=0.02, liq_entry="boost",
       high_exit="on", min_bein_pct=0.05, no_flip=True, neustart_mit_rest=True,
-      zonen_nachziehen=True, stop_rueckeroberung=1),
+      zonen_nachziehen=True, stop_rueckeroberung=1, bein_richtung="bias"),
     # E10.3 (Furkan-Update B, 18:27): Liquidationszonen auf der EINSTIEGS-Seite. Nach dem
     # Befund aus E10.2 (Verkaufsseite kostet durchgehend Rendite) ist das die Seite, auf
     # der noch etwas zu holen sein koennte. "boost" = zusaetzlich aufstocken bei Konfluenz,
@@ -382,7 +382,10 @@ GRID = [
     # intakt ist (hoeheres Tief UND hoeheres Hoch). Genau EIN Unterschied zur Live-Zeile.
     # Anlass: Kaiser "wenn sich eine neue Struktur ergibt, dann duerften diese nicht
     # festgefahren bleiben". Siehe docs/PLAN-E30-ZONEN-NACHZIEHEN.md.
-    V("LIVE-heute +Rueckeroberung vor dem Stop (1 Kerze)", panel=True,  # LIVE seit 21.09.2026 (E41)
+    V("LIVE-heute +Rueckeroberung vor dem Stop (1 Kerze)",  # LIVE seit 21.09.2026 (E41)
+      # panel=True ist seit 26.09.2026 (E43.2) auf die Bein-Richtung-Zeile weiter unten
+      # gewandert - diese Zeile hier entspricht bein_richtung="auto" und ist nicht mehr
+      # die Live-Einstellung.
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True,
@@ -440,17 +443,17 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
-      ampel_filter="klein"),
+      bein_richtung="bias", ampel_filter="klein"),
     V("LIVE-heute +Ampel UMGEKEHRT (Gegenprobe)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
-      ampel_filter="gross"),
+      bein_richtung="bias", ampel_filter="gross"),
     V("LIVE-heute +immer halbe Tranche (Nullhypothese)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
-      ampel_filter="immer"),
+      bein_richtung="bias", ampel_filter="immer"),
     V("LIVE-heute +Rest halten +Neustart mit Rest",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
@@ -465,17 +468,17 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
-      muster5_entry=True),
+      bein_richtung="bias", muster5_entry=True),
     V("LIVE-heute +Muster 5 haelt Zwischenverkaeufe",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
-      muster5_halten="leiter"),
+      bein_richtung="bias", muster5_halten="leiter"),
     V("LIVE-heute +Muster 5 haelt ALLE Teilverkaeufe",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
-      muster5_halten="alle"),
+      bein_richtung="bias", muster5_halten="alle"),
     # Gegenprobe zur Treibstoff-Lesart: die BREMSE, also genau die umgekehrte Deutung.
     # Sie wurde in E13 schon einmal verworfen — aber gegen eine andere Basis. Gewinnt
     # sie hier, war die Treibstoff-Idee von Anfang an falsch herum; verlieren beide,
@@ -484,14 +487,14 @@ GRID = [
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
-      block_unhealthy=True),
+      bein_richtung="bias", block_unhealthy=True),
     # Beide Treibstoff-Hebel zusammen — nur als Zusatz, nicht als Beleg: eine Zeile mit
     # zwei Unterschieden sagt nicht, welcher der beiden gewirkt hat.
     V("LIVE-heute +Muster 5 Kauf UND Halten (zwei Unterschiede)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
-      muster5_entry=True, muster5_halten="leiter"),
+      bein_richtung="bias", muster5_entry=True, muster5_halten="leiter"),
     # ---------------------------------------------------------------- E41 (21.09.2026)
     # Kaisers Rueckeroberungs-Regel ist seit 21.09.2026 LIVE (Zeile mit panel=True oben).
     # Gemessen wurde vorher gegen vier Zeilen (A Puffer, B1, B3, C Docht) - Ergebnis in
@@ -502,25 +505,42 @@ GRID = [
     #     VOR der ersten Messung fest (e41_ausschalten) - sonst sucht man sich hinterher
     #     aus, ob ein Unterschied "reicht".
     #   - drei statt einer Kerze: die Robustheitspruefung laeuft weiter mit.
+    # bein_richtung="bias" seit 26.09.2026 (E43.2) ergaenzt, damit beide Zeilen weiter
+    # GENAU EINEN Unterschied zur (gewanderten) Panel-Zeile tragen.
     V("LIVE bis 21.09.2026 (Stop ohne Rueckeroberung)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=0),
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=0,
+      bein_richtung="bias"),
     V("LIVE-heute +Rueckeroberung 3 statt 1 Kerze (Robustheit)",
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=3),
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=3,
+      bein_richtung="bias"),
     # ---------------------------------------------------------------- E43.2 (26.09.2026)
     # Gesamtpruefung: bein_richtung="bias" entspricht Furkans zwei Fib-Rastern (Standbild
     # 02.08.2026 16:12 - Kaufzonen aus dem grossen Aufwaerts-Bein, Widerstand aus dem
     # kleinen Abwaerts-Bein). Gemessen wurde es nur gegen die Live-Zeile vom 27.08.
-    # ("NEU-LIVE +Bein in Handelsrichtung ..."). Hier GENAU EIN Unterschied zur heutigen
-    # Live-Zeile. Entscheidungsregel VOR der Messung: docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md.
-    V("LIVE-heute +Bein in Handelsrichtung",
+    # ("NEU-LIVE +Bein in Handelsrichtung ..."). Hier GENAU EIN Unterschied zur damaligen
+    # Live-Zeile. Entscheidungsregel VOR der Messung (docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md):
+    # in BEIDEN Fensterhaelften mind. 1 Punkt besser UND Rueckgang nicht mehr als 1 Punkt
+    # tiefer. GEMESSEN 26.09.2026: H1 +3,6, H2 +5,2 Punkte besser, Rueckgang 1,0 Punkt
+    # FLACHER. Beide Bedingungen erfuellt - Kaisers Go am 26.09.2026, LIVE seit demselben
+    # Tag (panel=True ist von der Rueckeroberungs-Zeile oben hierher gewandert).
+    V("LIVE-heute +Bein in Handelsrichtung", panel=True,
       bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       bein_richtung="bias"),
+    # Ausschalt-Probe: die Live-Zeile mit GENAU EINEM Unterschied (bein_richtung="auto"
+    # statt "bias"). AUSSCHALTEN, wenn "auto" in BEIDEN Fensterhaelften mindestens 1
+    # Punkt besser ist ODER der Rueckgang live mehr als 1 Punkt tiefer liegt (dieselbe
+    # Regel wie bei der Einschaltung, siehe _hinweis_bein_richtung in config.json).
+    V("LIVE bis 26.09.2026 (ohne Bein-Richtung)",
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="auto"),
     V("Long+Short (Ref)"),
 ]
 
