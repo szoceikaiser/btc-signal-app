@@ -15,7 +15,7 @@
 | E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main` gemerged) |
 | E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **LIVE** seit 26.09.2026 (`bein_richtung: "bias"`, Entscheidungsregel erfüllt, Kaisers Go) |
 | E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 2 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"alt"` (Arbeitszweig) |
-| E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **mittel bis hoch** | OFFEN |
+| E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **BAUPLAN** 26.09.2026 (Abschnitt „E43.4“), nicht gebaut |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
@@ -384,7 +384,212 @@ Live-Einstellung grün. **450 Tests grün.** `sabotage_e433.py`: 5 von 5 gefange
 (Summe wieder ausgeschnitten, Szenario ohne Pump, OI zu schwach, `_slope` ohne Division,
 Muster 2 unerreichbar).
 
-## E43.4, E43.6, E43.7
+## E43.4 — Open Interest in Kontrakten statt Dollar (Befund A3)
+
+**Noch nicht gebaut.** Dieser Abschnitt ist der Bauplan (26.09.2026). Kaisers Auftrag:
+zuerst den Plan schreiben und zeigen, erst danach bauen.
+
+**Problem, genau lokalisiert** (`strategy_core.classify_pattern`):
+
+```python
+oi_chg = (f[-1].oi - f[0].oi) / f[0].oi if f[0].oi else 0.0   # f = flow[-12:], 2 Tage
+```
+
+`FlowPoint.oi` ist das Open Interest in **Dollar**. Es kommt von Coinalyze
+`open-interest-history` mit `convert_to_usd=true` für `BTCUSDT_PERP.A`. Das ist ein
+linearer USDT-Kontrakt, sein OI zählt BTC. Dollar-OI = BTC-OI × Kurs. In `oi_chg`
+steckt deshalb immer die Kursänderung im Fenster:
+(1 + Änderung der Kontrakte) × (1 + Änderung des Kurses) − 1. Die Schwellen sind so
+groß wie die Kursbewegungen, die die Muster selbst verlangen:
+
+| Muster | Bedingung heute (Dollar) | was sie in Kontrakten verlangt | live handelswirksam? |
+|---|---|---|---|
+| 4 Kapitulation | Kurs ≤ −4 %, OI ≤ −5 % | bei −5 % Kurs **keine** geschlossene Position | ja: starke Bestätigung beim Einstieg (`_confirm_long`) |
+| 5 Abverkauf mit neuen Shorts | Kurs ≤ −2 %, OI ≥ −1 % | bei −2 % Kurs müssen die Kontrakte um rund 1 % **steigen** | nein (`block_unhealthy`, `muster5_*` aus), nur Anzeige und Ampel |
+| 3 Short-Covering | Kurs ≥ +2 %, OI ≤ −2 % | bei +2 % Kurs müssen die Kontrakte um rund 4 % fallen | ja: Restverkauf nach dem ersten Ziel |
+| 2 Derivate-Pump | Kurs > 0, OI ≥ +3 % | bei +3 % Kurs **kein** neuer Kontrakt | ja: Einstiegssperre, Restverkauf, Telegram-Warnung |
+| 1 Gesunder Trend | Kurs > 0, OI 0 bis +10 % | bei +3 % Kurs dürfen die Kontrakte um rund 3 % fallen | nein (Short-Seite, `block_unhealthy`), nur Anzeige und Ampel |
+
+Muster 1 fehlt in der Tabelle des Prüfberichts. Es liest dasselbe `oi_chg` und ist
+genauso betroffen.
+
+**Nachgeprüft 26.09.2026** mit `demo_oi_usd.py` (Prüfbericht-Anhang) gegen den heutigen
+Code. Die Kontrakte bleiben die ganze Zeit gleich. Die Kontrakt-Rechnung ist von Hand
+nachgestellt (OI-Reihe = Kontrakte statt Kontrakte × Kurs):
+
+| Lage | heute (Dollar) | in Kontrakten |
+|---|---|---|
+| Kurs −5 %, Spot dreht am Ende, Kontrakte gleich | CAPITULATION_RESET | UNGESUNDER_ABVERKAUF |
+| Kurs +3,5 %, Futures steigt, Funding zieht an, Kontrakte gleich | DERIVATE_PUMP | GESUNDER_TREND |
+| wie oben, aber Kontrakte −6 % | – | CAPITULATION_RESET |
+| wie oben, aber Kontrakte +4 % | – | DERIVATE_PUMP |
+
+Die letzten beiden Zeilen sind die Gegenprobe: In Kontrakten werden beide Muster weiter
+erkannt, wenn wirklich Positionen geschlossen oder eröffnet werden. Der Schalter schaltet
+die Muster also nicht ab, er berichtigt sie.
+
+**Regel:** neuer Schalter `muster_oi`, Werte `"usd"` (Default, heutiges Verhalten
+unverändert) | `"btc"` (Kontrakte, gemessen in BTC).
+
+1. **Umrechnen am Datenpunkt, nicht an der Kerze.** Jeder echte Coinalyze-OI-Punkt wird
+   mit dem Schlusskurs **derselben** 4h-Kerze (gleiche `ts`) in BTC umgerechnet:
+   `oi_btc = oi_usd / close`. Beide Werte gelten zum Kerzenschluss (Coinalyze-Feld „c“).
+   Erst danach wird aufgefüllt, genau wie heute beim Dollar-OI: vor dem ersten Punkt gilt
+   der erste Wert, bei einem fehlenden Punkt der letzte. Aufgefüllt werden also
+   **Kontrakte**, nicht Dollar.
+   *Warum nicht einfach in `classify_pattern` durch den Kurs teilen, wie Teil E des
+   Prüfberichts vorschlägt?* Ein aufgefüllter Dollar-Wert, geteilt durch den Kurs einer
+   **anderen** Kerze, erfindet eine OI-Bewegung in Höhe der Kursbewegung. Das wäre genau
+   der Fehler, der behoben werden soll. Das passiert im echten Datensatz: Das Messfenster
+   beginnt dort, wo das Coinalyze-OI einsetzt (`eff_start = max(START_MS, min(oi_map))`,
+   zuletzt 18.01.2026). Die ersten 11 Kerzen des Fensters lesen also aufgefüllte Werte.
+   Live kann der OI-Punkt der gerade geschlossenen Kerze fehlen. Dann würde der
+   Dollar-Wert der Vorkerze durch den neuen Kurs geteilt.
+2. **Eine Hilfsfunktion für Live und Backtest:** `strategy_core.oi_in_btc(oi_usd, candles)`
+   liefert `{ts: BTC}`. OI-Punkte ohne Kerze mit gleicher `ts` entfallen (lieber kein Wert
+   als einer mit falschem Kurs, wie bei `_fut_cvd_usd`). `main.fetch_market_data` und
+   `backtest.build_series` rufen beide diese Funktion auf und füllen das Ergebnis so auf,
+   wie sie heute das Dollar-OI auffüllen. Neues Feld am Ende von `FlowPoint`:
+   `oi_btc: float = 0.0` (0.0 = keine Kontrakt-Reihe). `FlowPoint.oi` bleibt in Dollar.
+3. **`classify_pattern(..., muster_oi="usd")`:** Bei `"btc"` kommt `oi_chg` aus `oi_btc`
+   statt aus `oi`. Die Formel bleibt gleich, **nur die Einheit ändert sich**. Ist `oi_btc`
+   am Fensteranfang 0 (keine Reihe), gilt `oi_chg = 0`. Das ist dieselbe neutrale Antwort,
+   die `"usd"` heute ohne OI-Daten gibt.
+4. **Alle fünf Muster wechseln gemeinsam.** Es gibt nur ein `oi_chg`. Nur Muster 2 und 4
+   umzustellen hieße, in derselben Einordnung zwei Einheiten zu mischen. Die Schwellen
+   (+3 %, −5 %, −2 %, −1 %, 0 bis +10 %) bleiben, wie sie sind.
+5. **Ohne Coinalyze:** Im Backtest ohne `oi_map` (OI konstant 1.0) und live im
+   Kraken-Rückfall gilt `oi_btc = 0.0`, also OI-neutral. Die Kraken-Historie wird heute nur
+   geschrieben, wenn Coinalyze ausfällt. Sie ist lückenhaft und im Backtest gar nicht
+   nachstellbar.
+6. **Anzeige = Handel** (wie E43.3): `evaluate()` reicht `muster_oi` an `classify_pattern`
+   durch. Die drei Aufrufe für Lage-Abruf, Vorschau und Plan in `main.py` bekommen
+   denselben Wert. Solange der Schalter auf `"usd"` steht, ändert sich nirgends etwas.
+7. **Kurs-Quelle:** Geteilt wird durch den Binance-**Spot**-Schlusskurs, live und im
+   Backtest derselbe. Coinalyze rechnet mit dem Perp-Kurs. Der Unterschied (Basis) liegt
+   meist unter 0,1 % und ändert sich in zwei Tagen kaum. Gegen Schwellen von 1 bis 5 % ist
+   das vernachlässigbar. Vermerkt, nicht korrigiert.
+
+**Entscheidungsregel, festgelegt VOR der Messung** (wie E41, E43.2, E43.3; wird nicht
+nachträglich gelockert): `muster_oi: "btc"` geht nur live, wenn die Zeile gegen die
+heutige Live-Zeile (Panel: `bein_richtung="bias"`, `muster_cvd="alt"`)
+
+1. in **beiden** Fensterhälften um **mindestens 1 Punkt** besser ist, **und**
+2. der maximale Rückgang **nicht mehr als 1 Punkt** tiefer liegt.
+
+Sonst bleibt `"usd"`. **Vorbedingung für ein Urteil:** Der Bericht findet OI-Daten im
+Fenster, und die Vorprobe zählt mehr als 0 umklassifizierte Kerzen. Sonst meldet er „misst
+nichts“ und fällt kein Urteil.
+
+Geht der Schalter live, gilt die **Ausschalt-Regel**: zurück auf `"usd"`, wenn `"usd"` in
+beiden Hälften um mindestens 1 Punkt besser ist oder der Rückgang mit `"btc"` mehr als
+1 Punkt tiefer liegt. Der Bericht prüft das dann selbst (Vorbild E41, E43.2).
+
+**Anzeige-Frage (Sonderregel aus Teil E), vorab festgelegt:** Die Musterzeile im
+Lage-Abruf rechnet immer wie der Handel (Regel 6). Eine eigene Anzeige-Einstellung
+(„Anzeige berichtigt, Handel alt“) wird erst gebaut, wenn Kaiser das nach der Messung
+ausdrücklich will. Dann wird für A2 und A3 gemeinsam entschieden, wie in der Übergabe vom
+26.09.2026 empfohlen.
+
+**Vorab gesagt, damit das Ergebnis nicht falsch gelesen wird:** Anders als E43.3 (2 von
+1.504 Kerzen) wird E43.4 voraussichtlich viele Kerzen umklassifizieren, weil ±3 % Kurs in
+zwei Tagen häufig sind. Viele umklassifizierte Kerzen sind **kein** Urteil, es zählt nur
+die Regel oben. In welche Richtung sich der Handel verschiebt, ist offen: Muster 2 und 4
+werden seltener (weniger Einstiegssperren und Restverkäufe durch Muster 2, weniger starke
+Bestätigungen durch Muster 4), Muster 3 und 5 häufiger (mehr Restverkäufe durch Muster 3).
+
+**Vorprobe im Datensatz** (Berichtsabschnitt „E43.4“, Vorbild `e433_umklassifiziert`):
+
+1. An wie vielen Kerzen im Fenster gibt es einen echten OI-Punkt? Bei 0 misst die Zeile
+   nichts.
+2. An wie vielen Kerzen ergeben `"usd"` und `"btc"` verschiedene Muster? Dazu je Muster
+   die Anzahl unter beiden Einstellungen.
+3. **A3 als Zahl:** Wie oft war die OI-Bedingung von Muster 2 (≥ +3 %), 3 (≤ −2 %),
+   4 (≤ −5 %) und 5 (≥ −1 %) in Dollar erfüllt, und wie oft davon auch in Kontrakten?
+   Damit wird die Aussage des Prüfberichts („die Engine erkennt Muster 2 und 4 zu einem
+   großen Teil am Kurs“) am echten Datensatz geprüft statt an Kunstdaten.
+4. Urteil nach der Entscheidungsregel (`e434_einschalten`, Vorbild `e433_einschalten`).
+
+**Vorprobe in den Tests** (Regel 2: erst beweisen, dass der Zweig erreicht wird):
+
+- `demo_oi_usd.py` als bleibender Test, alle vier Zeilen der Tabelle oben: gleiche
+  Kontrakte → `"usd"` erkennt CAPITULATION_RESET und DERIVATE_PUMP, `"btc"` nicht. Echte
+  Kontrakt-Änderung → `"btc"` erkennt beide.
+- Ohne OI-Daten (konstant 1.0, `oi_btc = 0`) ergeben `"usd"` und `"btc"` dasselbe Muster.
+- Aufgefüllte Werte erfinden keine Bewegung: Fehlt der letzte OI-Punkt, bleibt `oi_btc`
+  beim Wert der Vorkerze, auch wenn der Kurs springt.
+- Live = Backtest: Dieselben Rohdaten durch `main.fetch_market_data` (mit
+  Coinalyze-Attrappe) und durch `backtest.build_series` ergeben je Kerze dasselbe
+  `oi_btc`.
+
+**Betroffene Dateien (geplant):**
+
+- `engine/strategy_core.py`: `FlowPoint.oi_btc`, `oi_in_btc()`,
+  `classify_pattern(..., muster_oi="usd")`, `evaluate(..., muster_oi="usd")` reicht durch.
+- `engine/main.py`: `fetch_market_data` füllt `oi_btc` (Coinalyze-Weg; Kraken-Rückfall
+  0.0); `EVAL_DEFAULTS["muster_oi"] = "usd"`; die drei Anzeige-Aufrufe von
+  `classify_pattern` bekommen `muster_oi`.
+- `engine/backtest.py`: `build_series` füllt `oi_btc` über dieselbe Hilfsfunktion;
+  `muster_oi` in `EVAL_KEYS` und `_BASE`; Gitterzeile `LIVE-heute +OI in Kontrakten
+  (E43.4)`, geklont von der Panel-Zeile plus **genau** `muster_oi="btc"`;
+  `e434_umklassifiziert`, `e434_einschalten`, `e434_abschnitt`, im Bericht verdrahtet.
+- `engine/test_strategy_core.py`, `engine/test_main.py`, `engine/test_backtest.py`: die
+  Tests oben, dazu: Schalter kommt in `evaluate` an (Vorbild
+  `test_e433_muster_cvd_kommt_in_evaluate_an`), Gitterzeile hat genau einen Unterschied,
+  Live-Konfiguration steht auf `"usd"`, Entscheidungsregel in beide Richtungen, Bericht
+  verdrahtet, Anzeige rechnet wie der Handel.
+- Neue Sabotage-Datei `engine/sabotage_e434.py` (Vorbild `sabotage_e433.py`), mindestens:
+  Schalter fehlt in `EVAL_KEYS` oder kommt nicht an; Umrechnung mit dem Kurs der falschen
+  Kerze (Vor- oder Folgekerze); erst Dollar auffüllen, dann teilen (der naive Weg);
+  Leer-Wächter fehlt (`oi_btc = 0` erzeugt eine Bewegung oder eine Division durch null);
+  `"btc"` wirkt nur in Muster 2 statt in allen; `main` und `backtest` rechnen verschieden;
+  Kraken-Rückfall teilt doch durch den Kurs; Gitterzeile mit zwei Unterschieden;
+  Entscheidungsregel falsch herum oder mit fehlender Bedingung.
+- `site/data/config.json`: `"muster_oi": "usd"` plus `_hinweis_muster_oi` (Default aus,
+  „erst nach Backtest-Messung und Kaisers Go umschalten“).
+
+**Bewusst NICHT:**
+
+- keine Änderung der Schwellen (+3 %, −5 %, −2 %, −1 %, +10 %, `oi_wipeout_pct`) über die
+  Einheit hinaus. Das wäre Nachjustieren an der Vergangenheit.
+- keine Kombination mit `muster_cvd="usd"` in derselben Zeile (ein Unterschied je Zeile).
+  Die E43.4-Zeile läuft mit `muster_cvd="alt"`, wie live.
+- kein zweiter Coinalyze-Abruf mit `convert_to_usd=false`. Er hätte die Kontrakte direkt
+  geliefert, kostet aber live und im Backtest einen weiteren Abruf (die 429-Grenzen sind
+  bekannt). Für die aggregierten E37-Reihen hilft er auch nicht: Dort rechnen inverse
+  Kontrakte in Dollar, lineare in BTC, summierbar ist nur Dollar.
+- die **OI-Zeile im Lage-Abruf** (`orderflow_detail`) bleibt in Dollar, mit ihrem Hinweis
+  („neues Geld kommt herein“ / „Positionen werden geschlossen“). Der Hinweis folgt der
+  Dollar-Richtung. Bei fallendem Kurs und gleichen Kontrakten sagt er also „Positionen
+  werden geschlossen“, obwohl niemand geschlossen hat. Das ist A3 in der Anzeige.
+  **Empfehlung:** ein eigener kleiner Anzeige-Schritt (Kontrakt-Änderung daneben, Hinweis
+  nach Kontrakten), unabhängig vom Handels-Urteil, Aufwand mittel. Nicht in dieser Etappe,
+  damit sie genau eine Sache ändert.
+- im Kraken-Rückfall keine Kontrakte in `state.json` speichern (das wäre eine Änderung am
+  Zustand, siehe Regel 5).
+- Liquidationen bleiben in Dollar: `_liq_spike` vergleicht die letzte Kerze mit dem
+  Mittel desselben Fensters. Der Kurseffekt ist dort klein und nicht Teil von A3.
+- die Auswertungen im Bericht, die `classify_pattern` ohne Schalter aufrufen
+  (`muster_nachlauf`, E38-Statistik), bleiben bei `"usd"`, solange der Schalter live aus
+  ist.
+- A5 (`next_pivot_beyond`) nicht nebenbei beheben.
+
+**Grenze, bewusst nicht behoben (vermerkt wie bei E43.3):** Die E37-Datenvarianten „OI
+aggregiert“ und folgende summieren das Dollar-OI mehrerer Perp-Märkte. `oi_in_btc` teilt
+diese Summe durch den Binance-Spot-Kurs. Das stimmt für lineare Kontrakte (USDT, USDC),
+für inverse (USD-Kontrakte) nicht, denn deren Dollar-OI bewegt sich nicht mit dem Kurs.
+Die Varianten laufen mit der Panel-Einstellung (`"usd"`) und sind deshalb erst betroffen,
+wenn `"btc"` live geht. Dann vorher prüfen, welche gewählten Märkte invers sind
+(`perp_auswahl` meldet die Denominierung je Markt).
+
+**Abhängigkeit:** E43.6 (Nachmessung `rest_halten`, `strict_confirm`, danach Muster 5)
+wartet auf das E43.4-Urteil. Der Restverkauf hängt an Muster 2 und 3, Muster 5 an der
+OI-Bedingung.
+
+**Aufwand:** hoch (Mustererkennung; Live und Backtest müssen gleich rechnen; Vorprobe und
+Sabotage). Stand vor dem Bau: **467 Tests grün**. Geschätzt rund 20 neue Tests.
+
+## E43.6, E43.7
 
 Werden vor dem Bau hier ergänzt (Regel, Schwellen, betroffene Dateien, Entscheidungsregel).
 Stichpunkte stehen in `docs/PRUEFUNG-2026-09-26-GESAMT.md`, Teil E.

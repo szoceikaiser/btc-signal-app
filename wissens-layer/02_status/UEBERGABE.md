@@ -8,6 +8,31 @@
 
 ---
 
+## 26.09.2026 (9) — Bauplan E43.4 (Open Interest in Kontrakten)
+
+**Kaisers Auftrag:** zuerst den Bauplan-Abschnitt E43.4 schreiben und zeigen, dann bauen.
+Zweig: `claude/e43-4-open-interest-9mmh0l`. Reine Planung, **am Code wurde nichts
+geändert**, 467 Tests weiter grün. `main` ist unverändert.
+
+**Ergänzt in `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „E43.4“:**
+- Schalter `muster_oi` (`"usd"` Default | `"btc"`). Bei `"btc"` rechnet `oi_chg` in
+  Kontrakten, für **alle fünf** Muster (Muster 1 fehlte in der Tabelle des Prüfberichts),
+  Schwellen unverändert.
+- **Abweichung vom Vorschlag im Prüfbericht:** nicht in `classify_pattern` durch den Kurs
+  teilen, sondern jeden echten OI-Punkt mit dem Kurs seiner eigenen Kerze umrechnen und
+  erst dann auffüllen. Sonst erfinden aufgefüllte Werte eine OI-Bewegung in Höhe der
+  Kursbewegung. Das träfe die ersten 11 Kerzen des Messfensters, das dort beginnt, wo das
+  OI einsetzt, und live eine fehlende letzte OI-Kerze.
+- Entscheidungsregel vor der Messung wie E43.3, dazu Ausschalt-Regel, Vorbedingung
+  „misst nichts“, Vorprobe im Datensatz (A3 als Zahl) und in den Tests (`demo_oi_usd`
+  mit Gegenprobe; heute nachgeprüft).
+- Die OI-Zeile im Lage-Abruf („Positionen werden geschlossen“) ist A3 in der Anzeige.
+  Empfohlen als eigener kleiner Anzeige-Schritt, nicht in E43.4.
+
+**Offen:** Kaisers Zustimmung zum Bauplan, dann der Bau (Aufwand **hoch**).
+
+---
+
 ## 26.09.2026 (8) — Kaisers Go: E43.5 und E43.3 in main
 
 Kaiser: *„Go“*. Arbeitszweig `claude/btc-signal-engine-start-hyiqny` per Fast-Forward
