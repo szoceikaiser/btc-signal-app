@@ -317,8 +317,8 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 
 | Etappe | Status |
 |---|---|
-| E44.1 Coinalyze-Archiv | IN ARBEIT (26.09.2026, Zweig `claude/blissful-maxwell-9uwt6x`) |
-| E44.2 Wechselwirkungen + Monats-Probe im Bericht | OFFEN |
+| E44.1 Coinalyze-Archiv | **GEBAUT** 26.09.2026 auf Zweig `claude/blissful-maxwell-9uwt6x`, 535 Tests, `sabotage_e441.py` 8/8. **Wartet auf Kaisers Go für `main`**: Erst dann läuft der tägliche Workflow `archiv.yml`. Nach dem Go einmal von Hand anstoßen (Actions → Coinalyze-Archiv → Run workflow) |
+| E44.2 Wechselwirkungen + Monats-Probe im Bericht | IN ARBEIT (26.09.2026, selber Zweig) |
 | E44.3 E42 Ausbruch mit Rücktest | OFFEN, wartet auf Kaisers Antwort zu Frage 1 |
 | E44.4 `verkauf_faktor` | OFFEN |
 | E44.5 2³-Gitter messen | OFFEN, braucht E44.2 bis E44.4 |

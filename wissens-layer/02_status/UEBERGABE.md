@@ -8,6 +8,28 @@
 
 ---
 
+## 26.09.2026 (21) — E44.1 gebaut: Coinalyze-Archiv (Zweig, wartet auf Go)
+
+Kaiser: *„Leg mir 44.1 und 44.2 los und bereite jede Etappe so vor, dass ich im neuen Chat
+damit beginnen kann.“* Startpunkte je Etappe stehen jetzt im Plan, Abschnitt 9a,
+Einzelheiten zu E44.1/E44.2 in 9b/9c, Platz für Kaisers Antworten in Abschnitt 10.
+
+**E44.1 gebaut** auf Zweig `claude/blissful-maxwell-9uwt6x`: `engine/archiv.py` (mischt
+OI, Liquidationen, Futures-Delta, Long-Short in `site/data/archiv/coinalyze_4h.json`, nur
+abgeschlossene Kerzen, neu gewinnt, alt bleibt), `backtest.py` mischt das Archiv vor dem
+Aufbau der Reihen dazu und nennt im Bericht, wie viele OI-Punkte nur aus dem Archiv stammen.
+Neuer Workflow `.github/workflows/archiv.yml` (täglich 03:47 UTC plus Knopf). `main.py`
+unberührt. 8 neue Tests, **535 grün**, `sabotage_e441.py` **8/8 gefangen**.
+
+**Solange das Archiv leer ist oder nicht älter als Coinalyze, ändert sich keine Zahl.**
+Der Nutzen beginnt erst, wenn der Workflow in `main` läuft; jeder Tag ohne ihn kostet rund
+6 alte 4h-Punkte. **Offen für Kaiser: Go für `main`.** Danach einmal anstoßen: Actions →
+Coinalyze-Archiv → Run workflow.
+
+**Als Nächstes:** E44.2 (läuft in diesem Chat weiter).
+
+---
+
 ## 26.09.2026 (20) — E44: Kombinations-Analyse, Bauplan geschrieben, nichts gebaut
 
 **Auftrag Kaiser:** *„welche dieser Tests und Indikatoren miteinander kombiniert und getestet
