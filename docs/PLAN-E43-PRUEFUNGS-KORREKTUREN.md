@@ -18,7 +18,7 @@
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 210 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"usd"`. Seit 26.09.2026 in `main` (Kaisers Go), 488 Tests, `sabotage_e434.py` 37/37 |
 | E43.4b | OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar (A3 in der Anzeige) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main`), 493 Tests, `sabotage_e434b.py` 9/9 |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
-| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **BAUPLAN GESCHRIEBEN** 26.09.2026, Muster-5-Wiederholung bewusst zurückgestellt (siehe Abschnitt E43.6) — wartet auf Kaisers Go zum Bauen |
+| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **GEMESSEN** 26.09.2026: alle vier Regeln nicht erfüllt, alle vier Schalter bleiben aus (Details „Messung E43.6"). Muster-5-Wiederholung weiterhin zurückgestellt |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
 | A5 | `next_pivot_beyond()` (Teilgewinn am letzten Hoch) haengt von der Historielaenge ab | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 53 von 1.177 Kerzen anders erkannt, Rendite/Haelften/Rueckgang identisch, Regel nicht erfuellt → bleibt `"voll"` (Arbeitszweig) |
 
@@ -750,8 +750,9 @@ zweiten Zeile, und der Pfeil gehört sichtbar zu den Kontrakten.
 ## E43.6 — Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`,
 `confirm_t1`, `cooldown_h`
 
-**Noch nicht gebaut.** Dieser Abschnitt ist der Bauplan — Kaiser sieht ihn, bevor etwas
-gebaut wird (Vorbild E43.3/E43.4: erst der Plan, dann sein „Ja").
+**GEBAUT UND GEMESSEN 26.09.2026 (Kaisers Go).** Alle vier Regeln nicht erfüllt — alle
+vier Schalter bleiben aus. Siehe „Messung E43.6" unten. Der ursprüngliche Bauplan
+(Kaisers „Ja" vor dem Bau) bleibt darunter unverändert stehen.
 
 **Warum diese vier:** Teil C des Prüfberichts (`docs/PRUEFUNG-2026-09-26-GESAMT.md`)
 listet sie als „gebaut, aber nie mit genau einem Unterschied gegen die heutige Live-Zeile
@@ -855,6 +856,35 @@ Schalter. 0 Treffer → die Zeile misst nichts.
 **Bewusst NICHT:** kein anderer Wert als 48 (das wäre Nachjustieren an der Vergangenheit);
 keine Kombination mit `min_stop_pct`, das laut Wissens-Layer-Hinweis dieselbe
 Stop-Serien-Frage schon stabiler adressiert.
+
+### Messung E43.6 (26.09.2026, GitHub-Actions-Lauf 36249824852, Fenster 18.01.–26.09.2026)
+
+Alle vier Vorproben haben Treffer > 0 (die Zeilen messen also etwas). Alle vier
+Entscheidungen fallen nach der vorab festgelegten Regel gleich aus: **Rückgang bei
+allen vieren unverändert (+0,0 Punkte), aber keine einzige Zeile ist in BEIDEN
+Fensterhälften mindestens 1 Punkt besser** — die Regel verlangt beides zusammen.
+
+| Schalter | Vorprobe (Treffer) | Rendite | H1 | H2 | Signale | Urteil |
+|---|---:|---:|---:|---:|---:|---|
+| **Live (Basis)** | — | +35,3 % | +23,6 % | +9,5 % | 244 | — |
+| `rest_halten` | 11 Positionen | +34,5 % | +19,4 % | +12,7 % | 236 | H1 −4,3, H2 +3,2 → **nicht erfüllt** |
+| `strict_confirm` | 1.356 von 1.505 Kerzen | +28,5 % | +26,0 % | +1,9 % | 206 | H1 +2,4, H2 −7,6 → **nicht erfüllt** |
+| `confirm_t1` | 9 von 14 Ersteinstiegen | +34,9 % | +22,8 % | +10,3 % | 240 | H1 −0,8, H2 +0,9 → **nicht erfüllt** |
+| `cooldown_h` (48h) | 1 Einstieg | +33,4 % | +21,8 % | +9,5 % | 244 | H1 −1,8, H2 +0,0 → **nicht erfüllt** |
+
+**Alle vier Schalter bleiben aus.** Auffällig: `strict_confirm` sieht in H1 (+2,4 Punkte)
+sogar besser aus als live, dreht in H2 aber um 7,6 Punkte — genau die Art von
+Einzelhälften-Vorsprung, vor der die Entscheidungsregel schützen soll (dieselbe Lehre
+wie bei B3/E41.6: eine Hälfte reicht nicht). `rest_halten` und `confirm_t1` verändern
+weniger Signale (236 bzw. 240 von 244) und liegen näher an der Basis, verfehlen die
+Regel aber ebenfalls in mindestens einer Hälfte.
+
+**Betroffene Dateien:** `engine/strategy_core.py` (`confirm_ok()` als einzige
+Rechenstelle für `_confirm_long`/`_confirm_short`, kein Verhaltensunterschied),
+`engine/backtest.py` (vier Vorproben, `e436_einschalten`, `e436_abschnitt`,
+Gitterzeilen), `engine/test_backtest.py`/`engine/test_strategy_core.py` (13 neue
+Tests). **520 Tests grün.** Keine eigene Sabotage-Datei (kein neuer Rechenweg
+außerhalb des bekannten `confirm_ok`/`exit_pat`/`_cooldown_ok`, wie E43.2).
 
 ### Bewusst NICHT (für ganz E43.6)
 

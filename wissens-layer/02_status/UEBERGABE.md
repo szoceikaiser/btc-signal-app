@@ -8,6 +8,48 @@
 
 ---
 
+## 26.09.2026 (17) — E43.6 gemessen: alle vier Schalter bleiben aus
+
+**Auftrag Kaiser:** „Merge nach main und E43.6 bauen" — A5 (siehe unten) nach `main`
+gemergt, dann E43.6 auf neuem Zweig `claude/e43-6-nachmessung-vier-schalter` (von
+`main`) gebaut: vier Gitterzeilen mit genau einem Unterschied zur Panel-Zeile
+(`rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h=48`), je eine Vorprobe im
+Datensatz, Entscheidungsregel wie E41/E43.2–E43.5/A5.
+
+**Vorbereitung:** `_confirm_long()`/`_confirm_short()` in `strategy_core.py` auf eine
+neue, öffentliche `confirm_ok()` zurückgeführt (einzige Rechenstelle) — `evaluate()`
+UND die `strict_confirm`/`confirm_t1`-Vorproben lesen jetzt von derselben Funktion.
+Reiner Refactor, kein Verhaltensunterschied. 13 neue Tests, **520 Tests grün.** Keine
+eigene Sabotage-Datei (kein neuer Rechenweg außerhalb des bekannten
+`confirm_ok`/`exit_pat`/`_cooldown_ok`, wie E43.2).
+
+**Gemessen (GitHub-Actions-Lauf 36249824852, Fenster 18.01.–26.09.2026):**
+
+| Schalter | Vorprobe (Treffer) | Rendite | H1 | H2 | Signale | Urteil |
+|---|---:|---:|---:|---:|---:|---|
+| **Live (Basis)** | — | +35,3 % | +23,6 % | +9,5 % | 244 | — |
+| `rest_halten` | 11 Positionen | +34,5 % | +19,4 % | +12,7 % | 236 | H1 −4,3, H2 +3,2 → nicht erfüllt |
+| `strict_confirm` | 1.356 von 1.505 Kerzen | +28,5 % | +26,0 % | +1,9 % | 206 | H1 +2,4, H2 −7,6 → nicht erfüllt |
+| `confirm_t1` | 9 von 14 Ersteinstiegen | +34,9 % | +22,8 % | +10,3 % | 240 | H1 −0,8, H2 +0,9 → nicht erfüllt |
+| `cooldown_h` (48h) | 1 Einstieg | +33,4 % | +21,8 % | +9,5 % | 244 | H1 −1,8, H2 +0,0 → nicht erfüllt |
+
+**Alle vier Schalter bleiben aus.** Rückgang bei allen vieren identisch zur Live-Zeile
+(+0,0 Punkte) — die Regel scheitert überall am ersten Kriterium (beide Hälften ≥ 1
+Punkt besser). Auffällig: `strict_confirm` sah in H1 sogar besser aus (+2,4 Punkte),
+drehte in H2 aber um 7,6 Punkte — genau die Art von Einzelhälften-Vorsprung, vor der
+die Regel schützen soll (dieselbe Lehre wie B3/E41.6). Am Handelsverhalten ändert sich
+nichts. Einzelheiten: `docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „Messung
+E43.6".
+
+**Damit sind `confirm_t1` und `cooldown_h` aus der Liste der seit Monaten
+unentschiedenen Schalter raus** (`02_status/OFFENE-PUNKTE.md`). Offen bleiben
+`be_im_plus` und `release_stale_rest` — dieselbe Messlücke, noch nicht angegangen.
+
+**Nächster Schritt, offen:** E43.7 (Wissens-Layer-Texte berichtigen), `be_im_plus`/
+`release_stale_rest` messen, oder E41.6/E42 (Kaisers Entscheidung).
+
+---
+
 ## 26.09.2026 (16) — A5 gemessen und entschieden: bleibt aus
 
 **Auftrag Kaiser:** A5 messen wie in `OFFENE-PUNKTE.md` Punkt 8 beschrieben. Erst
