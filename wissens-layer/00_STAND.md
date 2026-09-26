@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (7)**
+> Stand: **26.09.2026 (8)**
 
 ## Lage
 
@@ -14,7 +14,7 @@
   `signal-app\...` meinen jetzt die Repo-Wurzel. Einzelheiten: `START-HIER.md`.
 - Die Engine **läuft live** und handelt nicht selbst: sie sendet Telegram-Signale,
   Kaiser platziert die Orders. Webseite: `szoceikaiser.github.io/btc-signal-app`.
-- **Tests:** in `main` **467**, alle grün (`cd engine && python3 run_tests.py`).
+- **Tests:** in `main` **488**, alle grün (`cd engine && python3 run_tests.py`).
   Sabotage-Proben: fünf ältere (151 Sabotagen) plus `sabotage_e43.py` (7), alle gefangen.
 - **Kaisers Go 26.09.2026: E43.1 und E43.2 live.** Arbeitszweig nach `main` gemerged.
   E43.1 (Futures-CVD im Lage-Abruf jetzt in Dollar) ist reine Anzeige. E43.2
@@ -52,12 +52,11 @@
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
    E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 gebaut, gemessen und seit
    26.09.2026 in `main` (E43.3 bleibt `"alt"`). **Als Nächstes
-   E43.4** (Open Interest in Kontrakten statt Dollar, Befund A3): **gebaut und
-   gemessen** (26.09.2026, Zweig `claude/e43-4-open-interest-9mmh0l`, 488 Tests grün).
-   210 von 1.504 Kerzen anders erkannt, Rendite identisch, Regel nicht erfüllt,
-   `muster_oi` bleibt `"usd"`. A3 ist echt: Die Hälfte der Pump-Treffer beim OI kam nur
-   vom Kurs. Offen: Kaisers Go für `main`, Anzeige-Frage A2/A3. Danach E43.6
-   (Nachmessungen), E43.7 (Texte), A5
+   E43.4** (Open Interest in Kontrakten statt Dollar, Befund A3): **gebaut, gemessen,
+   seit 26.09.2026 in `main`** (Kaisers Go). 210 von 1.504 Kerzen anders erkannt,
+   Rendite identisch, Regel nicht erfüllt, `muster_oi` bleibt `"usd"`. A3 ist echt: Die
+   Hälfte der Pump-Treffer beim OI kam nur vom Kurs. Offen für Kaiser: Anzeige-Frage
+   A2/A3. Als Nächstes E43.6 (Nachmessungen, zuerst Bauplan), E43.7 (Texte), A5
    (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die

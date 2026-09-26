@@ -8,6 +8,26 @@
 
 ---
 
+## 26.09.2026 (12) — Kaisers Go: E43.4 in main
+
+Kaiser: *„Go für main“*. Arbeitszweig `claude/e43-4-open-interest-9mmh0l` per
+Fast-Forward nach `main` (`main` hatte sich seit dem Abzweigen nicht bewegt).
+`muster_oi` bleibt `"usd"`, das Handelsverhalten ändert sich nicht. **488 Tests grün in
+`main`.** `STARTPROMPT.md` auf den Stand nach dem Go gebracht.
+
+Kaisers Frage vor dem Go: Vor heute lag die Rendite bei rund 25 %, jetzt bei 35 %. Der
+Sprung kommt von E43.2 (`bein_richtung: "bias"`, Go am Vormittag), nicht von E43.3 oder
+E43.4. Belegt aus der Berichtsgeschichte: Lauf 08:23 Live-Zeile +25,2 %, die Zeile „Bein
+in Handelsrichtung“ im selben Lauf schon +35,4 %. Die alte Einstellung steht im
+heutigen Bericht als „LIVE bis 26.09.2026 (ohne Bein-Richtung)“ unverändert bei +25,2 %.
+Nebenbei: Die neue Einstellung trifft Furkans Kauftage seltener (Treffer-Quote 59 → 35 %,
+Präzision 35 → 23 %).
+
+**Offen für Kaiser:** die Anzeige-Frage zu A2/A3 (Empfehlung siehe Abschnitt 11).
+**Danach:** E43.6, zuerst der Bauplan-Abschnitt.
+
+---
+
 ## 26.09.2026 (11) — E43.4 gemessen: bleibt `"usd"`, A3 ist echt und groß
 
 Backtest-Lauf 36236645038 (Arbeitszweig `claude/e43-4-open-interest-9mmh0l`, Fenster
