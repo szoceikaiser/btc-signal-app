@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (11)**
+> Stand: **26.09.2026 (12)**
 
 ## Lage
 
@@ -22,13 +22,14 @@
   Fensterhälften ≥ 1 Punkt besser, Rückgang 1,0 Punkt flacher statt tiefer) und ist seit
   26.09.2026 live (`site/data/config.json`, Panel-Zeile in `backtest.py` mitgewandert).
   Einzelheiten und Messwerte: `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`.
-- **E43.6 gebaut (Arbeitszweig `claude/e43-6-gitterzeilen-eo6mzb`), noch NICHT
-  gemessen:** vier Gitterzeilen mit je genau einem Unterschied zur Live-Zeile
-  (`rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`) plus Vorproben und
-  Berichtsabschnitt in `engine/backtest.py`, **501 Tests grün** auf dem Zweig. Diese
-  Sitzung hatte keinen Netzzugriff auf Binance/Coinalyze — der echte
-  `python3 backtest.py`-Lauf mit den vier Zeilen steht noch aus. Alle vier Schalter
-  bleiben bis dahin aus. Einzelheiten: `02_status/UEBERGABE.md` (16).
+- **E43.6 gebaut UND gemessen** (Arbeitszweig `claude/e43-6-gitterzeilen-eo6mzb`,
+  GitHub-Actions-Backtest): vier Gitterzeilen mit je genau einem Unterschied zur
+  Live-Zeile (`rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`), **501 Tests
+  grün**. Ein Bug im ersten Lauf (Zählfunktionen griffen falsch auf die Signal-Dicts zu)
+  wurde gefunden und behoben. **Ergebnis: alle vier Schalter bleiben aus** — keiner
+  erfüllt die vorab festgelegte Regel (jeweils nicht in beiden Fensterhälften
+  ≥ 1 Punkt besser). Einzelheiten und Messwerte:
+  `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt E43.6, „Messung 26.09.2026“.
 - Letzte Live-Änderung am Handelsverhalten davor: **E41, Kaisers Rückeroberungs-Regel**
   (`stop_rueckeroberung: 1`), live seit 21.09.2026.
 - **Streitpunkt dazu (erledigt 26.09.2026, siehe oben):** Die Ausschalt-Regel für E41
@@ -65,11 +66,11 @@
    Hälfte der Pump-Treffer beim OI kam nur vom Kurs. **E43.4b** (Kaisers Antwort auf
    die Anzeige-Frage): Die OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar,
    Pfeil und Hinweis folgen den Kontrakten. **Live seit 26.09.2026** (Kaisers Go,
-   reine Anzeige). **E43.6-Bauplan geschrieben** 26.09.2026 (`rest_halten`,
+   reine Anzeige). **E43.6 gebaut und gemessen** 26.09.2026 (`rest_halten`,
    `strict_confirm`, `confirm_t1`, `cooldown_h`; Muster-5-Wiederholung bewusst
-   zurückgestellt, da `muster_cvd`/`muster_oi` beide auf dem alten Wert blieben) —
-   wartet auf Kaisers Go zum Bauen, dann E43.7 (Texte), A5
-   (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
+   zurückgestellt, da `muster_cvd`/`muster_oi` beide auf dem alten Wert blieben) — alle
+   vier Schalter bleiben aus, Regel nicht erfüllt, kein Go nötig. **Als Nächstes E43.7**
+   (Texte), dann A5 (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
    Ausschalt-Regel schlägt auf der neuen Live-Basis nicht mehr an.

@@ -8,6 +8,50 @@
 
 ---
 
+## 26.09.2026 (17) — E43.6 gemessen (GitHub-Actions-Backtest): alle vier Schalter bleiben aus
+
+Fortsetzung von (16): Diese Sitzung hat Zugriff auf GitHub Actions und hat den
+Backtest-Workflow (`.github/workflows/backtest.yml`, `workflow_dispatch`) zweimal auf
+dem Arbeitszweig `claude/e43-6-gitterzeilen-eo6mzb` angestoßen (Kaisers übliche
+Test-Umgebung: hochladen, Backtest laufen lassen, `BACKTEST.md` zurückholen).
+
+**Erster Lauf: Bug gefunden.** Der Abschnitt „E43.6" fiel mit
+`'dict' object has no attribute 'reason'` komplett aus. Ursache: `run_backtest()`
+liefert Signale als `dict` (`Signal.to_dict()`), nicht als `Signal`-Objekte — die drei
+Zählfunktionen (`e436_rest_halten_zaehlen`, `e436_confirm_t1_zaehlen`,
+`e436_cooldown_zaehlen`) griffen per Attribut (`s.reason`/`s.type`/`s.ts`) statt per
+Schlüssel zu. Die Testfixtures in `test_backtest.py` bauten fälschlich `Signal`-Objekte
+statt `dict` und haben den Fehler deshalb nicht gefangen — behoben (`.to_dict()`
+ergänzt). Fix committet, **weiterhin 501 Tests grün**, zweiter Lauf gestartet.
+
+**Zweiter Lauf: sauber durchgelaufen.** Live-Basis in diesem Fenster: +35,4 % Rendite,
+−9,9 % Rückgang, H1 +23,6 %, H2 +9,5 %, 244 Signale. Alle vier Vorproben zählen mehr
+als 0 Treffer (die Zeilen messen also etwas), aber **keine erfüllt die vorab
+festgelegte Entscheidungsregel** — alle scheitern an Bedingung 1 (nicht in beiden
+Fensterhälften ≥ 1 Punkt besser):
+
+| Schalter | Vorprobe | H1 ggü. live | H2 ggü. live | Rückgang ggü. live | Urteil |
+|---|---:|---:|---:|---:|---|
+| `rest_halten` | 11 Positionen | −4,3 | +3,2 | +0,0 | aus |
+| `strict_confirm` | 1.354/1.505 Kerzen | +2,4 | −7,6 | +0,0 | aus |
+| `confirm_t1` | 9/14 Ersteinstiege | −0,8 | +0,9 | +0,0 | aus |
+| `cooldown_h` (48h) | 1 Einstieg | −1,8 | +0,0 | +0,0 | aus |
+
+**Ergebnis: alle vier Schalter bleiben aus.** Kein Go nötig, keine Ausschalt-Frage (da
+keiner live gegangen ist). Am Code (`strategy_core.py`, `config.json`) wurde nichts
+geändert. Statusdokumente aktualisiert: `00_STAND.md`,
+`docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md` (Status-Tabelle + Abschnitt E43.6, „Messung
+26.09.2026"). Vollständiger Bericht: `BACKTEST.md` auf `claude/e43-6-gitterzeilen-eo6mzb`
+(Commit `7433652`).
+
+**Nächster Schritt:** E43.7 (Wissens-Layer-Text berichtigen: `be_im_plus`-Urteil,
+E37-Satz, Funding-Einheit — Prüfbericht Teil E, Punkt 7), danach A5
+(`OFFENE-PUNKTE.md`, Punkt 8: „Teilgewinn am letzten Hoch" hängt von der Historienlänge
+ab — erst messen). Die Muster-5-Wiederholung bleibt bewusst zurückgestellt, bis
+`muster_cvd` oder `muster_oi` einmal auf den korrigierten Wert wechseln.
+
+---
+
 ## 26.09.2026 (16) — E43.6 gebaut, Messung in dieser Sitzung nicht ausführbar (kein Netz)
 
 Bauplan-Abschnitt „E43.6" (`docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md`) umgesetzt in

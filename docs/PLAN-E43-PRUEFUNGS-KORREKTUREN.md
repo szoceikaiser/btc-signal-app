@@ -18,7 +18,7 @@
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 210 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"usd"`. Seit 26.09.2026 in `main` (Kaisers Go), 488 Tests, `sabotage_e434.py` 37/37 |
 | E43.4b | OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar (A3 in der Anzeige) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main`), 493 Tests, `sabotage_e434b.py` 9/9 |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
-| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **GEBAUT** 26.09.2026 (Arbeitszweig `claude/e43-6-gitterzeilen-eo6mzb`), 501 Tests grün. **NOCH NICHT GEMESSEN** — kein Netzzugriff in der bauenden Sitzung, echter `python3 backtest.py`-Lauf steht noch aus (siehe Abschnitt E43.6) |
+| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **GEMESSEN** 26.09.2026 (GitHub-Actions-Backtest, Arbeitszweig `claude/e43-6-gitterzeilen-eo6mzb`), 501 Tests grün. Alle vier Schalter erfüllen die Entscheidungsregel nicht → bleiben aus (siehe Abschnitt E43.6, „Messung 26.09.2026“) |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
 
 ### Aufwand je Etappe (Kaisers Wunsch 26.09.2026: Tokens sparen, wo es geht)
@@ -892,6 +892,32 @@ Stop-Serien-Frage schon stabiler adressiert.
 **Aufwand:** niedrig (reine Auswertung nach vorab festgelegter Regel, kein neuer
 Mechanismus) — wie in der Etappen-Tabelle oben vermerkt. Ausgangsbasis **493 Tests grün**;
 geschätzt **4 bis 8 neue Tests** (vier Zeilen-Tests plus ggf. je ein Vorprobe-Test).
+
+### Messung 26.09.2026 (GitHub-Actions-Backtest, Arbeitszweig)
+
+Gebaut wie oben beschrieben, 8 neue Tests, **501 grün**. Beim ersten Backtest-Lauf
+krachten alle vier Vorproben (`'dict' object has no attribute 'reason'`) — `run_backtest()`
+liefert Signale als `dict` (`Signal.to_dict()`), die Zählfunktionen griffen per Attribut
+statt per Schlüssel zu; die Testfixtures bauten fälschlich `Signal`-Objekte statt `dict`
+und fingen den Fehler deshalb nicht. Behoben, erneut gemessen, weiter 501 Tests grün.
+
+Live-Basis in diesem Lauf: +35,4 % Rendite, −9,9 % Rückgang, H1 +23,6 %, H2 +9,5 %,
+244 Signale. Alle vier Vorproben zählen mehr als 0 Treffer (misst also etwas), aber
+**keine der vier Zeilen erfüllt die Entscheidungsregel** — jede scheitert an
+Bedingung 1 (nicht in beiden Fensterhälften ≥ 1 Punkt besser):
+
+| Schalter | Vorprobe (Treffer) | H1 gegen live | H2 gegen live | Rückgang gegen live | Urteil |
+|---|---:|---:|---:|---:|---|
+| `rest_halten` | 11 Positionen | −4,3 | +3,2 | +0,0 | Regel nicht erfüllt → bleibt aus |
+| `strict_confirm` | 1.354 von 1.505 Kerzen | +2,4 | −7,6 | +0,0 | Regel nicht erfüllt → bleibt aus |
+| `confirm_t1` | 9 von 14 Ersteinstiegen | −0,8 | +0,9 | +0,0 | Regel nicht erfüllt → bleibt aus |
+| `cooldown_h` (48h) | 1 Einstieg | −1,8 | +0,0 | +0,0 | Regel nicht erfüllt → bleibt aus |
+
+**Ergebnis: alle vier Schalter bleiben aus** (`rest_halten=False`, `strict_confirm=False`,
+`confirm_t1=False`, `cooldown_h=0.0`). Keine Ausschalt-Frage, da keiner live gegangen ist.
+Am Code (`strategy_core.py`, `config.json`) wurde nichts geändert — reine Messung.
+Vollständiger Bericht: `BACKTEST.md`, Abschnitt „E43.6“, Commit `7433652` auf
+`claude/e43-6-gitterzeilen-eo6mzb`.
 
 ## E43.7
 
