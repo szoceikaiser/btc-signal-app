@@ -2365,6 +2365,88 @@ def test_e434_muster_oi_kommt_in_evaluate_an():
     assert lauf("usd") != lauf("btc")
 
 
+# ------------------------- E43.4b: OI-Zeile im Lage-Abruf in Kontrakten (reine Anzeige)
+
+def _oi_zeile_serie(kurs, kontrakte, mit_kontrakten=True, n=40, seed=7):
+    """Kerzen + Flow fuer die OI-Zeile. Bis 12 Kerzen vor Schluss schwanken Kurs und
+    Kontrakte leicht (daraus entsteht der Massstab fuer "flach"), in den letzten 12
+    Kerzen aendern sie sich gleichmaessig um `kurs` bzw. `kontrakte`. Das OI steht in
+    Dollar = Kontrakte x Kurs; oi_btc entsteht ueber oi_in_btc wie live."""
+    import random
+    from dataclasses import replace
+    from strategy_core import oi_in_btc
+    r = random.Random(seed)
+    v, k, cs, fl = 76000.0, 100_000.0, [], []
+    for i in range(n):
+        if i < n - 12:
+            v *= 1 + r.gauss(0, 0.004)
+            k *= 1 + r.gauss(0, 0.004)
+            v0, k0 = v, k
+        else:
+            j = i - (n - 13)
+            v, k = v0 * (1 + kurs * j / 12), k0 * (1 + kontrakte * j / 12)
+        cs.append(Candle(1_700_000_000_000 + i * H4_MS, v, v * 1.004, v * 0.996, v))
+        fl.append(FlowPoint(cs[-1].ts, 1e9 + i * 1e6, 0.0, k * v, 0.0001))
+    if mit_kontrakten:
+        btc = oi_in_btc({x.ts: x.oi for x in fl}, {x.ts: x.close for x in cs})
+        fl = [replace(x, oi_btc=btc[x.ts]) for x in fl]
+    return cs, fl
+
+
+def _oi_zeile(kurs, kontrakte, **kw):
+    cs, fl = _oi_zeile_serie(kurs, kontrakte, **kw)
+    return [z for z in orderflow_detail(cs, fl) if z["name"] == "Open Interest"][0]
+
+
+def test_e434b_kurs_allein_heisst_nicht_neues_geld():
+    """Der Fehler aus A3 in der Anzeige: Kurs +3 %, die Kontrakte bleiben gleich. In
+    Dollar steigt das OI um 3 %, und bisher stand dort "neues Geld kommt herein". Jetzt
+    folgen Pfeil und Hinweis den Kontrakten, und der Hinweis sagt, woher der
+    Dollar-Anstieg kommt. Vorprobe: Ohne Kontrakt-Reihe zeigt dieselbe Lage den alten
+    Fehler - das Szenario enthaelt ihn also."""
+    alt = _oi_zeile(0.03, 0.0, mit_kontrakten=False)
+    assert alt["richtung"] == "steigt" and alt["hinweis"] == "neues Geld kommt herein", alt
+    z = _oi_zeile(0.03, 0.0)
+    assert "Kontrakte +0,0 %" in z["wert"] and "(+3,0 %)" in z["wert"], z
+    assert z["richtung"] == "flach", z
+    assert z["hinweis"] == "unveraendert - der Dollar-Anstieg kommt nur vom Kurs", z
+
+
+def test_e434b_kursrutsch_heisst_nicht_positionen_werden_geschlossen():
+    """Kurs -5 %, niemand schliesst eine Position: bisher "Positionen werden
+    geschlossen". Jetzt: unveraendert, und der Rueckgang kommt nur vom Kurs."""
+    assert _oi_zeile(-0.05, 0.0, mit_kontrakten=False)["hinweis"] == \
+        "Positionen werden geschlossen"                               # Vorprobe
+    z = _oi_zeile(-0.05, 0.0)
+    assert z["richtung"] == "flach", z
+    assert z["hinweis"] == "unveraendert - der Dollar-Rueckgang kommt nur vom Kurs", z
+
+
+def test_e434b_echte_kontrakt_aenderung_bleibt_sichtbar():
+    """Die Gegenprobe: Kommen wirklich neue Positionen dazu (+4 %), heisst es weiter
+    "neues Geld kommt herein" - ohne Kurs-Bemerkung, wenn Dollar und Kontrakte
+    gemeinsam steigen. Und wenn der Kurs den Anstieg in Dollar verdeckt (Kurs -4 %,
+    Kontrakte +4 %, Dollar etwa flach), sagt der Hinweis genau das."""
+    z = _oi_zeile(0.0, 0.04)
+    assert z["richtung"] == "steigt" and z["hinweis"] == "neues Geld kommt herein", z
+    assert "Kontrakte +4,0 %" in z["wert"], z
+    z = _oi_zeile(-0.04, 0.04)
+    assert z["richtung"] == "steigt", z
+    assert z["hinweis"] == "neues Geld kommt herein - in Dollar vom Kurs verdeckt", z
+    z = _oi_zeile(0.0, -0.04)
+    assert z["richtung"] == "faellt" and z["hinweis"] == "Positionen werden geschlossen", z
+
+
+def test_e434b_ohne_kontrakt_reihe_bleibt_die_zeile_wie_bisher():
+    """Ohne Kontrakt-Reihe (Kraken-Rueckfall, oi_btc = 0) keine Zeile "Kontrakte 0 %"
+    - das behauptete Stillstand, wo nichts bekannt ist. Richtung und Hinweis folgen
+    dann wie vor E43.4b dem Dollar-Wert."""
+    for kurs, kontrakte in ((0.03, 0.0), (0.0, 0.04), (-0.05, 0.0)):
+        z = _oi_zeile(kurs, kontrakte, mit_kontrakten=False)
+        assert "Kontrakte" not in z["wert"], z
+        assert "Kurs" not in z["hinweis"], z
+
+
 def test_ema200_braucht_echte_historie():
     """Der stille Fehler, den E33 behebt: Mit 400 Kerzen (67 Tage) lieferte
     daily_trend(period=200) klaglos einen EMA67 und gab ihn als EMA200 aus."""

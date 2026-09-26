@@ -8,6 +8,24 @@
 
 ---
 
+## 26.09.2026 (13) — E43.4b: OI-Zeile im Lage-Abruf in Kontrakten (Arbeitszweig)
+
+**Kaisers Auftrag:** *„Bau zuerst die OI-Zeile in Kontrakten“* (seine Antwort auf die
+Anzeige-Frage A2/A3). Zweig: `claude/e43-4-open-interest-9mmh0l`. **`main` ist
+unverändert.** Reine Anzeige, kein Schalter, kein Signal ändert sich.
+
+- Die OI-Zeile zeigt hinter dem Dollar-Wert die Änderung der Kontrakte. Pfeil und Hinweis
+  folgen den Kontrakten. Zeigen Dollar und Kontrakte in verschiedene Richtungen, steht
+  dabei „der Dollar-Anstieg/-Rueckgang kommt nur vom Kurs“ bzw. „in Dollar vom Kurs
+  verdeckt“. Ohne Kontrakt-Reihe (Kraken-Rückfall) bleibt die Zeile wie bisher.
+- Die Musterzeile ändert sich nicht, sie rechnet weiter wie der Handel.
+- **493 Tests grün** (+5). `sabotage_e434b.py` 9/9 beim ersten Lauf.
+- Regel und Beispiel: `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „E43.4b“.
+
+**Offen für Kaiser:** „Go“ für `main`. **Danach:** E43.6, zuerst der Bauplan-Abschnitt.
+
+---
+
 ## 26.09.2026 (12) — Kaisers Go: E43.4 in main
 
 Kaiser: *„Go für main“*. Arbeitszweig `claude/e43-4-open-interest-9mmh0l` per

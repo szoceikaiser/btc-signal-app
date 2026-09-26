@@ -783,20 +783,37 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
                        "richtung": fu["richtung"], "hinweis": hinweis})
 
     # --- Open Interest: kommt neues Geld herein?
+    # E43.4b (Befund A3 in der Anzeige): Das Dollar-OI ist Kontrakte x Kurs. Faellt der
+    # Kurs um 5 % und niemand schliesst eine Position, fiel es trotzdem um 5 % - und hier
+    # stand "Positionen werden geschlossen". Deshalb folgen Richtung und Hinweis jetzt
+    # den KONTRAKTEN (oi_btc, dieselbe Reihe wie muster_oi in E43.4). Der Dollar-Wert
+    # bleibt stehen; zeigen beide in verschiedene Richtungen, sagt der Hinweis das dazu.
+    # Ohne Kontrakt-Reihe (Kraken-Rueckfall) bleibt alles wie vorher.
     oi = _of_reihe([p.oi for p in flow], fenster)
     if oi:
         oi_davor = flow[-1 - fenster].oi
         pct = (oi["aenderung"] / oi_davor * 100) if oi_davor else 0.0
-        if oi["richtung"] == "steigt":
+        pct_txt = f"{pct:+.1f}".replace(".", ",")
+        wert = f"{_usd_kurz(oi['aenderung'])} ({pct_txt} %)"
+        richtung = oi["richtung"]
+        kt = _of_reihe([p.oi_btc for p in flow], fenster)
+        kt_davor = flow[-1 - fenster].oi_btc
+        if kt and kt_davor:
+            kt_pct = kt["aenderung"] / kt_davor * 100
+            wert += f", Kontrakte {kt_pct:+.1f} %".replace(".", ",")
+            richtung = kt["richtung"]
+        if richtung == "steigt":
             hin = "neues Geld kommt herein"
-        elif oi["richtung"] == "faellt":
+        elif richtung == "faellt":
             hin = "Positionen werden geschlossen"
         else:
             hin = "unveraendert"
-        pct_txt = f"{pct:+.1f}".replace(".", ",")
-        zeilen.append({"name": "Open Interest",
-                       "wert": f"{_usd_kurz(oi['aenderung'])} ({pct_txt} %)",
-                       "richtung": oi["richtung"], "hinweis": hin})
+        if richtung != oi["richtung"]:
+            hin += {"steigt": " - der Dollar-Anstieg kommt nur vom Kurs",
+                    "faellt": " - der Dollar-Rueckgang kommt nur vom Kurs"}.get(
+                        oi["richtung"], " - in Dollar vom Kurs verdeckt")
+        zeilen.append({"name": "Open Interest", "wert": wert,
+                       "richtung": richtung, "hinweis": hin})
 
     # --- Funding: Ueberhebelung. Kein kumulierter Wert - der Stand zaehlt.
     fund = [p.funding for p in flow[-fenster:]]

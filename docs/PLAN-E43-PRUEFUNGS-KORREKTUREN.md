@@ -16,6 +16,7 @@
 | E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **LIVE** seit 26.09.2026 (`bein_richtung: "bias"`, Entscheidungsregel erfüllt, Kaisers Go) |
 | E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 2 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"alt"` (Arbeitszweig) |
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 210 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"usd"`. Seit 26.09.2026 in `main` (Kaisers Go), 488 Tests, `sabotage_e434.py` 37/37 |
+| E43.4b | OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar (A3 in der Anzeige) | reine Anzeige | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 493 Tests, `sabotage_e434b.py` 9/9 |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
@@ -686,6 +687,64 @@ Kaisers Zustimmung zum Bauplan: *„Ja“*. Gebaut wie oben, ohne Abweichung von
   geschlossen“) folgt den Kontrakten. Dann sieht Kaiser selbst, ob das OI wegen neuer
   Positionen oder nur wegen des Kurses steigt, und Anzeige und Handel bleiben bei
   derselben Mustererkennung.
+
+## E43.4b — OI-Zeile im Lage-Abruf in Kontrakten (reine Anzeige)
+
+**Kaisers Auftrag 26.09.2026:** *„Bau zuerst die OI-Zeile in Kontrakten“* (seine Antwort
+auf die Anzeige-Frage A2/A3 nach der Messung E43.4).
+
+**Problem:** Die Zeile „Open Interest“ im Lage-Abruf (`orderflow_detail`) zeigt die
+Änderung in Dollar. Richtung, Pfeil und Hinweis („neues Geld kommt herein“ /
+„Positionen werden geschlossen“) folgen dem Dollar-Wert. Fällt der Kurs um 5 % und
+niemand schließt eine Position, steht dort „Positionen werden geschlossen“. Das ist
+falsch (Befund A3 in der Anzeige; E43.4 hat gezählt, wie oft das passiert).
+
+**Regel:**
+
+1. Der Dollar-Wert bleibt stehen, **dahinter** steht die Änderung der Kontrakte in
+   Prozent (`FlowPoint.oi_btc`, dieselbe Reihe wie E43.4): „+120,0 Mio $ (+3,0 %),
+   Kontrakte +0,0 %“.
+2. Richtung (Pfeil) und Hinweis folgen den **Kontrakten**: steigt → „neues Geld kommt
+   herein“, fällt → „Positionen werden geschlossen“, flach → „unveraendert“. Die
+   Richtung wird wie bisher am Maßstab der früheren Fensteränderungen derselben Reihe
+   bestimmt (`_of_reihe`).
+3. Zeigen Dollar und Kontrakte in verschiedene Richtungen, sagt der Hinweis das dazu:
+   „der Dollar-Anstieg kommt nur vom Kurs“, „der Dollar-Rueckgang kommt nur vom Kurs“,
+   bzw. bei flachem Dollar-Wert „in Dollar vom Kurs verdeckt“.
+4. Ohne Kontrakt-Reihe (Kraken-Rückfall, kein Coinalyze) bleibt die Zeile genau wie
+   bisher: nur Dollar, Hinweis nach Dollar. Keine Zeile „Kontrakte 0 %“, die Stillstand
+   behauptet, wo nichts bekannt ist.
+
+**Bewusst NICHT:** keine Änderung an `classify_pattern`, `evaluate` oder am Muster im
+Lage-Abruf (die Musterzeile rechnet weiter wie der Handel, `muster_oi: "usd"`); kein
+Schalter (reine Anzeige, wie E43.1); keine anderen Zeilen des Order-Flow-Blocks.
+
+**Betroffene Dateien:** `engine/strategy_core.py` (`orderflow_detail`),
+`engine/test_strategy_core.py`, `engine/test_main.py` (Nachricht bleibt handytauglich),
+neue Sabotage-Probe `engine/sabotage_e434b.py`.
+
+**Umgesetzt 26.09.2026 (Arbeitszweig), ohne Abweichung von der Regel.** So steht es im
+Lage-Abruf (Kurs +3 %, Kontrakte gleich):
+
+```
+Open Interest: +225,5 Mio $ (+3,0 %),
+Kontrakte +0,0 % →
+  unveraendert - der Dollar-Anstieg
+  kommt nur vom Kurs
+```
+
+Der Dollar-Teil ist immer zu lang, um „Kontrakte“ noch in dieselbe Handyzeile (38
+Zeichen) zu nehmen. „Kontrakte +x,x %“ steht deshalb samt Pfeil geschlossen in der
+zweiten Zeile, und der Pfeil gehört sichtbar zu den Kontrakten.
+
+- **Tests:** 5 neue, **493 grün**. Je ein Test für „Kurs allein ist kein neues Geld“,
+  „Kursrutsch ist kein Schließen“ (beide mit Vorprobe: ohne Kontrakt-Reihe zeigt
+  dieselbe Lage den alten Fehler), für echte Kontrakt-Änderungen samt „in Dollar vom
+  Kurs verdeckt“, für „ohne Kontrakt-Reihe wie bisher“, und dafür, dass die Zeile im
+  Lage-Abruf ankommt und handytauglich bleibt.
+- **Sabotage:** `sabotage_e434b.py`, 9 Sabotagen, alle beim ersten Lauf gefangen.
+  `sabotage_e43.py` (7/7) und `sabotage_e434.py` (37/37) erneut gelaufen, alle
+  Vorlagen der übrigen Proben passen weiter.
 
 ## E43.6, E43.7
 

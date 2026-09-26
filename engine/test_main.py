@@ -823,6 +823,20 @@ def test_lage_abruf_enthaelt_furkans_rohwerte():
     assert "des Spot-Flows" in txt
 
 
+
+def test_e434b_oi_zeile_in_kontrakten_steht_handytauglich_in_der_nachricht():
+    """Die OI-Zeile mit Kontrakten und Kurs-Bemerkung ist laenger als vorher. Sie muss
+    im Lage-Abruf ankommen und darf auf dem Handy (38 Zeichen) nicht ueberlaufen."""
+    from telegram_notify import format_lage
+    from test_strategy_core import _oi_zeile_serie
+    cs, fl = _oi_zeile_serie(0.03, 0.0)
+    out, _ = _lage_lauf(cs, fl, {"pivot_n": 5, "bias_short": False, "trend_ema": 3})
+    txt = format_lage(out, cs[-1].ts)
+    assert "Kontrakte +0,0 %" in txt, txt
+    assert "Dollar-Anstieg kommt nur vom Kurs" in " ".join(txt.split()), txt
+    lang = [z for z in txt.split("\n") if len(z) > 38]
+    assert not lang, lang
+
 def test_lage_nachricht_bleibt_handy_tauglich():
     """E36.2 (Kaisers Fund 19.09.2026): Keine Zeile darf auf dem Handy umbrechen.
 
