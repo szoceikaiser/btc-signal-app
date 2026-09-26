@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1790380800000,
+ "last_signal_ts": 1790395200000,
  "retrace_extreme": 82874.93,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -46,10 +46,10 @@
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 83858.78115384615,
-  "kurs": 83939.0,
+  "kurs": 84116.8,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 83.939 $ ueber EMA200 (71.253 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.117 $ ueber EMA200 (71.255 $)",
    "struktur": "gebrochen",
    "struktur_text": "Struktur gebrochen - neues Bein 87.396 $ -> 82.875 $ setzt den Trend nicht fort",
    "spot": "schwach",
@@ -95,17 +95,17 @@
   ],
   "teilgewinn": [
    {
+    "preis": 84828.725,
+    "was": "kurz unter dem letzten Hoch 85.255",
+    "tranche": 15
+   },
+   {
     "zone": [
      85668.74732,
      85813.411
     ],
     "was": "Widerstand der Gegenbewegung \u2014 nur Hinweis, die Engine verkauft dort nicht",
     "tranche": 0
-   },
-   {
-    "preis": 86958.69165,
-    "was": "kurz unter dem letzten Hoch 87.396",
-    "tranche": 15
    },
    {
     "preis": 88690.63399999999,
@@ -174,13 +174,13 @@
   "ampel_filter": "off",
   "stop_rueckeroberung": 1
  },
- "updated_at": "2026-09-26T04:02:26Z",
- "last_close": 83939.0,
+ "updated_at": "2026-09-26T08:02:24Z",
+ "last_close": 84116.8,
  "zonen_vorschau": {
   "richtung": "SHORT",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 83.939 $ ueber EMA200 (71.253 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.117 $ ueber EMA200 (71.255 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 87.396 $ -> 82.875 $",
    "spot": "schwach",
