@@ -10,15 +10,28 @@
 
 ## Etappen (Reihenfolge = Nutzwert)
 
-| Etappe | Inhalt | Art | Status |
-|---|---|---|---|
-| E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | **FERTIG** 26.09.2026 (Arbeitszweig), wartet auf „Go“ |
-| E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | **GEBAUT** 26.09.2026, Backtest auf dem Arbeitszweig läuft |
-| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | OFFEN |
-| E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | OFFEN |
-| E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | OFFEN |
-| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | OFFEN |
-| E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | OFFEN |
+| Etappe | Inhalt | Art | Aufwand | Status |
+|---|---|---|---|---|
+| E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **FERTIG** 26.09.2026 (Arbeitszweig), wartet auf „Go“ |
+| E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **GEBAUT** 26.09.2026, Backtest auf dem Arbeitszweig läuft |
+| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | OFFEN |
+| E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **mittel bis hoch** | OFFEN |
+| E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | OFFEN |
+| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
+| E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
+
+### Aufwand je Etappe (Kaisers Wunsch 26.09.2026: Tokens sparen, wo es geht)
+
+| Stufe | Modell / Denkaufwand | Wann |
+|---|---|---|
+| **niedrig** | kleines oder mittleres Modell, niedriger Denkaufwand | Backtest anstoßen und eine Tabelle nach einer **vorab festgelegten** Regel auswerten; Gitterzeilen nach Vorlage; Texte berichtigen. Lesen: nur `00_STAND.md`, jüngster Abschnitt `UEBERGABE.md`, dieser Plan |
+| **mittel** | mittleres Modell, normaler Denkaufwand | kleine Code-Änderung mit Test und Sabotage, die kein Signal ändert (Anzeige, Test-Reparatur) |
+| **hoch** | stärkstes Modell, hoher Denkaufwand | Änderung an der Handelslogik oder Mustererkennung: Live und Backtest müssen gleich rechnen, Tests brauchen Vorprobe und Sabotage |
+| **maximal** | stärkstes Modell, maximaler Denkaufwand | Gesamtprüfungen, neue Mechanismen aus Furkans Videos (E42), Entscheidungsregeln für Live-Schaltungen, E41.6 |
+
+**Sparregeln:** Eine Etappe je Chat — lange Chats werden mit jeder Nachricht teurer.
+`BACKTEST.md` nie ganz lesen, nur die betroffenen Zeilen (Suche nach dem Zeilennamen).
+`GEMESSEN-UND-ENTSCHIEDEN.md` (42 KB) nur lesen, wenn etwas Neues vorgeschlagen wird.
 
 ## E43.1 — Futures-CVD in Dollar (Anzeige)
 

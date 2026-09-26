@@ -20,6 +20,11 @@ Du arbeitest an meiner BTC-Signal-Engine. Repo: github.com/szoceikaiser/btc-sign
 keine Zugangsdaten, keine privaten Notizen, keine kompletten Video-Transkripte hinein.
 Webseite: szoceikaiser.github.io/btc-signal-app
 
+VOR ALLEM ANDEREN: Der letzte Arbeitsstand liegt oft NICHT in main, sondern auf dem
+juengsten Zweig claude/... (git fetch; git branch -r --sort=-committerdate). Ist ein
+claude-Zweig neuer als main, lies die Dateien unten VON DIESEM ZWEIG und arbeite dort
+weiter. Dort steht in wissens-layer\02_status\UEBERGABE.md, was zuletzt lief.
+
 LIES ZUERST, IN DIESER REIHENFOLGE:
 1. wissens-layer\00_STAND.md                      (Kurzstand, halbe Minute)
 2. wissens-layer\02_status\UEBERGABE.md           (jüngster Abschnitt zuerst)
@@ -91,6 +96,12 @@ ausdruecklichen "Go". Vor jedem Push den neuesten Stand von main holen: Die Engi
 committet alle 4 Stunden selbst. Ich hole mir den Stand auf den PC mit
 stand-holen.bat nur, wenn ich dort etwas lesen will. Boersen-APIs sind aus
 Arbeitsumgebungen meist gesperrt - eigene Messungen gehen nur ueber den Backtest.
+
+ZWISCHENSTAENDE UND AUFWAND: Mein Budget kann jederzeit enden. Halte deshalb nach jeder
+Etappe, vor jedem langen Lauf und nach jedem groesseren Schritt den Stand fest
+(UEBERGABE.md, Bauplan-Status) und pushe ihn auf deinen Arbeitszweig. Nenne zu jedem
+vorgeschlagenen Schritt den noetigen Aufwand (niedrig/mittel/hoch/maximal, siehe
+ARBEITSREGELN.md, Abschnitt Budget), damit ich Tokens sparen kann.
 
 ARBEITSWEISE BEI GROESSEREN VORHABEN: erst einen Bauplan als docs\PLAN-E<nr>-<name>.md
 schreiben (Problem mit meinem Zitat, Regel, Schwellen, betroffene Dateien, "bewusst

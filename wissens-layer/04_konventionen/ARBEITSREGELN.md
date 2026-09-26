@@ -129,6 +129,27 @@ Regel selbst wird dabei nicht abgeschwächt.
 - **Der Zugangsschlüssel von Coinalyze wird Kaiser nie gezeigt** — auch nicht in Teilen.
   Er steckt als GitHub-Secret im Repo und wird dort von ihm selbst gepflegt.
 
+## Budget: Zwischenstände und Aufwand (Kaiser, 26.09.2026)
+
+*„Wichtig ist, dass du immer wieder den Zwischenstand festhältst und auf GitHub hochlädst
+für den Fall, dass mein Budget bei Claude dem Ende neigt und deine Arbeit abgebrochen
+wird. So hab ich den letzten Stand und kann es mit einem anderen Modell weiter
+fortführen.“*
+
+- **Zwischenstand sichern, nicht erst am Ende:** nach jeder Etappe, vor jedem langen Lauf
+  (Backtest, Sabotage-Probe) und spätestens nach jedem größeren Arbeitsschritt: 
+  `02_status/UEBERGABE.md` fortschreiben (was fertig, was läuft gerade, **welche Lauf-ID**,
+  was als Nächstes, auf welchem Zweig), Status im Bauplan setzen, **committen und auf den
+  Arbeitszweig pushen**. Halbfertiger Code wird nicht gepusht — dann wird der Stand im
+  Bauplan beschrieben und der Code zurückgerollt.
+- **Wo der letzte Stand liegt:** auf dem jüngsten Zweig `claude/...` auf GitHub, nicht
+  zwingend in `main`. Eine neue Sitzung prüft das zuerst (steht im Startprompt).
+- **Aufwand vorschlagen:** Zu jedem vorgeschlagenen Schritt nennt die KI die nötige Stufe
+  — niedrig / mittel / hoch / maximal — und was sie für diesen Schritt lesen muss. Die
+  Stufen sind in `docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md` beschrieben. Faustregel:
+  Handelslogik und Prüfungen hoch bis maximal; Auswerten nach vorab festgelegter Regel,
+  Gitterzeilen nach Vorlage und Texte niedrig.
+
 ## Git (umgestellt am 26.09.2026, Kaisers Wunsch)
 
 - **Die KI committet und pusht selbst — aber nur auf einen eigenen Arbeitszweig**
