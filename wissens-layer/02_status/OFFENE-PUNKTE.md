@@ -19,6 +19,16 @@ Bericht: `docs\PRUEFUNG-2026-09-26-GESAMT.md` (Teil E). Nichts davon ist gebaut.
    `confirm_t1`, `cooldown_h`; danach `block_unhealthy`/Muster 5 einmal wiederholen.
 7. **Wissens-Layer berichtigen:** `be_im_plus`-Urteil, E37-Satz („keine einzige
    Variante“), „Faktor 69“ beim Funding = Prozent-Einheit.
+8. **A5 (neu 26.09.2026, beim Bau von E43.5 gefunden, NICHT gemessen):** „Teilgewinn am
+   letzten Hoch“ (`high_exit`, live) hängt von der geladenen Historie ab.
+   `next_pivot_beyond()` nimmt das nächste Pivot-Hoch über dem Kurs aus **allen**
+   geladenen Kerzen. Ein längeres Fenster kann ein älteres, näher liegendes Hoch
+   dazuholen: Im Test-Szenario verkauft die Engine mit 1.200 Kerzen an 131.281, mit 400
+   erst an 135.282. Live lädt 1.300 Kerzen, der Backtest rechnet ab 10.08.2025. Das ist
+   dieselbe Fehlerklasse wie A2 (live ≠ Backtest). Erst messen: Zählt der Backtest
+   Kerzen, an denen das Hoch mit 1.300 Kerzen Historie ein anderes wäre? Erst danach
+   über einen Schalter reden. Einzelheiten: `docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md`,
+   Abschnitt E43.5.
 
 ## Am Wissens-Layer selbst
 

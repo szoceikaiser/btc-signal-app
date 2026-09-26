@@ -14,9 +14,9 @@
 |---|---|---|---|---|
 | E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main` gemerged) |
 | E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **LIVE** seit 26.09.2026 (`bein_richtung: "bias"`, Entscheidungsregel erfüllt, Kaisers Go) |
-| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **BAUPLAN FERTIG** 26.09.2026, Bau OFFEN |
+| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **IM BAU** 26.09.2026 (Arbeitszweig) |
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **mittel bis hoch** | OFFEN |
-| E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | OFFEN |
+| E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
 
@@ -242,7 +242,94 @@ je ausgelöst wird.
 - kein gleichzeitiges Anfassen von A3/OI (das ist E43.4) — ein Unterschied je Zeile,
   sonst weiß man hinterher nicht, was gewirkt hat.
 
-## E43.4 bis E43.7
+### Ergänzungen zum E43.3-Bauplan (26.09.2026, beim Bau, vor jeder Messung)
+
+Beim Lesen des Codes vor dem Bau gefunden. Die Regel oben ändert sich dadurch nicht, sie
+wird nur genauer:
+
+- **„Futures steigt“ bei `"usd"`:** Die Bedingung `fut > 0` prüft bei `"usd"` die
+  Dollar-Summe `fut_delta_usd > 0`, damit beide Seiten des Vergleichs in derselben
+  Einheit stehen. Das Vorzeichen stimmt fast immer mit dem der BTC-Differenz überein.
+  Nur bei stark wechselnden Kerzen-Deltas und großer Kursbewegung im Fenster kann es
+  abweichen.
+- **Fehlt zu einem Flow-Punkt im Fenster die Kerze** (gleiche `ts`), gibt es keine
+  Dollar-Summe. Dann wird kein Derivate-Pump erkannt: lieber keine Warnung als eine
+  mit falschem Kurs (dieselbe Haltung wie `_fut_cvd_usd`). Live und im Backtest werden
+  Kerze und Flow-Punkt in derselben Schleife gebaut, der Fall tritt dort nicht auf.
+- **Anzeige = Handel:** Die drei `classify_pattern`-Aufrufe für Lage-Abruf, Vorschau und
+  Plan in `main.py` bekommen denselben `muster_cvd`-Wert wie `evaluate()`. Solange der
+  Schalter auf `"alt"` steht, ändert sich dort nichts. Damit ist die Sonderregel
+  (Anzeige-Korrektur auch ohne Rendite-Gewinn) später eine reine Konfig-Frage.
+- **Grenze, bewusst nicht behoben:** Die E37-Datenvarianten „Spot-CVD aggregiert“ und
+  „ALLES aggregiert“ führen das Spot-CVD in **BTC** (`coinalyze.spot_delta_aggregiert`),
+  nicht in Dollar. Mit `"usd"` würden dort BTC und Dollar verglichen. Sie laufen mit
+  der Panel-Einstellung, also mit `"alt"`, solange der Schalter aus ist. Geht `"usd"`
+  live, müssen diese Varianten ihr Spot-Delta vorher in Dollar umrechnen (eigene
+  Folgeetappe, hier vermerkt, damit es nicht vergessen wird).
+- **Vorprobe im echten Datensatz:** Der Backtest-Bericht bekommt einen Abschnitt
+  „E43.3“, der (1) zählt, an wie vielen Kerzen im Fenster `"alt"` und `"usd"`
+  verschiedene Muster ergeben, und (2) die Entscheidungsregel oben selbst prüft
+  (Vorbild `e41_abschnitt`). Ist die Zahl der umklassifizierten Kerzen 0, misst die
+  Gitterzeile nichts, und der Bericht sagt das.
+
+## E43.5 — Der Test „mehr Historie“ summiert je Ladefenster neu und erreicht Muster 2 (Befund A4)
+
+**Kaisers Auftrag 26.09.2026:** *„Ja, bau E43.5 und E43.3“*. E43.5 kommt zuerst, weil
+E43.3 ohne ein Szenario, das Muster 2 erreicht, nichts beweisen kann.
+
+**Problem (Prüfbericht A4):** `test_mehr_historie_aendert_die_signale_nicht` schneidet
+**eine** vorgerechnete CVD-Liste verschieden weit aus. Live beginnt die Summe bei jedem
+Lauf neu bei null, und zwar ab der ersten geladenen Kerze. Außerdem erreicht das Szenario
+Muster 2 nie (OI +0,6 % je zwei Tage, Funding konstant). Zusätzlich beim Lesen gefunden:
+Die im Test hartcodierte „Live-Einstellung“ ist veraltet. Es fehlen
+`stop_rueckeroberung: 1` (live seit 21.09.) und `bein_richtung: "bias"` (live seit 26.09.).
+
+**Regel für den Test:**
+
+1. Der bestehende Test summiert das CVD je Ladefenster ab null (wie `main.fetch_data`).
+   Die Live-Einstellung kommt aus der Panel-Zeile des Gitters, die ein anderer Test
+   gegen `config.json` prüft, statt aus einer eigenen, veraltenden Liste. Sein Zweck
+   bleibt E33-A (Pivots, EMA, Zonen), Muster 2 ist dort ausdrücklich nicht gedeckt.
+2. Neues Szenario mit Pump-Phasen: Kurs, Futures-Delta, OI (+0,6 % je Kerze) und
+   Funding steigen gemeinsam, Spot kaum. Dazwischen schwanken Spot- und Futures-Delta
+   langsam, damit die kumulierten Summen je nach Startpunkt verschieden groß sind.
+3. **Vorprobe (Regel 2):** In den letzten 60 Kerzen erfüllt das Szenario mehrfach alle
+   Muster-2-Voraussetzungen außer dem strittigen Größenvergleich, und `classify_pattern`
+   erkennt in **beiden** Ladefenstern mindestens einmal DERIVATE_PUMP.
+4. **Befund A2 als Test:** Mit der heutigen Rechnung ergeben Ladefenster 400 und 1200
+   verschiedene Muster, und **jede** abweichende Kerze hat auf einer Seite
+   DERIVATE_PUMP. Damit ist bewiesen, dass die Abweichung genau aus Muster 2 kommt.
+   E43.3 muss diesen Unterschied bei `"usd"` zum Verschwinden bringen, bei `"alt"` muss
+   er bleiben.
+
+**Neuer Nebenbefund beim Bau (26.09.2026, noch nicht behoben):** Mit dem Pump-Szenario
+unterscheiden sich die Signale zwischen Ladefenster 400 und 1200 auch an einer Stelle,
+die mit Muster 2 nichts zu tun hat: „Teilgewinn am letzten Hoch“. `next_pivot_beyond()`
+nimmt das nächste Pivot-Hoch über dem Kurs aus der **ganzen** geladenen Historie. Ein
+längeres Fenster kann also ein älteres, näher liegendes Hoch dazuholen. Beispiel im
+Szenario: Mit 1200 Kerzen verkauft die Engine an „131.281“, mit 400 Kerzen erst an
+„135.282“. Live lädt 1.300 Kerzen, der Backtest rechnet ab 10.08.2025. Ob das im echten
+Datensatz einen Unterschied macht, ist **nicht gemessen**. Eingetragen in
+`02_status/OFFENE-PUNKTE.md` als **A5**. Der E43.5-Test vergleicht deshalb die
+Muster-Folge und die Muster-2-Signale, nicht alle Signale. Die Lücke steht im Test
+ausdrücklich dabei, statt still weggelassen zu werden.
+
+**Betroffene Dateien:** `engine/test_strategy_core.py` (Test umgebaut, Szenario, Vorprobe,
+Befund-Test), `engine/sabotage_e433.py` (Sabotagen für E43.5 und E43.3 zusammen).
+
+**Bewusst NICHT:** kein Eingriff in `strategy_core.py` in dieser Etappe; A5 nicht
+nebenbei beheben (eigene Etappe, eigener Schalter, eigene Messung).
+
+**Umgesetzt 26.09.2026 (Arbeitszweig):** `_flow_ab()` summiert je Ladefenster ab null,
+`_live_einstellung()` liest die Panel-Zeile, `_pump_szenario()` liefert die Pump-Phasen.
+Neu: `test_e435_szenario_erreicht_den_muster2_zweig` (Vorprobe) und
+`test_e435_befund_a2_mehr_historie_dreht_muster2` (Befund A2 als Test). Der umgebaute
+`test_mehr_historie_aendert_die_signale_nicht` bleibt mit Neu-Summierung und heutiger
+Live-Einstellung grün. **450 Tests grün.** `sabotage_e433.py`: 5 von 5 gefangen
+(Summe wieder ausgeschnitten, Szenario ohne Pump, OI zu schwach, `_slope` ohne Division,
+Muster 2 unerreichbar).
+
+## E43.4, E43.6, E43.7
 
 Werden vor dem Bau hier ergänzt (Regel, Schwellen, betroffene Dateien, Entscheidungsregel).
 Stichpunkte stehen in `docs/PRUEFUNG-2026-09-26-GESAMT.md`, Teil E.

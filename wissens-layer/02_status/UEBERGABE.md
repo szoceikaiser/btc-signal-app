@@ -8,6 +8,29 @@
 
 ---
 
+## 26.09.2026 (7) — E43.5 fertig, E43.3 im Bau (Arbeitszweig)
+
+**Kaisers Auftrag:** *„Ja, bau E43.5 und E43.3"*. Zweig:
+`claude/btc-signal-engine-start-hyiqny`. **`main` ist unverändert.**
+
+**E43.5 fertig** (Befund A4, Bauplan im Plan-Abschnitt „E43.5"):
+- `test_mehr_historie_aendert_die_signale_nicht` summiert das CVD jetzt je Ladefenster
+  ab null (wie live) und nimmt die Live-Einstellung aus der Panel-Zeile. Die alte,
+  hartcodierte Liste war veraltet (ohne `stop_rueckeroberung`, ohne `bein_richtung`).
+- Neues Pump-Szenario. Die Vorprobe beweist, dass Muster 2 erreicht wird. Ein
+  Befund-Test beweist A2: 400 und 1.200 geladene Kerzen ergeben verschiedene Muster, und
+  jede Abweichung ist ein Derivate-Pump.
+- **450 Tests grün.** `sabotage_e433.py` 5 von 5 gefangen.
+
+**Neuer Nebenbefund A5 (nicht gemessen, nicht behoben):** „Teilgewinn am letzten Hoch“
+hängt von der Länge der geladenen Historie ab (`next_pivot_beyond` sucht in allen
+Kerzen). Eingetragen in `OFFENE-PUNKTE.md` Punkt 8.
+
+**Nächster Schritt:** E43.3 bauen (Schalter `muster_cvd`, Plan-Abschnitt „E43.3“ und
+„Ergänzungen zum E43.3-Bauplan“). Aufwand **hoch**.
+
+---
+
 ## 26.09.2026 (6) — Bauplan E43.3 (Muster 2 in Dollar)
 
 **Kaisers Auftrag:** *„Ja, bereite den Bauplan für E43.3 vor."* — reine Planung, **am

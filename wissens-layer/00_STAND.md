@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (2)**
+> Stand: **26.09.2026 (3)**
 
 ## Lage
 
@@ -38,6 +38,11 @@
   Schwellen von Muster 2 und 4; (A4) der zugehörige Test erreicht den Zweig nie. Dazu:
   16 von 25 ausgeschalteten Schaltern nie gegen die heutige Live-Zeile gemessen, vorneweg
   `bein_richtung: bias` (Furkans zwei Raster).
+
+- **Auf dem Arbeitszweig `claude/btc-signal-engine-start-hyiqny` (nicht in `main`):**
+  E43.5 fertig (Test „mehr Historie“ erreicht jetzt Muster 2, 450 Tests grün),
+  E43.3 im Bau. Neuer, ungemessener Nebenbefund **A5**: „Teilgewinn am letzten Hoch“
+  hängt von der Länge der geladenen Historie ab (`OFFENE-PUNKTE.md`, Punkt 8).
 
 ## Was als Nächstes offen liegt (Reihenfolge = Nutzwert)
 

@@ -1907,34 +1907,157 @@ def _lange_serie(n_kerzen=1300, seed=42):
     return [c(i * H4_MS, x, x * 1.006, x * 0.994, x) for i, x in enumerate(preise)]
 
 
+def _live_einstellung() -> dict:
+    """Die Live-Einstellung aus der Panel-Zeile des Gitters (E43.5).
+
+    Vorher stand hier eine eigene, von Hand gepflegte Liste - und sie war veraltet:
+    stop_rueckeroberung (live seit 21.09.) und bein_richtung (live seit 26.09.) fehlten.
+    Die Panel-Zeile prueft test_panel_variante_entspricht_der_live_einstellung gegen
+    config.json; sie ist damit die eine Quelle, die nicht still veralten kann.
+    """
+    import backtest
+    panel = [v for v in backtest.GRID if v.get("panel")]
+    assert len(panel) == 1
+    return {k: panel[0][k] for k in backtest.EVAL_KEYS}
+
+
+def _flow_ab(kerzen, roh, aus, bis):
+    """Flow-Punkte fuer das Ladefenster kerzen[aus:bis], die CVD-Summen AB NULL.
+
+    Genau so rechnet main.fetch_data: Die Summe beginnt bei jedem Lauf neu, an der
+    ersten geladenen Kerze. `roh[i]` = (Spot-Delta $, Futures-Delta BTC, OI $, Funding)
+    der Kerze i - Werte, die nicht von der Historie abhaengen. Vor E43.5 schnitt der
+    Test EINE vorgerechnete Summe verschieden weit aus; der Startwert der Summe war
+    dadurch in beiden Fenstern derselbe, und genau davon haengt Befund A2 ab.
+    """
+    spot = fut = 0.0
+    out = []
+    for i in range(aus, bis):
+        sd, fd, oi, fu = roh[i]
+        spot += sd
+        fut += fd
+        out.append(FlowPoint(kerzen[i].ts, spot, fut, oi, fu))
+    return out
+
+
 def test_mehr_historie_aendert_die_signale_nicht():
     """DIE Voraussetzung fuer E33-A: LIMIT durfte nur erhoeht werden, wenn dadurch kein
     einziges Signal anders ausfaellt. Sonst waere aus einer Datenbeschaffung heimlich
     eine Strategieaenderung geworden.
 
     Geprueft wird die LIVE-Einstellung ueber die letzten 60 Kerzen, einmal mit einem
-    Ladefenster von 400 und einmal mit 1200.
+    Ladefenster von 400 und einmal mit 1200. Seit E43.5 beginnen die CVD-Summen in jedem
+    Fenster bei null (wie live).
+
+    WAS DIESER TEST NICHT DECKT: Muster 2 (Derivate-Pump). Der Flow hier steigt gleich-
+    maessig, OI kaum, Funding konstant - der Zweig wird nie erreicht (Befund A4). Das
+    deckt test_e435_... mit einem eigenen Szenario ab.
     """
     kerzen = _lange_serie()
-    flow = [FlowPoint(k.ts, 1000 + i * 7, 900 + i * 5, 1e9 * (1 + i * 0.0005), 0.0001)
-            for i, k in enumerate(kerzen)]
-    LIVE = dict(bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
-                min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
-                no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True)
+    roh = [(7.0, 5.0, 1e9 * (1 + i * 0.0005), 0.0001) for i in range(len(kerzen))]
+    LIVE = _live_einstellung()
 
     def lauf(fenster, n_letzte=60):
         pos, sigs = Position(), []
         for i in range(len(kerzen) - n_letzte, len(kerzen) + 1):
             aus = max(0, i - fenster)
-            sigs += evaluate(kerzen[aus:i], flow[aus:i], pos, **LIVE)
+            sigs += evaluate(kerzen[aus:i], _flow_ab(kerzen, roh, aus, i), pos, **LIVE)
         return [(x.ts, x.type, round(x.price, 4)) for x in sigs], pos.state
 
     klein, st_klein = lauf(400)
     gross, st_gross = lauf(1200)
+    assert klein, "Vorprobe: ohne ein einziges Signal prueft der Vergleich nichts"
     assert klein == gross, (
         f"mehr Historie darf die Signale nicht veraendern: "
         f"{len(klein)} gegen {len(gross)} Signale")
     assert st_klein == st_gross
+
+
+# ------------------------------- E43.5: "mehr Historie" erreicht Muster 2 (Befund A4)
+
+PUMP_ZYKLUS, PUMP_AB, PUMP_BIS = 36, 20, 32     # Kerzen 20-31 jedes 36er-Zyklus pumpen
+
+
+def _pump_szenario(n_kerzen=1300, seed=42):
+    """Kerzen plus Rohdaten mit wiederkehrenden Pump-Phasen (E43.5).
+
+    In einer Pump-Phase steigen Kurs, Futures-Delta (+400 BTC je Kerze), OI (+0,6 % je
+    Kerze) und Funding gemeinsam, das Spot-Delta nur wenig (+1 Mio $): Furkans
+    Derivate-Pump. Danach gibt der Kurs nach, OI und Funding fallen zurueck.
+    Dazwischen schwanken Spot- und Futures-Delta langsam mit VERSCHIEDENEN Perioden -
+    dadurch ist die kumulierte Summe je nach Startpunkt verschieden gross, wie in echten
+    Daten. Genau das macht den alten Vergleich spot <= fut/3 fensterabhaengig.
+    """
+    import math
+    import random
+    r = random.Random(seed)
+    p, kerzen, roh = 60000.0, [], []
+    for i in range(n_kerzen):
+        ph = i % PUMP_ZYKLUS
+        pump = PUMP_AB <= ph < PUMP_BIS
+        nach = PUMP_BIS <= ph < PUMP_BIS + 6
+        p *= 1 + r.gauss(0.0004, 0.012) + (0.006 if pump else 0) - (0.012 if nach else 0)
+        kerzen.append(c(i * H4_MS, p, p * 1.006, p * 0.994, p))
+        spot_d = 4e6 * math.sin(i / 37.0) + (1e6 if pump else 0.0)
+        fut_d = 150 * math.sin(i / 53.0 + 1) + (400.0 if pump else 0.0)
+        oi = 1e9 * (1 + 0.006 * (min(ph, PUMP_BIS - 1) - PUMP_AB + 1)) if ph >= PUMP_AB \
+            else 1e9
+        funding = 0.00005 + (0.00001 * (ph - PUMP_AB + 1) if pump else 0.0)
+        roh.append((spot_d, fut_d, oi, funding))
+    return kerzen, roh
+
+
+def _muster_je_fenster(kerzen, roh, fenster, n_letzte=60, **kw):
+    out = []
+    for i in range(len(kerzen) - n_letzte, len(kerzen) + 1):
+        aus = max(0, i - fenster)
+        out.append(classify_pattern(kerzen[aus:i], _flow_ab(kerzen, roh, aus, i), **kw))
+    return out
+
+
+def test_e435_szenario_erreicht_den_muster2_zweig():
+    """Vorprobe (Projektregel 2): Erst nachweisen, dass das Szenario den geprueften
+    Zweig ueberhaupt erreicht. Der alte Test tat das nie - A2 blieb deshalb unentdeckt.
+
+    Geprueft wird zweierlei: (1) die Voraussetzungen von Muster 2 AUSSER dem strittigen
+    Groessenvergleich liegen mehrfach vor (Kurs hoch, Futures hoch, OI >= 3 %, Funding
+    zieht an), (2) classify_pattern erkennt in BEIDEN Ladefenstern mindestens einmal
+    DERIVATE_PUMP.
+    """
+    kerzen, roh = _pump_szenario()
+    n = len(kerzen)
+    voraussetzungen = 0
+    for i in range(n - 60, n + 1):
+        cs, fl = kerzen[i - 12:i], _flow_ab(kerzen, roh, i - 12, i)
+        if ((cs[-1].close > cs[0].close) and fl[-1].fut_cvd > fl[0].fut_cvd
+                and (fl[-1].oi - fl[0].oi) / fl[0].oi >= 0.03
+                and fl[-1].funding > fl[0].funding):
+            voraussetzungen += 1
+    assert voraussetzungen >= 5, f"nur {voraussetzungen} Kerzen mit Pump-Voraussetzungen"
+    for fenster in (400, 1200):
+        m = _muster_je_fenster(kerzen, roh, fenster)
+        assert Pattern.DERIVATE_PUMP in m, f"Fenster {fenster}: Muster 2 nie erreicht"
+
+
+def test_e435_befund_a2_mehr_historie_dreht_muster2():
+    """Befund A2, im Test nachgestellt: Mit der BISHERIGEN Rechnung (relative Slopes,
+    geteilt durch den willkuerlichen Stand der Summe) erkennt die Engine bei 400 und bei
+    1200 geladenen Kerzen verschiedene Muster - bei identischer Marktlage.
+
+    Und JEDE abweichende Kerze hat auf einer Seite DERIVATE_PUMP: Die Abweichung kommt
+    genau aus dem Groessenvergleich in Muster 2, nicht von woanders (die Vorzeichen-
+    Pruefungen der anderen Muster sind vom Startwert unabhaengig).
+
+    Dieser Test haelt den Fehler fest, er billigt ihn nicht: E43.3 muss ihn bei
+    muster_cvd="usd" verschwinden lassen; bei "alt" muss er bestehen bleiben, sonst
+    rechnet "alt" nicht mehr wie bisher.
+    """
+    kerzen, roh = _pump_szenario()
+    klein = _muster_je_fenster(kerzen, roh, 400)
+    gross = _muster_je_fenster(kerzen, roh, 1200)
+    anders = [(a, b) for a, b in zip(klein, gross) if a != b]
+    assert anders, "A2 ist im Szenario nicht nachgestellt - der Test prueft dann nichts"
+    assert all(Pattern.DERIVATE_PUMP in paar for paar in anders), anders
 
 
 def test_ema200_braucht_echte_historie():
