@@ -8,6 +8,32 @@
 
 ---
 
+## 26.09.2026 (15) — E43.6-Bauplan geschrieben, wartet auf Kaisers Go zum Bauen
+
+Auftrag Kaiser: erst den Bauplan-Abschnitt E43.6 schreiben und zeigen, noch nicht bauen.
+Erledigt in `docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „E43.6": je Schalter
+(`rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`) eine Gitterzeile mit genau
+einem Unterschied zur heutigen Panel-Zeile, eine Vorprobe im Datensatz und die
+Entscheidungsregel wie bei E43.2/E43.3/E43.4 (beide Hälften ≥ 1 Punkt besser, Rückgang
+nicht mehr als 1 Punkt tiefer).
+
+**Geklärt: Muster-5-Wiederholung lohnt sich jetzt nicht.** Teil C des Prüfberichts wollte
+sie „nach der Korrektur" von A2/A3. Beide Korrekturen (`muster_cvd`, `muster_oi`) sind
+inzwischen gemessen und **beide auf dem alten Wert geblieben** (`"alt"`, `"usd"`) — an der
+Mustererkennung, an der Muster 5 hängt, hat sich also nichts geändert. Eine Wiederholung
+jetzt würde exakt dieselben Zahlen liefern wie zuletzt. Zurückgestellt, nicht vergessen:
+erst sinnvoll, wenn einer der beiden Schalter tatsächlich live geht.
+
+**Keine Code-Änderung, kein Test lief.** 493 Tests bleiben Referenz. Noch nicht gebaut:
+vier neue `V(...)`-Zeilen und ein Berichtsabschnitt „E43.6" in `engine/backtest.py`,
+geschätzt 4–8 neue Tests, aller Wahrscheinlichkeit nach ohne eigene Sabotage-Datei
+(kein neuer Rechenweg, nur neue Messzeilen).
+
+**Nächster Schritt:** Kaisers „Ja" zum Bauplan, dann Bau auf einem `claude/...`-Zweig,
+Vorprobe je Zeile, Messung, Urteil nach der Entscheidungsregel — wie bei E43.3/E43.4.
+
+---
+
 ## 26.09.2026 (14) — Kaisers Go: E43.4b in main, weiter im neuen Chat
 
 Kaiser: *„Ja“* (Go für `main`). Arbeitszweig `claude/e43-4-open-interest-9mmh0l` per

@@ -18,7 +18,7 @@
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 210 von 1.504 Kerzen anders, Rendite identisch, Regel nicht erfüllt → bleibt `"usd"`. Seit 26.09.2026 in `main` (Kaisers Go), 488 Tests, `sabotage_e434.py` 37/37 |
 | E43.4b | OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar (A3 in der Anzeige) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main`), 493 Tests, `sabotage_e434b.py` 9/9 |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
-| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
+| E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **BAUPLAN GESCHRIEBEN** 26.09.2026, Muster-5-Wiederholung bewusst zurückgestellt (siehe Abschnitt E43.6) — wartet auf Kaisers Go zum Bauen |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
 
 ### Aufwand je Etappe (Kaisers Wunsch 26.09.2026: Tokens sparen, wo es geht)
@@ -746,7 +746,142 @@ zweiten Zeile, und der Pfeil gehört sichtbar zu den Kontrakten.
   `sabotage_e43.py` (7/7) und `sabotage_e434.py` (37/37) erneut gelaufen, alle
   Vorlagen der übrigen Proben passen weiter.
 
-## E43.6, E43.7
+## E43.6 — Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`,
+`confirm_t1`, `cooldown_h`
 
-Werden vor dem Bau hier ergänzt (Regel, Schwellen, betroffene Dateien, Entscheidungsregel).
-Stichpunkte stehen in `docs/PRUEFUNG-2026-09-26-GESAMT.md`, Teil E.
+**Noch nicht gebaut.** Dieser Abschnitt ist der Bauplan — Kaiser sieht ihn, bevor etwas
+gebaut wird (Vorbild E43.3/E43.4: erst der Plan, dann sein „Ja").
+
+**Warum diese vier:** Teil C des Prüfberichts (`docs/PRUEFUNG-2026-09-26-GESAMT.md`)
+listet sie als „gebaut, aber nie mit genau einem Unterschied gegen die heutige Live-Zeile
+gemessen" — `strict_confirm` zusätzlich ohne echte OI-Daten (07/2026). Nach Projektregel
+ist ein Mechanismus, der gegen eine ältere Live-Einstellung verworfen wurde, wieder offen.
+Alle vier existieren im Code bereits und wirken, es fehlt nur die faire Messzeile.
+
+**Live-Basis, gegen die gemessen wird** (Panel-Zeile in `backtest.py`, seit 26.09.2026):
+`bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05, no_flip=True,
+neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+bein_richtung="bias"` (dazu die Defaults `muster_cvd="alt"`, `muster_oi="usd"`).
+
+**Geklärt vor dem Bau — lohnt sich die Muster-5-Wiederholung jetzt?** Teil C sagt zu
+`block_unhealthy`/`muster5_*`: „Urteil hält vorerst, Muster 5 hängt aber an A3: nach der
+Korrektur einmal wiederholen." Die Korrektur ist inzwischen gemessen: **A2 (`muster_cvd`)
+und A3 (`muster_oi`) blieben beide auf ihrem alten Wert** (`"alt"` bzw. `"usd"`, siehe
+„Messung E43.3" und „Messung E43.4" oben) — die Mustererkennung, an der Muster 5 hängt,
+hat sich also nirgends geändert. Eine Wiederholung jetzt würde exakt dieselben Kerzen und
+Zahlen liefern wie die letzte Messung. **Bewusst NICHT jetzt wiederholen.** Sinnvoll wird
+die Wiederholung erst, wenn `muster_cvd` oder `muster_oi` tatsächlich auf den korrigierten
+Wert wechselt — dann ändert sich die Mustererkennung real, und erst dann sagt eine neue
+Zahl etwas Neues. Bis dahin bleibt das Urteil aus Teil C stehen. E43.6 misst deshalb nur
+die vier Schalter im Titel; die Muster-5-Wiederholung ist zurückgestellt, nicht vergessen
+(Eintrag bleibt in `02_status/OFFENE-PUNKTE.md`).
+
+**Entscheidungsregel, festgelegt VOR der Messung (wie E41, E43.2, E43.3, E43.4; wird nicht
+nachträglich gelockert), für alle vier Zeilen gleich:** Ein Schalter geht nur live, wenn
+die Zeile gegen die heutige Live-Zeile
+1. in **beiden** Fensterhälften um **mindestens 1 Punkt** besser ist, **und**
+2. der maximale Rückgang **nicht mehr als 1 Punkt** tiefer liegt.
+
+Sonst bleibt der Schalter aus (`False` bzw. `0`). Geht einer live, gilt die
+**Ausschalt-Regel** wie bei E41/E43.2/E43.4: zurück auf aus, wenn „aus" in beiden
+Hälften mindestens 1 Punkt besser ist oder der Rückgang mit dem Schalter mehr als 1 Punkt
+tiefer liegt. Der Bericht prüft das dann selbst. **Vorbedingung für ein Urteil:** die
+Vorprobe (unten, je Schalter) zählt mehr als 0 Kerzen/Ereignisse, an denen der Schalter im
+Fenster überhaupt etwas ändert — sonst meldet der Bericht „misst nichts" und fällt kein
+Urteil (Vorbild `e433_umklassifiziert`).
+
+### `rest_halten`
+
+**Gitterzeile** `LIVE-heute +Rest halten (E43.6)`: Panel-Zeile plus **genau**
+`rest_halten=True`. Die im Wissens-Layer genannte Vorbedingung „nur zusammen mit
+`neustart_mit_rest` sinnvoll" ist bereits erfüllt — `neustart_mit_rest=True` ist seit
+E43.2 Teil der Live-Basis selbst.
+
+**Vorprobe im Datensatz:** zählen, an wie vielen abgeschlossenen Positionen im Fenster die
+Regel „Rest schliessen bei Gegen-Muster" (`strategy_core.py`, `exit_pat and not
+rest_halten`) überhaupt ausgelöst hat — das sind genau die Ereignisse, die `rest_halten`
+verändert (der Rest läuft dann bis zum Stop statt sofort verkauft zu werden). 0 Treffer →
+die Zeile misst nichts.
+
+**Bewusst NICHT:** keine gleichzeitige Änderung von `neustart_mit_rest` (bereits an, s.
+o.); keine Anpassung der Muster-Bedingung für `exit_pat` (das wäre eine zweite Änderung in
+derselben Zeile).
+
+### `strict_confirm`
+
+**Gitterzeile** `LIVE-heute +Strenge Bestaetigung (E43.6)`: Panel-Zeile plus **genau**
+`strict_confirm=True`.
+
+**Vorprobe im Datensatz:** zählen, an wie vielen Kerzen im Fenster `_confirm_long()` bzw.
+`_confirm_short()` beim heutigen (lockeren) Maßstab wahr wären, aber beim strengen
+Maßstab (`cvd_up UND fund_ok` statt `cvd_up ODER fund_ok`, jeweils ohne „starke"
+Bestätigung durch Muster 4/DERIVATE_PUMP/Muster-5) falsch — das sind die Einstiege, die
+`strict_confirm` verhindern würde. 0 Treffer → die Zeile misst nichts. **Wichtig:** Anders
+als die Messung 07/2026 (Wissens-Layer-Hinweis: „ohne echte OI-Daten") laufen im heutigen
+Fenster echte Coinalyze-Funding- und CVD-Daten mit — die alte Zahl von damals gilt hier
+nicht, es wird neu gezählt.
+
+**Bewusst NICHT:** keine Kombination mit `confirm_t1` in derselben Zeile — beide zusammen
+wären zwei Unterschiede, und ob sie sich gegenseitig verstärken, ist eine eigene, spätere
+Frage, falls beide einzeln etwas zeigen.
+
+### `confirm_t1`
+
+**Gitterzeile** `LIVE-heute +Bestaetigung am 0.5-Level (E43.6)`: Panel-Zeile plus
+**genau** `confirm_t1=True` (`strict_confirm` bleibt in dieser Zeile aus).
+
+**Vorprobe im Datensatz:** zählen, wie viele der Ersteinstiege am 0,5-Level im Fenster
+heute **ganz ohne** Order-Flow-Bestätigung ausgelöst hätten (`_confirm_long`/
+`_confirm_short` mit dem heutigen, nicht-strengen Maßstab wäre `False`) — das ist genau
+die Zahl, die `confirm_t1` blockieren würde. 0 Treffer → die Zeile misst nichts. Die alte
+Zahl aus dem Wissens-Layer-Hinweis (16 von 34, gemessen 07/2026) gilt nur für das damalige
+Fenster und wird hier neu gezählt.
+
+**Bewusst NICHT:** keine gleichzeitige Änderung von `strict_confirm` (s. o., eigene
+Zeile).
+
+### `cooldown_h`
+
+**Gitterzeile** `LIVE-heute +Sperrfrist nach Stop 48h (E43.6)`: Panel-Zeile plus
+**genau** `cooldown_h=48.0` — der im Wissens-Layer-Hinweis vorgeschlagene Wert, keine neu
+erfundene Zahl.
+
+**Vorprobe im Datensatz:** zählen, an wie vielen Stellen im Fenster ein neuer Einstieg
+innerhalb von 48 Stunden nach einem Stop erfolgt wäre — nur diese Fälle verändert der
+Schalter. 0 Treffer → die Zeile misst nichts.
+
+**Bewusst NICHT:** kein anderer Wert als 48 (das wäre Nachjustieren an der Vergangenheit);
+keine Kombination mit `min_stop_pct`, das laut Wissens-Layer-Hinweis dieselbe
+Stop-Serien-Frage schon stabiler adressiert.
+
+### Bewusst NICHT (für ganz E43.6)
+
+- Keine Kombination der vier Schalter untereinander in einer Zeile — jede Zeile hat
+  **genau einen** Unterschied zur heutigen Panel-Zeile, wie bei E43.2/E43.3/E43.4.
+- Keine Muster-5-Wiederholung in dieser Etappe (Begründung oben).
+- Kein Eingriff in `strategy_core.py` — alle vier Schalter existieren und rechnen schon
+  richtig, es fehlt nur die faire Messzeile im Gitter.
+- Keine Anpassung der Schwellen selbst (48h, die Bedingungen in `_confirm_long`/
+  `_confirm_short`) über die genannten Werte hinaus.
+
+**Betroffene Dateien (geplant):**
+
+- `engine/backtest.py`: vier neue `V(...)`-Zeilen (siehe oben), Berichtsabschnitt „E43.6"
+  mit den vier Vorproben und je einem Urteil nach der Entscheidungsregel (Vorbild
+  `e433_umklassifiziert`/`e433_einschalten`, `e434_umklassifiziert`/`e434_einschalten`).
+- `engine/test_backtest.py`: ein Test je Zeile „genau ein Unterschied zur Panel-Zeile"
+  (Vorbild `test_e43_bein_richtung_ist_live_und_das_panel_ist_mitgewandert`).
+- Voraussichtlich **keine eigene Sabotage-Datei** — anders als E43.3/E43.4 entsteht kein
+  neuer Rechenweg, nur neue Gitterzeilen und Zähl-Auswertungen (Vorbild E43.2, das ebenfalls
+  ohne eigene Sabotage auskam; `sabotage_e43.py` deckte dort nur E43.1s neue Rechnung ab).
+
+**Aufwand:** niedrig (reine Auswertung nach vorab festgelegter Regel, kein neuer
+Mechanismus) — wie in der Etappen-Tabelle oben vermerkt. Ausgangsbasis **493 Tests grün**;
+geschätzt **4 bis 8 neue Tests** (vier Zeilen-Tests plus ggf. je ein Vorprobe-Test).
+
+## E43.7
+
+Noch nicht als Bauplan ausgeschrieben (Text-Etappe: `be_im_plus`-Urteil im Wissens-Layer
+berichtigen, E37-Satz korrigieren, Funding-Einheit richtigstellen — Prüfbericht Teil E,
+Punkt 7). Wird ergänzt, wenn E43.6 gebaut und entschieden ist.

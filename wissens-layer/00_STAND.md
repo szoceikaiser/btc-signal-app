@@ -58,8 +58,10 @@
    Hälfte der Pump-Treffer beim OI kam nur vom Kurs. **E43.4b** (Kaisers Antwort auf
    die Anzeige-Frage): Die OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar,
    Pfeil und Hinweis folgen den Kontrakten. **Live seit 26.09.2026** (Kaisers Go,
-   reine Anzeige). **Als Nächstes E43.6** (Nachmessungen, zuerst Bauplan, Aufwand
-   mittel), dann E43.7 (Texte), A5
+   reine Anzeige). **E43.6-Bauplan geschrieben** 26.09.2026 (`rest_halten`,
+   `strict_confirm`, `confirm_t1`, `cooldown_h`; Muster-5-Wiederholung bewusst
+   zurückgestellt, da `muster_cvd`/`muster_oi` beide auf dem alten Wert blieben) —
+   wartet auf Kaisers Go zum Bauen, dann E43.7 (Texte), A5
    (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
