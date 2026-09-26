@@ -2125,6 +2125,72 @@ def e434_abschnitt(results: list, halves: list, basis_label: str, umkl: dict) ->
     return z
 
 
+# ---------------------------------------------------------------- A5 (26.09.2026)
+# Teilgewinn am letzten Hoch (`high_exit`, live) haengt von der Laenge der geladenen
+# Historie ab: next_pivot_beyond() sucht das naechste Pivot ueber ALLEN geladenen Kerzen.
+# Live laedt main.LIMIT_HAUPT (1.300) Spotkerzen, der Backtest rechnet ab Datenbeginn
+# (10.08.2025, WARMUP_MS) - ein wachsendes statt ein gleitendes Fenster. Erst zaehlen
+# (OFFENE-PUNKTE.md Punkt 8), bevor ueber einen Schalter geredet wird.
+A5_LIVE_SPOT_KERZEN = E433_LIVE_SPOT_KERZEN     # main.LIMIT_HAUPT, dieselbe Zahl wie E43.3
+
+
+def a5_next_pivot_beyond(candles: list, start_ms: int, pivot_n: int = 5) -> dict:
+    """Zaehlt Kerzen im Backtest-Fenster, an denen next_pivot_beyond() mit einer 1.300
+    Kerzen langen Live-Historie (gleitendes Fenster, wie main.py sie laedt) ein anderes
+    Pivot faende als mit der ganzen Backtest-Historie ab Datenbeginn (wachsendes Fenster,
+    wie evaluate() es aus candles[:i+1] baut). Long- und Short-Seite werden beide
+    geprueft; eine Kerze zaehlt als "anders", wenn sich mindestens eine Seite
+    unterscheidet. Kerzen, fuer die die Daten nicht 1.300 Kerzen zurueckreichen, lassen
+    sich nicht nachstellen und werden nicht mitgezaehlt (wie bei E43.3/E43.4).
+    """
+    from strategy_core import find_pivots, next_pivot_beyond
+    out = {"kerzen": 0, "anders": 0}
+    for i, c in enumerate(candles):
+        if c.ts < start_ms:
+            continue
+        i_s = i - A5_LIVE_SPOT_KERZEN + 1
+        if i_s < 0:
+            continue
+        out["kerzen"] += 1
+        piv_bt = find_pivots(candles[:i + 1], n=pivot_n)
+        piv_live = find_pivots(candles[i_s:i + 1], n=pivot_n)
+        anders = (next_pivot_beyond(piv_bt, c.close, True)
+                  != next_pivot_beyond(piv_live, c.close, True)
+                  or next_pivot_beyond(piv_bt, c.close, False)
+                  != next_pivot_beyond(piv_live, c.close, False))
+        out["anders"] += anders
+    return out
+
+
+def a5_abschnitt(umkl: dict) -> list:
+    """Berichtsabschnitt A5: nur die Zaehlung (OFFENE-PUNKTE.md Punkt 8). Kein Schalter,
+    keine Gitterzeile - die kommt erst, wenn die Zaehlung mindestens einen Treffer
+    zeigt."""
+    z = ["", "## A5: next_pivot_beyond haengt von der Historie ab (nur gezaehlt, "
+         "kein Schalter)", "",
+         "Befund beim Bau von E43.5: `next_pivot_beyond()` (Teilgewinn am letzten Hoch, "
+         "`high_exit`, live) sucht das naechste Pivot ueber ALLEN geladenen Kerzen. Live "
+         f"laedt main.py {A5_LIVE_SPOT_KERZEN} Spotkerzen (gleitendes Fenster), der "
+         "Backtest rechnet ab Datenbeginn (wachsendes Fenster). Erst zaehlen, ob das im "
+         "echten Datensatz ueberhaupt vorkommt.", "",
+         f"- Kerzen im Fenster mit {A5_LIVE_SPOT_KERZEN} nachstellbaren Kerzen davor: "
+         f"{umkl['kerzen']}.",
+         f"- Davon mit einem anderen naechsten Pivot (long ODER short): "
+         f"**{umkl['anders']}**."]
+    if not umkl["anders"]:
+        z += ["", "**0 Treffer -> kein Befund.** Die Live-Historie waehlt an keiner "
+              "einzigen Kerze im Fenster ein anderes Pivot als der Backtest. Damit bleibt "
+              "es bei der Beobachtung aus dem kuenstlichen E43.5-Szenario; im echten "
+              "Datensatz aendert sich nichts. Kein Schalter, keine Gitterzeile."]
+    else:
+        z += ["", "**Treffer > 0 - naechster Schritt (noch nicht gebaut):** Gitterzeile "
+              "mit genau einem Unterschied zur Panel-Zeile (Vorbild E43.6), Vorprobe und "
+              "Urteil nach der Entscheidungsregel aus E41/E43.2/E43.3/E43.4 (beide "
+              "Fensterhaelften >= 1 Punkt besser UND Rueckgang nicht mehr als 1 Punkt "
+              "tiefer)."]
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -2800,6 +2866,15 @@ def main():
         _e434, _e434fehler = {}, f"Vorprobe nicht gerechnet ({exc})"
         print(f"E43.4: {_e434fehler}")
 
+    # --- A5: haengt next_pivot_beyond von der Historielaenge ab? (nur Zaehlung) --------
+    try:
+        _a5, _a5fehler = a5_next_pivot_beyond(candles, eff_start), ""
+        print(f"A5: {_a5['anders']} von {_a5['kerzen']} Kerzen mit anderem naechsten "
+              f"Pivot (Live-Historie gegen Backtest-Historie).")
+    except Exception as exc:  # noqa: BLE001
+        _a5, _a5fehler = {}, f"Zaehlung nicht gerechnet ({exc})"
+        print(f"A5: {_a5fehler}")
+
     # Auswahl: primaer Rendite (das Geld-Maß), dann Recall, dann Praezision
     best = max(results, key=lambda r: (r[3]["rendite_pct"], r[2]["recall"], r[2]["precision"]))
     best_cfg, sigs, sc, pnl = best
@@ -3195,6 +3270,10 @@ def main():
         _e434 and [h for h in halves if h[0]["label"] == E434_BTC], _e434fehler
         or "die Zeile mit muster_oi=btc fehlt im Gitter oder in der Halbierung",
         lambda: e434_abschnitt(results, halves, panel_cfg["label"], _e434),
+    ) + abschnitt_oder_grund(
+        "A5: next_pivot_beyond haengt von der Historie ab (nur gezaehlt)",
+        _a5, _a5fehler,
+        lambda: a5_abschnitt(_a5),
     ) + [
         "",
         "## Einschraenkungen",

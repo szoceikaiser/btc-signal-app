@@ -1951,3 +1951,72 @@ def test_e434_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():
     q = inspect.getsource(backtest.main)
     assert 'e434_abschnitt(results, halves, panel_cfg["label"], _e434)' in q
     assert "e434_umklassifiziert(candles, flow, eff_start, oi_map)" in q
+
+
+# ------------------------------------------ A5: next_pivot_beyond haengt von der Historie ab
+
+def _a5_kerzen(n: int, spike_idx: int, spike_preis: float, basis: float = 100.0) -> list:
+    """n flache Kerzen um `basis`, eine einzelne Spitze bei `spike_idx` auf `spike_preis`
+    (bestaetigtes Pivot-Hoch mit pivot_n=5, weil links UND rechts genug flache Kerzen
+    liegen)."""
+    out = []
+    for i in range(n):
+        preis = spike_preis if i == spike_idx else basis
+        out.append(Candle(ts=1000 + i, open=preis, high=preis, low=preis, close=preis))
+    return out
+
+
+def test_a5_zaehlt_kerzen_ausserhalb_des_nachstellbaren_bereichs_nicht():
+    """Kerzen, fuer die die Daten nicht 1.300 Kerzen zurueckreichen (i - 1300 + 1 < 0),
+    werden nicht mitgezaehlt - wie bei E43.3/E43.4."""
+    cs = _a5_kerzen(1305, spike_idx=2, spike_preis=200.0)
+    u = backtest.a5_next_pivot_beyond(cs, cs[0].ts)
+    assert u["kerzen"] == 1305 - backtest.A5_LIVE_SPOT_KERZEN + 1 == 6
+
+
+def test_a5_findet_einen_unterschied_wenn_die_live_historie_das_alte_hoch_verliert():
+    """Die Spitze bei Index 20 ist ein bestaetigtes Pivot-Hoch. Gegen Ende der Reihe
+    faellt sie aus dem 1.300 Kerzen langen, gleitenden Live-Fenster (candles[i-1299:i+1])
+    komplett heraus, waehrend die wachsende Backtest-Historie (candles[:i+1], ab
+    Datenbeginn) sie weiter sieht -> next_pivot_beyond findet mit Live ein anderes (oder
+    gar kein) Pivot."""
+    cs = _a5_kerzen(1400, spike_idx=20, spike_preis=200.0)
+    u = backtest.a5_next_pivot_beyond(cs, cs[0].ts)
+    assert u["anders"] >= 1, u
+    assert u["kerzen"] == 1400 - backtest.A5_LIVE_SPOT_KERZEN + 1
+
+
+def test_a5_keine_kerzen_nachstellbar_ohne_1300_kerzen_vorlauf():
+    cs = _a5_kerzen(50, spike_idx=2, spike_preis=200.0)
+    u = backtest.a5_next_pivot_beyond(cs, cs[0].ts)
+    assert u == {"kerzen": 0, "anders": 0}
+
+
+def test_a5_ohne_jeden_unterschied_gleiche_pivots_ueberall():
+    """Keine Spitze ausserhalb des Live-Fensters -> 0 Treffer, wie im 0-Treffer-Fall
+    dokumentiert werden soll."""
+    cs = _a5_kerzen(1400, spike_idx=1350, spike_preis=200.0)   # Spitze bleibt im Live-Fenster
+    u = backtest.a5_next_pivot_beyond(cs, cs[0].ts)
+    assert u["kerzen"] > 0
+    assert u["anders"] == 0, u
+
+
+def test_a5_abschnitt_meldet_null_treffer_als_kein_befund():
+    text = "\n".join(backtest.a5_abschnitt({"kerzen": 1000, "anders": 0}))
+    assert "0 Treffer -> kein Befund" in text
+    assert "Kein Schalter, keine Gitterzeile" in text
+    assert "naechster Schritt" not in text.lower()
+
+
+def test_a5_abschnitt_meldet_treffer_als_naechsten_schritt():
+    text = "\n".join(backtest.a5_abschnitt({"kerzen": 1000, "anders": 7}))
+    assert "**7**" in text
+    assert "naechster schritt" in text.lower()
+    assert "Kein Befund" not in text
+
+
+def test_a5_ist_im_bericht_verdrahtet():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    assert "a5_next_pivot_beyond(candles, eff_start)" in q
+    assert "a5_abschnitt(_a5)" in q
