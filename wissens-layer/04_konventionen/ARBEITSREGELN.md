@@ -144,6 +144,11 @@ fortführen.“*
   Bauplan beschrieben und der Code zurückgerollt.
 - **Wo der letzte Stand liegt:** auf dem jüngsten Zweig `claude/...` auf GitHub, nicht
   zwingend in `main`. Eine neue Sitzung prüft das zuerst (steht im Startprompt).
+- **Am Ende jedes Schritts** (Kaiser, 26.09.2026: *„gebe mir immer den prompt für den
+  neuen chat und den benötigten aufwand. Sage mir immer, wenn ich den aufwand ändern
+  soll“*): (1) fertiger Prompt für den neuen Chat — für niedrig/mittel der Kurzprompt
+  aus `STARTPROMPT.md`, ausgefüllt; (2) der nötige Aufwand; (3) ausdrücklich, **ob Kaiser
+  den Aufwand gegenüber jetzt ändern soll**.
 - **Aufwand vorschlagen:** Zu jedem vorgeschlagenen Schritt nennt die KI die nötige Stufe
   — niedrig / mittel / hoch / maximal — und was sie für diesen Schritt lesen muss. Die
   Stufen sind in `docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md` beschrieben. Faustregel:
@@ -152,8 +157,11 @@ fortführen.“*
 
 ## Git (umgestellt am 26.09.2026, Kaisers Wunsch)
 
-- **Die KI committet und pusht selbst — aber nur auf einen eigenen Arbeitszweig**
-  (`claude/...`), **nie direkt auf `main`**. `main` ist die Live-Fassung: Von dort laufen
+- **Die KI committet und pusht selbst. Code nur auf einen eigenen Arbeitszweig**
+  (`claude/...`), **nie direkt auf `main`**. **Reine Unterlagen** (`wissens-layer\`,
+  `docs\`, `STARTPROMPT.md`, `PRUEFPROMPT.md`) darf sie direkt in `main` schreiben
+  (Kaisers Einverständnis 26.09.2026) — so liegt der letzte Stand immer dort, wo eine
+  neue Sitzung zuerst nachsieht. Danach `main` in den Arbeitszweig übernehmen. `main` ist die Live-Fassung: Von dort laufen
   Engine, Flush-Wache und Webseite.
 - **In `main` zusammengeführt wird erst nach Kaisers ausdrücklichem „Go“.** Vorher laufen
   auf dem Zweig die Tests (automatisch bei jedem Push) und, wo nötig, der Backtest
@@ -175,7 +183,7 @@ fortführen.“*
 
 Eine Aufgabe gilt erst dann als fertig, wenn:
 
-1. Alle Tests grün sind (`cd engine && python3 run_tests.py`, aktuell **447**) — und
+1. Alle Tests grün sind (`cd engine && python3 run_tests.py`; die aktuelle Zahl steht in `00_STAND.md`) — und
    die Zahl **genannt** wird. Läuft der Läufer mit weniger Tests durch und meldet
    trotzdem „0 failed", hat sich eine Datei still übersprungen.
 2. Zu jedem neuen Test eine Sabotage gelaufen ist und gefangen wurde.

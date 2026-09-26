@@ -45,8 +45,8 @@ BTC-Trading\                      Repo "260729-btc-trading-backup" (privat)
 | `engine\main.py` | 1.059 | Der Live-Lauf: Daten holen, `evaluate()` aufrufen, Zustand fortschreiben, Telegram. Dazu Flush-Wache, Lage-Abruf und die STH-Abrufe (die auch der Backtest benutzt) |
 | `engine\telegram_notify.py` | 557 | Nachrichtenformate (Signal, Vorschau, Plan, Flush-Warnung, Lage-Abruf, Stop wartet / Marke zurückerobert) |
 | `engine\coinalyze.py` | 1.047 | Order-Flow-Daten (Open Interest, Liquidationen, Futures-CVD, Long-Short) |
-| Tests | 7.078 in fünf Dateien | **447 Tests**, alle müssen grün sein |
-| `engine\sabotage_e*.py` | 924 in sechs Dateien | Sabotage-Proben: verfälschen den Code Zeile für Zeile und prüfen, dass Tests rot werden. Zusammen 158 Sabotagen |
+| Tests | fünf Dateien | **444 Tests** in `main`, 447 auf dem Arbeitszweig mit E43 — alle müssen grün sein |
+| `engine\sabotage_e*.py` | fünf Dateien (sechs auf dem E43-Zweig) | Sabotage-Proben: verfälschen den Code Zeile für Zeile und prüfen, dass Tests rot werden. Zusammen 151 Sabotagen (158 auf dem E43-Zweig) |
 
 **Eine Abhängigkeit, die man kennen muss:** `backtest.py` importiert aus `main.py`
 (`_get_json`, `fetch_funding_8h`, die STH-Abrufe). Der Grund ist Absicht — zwei
@@ -63,7 +63,7 @@ importiert **nicht** aus `backtest.py`, und der Live-Teil von `main.py` steht hi
 | **Lage-Abruf** (`lage.yml`) | nur von Hand | Die Lage auf Knopfdruck unter der Annahme einer Long-Position (E35/E36), inkl. Order-Flow-Rohwerten und STH-Kostenbasis. Ändert nichts |
 | **Backtest** (`backtest.yml`) | nur von Hand | Rechnet das Gitter (rund 6 Minuten), schreibt `BACKTEST.md`, `site\BACKTEST.md` und die JSON-Dateien |
 | **Chart-Webseite** (`pages.yml`) | Push nach `site\**`, **oder** nach erfolgreichem Signal-/Backtest-Lauf | Veröffentlicht den Ordner `site\` |
-| **Tests** (`tests.yml`) | Push | Hält die 447 Tests grün |
+| **Tests** (`tests.yml`) | Push | Hält die Tests grün |
 | **Coinalyze-Test** (`coinalyze-test.yml`) | nur von Hand | Klopft die Datenendpunkte ab |
 
 **Wichtig zu Pages:** GitHub löst bei einem Push, den ein Workflow selbst macht,

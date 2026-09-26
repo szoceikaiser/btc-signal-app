@@ -34,6 +34,10 @@ Nach Kaisers „Go“ zum Umzug (in `main` zusammengeführt) weiter nach Plan
   Kaiser berichten, um „Go“ bitten.
 - Neu seit 26.09.: Regel „Zwischenstände sichern und Aufwand vorschlagen“
   (`ARBEITSREGELN.md`, Abschnitt Budget).
+- Neu seit 26.09.: Reine Unterlagen dürfen direkt in `main`; am Ende jedes Schritts
+  bekommt Kaiser den fertigen Prompt für den neuen Chat, den Aufwand und den Hinweis,
+  ob er den Aufwand ändern soll. Die automatische Rückmeldung zum Backtest im alten Chat
+  ist abgesagt: Die Auswertung macht ein neuer Chat (Aufwand niedrig).
 
 ---
 

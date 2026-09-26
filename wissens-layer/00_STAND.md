@@ -14,9 +14,9 @@
   `signal-app\...` meinen jetzt die Repo-Wurzel. Einzelheiten: `START-HIER.md`.
 - Die Engine **läuft live** und handelt nicht selbst: sie sendet Telegram-Signale,
   Kaiser platziert die Orders. Webseite: `szoceikaiser.github.io/btc-signal-app`.
-- **447 Tests** grün (`cd engine && python3 run_tests.py`). Sechs
-  Sabotage-Proben (`sabotage_e38/e381/e39/e40/e41/e43.py`), zusammen 158 Sabotagen, alle
-  gefangen.
+- **Tests:** in `main` **444**, auf dem Arbeitszweig mit E43.1/E43.2 **447**, alle grün
+  (`cd engine && python3 run_tests.py`). Sabotage-Proben: in `main` fünf (151
+  Sabotagen), auf dem Zweig zusätzlich `sabotage_e43.py` (7), alle gefangen.
 - Letzte Live-Änderung am Handelsverhalten: **E41, Kaisers Rückeroberungs-Regel**
   (`stop_rueckeroberung: 1`), live seit 21.09.2026.
 - **Offener Streitpunkt dazu:** Die vorab festgelegte Ausschalt-Regel für E41 hat am
