@@ -403,8 +403,8 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
   gemessen ist, und die Ausschalt-Regel ernst zu nehmen.
 - **Frage 3 (Transkripte), 26.09.2026:** Kaiser hat sie in `wissens-layer/05_quellen/`
   abgelegt, Haupttranskript `ORderFLow-Transkript.md`, dazu 260727, 260802, 260803, 260910,
-  260913. **Achtung:** Das Repo ist öffentlich, die Arbeitsregeln verbieten vollständige
-  Transkripte darin (Hinweis an Kaiser gegeben, Entscheidung bei ihm).
+  260913. Ausgewertet für E42 und Shorts (Zitate oben). Danach auf Kaisers Wunsch wieder aus
+  dem öffentlichen Repo gelöscht (26.09.2026); bei Bedarf lädt Kaiser sie in den Chat hoch.
 
 **Frage 1 einfach erklärt (für Kaiser):** Die Engine verkauft heute einen Teil kurz unter
 dem letzten Hoch. Beispiel: letztes Hoch 70.000, Verkauf bei 69.650. Steigt der Kurs danach

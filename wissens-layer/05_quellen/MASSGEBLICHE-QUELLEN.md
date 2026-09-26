@@ -9,7 +9,7 @@
 |---|---|---|
 | Kurzstand des Projekts | `wissens-layer\00_STAND.md` | Wird nach jeder Arbeit fortgeschrieben |
 | Furkans Strategie | `docs\STRATEGIE.md` | Aus dem Video abgeleitet, mit geprüften Frame-Zeitmarken |
-| Furkans Worte selbst | `wissens-layer\05_quellen\` (seit 26.09.2026): `ORderFLow-Transkript.md` (Haupttranskript, Tutorial), `260727_TRanskript.txt`, `260802_Transkript.txt`, `260803_Transkript.txt`, `260910.txt`, `260913.txt`. Früher `Transkript.md`, `Videos\` im Backup | Rohabschriften mit Zeitmarken. Die letzte Instanz, wenn eine Auslegung strittig ist. **Achtung: liegen im öffentlichen Repo** (Arbeitsregel: keine vollständigen Transkripte hinein), Entscheidung bei Kaiser |
+| Furkans Worte selbst | Rohabschriften bei Kaiser (Rechner und privates Backup), **nicht im öffentlichen Repo**: Tutorial „Orderflow“ (Haupttranskript), 27.07., 02.08., 03.08., 10.09., 13.09.2026 | Die letzte Instanz, wenn eine Auslegung strittig ist. Lagen am 26.09.2026 kurz in `wissens-layer\05_quellen\`, auf Kaisers Wunsch wieder gelöscht (`.gitignore` sperrt sie jetzt). Die benötigten Zitate mit Zeitmarken stehen in `docs\` (u. a. `STRATEGIE.md`, `FURKAN-UPDATE-*.md`, `PLAN-E44-KOMBINATIONEN.md`). Wer ein Transkript braucht, bittet Kaiser, es in den Chat hochzuladen |
 | Kaisers notierte Handelstermine | `Kauftrigger.md`, `Verkaufstrigger.md` | Rohdaten, nicht rekonstruierbar. Grundlage für Recall und Präzision |
 | Chronik: was wann warum entschieden wurde | `docs\ETAPPENPLAN.md` | 128 KB. Nachschlagen, nicht am Stück lesen |
 | Landkarte aller Messungen und Entscheidungen | `wissens-layer\02_status\GEMESSEN-UND-ENTSCHIEDEN.md` | Die Datei, die verhindert, dass Durchgefallenes erneut vorgeschlagen wird |

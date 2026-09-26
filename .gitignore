@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+
+# Vollstaendige Video-Transkripte gehoeren nicht ins oeffentliche Repo (26.09.2026)
+wissens-layer/05_quellen/*.txt
+wissens-layer/05_quellen/*[Tt]ranskript*
