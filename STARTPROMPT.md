@@ -8,7 +8,9 @@
 > **Seit 26.09.2026 liegen Code UND Unterlagen in diesem einen Repo** (`docs\`,
 > `wissens-layer\`). Das private Repo `260729-btc-trading-backup` ist nur noch ein
 > Backup von Kaisers Rechner und nicht maßgeblich.
-> Prüfe vor dem Einfügen nur eines: Stimmt die Testzahl unten noch (main 444, Arbeitszweig 447)?
+> Prüfe vor dem Einfügen nur eines: Stimmt die Testzahl unten noch (main 448)? Es gibt
+> gerade keinen offenen Arbeitszweig — E43.1/E43.2 sind live in main, E43.3 hat einen
+> fertigen Bauplan, aber noch keinen eigenen Zweig.
 
 ---
 
@@ -42,15 +44,20 @@ nach jedem 4h-Kerzenschluss (pünktlich ueber cron-job.org), plus Flush-Wache al
 15 Minuten, plus Lage-Abruf auf Knopfdruck. Python-Standardbibliothek, kein pandas,
 kein pytest.
 
-STAND: Letzte Live-Aenderung am Handelsverhalten ist E41 (meine Rueckeroberungs-Regel,
-"stop_rueckeroberung": 1, live seit 21.09.2026). OFFEN UND WICHTIG: Die vorab
-festgelegte Ausschalt-Regel dazu hat am 23.09.2026 angeschlagen (Rueckgang 1,5 statt
+STAND: Letzte Live-Aenderungen am Handelsverhalten: E41 (Rueckeroberungs-Regel,
+"stop_rueckeroberung": 1, live seit 21.09.2026) und E43.2 ("bein_richtung": "bias",
+live seit 26.09.2026, Entscheidungsregel erfuellt). OFFEN UND WICHTIG: Die vorab
+festgelegte Ausschalt-Regel zu E41 hat am 23.09.2026 angeschlagen (Rueckgang 1,5 statt
 erlaubter 1,0 Punkte tiefer); ich habe sie bewusst ueberstimmt. Der Bericht meldet
 weiter "AUSSCHALTEN". Das ist beim naechsten Backtest neu zu bewerten - Einzelheiten
 in docs\PLAN-E41-STOP.md, Abschnitt "Nachmessung 23.09.2026".
 NEU 26.09.2026: Gesamtpruefung docs\PRUEFUNG-2026-09-26-GESAMT.md - vier Fehler in
-Muster-Erkennung und Anzeige bewiesen (A1-A4), noch nicht behoben. Vor jeder Arbeit an
-Order-Flow-Mustern zuerst diesen Bericht lesen.
+Muster-Erkennung und Anzeige bewiesen (A1-A4). A1 und die Gitterzeile aus A2-Vorarbeit
+sind erledigt (E43.1/E43.2, live). **Naechster Schritt: E43.3** (A2, Muster 2 "Derivate-
+Pump" in Dollar statt Anteile an einer willkuerlichen Summe) hat einen fertigen Bauplan
+in docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md, Abschnitt "E43.3" - noch nicht gebaut,
+Aufwand hoch. A3/A4 (E43.4/E43.5) noch offen. Vor jeder Arbeit an Order-Flow-Mustern
+zuerst den Gesamtpruefungs-Bericht und den jeweiligen Bauplan-Abschnitt lesen.
 
 ICH: Kaiser, nicht IT-affin. Antworte auf Deutsch, kurz, mit einem konkreten naechsten
 Schritt. Befehle als fertige Bloecke, einer nach dem anderen, und warte auf meine
@@ -74,8 +81,7 @@ DIE FUENF REGELN, DIE HIER GELTEN:
     zuerst, warum er nicht unter diese Diagnose fällt. Eine Beobachtung, die als Regel
     nichts bringt, wird ANGEZEIGT statt gehandelt - das ist hier ein etablierter Weg.
 
-TESTS: cd engine && python3 run_tests.py -> in main 444 Tests, auf dem Arbeitszweig mit
-E43.1/E43.2 447 Tests (bis zu meinem Go), alle gruen.
+TESTS: cd engine && python3 run_tests.py -> in main 448 Tests, alle gruen.
 Nenne die Zahl in deiner Antwort. Meldet der Laeufer WENIGER Tests und trotzdem
 "0 failed", hat sich eine Datei still uebersprungen. Auf Windows vorher
 PYTHONIOENCODING=utf-8 setzen. Eine Sabotage-Probe niemals mitten im Lauf abbrechen -
