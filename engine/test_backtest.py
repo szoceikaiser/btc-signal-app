@@ -1951,3 +1951,131 @@ def test_e434_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():
     q = inspect.getsource(backtest.main)
     assert 'e434_abschnitt(results, halves, panel_cfg["label"], _e434)' in q
     assert "e434_umklassifiziert(candles, flow, eff_start, oi_map)" in q
+
+
+# ------------------------------------------ A5: next_pivot_beyond haengt von der Historie ab
+
+def _a5_kerzen(n: int, spike_idx: int, spike_preis: float, basis: float = 100.0) -> list:
+    """n flache Kerzen um `basis`, eine einzelne Spitze bei `spike_idx` auf `spike_preis`
+    (bestaetigtes Pivot-Hoch mit pivot_n=5, weil links UND rechts genug flache Kerzen
+    liegen)."""
+    out = []
+    for i in range(n):
+        preis = spike_preis if i == spike_idx else basis
+        out.append(Candle(ts=1000 + i, open=preis, high=preis, low=preis, close=preis))
+    return out
+
+
+def test_a5_zaehlt_kerzen_ausserhalb_des_nachstellbaren_bereichs_nicht():
+    """Kerzen, fuer die die Daten nicht 1.300 Kerzen zurueckreichen (i - 1300 + 1 < 0),
+    werden nicht mitgezaehlt - wie bei E43.3/E43.4."""
+    cs = _a5_kerzen(1305, spike_idx=2, spike_preis=200.0)
+    u = backtest.a5_next_pivot_beyond(cs, cs[0].ts)
+    assert u["kerzen"] == 1305 - backtest.A5_LIVE_SPOT_KERZEN + 1 == 6
+
+
+def test_a5_findet_einen_unterschied_wenn_die_live_historie_das_alte_hoch_verliert():
+    """Die Spitze bei Index 20 ist ein bestaetigtes Pivot-Hoch. Gegen Ende der Reihe
+    faellt sie aus dem 1.300 Kerzen langen, gleitenden Live-Fenster (candles[i-1299:i+1])
+    komplett heraus, waehrend die wachsende Backtest-Historie (candles[:i+1], ab
+    Datenbeginn) sie weiter sieht -> next_pivot_beyond findet mit Live ein anderes (oder
+    gar kein) Pivot."""
+    cs = _a5_kerzen(1400, spike_idx=20, spike_preis=200.0)
+    u = backtest.a5_next_pivot_beyond(cs, cs[0].ts)
+    assert u["anders"] >= 1, u
+    assert u["kerzen"] == 1400 - backtest.A5_LIVE_SPOT_KERZEN + 1
+
+
+def test_a5_keine_kerzen_nachstellbar_ohne_1300_kerzen_vorlauf():
+    cs = _a5_kerzen(50, spike_idx=2, spike_preis=200.0)
+    u = backtest.a5_next_pivot_beyond(cs, cs[0].ts)
+    assert u == {"kerzen": 0, "anders": 0}
+
+
+def test_a5_ohne_jeden_unterschied_gleiche_pivots_ueberall():
+    """Keine Spitze ausserhalb des Live-Fensters -> 0 Treffer, wie im 0-Treffer-Fall
+    dokumentiert werden soll."""
+    cs = _a5_kerzen(1400, spike_idx=1350, spike_preis=200.0)   # Spitze bleibt im Live-Fenster
+    u = backtest.a5_next_pivot_beyond(cs, cs[0].ts)
+    assert u["kerzen"] > 0
+    assert u["anders"] == 0, u
+
+
+def test_a5_abschnitt_meldet_null_treffer_als_kein_befund():
+    text = "\n".join(backtest.a5_abschnitt({"kerzen": 1000, "anders": 0}))
+    assert "0 Treffer -> kein Befund" in text
+    assert "Kein Schalter, keine Gitterzeile" in text
+    assert "Gitterzeile mit genau einem" not in text
+
+
+def test_a5_abschnitt_meldet_treffer_ohne_gitter_als_nicht_gemessen():
+    text = "\n".join(backtest.a5_abschnitt({"kerzen": 1000, "anders": 7}))
+    assert "**7**" in text
+    assert "nicht gemessen" in text
+    assert "Kein Befund" not in text
+
+
+def _a5_grid_daten():
+    def r(label, rendite, dd, n=5):
+        return ({"label": label}, [{}] * n, {}, {"rendite_pct": rendite,
+                                                  "max_drawdown_pct": dd})
+
+    def h(label, h1, h2):
+        return ({"label": label}, {"rendite_pct": h1}, {"rendite_pct": h2})
+
+    res = [r("LIVE", 25.0, -9.9), r(backtest.A5_LIVE, 28.0, -10.2)]
+    hal = [h("LIVE", 20.0, 5.0), h(backtest.A5_LIVE, 21.5, 6.2)]
+    return res, hal
+
+
+def test_a5_abschnitt_meldet_urteil_und_kein_urteil():
+    res, hal = _a5_grid_daten()
+    umkl = {"kerzen": 1177, "anders": 53}
+    text = "\n".join(backtest.a5_abschnitt(umkl, res, hal, "LIVE"))
+    assert "Regel erfuellt" in text and "high_exit_hist=\"live\"" in text
+    hal2 = list(hal)
+    hal2[1] = ({"label": backtest.A5_LIVE}, {"rendite_pct": 21.5}, {"rendite_pct": 5.5})
+    text = "\n".join(backtest.a5_abschnitt(umkl, res, hal2, "LIVE"))
+    assert "bleibt auf `\"voll\"`" in text
+
+
+def test_a5_abschnitt_ohne_zeile_im_gitter_sagt_nicht_gemessen():
+    text = "\n".join(backtest.a5_abschnitt({"kerzen": 1000, "anders": 7}, [], [], "LIVE"))
+    assert "nicht gemessen" in text
+
+
+def test_a5_einschalten_folgt_derselben_regel_wie_e43():
+    live = _hz(10.0, 5.0)
+    assert backtest.a5_einschalten(live, _hz(11.0, 6.0))["einschalten"] is True
+    assert backtest.a5_einschalten(live, _hz(11.0, 5.9))["einschalten"] is False
+    assert backtest.a5_einschalten(live, _hz(9.0, 4.0))["einschalten"] is False
+
+
+def test_a5_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live():
+    assert "high_exit_hist" in backtest.EVAL_KEYS and backtest._BASE["high_exit_hist"] == "voll"
+    panel = [v for v in backtest.GRID if v.get("panel")][0]
+    basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
+    z = _zeile(backtest.A5_LIVE)
+    hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+    abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+    assert abweichend == {"high_exit_hist"}, abweichend
+    assert hier["high_exit_hist"] == "live"
+
+
+def test_a5_live_konfig_steht_auf_voll():
+    import json
+    from pathlib import Path
+    cfg_datei = Path(__file__).resolve().parent.parent / "site" / "data" / "config.json"
+    if not cfg_datei.exists():
+        print("  UEBERSPRUNGEN: site/data/config.json fehlt - high_exit_hist ungeprueft!")
+        return
+    cfg = json.loads(cfg_datei.read_text(encoding="utf-8"))
+    assert cfg.get("high_exit_hist") == "voll"
+    assert "_hinweis_high_exit_hist" in cfg
+
+
+def test_a5_ist_im_bericht_verdrahtet():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    assert "a5_next_pivot_beyond(candles, eff_start)" in q
+    assert 'a5_abschnitt(_a5, results, halves, panel_cfg["label"])' in q

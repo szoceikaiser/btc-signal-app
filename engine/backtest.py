@@ -82,7 +82,8 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "no_flip", "freeze_targets",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
              "rest_halten", "neustart_mit_rest", "zonen_1d",
-             "zonen_nachziehen", "pivot_n_1d", "ampel_filter", "muster_cvd", "muster_oi")
+             "zonen_nachziehen", "pivot_n_1d", "ampel_filter", "muster_cvd", "muster_oi",
+             "high_exit_hist")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              # E33 (13.09.2026) hob trend_ema von 50 auf 200 — in evaluate(),
@@ -102,7 +103,7 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              bein_richtung="auto", widerstand_exit="off",
              rest_halten=False, neustart_mit_rest=False, zonen_1d=False,
              zonen_nachziehen=False, pivot_n_1d=0, ampel_filter="off",
-             muster_cvd="alt", muster_oi="usd")
+             muster_cvd="alt", muster_oi="usd", high_exit_hist="voll")
 
 
 def V(label, panel=False, **kw):
@@ -125,6 +126,7 @@ def V(label, panel=False, **kw):
 # evaluate-Defaults muss dieses Flag mitwandern.
 E433_USD = "LIVE-heute +Muster 2 in Dollar (E43.3)"
 E434_BTC = "LIVE-heute +OI in Kontrakten (E43.4)"
+A5_LIVE = "LIVE-heute +Pivot-Hoch nur letzte 1.300 Kerzen (A5)"
 GRID = [
     V("nur Long (Basis)", bias_short=False),
     V("+Kaufleiter", bias_short=False, buy_ladder=True),
@@ -573,6 +575,19 @@ GRID = [
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       bein_richtung="bias", muster_oi="btc"),
+    # ---------------------------------------------------------------- A5 (26.09.2026)
+    # Befund beim Bau von E43.5: next_pivot_beyond() (Teilgewinn am letzten Hoch,
+    # `high_exit`) sucht ueber ALLE geladenen Kerzen - live sind das main.LIMIT_HAUPT
+    # (1.300) Spotkerzen (gleitendes Fenster), der Backtest rechnet ab Datenbeginn
+    # (wachsendes Fenster). high_exit_hist="live" bildet das gleitende Fenster nach.
+    # GENAU EIN Unterschied zur Panel-Zeile. Vorprobe (a5_next_pivot_beyond): 53 von
+    # 1177 nachstellbaren Kerzen faenden ein anderes Pivot. Entscheidungsregel VOR der
+    # Messung wie E41/E43.2/E43.3/E43.4 (a5_abschnitt).
+    V(A5_LIVE,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", high_exit_hist="live"),
     V("Long+Short (Ref)"),
 ]
 
@@ -2125,6 +2140,123 @@ def e434_abschnitt(results: list, halves: list, basis_label: str, umkl: dict) ->
     return z
 
 
+# ---------------------------------------------------------------- A5 (26.09.2026)
+# Teilgewinn am letzten Hoch (`high_exit`, live) haengt von der Laenge der geladenen
+# Historie ab: next_pivot_beyond() sucht das naechste Pivot ueber ALLEN geladenen Kerzen.
+# Live laedt main.LIMIT_HAUPT (1.300) Spotkerzen, der Backtest rechnet ab Datenbeginn
+# (10.08.2025, WARMUP_MS) - ein wachsendes statt ein gleitendes Fenster. Erst zaehlen
+# (OFFENE-PUNKTE.md Punkt 8), bevor ueber einen Schalter geredet wird.
+A5_LIVE_SPOT_KERZEN = E433_LIVE_SPOT_KERZEN     # main.LIMIT_HAUPT, dieselbe Zahl wie E43.3
+
+
+def a5_next_pivot_beyond(candles: list, start_ms: int, pivot_n: int = 5) -> dict:
+    """Zaehlt Kerzen im Backtest-Fenster, an denen next_pivot_beyond() mit einer 1.300
+    Kerzen langen Live-Historie (gleitendes Fenster, wie main.py sie laedt) ein anderes
+    Pivot faende als mit der ganzen Backtest-Historie ab Datenbeginn (wachsendes Fenster,
+    wie evaluate() es aus candles[:i+1] baut). Long- und Short-Seite werden beide
+    geprueft; eine Kerze zaehlt als "anders", wenn sich mindestens eine Seite
+    unterscheidet. Kerzen, fuer die die Daten nicht 1.300 Kerzen zurueckreichen, lassen
+    sich nicht nachstellen und werden nicht mitgezaehlt (wie bei E43.3/E43.4).
+    """
+    from strategy_core import find_pivots, next_pivot_beyond
+    out = {"kerzen": 0, "anders": 0}
+    for i, c in enumerate(candles):
+        if c.ts < start_ms:
+            continue
+        i_s = i - A5_LIVE_SPOT_KERZEN + 1
+        if i_s < 0:
+            continue
+        out["kerzen"] += 1
+        piv_bt = find_pivots(candles[:i + 1], n=pivot_n)
+        piv_live = find_pivots(candles[i_s:i + 1], n=pivot_n)
+        anders = (next_pivot_beyond(piv_bt, c.close, True)
+                  != next_pivot_beyond(piv_live, c.close, True)
+                  or next_pivot_beyond(piv_bt, c.close, False)
+                  != next_pivot_beyond(piv_live, c.close, False))
+        out["anders"] += anders
+    return out
+
+
+A5_RAUSCHGRENZE = 1.0           # dieselbe Regel wie E41/E43.2/E43.3/E43.4, vorab festgelegt
+A5_DD_TOLERANZ = 1.0
+
+
+def a5_einschalten(live: dict, hist: dict) -> dict:
+    """Entscheidungsregel fuer high_exit_hist="live", festgelegt VOR der Messung
+    (dieselbe wie E41/E43.2/E43.3/E43.4)."""
+    beide = (hist["h1"] - live["h1"] >= A5_RAUSCHGRENZE
+             and hist["h2"] - live["h2"] >= A5_RAUSCHGRENZE)
+    dd_ok = hist["dd"] >= live["dd"] - A5_DD_TOLERANZ
+    return {"beide_haelften_besser": beide, "rueckgang_ok": dd_ok,
+            "einschalten": beide and dd_ok}
+
+
+def a5_abschnitt(umkl: dict, results: list | None = None, halves: list | None = None,
+                 basis_label: str | None = None) -> list:
+    """Berichtsabschnitt A5: die Zaehlung (OFFENE-PUNKTE.md Punkt 8) - bei 0 Treffern
+    kein weiterer Text. Bei mindestens einem Treffer zusaetzlich die Gitterzeile mit
+    genau einem Unterschied (high_exit_hist="live") und das Urteil nach der vorab
+    festgelegten Entscheidungsregel."""
+    z = ["", "## A5: next_pivot_beyond haengt von der Historie ab", "",
+         "Befund beim Bau von E43.5: `next_pivot_beyond()` (Teilgewinn am letzten Hoch, "
+         "`high_exit`, live) sucht das naechste Pivot ueber ALLEN geladenen Kerzen. Live "
+         f"laedt main.py {A5_LIVE_SPOT_KERZEN} Spotkerzen (gleitendes Fenster), der "
+         "Backtest rechnet ab Datenbeginn (wachsendes Fenster). Erst zaehlen, ob das im "
+         "echten Datensatz ueberhaupt vorkommt.", "",
+         f"- Kerzen im Fenster mit {A5_LIVE_SPOT_KERZEN} nachstellbaren Kerzen davor: "
+         f"{umkl['kerzen']}.",
+         f"- Davon mit einem anderen naechsten Pivot (long ODER short): "
+         f"**{umkl['anders']}**."]
+    if not umkl["anders"]:
+        z += ["", "**0 Treffer -> kein Befund.** Die Live-Historie waehlt an keiner "
+              "einzigen Kerze im Fenster ein anderes Pivot als der Backtest. Damit bleibt "
+              "es bei der Beobachtung aus dem kuenstlichen E43.5-Szenario; im echten "
+              "Datensatz aendert sich nichts. Kein Schalter, keine Gitterzeile."]
+        return z
+
+    voll = {r[0]["label"]: r for r in (results or [])}
+    halb = {h[0]["label"]: (h[1], h[2]) for h in (halves or [])}
+    if basis_label is None or A5_LIVE not in voll or basis_label not in voll \
+            or A5_LIVE not in halb or basis_label not in halb:
+        z += ["", "**Treffer > 0, aber nicht gemessen:** die Zeile mit "
+              "`high_exit_hist=\"live\"` fehlt im Gitter oder in der Halbierung."]
+        return z
+
+    def _kz(label: str) -> dict:
+        _cfg, sigs, _sc, p = voll[label]
+        h1, h2 = halb[label]
+        return {"rendite": p["rendite_pct"], "dd": p.get("max_drawdown_pct", 0.0),
+                "h1": h1["rendite_pct"], "h2": h2["rendite_pct"], "n": len(sigs)}
+
+    live, hist = _kz(basis_label), _kz(A5_LIVE)
+    u = a5_einschalten(live, hist)
+    ja = lambda b: "**ja**" if b else "nein"
+
+    def _zeile(name: str, v: dict) -> str:
+        return (f"| {name} | {v['rendite']:+.1f} % | {v['dd']:.1f} % | {v['h1']:+.1f} % | "
+                f"{v['h2']:+.1f} % | {v['n']} |")
+
+    z += ["", "**Gitterzeile mit genau einem Unterschied** "
+          "(`high_exit_hist=\"live\"` statt `\"voll\"`):", "",
+          "| Variante | Rendite | Rueckgang | H1 | H2 | Signale |",
+          "|---|---:|---:|---:|---:|---:|",
+          _zeile("**Live (voll)**", live),
+          _zeile("Pivot-Hoch nur letzte 1.300 Kerzen (live)", hist), "",
+          "**Urteil nach der Entscheidungsregel (vorab festgelegt):**", "",
+          f"- In beiden Haelften mindestens {A5_RAUSCHGRENZE:.0f} Punkt besser: "
+          f"{ja(u['beide_haelften_besser'])} (H1 {hist['h1'] - live['h1']:+.1f}, "
+          f"H2 {hist['h2'] - live['h2']:+.1f} Punkte gegen live)",
+          f"- Rueckgang nicht mehr als {A5_DD_TOLERANZ:.0f} Punkt tiefer: "
+          f"{ja(u['rueckgang_ok'])} ({hist['dd'] - live['dd']:+.1f} Punkte gegen live)"]
+    if u["einschalten"]:
+        z.append("- **Regel erfuellt.** `high_exit_hist` darf nach Kaisers Go auf "
+                 "`\"live\"`; dann wandert `panel=True` auf diese Zeile, die alte "
+                 "Rechnung bleibt als Ausschalt-Probe im Gitter.")
+    else:
+        z.append("- **Regel nicht erfuellt - bleibt auf `\"voll\"`.**")
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -2800,6 +2932,15 @@ def main():
         _e434, _e434fehler = {}, f"Vorprobe nicht gerechnet ({exc})"
         print(f"E43.4: {_e434fehler}")
 
+    # --- A5: haengt next_pivot_beyond von der Historielaenge ab? (nur Zaehlung) --------
+    try:
+        _a5, _a5fehler = a5_next_pivot_beyond(candles, eff_start), ""
+        print(f"A5: {_a5['anders']} von {_a5['kerzen']} Kerzen mit anderem naechsten "
+              f"Pivot (Live-Historie gegen Backtest-Historie).")
+    except Exception as exc:  # noqa: BLE001
+        _a5, _a5fehler = {}, f"Zaehlung nicht gerechnet ({exc})"
+        print(f"A5: {_a5fehler}")
+
     # Auswahl: primaer Rendite (das Geld-Maß), dann Recall, dann Praezision
     best = max(results, key=lambda r: (r[3]["rendite_pct"], r[2]["recall"], r[2]["precision"]))
     best_cfg, sigs, sc, pnl = best
@@ -3195,6 +3336,10 @@ def main():
         _e434 and [h for h in halves if h[0]["label"] == E434_BTC], _e434fehler
         or "die Zeile mit muster_oi=btc fehlt im Gitter oder in der Halbierung",
         lambda: e434_abschnitt(results, halves, panel_cfg["label"], _e434),
+    ) + abschnitt_oder_grund(
+        "A5: next_pivot_beyond haengt von der Historie ab",
+        _a5, _a5fehler,
+        lambda: a5_abschnitt(_a5, results, halves, panel_cfg["label"]),
     ) + [
         "",
         "## Einschraenkungen",

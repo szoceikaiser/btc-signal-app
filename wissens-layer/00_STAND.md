@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (10)**
+> Stand: **26.09.2026 (11)**
 
 ## Lage
 
@@ -44,8 +44,12 @@
   `muster_cvd` bleibt `"alt"`. **467 Tests grün in `main`.**
 - **E41-Streitpunkt erledigt (26.09.2026):** Auf der neuen Live-Basis
   (`bein_richtung: "bias"`) schlägt die Ausschalt-Regel nicht mehr an, der Bericht
-  meldet „Bleibt an“ (`docs\PLAN-E41-STOP.md`, „Nachmessung 26.09.2026“). Neuer, ungemessener Nebenbefund **A5**: „Teilgewinn am letzten Hoch“
-  hängt von der Länge der geladenen Historie ab (`OFFENE-PUNKTE.md`, Punkt 8).
+  meldet „Bleibt an“ (`docs\PLAN-E41-STOP.md`, „Nachmessung 26.09.2026“).
+- **A5 gemessen und entschieden (26.09.2026, Arbeitszweig):** „Teilgewinn am letzten
+  Hoch“ hing von der Länge der geladenen Historie ab (53 von 1.177 Kerzen anders
+  erkannt) — Gitterzeile `high_exit_hist="live"` gebaut, Rendite/Hälften/Rückgang
+  identisch, Regel nicht erfüllt, bleibt `"voll"`. **507 Tests grün.** Einzelheiten:
+  `OFFENE-PUNKTE.md` Punkt 8, `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md` Abschnitt „A5“.
 
 ## Was als Nächstes offen liegt (Reihenfolge = Nutzwert)
 
@@ -61,8 +65,8 @@
    reine Anzeige). **E43.6-Bauplan geschrieben** 26.09.2026 (`rest_halten`,
    `strict_confirm`, `confirm_t1`, `cooldown_h`; Muster-5-Wiederholung bewusst
    zurückgestellt, da `muster_cvd`/`muster_oi` beide auf dem alten Wert blieben) —
-   wartet auf Kaisers Go zum Bauen, dann E43.7 (Texte), A5
-   (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
+   wartet auf Kaisers Go zum Bauen, dann E43.7 (Texte). A5 ist gemessen und entschieden
+   (siehe oben).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
    Ausschalt-Regel schlägt auf der neuen Live-Basis nicht mehr an.

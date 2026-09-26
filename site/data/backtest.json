@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-26T10:50:57Z",
+ "generated_at": "2026-09-26T14:34:23Z",
  "zeitraum": "18.01.2026-26.09.2026",
  "variante": "LIVE-heute +Bein in Handelsrichtung",
  "params": {
@@ -43,7 +43,8 @@
   "pivot_n_1d": 0,
   "ampel_filter": "off",
   "muster_cvd": "alt",
-  "muster_oi": "usd"
+  "muster_oi": "usd",
+  "high_exit_hist": "voll"
  },
  "recall_kauf": "3/7",
  "recall_verkauf": "3/10",
@@ -51,9 +52,9 @@
  "precision_pct": 23,
  "pnl": {
   "start": 10000.0,
-  "ende": 13544.49,
-  "rendite_pct": 35.44,
-  "buyhold_pct": -10.18,
+  "ende": 13527.25,
+  "rendite_pct": 35.27,
+  "buyhold_pct": -10.36,
   "trades": 97,
   "gewinn_trades": 65,
   "long_profit": 3524.24,
@@ -124,30 +125,30 @@
    },
    {
     "monat": "2026-09",
-    "ende": 13544.49,
-    "gewinn": 465.04,
-    "rendite_pct": 3.56,
-    "btc_pct": 7.07
+    "ende": 13527.25,
+    "gewinn": 447.81,
+    "rendite_pct": 3.42,
+    "btc_pct": 6.86
    }
   ],
   "beteiligung": {
    "auf_monate": 5,
    "ab_monate": 4,
-   "auf_btc": 53.1,
-   "auf_engine": 26.6,
+   "auf_btc": 52.9,
+   "auf_engine": 26.5,
    "ab_btc": -54.8,
    "ab_engine": 4.8,
    "auf_pct": 50,
    "ab_pct": -9
   },
-  "offene_position": 8811.0
+  "offene_position": 8793.76
  },
  "variante_ohne_flush": "MEINE Einstellung ohne Flush",
  "pnl_ohne_flush": {
   "start": 10000.0,
-  "ende": 12126.8,
-  "rendite_pct": 21.27,
-  "buyhold_pct": -10.18,
+  "ende": 12111.36,
+  "rendite_pct": 21.11,
+  "buyhold_pct": -10.36,
   "trades": 79,
   "gewinn_trades": 52,
   "long_profit": 2108.67,
@@ -218,22 +219,22 @@
    },
    {
     "monat": "2026-09",
-    "ende": 12126.8,
-    "gewinn": -167.32,
-    "rendite_pct": -1.36,
-    "btc_pct": 7.07
+    "ende": 12111.36,
+    "gewinn": -182.76,
+    "rendite_pct": -1.49,
+    "btc_pct": 6.86
    }
   ],
   "beteiligung": {
    "auf_monate": 5,
    "ab_monate": 4,
-   "auf_btc": 53.1,
-   "auf_engine": 16.6,
+   "auf_btc": 52.9,
+   "auf_engine": 16.5,
    "ab_btc": -54.8,
    "ab_engine": 3.3,
    "auf_pct": 31,
    "ab_pct": -6
   },
-  "offene_position": 7888.76
+  "offene_position": 7873.33
  }
 }

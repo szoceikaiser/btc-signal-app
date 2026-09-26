@@ -354,6 +354,10 @@ EVAL_DEFAULTS = {
     # E43.4 (26.09.2026), Default "usd" = bisheriges Verhalten - siehe
     # strategy_core.oi_aenderung.
     "muster_oi": "usd",
+    # A5 (26.09.2026), Default "voll" = bisheriges Verhalten - siehe
+    # strategy_core.evaluate (high_exit_hist). Live laedt ohnehin nur main.LIMIT_HAUPT
+    # Kerzen, hier also folgenlos - der Unterschied betrifft nur den Backtest.
+    "high_exit_hist": "voll",
 }
 
 

@@ -8,6 +8,51 @@
 
 ---
 
+## 26.09.2026 (16) — A5 gemessen und entschieden: bleibt aus
+
+**Auftrag Kaiser:** A5 messen wie in `OFFENE-PUNKTE.md` Punkt 8 beschrieben. Erst
+zählen, an wie vielen Kerzen im Fenster `next_pivot_beyond()` mit der Live-Historie
+(1.300 Kerzen) ein anderes nächstes Pivot-Hoch fände als mit der Backtest-Historie (ab
+10.08.2025). Bei 0 Treffern nur dokumentieren, sonst eine Gitterzeile mit genau einem
+Unterschied bauen.
+
+**Zählung (GitHub-Actions-Lauf 36247317191):** 53 von 1.177 nachstellbaren Kerzen im
+Fenster hätten ein anderes nächstes Pivot gesehen (long oder short) — Treffer > 0, also
+weiter wie im Auftrag beschrieben.
+
+**Gebaut:** neuer Parameter `evaluate(high_exit_hist="voll"|"live")` in
+`strategy_core.py`. `"live"` beschränkt die Pivotsuche NUR für den `high_exit`-
+Teilverkauf (Teilgewinn am letzten Hoch) auf die letzten `HIGH_EXIT_LIVE_KERZEN`
+(= `main.LIMIT_HAUPT`, 1.300) Kerzen — kein Eingriff in die übrigen Pivot-Verwender
+(Impuls, Gegenzonen, 1D-Ebene). Default `"voll"` = bisheriges Verhalten; `main.py` lädt
+ohnehin nur 1.300 Kerzen, dort also folgenlos. Gitterzeile „LIVE-heute +Pivot-Hoch nur
+letzte 1.300 Kerzen (A5)“ mit genau einem Unterschied zur Panel-Zeile. `a5_next_pivot_
+beyond`, `a5_einschalten`, `a5_abschnitt` im Bericht (Vorbild E43.3/E43.4). 8 neue
+Tests (Mechanismus in `evaluate()`, Berichtsabschnitt, Konfig-Default) — **507 Tests
+grün.** Keine eigene Sabotage-Datei (kein neuer Rechenweg außerhalb des bekannten
+`next_pivot_beyond`, wie E43.2).
+
+**Gemessen (GitHub-Actions-Lauf 36248384303, Fenster 18.01.–26.09.2026):**
+
+| Variante | Rendite | Rückgang | H1 | H2 | Signale |
+|---|---:|---:|---:|---:|---:|
+| **Live (voll)** | +35,3 % | −9,9 % | +23,6 % | +9,4 % | 244 |
+| Pivot-Hoch nur letzte 1.300 Kerzen (live) | +35,3 % | −9,9 % | +23,6 % | +9,4 % | 244 |
+
+**Urteil nach der vorab festgelegten Entscheidungsregel** (wie E41/E43.2/E43.3/E43.4):
+in beiden Hälften ≥ 1 Punkt besser: **nein** (H1 ±0,0, H2 ±0,0). Rückgang: gleich.
+**Regel nicht erfüllt — `high_exit_hist` bleibt auf `"voll"`.**
+
+**Einordnung:** dieselbe Lehre wie bei A2/E43.3 — der Fehler ist im Prinzip echt (53
+von 1.177 Kerzen sehen ein anderes Pivot), wirkt sich im gemessenen Fenster aber auf
+kein einziges Signal aus. Kein Renditebefund, weder dafür noch dagegen. Am Code sonst
+nichts geändert. Einzelheiten: `docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „A5“.
+
+**Nächster Schritt, offen:** E43.6 bauen (wartet auf Kaisers Go, siehe unten) oder
+E41.6/E42 (Kaisers Entscheidung).
+
+---
+
 ## 26.09.2026 (15) — E43.6-Bauplan geschrieben, wartet auf Kaisers Go zum Bauen
 
 Auftrag Kaiser: erst den Bauplan-Abschnitt E43.6 schreiben und zeigen, noch nicht bauen.
