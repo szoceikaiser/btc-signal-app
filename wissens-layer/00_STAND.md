@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (12)**
+> Stand: **26.09.2026 (13)**
 
 ## Lage
 
@@ -50,12 +50,19 @@
   anders erkannt) — Gitterzeile `high_exit_hist="live"` gebaut, Rendite/Hälften/
   Rückgang identisch, Regel nicht erfüllt, bleibt `"voll"`. Einzelheiten:
   `OFFENE-PUNKTE.md` Punkt 8, `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md` Abschnitt „A5“.
-- **E43.6 gemessen (26.09.2026, Arbeitszweig):** vier seit Monaten unentschiedene
-  Schalter (`rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h=48`) mit genau
-  einem Unterschied gegen die Live-Zeile gemessen — **alle vier Regeln nicht erfüllt,
-  alle vier bleiben aus.** `strict_confirm` sah in H1 sogar besser aus, drehte in H2
-  aber um 7,6 Punkte. **520 Tests grün.** Einzelheiten: `docs\PLAN-E43-PRUEFUNGS-
-  KORREKTUREN.md`, Abschnitt „Messung E43.6“.
+- **E43.6 gemessen (26.09.2026), seit 26.09.2026 in `main`:** vier seit Monaten
+  unentschiedene Schalter (`rest_halten`, `strict_confirm`, `confirm_t1`,
+  `cooldown_h=48`) mit genau einem Unterschied gegen die Live-Zeile gemessen — **alle
+  vier Regeln nicht erfüllt, alle vier bleiben aus.** `strict_confirm` sah in H1 sogar
+  besser aus, drehte in H2 aber um 7,6 Punkte. Einzelheiten: `docs\PLAN-E43-
+  PRUEFUNGS-KORREKTUREN.md`, Abschnitt „Messung E43.6“.
+- **E43.8 gemessen (26.09.2026, Arbeitszweig):** die letzten zwei unentschiedenen
+  Schalter (`be_im_plus`, `release_stale_rest`) gemessen — **beide Regeln nicht
+  erfüllt, beide bleiben aus.** `be_im_plus` ist dabei ein echter, großer Befund
+  (Rendite +35,3 % → +18,0 %, +104 Signale) — reiht sich bei den zwölf zuvor
+  gemessenen Filtern ein. `release_stale_rest` ändert kaum etwas. **527 Tests grün.**
+  Damit sind alle sechs seit Monaten unentschiedenen Schalter gemessen. Einzelheiten:
+  `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „Messung E43.8“.
 
 ## Was als Nächstes offen liegt (Reihenfolge = Nutzwert)
 
@@ -68,11 +75,11 @@
    Hälfte der Pump-Treffer beim OI kam nur vom Kurs. **E43.4b** (Kaisers Antwort auf
    die Anzeige-Frage): Die OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar,
    Pfeil und Hinweis folgen den Kontrakten. **Live seit 26.09.2026** (Kaisers Go,
-   reine Anzeige). **E43.6 gemessen** 26.09.2026 (`rest_halten`, `strict_confirm`,
-   `confirm_t1`, `cooldown_h` — alle vier Regeln nicht erfüllt, alle bleiben aus;
-   Muster-5-Wiederholung weiterhin zurückgestellt, da `muster_cvd`/`muster_oi` beide
-   auf dem alten Wert blieben). **Als Nächstes E43.7** (Texte). A5 ist gemessen und
-   entschieden (siehe oben).
+   reine Anzeige). **E43.6 und E43.8 gemessen** 26.09.2026 (`rest_halten`,
+   `strict_confirm`, `confirm_t1`, `cooldown_h`, `be_im_plus`, `release_stale_rest` —
+   alle sechs Regeln nicht erfüllt, alle bleiben aus; Muster-5-Wiederholung weiterhin
+   zurückgestellt, da `muster_cvd`/`muster_oi` beide auf dem alten Wert blieben).
+   **Als Nächstes E43.7** (Texte). A5 ist gemessen und entschieden (siehe oben).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
    Ausschalt-Regel schlägt auf der neuen Live-Basis nicht mehr an.

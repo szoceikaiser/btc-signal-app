@@ -109,10 +109,14 @@ Zahl „erst mal belassen").
   ihrer damaligen Basis (+33,3 %) sahen sie deutlich besser aus (+36,1 % bzw. +36,5 %)
   — diese Basis gibt es nicht mehr. Auf der heutigen Live-Zeile mit genau einem
   Unterschied gemessen: beide Regeln nicht erfüllt, beide bleiben aus.
-- **Zwei Schalter hängen weiterhin unentschieden in der Luft:** `be_im_plus`,
-  `release_stale_rest`. Stehen seit Monaten auf „erst nach Backtest-Messung
-  einschalten", nie mit genau einem Unterschied gegen die heutige Live-Zeile
-  gemessen. Zwei saubere Gitterzeilen würden das klären (Vorbild E43.6).
+- **`be_im_plus` und `release_stale_rest` — GEMESSEN 26.09.2026 als E43.8** (Details:
+  `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „Messung E43.8"). Beide Regeln
+  nicht erfüllt, beide bleiben aus. **`be_im_plus` ist dabei ein echter, großer
+  Befund** (anders als A2/A3/A5/E43.6): 205 von 244 Signal-Paaren ändern sich, die
+  Rendite bricht von +35,3 % auf +18,0 % ein (−17,3 Punkte, fast nur in Hälfte 1) —
+  reiht sich bei den zwölf zuvor gemessenen Filtern ein, die alle Rendite kosteten.
+  `release_stale_rest` ändert kaum etwas (2 von 244 Paaren) und verfehlt die Regel nur
+  knapp.
 - **E32.2 — Meldung, wenn die Spot-Nachfrage kippt**, während eine Position offen ist.
   Schaltbar, Default aus. Seit E32.1 steht die Lage in Plan und Vorschau, seit E34 auch
   die Ampel; was fehlt, ist die aktive Meldung bei einem **Wechsel** — heute muss Kaiser

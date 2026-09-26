@@ -19,7 +19,7 @@
 | E43.4b | OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar (A3 in der Anzeige) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main`), 493 Tests, `sabotage_e434b.py` 9/9 |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **GEMESSEN** 26.09.2026: alle vier Regeln nicht erfüllt, alle vier Schalter bleiben aus (Details „Messung E43.6"). Muster-5-Wiederholung weiterhin zurückgestellt |
-| E43.8 | Nachmessung mit genau einem Unterschied: `be_im_plus`, `release_stale_rest` | Messung | **niedrig** | **GEBAUT** 26.09.2026, wartet auf den Backtest-Lauf (Details Abschnitt „E43.8") |
+| E43.8 | Nachmessung mit genau einem Unterschied: `be_im_plus`, `release_stale_rest` | Messung | **niedrig** | **GEMESSEN** 26.09.2026: beide Regeln nicht erfüllt, beide bleiben aus. `be_im_plus` ist ein echter, großer Befund (−17,3 Punkte Rendite, +104 Signale), `release_stale_rest` ändert kaum etwas (Details „Messung E43.8") |
 | E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
 | A5 | `next_pivot_beyond()` (Teilgewinn am letzten Hoch) haengt von der Historielaenge ab | Schalter, Default aus | **hoch** | **GEMESSEN** 26.09.2026: 53 von 1.177 Kerzen anders erkannt, Rendite/Haelften/Rueckgang identisch, Regel nicht erfuellt → bleibt `"voll"` (Arbeitszweig) |
 
@@ -996,4 +996,27 @@ nicht mehr als 1 Punkt tiefer liegt.
 grün.** Keine Änderung an `strategy_core.py` (beide Schalter existieren und rechnen
 schon richtig), keine eigene Sabotage-Datei (kein neuer Rechenweg, wie E43.2/E43.6).
 
-Messung folgt über GitHub Actions (`backtest.yml`), Ergebnis wird hier ergänzt.
+### Messung E43.8 (26.09.2026, GitHub-Actions-Lauf 36250880529, Fenster 18.01.–26.09.2026)
+
+| Schalter | Vorprobe (Treffer) | Rendite | H1 | H2 | Signale | Urteil |
+|---|---:|---:|---:|---:|---:|---|
+| **Live (Basis)** | — | +35,3 % | +23,6 % | +9,5 % | 244 | — |
+| `be_im_plus` | 205 Paare | +18,0 % | +8,1 % | +10,0 % | 348 | H1 −15,5, H2 +0,5 → **nicht erfüllt** |
+| `release_stale_rest` | 2 Paare | +34,6 % | +22,5 % | +9,5 % | 244 | H1 −1,1, H2 +0,0 → **nicht erfüllt** |
+
+**Beide Schalter bleiben aus.**
+
+- **`be_im_plus` ist ein echter, großer Befund — anders als A2/A3/A5/E43.6.** 205 von
+  244 Signal-Paaren ändern sich, die Signalzahl steigt von 244 auf 348 (+104), die
+  Rendite bricht von +35,3 % auf +18,0 % ein (−17,3 Punkte), fast ausschließlich in
+  Hälfte 1 (−15,5 Punkte). Der frühere Break-even-Stop wirft die Engine viel öfter
+  aus Positionen, die später weitergelaufen wären — die 44 % der Verlustsumme aus
+  `docs\VERLUST-ANALYSE-2026-07-27.md`, denen `be_im_plus` begegnen sollte, wiegen im
+  gemessenen Fenster offenbar weniger als die abgeschnittenen Gewinne. Reiht sich damit
+  bei den zwölf zuvor gemessenen Filtern ein: Was die Engine früher aus dem Markt nimmt,
+  hat bisher immer Rendite gekostet (`00_STAND.md`, „Zwölf gemessene Filter, zwölf
+  schlechter").
+- **`release_stale_rest` ändert kaum etwas** (nur 2 von 244 Paaren) und verfehlt die
+  Regel knapp (H1 −1,1 Punkte) — dieselbe Größenordnung wie A2/E43.3.
+- **Betroffene Dateien:** siehe Bauplan oben. Am Code sonst nichts geändert. **527
+  Tests grün.**
