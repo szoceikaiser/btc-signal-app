@@ -45,6 +45,11 @@ E43.3“):
 `BACKTEST.md` lesen (Urteil steht dort), dazu den E41-Abschnitt auf der neuen
 Live-Basis (`bein_richtung: "bias"`). Aufwand **niedrig**.
 
+**ZWISCHENSTAND 26.09.2026, 09:46 UTC** (für den Fall eines Abbruchs): Backtest auf dem
+Zweig läuft, GitHub-Lauf **36233723729** (angestoßen 09:45 UTC, Stand `c0678ce`). Er
+committet `BACKTEST.md` auf den Zweig. Danach: `git pull` auf dem Zweig, in
+`BACKTEST.md` nach „## E43.3“ und „## E41“ suchen (nicht die ganze Datei lesen).
+
 ---
 
 ## 26.09.2026 (6) — Bauplan E43.3 (Muster 2 in Dollar)
