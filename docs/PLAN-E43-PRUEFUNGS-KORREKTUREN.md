@@ -19,7 +19,7 @@
 | E43.4b | OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar (A3 in der Anzeige) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main`), 493 Tests, `sabotage_e434b.py` 9/9 |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h` | Messung | **niedrig** | **GEMESSEN** 26.09.2026 (GitHub-Actions-Backtest, Arbeitszweig `claude/e43-6-gitterzeilen-eo6mzb`), 501 Tests grün. Alle vier Schalter erfüllen die Entscheidungsregel nicht → bleiben aus (siehe Abschnitt E43.6, „Messung 26.09.2026“) |
-| E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | OFFEN |
+| E43.7 | Wissens-Layer berichtigen (`be_im_plus`, E37-Satz, Funding-Einheit) | Text | **niedrig** | **FERTIG** 26.09.2026 (`wissens-layer/02_status/GEMESSEN-UND-ENTSCHIEDEN.md`), reine Textkorrektur, 501 Tests unverändert grün |
 
 ### Aufwand je Etappe (Kaisers Wunsch 26.09.2026: Tokens sparen, wo es geht)
 

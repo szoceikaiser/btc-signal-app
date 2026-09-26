@@ -8,6 +8,33 @@
 
 ---
 
+## 26.09.2026 (18) — E43.7: drei Textkorrekturen im Wissens-Layer
+
+Prüfbericht Teil E, Punkt 7, umgesetzt. Alle drei Korrekturen in
+`wissens-layer/02_status/GEMESSEN-UND-ENTSCHIEDEN.md`:
+
+1. **E37-Satz:** „keine einzige Variante in beiden Hälften besser“ war für den Lauf vom
+   23.09. falsch — „OI aggregiert“ war dort in beiden Hälften besser (H1 +0,6, H2 +1,0),
+   H1 lag aber unter der 1-Punkt-Rauschgrenze. Urteil (durchgefallen) bleibt, Begründung
+   korrigiert.
+2. **`confirm_t1`/`cooldown_h` aus der „nie entschieden“-Tabelle:** durch E43.6 (siehe
+   (17)) inzwischen tatsächlich gegen die heutige Live-Zeile gemessen — Nachtrag mit den
+   Zahlen ergänzt, beide bleiben aus.
+3. **Funding-„Faktor 69“:** stand als ungeklärte Diskrepanz da, ist aber laut
+   Gesamtprüfung im Kern eine Einheit (Coinalyze Prozent, Kraken Bruch) — richtiggestellt,
+   die separate Vorzeichen-Frage (71 % Übereinstimmung) bleibt offen.
+
+`be_im_plus`-Lesefehler („ist nicht Furkans Regel“) stand bereits korrekt im Vorbehalt
+oben in derselben Datei — keine Änderung nötig.
+
+Reine Textänderung, Code unberührt, **501 Tests unverändert grün**.
+
+**Nächster Schritt:** A5 (`OFFENE-PUNKTE.md`, Punkt 8: „Teilgewinn am letzten Hoch“
+hängt von der Länge der geladenen Historie ab — erst messen). Damit ist die gesamte
+E43-Kette (E43.1–E43.7) abgearbeitet.
+
+---
+
 ## 26.09.2026 (17) — E43.6 gemessen (GitHub-Actions-Backtest): alle vier Schalter bleiben aus
 
 Fortsetzung von (16): Diese Sitzung hat Zugriff auf GitHub Actions und hat den

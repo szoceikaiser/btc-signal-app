@@ -89,7 +89,7 @@ Rückgang (beide Male −9,7 %) und die Beteiligungspaare (Aufwärts 52 gegen 51
 | **Muster 5 als Treibstoff** (E38, 21.09.2026) — `muster5_entry`, `muster5_halten` (leiter/alle), Gegenprobe `block_unhealthy` | **Durchgefallen — aber weil die Schalter kaum greifen, nicht weil das Signal falsch ist.** `muster5_halten` griff in acht Monaten **nie** (238 Signale wie die Basis). `muster5_entry` griff fünfmal, +1,4 Punkte, nur in Hälfte 2. Die Bremse: ein Signal weniger. Das Signal selbst hält der Episoden-Gegenprobe stand (+1,2 Punkte über Grundrate, 77 % höher) — die Engine entscheidet nur fast nie, während es gilt | `docs\PLAN-E38-MUSTER5.md` |
 | **STH-Kostenbasis als Regel** (E40.2/E40.3, 21.09.2026) — Filter „nur über STH" und Verstärker „unter STH" | **Nicht gebaut, weil die Vorfrage es ausschließt.** Jan–Sep 2026 lag der Kurs zu 84 % unter der STH-Kostenbasis, 90 von 108 Einstiegen darunter, nur 7 Wechsel im ganzen Fenster. Der Filter strich 83 % der Einstiege (wie EMA200), der Verstärker wäre eine allgemeine Positionsvergrößerung. Urteil über das Fenster, nicht über den Indikator. Quellen: bitview.space und bitcoin-data.com, beide frei, Abweichung 0,6 % | `docs\PLAN-E39-E40.md` |
 | **Stop-Puffer 0,5 % und Stop beim Docht** (E41, 21.09.2026) — `stop_puffer_pct`, `stop_auf_docht` | **Docht (die strengere Richtung): durchgefallen** (+23,9 %, Hälfte 2 schlechter, 12 statt 10 Stops). **Puffer: formal bestanden, trotzdem nicht genommen** — der Wert 0,5 % lag nahe an den zehn Stops, die vorher angesehen wurden; das Risiko „auf genau diese Stops hin eingestellt" war im Plan benannt. Beide seit der Live-Schaltung der Rückeroberung aus dem Gitter | `docs\PLAN-E41-STOP.md` |
-| **Aggregation über mehrere Börsen** (E37, 20.09.2026) — Spot-CVD, Open Interest, Liquidationen, Futures-CVD, Funding, Long-Short | **Durchgefallen, und zwar in der Robustheitsprüfung.** Im Vollfenster sah manches gut aus (OI +1,1 Punkte, Trefferquote 56→61 % Recall und 32→35 % Präzision bei 21 Signalen weniger). In der Halbierung ist **keine einzige** der neun Datenvarianten in BEIDEN Hälften besser als der heutige Stand. Die Rangfolge kippt lehrbuchmäßig: heutiger Stand Platz 1 in H1 und Platz 7 in H2; aggregiertes Spot-CVD genau umgekehrt. Funding aggregiert ist ein klares Nein (−6,1 Punkte auch nach Skalen-Normierung) | `docs\PLAN-E37-AGGREGATION.md` |
+| **Aggregation über mehrere Börsen** (E37, 20.09.2026) — Spot-CVD, Open Interest, Liquidationen, Futures-CVD, Funding, Long-Short | **Durchgefallen, und zwar in der Robustheitsprüfung.** Im Vollfenster sah manches gut aus (OI +1,1 Punkte, Trefferquote 56→61 % Recall und 32→35 % Präzision bei 21 Signalen weniger). In der Halbierung war „OI aggregiert“ im Lauf vom 23.09. tatsächlich in BEIDEN Hälften besser (H1 +0,6, H2 +1,0) — H1 lag aber unter der 1-Punkt-Rauschgrenze, das Urteil hält also trotzdem (**berichtigt 26.09.2026**, Gesamtprüfung Teil E Punkt 7 — der ursprüngliche Satz „keine einzige Variante in beiden Hälften besser“ war für diesen Lauf falsch). Die Rangfolge kippt sonst lehrbuchmäßig: heutiger Stand Platz 1 in H1 und Platz 7 in H2; aggregiertes Spot-CVD genau umgekehrt. Funding aggregiert ist ein klares Nein (−6,1 Punkte auch nach Skalen-Normierung) | `docs\PLAN-E37-AGGREGATION.md` |
 | `muster_cvd: usd` — Muster 2 vergleicht Dollar-Beträge im Fenster (E43.3, Befund A2, 26.09.2026) | **Misst fast nichts.** Nur **2 von 1.504** Kerzen anders erkannt; Rendite, Rückgang, beide Hälften und 244 Signale identisch. Entscheidungsregel nicht erfüllt → bleibt `alt`. Live gegen Backtest wich mit `alt` an 1 von 1.175 Kerzen ab, mit `usd` an 0: A2 ist echt, aber im Datensatz klein | `docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md` |
 
 ## Gemessen, aber nie entschieden — offene Baustelle
@@ -105,11 +105,18 @@ entschieden. Zwei davon sahen auf ihrer damaligen Basis sogar besser aus:
 | `be_im_plus` — Stop auf Einstand, sobald einmal im Plus | in der Fensterhalbierung auf Platz 48 und 52 von 52 — deutlich schlechter | aus |
 | `release_stale_rest` — Rest freigeben bei veralteter Struktur | durch `trail_stop` und `neustart_mit_rest` praktisch ersetzt | aus |
 
-**Wichtig und ehrlich — hier widersprechen sich zwei Quellen.** Zu `confirm_t1` und
-`cooldown_h` gibt es je zwei Zahlen: eine aus dem heutigen Gitter (beide besser als
+**Wichtig und ehrlich — hier widersprachen sich zwei Quellen.** Zu `confirm_t1` und
+`cooldown_h` gab es je zwei Zahlen: eine aus dem damaligen Gitter (beide besser als
 ihre Basis) und eine aus `ANLEITUNG-EINSTELLUNGEN.md` vom 28.07.2026 (beide verworfen).
-Beide können stimmen — sie wurden gegen verschiedene Basisvarianten gemessen. Auf der
-heutigen Live-Zeile mit genau einem Unterschied wurde keiner der beiden je gemessen.
+Beide konnten stimmen — sie waren gegen verschiedene Basisvarianten gemessen. Auf der
+heutigen Live-Zeile mit genau einem Unterschied war keiner der beiden je gemessen.
+
+**Erledigt 26.09.2026 (E43.6):** Genau diese Lücke ist jetzt geschlossen. Gegen die
+heutige Live-Zeile mit genau einem Unterschied gemessen: `confirm_t1` (+35,0 % gegen
+Live +35,4 %, H1 −0,8/H2 +0,9 Punkte) und `cooldown_h: 48` (+33,5 % gegen +35,4 %,
+H1 −1,8/H2 +0,0 Punkte) erfüllen beide die vorab festgelegte Regel nicht (keiner in
+beiden Fensterhälften mindestens 1 Punkt besser) — beide bleiben aus. Einzelheiten:
+`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt E43.6.
 
 Damit gilt hier dieselbe Lehre, die im Projekt schon einmal teuer war: **Ein
 Messergebnis gilt nur gegen die Basis, gegen die gemessen wurde. Nach jeder
@@ -264,7 +271,11 @@ führte das Funding selbst falsch unter Coinalyze.)
 - **71 % Vorzeichen-Übereinstimmung** zwischen Kraken- und Coinalyze-Funding. In fast
   jedem dritten Zeitpunkt widersprechen sich die beiden Reihen. Solange das nicht
   erklärt ist, wäre ein Quellentausch ein Austausch der Bedeutung, nicht der
-  Genauigkeit. Die Skalen unterscheiden sich zusätzlich um Faktor ~69.
+  Genauigkeit. **Berichtigt 26.09.2026** (Gesamtprüfung Teil E Punkt 7): Der „Faktor
+  ~69“ zwischen den Skalen ist im Kern keine echte Diskrepanz, sondern eine **Einheit**
+  — Coinalyze liefert Funding in Prozent (0,01 = 0,01 %), Kraken als Bruch. Rechnet man
+  das um, ist der verbleibende Niveauunterschied klein (Median 3,8e-5 gegen 2,6e-5 als
+  Bruch). Die Vorzeichen-Frage (71 % Übereinstimmung) bleibt davon unberührt und offen.
 - Ob die Schwelle `funding_hot = 0.0001` zur Kraken-Reihe überhaupt passt. Sie wurde
   nie gegen diese Skala geprüft.
 - **OKX hat bei Coinalyze keinen Spotmarkt** (belegt: Binance 49 abgelehnte

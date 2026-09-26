@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (12)**
+> Stand: **26.09.2026 (13)**
 
 ## Lage
 
@@ -69,8 +69,10 @@
    reine Anzeige). **E43.6 gebaut und gemessen** 26.09.2026 (`rest_halten`,
    `strict_confirm`, `confirm_t1`, `cooldown_h`; Muster-5-Wiederholung bewusst
    zurückgestellt, da `muster_cvd`/`muster_oi` beide auf dem alten Wert blieben) — alle
-   vier Schalter bleiben aus, Regel nicht erfüllt, kein Go nötig. **Als Nächstes E43.7**
-   (Texte), dann A5 (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
+   vier Schalter bleiben aus, Regel nicht erfüllt, kein Go nötig. **E43.7 fertig**
+   (drei Textkorrekturen im Wissens-Layer: E37-Satz, `confirm_t1`/`cooldown_h`-Nachtrag,
+   Funding-„Faktor 69"). Damit ist die E43-Kette abgearbeitet. **Als Nächstes A5**
+   (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
    Ausschalt-Regel schlägt auf der neuen Live-Basis nicht mehr an.
