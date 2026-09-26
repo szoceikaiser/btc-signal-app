@@ -8,6 +8,52 @@
 
 ---
 
+## 26.09.2026 (18) — E43.8 gemessen: be_im_plus und release_stale_rest bleiben aus
+
+**Auftrag Kaiser:** „be_im_plus und release_stale_rest jetzt auch messen" — die
+letzten zwei aus der Liste der seit Monaten unentschiedenen Schalter
+(`02_status/OFFENE-PUNKTE.md`). Auf neuem Zweig
+`claude/e43-8-nachmessung-be-im-plus-release-stale-rest` (von `main`) gebaut: zwei
+Gitterzeilen mit genau einem Unterschied zur Panel-Zeile, Vorbild E43.6.
+
+**Besonderheit:** beide Schalter sind zustandsabhängig (Break-even-Zeitpunkt bzw.
+Rest-Freigabe hängen vom laufenden Positions-Status ab) — anders als
+`strict_confirm`/`confirm_t1` (reine Kerzen-Logik) gibt es keine Vorprobe ohne
+Simulation. Die Vorprobe zählt deshalb generischer: an wie vielen (Zeitpunkt,
+Signaltyp)-Paaren die Gitterzeile überhaupt vom Live-Lauf abweicht
+(`e438_signale_verschieden`, verallgemeinert aus dem „Verschieden erkannt" von
+E43.3/E43.4). 7 neue Tests, **527 Tests grün**, keine Änderung an `strategy_core.py`
+(beide Schalter existieren und rechnen schon richtig), keine eigene Sabotage-Datei.
+
+**Gemessen (GitHub-Actions-Lauf 36250880529, Fenster 18.01.–26.09.2026):**
+
+| Schalter | Vorprobe (Treffer) | Rendite | H1 | H2 | Signale | Urteil |
+|---|---:|---:|---:|---:|---:|---|
+| **Live (Basis)** | — | +35,3 % | +23,6 % | +9,5 % | 244 | — |
+| `be_im_plus` | 205 Paare | +18,0 % | +8,1 % | +10,0 % | 348 | H1 −15,5, H2 +0,5 → nicht erfüllt |
+| `release_stale_rest` | 2 Paare | +34,6 % | +22,5 % | +9,5 % | 244 | H1 −1,1, H2 +0,0 → nicht erfüllt |
+
+**Beide Schalter bleiben aus.** `be_im_plus` ist dabei — anders als A2/A3/A5/E43.6 —
+ein echter, großer Befund: 205 von 244 Signal-Paaren ändern sich, die Signalzahl
+steigt um 104 (244→348), die Rendite bricht um 17,3 Punkte ein, fast ausschließlich in
+Hälfte 1. Der frühere Break-even-Stop wirft die Engine öfter aus Positionen, die
+später weitergelaufen wären. Reiht sich bei den zwölf zuvor gemessenen Filtern ein
+(„Zwölf gemessene Filter, zwölf schlechter", `00_STAND.md`). `release_stale_rest`
+ändert dagegen kaum etwas (2 von 244 Paaren) und verfehlt die Regel nur knapp.
+Am Handelsverhalten ändert sich nichts. Einzelheiten:
+`docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md`, Abschnitt „Messung E43.8".
+
+**Damit ist Punkt 6 aus `02_status/OFFENE-PUNKTE.md` (seit Monaten unentschiedene
+Schalter) vollständig abgeschlossen:** alle sechs (`rest_halten`, `strict_confirm`,
+`confirm_t1`, `cooldown_h`, `be_im_plus`, `release_stale_rest`) sind jetzt mit genau
+einem Unterschied gemessen. Alle bleiben aus.
+
+**Nächster Schritt, offen:** E43.7 (Wissens-Layer-Texte berichtigen — u. a. das
+`be_im_plus`-Lesefehler-Urteil aus der Gesamtprüfung, jetzt mit den echten Zahlen von
+E43.8 unterlegbar), oder E41.6/E42 (Kaisers Entscheidung).
+
+---
+
 ## 26.09.2026 (17) — E43.6 gemessen: alle vier Schalter bleiben aus
 
 **Auftrag Kaiser:** „Merge nach main und E43.6 bauen" — A5 (siehe unten) nach `main`

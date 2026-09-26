@@ -131,6 +131,8 @@ E436_REST = "LIVE-heute +Rest halten (E43.6)"
 E436_STRICT = "LIVE-heute +Strenge Bestaetigung (E43.6)"
 E436_CONFIRM_T1 = "LIVE-heute +Bestaetigung am 0.5-Level (E43.6)"
 E436_COOLDOWN = "LIVE-heute +Sperrfrist nach Stop 48h (E43.6)"
+E438_BE_IM_PLUS = "LIVE-heute +Break-even im Plus (E43.8)"
+E438_RELEASE_STALE_REST = "LIVE-heute +Rest-Freigabe bei neuer Struktur (E43.8)"
 GRID = [
     V("nur Long (Basis)", bias_short=False),
     V("+Kaufleiter", bias_short=False, buy_ladder=True),
@@ -616,6 +618,20 @@ GRID = [
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       bein_richtung="bias", cooldown_h=48.0),
+    # ---------------------------------------------------------------- E43.8 (26.09.2026)
+    # Nachmessung der letzten zwei seit Monaten unentschiedenen Schalter
+    # (`02_status/OFFENE-PUNKTE.md`), Vorbild E43.6: genau ein Unterschied zur
+    # Panel-Zeile je Zeile.
+    V(E438_BE_IM_PLUS,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", be_im_plus=True),
+    V(E438_RELEASE_STALE_REST,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", release_stale_rest=True),
     V("Long+Short (Ref)"),
 ]
 
@@ -2465,6 +2481,106 @@ def e436_abschnitt(results: list, halves: list, basis_label: str, vorproben: dic
     return z
 
 
+# ---------------------------------------------------------------- E43.8 (26.09.2026)
+# Nachmessung der letzten zwei seit Monaten unentschiedenen Schalter (`02_status/
+# OFFENE-PUNKTE.md`): be_im_plus, release_stale_rest. Beide sind zustandsabhaengig
+# (Positions-Status) - anders als bei strict_confirm/confirm_t1 (reine Kerzen-Logik)
+# gibt es keine Vorprobe ohne Simulation. Die Vorprobe ist deshalb die Grundzahl aus
+# E43.3/E43.4 verallgemeinert: an wie vielen (Zeitpunkt, Signaltyp)-Paaren weicht die
+# Gitterzeile ueberhaupt vom Live-Lauf ab.
+E438_RAUSCHGRENZE = 1.0         # dieselbe Regel wie E41/E43.2 bis E43.6/A5
+E438_DD_TOLERANZ = 1.0
+
+
+def e438_einschalten(live: dict, var: dict) -> dict:
+    """Entscheidungsregel fuer die zwei E43.8-Zeilen, festgelegt VOR der Messung
+    (dieselbe wie E41/E43.2 bis E43.6/A5)."""
+    beide = (var["h1"] - live["h1"] >= E438_RAUSCHGRENZE
+             and var["h2"] - live["h2"] >= E438_RAUSCHGRENZE)
+    dd_ok = var["dd"] >= live["dd"] - E438_DD_TOLERANZ
+    return {"beide_haelften_besser": beide, "rueckgang_ok": dd_ok,
+            "einschalten": beide and dd_ok}
+
+
+def e438_signale_verschieden(sigs_live: list, sigs_var: list) -> dict:
+    """Zaehlt, an wie vielen (Zeitpunkt, Signaltyp)-Paaren sich die Gitterzeile vom
+    Live-Lauf unterscheidet - die Grundzahl dafuer, ob der Schalter im Fenster
+    ueberhaupt etwas veraendert (Vorbild E43.3/E43.4: "Verschieden erkannt"), nur auf
+    ganze Signalfolgen statt auf ein einzelnes Muster verallgemeinert, weil be_im_plus/
+    release_stale_rest keinen eigenen Kerzen-Test ohne Positions-Simulation erlauben."""
+    a = {(s["ts"], s["type"]) for s in sigs_live}
+    b = {(s["ts"], s["type"]) for s in sigs_var}
+    return {"treffer": len(a ^ b)}
+
+
+def e438_abschnitt(results: list, halves: list, basis_label: str) -> list:
+    """Berichtsabschnitt E43.8: zwei Zeilen, je eine Vorprobe und ein Urteil nach der
+    vorab festgelegten Entscheidungsregel (Vorbild e436_abschnitt)."""
+    voll = {r[0]["label"]: r for r in results}
+    halb = {h[0]["label"]: (h[1], h[2]) for h in halves}
+
+    if basis_label not in voll or basis_label not in halb:
+        return ["", "## E43.8: Nachmessung mit genau einem Unterschied", "",
+                "**Kein Urteil:** die Panel-Zeile fehlt im Gitter oder in der "
+                "Halbierung."]
+
+    def _kz(label: str) -> dict:
+        _cfg, sigs, _sc, p = voll[label]
+        h1, h2 = halb[label]
+        return {"rendite": p["rendite_pct"], "dd": p.get("max_drawdown_pct", 0.0),
+                "h1": h1["rendite_pct"], "h2": h2["rendite_pct"], "n": len(sigs)}
+
+    def _zeile(name: str, v: dict) -> str:
+        return (f"| {name} | {v['rendite']:+.1f} % | {v['dd']:.1f} % | {v['h1']:+.1f} % | "
+                f"{v['h2']:+.1f} % | {v['n']} |")
+
+    ja = lambda b: "**ja**" if b else "nein"
+    live_sigs = voll[basis_label][1]
+    live = _kz(basis_label)
+    z = ["", "## E43.8: Nachmessung mit genau einem Unterschied "
+         "(be_im_plus, release_stale_rest)", "",
+         "Die letzten zwei seit Monaten unentschiedenen Schalter "
+         "(`02_status/OFFENE-PUNKTE.md`), jeder mit GENAU EINEM Unterschied zur "
+         "heutigen Panel-Zeile."]
+
+    def _teil(titel: str, label: str) -> None:
+        z.extend(["", f"### {titel}"])
+        if label not in voll or label not in halb:
+            z.append("")
+            z.append("**Nicht gemessen:** die Zeile fehlt im Gitter oder in der "
+                     "Halbierung.")
+            return
+        vp = e438_signale_verschieden(live_sigs, voll[label][1])
+        z.extend(["", f"**Vorprobe im Datensatz:** {vp['treffer']} (Zeitpunkt, "
+                  "Signaltyp)-Paare unterscheiden sich vom Live-Lauf."])
+        if not vp["treffer"]:
+            z.append("")
+            z.append("**Kein Urteil:** der Schalter aendert im Fenster nichts - die "
+                     "Zeile ist eine Kopie der Live-Zeile.")
+            return
+        var = _kz(label)
+        u = e438_einschalten(live, var)
+        z.extend(["", "| Variante | Rendite | Rueckgang | H1 | H2 | Signale |",
+                  "|---|---:|---:|---:|---:|---:|",
+                  _zeile("**Live**", live), _zeile(label, var), "",
+                  "**Urteil nach der Entscheidungsregel (vorab festgelegt):**", "",
+                  f"- In beiden Haelften mindestens {E438_RAUSCHGRENZE:.0f} Punkt "
+                  f"besser: {ja(u['beide_haelften_besser'])} "
+                  f"(H1 {var['h1'] - live['h1']:+.1f}, "
+                  f"H2 {var['h2'] - live['h2']:+.1f} Punkte gegen live)",
+                  f"- Rueckgang nicht mehr als {E438_DD_TOLERANZ:.0f} Punkt tiefer: "
+                  f"{ja(u['rueckgang_ok'])} ({var['dd'] - live['dd']:+.1f} Punkte "
+                  "gegen live)"])
+        if u["einschalten"]:
+            z.append("- **Regel erfuellt.** Der Schalter darf nach Kaisers Go an.")
+        else:
+            z.append("- **Regel nicht erfuellt - bleibt aus.**")
+
+    _teil("`be_im_plus`", E438_BE_IM_PLUS)
+    _teil("`release_stale_rest`", E438_RELEASE_STALE_REST)
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -3569,6 +3685,12 @@ def main():
         "E43.6: Nachmessung mit genau einem Unterschied",
         _e436, _e436fehler,
         lambda: e436_abschnitt(results, halves, panel_cfg["label"], _e436),
+    ) + abschnitt_oder_grund(
+        "E43.8: Nachmessung mit genau einem Unterschied (be_im_plus, release_stale_rest)",
+        [h for h in halves if h[0]["label"] in (E438_BE_IM_PLUS, E438_RELEASE_STALE_REST)],
+        "die Zeilen fuer be_im_plus/release_stale_rest fehlen im Gitter oder in der "
+        "Halbierung",
+        lambda: e438_abschnitt(results, halves, panel_cfg["label"]),
     ) + [
         "",
         "## Einschraenkungen",

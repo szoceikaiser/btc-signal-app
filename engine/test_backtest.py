@@ -2226,3 +2226,79 @@ def test_e436_ist_im_bericht_verdrahtet():
     assert "e436_confirm_t1_vorprobe(_psigs, candles, flow)" in q
     assert "e436_cooldown_vorprobe(_psigs)" in q
     assert 'e436_abschnitt(results, halves, panel_cfg["label"], _e436)' in q
+
+
+# ------------------------------------------ E43.8: be_im_plus, release_stale_rest
+
+def test_e438_zwei_zeilen_haben_genau_einen_unterschied_zur_panel_zeile():
+    panel = [v for v in backtest.GRID if v.get("panel")][0]
+    basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
+    for label, key in ((backtest.E438_BE_IM_PLUS, "be_im_plus"),
+                       (backtest.E438_RELEASE_STALE_REST, "release_stale_rest")):
+        z = _zeile(label)
+        hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+        abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+        assert abweichend == {key}, (label, abweichend)
+        assert hier[key] is True
+
+
+def test_e438_signale_verschieden_zaehlt_symmetrische_differenz():
+    live = [{"ts": 1, "type": "KAUF_1"}, {"ts": 2, "type": "STOPLOSS"}]
+    var = [{"ts": 1, "type": "KAUF_1"}, {"ts": 3, "type": "STOPLOSS"}]
+    assert backtest.e438_signale_verschieden(live, var) == {"treffer": 2}
+    assert backtest.e438_signale_verschieden(live, live) == {"treffer": 0}
+    assert backtest.e438_signale_verschieden([], []) == {"treffer": 0}
+
+
+def test_e438_einschalten_folgt_derselben_regel_wie_e43():
+    live = _hz(10.0, 5.0)
+    assert backtest.e438_einschalten(live, _hz(11.0, 6.0))["einschalten"] is True
+    assert backtest.e438_einschalten(live, _hz(11.0, 5.9))["einschalten"] is False
+    assert backtest.e438_einschalten(live, _hz(9.0, 4.0))["einschalten"] is False
+
+
+def _e438_grid(live_sigs, var_sigs, label, rendite=28.0, dd=-10.2, h1=21.5, h2=6.2):
+    def r(lbl, sigs, rendite, dd):
+        return ({"label": lbl}, sigs, {}, {"rendite_pct": rendite, "max_drawdown_pct": dd})
+
+    def h(lbl, h1, h2):
+        return ({"label": lbl}, {"rendite_pct": h1}, {"rendite_pct": h2})
+
+    res = [r("LIVE", live_sigs, 25.0, -9.9), r(label, var_sigs, rendite, dd)]
+    hal = [h("LIVE", 20.0, 5.0), h(label, h1, h2)]
+    return res, hal
+
+
+def test_e438_abschnitt_ohne_unterschied_meldet_kein_urteil():
+    sigs = [{"ts": 1, "type": "KAUF_1"}]
+    res, hal = _e438_grid(sigs, sigs, backtest.E438_BE_IM_PLUS)
+    text = "\n".join(backtest.e438_abschnitt(res, hal, "LIVE"))
+    assert "Kein Urteil" in text
+    assert "Regel erfuellt" not in text and "bleibt aus" not in text
+
+
+def test_e438_abschnitt_meldet_urteil_je_zeile():
+    live_sigs = [{"ts": 1, "type": "KAUF_1"}]
+    var_sigs = [{"ts": 1, "type": "KAUF_1"}, {"ts": 2, "type": "STOPLOSS"}]
+    res, hal = _e438_grid(live_sigs, var_sigs, backtest.E438_BE_IM_PLUS,
+                          rendite=28.0, dd=-10.2, h1=21.5, h2=6.2)
+    text = "\n".join(backtest.e438_abschnitt(res, hal, "LIVE"))
+    assert "Regel erfuellt" in text
+    assert "Nicht gemessen" in text          # release_stale_rest fehlt in diesem Gitter
+
+    hal2 = list(hal)
+    hal2[1] = ({"label": backtest.E438_BE_IM_PLUS}, {"rendite_pct": 21.5},
+               {"rendite_pct": 5.5})           # H2 nur +0,5
+    text2 = "\n".join(backtest.e438_abschnitt(res, hal2, "LIVE"))
+    assert "bleibt aus" in text2
+
+
+def test_e438_abschnitt_ohne_panel_zeile_kein_urteil():
+    text = "\n".join(backtest.e438_abschnitt([], [], "GIBT ES NICHT"))
+    assert "Kein Urteil" in text
+
+
+def test_e438_ist_im_bericht_verdrahtet():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    assert 'e438_abschnitt(results, halves, panel_cfg["label"])' in q
