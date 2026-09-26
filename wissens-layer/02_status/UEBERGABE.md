@@ -8,6 +8,22 @@
 
 ---
 
+## 26.09.2026 (14) — Kaisers Go: E43.4b in main, weiter im neuen Chat
+
+Kaiser: *„Ja“* (Go für `main`). Arbeitszweig `claude/e43-4-open-interest-9mmh0l` per
+Fast-Forward nach `main`. Die OI-Zeile im Lage-Abruf zeigt ab dem nächsten Abruf die
+Kontrakte (reine Anzeige). **493 Tests grün in `main`.** `STARTPROMPT.md` nachgezogen.
+
+**Nächster Schritt: E43.6**, im neuen Chat. Zuerst den Bauplan-Abschnitt „E43.6“ im
+Plan schreiben und Kaiser zeigen: vier Gitterzeilen mit genau einem Unterschied zur
+heutigen Live-Zeile (`rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`), je
+eine Vorprobe, dass der Schalter im Datensatz überhaupt etwas ändert, und die
+Entscheidungsregel vorab (wie E43.2). **Dabei klären:** Die Muster-5-Wiederholung war
+„nach der Korrektur von A3“ gedacht. `muster_oi` blieb aber `"usd"`. Ob sie noch etwas
+misst, gehört in den Bauplan. Aufwand: mittel.
+
+---
+
 ## 26.09.2026 (13) — E43.4b: OI-Zeile im Lage-Abruf in Kontrakten (Arbeitszweig)
 
 **Kaisers Auftrag:** *„Bau zuerst die OI-Zeile in Kontrakten“* (seine Antwort auf die

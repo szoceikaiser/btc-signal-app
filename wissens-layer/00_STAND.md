@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (9)**
+> Stand: **26.09.2026 (10)**
 
 ## Lage
 
@@ -14,7 +14,7 @@
   `signal-app\...` meinen jetzt die Repo-Wurzel. Einzelheiten: `START-HIER.md`.
 - Die Engine **läuft live** und handelt nicht selbst: sie sendet Telegram-Signale,
   Kaiser platziert die Orders. Webseite: `szoceikaiser.github.io/btc-signal-app`.
-- **Tests:** in `main` **488**, alle grün (`cd engine && python3 run_tests.py`).
+- **Tests:** in `main` **493**, alle grün (`cd engine && python3 run_tests.py`).
   Sabotage-Proben: fünf ältere (151 Sabotagen) plus `sabotage_e43.py` (7), alle gefangen.
 - **Kaisers Go 26.09.2026: E43.1 und E43.2 live.** Arbeitszweig nach `main` gemerged.
   E43.1 (Futures-CVD im Lage-Abruf jetzt in Dollar) ist reine Anzeige. E43.2
@@ -57,9 +57,9 @@
    Rendite identisch, Regel nicht erfüllt, `muster_oi` bleibt `"usd"`. A3 ist echt: Die
    Hälfte der Pump-Treffer beim OI kam nur vom Kurs. **E43.4b** (Kaisers Antwort auf
    die Anzeige-Frage): Die OI-Zeile im Lage-Abruf zeigt die Kontrakte neben den Dollar,
-   Pfeil und Hinweis folgen den Kontrakten. Fertig auf dem Arbeitszweig, 493 Tests,
-   wartet auf Kaisers Go. Als Nächstes E43.6 (Nachmessungen, zuerst Bauplan), E43.7
-   (Texte), A5
+   Pfeil und Hinweis folgen den Kontrakten. **Live seit 26.09.2026** (Kaisers Go,
+   reine Anzeige). **Als Nächstes E43.6** (Nachmessungen, zuerst Bauplan, Aufwand
+   mittel), dann E43.7 (Texte), A5
    (`OFFENE-PUNKTE.md`, Punkt 8: erst messen).
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
