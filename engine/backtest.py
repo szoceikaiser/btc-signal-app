@@ -1610,6 +1610,15 @@ E41_ZEILEN = {                        # Gitterzeile -> Kurzname im Bericht
 }
 E41_DD_TOLERANZ = 1.0                 # dieselbe Grenze wie beim Einschalten
 E41_RAUSCHGRENZE = 1.0                # 06.09.2026: ein Tag mehr Daten drehte 1,0 Punkte um
+# 23.09.2026: Die Regel hat angeschlagen (Rueckgang 1,5 Punkte tiefer statt 1,0) und
+# Kaiser hat sie bewusst ueberstimmt. Der Bericht sagt das seitdem mit - sonst sieht jeder
+# Lauf wie ein unbeachteter Alarm aus. Die Regel selbst bleibt unveraendert scharf.
+E41_UEBERSTIMMT = (
+    "**Bewusst ueberstimmt am 23.09.2026.** Kaiser laesst den Schalter an: Die Rendite lag "
+    "2,6 Punkte hoeher, und der Rueckgangsvergleich zwischen zwei Varianten ist "
+    "pfadabhaengig (B3 wartet laenger und zeigt trotzdem einen flacheren Rueckgang). "
+    "Begruendung, Gegenargumente und die naechste Pruefung: `docs/PLAN-E41-STOP.md`. Die "
+    "Regel wird dadurch nicht abgeschwaecht - sie meldet weiter, bei jedem Lauf.")
 
 _AUSSTIEGE = ("STOPLOSS", "VERKAUF_REST")
 _KAEUFE = ("KAUF_1", "KAUF_2", "NACHKAUF")
@@ -1708,6 +1717,7 @@ def e41_abschnitt(results: list, halves: list, basis_label: str) -> list:
         z.append("- **AUSSCHALTEN.** In `site/data/config.json` `stop_rueckeroberung` auf 0 "
                  "setzen. Die Regel war vorab festgelegt; ein Nachverhandeln waere genau die "
                  "nachtraegliche Auswahl, vor der der Plan warnt.")
+        z.append("- " + E41_UEBERSTIMMT)
     else:
         z.append("- **Bleibt an.**")
     if not u["greift"]:

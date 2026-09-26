@@ -1575,6 +1575,18 @@ def test_e41_abschnitt_meldet_ausschalten_bei_klar_besserem_alten_stop():
     assert "`stop_rueckeroberung` auf 0" in text
 
 
+def test_e41_abschnitt_nennt_die_ueberstimmung_nur_bei_ausschalten():
+    """23.09.2026: Die Regel schlug an, Kaiser liess den Schalter an. Ohne diesen Hinweis
+    liest sich jeder weitere Bericht wie ein Alarm, den niemand bemerkt hat - und in zwei
+    Monaten weiss keiner mehr, ob die Meldung gesehen wurde. Die Regel selbst bleibt
+    unveraendert: Sie meldet weiter AUSSCHALTEN."""
+    aus = _e41_text(alt_h=(11.0, 6.0))
+    assert "Bewusst ueberstimmt am 23.09.2026." in aus
+    assert "docs/PLAN-E41-STOP.md" in aus
+    assert "**AUSSCHALTEN.**" in aus                  # nicht abgeschwaecht
+    assert "ueberstimmt" not in _e41_text()           # solange die Regel nicht anschlaegt
+
+
 def test_e41_abschnitt_meldet_ausschalten_bei_zu_tiefem_rueckgang():
     text = _e41_text(alt_dd=-8.0)                    # live -9,5 -> 1,5 Punkte tiefer
     assert "**AUSSCHALTEN.**" in text
