@@ -338,6 +338,9 @@ EVAL_DEFAULTS = {
     "zonen_1d": False, "zonen_nachziehen": False, "pivot_n_1d": 0,
     "trend_filter": False, "trend_ema": 200,
     "ampel_filter": "off",
+    # E43.3 (26.09.2026), Default "alt" = bisheriges Verhalten - siehe
+    # strategy_core.classify_pattern.
+    "muster_cvd": "alt",
 }
 
 
@@ -482,7 +485,8 @@ def zonen_vorschau(candles: list[Candle], cfg: dict | None = None,
     # Limit-Orders setzt. Ohne Position gibt es kein Vergleichsbein, also nur das
     # aktuelle Bein, die Spot-Nachfrage und das Muster.
     _lage = lage_bericht(candles, flow or [], imp=imp,
-                         pattern=classify_pattern(candles, flow) if flow else None,
+                         pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"])
+                         if flow else None,
                          trend_period=par.get("trend_ema", 200))
     # E34: die Ampel fasst die Lage zu EINER Aussage zusammen. Richtung aus dem Bein,
     # denn ohne Position gibt es noch keine eigene - die Vorschau kuendigt genau dieses
@@ -571,7 +575,8 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
                                           bein_wahl=par["bein_wahl"], nur_auf=_nur_auf_p)
     _lage = lage_bericht(candles, flow, imp=_imp_jetzt,
                          pos_impulse=z.impulse,
-                         pattern=classify_pattern(candles, flow) if flow else None,
+                         pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"])
+                         if flow else None,
                          trend_period=par.get("trend_ema", 200))
     if _lage:
         plan["lage"] = _lage
@@ -830,7 +835,8 @@ def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
                                    min_bein_pct=par["min_bein_pct"],
                                    bein_wahl=par["bein_wahl"], nur_auf=True)
     lage = lage_bericht(candles, flow or [], imp=imp,
-                        pattern=classify_pattern(candles, flow) if flow else None,
+                        pattern=classify_pattern(candles, flow, muster_cvd=par["muster_cvd"])
+                        if flow else None,
                         trend_period=par.get("trend_ema", 200))
     out = {
         "kurs": candles[-1].close,

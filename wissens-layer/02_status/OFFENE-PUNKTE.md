@@ -8,13 +8,15 @@
 
 Bericht: `docs\PRUEFUNG-2026-09-26-GESAMT.md` (Teil E). Nichts davon ist gebaut.
 
-1. **A1 Anzeige:** Futures-CVD im Lage-Abruf in $ umrechnen (heute BTC mit $-Zeichen).
+1. **A1 Anzeige:** Futures-CVD im Lage-Abruf in $ umrechnen. **Erledigt, live seit 26.09.2026 (E43.1).**
 2. **Gitterzeile „LIVE-heute +Bein in Handelsrichtung“** (`bein_richtung: bias`), genau ein
-   Unterschied. Kein neuer Code.
+   Unterschied. Kein neuer Code. **Erledigt: gemessen, live seit 26.09.2026 (E43.2).**
 3. **A2 als Schalter:** Muster 2 vergleicht Dollar-Beträge statt Anteile an einer
-   willkürlichen Summe. Behebt zugleich live ≠ Backtest.
+   willkürlichen Summe. Behebt zugleich live ≠ Backtest. **Gebaut 26.09.2026 als E43.3**
+   (Arbeitszweig, `muster_cvd`, Default `"alt"`). Messung offen.
 4. **A3 als Schalter:** OI durch den Kurs teilen (Kontrakte statt Dollar).
-5. **A4:** Test summiert ab Fensteranfang neu, Vorprobe auf den Muster-2-Zweig.
+5. **A4:** Test summiert ab Fensteranfang neu, Vorprobe auf den Muster-2-Zweig. **Erledigt
+   26.09.2026 als E43.5** (Arbeitszweig).
 6. **Nachmessung mit genau einem Unterschied:** `rest_halten`, `strict_confirm`,
    `confirm_t1`, `cooldown_h`; danach `block_unhealthy`/Muster 5 einmal wiederholen.
 7. **Wissens-Layer berichtigen:** `be_im_plus`-Urteil, E37-Satz („keine einzige

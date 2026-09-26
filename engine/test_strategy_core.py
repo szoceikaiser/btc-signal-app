@@ -2053,11 +2053,173 @@ def test_e435_befund_a2_mehr_historie_dreht_muster2():
     rechnet "alt" nicht mehr wie bisher.
     """
     kerzen, roh = _pump_szenario()
-    klein = _muster_je_fenster(kerzen, roh, 400)
-    gross = _muster_je_fenster(kerzen, roh, 1200)
+    klein = _muster_je_fenster(kerzen, roh, 400, muster_cvd="alt")
+    gross = _muster_je_fenster(kerzen, roh, 1200, muster_cvd="alt")
     anders = [(a, b) for a, b in zip(klein, gross) if a != b]
     assert anders, "A2 ist im Szenario nicht nachgestellt - der Test prueft dann nichts"
     assert all(Pattern.DERIVATE_PUMP in paar for paar in anders), anders
+
+
+# ------------------------------------------ E43.3: Muster 2 in Dollar (Befund A2)
+
+def _demo_slope(spot_start, fut_start):
+    """demo_slope.py aus dem Pruefbericht (Anhang), als bleibender Test verdrahtet.
+
+    Identische Marktlage: Kurs +3 %, Spot +200 Mio $, Futures +2.000 BTC, OI +4 %,
+    Funding steigt leicht. Geaendert wird NUR der Startwert der beiden Summen - also
+    genau das, was live und im Backtest verschieden ist.
+    """
+    cs, fl = [], []
+    for i in range(12):
+        p = 60000 * (1 + 0.03 * i / 11)
+        cs.append(Candle(i, p, p * 1.002, p * 0.998, p))
+        fl.append(FlowPoint(i, spot_start + 200e6 * i / 11, fut_start + 2000 * i / 11,
+                            10e9 * (1 + 0.04 * i / 11), 0.00002 + 0.000001 * i))
+    return cs, fl
+
+
+_DEMO_STARTWERTE = [(-5e9, -20000), (-0.5e9, -20000), (-50e9, -20000), (-5e9, 1000)]
+
+
+def test_e433_vorprobe_demo_slope_alt_verschieden_usd_gleich():
+    """Die Vorprobe aus dem Bauplan: bei "alt" ergibt dieselbe Lage je nach Startwert
+    verschiedene Muster (Ergebnis des Pruefberichts 26.09.2026), bei "usd" immer
+    dasselbe. Ohne den ersten Teil waere nicht bewiesen, dass das Szenario den Fehler
+    ueberhaupt enthaelt."""
+    alt = [classify_pattern(*_demo_slope(sp, fu), muster_cvd="alt")
+           for sp, fu in _DEMO_STARTWERTE]
+    assert alt == [Pattern.GESUNDER_TREND, Pattern.GESUNDER_TREND,
+                   Pattern.DERIVATE_PUMP, Pattern.DERIVATE_PUMP], alt
+    usd = [classify_pattern(*_demo_slope(sp, fu), muster_cvd="usd")
+           for sp, fu in _DEMO_STARTWERTE]
+    assert len(set(usd)) == 1, usd
+    # Spot +200 Mio $ gegen Futures ~ +122 Mio $: Spot traegt die Bewegung - das ist
+    # Furkans gesunder Trend, kein Derivate-Pump.
+    assert usd[0] == Pattern.GESUNDER_TREND
+
+
+def test_e433_usd_erkennt_den_pump_in_dollar():
+    """Die Gegenrichtung: Wo die Futures in Dollar das Dreifache des Spot uebertreffen,
+    muss "usd" den Derivate-Pump auch erkennen - sonst waere "usd" nur ein Weg, Muster
+    2 abzuschalten. Spot +20 Mio $, Futures 2.000 BTC (~122 Mio $) -> Pump."""
+    cs, fl = _demo_slope(-5e9, -20000)
+    fl = [FlowPoint(p.ts, -5e9 + 20e6 * i / 11, p.fut_cvd, p.oi, p.funding)
+          for i, p in enumerate(fl)]
+    assert classify_pattern(cs, fl, muster_cvd="usd") == Pattern.DERIVATE_PUMP
+    # Grenze genau am Dreifachen: Spot = Futures/3 ist noch Pump, knapp darueber nicht
+    fut_usd = sum((b.fut_cvd - a.fut_cvd) * k.close for a, b, k in zip(fl, fl[1:], cs[1:]))
+    for spot, erwartet in ((fut_usd / 3 * 0.999, True), (fut_usd / 3 * 1.01, False)):
+        f2 = [FlowPoint(p.ts, -5e9 + spot * i / 11, p.fut_cvd, p.oi, p.funding)
+              for i, p in enumerate(fl)]
+        ist = classify_pattern(cs, f2, muster_cvd="usd") == Pattern.DERIVATE_PUMP
+        assert ist is erwartet, (spot, fut_usd)
+
+
+def test_e433_usd_rechnet_jedes_delta_mit_dem_kurs_seiner_kerze():
+    """Ein Kurs fuer das ganze Fenster waere bei 3 % Kursbewegung 3 % daneben - und
+    genau an der Dreifach-Grenze kippt dann das Muster. Hier: Futures-Delta nur in der
+    LETZTEN Kerze (Kurs 61.800), Spot knapp unter einem Drittel davon. Wer mit dem
+    ersten Kurs (60.000) rechnet, sieht keinen Pump mehr."""
+    cs, fl = _demo_slope(-5e9, -20000)
+    k_letzt = cs[-1].close
+    fut_usd = 2000 * k_letzt
+    spot = fut_usd / 3 * 0.99                       # Pump nur mit dem richtigen Kurs
+    assert spot > 2000 * cs[0].close / 3            # mit dem Anfangskurs waere es keiner
+    f2 = [FlowPoint(p.ts, -5e9 + spot * i / 11,
+                    -20000 + (2000 if i == 11 else 0), p.oi, p.funding)
+          for i, p in enumerate(fl)]
+    assert classify_pattern(cs, f2, muster_cvd="usd") == Pattern.DERIVATE_PUMP
+
+
+def test_e433_fallende_futures_sind_kein_pump():
+    """Muster 2 heisst: Futures TREIBEN den Kurs. Fallen Spot UND Futures, gilt
+    rechnerisch trotzdem spot <= fut/3 (-100 Mio <= -20 Mio) - ohne die Pruefung
+    "Futures steigt" waere das ein Derivate-Pump. Vorprobe: alle uebrigen
+    Pump-Bedingungen liegen vor, und mit steigenden Futures IST es ein Pump."""
+    cs, fl = _demo_slope(-5e9, -20000)
+    assert cs[-1].close > cs[0].close                           # Kurs hoch
+    assert (fl[-1].oi - fl[0].oi) / fl[0].oi >= 0.03            # OI deutlich hoch
+    assert fl[-1].funding > fl[0].funding                       # Funding zieht an
+    fallend = [FlowPoint(p.ts, -5e9 - 100e6 * i / 11, -20000 - 1000 * i / 11, p.oi,
+                         p.funding) for i, p in enumerate(fl)]
+    assert classify_pattern(cs, fallend, muster_cvd="usd") != Pattern.DERIVATE_PUMP
+    steigend = [FlowPoint(p.ts, -5e9 + 10e6 * i / 11, -20000 + 1000 * i / 11, p.oi,
+                          p.funding) for i, p in enumerate(fl)]
+    assert classify_pattern(cs, steigend, muster_cvd="usd") == Pattern.DERIVATE_PUMP
+
+
+def test_e433_ohne_kerze_zum_flowpunkt_kein_pump():
+    """Fehlt zu einem Flow-Punkt die Kerze, gibt es keinen Kurs - lieber kein Pump als
+    einer mit falschem Kurs. Vorprobe: mit Kerzen IST es ein Pump."""
+    cs, fl = _demo_slope(-5e9, -20000)
+    fl = [FlowPoint(p.ts, -5e9 + 20e6 * i / 11, p.fut_cvd, p.oi, p.funding)
+          for i, p in enumerate(fl)]
+    assert classify_pattern(cs, fl, muster_cvd="usd") == Pattern.DERIVATE_PUMP
+    verschoben = [FlowPoint(p.ts + 1, p.spot_cvd, p.fut_cvd, p.oi, p.funding) for p in fl]
+    assert classify_pattern(cs, verschoben, muster_cvd="usd") != Pattern.DERIVATE_PUMP
+    # "alt" braucht keinen Kurs und bleibt davon unberuehrt
+    assert classify_pattern(cs, verschoben, muster_cvd="alt") == \
+        classify_pattern(cs, fl, muster_cvd="alt")
+
+
+def test_e433_mehr_historie_aendert_muster2_nicht_bei_usd():
+    """Der Kern von E43.3: Mit "usd" erkennt die Engine bei 400 und bei 1200 geladenen
+    Kerzen DIESELBEN Muster - live und Backtest sehen dieselbe Lage gleich.
+
+    Und durch evaluate() hindurch: Die Signale sind gleich - mit einer benannten
+    Ausnahme, Nebenbefund A5 (Teilgewinn am letzten Hoch haengt von der Laenge der
+    Historie ab, docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md, Abschnitt E43.5). Jede ANDERE
+    Abweichung macht den Test rot. Wird A5 behoben, faellt die Ausnahme weg.
+
+    Vorprobe: Bei "alt" unterscheiden sich die Derivate-Pump-Warnungen zwischen den
+    Fenstern - der Vergleich erreicht Muster 2 also auch auf Signal-Ebene.
+    """
+    kerzen, roh = _pump_szenario()
+    klein = _muster_je_fenster(kerzen, roh, 400, muster_cvd="usd")
+    gross = _muster_je_fenster(kerzen, roh, 1200, muster_cvd="usd")
+    assert Pattern.DERIVATE_PUMP in klein, "Vorprobe: usd erreicht Muster 2 nie"
+    assert klein == gross
+
+    n = len(kerzen)
+
+    def lauf(fenster, muster_cvd, n_letzte=60):
+        live = dict(_live_einstellung(), muster_cvd=muster_cvd)
+        pos, sigs = Position(), []
+        for i in range(n - n_letzte, n + 1):
+            aus = max(0, i - fenster)
+            sigs += evaluate(kerzen[aus:i], _flow_ab(kerzen, roh, aus, i), pos, **live)
+        return [(x.ts, x.type, round(x.price, 4), x.reason) for x in sigs]
+
+    def pump_warnungen(sigs):
+        return [x for x in sigs if x[1] == SignalType.WARNUNG and "Derivate-Pump" in x[3]]
+
+    assert pump_warnungen(lauf(400, "alt")) != pump_warnungen(lauf(1200, "alt")), \
+        "Vorprobe: bei alt muessten sich die Pump-Warnungen unterscheiden (A2)"
+
+    a5 = "Teilgewinn am letzten Hoch"
+    k, g = lauf(400, "usd"), lauf(1200, "usd")
+    assert pump_warnungen(k), "Vorprobe: ohne Pump-Warnung prueft der Vergleich nichts"
+    rest_k = [x for x in k if not x[3].startswith(a5)]
+    rest_g = [x for x in g if not x[3].startswith(a5)]
+    assert rest_k == rest_g, [x for x in rest_k + rest_g if (x in rest_k) != (x in rest_g)]
+
+
+def test_e433_muster_cvd_kommt_in_evaluate_an():
+    """Der Weg DURCH evaluate(): Stehen die Muster bei alt und usd verschieden, muessen
+    sich auch die Signale unterscheiden. Bliebe der Parameter in evaluate() haengen,
+    rechnete die Gitterzeile still mit "alt" - eine Kopie der Live-Zeile."""
+    kerzen, roh = _pump_szenario()
+    n = len(kerzen)
+
+    def lauf(muster_cvd):
+        live = dict(_live_einstellung(), muster_cvd=muster_cvd)
+        pos, sigs = Position(), []
+        for i in range(n - 60, n + 1):
+            sigs += evaluate(kerzen[i - 400:i], _flow_ab(kerzen, roh, i - 400, i), pos,
+                             **live)
+        return [(x.ts, x.type, x.reason) for x in sigs]
+
+    assert lauf("alt") != lauf("usd")
 
 
 def test_ema200_braucht_echte_historie():

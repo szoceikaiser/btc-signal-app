@@ -1665,3 +1665,130 @@ def test_e41_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():
     import inspect
     q = inspect.getsource(backtest.main)
     assert 'e41_abschnitt(results, halves, panel_cfg["label"])' in q
+
+
+# ------------------------------------------ E43.3: Muster 2 in Dollar (Befund A2)
+
+def test_e433_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live():
+    """Ein Messergebnis gilt nur gegen die Basis, gegen die gemessen wurde. Genau EIN
+    Unterschied zur Panel-Zeile: muster_cvd. Und die Panel-Zeile rechnet noch "alt" -
+    sonst waere die Zeile eine Kopie der Live-Zeile."""
+    assert "muster_cvd" in backtest.EVAL_KEYS and backtest._BASE["muster_cvd"] == "alt"
+    panel = [v for v in backtest.GRID if v.get("panel")][0]
+    basis = {k: panel[k] for k in backtest.EVAL_KEYS if k in panel}
+    z = _zeile(backtest.E433_USD)
+    hier = {k: z[k] for k in backtest.EVAL_KEYS if k in z}
+    abweichend = {k for k in set(basis) | set(hier) if basis.get(k) != hier.get(k)}
+    assert abweichend == {"muster_cvd"}, abweichend
+    assert hier["muster_cvd"] == "usd" and basis["muster_cvd"] == "alt"
+
+
+def test_e433_live_konfig_steht_auf_alt():
+    """Default AUS bis zur Messung und Kaisers Go (Projektregel 1)."""
+    import json
+    from pathlib import Path
+    cfg_datei = Path(__file__).resolve().parent.parent / "site" / "data" / "config.json"
+    if not cfg_datei.exists():
+        print("  UEBERSPRUNGEN: site/data/config.json fehlt - muster_cvd ungeprueft!")
+        return
+    cfg = json.loads(cfg_datei.read_text(encoding="utf-8"))
+    assert cfg.get("muster_cvd") == "alt"
+    assert "_hinweis_muster_cvd" in cfg
+
+
+def _hz(h1=10.0, h2=5.0, dd=-9.0):
+    return {"h1": h1, "h2": h2, "dd": dd}
+
+
+def test_e433_einschalten_nur_wenn_beide_haelften_klar_besser():
+    live = _hz(10.0, 5.0)
+    assert backtest.e433_einschalten(live, _hz(11.0, 6.0))["einschalten"] is True   # genau 1,0
+    assert backtest.e433_einschalten(live, _hz(11.0, 5.9))["einschalten"] is False  # H2 Rauschen
+    assert backtest.e433_einschalten(live, _hz(10.9, 9.0))["einschalten"] is False  # H1 Rauschen
+    assert backtest.e433_einschalten(live, _hz(9.0, 4.0))["einschalten"] is False   # schlechter
+
+
+def test_e433_einschalten_nicht_bei_zu_tiefem_rueckgang():
+    live = _hz(dd=-9.0)
+    gut = dict(h1=12.0, h2=7.0)
+    assert backtest.e433_einschalten(live, _hz(dd=-10.0, **gut))["einschalten"] is True  # Grenze
+    u = backtest.e433_einschalten(live, _hz(dd=-10.1, **gut))
+    assert u["rueckgang_ok"] is False and u["einschalten"] is False
+    # ein FLACHERER Rueckgang ist nie ein Hindernis
+    assert backtest.e433_einschalten(live, _hz(dd=-5.0, **gut))["einschalten"] is True
+
+
+def _pump_reihe(n, alter_abfluss=0.0):
+    """Das E43.5-Szenario als EINE durchgehende Reihe, summiert ab Datenbeginn - so wie
+    build_series im Backtest rechnet. `alter_abfluss` = Spot-Delta je Kerze in den
+    ersten 100 Kerzen: Geld, das der Backtest in seiner Summe mitschleppt, die Live-
+    Engine (1.300 Kerzen) aber nie geladen hat - der Fall aus dem Pruefbericht."""
+    from test_strategy_core import _flow_ab, _pump_szenario
+    kerzen, roh = _pump_szenario(n_kerzen=n)
+    roh = [(sd + (alter_abfluss if i < 100 else 0.0), fd, oi, fu)
+           for i, (sd, fd, oi, fu) in enumerate(roh)]
+    return kerzen, _flow_ab(kerzen, roh, 0, n)
+
+
+def test_e433_vorprobe_im_bericht_zaehlt_umklassifizierte_kerzen():
+    """e433_umklassifiziert() ist die Vorprobe im echten Datensatz: Aendert usd
+    ueberhaupt ein Muster? Im Pump-Szenario muss sie solche Kerzen finden."""
+    kerzen, flow = _pump_reihe(1900)
+    u = backtest.e433_umklassifiziert(kerzen, flow, kerzen[1300].ts)
+    assert u["kerzen"] == 600 and u["live_kerzen"] == 600, u
+    assert u["verschieden"] > 0 and u["pump_usd"] > 0, u
+
+
+def test_e433_vorprobe_zeigt_live_gegen_backtest():
+    """Zweiter Teil der Vorprobe: Wie oft saehe die Live-Engine ein anderes Muster als
+    der Backtest? Mit einem alten Spot-Abfluss (-500 Mio $ je Kerze in den ersten 100
+    Kerzen, zusammen -50 Mrd $ wie im Pruefbericht) vor dem Live-Ladefenster: bei alt
+    an manchen Kerzen (A2), bei usd an KEINER.
+
+    Gezaehlt wird ab Kerze 1400 - erst dort liegt der Abfluss ganz vor dem
+    Live-Fenster. Vorprobe: ohne den Abfluss liegt die Zahl im selben Szenario bei 0,
+    der Abfluss ist also, was den Unterschied macht."""
+    kerzen, flow = _pump_reihe(1900)
+    ohne = backtest.e433_umklassifiziert(kerzen, flow, kerzen[1400].ts)
+    kerzen, flow = _pump_reihe(1900, alter_abfluss=-5e8)
+    mit = backtest.e433_umklassifiziert(kerzen, flow, kerzen[1400].ts)
+    assert ohne["live_anders_alt"] == 0, ohne
+    assert mit["live_kerzen"] == 500 and mit["live_anders_alt"] > 0, mit
+    assert mit["live_anders_usd"] == 0, mit
+
+
+def test_e433_vorprobe_zaehlt_nur_nachstellbare_kerzen_fuer_live():
+    """Reichen die Daten keine 1.300 Kerzen vor eine Kerze zurueck, ist der Live-Stand
+    dort unbekannt - diese Kerzen duerfen nicht als 'live gleich' gezaehlt werden."""
+    kerzen, flow = _pump_reihe(1400)
+    u = backtest.e433_umklassifiziert(kerzen, flow, kerzen[1000].ts)
+    assert u["kerzen"] == 400 and u["live_kerzen"] == 100, u
+
+
+def test_e433_abschnitt_meldet_urteil_und_kein_urteil_ohne_umklassifizierung():
+    def r(label, rendite, dd, n=5):
+        return ({"label": label}, [{}] * n, {}, {"rendite_pct": rendite,
+                                                  "max_drawdown_pct": dd})
+
+    def h(label, h1, h2):
+        return ({"label": label}, {"rendite_pct": h1}, {"rendite_pct": h2})
+
+    res = [r("LIVE", 25.0, -9.9), r(backtest.E433_USD, 28.0, -10.2)]
+    hal = [h("LIVE", 20.0, 5.0), h(backtest.E433_USD, 21.5, 6.2)]
+    umkl = {"kerzen": 100, "pump_alt": 7, "pump_usd": 4, "verschieden": 5,
+            "live_kerzen": 50, "live_anders_alt": 3, "live_anders_usd": 0}
+    text = "\n".join(backtest.e433_abschnitt(res, hal, "LIVE", umkl))
+    assert "Regel erfuellt" in text and "Verschieden erkannt: 5 Kerzen" in text
+    hal[1] = h(backtest.E433_USD, 21.5, 5.5)                       # H2 nur +0,5
+    text = "\n".join(backtest.e433_abschnitt(res, hal, "LIVE", umkl))
+    assert "bleibt auf `alt`" in text
+    umkl["verschieden"] = 0
+    text = "\n".join(backtest.e433_abschnitt(res, hal, "LIVE", umkl))
+    assert "Kein Urteil" in text and "Regel" not in text.split("Kein Urteil")[1]
+
+
+def test_e433_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis():
+    import inspect
+    q = inspect.getsource(backtest.main)
+    assert 'e433_abschnitt(results, halves, panel_cfg["label"], _umkl)' in q
+    assert "e433_umklassifiziert(candles, flow, eff_start)" in q

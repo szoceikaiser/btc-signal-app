@@ -82,7 +82,7 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "no_flip", "freeze_targets",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
              "rest_halten", "neustart_mit_rest", "zonen_1d",
-             "zonen_nachziehen", "pivot_n_1d", "ampel_filter")
+             "zonen_nachziehen", "pivot_n_1d", "ampel_filter", "muster_cvd")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              # E33 (13.09.2026) hob trend_ema von 50 auf 200 — in evaluate(),
@@ -101,7 +101,8 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              min_bein_pct=0.0, bein_wahl="juengstes", be_im_plus=False,
              bein_richtung="auto", widerstand_exit="off",
              rest_halten=False, neustart_mit_rest=False, zonen_1d=False,
-             zonen_nachziehen=False, pivot_n_1d=0, ampel_filter="off")
+             zonen_nachziehen=False, pivot_n_1d=0, ampel_filter="off",
+             muster_cvd="alt")
 
 
 def V(label, panel=False, **kw):
@@ -122,6 +123,7 @@ def V(label, panel=False, **kw):
 # (site/data/config.json: bias_short=false) + Kaufleiter + Flush core + tp_ladder
 # (Defaults in strategy_core.evaluate). Bei jeder Aenderung an config.json oder an den
 # evaluate-Defaults muss dieses Flag mitwandern.
+E433_USD = "LIVE-heute +Muster 2 in Dollar (E43.3)"
 GRID = [
     V("nur Long (Basis)", bias_short=False),
     V("+Kaufleiter", bias_short=False, buy_ladder=True),
@@ -541,6 +543,18 @@ GRID = [
       min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
       no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
       bein_richtung="auto"),
+    # ---------------------------------------------------------------- E43.3 (26.09.2026)
+    # Befund A2: Muster 2 (Derivate-Pump) verglich Anteile an einer willkuerlich
+    # begonnenen CVD-Summe - live anders als im Backtest. muster_cvd="usd" vergleicht
+    # Dollar-Betraege im Fenster. GENAU EIN Unterschied zur Panel-Zeile.
+    # Entscheidungsregel VOR der Messung (docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md, E43.3):
+    # live nur, wenn in BEIDEN Fensterhaelften mind. 1 Punkt besser UND Rueckgang nicht
+    # mehr als 1 Punkt tiefer. Der Bericht prueft das selbst (e433_abschnitt).
+    V(E433_USD,
+      bias_short=False, flush_entry="core", buy_ladder=True, trail_stop=True,
+      min_stop_pct=0.02, liq_entry="boost", high_exit="on", min_bein_pct=0.05,
+      no_flip=True, neustart_mit_rest=True, zonen_nachziehen=True, stop_rueckeroberung=1,
+      bein_richtung="bias", muster_cvd="usd"),
     V("Long+Short (Ref)"),
 ]
 
@@ -1794,6 +1808,144 @@ def e41_abschnitt(results: list, halves: list, basis_label: str) -> list:
     return z
 
 
+# ---------------------------------------------------------------- E43.3 (26.09.2026)
+# Muster 2 in Dollar (Befund A2). Die Regel steht VOR der ersten Messung fest
+# (docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md, Abschnitt E43.3) - dieselbe wie bei E41/E43.2.
+E433_RAUSCHGRENZE = 1.0         # 06.09.2026: ein Tag mehr Daten drehte 1,0 Punkte um
+E433_DD_TOLERANZ = 1.0
+# So viel Historie hat die Live-Engine: main.LIMIT_HAUPT Spotkerzen, Coinalyze-Futures-
+# Delta ueber days=90 (= 540 4h-Kerzen). Ab dort beginnen live die beiden CVD-Summen.
+E433_LIVE_SPOT_KERZEN = 1300
+E433_LIVE_FUT_KERZEN = 540
+
+
+def e433_einschalten(live: dict, usd: dict) -> dict:
+    """Entscheidungsregel fuer muster_cvd="usd", festgelegt VOR der Messung.
+
+    live/usd: {"h1", "h2", "dd"} (dd negativ, z. B. -9.9). Einschalten nur, wenn BEIDES
+    gilt:
+      1. "usd" ist in BEIDEN Fensterhaelften um mindestens E433_RAUSCHGRENZE Punkte
+         besser. Ein Vorsprung in nur einer Haelfte ist nicht von Zufall zu trennen.
+      2. Der Rueckgang liegt mit "usd" um NICHT mehr als E433_DD_TOLERANZ Punkte tiefer.
+    """
+    beide = (usd["h1"] - live["h1"] >= E433_RAUSCHGRENZE
+             and usd["h2"] - live["h2"] >= E433_RAUSCHGRENZE)
+    dd_ok = usd["dd"] >= live["dd"] - E433_DD_TOLERANZ
+    return {"beide_haelften_besser": beide, "rueckgang_ok": dd_ok,
+            "einschalten": beide and dd_ok}
+
+
+def e433_umklassifiziert(candles: list, flow: list, start_ms: int) -> dict:
+    """Vorprobe im echten Datensatz: Aendert muster_cvd="usd" ueberhaupt ein Muster?
+
+    Ist die Zahl 0, ist die Gitterzeile eine Kopie der Live-Zeile und misst nichts
+    (dieselbe Lehre wie bei E43.2s bias_long != bias_short).
+
+    Zweitens: Wie oft haette die LIVE-Engine ein anderes Muster gesehen als der
+    Backtest? Live beginnen die Summen an der ersten geladenen Kerze, im Backtest am
+    Datenbeginn. Die Live-Reihe ist also die Backtest-Reihe minus einem festen Stand -
+    genau der Stand, von dem der alte Vergleich abhaengt. Mit "usd" muss diese Zahl 0
+    sein, sonst haengt auch die neue Rechnung vom Startpunkt ab. Kerzen, fuer die die
+    Daten nicht 1.300 Kerzen zurueckreichen, lassen sich so nicht nachstellen und werden
+    nicht mitgezaehlt.
+
+    classify_pattern liest nur die letzten 12 Kerzen - deshalb genuegt ein 12er-
+    Ausschnitt, und die Rechnung bleibt linear.
+    """
+    from dataclasses import replace
+    from strategy_core import Pattern, classify_pattern
+    dp = Pattern.DERIVATE_PUMP
+    out = {"kerzen": 0, "pump_alt": 0, "pump_usd": 0, "verschieden": 0,
+           "live_kerzen": 0, "live_anders_alt": 0, "live_anders_usd": 0}
+    for i, c in enumerate(candles):
+        if c.ts < start_ms or i < 11:
+            continue
+        cs, fl = candles[i - 11:i + 1], flow[i - 11:i + 1]
+        a = classify_pattern(cs, fl, muster_cvd="alt")
+        u = classify_pattern(cs, fl, muster_cvd="usd")
+        out["kerzen"] += 1
+        out["pump_alt"] += a == dp
+        out["pump_usd"] += u == dp
+        out["verschieden"] += a != u
+        i_s, i_f = i - E433_LIVE_SPOT_KERZEN, i - E433_LIVE_FUT_KERZEN
+        if i_s < 0:
+            continue
+        off_s, off_f = flow[i_s].spot_cvd, flow[i_f].fut_cvd
+        fl_live = [replace(p, spot_cvd=p.spot_cvd - off_s, fut_cvd=p.fut_cvd - off_f)
+                   for p in fl]
+        out["live_kerzen"] += 1
+        out["live_anders_alt"] += classify_pattern(cs, fl_live, muster_cvd="alt") != a
+        out["live_anders_usd"] += classify_pattern(cs, fl_live, muster_cvd="usd") != u
+    return out
+
+
+def e433_abschnitt(results: list, halves: list, basis_label: str, umkl: dict) -> list:
+    """Berichtsabschnitt E43.3: Live gegen "usd", die Vorprobe im Datensatz und das
+    Urteil nach der vorab festgelegten Entscheidungsregel."""
+    voll = {r[0]["label"]: r for r in results}
+    halb = {h[0]["label"]: (h[1], h[2]) for h in halves}
+    if any(x not in voll or x not in halb for x in (basis_label, E433_USD)):
+        return []
+
+    def _kz(label: str) -> dict:
+        _cfg, sigs, _sc, p = voll[label]
+        h1, h2 = halb[label]
+        return {"rendite": p["rendite_pct"], "dd": p.get("max_drawdown_pct", 0.0),
+                "h1": h1["rendite_pct"], "h2": h2["rendite_pct"], "n": len(sigs)}
+
+    live, usd = _kz(basis_label), _kz(E433_USD)
+    u = e433_einschalten(live, usd)
+
+    def _zeile(name: str, v: dict) -> str:
+        return (f"| {name} | {v['rendite']:+.1f} % | {v['dd']:.1f} % | {v['h1']:+.1f} % | "
+                f"{v['h2']:+.1f} % | {v['n']} |")
+
+    ja = lambda b: "**ja**" if b else "nein"
+    z = ["", "## E43.3: Muster 2 in Dollar (Schalter `muster_cvd`, Default aus)", "",
+         "Befund A2 der Gesamtpruefung: Muster 2 (Derivate-Pump) teilte die Veraenderung im "
+         "Fenster durch den Stand der kumulierten Summe am Fensteranfang - einen Stand, der "
+         "nur davon abhaengt, wo die Summe zu laufen begann. `usd` vergleicht stattdessen "
+         "Spot- und Futures-Delta als Dollar-Betraege im Fenster. Die Zeile unten "
+         "unterscheidet sich von der Live-Zeile **nur** darin.", "",
+         "| Variante | Rendite | Rueckgang | H1 | H2 | Signale |",
+         "|---|---:|---:|---:|---:|---:|",
+         _zeile("**Live (alt)**", live), _zeile("Muster 2 in Dollar (usd)", usd), "",
+         "**Vorprobe im Datensatz:**", "",
+         f"- Kerzen im Fenster: {umkl['kerzen']}. Derivate-Pump mit alt: "
+         f"{umkl['pump_alt']}, mit usd: {umkl['pump_usd']}. **Verschieden erkannt: "
+         f"{umkl['verschieden']} Kerzen.**"]
+    if umkl["live_kerzen"]:
+        z.append(f"- Live gegen Backtest ({umkl['live_kerzen']} nachstellbare Kerzen, "
+                 f"Summen live ab {E433_LIVE_SPOT_KERZEN} bzw. {E433_LIVE_FUT_KERZEN} "
+                 f"Kerzen zurueck): Die Live-Engine haette mit alt an "
+                 f"**{umkl['live_anders_alt']}** Kerzen ein anderes Muster gesehen als der "
+                 f"Backtest, mit usd an **{umkl['live_anders_usd']}** (muss 0 sein).")
+    else:
+        z.append("- Live gegen Backtest: nicht nachstellbar, die Daten reichen keine "
+                 f"{E433_LIVE_SPOT_KERZEN} Kerzen vor das Fenster zurueck.")
+    if not umkl["verschieden"]:
+        z += ["", "**Kein Urteil:** Der Schalter aendert im Fenster kein einziges Muster. "
+              "Die Zeile ist dann eine Kopie der Live-Zeile, jeder Unterschied oben ist "
+              "Zufall der Rundung."]
+        return z
+    z += ["", "**Urteil nach der Entscheidungsregel (vorab festgelegt):**", "",
+          f"- In beiden Haelften mindestens {E433_RAUSCHGRENZE:.0f} Punkt besser: "
+          f"{ja(u['beide_haelften_besser'])} (H1 {usd['h1'] - live['h1']:+.1f}, "
+          f"H2 {usd['h2'] - live['h2']:+.1f} Punkte gegen live)",
+          f"- Rueckgang nicht mehr als {E433_DD_TOLERANZ:.0f} Punkt tiefer: "
+          f"{ja(u['rueckgang_ok'])} ({usd['dd'] - live['dd']:+.1f} Punkte gegen live)"]
+    if u["einschalten"]:
+        z.append("- **Regel erfuellt.** `muster_cvd` darf nach Kaisers Go auf `usd`; dann "
+                 "wandert `panel=True` auf diese Zeile, und die alte Rechnung bleibt als "
+                 "Ausschalt-Probe im Gitter.")
+    else:
+        z.append("- **Regel nicht erfuellt - der Schalter bleibt auf `alt`.** Offen fuer "
+                 "Kaiser (Sonderregel aus dem Pruefbericht, Teil E): die Korrektur nur in "
+                 "der Anzeige uebernehmen. Dann stuende im Lage-Abruf gelegentlich ein "
+                 "anderes Muster als das, nach dem die Engine handelt.")
+    return z
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -2450,6 +2602,16 @@ def main():
         print(f"  {cfg['label']}: H1 {p1['rendite_pct']:+.1f} % | "
               f"H2 {p2['rendite_pct']:+.1f} %")
 
+    # --- E43.3: Vorprobe im Datensatz (aendert muster_cvd="usd" ueberhaupt etwas?) ------
+    try:
+        _umkl, _umklfehler = e433_umklassifiziert(candles, flow, eff_start), ""
+        print(f"E43.3: {_umkl['verschieden']} von {_umkl['kerzen']} Kerzen mit usd anders "
+              f"erkannt; live gegen Backtest (alt) {_umkl['live_anders_alt']} von "
+              f"{_umkl['live_kerzen']}.")
+    except Exception as exc:  # noqa: BLE001
+        _umkl, _umklfehler = {}, f"Vorprobe nicht gerechnet ({exc})"
+        print(f"E43.3: {_umklfehler}")
+
     # Auswahl: primaer Rendite (das Geld-Maß), dann Recall, dann Praezision
     best = max(results, key=lambda r: (r[3]["rendite_pct"], r[2]["recall"], r[2]["precision"]))
     best_cfg, sigs, sc, pnl = best
@@ -2835,6 +2997,11 @@ def main():
         [h for h in halves if h[0]["label"] == E41_ALTER_STOP],
         "die Zeile mit dem alten Stop fehlt im Gitter oder in der Halbierung",
         lambda: e41_abschnitt(results, halves, panel_cfg["label"]),
+    ) + abschnitt_oder_grund(
+        "E43.3: Muster 2 in Dollar (Schalter `muster_cvd`, Default aus)",
+        _umkl and [h for h in halves if h[0]["label"] == E433_USD], _umklfehler
+        or "die Zeile mit muster_cvd=usd fehlt im Gitter oder in der Halbierung",
+        lambda: e433_abschnitt(results, halves, panel_cfg["label"], _umkl),
     ) + [
         "",
         "## Einschraenkungen",

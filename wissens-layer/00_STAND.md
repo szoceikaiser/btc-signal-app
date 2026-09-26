@@ -40,8 +40,9 @@
   `bein_richtung: bias` (Furkans zwei Raster).
 
 - **Auf dem Arbeitszweig `claude/btc-signal-engine-start-hyiqny` (nicht in `main`):**
-  E43.5 fertig (Test „mehr Historie“ erreicht jetzt Muster 2, 450 Tests grün),
-  E43.3 im Bau. Neuer, ungemessener Nebenbefund **A5**: „Teilgewinn am letzten Hoch“
+  E43.5 fertig (Test „mehr Historie“ erreicht jetzt Muster 2), **E43.3 gebaut**
+  (Schalter `muster_cvd`, Default `"alt"`, Gitterzeile und Berichtsabschnitt mit
+  Entscheidungsregel), **467 Tests grün**. Die Messung steht aus. Neuer, ungemessener Nebenbefund **A5**: „Teilgewinn am letzten Hoch“
   hängt von der Länge der geladenen Historie ab (`OFFENE-PUNKTE.md`, Punkt 8).
 
 ## Was als Nächstes offen liegt (Reihenfolge = Nutzwert)

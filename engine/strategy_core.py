@@ -461,6 +461,36 @@ def _slope(vals: list[float]) -> float:
     return (vals[-1] - vals[0]) / abs(vals[0])
 
 
+def _muster2_dollar(c: list[Candle], f: list[FlowPoint]) -> Optional[tuple[float, float]]:
+    """(Spot-Delta, Futures-Delta) im Fenster, beide in DOLLAR (E43.3, Befund A2).
+
+    Der alte Vergleich in Muster 2 teilte die Veraenderung im Fenster durch den STAND
+    der kumulierten Summe am Fensteranfang. Dieser Stand ist willkuerlich - er haengt
+    nur davon ab, wo die Summe zu laufen begann (live: ab der ersten geladenen Kerze,
+    im Backtest: ab Datenbeginn). Dieselbe Marktlage ergab so je nach Startpunkt
+    "gesunder Trend" oder "Derivate-Pump".
+
+    Hier zaehlen nur Differenzen INNERHALB des Fensters - ein konstanter Startwert
+    kuerzt sich heraus:
+      - Spot: f[-1].spot_cvd - f[0].spot_cvd (die Reihe ist schon in Dollar).
+      - Futures: jedes Kerzen-Delta (BTC) mal Schlusskurs DERSELBEN Kerze, dann
+        aufsummiert - dieselbe Umrechnung wie _fut_cvd_usd (E43.1), nur fensterlokal.
+    Beide decken dieselben Kerzen ab (die Deltas von Kerze 2 bis 12 des Fensters).
+
+    None, wenn zu einem Flow-Punkt keine Kerze existiert: lieber kein Derivate-Pump
+    als einer mit falschem Kurs. Live und im Backtest entstehen Kerze und Flow-Punkt in
+    derselben Schleife, der Fall tritt dort nicht auf.
+    """
+    kurs = {x.ts: x.close for x in c}
+    fut = 0.0
+    for vorher, p in zip(f, f[1:]):
+        k = kurs.get(p.ts)
+        if k is None:
+            return None
+        fut += (p.fut_cvd - vorher.fut_cvd) * k
+    return f[-1].spot_cvd - f[0].spot_cvd, fut
+
+
 # ------------------------------------------------ E32: Lage-Bericht (reine Information)
 
 # Klartext zu den Kompass-Mustern. Pattern.UNGESUNDER_ABVERKAUF sagt einem Menschen
@@ -956,8 +986,14 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
                      oi_wipeout_pct: float = 0.05,
                      sharp_move_pct: float = 0.04,
                      funding_hot: float = 0.0001,
-                     liq_spike_mult: float = 3.0) -> Pattern:
+                     liq_spike_mult: float = 3.0,
+                     muster_cvd: str = "alt") -> Pattern:
     """Ordnet die juengste Marktphase einem der 4 Kompass-Muster zu.
+
+    muster_cvd (E43.3, Default "alt" = bisheriges Verhalten): "usd" ersetzt in Muster 2
+    den Vergleich zweier relativer Slopes durch einen Vergleich zweier Dollar-Betraege
+    im Fenster (_muster2_dollar). Nur Muster 2 aendert sich - die Vorzeichen-Pruefungen
+    der anderen Muster haengen nicht vom Startwert der Summe ab.
 
     `window` = Anzahl Kerzen (12 x 4h = 2 Tage). Schwellen sind Startwerte.
     E9.1: echte Liquidationen (Coinalyze) verstaerken Muster 3/4 — eine Long-Liq-
@@ -1005,7 +1041,15 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
     # 2: Derivate-Pump — Futures-CVD stark hoch, Spot flach/runter, OI deutlich hoch, Funding zieht an
     has_fut = any(p.fut_cvd for p in f)
     if has_fut:
-        if (price_chg > 0 and fut > 0 and spot <= fut / 3 and oi_chg >= 0.03
+        if muster_cvd == "usd":
+            # E43.3: zwei Dollar-Betraege im Fenster statt zweier Anteile an einer
+            # willkuerlich begonnenen Summe. "Futures steigt" ebenfalls in Dollar,
+            # damit beide Seiten des Vergleichs dieselbe Einheit haben.
+            d = _muster2_dollar(c, f)
+            cvd_pump = d is not None and d[1] > 0 and d[0] <= d[1] / 3
+        else:
+            cvd_pump = fut > 0 and spot <= fut / 3
+        if (price_chg > 0 and cvd_pump and oi_chg >= 0.03
                 and (funding_rising or funding_now >= funding_hot)):
             return Pattern.DERIVATE_PUMP
     else:
@@ -1364,7 +1408,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              zonen_1d: bool = False,
              zonen_nachziehen: bool = False,
              pivot_n_1d: int = 0,
-             ampel_filter: str = "off") -> list[Signal]:
+             ampel_filter: str = "off",
+             muster_cvd: str = "alt") -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -1505,6 +1550,12 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     #   Punkt 2 aus docs/VERLUST-ANALYSE-2026-07-27.md ab (44 % der Verlustsumme). Wirkt nur
     #   zusammen mit trail_stop und nur, wenn der Einstand UNTER dem Kurs liegt — sonst
     #   waere der Stop im selben Moment ausgeloest.
+    # muster_cvd (E43.3, Befund A2 der Gesamtpruefung 26.09.2026): "alt" | "usd". Bei
+    #   "usd" vergleicht Muster 2 (Derivate-Pump) Spot- und Futures-Delta als Dollar-
+    #   Betraege im Fenster statt als Anteile an einer willkuerlich begonnenen Summe.
+    #   Muster 2 sperrt Einstiege und loest den Restverkauf aus - die Korrektur aendert
+    #   also Signale. Default "alt", bis der Backtest gegen die Entscheidungsregel in
+    #   docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md gemessen hat.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -1552,7 +1603,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             return False
         return not muster5_haelt_zurueck(muster5_halten, pattern, pos.direction, ziel)
 
-    pattern = classify_pattern(candles, flow) if flow else Pattern.NEUTRAL
+    # E43.3: muster_cvd MUSS hier ankommen - sonst misst die Gitterzeile die Live-Zeile.
+    pattern = classify_pattern(candles, flow, muster_cvd=muster_cvd) if flow \
+        else Pattern.NEUTRAL
     pivots = find_pivots(candles, n=pivot_n)
     _nur_auf = None
     if bein_richtung == "bias" and bias_long != bias_short:

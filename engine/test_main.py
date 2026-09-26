@@ -1225,3 +1225,15 @@ def test_plan_nachgezogener_stop_bleibt_ohne_rueckeroberung():
                                      "stop_rueckeroberung": 1}, pos)
     assert p["stop"]["grund"] == "Einstand (nachgezogen)"        # Vorprobe
     assert "rueckeroberung" not in p["stop"]
+
+
+def test_e433_anzeige_rechnet_muster2_wie_der_handel():
+    """Lage-Abruf, Vorschau und Plan zeigen das Muster an. Sie muessen es mit
+    demselben muster_cvd rechnen wie evaluate() - sonst steht in der Nachricht ein
+    anderes Muster als das, nach dem die Engine gehandelt hat."""
+    import inspect
+    q = inspect.getsource(main)
+    aufrufe = q.count("classify_pattern(")
+    assert aufrufe >= 3, "Vorprobe: die Anzeige-Aufrufe sind nicht mehr da"
+    assert q.count('classify_pattern(candles, flow, muster_cvd=par["muster_cvd"])') == aufrufe
+    assert main.EVAL_DEFAULTS["muster_cvd"] == "alt"

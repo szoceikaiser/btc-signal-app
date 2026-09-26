@@ -14,7 +14,7 @@
 |---|---|---|---|---|
 | E43.1 | Futures-CVD im Lage-Abruf in Dollar (Befund A1) | reine Anzeige | mittel | **LIVE** seit 26.09.2026 (Kaisers Go, in `main` gemerged) |
 | E43.2 | Gitterzeile „LIVE-heute +Bein in Handelsrichtung“, genau ein Unterschied | Messung, kein neuer Schalter | Auswertung: **niedrig** | **LIVE** seit 26.09.2026 (`bein_richtung: "bias"`, Entscheidungsregel erfüllt, Kaisers Go) |
-| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **IM BAU** 26.09.2026 (Arbeitszweig) |
+| E43.3 | Muster 2 vergleicht Dollar-Beträge statt Anteile an einer willkürlichen Summe (A2) | Schalter, Default aus | **hoch** | **GEBAUT** 26.09.2026 (Arbeitszweig), Messung OFFEN |
 | E43.4 | Open Interest in Kontrakten statt Dollar (A3) | Schalter, Default aus | **mittel bis hoch** | OFFEN |
 | E43.5 | Test „mehr Historie“ summiert neu und erreicht den Muster-2-Zweig (A4) | Test | mittel | **FERTIG** 26.09.2026 (Arbeitszweig, noch nicht in `main`), 450 Tests, `sabotage_e433.py` 5/5 |
 | E43.6 | Nachmessung mit genau einem Unterschied: `rest_halten`, `strict_confirm`, `confirm_t1`, `cooldown_h`; danach Muster 5 wiederholen | Messung | **niedrig** | OFFEN |
@@ -258,8 +258,12 @@ wird nur genauer:
   Kerze und Flow-Punkt in derselben Schleife gebaut, der Fall tritt dort nicht auf.
 - **Anzeige = Handel:** Die drei `classify_pattern`-Aufrufe für Lage-Abruf, Vorschau und
   Plan in `main.py` bekommen denselben `muster_cvd`-Wert wie `evaluate()`. Solange der
-  Schalter auf `"alt"` steht, ändert sich dort nichts. Damit ist die Sonderregel
-  (Anzeige-Korrektur auch ohne Rendite-Gewinn) später eine reine Konfig-Frage.
+  Schalter auf `"alt"` steht, ändert sich dort nichts. **Offen für Kaiser nach der
+  Messung:** Die Sonderregel (Anzeige-Korrektur auch ohne Rendite-Gewinn) hieße, dass
+  die Anzeige `"usd"` rechnet, der Handel aber `"alt"`. Dann stünde im Lage-Abruf
+  gelegentlich ein anderes Muster als das, nach dem die Engine gehandelt hat. Dafür
+  bräuchte es einen eigenen Anzeige-Schlüssel. Er wird erst gebaut, wenn Kaiser das
+  nach der Messung so will.
 - **Grenze, bewusst nicht behoben:** Die E37-Datenvarianten „Spot-CVD aggregiert“ und
   „ALLES aggregiert“ führen das Spot-CVD in **BTC** (`coinalyze.spot_delta_aggregiert`),
   nicht in Dollar. Mit `"usd"` würden dort BTC und Dollar verglichen. Sie laufen mit
@@ -271,6 +275,31 @@ wird nur genauer:
   verschiedene Muster ergeben, und (2) die Entscheidungsregel oben selbst prüft
   (Vorbild `e41_abschnitt`). Ist die Zahl der umklassifizierten Kerzen 0, misst die
   Gitterzeile nichts, und der Bericht sagt das.
+
+### Umsetzung E43.3 (26.09.2026, Arbeitszweig, noch nicht gemessen)
+
+- `strategy_core.py`: `_muster2_dollar()` (Spot- und Futures-Delta im Fenster in Dollar,
+  Futures je Kerze mit deren Schlusskurs), `classify_pattern(..., muster_cvd="alt")`,
+  `evaluate(..., muster_cvd="alt")` reicht den Wert weiter. Bei `"alt"` rechnet alles
+  wie bisher.
+- `main.py`: `EVAL_DEFAULTS["muster_cvd"] = "alt"`; Lage-Abruf, Vorschau und Plan rechnen
+  das Muster mit demselben Wert wie der Handel.
+- `backtest.py`: `muster_cvd` in `EVAL_KEYS` und `_BASE`; Gitterzeile
+  „LIVE-heute +Muster 2 in Dollar (E43.3)“ mit genau einem Unterschied; Berichtsabschnitt
+  „E43.3“ mit Vorprobe im Datensatz (`e433_umklassifiziert`) und Urteil nach der
+  Entscheidungsregel (`e433_einschalten`).
+- `site/data/config.json`: `"muster_cvd": "alt"` plus `_hinweis_muster_cvd`.
+- **Tests:** 17 neue, zusammen mit E43.5 jetzt **467 grün**. Darunter die verdrahtete
+  Vorprobe `demo_slope` (bei `"alt"` GESUNDER_TREND, GESUNDER_TREND, DERIVATE_PUMP,
+  DERIVATE_PUMP wie im Prüfbericht; bei `"usd"` viermal GESUNDER_TREND) und der Kern:
+  Mit `"usd"` erkennt die Engine bei 400 und 1.200 geladenen Kerzen dieselben Muster
+  (im Pump-Szenario 16 gegen 16 Derivate-Pumps; bei `"alt"` 8 gegen 3).
+- **Die Vorprobe im Bericht rechnet richtig**, bewiesen im Szenario: Mit einem alten
+  Spot-Abfluss vor dem Live-Ladefenster hätte die Live-Engine mit `"alt"` an 47 von 500
+  Kerzen ein anderes Muster gesehen als der Backtest, mit `"usd"` an 0.
+- **Sabotage:** `sabotage_e433.py`, 29 Sabotagen. Beim ersten Lauf blieb eine
+  ungefangen („Futures steigt“ fehlt bei `"usd"`). Dafür kam der Test
+  `test_e433_fallende_futures_sind_kein_pump` dazu, danach war auch sie gefangen.
 
 ## E43.5 — Der Test „mehr Historie“ summiert je Ladefenster neu und erreicht Muster 2 (Befund A4)
 

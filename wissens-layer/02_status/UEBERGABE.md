@@ -8,7 +8,7 @@
 
 ---
 
-## 26.09.2026 (7) — E43.5 fertig, E43.3 im Bau (Arbeitszweig)
+## 26.09.2026 (7) — E43.5 und E43.3 gebaut (Arbeitszweig)
 
 **Kaisers Auftrag:** *„Ja, bau E43.5 und E43.3"*. Zweig:
 `claude/btc-signal-engine-start-hyiqny`. **`main` ist unverändert.**
@@ -26,8 +26,24 @@
 hängt von der Länge der geladenen Historie ab (`next_pivot_beyond` sucht in allen
 Kerzen). Eingetragen in `OFFENE-PUNKTE.md` Punkt 8.
 
-**Nächster Schritt:** E43.3 bauen (Schalter `muster_cvd`, Plan-Abschnitt „E43.3“ und
-„Ergänzungen zum E43.3-Bauplan“). Aufwand **hoch**.
+**E43.3 gebaut** (Befund A2, Plan-Abschnitte „E43.3“, „Ergänzungen“ und „Umsetzung
+E43.3“):
+- Neuer Schalter `muster_cvd` (`"alt"` | `"usd"`), Default `"alt"` in `config.json`,
+  `EVAL_DEFAULTS` und `_BASE`. Bei `"usd"` vergleicht Muster 2 Spot- und Futures-Delta
+  als Dollar-Beträge im 12-Kerzen-Fenster. Anzeige und Handel rechnen mit demselben Wert.
+- Gitterzeile „LIVE-heute +Muster 2 in Dollar (E43.3)“, genau ein Unterschied zur
+  Panel-Zeile. Neuer Berichtsabschnitt „E43.3“: zählt die umklassifizierten Kerzen,
+  zählt, wie oft live und Backtest verschieden erkannt hätten, und prüft die
+  Entscheidungsregel selbst.
+- **467 Tests grün.** `sabotage_e433.py`: 29 Sabotagen, alle gefangen (eine brauchte
+  einen zusätzlichen Test, siehe Plan).
+- **Offene Entscheidung für Kaiser nach der Messung:** Sonderregel aus dem Prüfbericht
+  (Korrektur nur in der Anzeige, Handel bleibt `"alt"`) hieße, dass Anzeige und Handel
+  auseinanderlaufen. Nicht gebaut, bis Kaiser das will.
+
+**Nächster Schritt:** Backtest auf dem Arbeitszweig auswerten: Abschnitt „E43.3“ in
+`BACKTEST.md` lesen (Urteil steht dort), dazu den E41-Abschnitt auf der neuen
+Live-Basis (`bein_richtung: "bias"`). Aufwand **niedrig**.
 
 ---
 
