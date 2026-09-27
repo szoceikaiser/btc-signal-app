@@ -22,8 +22,8 @@
 - Reine Textkorrektur auch bei Default: voller Restverkauf nennt in Telegram
   jetzt den gesamten Rest statt pauschal 20 %.
 - Naechster Schritt: Hintergrund-Sabotage `engine/sabotage_e444.py`, 14 gezielte
-  Mutationen fuer alle 12 neuen Tests. Lauf-ID **e444-20260927-01**, Protokoll
-  `e444-sabotage.log` in der Repo-Wurzel. Noch nicht gestartet; niemals abbrechen.
+  Mutationen fuer alle 12 neuen Tests. Lauf-ID **e444-20260927-02**, Protokoll
+  `e444-sabotage-02.log` in der Repo-Wurzel. Lauf 01 beendet: 13/14 gefangen. Neustart-Test endete bei Bestand 0; jetzt auch bei offener Position geprueft und gruen. Lauf 02 wird gestartet; niemals abbrechen.
   Mutationen finden nur in temporaeren Kopien statt. Danach gesamte Suite erneut.
 - E44.3 bereits in main (5a50fd8); E44.4 bleibt bis Kaisers Go auf diesem Zweig.
 

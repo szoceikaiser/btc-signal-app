@@ -166,9 +166,9 @@ print(json.dumps([texte, sig, json.loads((d / "state.json").read_text())]))
 '''
 
 
-def _prozesse(schrittweise):
+def _prozesse(schrittweise, nach=None):
     from dataclasses import asdict
-    cs, fl = bau(ANLAUF + [130, 131, 130, 128.5])
+    cs, fl = bau(ANLAUF + ([130, 131, 130, 128.5] if nach is None else nach))
     texte, sig, staende = [], [], []
     with tempfile.TemporaryDirectory() as tmp:
         d = Path(tmp)
@@ -192,6 +192,14 @@ def test_getrennte_prozesse_gleiche_signale_telegram_und_state():
     assert any(abs(z["bestand_pct"] - 14.95) < 1e-8 for z in z2)
     assert t1 == t2 and s1 == s2
     assert z1[-1]["bestand_pct"] == z2[-1]["bestand_pct"]
+    # Vor dem Stop bleibt ein Bruchteil offen. Am Ende mit Bestand 0 waere ein
+    # zwischenzeitlicher Rundungsfehler unsichtbar (Sabotage-Lauf 01: echte Luecke).
+    t3, s3, z3 = _prozesse(False, nach=[])
+    t4, s4, z4 = _prozesse(True, nach=[])
+    assert "RUECKKAUF" in {s["type"] for s in s3}
+    assert z3[-1]["bestand_pct"] % 1 != 0
+    assert t3 == t4 and s3 == s4
+    assert z3[-1]["bestand_pct"] == z4[-1]["bestand_pct"]
 
 
 def test_rest_meldung_verspricht_keine_feste_20_prozent():
