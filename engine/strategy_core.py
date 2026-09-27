@@ -1288,6 +1288,49 @@ _VOLL_RAUS_TYPES = {SignalType.STOPLOSS, SignalType.SHORT_STOPLOSS,
 
 TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
 
+# E44.4 (Plan E44, Abschnitt 6 K2, Furkan Juli-B 19:14): Verkaufs-Tranchen nach oben
+# kleiner. verkauf_faktor verkleinert JEDEN Teilverkauf (Leiter und Zwischenverkaeufe
+# 15 %, Ziel 1.0 und Ziel 1.618 je 40 %), Long wie Short. Der Rest wird groesser und laeuft
+# laenger - die Gegenrichtung zu "mehr verkaufen". 1.0 = bisheriges Verhalten (live);
+# Messwert 0.67 (E44.5). Bewusst NICHT betroffen: volle Ausstiege (Stop, Rest-Verkauf) und
+# der Stop des Rueckkauf-Teils - die verkaufen, was da ist.
+VERKAUF_FAKTOR = 1.0
+
+
+def teilverkauf_tranche(basis: int, faktor: float = VERKAUF_FAKTOR) -> int:
+    """Groesse eines Teilverkaufs in % nach verkauf_faktor (E44.4) - einzige Rechenstelle.
+
+    Signal, Telegram-Text, Plan-Nachricht und Backtest-Abrechnung lesen alle von hier: Der
+    Backtest bucht, was Telegram sagt. Deshalb ganze Prozent, kaufmaennisch gerundet
+    (40 x 0,67 = 26,8 -> 27; 15 x 0,67 = 10,05 -> 10), mindestens 1. Faktor 1.0 ->
+    unveraendert, auch ohne Rundung.
+    """
+    if faktor == 1.0:
+        return basis
+    return max(1, int(basis * faktor + 0.5))
+
+
+def pruefe_verkauf_faktor(faktor: float) -> None:
+    """Nur 0 < faktor <= 1 (E44.4). Groesser als 1 waere "mehr verkaufen" (auserzaehlt,
+    und zwei Ziele zu 40 % wuerden zusammen mehr als die Position verkaufen); 0 hiesse
+    "nie Teilgewinne" - das ist kein Faktor mehr, sondern ein anderer Schalter."""
+    if not 0.0 < faktor <= 1.0:
+        raise ValueError(f"verkauf_faktor muss groesser 0 und hoechstens 1 sein, nicht {faktor!r}")
+
+
+def verkleinere_teilverkaeufe(signals: list, faktor: float) -> None:
+    """Wendet verkauf_faktor auf die TEILVERKAEUFE einer Kerze an (E44.4).
+
+    Eine Stelle fuer alle Teilverkaufs-Pfade (Liquidationen, Widerstand, letztes Hoch,
+    Leiter, Ziel 1.0, Ziel 1.618), damit keiner vergessen wird. Volle Ausstiege und der
+    Stop des Rueckkauf-Teils sind keine Teilverkaeufe und bleiben unberuehrt.
+    """
+    if faktor == 1.0:
+        return
+    for s in signals:
+        if s.type in _TEILVERKAUF_TYPES and s.tranche_pct > 0:
+            s.tranche_pct = teilverkauf_tranche(s.tranche_pct, faktor)
+
 # Bedingter Stop/Nachkauf (E9.3): statt pauschalem Stop bei Verlust nachkaufen, solange
 # der Order-Flow den Trend bestaetigt (Furkan: "bei Verlust nachgekauft, weil vom
 # Aufwaertstrend ueberzeugt"). MAX_DIP_BUYS begrenzt die Leiter; DIP_FLOOR_PCT ist der
@@ -1664,7 +1707,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              muster_oi: str = "usd",
              high_exit_hist: str = "voll",
              ausbruch_ruecktest: bool = False,
-             ruecktest_fenster: int = RUECKTEST_FENSTER) -> list[Signal]:
+             ruecktest_fenster: int = RUECKTEST_FENSTER,
+             verkauf_faktor: float = VERKAUF_FAKTOR) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -1830,11 +1874,16 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     #   das Hoch ist durchbrochen (Plan E44, Abschnitt 6 K1). Spiegelbildlich fuer Short.
     # ruecktest_fenster: Kerzen fuer den Ruecktest (Kaiser: 12 = 2 Tage). Die
     #   Robustheitszeile in E44.5 misst 6 - sie entscheidet nichts.
+    # ---------------------------------------- E44.4 (K2, Default 1.0 = bisher)
+    # verkauf_faktor: verkleinert jeden Teilverkauf (15 % / 40 % / 40 %) um diesen Faktor,
+    #   Long wie Short; der Rest bleibt groesser investiert. Nur 0 < f <= 1. Messwert 0.67
+    #   (ein Drittel weniger je Teilverkauf), gemessen in E44.5. Siehe teilverkauf_tranche.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
     `pos` wird mutiert (Zustandsmaschine); Aufrufer persistiert `pos` in state.json.
     """
+    pruefe_verkauf_faktor(verkauf_faktor)                  # E44.4: falscher Wert -> sofort
     if not candles:
         return []
 
@@ -2516,6 +2565,12 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             pos.tp_rungs = pos.buy_rungs = pos.dip_buys = 0
             pos.liq_entries = pos.liq_exits = pos.high_exits = pos.widerstand_exits = 0
             pos.ziel_extrem = None
+
+    # E44.4: Teilverkaeufe verkleinern. HIER, nach allen Teilverkaufs-Pfaden und VOR dem
+    # E42-Block: dessen Pruefung "schon voll investiert?" (bestand_nach) und der Bestand
+    # am Ende der Kerze muessen die Groesse sehen, die Telegram meldet und der Backtest
+    # bucht. Bei 1.0 geschieht nichts.
+    verkleinere_teilverkaeufe(signals, verkauf_faktor)
 
     # --- E44.3 (E42): die beobachtete Marke in dieser Kerze -------------------------------
     # NACH Stop, Teilverkaeufen und Einstiegen: Ein Stop in dieser Kerze hat die

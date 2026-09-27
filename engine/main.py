@@ -34,7 +34,8 @@ from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCH
                            ampel, ampel_richtung, classify_pattern, lage_bericht,
                            orderflow_detail, OF_FENSTER, DIP_FLOOR_PCT, SignalType,
                            last_significant_impulse, liq_levels, next_pivot_beyond,
-                           oi_in_btc, RUECKKAUF_TRANCHE)
+                           oi_in_btc, RUECKKAUF_TRANCHE, teilverkauf_tranche,
+                           pruefe_verkauf_faktor)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
                              format_ruecktest, format_stop_rueckeroberung,
                              send_lage, send_plan,
@@ -361,6 +362,9 @@ EVAL_DEFAULTS = {
     "high_exit_hist": "voll",
     # E44.3 (27.09.2026), Default aus - siehe strategy_core.ruecktest_schritt.
     "ausbruch_ruecktest": False, "ruecktest_fenster": 12,
+    # E44.4 (27.09.2026), Default 1.0 = bisheriges Verhalten - siehe
+    # strategy_core.teilverkauf_tranche.
+    "verkauf_faktor": 1.0,
 }
 
 
@@ -387,6 +391,15 @@ def eval_params(cfg: dict) -> dict:
                   f"-> Vorgabewert {default!r}.")
             wert = default
         out[name] = wert
+    # E44.4: ein Faktor ausserhalb 0 < f <= 1 wuerde evaluate() abbrechen lassen - also
+    # wie ein falscher Typ behandeln: Vorgabewert, protokolliert, Lauf geht weiter.
+    try:
+        pruefe_verkauf_faktor(out["verkauf_faktor"])
+    except ValueError:
+        print(f"config.json: 'verkauf_faktor' = {out['verkauf_faktor']!r} ist unbrauchbar "
+              f"(erlaubt: groesser 0 bis 1) -> Vorgabewert "
+              f"{EVAL_DEFAULTS['verkauf_faktor']!r}.")
+        out["verkauf_faktor"] = EVAL_DEFAULTS["verkauf_faktor"]
     return out
 
 
@@ -649,6 +662,8 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
             nach.append({"preis": preis, "was": "Liquidationszone", "tranche": 20})
 
     # --- wo Gewinne mitgenommen werden ---
+    # E44.4: dieselbe Groesse, die das Signal spaeter meldet (verkauf_faktor).
+    tv = lambda basis: teilverkauf_tranche(basis, par["verkauf_faktor"])
     raus = []
     gz = gegen_zonen(candles, piv, lang, k_atr=par["k_atr"])
     if gz is not None:
@@ -662,26 +677,26 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
         raus.append({"zone": [a, b],
                      "was": "Widerstand der Gegenbewegung" if aktiv
                             else "Widerstand der Gegenbewegung — nur Hinweis, die Engine verkauft dort nicht",
-                     "tranche": LADDER_TRANCHE if aktiv else 0})
+                     "tranche": tv(LADDER_TRANCHE) if aktiv else 0})
     if par["high_exit"] != "off":
         lvl = next_pivot_beyond(piv, cur.close, lang)
         if lvl is not None:
             ziel = lvl * (1 - HIGH_EXIT_TOL) if lang else lvl * (1 + HIGH_EXIT_TOL)
             raus.append({"preis": ziel, "was": f"kurz unter dem letzten {'Hoch' if lang else 'Tief'} "
                                                f"{lvl:,.0f}".replace(",", "."),
-                         "tranche": LADDER_TRANCHE})
+                         "tranche": tv(LADDER_TRANCHE)})
     ref = pos.ziel_extrem if pos.ziel_extrem is not None else pos.retrace_extreme
     if ref is not None:
         if par["tp_ladder"]:
             for f in LADDER_FACTORS[pos.tp_rungs:]:
                 raus.append({"preis": z.ext_target(ref, f), "was": f"Zwischenziel (Extension {f})",
-                             "tranche": LADDER_TRANCHE})
+                             "tranche": tv(LADDER_TRANCHE)})
         if pos.state in (PosState.T1, PosState.CORE, PosState.FULL):
             raus.append({"preis": z.ext_target(ref, 1.0), "was": "Ziel 1.0",
-                         "tranche": TRANCHEN["TP1"]})
+                         "tranche": tv(TRANCHEN["TP1"])})
         if pos.state in (PosState.T1, PosState.CORE, PosState.FULL, PosState.TP1):
             raus.append({"preis": z.ext_target(ref, 1.618), "was": "Ziel 1.618",
-                         "tranche": TRANCHEN["TP2"]})
+                         "tranche": tv(TRANCHEN["TP2"])})
 
     # --- Stop ---
     stop, grund = z.invalidation, "Invalidierung"

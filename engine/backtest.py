@@ -33,7 +33,8 @@ from pathlib import Path
 import archiv
 import coinalyze
 from main import _get_json, fetch_funding_8h
-from strategy_core import Candle, FlowPoint, LADDER_TRANCHE, Position, evaluate, oi_in_btc
+from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, TRANCHEN, Position, evaluate,
+                           oi_in_btc)
 
 ROOT = Path(__file__).resolve().parent.parent
 CANDLE_MS = 4 * 3600 * 1000
@@ -86,7 +87,8 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
              "rest_halten", "neustart_mit_rest", "zonen_1d",
              "zonen_nachziehen", "pivot_n_1d", "ampel_filter", "muster_cvd", "muster_oi",
-             "high_exit_hist", "ausbruch_ruecktest", "ruecktest_fenster")
+             "high_exit_hist", "ausbruch_ruecktest", "ruecktest_fenster",
+             "verkauf_faktor")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              # E33 (13.09.2026) hob trend_ema von 50 auf 200 — in evaluate(),
@@ -107,7 +109,8 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              rest_halten=False, neustart_mit_rest=False, zonen_1d=False,
              zonen_nachziehen=False, pivot_n_1d=0, ampel_filter="off",
              muster_cvd="alt", muster_oi="usd", high_exit_hist="voll",
-             ausbruch_ruecktest=False, ruecktest_fenster=12)
+             ausbruch_ruecktest=False, ruecktest_fenster=12,
+             verkauf_faktor=1.0)
 
 
 def V(label, panel=False, **kw):
@@ -856,8 +859,9 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
 
     Annahmen (dokumentiert): kein Hebel; Kauf-Tranchen als %-Anteil des beim
     Ladder-Start verfuegbaren Kapitals (aus tranche_pct des Signals); Teilverkaeufe
-    40 %/40 %/Rest der vollen Position; 0,1 % Gebuehr je Order; Shorts nominal
-    ohne Funding-Kosten. Ergebnis inkl. Buy&Hold-Vergleich ueber denselben Zeitraum.
+    40 %/40 %/Rest der vollen Position (Hoechstbestand), Leiter 15 % - seit E44.4 aus
+    tranche_pct des Signals, damit verkauf_faktor wirkt; 0,1 % Gebuehr je Order; Shorts
+    nominal ohne Funding-Kosten. Ergebnis inkl. Buy&Hold-Vergleich ueber denselben Zeitraum.
 
     `deploy_pct` (Furkan-Update Juli 2026, "Pulver behalten"): Anteil des verfuegbaren
     Kapitals, der je Position hoechstens eingesetzt wird. 1.0 = bisheriges Verhalten
@@ -893,6 +897,17 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     eine UNTERGRENZE fuer den Wert der Vorab-Order.
     """
     schluss_je_ts = {c.ts: c.close for c in candles}
+
+    def _teil_pct(s: dict) -> float:
+        """Groesse eines Teilverkaufs in % vom Hoechstbestand. E44.4: aus dem Signal - es
+        traegt den verkauf_faktor schon (strategy_core.teilverkauf_tranche), der Backtest
+        bucht also, was Telegram meldet. Ohne Angabe die bisherigen festen Groessen
+        (Leiter 15 %, Ziele 40 %) - bei verkauf_faktor 1.0 sind beide Wege gleich."""
+        pct = s.get("tranche_pct")
+        if pct:
+            return pct
+        return LADDER_TRANCHE if s["type"] in ("TEILVERKAUF_LADDER", "SHORT_TP_LADDER") \
+            else TRANCHEN["TP1"]
 
     def _preis(s: dict) -> float:
         if fill == "level":
@@ -982,10 +997,8 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                 sell = units
             elif t == "RUECKKAUF_STOP":
                 sell = min(units, rk_units)
-            elif t == "TEILVERKAUF_LADDER":
-                sell = min(units, LADDER_TRANCHE / 100.0 * peak_units)
             else:
-                sell = min(units, 0.4 * peak_units)
+                sell = min(units, _teil_pct(s) / 100.0 * peak_units)
             if t == "RUECKKAUF_STOP" or sell >= units:
                 rk_units = 0.0
             elif units > 0:
@@ -1018,10 +1031,8 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                 cover = s_units
             elif t == "SHORT_RUECKTEST_STOP":
                 cover = min(s_units, rk_s_units)
-            elif t == "SHORT_TP_LADDER":
-                cover = min(s_units, LADDER_TRANCHE / 100.0 * s_peak)
             else:
-                cover = min(s_units, 0.4 * s_peak)
+                cover = min(s_units, _teil_pct(s) / 100.0 * s_peak)
             if t == "SHORT_RUECKTEST_STOP" or cover >= s_units:
                 rk_s_units = 0.0
             elif s_units > 0:
