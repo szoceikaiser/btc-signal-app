@@ -717,6 +717,11 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
         if n > 0:
             teil["boden"] = m * (1 - DIP_FLOOR_PCT) if lang else m * (1 + DIP_FLOOR_PCT)
         plan["rueckkauf_teil"] = teil
+        # anteil_pct ist die Summe der Kaeufe; der Rueckkauf zaehlt dort nicht mit (er
+        # bleibt aus dem Einstand heraus, damit der Stop der uebrigen Position nicht
+        # wandert). Im Plankopf gehoert er trotzdem dazu - sonst stuende nach einem
+        # Rueckkauf aus FLAT "0 % investiert" ueber einer offenen Position.
+        plan["anteil_pct"] = (pos.entry_pct or 0) + RUECKKAUF_TRANCHE
     # ... und eine laufende Beobachtung (nur Hinweis: ein Ruecktest laesst sich nicht als
     # Limit-Order vorlegen, die Engine meldet Ausbruch und Rueckkauf selbst).
     if pos.e42_marke is not None and pos.e42_richtung == pos.direction:

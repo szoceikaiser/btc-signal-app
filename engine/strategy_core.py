@@ -1880,8 +1880,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         pos.state zurueckdrehen — jeder vergessene Zaehler waere ein stiller Fehler
         (eine Leiterstufe gilt als verbraucht, ohne dass verkauft wurde).
         """
-        if no_flip and any(x.type in _AUFBAU_TYPES or x.type in _RUECKKAUF_TYPES
-                           for x in signals):
+        # E44.3: Der Rueckkauf steht hier bewusst NICHT - er wird erst NACH allen
+        # Teilverkaeufen der Kerze bewertet, ein Teilverkauf nach ihm ist unmoeglich. Die
+        # umgekehrte Folge (erst Teilverkauf, dann kein Rueckkauf) regelt _darf_aufstocken.
+        if no_flip and any(x.type in _AUFBAU_TYPES for x in signals):
             return False
         return not muster5_haelt_zurueck(muster5_halten, pattern, pos.direction, ziel)
 
