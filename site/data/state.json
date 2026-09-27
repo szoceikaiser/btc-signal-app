@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1790452800000,
+ "last_signal_ts": 1790467200000,
  "retrace_extreme": 82874.93,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -46,10 +46,10 @@
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 83858.78115384615,
-  "kurs": 84433.1,
+  "kurs": 84402.15,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.433 $ ueber EMA200 (71.220 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.402 $ ueber EMA200 (71.351 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
    "spot": "nachgelassen",
@@ -177,13 +177,13 @@
   "muster_oi": "usd",
   "high_exit_hist": "voll"
  },
- "updated_at": "2026-09-27T03:23:39Z",
- "last_close": 84433.1,
+ "updated_at": "2026-09-27T04:02:24Z",
+ "last_close": 84402.15,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.433 $ ueber EMA200 (71.220 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.402 $ ueber EMA200 (71.351 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
    "spot": "nachgelassen",
