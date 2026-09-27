@@ -204,6 +204,43 @@ def test_schluss_unter_der_marke_im_fenster_scheitert_dann_neuer_ausbruch():
     assert [i for i, _s in typen(sig, SignalType.RUECKKAUF)] == [33]
 
 
+def test_die_verkaufskerze_ist_nie_der_ruecktest_auch_ohne_no_flip():
+    """Schliesst die Verkaufskerze schon ueber der Marke, ist sie der Ausbruch - und damit
+    nie der Ruecktest, obwohl ihr Tief die Zone beruehrt. Mit no_flip (live) verdeckt die
+    Gegengeschaeft-Sperre das, deshalb hier ohne."""
+    cs, fl = bau(ANLAUF)
+    assert cs[K_VERKAUF].low <= MARKE * 1.005 and cs[K_VERKAUF].close > MARKE   # Vorprobe
+    sig, mel, _pos = lauf(cs, fl, **an(no_flip=False))
+    assert (K_VERKAUF, "ausbruch") in [(i, m["art"]) for i, m in mel]
+    assert [i for i, _s in typen(sig, SignalType.RUECKKAUF)] == [K_RUECKKAUF]
+
+
+def _beobachtung(cs, ausbruch_idx):
+    """Offene Position (ohne Teilverkaeufe am Hoch), Marke beobachtet, Ausbruch in Kerze
+    `ausbruch_idx` - damit kein neuer Verkauf die Beobachtung neu startet."""
+    p = _voll_pos(cs, 60)
+    p.state, p.last_signal_ts = PosState.CORE, cs[ausbruch_idx].ts
+    p.e42_start_ts, p.e42_ausbruch_ts = cs[ausbruch_idx - 1].ts, cs[ausbruch_idx].ts
+    return p
+
+
+def test_nach_gescheitertem_ausbruch_braucht_es_einen_neuen():
+    """Schluss unter der Marke beendet den Ausbruch. Die naechste Kerze, die von unten
+    ueber die Marke schliesst, ist ein NEUER Ausbruch - kein Ruecktest des alten, obwohl
+    ihr Tief die Zone beruehrt. Erst die Kerze danach kann der Ruecktest sein."""
+    cs, fl = bau([118, 122, 126, 129.5, 131.5, (130.0, 129.9), 132, (131.5, 130.9)])
+    kw = an(tp_ladder=False, high_exit="off", buy_ladder=False, liq_entry="off")
+    pos = _beobachtung(cs, 30)
+    arten, rk = [], []
+    for i in range(31, len(cs)):
+        sigs = evaluate(cs[:i + 1], fl[:i + 1], pos, **kw)
+        arten += [(i, m["art"]) for m in pos.e42_meldungen]
+        rk += [i for s in sigs if s.type == SignalType.RUECKKAUF]
+    assert (31, "gescheitert") in arten, arten                            # Vorprobe
+    assert cs[32].low <= MARKE * 1.005 and cs[32].close > MARKE           # 32 beruehrt die Zone
+    assert (32, "ausbruch") in arten and rk == [33], (arten, rk)
+
+
 def test_ruecktest_nach_dem_fenster_kauft_nicht():
     hoch_bleiben = [133 + k * 0.5 for k in range(12)]
     cs, fl = bau(ANLAUF[:-1] + hoch_bleiben + [(134, 130.6)])
@@ -335,6 +372,18 @@ def test_no_flip_kein_rueckkauf_in_einer_kerze_mit_teilverkauf():
     q.retrace_extreme = p.retrace_extreme
     sigs = evaluate(cs, fl, q, **{**kw, "no_flip": False})
     assert {s.type for s in sigs} == {SignalType.TEILVERKAUF_LADDER, SignalType.RUECKKAUF}
+
+
+def test_hauptstop_nimmt_den_rueckkauf_teil_mit():
+    """Loest der Stop der Position aus, geht der Teil mit ihr - und darf danach nicht als
+    offener Teil weiterleben (er wuerde spaeter einen Stop auf nichts ausloesen)."""
+    cs, fl = bau(ANLAUF + [(92.0, 91.0)])          # mehr als 5 % unter der Invalidierung
+    sig, _m, pos = lauf(cs, fl, **an())
+    assert typen(sig, SignalType.RUECKKAUF), "Vorprobe"
+    assert [s.type for i, s in sig if i == len(cs) - 1] == [SignalType.STOPLOSS]
+    assert pos.state == PosState.FLAT
+    assert pos.e42_teil_marke is None and pos.bestand_pct == 0
+    assert abs(pos.e42_gekauft - MARKE) < 1e-9        # die Erinnerung bleibt
 
 
 def test_nach_einem_stop_keine_beobachtung():
