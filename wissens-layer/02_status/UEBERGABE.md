@@ -8,6 +8,53 @@
 
 ---
 
+## 27.09.2026 (27) — E44.4 fertig, 597 Tests und 14/14 Sabotagen gruen
+
+- **GitHub-Push erlaubt und ausgefuehrt.** E44.3 war bereits in main (5a50fd8),
+  vor Beginn `git pull --rebase`, anschliessend **585 Tests gruen** bestaetigt.
+- **E44.4 fertig auf `claude/e44-4-verkauf-faktor`**, nicht in main. Default **1.0**,
+  Messwert **0.67**, nicht aktiviert und nicht gemessen. Alle Teilgewinn-Typen
+  Long/Short skaliert (15 -> 10.05, 40 -> 26.8); Kaeufe, Rueckkauf, Stops und volle
+  Restverkaeufe bleiben unveraendert. Keine neue Gitterzeile vor E44.5.
+- Plan/Telegram zeigen reduzierte Mengen; simulate bucht die Signalmenge. Reine
+  Textkorrektur auch bei Default: Restverkauf nennt den ganzen Rest statt pauschal 20 %.
+- `bestand_pct` ueberlebt state.json mit Nachkommastellen. Kursfolge am Stueck und
+  Kerze fuer Kerze in **getrennten Python-Prozessen**: Signale, Telegram-Ereignisse und
+  Endbestand gleich, auch bei noch offener Position. Plan/Vorschau sind je Lauf
+  Zusammenfassungen, separat auf passende Mengen geprueft.
+- **597 Tests gruen (12 neu)**; **14/14 Sabotagen gefangen**, alle 12 neuen Tests
+  abgedeckt. Lauf **e444-20260927-03** vollstaendig beendet, Exit 0; kein Lauf abgebrochen.
+  Protokoll: `docs/E44-4-PRUEFPROTOKOLL.txt`, volles lokales Log `e444-sabotage-03.log`.
+  Lauf 01 fand eine echte Testluecke (Endbestand 0 verdeckte Rundungsfehler); geschlossen.
+  Lauf 02 hatte beim Rebase nochmals die alte Testkopie erwischt, ebenfalls beendet.
+- GitHub-Tests ebenfalls gruen: Lauf 36305171547. Windows: `PYTHONUTF8=1` setzen,
+  sonst scheitert die Emoji-Ausgabe an der Konsolen-Codierung.
+- Mit einem spaeteren Go fuer E44.4 kommt nur der Bau nach main, **Faktor bleibt 1.0**.
+  Die Aktivierung von 0.67 erfordert erst E44.5 und danach Kaisers Entscheidung.
+- Naechster Schritt **E44.5**, Aufwand **mittel**; dafuer auf mittel stellen.
+
+**Fertiger Prompt fuer den naechsten Chat:**
+
+```text
+Repo github.com/szoceikaiser/btc-signal-app. Deutsch, kurz, keine Anlageberatung.
+Pruefe zuerst GitHub-Push-Zugriff. Lies nur wissens-layer/00_STAND.md, den juengsten
+Abschnitt von wissens-layer/02_status/UEBERGABE.md und docs/PLAN-E44-KOMBINATIONEN.md
+(Abschnitte 6 K1-K3, 8, 9a, 10); bei Bedarf ARBEITSREGELN.md.
+E44.3 ist in main. E44.4 ist fertig auf claude/e44-4-verkauf-faktor:
+597 Tests gruen, 14/14 Sabotagen. Kein Go zum Merge oder Aktivieren von E44.4.
+AUFGABE: E44.5 bauen, 2^3-Gitter nach Abschnitt 8 und K1-Robustheitszeile;
+auf neuem claude/...-Zweig vom E44.4-Zweig (von main nur, falls inzwischen gemerged).
+Backtest auf dem Zweig anstossen, nach der vorab festgelegten Regel urteilen.
+Nichts live schalten. Tests: cd engine && python3 run_tests.py; neue Tests jeweils
+mit Sabotage-Probe, im Hintergrund mit Protokoll, nie abbrechen. Zustand ueber
+Kerzen in state.json; Signale UND Telegram am Stueck gegen Neustarts vergleichen.
+Nach groesseren Schritten UEBERGABE und Plan 9a aktualisieren und pushen;
+vor jedem Push git pull --rebase und aktuellen main-Stand beruecksichtigen.
+Am Ende fertiger Folgeprompt, Aufwand und Hinweis, ob Aufwand zu aendern ist.
+```
+
+---
+
 ## 27.09.2026 (26) — E44.4 gebaut, vor Sabotage-Probe gesichert
 
 - Zweig `claude/e44-4-verkauf-faktor`: **597 Tests gruen** (585 + 12 neue).

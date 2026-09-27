@@ -1,0 +1,24 @@
+E44.4 - Pruefprotokoll 27.09.2026
+Arbeitszweig: claude/e44-4-verkauf-faktor
+Keine Markt-Messung, ausschliesslich synthetische Testdaten.
+Basis: 585 passed, 0 failed.
+Erweitert: 597 passed, 0 failed.
+Sabotage Lauf e444-20260927-03 (isolierte Kopien, vollstaendig beendet):
+BASIS: 12 Tests gruen
+01 GEFANGEN: Default aktiviert -> test_defaults_und_neutraler_pfad
+02 GEFANGEN: Ungueltiger Faktor erlaubt -> test_faktor_validierung
+03 GEFANGEN: Long unskaliert -> test_long_alle_teilgewinn_typen
+04 GEFANGEN: Short unskaliert -> test_short_alle_teilgewinn_typen
+05 GEFANGEN: Kaeufe und Stops auch gekuerzt -> test_kauf_rueckkauf_und_stops_bleiben_unskaliert
+06 GEFANGEN: Plan behaelt alte Mengen -> test_plan_und_telegram_nennen_die_reduzierten_mengen
+07 GEFANGEN: Backtest verwirft Parameter -> test_backtest_reicht_faktor_an_engine_weiter
+08 GEFANGEN: Long Leiter verkauft weiter 15 -> test_simulate_long_bucht_signalmenge_und_ganzen_rest
+09 GEFANGEN: Long TP verkauft weiter 40 -> test_simulate_long_bucht_signalmenge_und_ganzen_rest
+10 GEFANGEN: Short Leiter deckt weiter 15 -> test_simulate_short_bucht_signalmenge_und_ganzen_rest
+11 GEFANGEN: Short TP deckt weiter 40 -> test_simulate_short_bucht_signalmenge_und_ganzen_rest
+12 GEFANGEN: State verliert Bruchteile -> test_bruchteile_ueberleben_state_json
+13 GEFANGEN: Neustart verliert Bruchteile -> test_getrennte_prozesse_gleiche_signale_telegram_und_state
+14 GEFANGEN: Restmeldung behauptet 20 Prozent -> test_rest_meldung_verspricht_keine_feste_20_prozent
+ERGEBNIS: 14/14 gefangen; 12 Tests abgedeckt
+EXIT_CODE=0
+GitHub Tests: https://github.com/szoceikaiser/btc-signal-app/actions/runs/36305171547 - success
