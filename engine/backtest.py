@@ -64,10 +64,12 @@ VERKAUF_DATEN = [
 
 # Kauf-Handlung = Long eroeffnen/aufstocken ODER Short zurueckkaufen
 BUY_TYPES = {"KAUF_1", "KAUF_2", "NACHKAUF",
-             "SHORT_TP_LADDER", "SHORT_TP_1", "SHORT_TP_2", "SHORT_COVER_REST", "SHORT_STOPLOSS"}
+             "SHORT_TP_LADDER", "SHORT_TP_1", "SHORT_TP_2", "SHORT_COVER_REST", "SHORT_STOPLOSS",
+             "RUECKKAUF", "SHORT_RUECKTEST_STOP"}                    # E44.3
 # Verkauf-Handlung = Long reduzieren/schliessen ODER Short eroeffnen/aufstocken
 SELL_TYPES = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS",
-              "SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"}
+              "SHORT_1", "SHORT_2", "SHORT_NACHLEGEN",
+              "RUECKKAUF_STOP", "SHORT_RUECKTEST"}                   # E44.3
 
 # Grid (E8.5): n=5, k=2.0, flush='off', tp_ladder=True fix (kalibriert). Getestet werden
 # die drei Furkan-Filter fuer bessere Long-Einstiege — einzeln UND kombiniert, damit die
@@ -84,7 +86,7 @@ EVAL_KEYS = ("bias_long", "bias_short", "pivot_n", "k_atr", "flush_entry",
              "min_bein_pct", "bein_wahl", "be_im_plus", "bein_richtung", "widerstand_exit",
              "rest_halten", "neustart_mit_rest", "zonen_1d",
              "zonen_nachziehen", "pivot_n_1d", "ampel_filter", "muster_cvd", "muster_oi",
-             "high_exit_hist")
+             "high_exit_hist", "ausbruch_ruecktest", "ruecktest_fenster")
 _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              flush_entry="off", tp_ladder=True,
              # E33 (13.09.2026) hob trend_ema von 50 auf 200 — in evaluate(),
@@ -104,7 +106,8 @@ _BASE = dict(bias_long=True, bias_short=True, pivot_n=5, k_atr=2.0,
              bein_richtung="auto", widerstand_exit="off",
              rest_halten=False, neustart_mit_rest=False, zonen_1d=False,
              zonen_nachziehen=False, pivot_n_1d=0, ampel_filter="off",
-             muster_cvd="alt", muster_oi="usd", high_exit_hist="voll")
+             muster_cvd="alt", muster_oi="usd", high_exit_hist="voll",
+             ausbruch_ruecktest=False, ruecktest_fenster=12)
 
 
 def V(label, panel=False, **kw):
@@ -898,6 +901,10 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     cash, units, peak_units, l_avg = start_capital, 0.0, 0.0, 0.0
     s_units, s_peak, s_avg = 0.0, 0.0, 0.0            # Short-Seite
     alloc = 0.0
+    # E44.3: Einheiten des Rueckkauf-Teils (Long bzw. Short). Sein Stop verkauft GENAU
+    # diese - nicht einen Anteil am Hoechstbestand. Teilverkaeufe der Position nehmen den
+    # Teil anteilig mit (sie verkaufen einen Bruchteil ALLER Einheiten).
+    rk_units, rk_s_units = 0.0, 0.0
     trades_closed = wins = 0
     long_profit = short_profit = 0.0                 # Gewinn/Verlust je Richtung (E9.6)
     long_trades = long_wins = short_trades = short_wins = 0
@@ -957,22 +964,32 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     for s in signals:
         _snapshot_bis(s["ts"])
         p, t = _preis(s), s["type"]
-        if t in ("KAUF_1", "KAUF_2", "NACHKAUF"):
+        if t in ("KAUF_1", "KAUF_2", "NACHKAUF", "RUECKKAUF"):
             if units == 0.0:
                 alloc, peak_units, l_avg = cash * deploy_pct, 0.0, 0.0
+                rk_units = 0.0
             spend = min(cash, alloc * s["tranche_pct"] / 100.0)
             new_u = spend * (1 - fee) / p
             l_avg = (l_avg * units + spend) / (units + new_u) if (units + new_u) else 0.0
             units += new_u
+            if t == "RUECKKAUF":
+                rk_units += new_u
             peak_units = max(peak_units, units)
             cash -= spend
-        elif t in ("TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS"):
+        elif t in ("TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2", "VERKAUF_REST", "STOPLOSS",
+                   "RUECKKAUF_STOP"):
             if t in ("VERKAUF_REST", "STOPLOSS"):
                 sell = units
+            elif t == "RUECKKAUF_STOP":
+                sell = min(units, rk_units)
             elif t == "TEILVERKAUF_LADDER":
                 sell = min(units, LADDER_TRANCHE / 100.0 * peak_units)
             else:
                 sell = min(units, 0.4 * peak_units)
+            if t == "RUECKKAUF_STOP" or sell >= units:
+                rk_units = 0.0
+            elif units > 0:
+                rk_units *= (units - sell) / units
             if sell > 0:
                 proceeds = sell * p * (1 - fee)
                 pnl = proceeds - sell * l_avg
@@ -983,22 +1000,32 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                 long_wins += 1 if pnl > 0 else 0
                 cash += proceeds
                 units -= sell
-        elif t in ("SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"):
+        elif t in ("SHORT_1", "SHORT_2", "SHORT_NACHLEGEN", "SHORT_RUECKTEST"):
             if s_units == 0.0:
                 alloc, s_peak, s_avg = cash * deploy_pct, 0.0, 0.0
+                rk_s_units = 0.0
             nominal = min(cash, alloc * s["tranche_pct"] / 100.0)
             new_units = nominal / p
             s_avg = (s_avg * s_units + p * new_units) / (s_units + new_units)
             s_units += new_units
+            if t == "SHORT_RUECKTEST":
+                rk_s_units += new_units
             s_peak = max(s_peak, s_units)
             cash -= nominal * fee                      # Eroeffnungsgebuehr
-        elif t in ("SHORT_TP_LADDER", "SHORT_TP_1", "SHORT_TP_2", "SHORT_COVER_REST", "SHORT_STOPLOSS"):
+        elif t in ("SHORT_TP_LADDER", "SHORT_TP_1", "SHORT_TP_2", "SHORT_COVER_REST", "SHORT_STOPLOSS",
+                   "SHORT_RUECKTEST_STOP"):
             if t in ("SHORT_COVER_REST", "SHORT_STOPLOSS"):
                 cover = s_units
+            elif t == "SHORT_RUECKTEST_STOP":
+                cover = min(s_units, rk_s_units)
             elif t == "SHORT_TP_LADDER":
                 cover = min(s_units, LADDER_TRANCHE / 100.0 * s_peak)
             else:
                 cover = min(s_units, 0.4 * s_peak)
+            if t == "SHORT_RUECKTEST_STOP" or cover >= s_units:
+                rk_s_units = 0.0
+            elif s_units > 0:
+                rk_s_units *= (s_units - cover) / s_units
             if cover > 0:
                 pnl = cover * (s_avg - p) - cover * p * fee
                 trades_closed += 1
@@ -1130,9 +1157,13 @@ def gegengeschaefte(sigs: list) -> dict:
     sind EIN Widerspruch, nicht drei. Vollstaendige Ausstiege (Stop, Rest schliessen)
     bleiben aussen vor — die duerfen immer feuern, auch nach einem Nachkauf.
     """
-    aufbau = {"KAUF_1", "KAUF_2", "NACHKAUF", "SHORT_1", "SHORT_2", "SHORT_NACHLEGEN"}
+    aufbau = {"KAUF_1", "KAUF_2", "NACHKAUF", "SHORT_1", "SHORT_2", "SHORT_NACHLEGEN",
+              "RUECKKAUF", "SHORT_RUECKTEST"}                       # E44.3
+    # E44.3: Der Stop des Rueckkauf-Teils ist kein vollstaendiger Ausstieg - ein Kauf in
+    # derselben Kerze waere ein Gegengeschaeft wie nach einem Teilverkauf.
     teilab = {"TEILVERKAUF_LADDER", "TEILVERKAUF_1", "TEILVERKAUF_2",
-              "SHORT_TP_LADDER", "SHORT_TP_1", "SHORT_TP_2"}
+              "SHORT_TP_LADDER", "SHORT_TP_1", "SHORT_TP_2",
+              "RUECKKAUF_STOP", "SHORT_RUECKTEST_STOP"}
     kerzen: dict = {}
     for s in sigs:
         ts = s["ts"] if isinstance(s, dict) else s.ts

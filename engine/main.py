@@ -34,9 +34,10 @@ from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCH
                            ampel, ampel_richtung, classify_pattern, lage_bericht,
                            orderflow_detail, OF_FENSTER, DIP_FLOOR_PCT, SignalType,
                            last_significant_impulse, liq_levels, next_pivot_beyond,
-                           oi_in_btc)
+                           oi_in_btc, RUECKKAUF_TRANCHE)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
-                             format_stop_rueckeroberung, send_lage, send_plan,
+                             format_ruecktest, format_stop_rueckeroberung,
+                             send_lage, send_plan,
                              send_signals, send_text, send_vorschau)
 
 ROOT = Path(__file__).resolve().parent.parent          # Repo-Wurzel (signal-app/)
@@ -358,6 +359,8 @@ EVAL_DEFAULTS = {
     # strategy_core.evaluate (high_exit_hist). Live laedt ohnehin nur main.LIMIT_HAUPT
     # Kerzen, hier also folgenlos - der Unterschied betrifft nur den Backtest.
     "high_exit_hist": "voll",
+    # E44.3 (27.09.2026), Default aus - siehe strategy_core.ruecktest_schritt.
+    "ausbruch_ruecktest": False, "ruecktest_fenster": 12,
 }
 
 
@@ -403,6 +406,18 @@ def pos_to_state(pos: Position) -> dict:
          # Stop kaeme nie, und im Backtest fiele es nicht auf (der rechnet am Stueck).
          "stop_wartet": pos.stop_wartet, "stop_wartet_inv": pos.stop_wartet_inv,
          "stop_geprueft": pos.stop_geprueft,
+         # E44.3 (E42): Beobachtung, Ausbruch, Rueckkauf-Teil und sein Stop gelten ueber
+         # viele Kerzen. Ohne diese Felder finge jeder Lauf (alle 4 Stunden ein neuer
+         # Prozess) von vorn an: kein Ausbruch wuerde je erinnert, das Ruecktest-Fenster
+         # liefe nie ab, der Teil verloere seinen Stop - und der Backtest (am Stueck)
+         # zeigte davon nichts.
+         "e42_marke": pos.e42_marke, "e42_richtung": pos.e42_richtung,
+         "e42_start_ts": pos.e42_start_ts, "e42_ausbruch_ts": pos.e42_ausbruch_ts,
+         "e42_gekauft": pos.e42_gekauft, "e42_teil_marke": pos.e42_teil_marke,
+         "e42_teil_wartet": pos.e42_teil_wartet,
+         "e42_teil_wartet_inv": pos.e42_teil_wartet_inv,
+         "e42_teil_geprueft": pos.e42_teil_geprueft,
+         "bestand_pct": pos.bestand_pct,
          "zones": None}
     if pos.zones:
         z = pos.zones
@@ -445,6 +460,19 @@ def pos_from_state(d: dict) -> Position:
     pos.stop_wartet = int(d.get("stop_wartet", 0) or 0)
     pos.stop_wartet_inv = d.get("stop_wartet_inv")
     pos.stop_geprueft = d.get("stop_geprueft")
+    pos.e42_marke = d.get("e42_marke")
+    pos.e42_richtung = d.get("e42_richtung", "NONE") or "NONE"
+    pos.e42_start_ts = int(d.get("e42_start_ts", -1))
+    pos.e42_ausbruch_ts = int(d.get("e42_ausbruch_ts", -1))
+    pos.e42_gekauft = d.get("e42_gekauft")
+    pos.e42_teil_marke = d.get("e42_teil_marke")
+    pos.e42_teil_wartet = int(d.get("e42_teil_wartet", 0) or 0)
+    pos.e42_teil_wartet_inv = d.get("e42_teil_wartet_inv")
+    pos.e42_teil_geprueft = d.get("e42_teil_geprueft")
+    # Altbestand ohne das Feld: aus den Kaeufen schaetzen, hoechstens 100. Die Schaetzung
+    # kennt keine Teilverkaeufe und liegt damit eher zu HOCH - im Zweifel also "voll",
+    # also eher kein Rueckkauf als einer zu viel.
+    pos.bestand_pct = int(d.get("bestand_pct", min(100, pos.entry_pct or 0)) or 0)
     z = d.get("zones")
     if z and "impuls_start" in z:
         imp = Impulse(
@@ -679,6 +707,23 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
             "boden": stop * (1 - DIP_FLOOR_PCT) if lang else stop * (1 + DIP_FLOOR_PCT),
             "geprueft": pos.stop_geprueft == stop,
             "wartet": pos.stop_wartet})
+    # E44.3 (E42): Der Rueckkauf-Teil hat einen EIGENEN Stop (Kaiser 27.09.2026: "nur die
+    # 25 %"). Der Plan muss ihn nennen - er sagt "diese Preise kannst du hinterlegen".
+    if pos.e42_teil_marke is not None:
+        m = pos.e42_teil_marke
+        teil = {"marke": m, "tranche": RUECKKAUF_TRANCHE,
+                "nur_rueckkauf": pos.entry_pct == 0, "rueckeroberung": n,
+                "geprueft": pos.e42_teil_geprueft == m, "wartet": pos.e42_teil_wartet}
+        if n > 0:
+            teil["boden"] = m * (1 - DIP_FLOOR_PCT) if lang else m * (1 + DIP_FLOOR_PCT)
+        plan["rueckkauf_teil"] = teil
+    # ... und eine laufende Beobachtung (nur Hinweis: ein Ruecktest laesst sich nicht als
+    # Limit-Order vorlegen, die Engine meldet Ausbruch und Rueckkauf selbst).
+    if pos.e42_marke is not None and pos.e42_richtung == pos.direction:
+        plan["ruecktest"] = {"marke": pos.e42_marke,
+                             "ausbruch": pos.e42_ausbruch_ts >= 0,
+                             "fenster": par["ruecktest_fenster"],
+                             "tranche": RUECKKAUF_TRANCHE}
     return plan
 
 
@@ -698,6 +743,12 @@ def plan_geaendert(alt: dict | None, neu: dict | None, toleranz: float = 0.0025)
         for eintrag in p.get("nachkauf", []) + p.get("teilgewinn", []):
             out.append((eintrag["was"], tuple(eintrag.get("zone") or [eintrag["preis"]])))
         out.append(("stop", (p["stop"]["preis"],)))
+        # E44.3: Stop des Rueckkauf-Teils und beobachtete Marke - nur wenn vorhanden, ohne
+        # E42 also Wort fuer Wort der alte Vergleich.
+        if p.get("rueckkauf_teil"):
+            out.append(("rueckkauf-stop", (p["rueckkauf_teil"]["marke"],)))
+        if p.get("ruecktest"):
+            out.append(("ruecktest", (p["ruecktest"]["marke"],)))
         return out
     a, n = _marken(alt), _marken(neu)
     # Bewusst NICHT verglichen: der investierte Anteil. Er aendert sich bei jedem Nachkauf
@@ -954,18 +1005,24 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
             print(f"config.json nicht lesbar ({exc}) -> alte Einstellungen.")
     new_signals: list[dict] = []
     params = eval_params(cfg)
-    # Nachholen: alle Kerzen, die neuer sind als der letzte verarbeitete Stand
-    e41_meldungen: list[dict] = []
+    # Nachholen: alle Kerzen, die neuer sind als der letzte verarbeitete Stand.
+    # E44.3: Die Meldungen werden JE KERZE gesammelt (E41-Meldung, E42-Meldungen, Signale)
+    # und in dieser Reihenfolge gesendet. Holt ein Lauf mehrere Kerzen nach, kommt so
+    # alles in derselben Folge an wie bei vier Stunden Abstand - "Ausbruch" vor dem
+    # Rueckkauf, "Stop wartet" vor dem Stop. Vorher kamen erst alle E41-Meldungen, dann
+    # alle Signale.
+    pakete: list[tuple] = []
     for i, c in enumerate(candles):
         if c.ts <= pos.last_signal_ts:
             continue
         _wartete, _marke = pos.stop_wartet, pos.stop_wartet_inv
         sigs = evaluate(candles[:i + 1], flow[:i + 1], pos, **params)
-        new_signals += [s.to_dict() for s in sigs]
+        sig_dicts = [s.to_dict() for s in sigs]
+        new_signals += sig_dicts
         m = e41_meldung(pos, _wartete, sigs, c, int(params.get("stop_rueckeroberung", 0)),
                         marke_vorher=_marke)
-        if m:
-            e41_meldungen.append(m)
+        if m or pos.e42_meldungen or sig_dicts:
+            pakete.append((m, list(pos.e42_meldungen), sig_dicts))
 
     # Historie fortschreiben
     hist = {"signals": []}
@@ -1031,12 +1088,14 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
             watch_path.write_text(json.dumps(w, indent=1), encoding="utf-8")
             print(f"Flush-Warnung aufgeloest: {'bestaetigt' if bestaetigt else 'nicht bestaetigt'}")
 
-    # E41: VOR den Signalen - holt ein Lauf mehrere Kerzen nach, steht die Wartemeldung
-    # vor dem Stop, der ihr folgt.
-    for m in e41_meldungen:
-        send_text(format_stop_rueckeroberung(m), dry_run=dry_run)
-    if new_signals:
-        send_signals(new_signals, dry_run=dry_run)
+    # E41/E44.3: je Kerze erst die Meldungen, dann die Signale dieser Kerze.
+    for m41, m42, sigs in pakete:
+        if m41:
+            send_text(format_stop_rueckeroberung(m41), dry_run=dry_run)
+        for m in m42:
+            send_text(format_ruecktest(m), dry_run=dry_run)
+        if sigs:
+            send_signals(sigs, dry_run=dry_run)
     print(f"Lauf ok: {len(candles)} Kerzen, {len(new_signals)} neue Signale, "
           f"OI-Punkte: {len(oi_history)}, Position: {pos.direction}/{pos.state.value}")
     return new_signals

@@ -39,6 +39,11 @@ STYLE = {
     "SHORT_TP_2":       ("\U0001F7E3", "STP2"),
     "SHORT_COVER_REST": ("\U0001F534", "SC"),
     "SHORT_STOPLOSS":   ("\U0001F6D1", "SSL"),
+    # E44.3 (E42, Ausbruch mit Ruecktest):
+    "RUECKKAUF":        ("\U0001F501", "RK"),   # Pfeile im Kreis (wieder rein)
+    "RUECKKAUF_STOP":   ("\U0001F6D1", "RKS"),  # Stoppschild - nur der Rueckkauf-Teil
+    "SHORT_RUECKTEST":  ("\U0001F501", "SRT"),
+    "SHORT_RUECKTEST_STOP": ("\U0001F6D1", "SRTS"),
     # Kein Signal, sondern eine Ankuendigung (2026-07-29, Kaisers Anforderung):
     "VORSCHAU":         ("\U0001F4CD", "VOR"),  # Stecknadel
     "PLAN":             ("\U0001F4CB", "PLAN"), # Klemmbrett
@@ -201,6 +206,36 @@ def format_plan(p: dict) -> str:
     else:
         zeilen.append(f"Stop {_fmt_usd(st['preis'])} — {st['grund']}, "
                       f"bei Kerzenschluss {seite}")
+    # E44.3 (E42): der Rueckkauf-Teil mit EIGENEM Stop und eine laufende Beobachtung.
+    teil = p.get("rueckkauf_teil")
+    if teil:
+        marke = _fmt_usd(teil["marke"])
+        zeilen.append("")
+        if teil.get("rueckeroberung") and teil.get("geprueft"):
+            regel = (f"schon einmal zurueckerobert: naechster Kerzenschluss {seite} = "
+                     f"Stop fuer diesen Teil")
+        elif teil.get("rueckeroberung"):
+            regel = (f"ein Kerzenschluss {seite} loest noch nicht aus, erst wenn auch die "
+                     f"naechste Kerze {seite} schliesst - ab {_fmt_usd(teil['boden'])} sofort")
+        else:
+            regel = f"bei Kerzenschluss {seite}"
+        zeilen.append(f"Rueckkauf-Teil ({teil['tranche']} %): Stop {marke} — {regel}")
+        zeilen.append("  Die Position besteht nur aus diesem Teil." if teil.get("nur_rueckkauf")
+                      else "  Gilt nur fuer diesen Teil - der Rest behaelt den Stop oben.")
+        if teil.get("wartet"):
+            zeilen.append(f"  Achtung: Die letzte Kerze schloss schon {seite} — die Engine "
+                          f"wartet auf die Rueckeroberung.")
+    rt = p.get("ruecktest")
+    if rt:
+        ueber = "ueber" if lang else "unter"
+        zeilen.append("")
+        if rt.get("ausbruch"):
+            zeilen.append(f"Beobachtet: {_fmt_usd(rt['marke'])} ist durchbrochen, das "
+                          f"Ruecktest-Fenster laeuft ({rt['fenster']} Kerzen). Haelt der "
+                          f"Ruecktest, kauft die Engine {rt['tranche']} % zurueck.")
+        else:
+            zeilen.append(f"Beobachtet: Schliesst eine Kerze {ueber} {_fmt_usd(rt['marke'])} "
+                          f"und haelt der Ruecktest, kauft die Engine {rt['tranche']} % zurueck.")
     zeilen += _lage_zeilen(p.get("lage"))
     zeilen += _ampel_zeilen(p.get("ampel"))
     zeilen.append("")
@@ -342,6 +377,86 @@ def format_stop_rueckeroberung(m: dict) -> str:
         zeilen += [""]
         zeilen += _umbruch(f"Ab jetzt gilt sie als geprueft: Der naechste Kerzenschluss "
                            f"{seite} {marke} loest den Stop sofort aus.")
+    zeilen += ["", _fmt_ts(m["ts"]), ""]
+    zeilen += _umbruch("Kein Trade-Auto-Pilot: selbst pruefen.")
+    return "\n".join(zeilen)
+
+
+def _dauer(kerzen: int) -> str:
+    """12 Kerzen a 4h -> "2 Tage". Nur fuer die Nachricht - die Engine zaehlt Kerzen."""
+    h = kerzen * 4
+    if h % 24 == 0:
+        return "1 Tag" if h == 24 else f"{h // 24} Tage"
+    return f"{h} Stunden"
+
+
+def format_ruecktest(m: dict) -> str:
+    """E44.3 (E42, Kaisers Regel "Ausbruch mit Ruecktest"): Meldungen der Beobachtung.
+
+    Der Rueckkauf und der Stop des Rueckkauf-Teils sind Signale (format_signal). Hier steht
+    alles, was die Engine dazwischen tut - ohne diese Nachrichten saehe man nach einem
+    Ausbruch nichts und wuesste nicht, ob sie wartet, verzichtet oder etwas uebersehen hat:
+      "ausbruch"     Schluss jenseits der Marke, das Ruecktest-Fenster beginnt.
+      "gescheitert"  Schluss wieder diesseits - kein Rueckkauf, sie wartet neu.
+      "verfallen"    Fenster abgelaufen ohne Ruecktest - Beobachtung beendet.
+      "ohne_kauf"    Ruecktest gehalten, aber kein Rueckkauf (Grund steht dabei).
+      "teil_wartet"  Schluss jenseits der Marke - der Stop des Teils wartet (E41-Regel).
+      "teil_zurueck" Marke zurueckerobert - ab jetzt gilt sie als geprueft.
+    Handybreit (ZEILE_MAX), wie die E41-Meldung.
+    """
+    lang = m.get("lang", True)
+    ueber, unter = ("ueber", "unter") if lang else ("unter", "ueber")
+    marke = _fmt_usd(m["marke"])
+    art = m["art"]
+    kopf = {"ausbruch": ("\U0001F4C8 AUSBRUCH UEBER " if lang else "\U0001F4C9 DURCHBRUCH UNTER ") + marke,
+            "gescheitert": "\u21a9\ufe0f AUSBRUCH GESCHEITERT",
+            "verfallen": "\u231b KEIN RUECKTEST - KEIN RUECKKAUF",
+            "ohne_kauf": "\u2139\ufe0f RUECKTEST OHNE RUECKKAUF",
+            "teil_wartet": "\u23f3 STOP RUECKKAUF-TEIL WARTET",
+            "teil_zurueck": "\u2705 AUSBRUCHSMARKE ZURUECKEROBERT"}[art]
+    zeilen = [kopf, f"BTC {_fmt_usd(m['kurs'])}", ""]
+    if art == "ausbruch":
+        n, tr = m.get("fenster", 12), m.get("tranche", 25)
+        zeilen += _umbruch(f"Kerzenschluss {ueber} {marke}, der Marke, an der die Engine "
+                           "Gewinn mitgenommen hat.")
+        zeilen += [""]
+        zeilen += _umbruch(f"Kommt der Kurs in den naechsten {n} Kerzen ({_dauer(n)}) bis "
+                           f"{_fmt_usd(m['zone'])} zurueck und schliesst die Kerze nicht {unter} "
+                           f"{marke}, kauft die Engine {tr} % zurueck.")
+        zeilen += _umbruch(f"Stop fuer diesen Teil: Schluss {unter} {marke}.")
+    elif art == "gescheitert":
+        zeilen += _umbruch(f"Schluss wieder {unter} {marke}. Der Ausbruch hat nicht "
+                           "gehalten, kein Rueckkauf.")
+        zeilen += _umbruch(f"Die Engine wartet auf einen neuen Schluss {ueber} {marke}.")
+    elif art == "verfallen":
+        n = m.get("fenster", 12)
+        zeilen += _umbruch(f"In {n} Kerzen ({_dauer(n)}) nach dem Ausbruch kam kein "
+                           f"Ruecktest an {marke}. Kein Rueckkauf auf diese Marke, die "
+                           "Beobachtung ist beendet.")
+    elif art == "ohne_kauf":
+        zeilen += _umbruch(f"Der Ruecktest an {marke} hat gehalten, aber die Engine kauft "
+                           f"nicht zurueck: {m.get('grund', '')}.")
+        zeilen += _umbruch("Die Beobachtung ist beendet.")
+    elif art == "teil_wartet":
+        abstand = f"{abs(m['kurs'] - m['marke']) / m['marke'] * 100:.1f}".replace(".", ",")
+        noch = m.get("noch", 1)
+        naechste = "die naechste Kerze" if noch == 1 else f"eine der naechsten {noch} Kerzen"
+        zeilen += _umbruch(f"Kerzenschluss {abstand} % {unter} der Ausbruchsmarke {marke}.")
+        zeilen += [""]
+        zeilen += _umbruch("Nach der Rueckeroberungs-Regel noch kein Stop fuer den "
+                           "Rueckkauf-Teil:")
+        zeilen += _umbruch(f"- Schliesst {naechste} wieder {ueber} {marke}, hat die Marke "
+                           "gehalten.")
+        zeilen += _umbruch("- Sonst wird der Rueckkauf-Teil verkauft.")
+        if noch > 1:
+            zeilen += _umbruch(f"- Schluss {unter} {_fmt_usd(m['boden'])}: sofort.")
+        zeilen += _umbruch("Die Position besteht nur aus diesem Teil." if m.get("nur_rueckkauf")
+                           else "Der Rest der Position ist davon nicht betroffen.")
+    else:  # teil_zurueck
+        zeilen += _umbruch(f"Schluss wieder {ueber} {marke}. Die Marke hat gehalten.")
+        zeilen += [""]
+        zeilen += _umbruch(f"Ab jetzt gilt sie als geprueft: Der naechste Kerzenschluss "
+                           f"{unter} {marke} verkauft den Rueckkauf-Teil sofort.")
     zeilen += ["", _fmt_ts(m["ts"]), ""]
     zeilen += _umbruch("Kein Trade-Auto-Pilot: selbst pruefen.")
     return "\n".join(zeilen)

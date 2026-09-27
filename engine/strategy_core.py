@@ -76,6 +76,14 @@ class SignalType(Enum):
     SHORT_TP_2 = "SHORT TEILGEWINN 2 (Extension 1.618)"
     SHORT_COVER_REST = "SHORT Rest schliessen"
     SHORT_STOPLOSS = "SHORT STOPLOSS"
+    # E44.3 (E42, Kaisers Regel "Ausbruch mit Ruecktest", Default aus). Eigene Typen,
+    # weil der Rueckkauf-Teil einen EIGENEN Stop hat (Kaiser 27.09.2026: "nur die 25 %")
+    # und die Abrechnung genau diesen Teil wieder verkaufen muss - weder ein Kauf am
+    # Fib-Level noch ein Teilgewinn beschreibt das.
+    RUECKKAUF = "RUECKKAUF (Ausbruch mit Ruecktest)"
+    RUECKKAUF_STOP = "STOP Rueckkauf-Teil (Schluss unter der Ausbruchsmarke)"
+    SHORT_RUECKTEST = "SHORT NACH RUECKTEST (Durchbruch mit Ruecktest)"
+    SHORT_RUECKTEST_STOP = "STOP Short-Rueckteil (Schluss ueber der Durchbruchsmarke)"
 
 
 @dataclass
@@ -1169,6 +1177,31 @@ class Position:
     # _reset_position: Er ist die Erinnerung ZWISCHEN zwei Positionen und muss den
     # Positions-Reset ueberleben, sonst wuesste die Sperre nach dem Stop nichts mehr.
     last_stop_ts: int = -1
+    # --- E44.3 (E42, Ausbruch mit Ruecktest), siehe ruecktest_schritt() -------------
+    # Die Beobachtung einer Marke. Gehoert BEWUSST NICHT in _reset_position: Sie beginnt
+    # gerade nach einem Rest-Verkauf, also im Moment des Resets. Beendet wird sie durch
+    # Rueckkauf, Stop, abgelaufenes Fenster oder eine neue Marke (_e42_ende in evaluate).
+    e42_marke: Optional[float] = None        # beobachtete Marke (None = keine Beobachtung)
+    e42_richtung: str = "NONE"               # "LONG" | "SHORT"
+    e42_start_ts: int = -1                   # Kerze, in der die Beobachtung begann
+    e42_ausbruch_ts: int = -1                # Kerze des Ausbruchs (-1 = wartet darauf)
+    # Marke des letzten Rueckkaufs: kein zweiter Rueckkauf auf dieselbe Marke. Ueberlebt
+    # den Reset wie last_stop_ts.
+    e42_gekauft: Optional[float] = None
+    # Der offene Rueckkauf-Teil und sein eigener Stop (Kaiser 27.09.2026: der Stop an der
+    # Marke gilt NUR fuer die zurueckgekauften 25 %). Die drei Merker sind die E41-Merker
+    # dieses Teils - gerechnet von derselben stop_entscheidung() wie der Hauptstop.
+    e42_teil_marke: Optional[float] = None
+    e42_teil_wartet: int = 0
+    e42_teil_wartet_inv: Optional[float] = None
+    e42_teil_geprueft: Optional[float] = None
+    # Investierter Anteil in Prozent der Position: Kaeufe +, Teilverkaeufe -, voller
+    # Ausstieg 0, nie ueber 100. Grundlage fuer "nur, wenn nicht schon voll investiert".
+    # entry_pct taugt dafuer nicht - es zaehlt nur Kaeufe und sinkt nie.
+    bestand_pct: int = 0
+    # NUR die Meldungen der zuletzt bewerteten Kerze (fuer Telegram). Nicht in state.json:
+    # run_engine liest sie direkt nach jedem evaluate()-Aufruf.
+    e42_meldungen: list = field(default_factory=list)
 
 
 def _reset_position(pos: "Position") -> None:
@@ -1188,6 +1221,13 @@ def _reset_position(pos: "Position") -> None:
     pos.stop_wartet = 0
     pos.stop_wartet_inv = None
     pos.stop_geprueft = None
+    # E44.3: Der Rueckkauf-Teil gehoert zur Position und geht mit ihr. Die Beobachtung
+    # (e42_marke ...) und e42_gekauft bleiben - siehe Position.
+    pos.e42_teil_marke = None
+    pos.e42_teil_wartet = 0
+    pos.e42_teil_wartet_inv = None
+    pos.e42_teil_geprueft = None
+    pos.bestand_pct = 0
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
@@ -1234,6 +1274,16 @@ _AUFBAU_TYPES = {SignalType.NACHKAUF, SignalType.SHORT_NACHLEGEN,
 _TEILVERKAUF_TYPES = {SignalType.TEILVERKAUF_LADDER, SignalType.TEILVERKAUF_1,
                       SignalType.TEILVERKAUF_2, SignalType.SHORT_TP_LADDER,
                       SignalType.SHORT_TP_1, SignalType.SHORT_TP_2}
+# E44.3 (E42): Rueckkauf nach Ruecktest und sein eigener Stop. Bewusst NICHT in
+# _ENTRY_TYPES bzw. _TEILVERKAUF_TYPES: Der Rueckkauf-Teil hat einen eigenen Stop und
+# soll weder den Durchschnitts-Einstand (und damit den nachgezogenen Stop der uebrigen
+# Position) noch die Ampel oder freeze_targets beruehren (Plan E44, Abschnitt 7: "nichts
+# an den Stops"). no_flip sieht beide trotzdem - siehe _darf_aufstocken/_darf_teilverkaufen.
+_RUECKKAUF_TYPES = {SignalType.RUECKKAUF, SignalType.SHORT_RUECKTEST}
+_RUECKKAUF_STOP_TYPES = {SignalType.RUECKKAUF_STOP, SignalType.SHORT_RUECKTEST_STOP}
+# Vollstaendige Ausstiege: danach ist der investierte Anteil 0.
+_VOLL_RAUS_TYPES = {SignalType.STOPLOSS, SignalType.SHORT_STOPLOSS,
+                    SignalType.VERKAUF_REST, SignalType.SHORT_COVER_REST}
 
 
 TRANCHEN = {"T1": 25, "CORE": 50, "FULL": 25, "TP1": 40, "TP2": 40}
@@ -1475,6 +1525,116 @@ def muster5_haelt_zurueck(modus: str, pattern: "Pattern", richtung: str,
     return modus == "alle" or not ziel
 
 
+# ------------------------------------------------ E44.3 (E42): Ausbruch mit Ruecktest
+# Kaisers Regel, Werte von ihm am 26.09.2026 bestaetigt (docs/PLAN-E44-KOMBINATIONEN.md,
+# Abschnitt 6 K1 und 10). Default aus (ausbruch_ruecktest=False) bis zur Messung E44.5.
+RUECKTEST_FENSTER = 12                 # Kerzen nach dem Ausbruch = 2 Tage (Kaiser: "ja")
+RUECKTEST_TOL = HIGH_EXIT_TOL          # Zone Marke +0,5 % - derselbe Abstand wie high_exit
+RUECKKAUF_TRANCHE = TRANCHEN["T1"]     # 25 %, die Groesse von KAUF 1 (Kaiser: "ja")
+
+
+def ruecktest_schritt(marke: float, lang: bool, seit: Optional[int], cur: "Candle",
+                      fenster: int = RUECKTEST_FENSTER) -> str:
+    """E44.3: Was bedeutet diese Kerze fuer die beobachtete Marke? (rein, ohne Zustand)
+
+    `seit` = Kerzen seit der Ausbruchs-Kerze, None = es gab noch keinen Ausbruch.
+    Rueckgabe:
+      "ausbruch"    Die Kerze SCHLIESST jenseits der Marke. Ein Docht allein zaehlt nicht.
+      "ruecktest"   Innerhalb des Fensters beruehrt das Tief die Zone Marke +0,5 % (Long)
+                    und die Kerze schliesst NICHT darunter ("hoechstens mit dem Docht").
+      "gescheitert" Schluss wieder diesseits der Marke - der Ausbruch hat nicht gehalten.
+                    evaluate() wartet danach auf einen neuen Ausbruch.
+      "verfallen"   Das Fenster ist ohne Ruecktest abgelaufen (die letzte Fensterkerze
+                    ist bewertet). evaluate() beendet dann die Beobachtung.
+      ""            nichts davon.
+    Die Ausbruchs-Kerze selbst ist nie der Ruecktest ("innerhalb der NAECHSTEN 12").
+    Auf Modulebene statt in evaluate() - die Lehre aus E34: jeder Fall einzeln pruefbar.
+    """
+    if lang:
+        jenseits, diesseits = cur.close > marke, cur.close < marke
+        beruehrt = cur.low <= marke * (1 + RUECKTEST_TOL)
+    else:
+        jenseits, diesseits = cur.close < marke, cur.close > marke
+        beruehrt = cur.high >= marke * (1 - RUECKTEST_TOL)
+    if seit is None:
+        return "ausbruch" if jenseits else ""
+    if seit > fenster:
+        return "verfallen"
+    if diesseits:
+        return "gescheitert"
+    if beruehrt:
+        return "ruecktest"
+    return "verfallen" if seit >= fenster else ""
+
+
+def kerzen_seit(candles: list["Candle"], ts: int, grenze: int) -> int:
+    """Wie viele Kerzen liegen nach der Kerze `ts`? Hoechstens `grenze`.
+
+    Gezaehlt in der Kerzenliste, nicht ueber die Zeit - strategy_core ist
+    Timeframe-agnostisch. Wird `ts` in den letzten `grenze` Kerzen nicht gefunden,
+    ist sie aelter: Rueckgabe `grenze`.
+    """
+    for k in range(1, min(len(candles), grenze) + 1):
+        if candles[-k].ts == ts:
+            return k - 1
+        if candles[-k].ts < ts:
+            break
+    return grenze
+
+
+@dataclass
+class _StopMerker:
+    """Die drei E41-Merker, damit stop_entscheidung() auch den Stop des Rueckkauf-Teils
+    rechnet (eine Rechenstelle fuer beide Stops, keine zweite Fassung der Regel)."""
+    stop_wartet: int = 0
+    stop_wartet_inv: Optional[float] = None
+    stop_geprueft: Optional[float] = None
+
+
+def ruecktest_teil_stop(pos: "Position", cur: "Candle", rueckeroberung: int) -> tuple:
+    """E44.3: Loest der Stop des Rueckkauf-Teils in dieser Kerze aus?
+
+    Stop bei Kerzenschluss jenseits der Marke, mit der live geschalteten Rueckeroberung
+    (stop_rueckeroberung, heute 1 Kerze) und dem harten Boden - genau wie der Hauptstop.
+    Aktualisiert die Merker in `pos`. Rueckgabe (stop, grund, wartet_neu, zurueck).
+    """
+    lang = pos.direction != "SHORT"
+    m = _StopMerker(pos.e42_teil_wartet, pos.e42_teil_wartet_inv, pos.e42_teil_geprueft)
+    vorher = m.stop_wartet
+    marke = pos.e42_teil_marke
+    hit, _preis, grund = stop_entscheidung(m, cur, marke, lang,
+                                           rueckeroberung=rueckeroberung)
+    pos.e42_teil_wartet, pos.e42_teil_wartet_inv, pos.e42_teil_geprueft = \
+        m.stop_wartet, m.stop_wartet_inv, m.stop_geprueft
+    seite = "unter" if lang else "ueber"
+    if grund:
+        grund = grund.replace("Invalidierung", "Ausbruchsmarke")
+    else:
+        grund = f"Kerzenschluss {seite} Ausbruchsmarke {marke:.0f}"
+    wartet_neu = (not hit) and m.stop_wartet > vorher
+    zurueck = (not hit) and vorher > 0 and m.stop_wartet == 0 and m.stop_geprueft == marke
+    return hit, grund, wartet_neu, zurueck
+
+
+def bestand_nach(start: int, signals: list) -> int:
+    """Investierter Anteil nach diesen Signalen (E44.3, "nur, wenn nicht voll investiert").
+
+    Kaeufe (auch der Rueckkauf) +Tranche, hoechstens 100; Teilverkaeufe (auch der Stop des
+    Rueckkauf-Teils) -Tranche, mindestens 0; ein voller Ausstieg setzt auf 0. Eine
+    Naeherung an simulate() (das Teilverkaeufe am Hoechstbestand bemisst) - fuer die Frage
+    "voll oder nicht" genuegt sie.
+    """
+    b = start
+    for s in signals:
+        if s.type in _VOLL_RAUS_TYPES:
+            b = 0
+        elif s.type in _ENTRY_TYPES or s.type in _RUECKKAUF_TYPES:
+            b = min(100, b + s.tranche_pct)
+        elif s.type in _TEILVERKAUF_TYPES or s.type in _RUECKKAUF_STOP_TYPES:
+            b = max(0, b - s.tranche_pct)
+    return b
+
+
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              bias_long: bool = True, bias_short: bool = True,
              pivot_n: int = 5, k_atr: float = 2.0,
@@ -1502,7 +1662,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              ampel_filter: str = "off",
              muster_cvd: str = "alt",
              muster_oi: str = "usd",
-             high_exit_hist: str = "voll") -> list[Signal]:
+             high_exit_hist: str = "voll",
+             ausbruch_ruecktest: bool = False,
+             ruecktest_fenster: int = RUECKTEST_FENSTER) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -1654,6 +1816,20 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     #   Dollar erfuellt schon die Kursbewegung die Schwellen von Muster 2 und 4. Wirkt
     #   ueber die Muster auf Einstiegssperre (2), Bestaetigung (4) und Restverkauf (2, 3).
     #   Default "usd", bis der Backtest gegen die Entscheidungsregel gemessen hat.
+    # ---------------------------------------- E44.3 (E42, Kaisers Regel, Default aus)
+    # ausbruch_ruecktest: Nach einem Teilverkauf am letzten Hoch (high_exit) oder einem
+    #   Rest-Verkauf (nicht nach einem Stop) beobachtet die Engine die Marke - dieselbe,
+    #   die high_exit benutzt (next_pivot_beyond). Schliesst eine Kerze darueber
+    #   (Ausbruch) und beruehrt eine der naechsten `ruecktest_fenster` Kerzen die Zone
+    #   Marke +0,5 %, ohne darunter zu schliessen (Ruecktest), kauft sie 25 % zurueck,
+    #   zum Schluss dieser Kerze. Stop NUR fuer diesen Teil: Schluss unter der Marke, mit
+    #   der live geschalteten Rueckeroberung (Kaiser 27.09.2026: "nur die 25 %"). Ziele
+    #   ueber die vorhandene Extension-Logik. Nicht, wenn schon voll investiert; kein
+    #   zweiter Rueckkauf auf dieselbe Marke. Anlass: high_exit verkauft unter dem Hoch
+    #   und hinterlaesst einen Zustand, den niemand aufloest - die Engine ist draussen,
+    #   das Hoch ist durchbrochen (Plan E44, Abschnitt 6 K1). Spiegelbildlich fuer Short.
+    # ruecktest_fenster: Kerzen fuer den Ruecktest (Kaiser: 12 = 2 Tage). Die
+    #   Robustheitszeile in E44.5 misst 6 - sie entscheidet nichts.
     """Bewertet die juengste ABGESCHLOSSENE Kerze und liefert neue Signale.
 
     Idempotent: dieselbe Kerze (ts) erzeugt nie zweimal Signale (pos.last_signal_ts).
@@ -1669,9 +1845,13 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # geschenkt, das keine Information enthaelt. Steht hier ganz oben, weil sowohl
     # _versuche_einstieg() als auch zonen_nachziehen pos.zones unterwegs ersetzen.
     _pos_imp_vorher = pos.zones.impulse if pos.zones is not None else None
+    # E44.3: Meldungen gelten nur fuer DIESE Kerze - auch eine schon bewertete Kerze darf
+    # keine alten Meldungen stehen lassen, sonst sendete run_engine sie ein zweites Mal.
+    pos.e42_meldungen = []
     cur = candles[-1]
     if cur.ts <= pos.last_signal_ts:
         return []
+    _bestand_start = pos.bestand_pct
 
     signals: list[Signal] = []
     # E41: in dieser Kerze kein Aufstocken, weil auf eine Rueckeroberung gewartet wird
@@ -1685,7 +1865,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         die Hintertuer."""
         if _e41_sperre:
             return False
-        return not (no_flip and any(x.type in _TEILVERKAUF_TYPES for x in signals))
+        # E44.3: Der Stop des Rueckkauf-Teils ist ein Verkauf - no_flip sieht ihn wie einen
+        # Teilverkauf. Ohne Signale dieser Art ist die Bedingung Wort fuer Wort die alte.
+        return not (no_flip and any(x.type in _TEILVERKAUF_TYPES
+                                    or x.type in _RUECKKAUF_STOP_TYPES for x in signals))
 
     def _darf_teilverkaufen(ziel: bool = False) -> bool:
         """E18.2: Nach einem Nachkauf in derselben Kerze wird nicht teilverkauft.
@@ -1697,9 +1880,46 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         pos.state zurueckdrehen — jeder vergessene Zaehler waere ein stiller Fehler
         (eine Leiterstufe gilt als verbraucht, ohne dass verkauft wurde).
         """
-        if no_flip and any(x.type in _AUFBAU_TYPES for x in signals):
+        if no_flip and any(x.type in _AUFBAU_TYPES or x.type in _RUECKKAUF_TYPES
+                           for x in signals):
             return False
         return not muster5_haelt_zurueck(muster5_halten, pattern, pos.direction, ziel)
+
+    # --- E44.3 (E42) Helfer --------------------------------------------------------------
+    def _e42_melden(art: str, marke: float, lang: bool, **extra) -> None:
+        pos.e42_meldungen.append({"art": art, "ts": cur.ts, "kurs": cur.close,
+                                  "marke": marke, "lang": lang, **extra})
+
+    def _e42_zone(marke: float, lang: bool) -> float:
+        return marke * (1 + RUECKTEST_TOL) if lang else marke * (1 - RUECKTEST_TOL)
+
+    def _e42_ende() -> None:
+        pos.e42_marke, pos.e42_richtung = None, "NONE"
+        pos.e42_start_ts = pos.e42_ausbruch_ts = -1
+
+    def _piv_marke():
+        # dieselbe Pivot-Liste wie high_exit (A5: high_exit_hist)
+        return pivots if high_exit_hist != "live" \
+            else find_pivots(candles[-HIGH_EXIT_LIVE_KERZEN:], n=pivot_n)
+
+    def _e42_beobachten(marke: Optional[float], long_side: bool) -> str:
+        """Beobachtung einer Marke beginnen. Rueckgabe: Zusatz fuer den Verkaufsgrund.
+
+        Ohne brauchbare Marke (kein Pivot jenseits, oder auf diese Marke wurde schon
+        zurueckgekauft) bleibt eine laufende Beobachtung unberuehrt."""
+        if not ausbruch_ruecktest or marke is None or marke == pos.e42_gekauft:
+            return ""
+        pos.e42_marke, pos.e42_richtung = marke, ("LONG" if long_side else "SHORT")
+        pos.e42_start_ts = cur.ts
+        jenseits = cur.close > marke if long_side else cur.close < marke
+        pos.e42_ausbruch_ts = cur.ts if jenseits else -1
+        if jenseits:
+            # Die Verkaufskerze selbst schliesst schon jenseits: das IST der Ausbruch.
+            _e42_melden("ausbruch", marke, long_side, fenster=ruecktest_fenster,
+                        zone=_e42_zone(marke, long_side), tranche=RUECKKAUF_TRANCHE)
+        return (" - beobachte {} {:.0f} ({} nach Ruecktest)".format(
+            "Ausbruch ueber" if long_side else "Durchbruch unter", marke,
+            "Rueckkauf" if long_side else "Short"))
 
     # E43.3/E43.4: muster_cvd und muster_oi MUESSEN hier ankommen - sonst misst die
     # Gitterzeile die Live-Zeile.
@@ -1989,6 +2209,26 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                       stop_ref=z.invalidation))
                 pos.dip_buys += 1
                 stop_hit = False                             # kein Stop diese Kerze
+        # E44.3: der eigene Stop des Rueckkauf-Teils. Nur wenn der Hauptstop NICHT
+        # ausloest - sonst geht die ganze Position, der Teil mit ihr. Unabhaengig vom
+        # Schalter: Ein offener Teil behaelt seinen Stop, auch wenn ausbruch_ruecktest
+        # inzwischen aus ist (ohne Schalter entsteht nie ein Teil, also bitgleich).
+        _teil_stop, _teil_grund = False, None
+        if pos.e42_teil_marke is not None and not stop_hit:
+            _teil_marke = pos.e42_teil_marke
+            _teil_stop, _teil_grund, _t_wartet, _t_zurueck = ruecktest_teil_stop(
+                pos, cur, stop_rueckeroberung)
+            if _t_wartet:
+                _n = max(1, stop_rueckeroberung)
+                _melde_boden = _teil_marke * (1 - DIP_FLOOR_PCT) if long_side \
+                    else _teil_marke * (1 + DIP_FLOOR_PCT)
+                _e42_melden("teil_wartet", _teil_marke, long_side,
+                            kerze_nr=pos.e42_teil_wartet, von=_n,
+                            noch=_n - pos.e42_teil_wartet + 1, boden=_melde_boden,
+                            nur_rueckkauf=pos.entry_pct == 0)
+            elif _t_zurueck:
+                _e42_melden("teil_zurueck", _teil_marke, long_side,
+                            nur_rueckkauf=pos.entry_pct == 0)
         if stop_hit:
             st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
             if trail_note and trail_note != "Invalidierung":
@@ -2012,7 +2252,29 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             # einmal ueber VERKAUF_REST geschlossen wurde. Jetzt derselbe Reset wie ueberall.
             _reset_position(pos)
             pos.last_stop_ts = cur.ts        # E13: Merker fuer die Sperrfrist (cooldown_h)
+            _e42_ende()                      # E44.3: nach einem Stop wird nicht beobachtet
+        elif _teil_stop and pos.entry_pct == 0:
+            # E44.3: Die Position besteht NUR aus dem Rueckkauf (aus FLAT eroeffnet, seither
+            # kein anderer Kauf) - dann ist der Stop des Teils ein vollstaendiger Ausstieg.
+            # Sonst bliebe eine leere Position mit Zonen stehen, die spaeter "aufstockt".
+            st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
+            signals.append(Signal(cur.ts, st, cur.close, 100,
+                                  ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
+                                  + _teil_grund))
+            _reset_position(pos)
+            pos.last_stop_ts = cur.ts
+            _e42_ende()
         else:
+            if _teil_stop:
+                # E44.3: nur der Rueckkauf-Teil geht, der Rest behaelt seinen Stop.
+                ts_ = SignalType.RUECKKAUF_STOP if long_side else SignalType.SHORT_RUECKTEST_STOP
+                signals.append(Signal(cur.ts, ts_, cur.close, RUECKKAUF_TRANCHE,
+                                      ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
+                                      + _teil_grund
+                                      + " - der Rest der Position behaelt seinen Stop"))
+                pos.e42_teil_marke = None
+                pos.e42_teil_wartet, pos.e42_teil_wartet_inv = 0, None
+                pos.e42_teil_geprueft = None
             # Mehrtages-Kaufleiter (E9.5): neue Tiefkerze IN der Retracement-Zone (ueber
             # Invalidierung, unter 0.5) mit Flow-Bestaetigung -> kleine Tranche nachlegen.
             if buy_ladder and made_new_extreme and pos.buy_rungs < MAX_BUY_RUNGS \
@@ -2125,6 +2387,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                               f"Teilgewinn am letzten {'Hoch' if long_side else 'Tief'} "
                                               f"{lvl:.0f}{zusatz}"))
                         pos.high_exits += 1
+                        # E44.3: ab jetzt die Marke beobachten (dieselbe wie high_exit)
+                        signals[-1].reason += _e42_beobachten(lvl, long_side)
             # Upgrade T1 -> CORE: Kernposition im Golden Pocket (KAUF 2 / SHORT 2)
             if pos.state == PosState.T1 and _darf_aufstocken():
                 in_gp = (z.gp_lower <= cur.low <= z.gp_upper) if long_side \
@@ -2200,6 +2464,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Gegen-Muster am Ziel: {pattern.name}"))
                     _reset_position(pos)
+                    # E44.3: Rest-Verkauf (kein Stop) -> naechstes Pivot jenseits beobachten
+                    signals[-1].reason += _e42_beobachten(
+                        next_pivot_beyond(_piv_marke(), cur.close, long_side), long_side)
             # Rest freigeben, wenn die Struktur veraltet ist (E9.9). Nur nach Teilgewinnen
             # (TP1/TP2) — beim Positionsaufbau bleibt der Stop zustaendig.
             if release_stale_rest and pos.state in (PosState.TP1, PosState.TP2) \
@@ -2211,6 +2478,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                           f"Struktur veraltet: neuer Impuls bestaetigt "
                                           f"({imp.start.price:.0f}->{imp.end.price:.0f}) — Rest freigegeben"))
                     _reset_position(pos)
+                    signals[-1].reason += _e42_beobachten(                    # E44.3
+                        next_pivot_beyond(_piv_marke(), cur.close, long_side), long_side)
             # Warnung waehrend offener Long-Position
             if long_side and pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
                     and pattern == Pattern.DERIVATE_PUMP:
@@ -2245,6 +2514,69 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             pos.tp_rungs = pos.buy_rungs = pos.dip_buys = 0
             pos.liq_entries = pos.liq_exits = pos.high_exits = pos.widerstand_exits = 0
             pos.ziel_extrem = None
+
+    # --- E44.3 (E42): die beobachtete Marke in dieser Kerze -------------------------------
+    # NACH Stop, Teilverkaeufen und Einstiegen: Ein Stop in dieser Kerze hat die
+    # Beobachtung schon beendet; eine in dieser Kerze BEGONNENE Beobachtung wird erst ab
+    # der naechsten Kerze bewertet (ihr Ausbruch-Fall ist in _e42_beobachten erledigt).
+    if pos.e42_marke is not None and pos.e42_start_ts != cur.ts:
+        _m, _lang = pos.e42_marke, pos.e42_richtung == "LONG"
+        _seit = None if pos.e42_ausbruch_ts < 0 else kerzen_seit(
+            candles, pos.e42_ausbruch_ts, ruecktest_fenster + 1)
+        _was = ruecktest_schritt(_m, _lang, _seit, cur, ruecktest_fenster)
+        if _was == "ausbruch":
+            pos.e42_ausbruch_ts = cur.ts
+            _e42_melden("ausbruch", _m, _lang, fenster=ruecktest_fenster,
+                        zone=_e42_zone(_m, _lang), tranche=RUECKKAUF_TRANCHE)
+        elif _was == "gescheitert":
+            pos.e42_ausbruch_ts = -1                     # auf einen neuen Ausbruch warten
+            _e42_melden("gescheitert", _m, _lang)
+        elif _was == "verfallen":
+            _e42_ende()
+            _e42_melden("verfallen", _m, _lang, fenster=ruecktest_fenster)
+        elif _was == "ruecktest":
+            _flat = pos.state == PosState.FLAT
+            _hindernis = None
+            if not (bias_long if _lang else bias_short):
+                _hindernis = "die Richtung ist in den Einstellungen abgeschaltet"
+            elif not _flat and pos.direction != ("LONG" if _lang else "SHORT"):
+                _hindernis = "eine Gegenposition ist offen"
+            elif _m == pos.e42_gekauft:
+                _hindernis = "auf diese Marke wurde schon zurueckgekauft"
+            elif bestand_nach(_bestand_start, signals) >= 100:
+                _hindernis = "die Engine ist schon voll investiert"
+            elif _flat and (imp is None or imp.up != _lang):
+                _hindernis = "es gibt kein Bein fuer die Ziele"
+            if _hindernis:
+                _e42_ende()
+                _e42_melden("ohne_kauf", _m, _lang, grund=_hindernis)
+            elif not _darf_aufstocken():
+                # no_flip/E41: in DIESER Kerze kein Kauf - das Fenster laeuft weiter
+                if _seit is not None and _seit >= ruecktest_fenster:
+                    _e42_ende()
+                    _e42_melden("verfallen", _m, _lang, fenster=ruecktest_fenster)
+            else:
+                if _flat:
+                    # Aus FLAT: neue Position auf dem aktuellen Bein, damit die vorhandene
+                    # Extension-Logik die Ziele stellt (vom Ruecktest-Extrem aus).
+                    pos.direction = "LONG" if _lang else "SHORT"
+                    pos.state, pos.zones = PosState.T1, fib_zones(imp)
+                    pos.retrace_extreme = cur.low if _lang else cur.high
+                rt = SignalType.RUECKKAUF if _lang else SignalType.SHORT_RUECKTEST
+                gegen = "unter" if _lang else "ueber"
+                signals.append(Signal(
+                    cur.ts, rt, cur.close, RUECKKAUF_TRANCHE,
+                    "{} {:.0f}, Ruecktest gehalten ({} {:.0f}, Schluss {:.0f}) - "
+                    "Stop fuer diesen Teil bei Schluss {} {:.0f}".format(
+                        "Ausbruch ueber" if _lang else "Durchbruch unter", _m,
+                        "Tief" if _lang else "Hoch",
+                        cur.low if _lang else cur.high, cur.close, gegen, _m),
+                    stop_ref=_m))
+                pos.e42_teil_marke = _m
+                pos.e42_teil_wartet, pos.e42_teil_wartet_inv = 0, None
+                pos.e42_teil_geprueft = None
+                pos.e42_gekauft = _m
+                _e42_ende()
 
     # E34: die Ampel darf die GROESSE eines Einstiegs aendern - mehr nicht.
     # Bewusst HIER, nach allen Einstiegspfaden und VOR der Einstands-Rechnung:
@@ -2285,6 +2617,10 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     if freeze_targets and pos.ziel_extrem is None and pos.retrace_extreme is not None \
             and any(s.type in _TEILVERKAUF_TYPES for s in signals):
         pos.ziel_extrem = pos.retrace_extreme
+
+    # E44.3: investierter Anteil nach dieser Kerze (immer gefuehrt, damit er stimmt,
+    # wenn ausbruch_ruecktest spaeter eingeschaltet wird; aendert kein Signal).
+    pos.bestand_pct = bestand_nach(_bestand_start, signals)
 
     pos.last_signal_ts = cur.ts
     return signals
