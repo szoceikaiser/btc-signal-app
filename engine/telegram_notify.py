@@ -273,7 +273,9 @@ def format_signal(sig: dict) -> str:
                      "DEINE Entscheidung, kein Standard-Signal!")
     lines.append(f"{emoji} {sig['label']}")
     lines.append(f"BTC {_fmt_usd(sig['price'])}")
-    if sig.get("tranche_pct"):
+    if sig["type"] in ("VERKAUF_REST", "SHORT_COVER_REST"):
+        lines.append("Tranche: gesamter Rest der Position")
+    elif sig.get("tranche_pct"):
         lines.append(f"Tranche: {sig['tranche_pct']} % der Position")
     if sig.get("stop_ref"):
         lines.append(f"Stop-Referenz: {_fmt_usd(sig['stop_ref'])}")

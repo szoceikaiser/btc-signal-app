@@ -271,6 +271,16 @@ gewirkt hat, hielt die Engine länger investiert“) und ist **nicht** die sechs
 „mehr verkaufen“, die der Wissens-Layer als auserzählt führt, sondern die Gegenrichtung.
 Nie gemessen.
 
+**Bau-Auslegung E44.4 (27.09.2026):** Faktor fuer alle Teilgewinn-Signale, Long und
+Short: Leiter, letztes Hoch/Tief, Liquidations-/Widerstandszone sowie TP1/TP2.
+15 % werden bei 0.67 zu 10.05 %, 40 % zu 26.8 % (keine Ganzzahl-Rundung).
+Kaeufe, Rueckkauf, Stops und volle Restverkaeufe bleiben unveraendert. Die Restmeldung
+nennt jetzt den ganzen Rest statt pauschal 20 % (auch bei Faktor 1.0, reine Textkorrektur).
+Zulaessig sind Faktoren groesser 0 bis 1; unbrauchbare Werte fallen auf 1.0 zurueck.
+Plan und Telegram zeigen die Signalmenge; simulate bucht sie statt fester 15/40 %.
+`bestand_pct` bleibt in state.json und wird mit Nachkommastellen wieder geladen.
+Keine Gitterzeile/Messung vor E44.5, live bleibt 1.0.
+
 ### K3: `rest_halten` noch einmal, aber nur als Partner von K1
 
 Einzeln ist `rest_halten` gemessen und aus (E43.6). Mit E42 ändert sich die Frage: Ist ein
@@ -363,7 +373,7 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 | E44.1 Coinalyze-Archiv | **GEBAUT** 26.09.2026 auf Zweig `claude/blissful-maxwell-9uwt6x`, 535 Tests, `sabotage_e441.py` 8/8. **IN `main` seit 26.09.2026** (Kaisers Go). Täglicher Anstoß über cron-job.org, Anleitung `ANLEITUNG-PUENKTLICHER-START.md` Schritt 5 (Kaiser richtet ein) |
 | E44.2 Wechselwirkungen + Monats-Probe im Bericht | **GEBAUT** 26.09.2026 auf demselben Zweig, 545 Tests, `sabotage_e442.py` 8/8 gefangen. Findet im echten Gitter dieselben 16 Gruppen wie Abschnitt 2. Wirkt erst im nächsten Backtest-Lauf (neuer Berichtsabschnitt „E44“). **IN `main` seit 26.09.2026** (Kaisers Go). Erscheint im nächsten Backtest |
 | E44.3 E42 Ausbruch mit Rücktest | **GEBAUT** 27.09.2026 auf Zweig `claude/e44-3-ausbruch-ruecktest-k7m2qx`, Schalter `ausbruch_ruecktest` (Default aus) + `ruecktest_fenster` (12), 582 Tests grün (37 neu in `test_e443.py`), Sabotage `sabotage_e443.py` siehe UEBERGABE. Kaiser 27.09.: Stop nur für die 25 %. Auslegung: Abschnitt 6 K1 „Bau-Auslegung“. **Noch nicht live, noch nicht gemessen** (E44.5). Wartet auf Kaisers Go für `main` (Handelsverhalten unverändert, Schalter aus) |
-| E44.4 `verkauf_faktor` | IN ARBEIT auf `claude/e44-4-verkauf-faktor`. E44.3 bereits in main (5a50fd8), Basis 585 Tests gruen. Default 1.0, Messwert 0.67; keine Messung oder Aktivierung. |
+| E44.4 `verkauf_faktor` | GEBAUT auf `claude/e44-4-verkauf-faktor`, **597 Tests gruen** (12 neu). Sabotage-Pruefung ausstehend: `engine/sabotage_e444.py`, 14 Proben fuer alle 12 Tests, Lauf-ID `e444-20260927-01`, Protokoll `e444-sabotage.log`. Default 1.0, Messwert 0.67; keine Messung oder Aktivierung. |
 | E44.5 2³-Gitter messen | OFFEN, braucht E44.2 bis E44.4 |
 | E44.6 Shorts im Abwärts-Regime | OFFEN, **Kaisers Ja am 26.09.2026**. Zuerst eigener Bauplan-Abschnitt (Punkte a und b in Abschnitt 10) |
 

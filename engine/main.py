@@ -28,7 +28,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import coinalyze
-from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
+from strategy_core import (verkauf_faktor_wert, verkauf_tranche,
+                           HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
                            Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots, gegen_zonen,
                            ampel, ampel_richtung, classify_pattern, lage_bericht,
@@ -361,6 +362,7 @@ EVAL_DEFAULTS = {
     "high_exit_hist": "voll",
     # E44.3 (27.09.2026), Default aus - siehe strategy_core.ruecktest_schritt.
     "ausbruch_ruecktest": False, "ruecktest_fenster": 12,
+    "verkauf_faktor": 1.0,
 }
 
 
@@ -375,6 +377,8 @@ def eval_params(cfg: dict) -> dict:
     out = {}
     for name, default in EVAL_DEFAULTS.items():
         wert = cfg.get(name, default)
+        if name == "verkauf_faktor":
+            wert = verkauf_faktor_wert(wert)
         try:
             if isinstance(default, bool):
                 wert = bool(wert)
@@ -472,7 +476,7 @@ def pos_from_state(d: dict) -> Position:
     # Altbestand ohne das Feld: aus den Kaeufen schaetzen, hoechstens 100. Die Schaetzung
     # kennt keine Teilverkaeufe und liegt damit eher zu HOCH - im Zweifel also "voll",
     # also eher kein Rueckkauf als einer zu viel.
-    pos.bestand_pct = int(d.get("bestand_pct", min(100, pos.entry_pct or 0)) or 0)
+    pos.bestand_pct = float(d.get("bestand_pct", min(100, pos.entry_pct or 0)) or 0)
     z = d.get("zones")
     if z and "impuls_start" in z:
         imp = Impulse(
@@ -682,6 +686,10 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
         if pos.state in (PosState.T1, PosState.CORE, PosState.FULL, PosState.TP1):
             raus.append({"preis": z.ext_target(ref, 1.618), "was": "Ziel 1.618",
                          "tranche": TRANCHEN["TP2"]})
+
+    # E44.4: dieselben Mengen wie in den spaeteren Teilverkaufs-Signalen.
+    for ziel in raus:
+        ziel["tranche"] = verkauf_tranche(ziel["tranche"], par["verkauf_faktor"])
 
     # --- Stop ---
     stop, grund = z.invalidation, "Invalidierung"

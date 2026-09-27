@@ -27,6 +27,8 @@
  "high_exit_hist": "voll",
  "ausbruch_ruecktest": false,
  "ruecktest_fenster": 12,
+ "verkauf_faktor": 1.0,
+ "_hinweis_verkauf_faktor": "E44.4: Teilverkaeufe Long/Short werden mit diesem Faktor multipliziert (Leiter, Hoch/Tief, Liquidationen, Widerstand, TP1/TP2). Default 1.0 = unveraendert; Messwert 0.67: 15 -> 10.05 Prozent, 40 -> 26.8 Prozent. Kaeufe, Stops und volle Restverkaeufe bleiben unveraendert. Erlaubt: 0 < Faktor <= 1; unbrauchbare Werte fallen auf 1.0 zurueck. NOCH NICHT GEMESSEN, keine Aktivierung. E44.5 misst das 2^3-Gitter. Entscheidungsregel fuer K2-Kombinationen: beide Fensterhaelften mindestens 2 Punkte besser als live, Rueckgang maximal 1 Punkt tiefer, Vorsprung positiv ohne jeden einzelnen Monat, dazu inhaltliche Erklaerung der Wechselwirkungen. Erst nach Kaisers Go aktivieren. Ausschalten, falls die alte Einstellung in beiden Haelften mindestens 1 Punkt besser ist oder der Rueckgang live mehr als 1 Punkt tiefer liegt (Plan E44 Abschnitt 8).",
  "release_stale_rest": false,
  "trail_stop": true,
  "liq_exit": "off",

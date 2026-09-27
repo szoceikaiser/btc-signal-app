@@ -91,7 +91,7 @@ class Signal:
     ts: int
     type: SignalType
     price: float
-    tranche_pct: int          # Anteil der Gesamtposition in %
+    tranche_pct: float        # Anteil der Gesamtposition in %, E44.4 auch Bruchteile
     reason: str               # Begruendung (Muster/Level) fuer die Telegram-Nachricht
     stop_ref: Optional[float] = None
     tag: str = ""             # z. B. "FLUSH" = aggressiver Kapitulations-Einstieg (Kaiser entscheidet)
@@ -1198,7 +1198,7 @@ class Position:
     # Investierter Anteil in Prozent der Position: Kaeufe +, Teilverkaeufe -, voller
     # Ausstieg 0, nie ueber 100. Grundlage fuer "nur, wenn nicht schon voll investiert".
     # entry_pct taugt dafuer nicht - es zaehlt nur Kaeufe und sinkt nie.
-    bestand_pct: int = 0
+    bestand_pct: float = 0
     # NUR die Meldungen der zuletzt bewerteten Kerze (fuer Telegram). Nicht in state.json:
     # run_engine liest sie direkt nach jedem evaluate()-Aufruf.
     e42_meldungen: list = field(default_factory=list)
@@ -1616,7 +1616,7 @@ def ruecktest_teil_stop(pos: "Position", cur: "Candle", rueckeroberung: int) -> 
     return hit, grund, wartet_neu, zurueck
 
 
-def bestand_nach(start: int, signals: list) -> int:
+def bestand_nach(start: float, signals: list) -> float:
     """Investierter Anteil nach diesen Signalen (E44.3, "nur, wenn nicht voll investiert").
 
     Kaeufe (auch der Rueckkauf) +Tranche, hoechstens 100; Teilverkaeufe (auch der Stop des
@@ -1633,6 +1633,23 @@ def bestand_nach(start: int, signals: list) -> int:
         elif s.type in _TEILVERKAUF_TYPES or s.type in _RUECKKAUF_STOP_TYPES:
             b = max(0, b - s.tranche_pct)
     return b
+
+
+def verkauf_faktor_wert(wert) -> float:
+    """E44.4: nur kleinere Teilverkaeufe; unbrauchbare Werte bleiben neutral."""
+    if isinstance(wert, bool):
+        return 1.0
+    try:
+        faktor = float(wert)
+    except (TypeError, ValueError, OverflowError):
+        return 1.0
+    return faktor if 0 < faktor <= 1 else 1.0
+
+
+def verkauf_tranche(tranche: float, faktor: float) -> float:
+    # Neutralen Pfad unveraendert lassen (auch Telegram: 15 statt 15.0).
+    faktor = verkauf_faktor_wert(faktor)
+    return tranche if faktor == 1.0 else round(tranche * faktor, 8)
 
 
 def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
@@ -1664,7 +1681,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              muster_oi: str = "usd",
              high_exit_hist: str = "voll",
              ausbruch_ruecktest: bool = False,
-             ruecktest_fenster: int = RUECKTEST_FENSTER) -> list[Signal]:
+             ruecktest_fenster: int = RUECKTEST_FENSTER,
+             verkauf_faktor: float = 1.0) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -2516,6 +2534,12 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             pos.tp_rungs = pos.buy_rungs = pos.dip_buys = 0
             pos.liq_entries = pos.liq_exits = pos.high_exits = pos.widerstand_exits = 0
             pos.ziel_extrem = None
+
+    # E44.4: alle Teilgewinn-Pfade Long/Short, vor der E42-Bestandspruefung.
+    # Kaeufe, volle Ausstiege und Stop des Rueckkauf-Teils sind nicht betroffen.
+    for s in signals:
+        if s.type in _TEILVERKAUF_TYPES:
+            s.tranche_pct = verkauf_tranche(s.tranche_pct, verkauf_faktor)
 
     # --- E44.3 (E42): die beobachtete Marke in dieser Kerze -------------------------------
     # NACH Stop, Teilverkaeufen und Einstiegen: Ein Stop in dieser Kerze hat die
