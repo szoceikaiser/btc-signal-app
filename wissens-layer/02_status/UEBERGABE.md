@@ -1,5 +1,28 @@
 # Laufende Übergabe
 
+## 27.09.2026 (28) — E44.5 gebaut, vor Pruefung und Messung gesichert
+
+- GitHub-Schreibzugriff ueber API bestaetigt (`push: true`). Neuer Zweig
+  `claude/e44-5-kombinationsgitter` von E44.4 (`eeb4eea`). Kein Merge-Go fuer E44.4.
+- Acht Kombinationen K1/K2/K3 + Robustheit 6 Kerzen in `backtest.GRID`.
+  Live- und bestehende Rest-Zeile wiederverwendet, keine doppelten Messungen.
+- `engine/e445.py`: neun Zeilen mit Vollfenster und beiden getrennten Haelften,
+  Regel aus Abschnitt 8, sechs Wechselwirkungen und Alterszaehlung der Marken.
+  Speichert Eingabestand, Signale, JSON und Bericht unter `docs/e445/`.
+- Eigener Workflow `E44.5 Kombinationsmessung`: der alte Backtest wuerde ueber
+  `workflow_run` Pages ausloesen. Neuer Workflow laeuft nur ausserhalb main und
+  schreibt nur docs/e445. Initialer Push startet Tests, Sabotage, dann Messung.
+- Zehn neue Tests einzeln gruen. Gesamttests und Sabotage noch offen.
+  Lokale Lauf-ID: `e445-20260927-01`, Logs `e445-tests-01.log` und
+  `e445-sabotage-01.log`. Nicht abbrechen. CI-Lauf-ID nach Start nachtragen.
+- Kein neuer Zustand in der Live-Engine. Bestehende E44.3/E44.4-Prozess-Neustarttests
+  fuer Signale UND Telegram laufen in der Gesamtsuite mit.
+- Naechster Schritt: Tests/Sabotage vollstaendig abwarten, Branch-Messung auswerten,
+  nur danach Urteil eintragen. Nichts live schalten. Aufwand mittel, unveraendert.
+
+---
+
+
 > Was zuletzt passiert ist, was offen liegt, was eine neue Session als Erstes wissen
 > muss. **Jüngster Abschnitt oben.** Nach jeder abgeschlossenen Arbeit einen datierten
 > Abschnitt hier ergänzen — nicht erst am Ende eines Vorhabens.
@@ -882,3 +905,4 @@ naheliegenden Vorhaben:
 **Vier Schalter hängen seit Monaten unentschieden** (`confirm_t1`, `cooldown_h`,
 `be_im_plus`, `release_stale_rest`) — sie wurden nie mit **genau einem** Unterschied
 gegen die heutige Basis gemessen. Zwei saubere Gitterzeilen würden das klären.
+

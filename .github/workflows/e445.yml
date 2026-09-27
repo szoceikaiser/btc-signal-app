@@ -1,0 +1,38 @@
+name: E44.5 Kombinationsmessung
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/e44-5-kombinationsgitter]
+    paths: [.github/workflows/e445.yml]
+permissions:
+  contents: write
+jobs:
+  messen:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests vor Messung
+        run: cd engine && python3 run_tests.py
+      - name: Sabotage-Proben
+        run: cd engine && python3 -u sabotage_e445.py
+      - name: Gitter messen
+        env:
+          COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
+        run: cd engine && python3 -u e445.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e445-messung
+          path: docs/e445/
+      - name: Bericht auf Arbeitszweig sichern
+        run: |
+          git config user.name "backtest"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/e445/
+          git diff --cached --quiet || git commit -m "E44.5 combination measurement"
+          git pull --rebase
+          git fetch origin main
+          git diff --stat HEAD...origin/main
+          git push origin HEAD:${{ github.ref_name }}

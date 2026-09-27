@@ -640,6 +640,29 @@ GRID = [
 ]
 
 
+# E44.5: acht Ecken auf derselben Live-Basis; vorhandene Basis/Rest-Zeile
+# wiederverwenden. Die Hauptzeile ist VOR der Messung festgelegt.
+E445_HAUPT = "LIVE-heute +E42"
+E445_ROBUST = "LIVE-heute +E42 (6 Kerzen, Robustheit)"
+E445_GRID = []
+_e445_live = next(c for c in GRID if c.get("panel"))
+for _k1 in (False, True):
+    for _k2 in (False, True):
+        for _k3 in (False, True):
+            _cfg = dict(_e445_live, panel=False, ausbruch_ruecktest=_k1,
+                        verkauf_faktor=0.67 if _k2 else 1.0, rest_halten=_k3)
+            _cfg["label"] = "LIVE-heute +" + " +".join(
+                name for name, on in (("E42", _k1), ("kleinere Verkaeufe", _k2),
+                                     ("Rest halten", _k3)) if on)
+            _same = next((c for c in GRID if all(c[k] == _cfg[k] for k in EVAL_KEYS)), None)
+            if _same is None:
+                GRID.append(_cfg)
+            E445_GRID.append(_same if _same is not None else _cfg)
+E445_GRID.append(dict(_e445_live, label=E445_ROBUST, panel=False,
+                      ausbruch_ruecktest=True, ruecktest_fenster=6))
+GRID.append(E445_GRID[-1])
+
+
 def fetch_candles_range(start_ms: int, end_ms: int) -> list:
     """Binance-Vision-Spotkerzen 4h, paginiert (1000er-Bloecke)."""
     out, cursor = [], start_ms
@@ -766,7 +789,8 @@ def build_series(raw: list, funding: list[tuple[int, float]],
     return candles, flow
 
 
-def run_backtest(candles, flow, cfg: dict, start_ms: int = START_MS) -> list[dict]:
+def run_backtest(candles, flow, cfg: dict, start_ms: int = START_MS,
+                 diagnose_e445: bool = False) -> list[dict]:
     """Signale ab `start_ms` (Voll-Daten-Fenster). Vorher nur Warmup (kein Signal)."""
     params = {k: cfg[k] for k in EVAL_KEYS if k in cfg}
     pos = Position()
@@ -775,8 +799,13 @@ def run_backtest(candles, flow, cfg: dict, start_ms: int = START_MS) -> list[dic
         if candles[i].ts < start_ms:
             pos.last_signal_ts = candles[i].ts                 # Warmup ohne Signale
             continue
+        beobachtung_start = pos.e42_start_ts
         for s in evaluate(candles[:i + 1], flow[:i + 1], pos, **params):
-            signals.append(s.to_dict())
+            eintrag = s.to_dict()
+            if diagnose_e445 and eintrag["type"] in ("RUECKKAUF", "SHORT_RUECKTEST"):
+                # Nur Mess-Metadaten; die Engine selbst bleibt unveraendert.
+                eintrag["beobachtung_kerzen"] = (s.ts - beobachtung_start) // CANDLE_MS
+            signals.append(eintrag)
     return signals
 
 
@@ -2758,6 +2787,14 @@ def e442_abschnitt(results: list, halves: list, grid: list, basis_label: str) ->
     return z
 
 
+def e445_abschnitt(results, halves):
+    from e445 import auswerten, bericht
+    try:
+        return ["", bericht(auswerten(results, halves))]
+    except ValueError as exc:
+        return ["", "## E44.5", "", str(exc)]
+
+
 def main():
     print("Lade Kerzen ...")
     raw = fetch_candles_range(WARMUP_MS, END_MS)
@@ -2975,7 +3012,7 @@ def main():
     results = []
     for cfg in GRID:
         t0 = time.time()
-        sigs = run_backtest(candles, flow, cfg, start_ms=eff_start)
+        sigs = run_backtest(candles, flow, cfg, start_ms=eff_start, diagnose_e445=True)
         sc = score(sigs, start_ms=eff_start)
         p = simulate(sigs, candles, start_ms=eff_start,
                      deploy_pct=cfg.get("deploy_pct", 1.0))
@@ -3879,7 +3916,7 @@ def main():
         "E44: Wechselwirkungen und Monats-Probe", results,
         "keine Gitterzeilen gerechnet",
         lambda: e442_abschnitt(results, halves, GRID, panel_cfg["label"]),
-    ) + [
+    ) + e445_abschnitt(results, halves) + [
         "",
         "## Einschraenkungen",
         "",
