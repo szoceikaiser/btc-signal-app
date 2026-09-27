@@ -8,6 +8,43 @@
 
 ---
 
+## 27.09.2026 (24) — E44.3 gebaut: E42 „Ausbruch mit Rücktest“ (Zweig, wartet auf Go)
+
+- **Zweig `claude/e44-3-ausbruch-ruecktest-k7m2qx`** (von `main` 2643f13). **585 Tests grün**
+  (545 + 40 neu in `engine/test_e443.py`). **Sabotage `engine/sabotage_e443.py`: 42 Sabotagen.**
+  Erster Lauf 39 gefangen; die drei Lücken (Verkaufskerze als Fenster ohne `no_flip`,
+  gescheiterter Ausbruch ohne neuen Ausbruch, Hauptstop nimmt den Teil nicht mit) mit drei
+  Tests geschlossen, zweiter Lauf: **42 von 42 gefangen**, danach wieder 585 grün.
+- **Schalter** `ausbruch_ruecktest` (Default `false`) und `ruecktest_fenster` (12) in
+  `site/data/config.json`, mit Hinweistext samt Entscheidungs- und Ausschalt-Regel aus Plan
+  Abschnitt 8. Solange aus: exakt dieselben Signale (Test). **Nicht live, nicht gemessen.**
+- **Kaiser 27.09.2026 (neue Frage 4): „Nur die 25 %“** — der Stop an der Marke gilt nur für den
+  Rückkauf-Teil, der Rest behält Stop und Einstand. Alles, was die Regel sonst offen ließ, steht
+  als **Bau-Auslegung** im Plan, Abschnitt 6 K1 (u. a. neue Signaltypen `RUECKKAUF`/
+  `RUECKKAUF_STOP`, Feld `bestand_pct` für „voll investiert“, Rückkauf aus FLAT eröffnet eine
+  Position auf dem aktuellen Bein, spiegelbildlich für Short).
+- **Zustand in `state.json`:** 10 neue Felder (`e42_*`, `bestand_pct`). Prüfweg am Stück gegen
+  Kerze für Kerze in getrennten Läufen: Signale **und alle Telegram-Texte** gleich, in zwei
+  Szenarien (nach Teilverkauf am Hoch mit Warten, Rückeroberung und Stop des Teils; aus FLAT
+  nach Rest-Verkauf).
+- **Versand geändert (auch ohne E42 wirksam, nur bei Nachhol-Läufen):** Meldungen und Signale
+  gehen jetzt **je Kerze** raus (E41-Meldung, E42-Meldungen, Signale dieser Kerze). Vorher kamen
+  erst alle E41-Meldungen, dann alle Signale. Im Normalbetrieb (eine Kerze je Lauf) gleich.
+- **Nebenbei erledigt:** `_hinweis_be_im_plus` in `config.json` berichtigt (Rest aus E43).
+- **Backtest:** `simulate()` bucht den Rückkauf und verkauft beim Stop genau diese Einheiten;
+  `gegengeschaefte()` und Recall-Typen kennen die neuen Signale; Chart-Marker `RK`/`RKS`. **Keine
+  Gitterzeile** — die kommt mit E44.5.
+- **Hochladen:** Aus dieser Sitzung war GitHub gesperrt (Repo nicht für die Sitzung freigegeben,
+  Kaisers Rechner ohne GitHub-Zugang aus der Sandbox). Der Stand liegt als git-Bundle in
+  `BTC-Trading\Claude outputs\e44-3.bundle`, dazu `E44-3-HOCHLADEN.cmd` im Ordner `BTC-Trading`
+  (Doppelklick: Zweig hoch, Unterlagen nach `main`). Steht der Zweig auf GitHub, ist das erledigt.
+- **Nächster Schritt:** Kaisers Go für `main` (Schalter bleibt aus, ändert live nichts außer der
+  Versand-Reihenfolge bei Nachhol-Läufen). Danach **E44.4** (`verkauf_faktor`, Aufwand mittel),
+  dann E44.5 (Gitter messen). Offen für E44.5: zählen, wie oft ein Rückkauf auf eine alte Marke
+  kam (die Beobachtung hat bis zum Ausbruch keine Frist).
+
+---
+
 ## 26.09.2026 (23) — Kaisers Go: E44.1 und E44.2 in main, Antworten auf die Fragen
 
 - **Go für `main`:** Zweig `claude/blissful-maxwell-9uwt6x` nach `main` gemerged (Commit
