@@ -8,6 +8,21 @@
 
 ---
 
+## 27.09.2026 (25) — E44.4 begonnen; E44.3 bereits in main
+
+- GitHub-Schreibzugriff per Push-Probelauf bestaetigt. E44.3 ist bereits mit 5a50fd8
+  in main. `git pull --rebase origin main`, Merge-Pruefung: bereits enthalten.
+- Basis: **585 Tests gruen**, unter Windows mit `PYTHONUTF8=1`.
+- Arbeitszweig: `claude/e44-4-verkauf-faktor`, von main. Teilverkaeufe Long/Short
+  werden mit Faktor 0.67 verkleinert (15 -> 10.05, 40 -> 26.8); Default bleibt 1.0.
+  Stops, volle Restverkaeufe und Kaeufe unveraendert. Plan/Telegram und simulate
+  muessen die Signalmenge beachten. Bruchteile muessen state.json ueberleben.
+- Naechster Schritt: Umsetzung, gezielte Tests und je Test Sabotage in
+  `engine/sabotage_e444.py`; Hintergrundlauf mit Protokoll. Noch kein Lauf gestartet.
+- Keine Aktivierung, keine Messung; E44.5 folgt erst spaeter.
+
+---
+
 ## 27.09.2026 (24) — E44.3 gebaut: E42 „Ausbruch mit Rücktest“ (Zweig, wartet auf Go)
 
 - **Zweig `claude/e44-3-ausbruch-ruecktest-k7m2qx`** (von `main` 2643f13). **585 Tests grün**
