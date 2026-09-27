@@ -1,0 +1,49 @@
+E44.5 Pruefprotokoll, 27.09.2026
+Zweig: claude/e44-5-kombinationsgitter
+Code-Stand: 68e15ae
+
+Gesamtsuite: 607 Tests gruen, 0 fehlgeschlagen (10 neu).
+Lokales Log: e445-tests-02.log; stderr leer.
+GitHub Tests: 36306286438, success.
+Signale UND Telegram samt Bruchteilen nach Prozess-Neustarts:
+bestehende E44.3/E44.4-Tests in der Gesamtsuite bestanden.
+Keine Aenderung an strategy_core.py, main.py oder telegram_notify.py.
+
+Vorheriger Lauf e445-tests-01: 606 gruen, 1 fehlgeschlagen.
+Ursache: alte E44.4-Vorbedingung verbot .67 in jeder Gitterzeile.
+Jetzt nur E44.5-Messzeilen ausgenommen; Live/Defaults weiter auf 1.0 geprueft.
+CI-Erstlauf 36306141753 stoppte vor der Messung an derselben Vorbedingung.
+Kein Lauf wurde abgebrochen.
+
+Neue Sabotagen: Lauf e445-20260927-01, nur temporaere Kopien.
+BASIS: 10 Tests gruen
+01 GEFANGEN: K2 falsch -> test_gitter_acht_ecken_genau_live_basis
+02 GEFANGEN: Robustheit falsch -> test_robustheit_nur_sechs_statt_zwoelf
+03 GEFANGEN: H2 ignoriert -> test_hauptzeile_beide_haelften_und_exakte_grenze
+04 GEFANGEN: Kombination zu leicht -> test_kombination_braucht_zwei_punkte
+05 GEFANGEN: Rueckgang ignoriert -> test_rueckgang_verhindert_positive_renditeentscheidung
+06 GEFANGEN: Monatsprobe ignoriert -> test_monatsprobe_ausreisser_null_und_fehlende_monate
+07 GEFANGEN: Fehlende Monate erlaubt -> test_monatsprobe_ausreisser_null_und_fehlende_monate
+08 GEFANGEN: Hauptrolle vertauscht -> test_auswertung_rollen_wechselwirkungen_und_bericht
+09 GEFANGEN: Fehlende Haelfte ignoriert -> test_fehlende_haelfte_keine_entscheidung
+10 GEFANGEN: Alter immer null -> test_alter_aus_echter_engine_ohne_signalveraenderung
+11 GEFANGEN: Altersgrenze verschoben -> test_alte_marken_grenze_im_bericht
+ERGEBNIS: 11/11 gefangen; 10 Tests abgedeckt
+
+E44.4 nach Aenderung des bestehenden Tests erneut geprueft:
+BASIS: 12 Tests gruen
+01 GEFANGEN: Default aktiviert -> test_defaults_und_neutraler_pfad
+02 GEFANGEN: Ungueltiger Faktor erlaubt -> test_faktor_validierung
+03 GEFANGEN: Long unskaliert -> test_long_alle_teilgewinn_typen
+04 GEFANGEN: Short unskaliert -> test_short_alle_teilgewinn_typen
+05 GEFANGEN: Kaeufe und Stops auch gekuerzt -> test_kauf_rueckkauf_und_stops_bleiben_unskaliert
+06 GEFANGEN: Plan behaelt alte Mengen -> test_plan_und_telegram_nennen_die_reduzierten_mengen
+07 GEFANGEN: Backtest verwirft Parameter -> test_backtest_reicht_faktor_an_engine_weiter
+08 GEFANGEN: Long Leiter verkauft weiter 15 -> test_simulate_long_bucht_signalmenge_und_ganzen_rest
+09 GEFANGEN: Long TP verkauft weiter 40 -> test_simulate_long_bucht_signalmenge_und_ganzen_rest
+10 GEFANGEN: Short Leiter deckt weiter 15 -> test_simulate_short_bucht_signalmenge_und_ganzen_rest
+11 GEFANGEN: Short TP deckt weiter 40 -> test_simulate_short_bucht_signalmenge_und_ganzen_rest
+12 GEFANGEN: State verliert Bruchteile -> test_bruchteile_ueberleben_state_json
+13 GEFANGEN: Neustart verliert Bruchteile -> test_getrennte_prozesse_gleiche_signale_telegram_und_state
+14 GEFANGEN: Restmeldung behauptet 20 Prozent -> test_rest_meldung_verspricht_keine_feste_20_prozent
+ERGEBNIS: 14/14 gefangen; 12 Tests abgedeckt

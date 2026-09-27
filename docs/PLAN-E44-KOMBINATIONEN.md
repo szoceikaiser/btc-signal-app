@@ -481,5 +481,3 @@ erste Kauf), (3) wo der Stop liegt (Vorschlag: Schluss wieder unter 70.000). Ant
    Analyse stützt sich auf die ausgewerteten Auszüge in `docs\`. Das Makro-Video vom
    02.08.2026 ist laut Wissens-Layer noch nicht vollständig ausgewertet. Soll ich das
    nachholen, wenn du den Zugriff freigibst?
-
-

@@ -1977,4 +1977,3 @@ E44.5 (Hauptzeile „LIVE-heute +E42“).
 ## E44.5 — Kombinationsgitter (27.09.2026)
 
 Gebaut auf claude/e44-5-kombinationsgitter: 8 Ecken + Robustheit, Regel und Wechselwirkungen. Pruefung/Messung offen, Lauf e445-20260927-01. Kein Merge und keine Aktivierung. Details: PLAN-E44-KOMBINATIONEN.md, 9a.
-
