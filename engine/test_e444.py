@@ -29,7 +29,10 @@ def test_defaults_und_neutraler_pfad():
     assert "verkauf_faktor" in cfg and "verkauf_faktor" in main.EVAL_DEFAULTS
     assert cfg["verkauf_faktor"] == main.EVAL_DEFAULTS["verkauf_faktor"] == 1.0
     assert "verkauf_faktor" in backtest.EVAL_KEYS
-    assert all(v["verkauf_faktor"] == 1.0 for v in backtest.GRID)
+    # Seit E44.5 existieren bewusst Messzeilen mit .67; Live und alle alten
+    # Gitterzeilen bleiben neutral. Die acht Ecken prueft test_e445 separat.
+    assert all(v["verkauf_faktor"] == 1.0 for v in backtest.GRID
+               if v["panel"] or v not in backtest.E445_GRID)
     cs, fl = pfad()
     a, _, pa = lauf(cs, fl, **KW)
     b, _, pb = lauf(cs, fl, **KW, verkauf_faktor=1.0)

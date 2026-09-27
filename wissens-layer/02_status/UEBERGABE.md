@@ -12,9 +12,9 @@
 - Eigener Workflow `E44.5 Kombinationsmessung`: der alte Backtest wuerde ueber
   `workflow_run` Pages ausloesen. Neuer Workflow laeuft nur ausserhalb main und
   schreibt nur docs/e445. Initialer Push startet Tests, Sabotage, dann Messung.
-- Zehn neue Tests einzeln gruen. Gesamttests und Sabotage noch offen.
+- 607 Tests gruen (10 neu), 11/11 neue Sabotagen gefangen. Erster Gesamtlauf: 606 gruen, 1 alte E44.4-Gitterannahme verletzt; fuer E44.5 korrigiert, dann 607/607. Alle Laeufe beendet, nichts abgebrochen.
   Lokale Lauf-ID: `e445-20260927-01`, Logs `e445-tests-01.log` und
-  `e445-sabotage-01.log`. Nicht abbrechen. CI-Lauf-ID nach Start nachtragen.
+  `e445-sabotage-01.log`. Nicht abbrechen. CI-Erstlauf 36306141753 scheiterte an derselben alten Testannahme VOR Messung. Zweiter Lauf folgt nach Push. Wiederholungslog: e445-tests-02.log.
 - Kein neuer Zustand in der Live-Engine. Bestehende E44.3/E44.4-Prozess-Neustarttests
   fuer Signale UND Telegram laufen in der Gesamtsuite mit.
 - Naechster Schritt: Tests/Sabotage vollstaendig abwarten, Branch-Messung auswerten,
@@ -905,4 +905,5 @@ naheliegenden Vorhaben:
 **Vier Schalter hängen seit Monaten unentschieden** (`confirm_t1`, `cooldown_h`,
 `be_im_plus`, `release_stale_rest`) — sie wurden nie mit **genau einem** Unterschied
 gegen die heutige Basis gemessen. Zwei saubere Gitterzeilen würden das klären.
+
 

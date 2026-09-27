@@ -374,7 +374,7 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 | E44.2 Wechselwirkungen + Monats-Probe im Bericht | **GEBAUT** 26.09.2026 auf demselben Zweig, 545 Tests, `sabotage_e442.py` 8/8 gefangen. Findet im echten Gitter dieselben 16 Gruppen wie Abschnitt 2. Wirkt erst im nächsten Backtest-Lauf (neuer Berichtsabschnitt „E44“). **IN `main` seit 26.09.2026** (Kaisers Go). Erscheint im nächsten Backtest |
 | E44.3 E42 Ausbruch mit Ruecktest | **IN main** (5a50fd8, Kaisers Go 27.09.2026), 585 Tests gruen. Schalter bleibt aus; nicht gemessen. |
 | E44.4 `verkauf_faktor` | **FERTIG auf `claude/e44-4-verkauf-faktor`**, 597 Tests gruen (12 neu), **14/14 Sabotagen gefangen** (Lauf `e444-20260927-03`, Protokoll `docs/E44-4-PRUEFPROTOKOLL.txt`). Neustart mit Signalen UND Telegram geprueft. Default 1.0; 0.67 erst in E44.5 messen. Nicht in main, keine Aktivierung/Messung. |
-| E44.5 2³-Gitter messen | GEBAUT auf `claude/e44-5-kombinationsgitter`, 27.09.2026. 8 Ecken + 6-Kerzen-Robustheit, automatische Regel und Markenalter. 10 neue Tests einzeln gruen; Gesamttests und 11 Sabotagen folgen (Lauf e445-20260927-01). Eigener Workflow ohne Pages-Ausloesung, Messung noch offen. |
+| E44.5 2³-Gitter messen | GEBAUT auf `claude/e44-5-kombinationsgitter`, 27.09.2026. 8 Ecken + 6-Kerzen-Robustheit, automatische Regel und Markenalter. 607 Tests gruen (10 neu), 11/11 Sabotagen gefangen (e445-20260927-01; Gesamttests korrigiert in Lauf 02). Eigener Workflow ohne Pages-Ausloesung, Messung noch offen. |
 | E44.6 Shorts im Abwärts-Regime | OFFEN, **Kaisers Ja am 26.09.2026**. Zuerst eigener Bauplan-Abschnitt (Punkte a und b in Abschnitt 10) |
 
 **So beginnt ein neuer Chat mit einer Etappe (spart Tokens):** Den Kurzprompt aus
@@ -481,4 +481,5 @@ erste Kauf), (3) wo der Stop liegt (Vorschlag: Schluss wieder unter 70.000). Ant
    Analyse stützt sich auf die ausgewerteten Auszüge in `docs\`. Das Makro-Video vom
    02.08.2026 ist laut Wissens-Layer noch nicht vollständig ausgewertet. Soll ich das
    nachholen, wenn du den Zugriff freigibst?
+
 
