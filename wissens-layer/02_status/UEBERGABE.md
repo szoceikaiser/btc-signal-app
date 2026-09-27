@@ -1,6 +1,6 @@
 # Laufende Übergabe
 
-## 27.09.2026 (29) — E44.5 gemessen: keine Zeile besteht, Replay laeuft als Abschluss
+## 27.09.2026 (29) — E44.5 fertig: keine Zeile besteht, Replay und Speicherung gruen
 
 - GitHub-Schreibzugriff bestaetigt, Arbeit auf `claude/e44-5-kombinationsgitter`
   ab E44.4. `main` unveraendert. Kein Go zum Merge von E44.4, nichts aktiviert.
@@ -17,11 +17,11 @@
   Wechselwirkungen und Einordnung: Plan E44, Abschnitt 9a und Messbericht.
 - Messlauf 36306294148: Berechnung erfolgreich, nur Git-Sicherung gescheitert
   (flacher Checkout). Artefakt gesichert, volle Git-Historie im Workflow korrigiert.
-  Abschliessend Replay derselben Eingaben mit Dateivergleich, Lauf-ID folgt.
-- Keine Live-Dateien geaendert. Eigener Workflow statt bestehendem Backtest,
+  Replay 36321120479: Tests, Sabotage, Messung, Dateivergleich und Speicherung alle erfolgreich. Ergebnisdateien identisch. GitHub-Tests 36321117238 ebenfalls gruen.
+- Schalterwerte und Handelslogik gegenueber E44.4 unveraendert; nur Hinweistexte in config.json um Messwerte ergaenzt. Eigener Workflow statt bestehendem Backtest,
   damit keine Pages-Veroeffentlichung angestossen wird.
 
-**Folgeprompt (nach abgeschlossenem Replay):**
+**Fertiger Folgeprompt (Aufwand hoch, von mittel auf hoch wechseln):**
 
 ```text
 Repo szoceikaiser/btc-signal-app. Deutsch, kurz.

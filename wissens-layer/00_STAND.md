@@ -21,7 +21,7 @@
   Bruchteile in state.json, Signale/Telegram am Stueck und in getrennten Prozessen gleich.
   Nicht in main, nicht aktiviert. In E44.5 gemessen: keine Regel erfuellt, Faktor bleibt 1.0.
   Einzelheiten: Plan E44 Abschnitt 9a und UEBERGABE (29).
-- **E44.5 gemessen auf `claude/e44-5-kombinationsgitter`**: 8 Kombinationen + Robustheit, 607 Tests gruen, 11/11 neue Sabotagen. E42 H1 +1,76 / H2 -1,71 Punkte gegen live; Monatsprobe -0,83. **Keine Zeile besteht, nichts aktivieren.** Abschliessender Replay/Speichercheck noch offen. Bericht `docs/e445/BERICHT.md`. Danach E44.6-Bauplan (Shorts), Aufwand hoch.
+- **E44.5 gemessen auf `claude/e44-5-kombinationsgitter`**: 8 Kombinationen + Robustheit, 607 Tests gruen, 11/11 neue Sabotagen. E42 H1 +1,76 / H2 -1,71 Punkte gegen live; Monatsprobe -0,83. **Keine Zeile besteht, nichts aktivieren.** Replay 36321120479 erfolgreich: alle Ergebnisdateien identisch, Speicherung erfolgreich. Bericht `docs/e445/BERICHT.md`. Danach E44.6-Bauplan (Shorts), Aufwand hoch.
 - **Kaisers Go 26.09.2026: E43.1 und E43.2 live.** Arbeitszweig nach `main` gemerged.
   E43.1 (Futures-CVD im Lage-Abruf jetzt in Dollar) ist reine Anzeige. E43.2
   (`bein_richtung: "bias"`) hat die vorab festgelegte Entscheidungsregel erfüllt (beide

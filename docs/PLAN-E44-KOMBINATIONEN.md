@@ -374,7 +374,7 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 | E44.2 Wechselwirkungen + Monats-Probe im Bericht | **GEBAUT** 26.09.2026 auf demselben Zweig, 545 Tests, `sabotage_e442.py` 8/8 gefangen. Findet im echten Gitter dieselben 16 Gruppen wie Abschnitt 2. Wirkt erst im nächsten Backtest-Lauf (neuer Berichtsabschnitt „E44“). **IN `main` seit 26.09.2026** (Kaisers Go). Erscheint im nächsten Backtest |
 | E44.3 E42 Ausbruch mit Ruecktest | **IN main** (5a50fd8, Kaisers Go 27.09.2026), 585 Tests gruen. Schalter bleibt aus; nicht gemessen. |
 | E44.4 `verkauf_faktor` | **FERTIG auf `claude/e44-4-verkauf-faktor`**, 597 Tests gruen (12 neu), **14/14 Sabotagen gefangen** (Lauf `e444-20260927-03`, Protokoll `docs/E44-4-PRUEFPROTOKOLL.txt`). Neustart mit Signalen UND Telegram geprueft. Default 1.0; 0.67 erst in E44.5 messen. Nicht in main, keine Aktivierung/Messung. |
-| E44.5 2³-Gitter messen | GEMESSEN 27.09.2026 auf `claude/e44-5-kombinationsgitter`. 607 Tests gruen, 11/11 neue und erneut 14/14 E44.4-Sabotagen gefangen. Hauptzeile H1 +1,76 / H2 -1,71 Punkte, Monatsprobe -0,83: Regel nicht erfuellt; auch keine Erklaerungszeile besteht. Replay/Speicherabschluss noch offen. Bericht `docs/e445/BERICHT.md`. Kein Merge/keine Aktivierung. |
+| E44.5 2³-Gitter messen | GEMESSEN 27.09.2026 auf `claude/e44-5-kombinationsgitter`. 607 Tests gruen, 11/11 neue und erneut 14/14 E44.4-Sabotagen gefangen. Hauptzeile H1 +1,76 / H2 -1,71 Punkte, Monatsprobe -0,83: Regel nicht erfuellt; auch keine Erklaerungszeile besteht. Replay 36321120479 mit identischen Dateien und Speicherung gruen. Bericht `docs/e445/BERICHT.md`. Kein Merge/keine Aktivierung. |
 | E44.6 Shorts im Abwärts-Regime | OFFEN, **Kaisers Ja am 26.09.2026**. Zuerst eigener Bauplan-Abschnitt (Punkte a und b in Abschnitt 10) |
 
 **So beginnt ein neuer Chat mit einer Etappe (spart Tokens):** Den Kurzprompt aus
@@ -419,7 +419,7 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 - Lauf 36306294148 hat alle Werte berechnet und als Artefakt gesichert, scheiterte
   erst beim anschliessenden Git-Vergleich (shallow Checkout, keine merge base).
   Ergebnisse aus Artefakt gerettet; Checkout auf volle Historie korrigiert.
-  Ein Replay auf genau denselben Eingaben prueft auch identische Ergebnisdateien.
+  Replay 36321120479 auf genau denselben Eingaben erfolgreich; alle Ergebnisdateien identisch, Git-Sicherung ebenfalls gruen.
 - Neuer Workflow `E44.5 Kombinationsmessung` loest keine Pages-Veröffentlichung aus
   und verweigert main. Bestehender Backtest-Bericht enthaelt jetzt dieselbe Regel.
   Bei spaeterem Go gilt die unveraenderte Ausschalt-Regel aus Abschnitt 8.

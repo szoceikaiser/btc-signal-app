@@ -1,0 +1,10 @@
+Repo szoceikaiser/btc-signal-app. Deutsch, kurz.
+Pruefe zuerst GitHub-Schreibzugriff. Lies wissens-layer/00_STAND.md und nur den
+juengsten Abschnitt von wissens-layer/02_status/UEBERGABE.md auf
+claude/e44-5-kombinationsgitter. E44.5 fertig: keine Zeile besteht die Regel,
+607 Tests gruen, 11/11 Sabotagen, Replay 36321120479 vollstaendig erfolgreich.
+Kein Merge-Go fuer E44.4/E44.5 und nichts aktivieren.
+Naechster Schritt E44.6: zuerst den Bauplan fuer Shorts im Abwaerts-Regime
+ausarbeiten, anhand docs/PLAN-E44-KOMBINATIONEN.md K4, 9a und 10.
+Kaisers Ja zu Shorts liegt vor. Noch nicht bauen oder live schalten.
+Aufwand hoch; gegenueber E44.5 (mittel) auf hoch wechseln.

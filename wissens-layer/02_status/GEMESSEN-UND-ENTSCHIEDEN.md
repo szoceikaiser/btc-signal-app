@@ -647,3 +647,15 @@ Mindestspanne. Das Projekt kennt die Größenordnung des Rauschens (06.09.: ein 
 Daten dreht 1,0 Punkte) — sie gehört in jede Regel, die vor einer Messung festgelegt
 wird. Ebenso ein Abgleich zweier Datenquellen: „bester Versatz ≠ 0" ohne Mindestabstand
 schlägt bei einer träge laufenden Reihe schon bei 0,01 Punkten an (E40.1).
+
+## E44.5 — Kombinationen (27.09.2026, Arbeitszweig)
+
+Gemessen auf `claude/e44-5-kombinationsgitter`, nicht live geschaltet.
+Acht K1/K2/K3-Ecken plus Robustheit, alle auf derselben Live-Basis.
+Hauptzeile E42: +35,93 % gegen live +36,14 %, H1 +1,76 / H2 -1,71 Punkte,
+DD beider -9,94 %, Monatsprobe -0,83. Regel nicht erfuellt, bleibt aus.
+Keine der sechs Erklaerungszeilen besteht die strengere Regel. Faktor bleibt 1,0,
+Rest halten aus. 6-Kerzen-Robustheit behebt das negative H2-Ergebnis nicht.
+Bericht und sechs Wechselwirkungen: `docs/e445/BERICHT.md`.
+607 Tests, 11/11 neue Sabotagen, Replay 36321120479 mit identischen Dateien gruen.
+Kein Merge-Go fuer E44.4 oder E44.5.

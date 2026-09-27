@@ -49,3 +49,12 @@ BASIS: 12 Tests gruen
 ERGEBNIS: 14/14 gefangen; 12 Tests abgedeckt
 
 Messlauf 36306294148: Tests/Sabotage/Messung gruen; Git-Sicherung scheiterte an shallow checkout. Vollstaendiges Artefakt gesichert. Workflow fetch-depth=0, Replay mit identischen Eingaben folgt.
+Abschluss:
+Replay 36321120479, success, Code 421de88.
+607 Tests, 11/11 Sabotagen, Gittermessung, git diff --exit-code der Ergebnisdateien,
+Artefakt und Git-Sicherung alle erfolgreich. Alle Laeufe vollstaendig beendet.
+GitHub-Tests 36321117238 ebenfalls success.
+E44.5 aendert keine Handelslogik; Hinweistexte in config.json enthalten jetzt Messwerte.
+Keine Schalterwerte geaendert, kein Merge nach main, keine Live-Schaltung.
+Ergebnis-SHA256: 670463bfb6d82d3d30a8cd6b83981d216102c21401111d4d1f9ff27807b3204d
+Signale-SHA256: 7ddfb03c05c12cb65dd869c735d40c42ee801d16359e05258b3a208cd3b797ec
