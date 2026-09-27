@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **26.09.2026 (17)**
+> Stand: **27.09.2026 (18)**
 
 ## Lage
 
@@ -14,8 +14,15 @@
   `signal-app\...` meinen jetzt die Repo-Wurzel. Einzelheiten: `START-HIER.md`.
 - Die Engine **läuft live** und handelt nicht selbst: sie sendet Telegram-Signale,
   Kaiser platziert die Orders. Webseite: `szoceikaiser.github.io/btc-signal-app`.
-- **Tests:** in `main` **545**, alle grün (`cd engine && python3 run_tests.py`).
-  Sabotage-Proben: fünf ältere (151 Sabotagen) plus `sabotage_e43.py` (7), alle gefangen.
+- **Tests:** in `main` **545**, alle grün (`cd engine && python3 run_tests.py`); auf dem
+  Zweig `claude/e44-3-ausbruch-ruecktest-k7m2qx` (E44.3) **585**.
+  Sabotage-Proben: fünf ältere (151 Sabotagen) plus `sabotage_e43.py` (7), alle gefangen;
+  neu `sabotage_e443.py` (42 Sabotagen, alle gefangen).
+- **NEU 27.09.2026: E44.3 gebaut (Zweig, wartet auf Kaisers Go).** E42 „Ausbruch mit
+  Rücktest“ als Schalter `ausbruch_ruecktest` (Default **aus**), Kaisers Werte (12 Kerzen,
+  25 %, Stop bei Schluss unter der Marke). **Kaiser 27.09.: der Stop gilt nur für die 25 %.**
+  Handelsverhalten unverändert, solange aus. Noch nicht gemessen (E44.5). Einzelheiten:
+  `docs\PLAN-E44-KOMBINATIONEN.md`, Abschnitt 6 K1 „Bau-Auslegung“, und `UEBERGABE.md` (24).
 - **Kaisers Go 26.09.2026: E43.1 und E43.2 live.** Arbeitszweig nach `main` gemerged.
   E43.1 (Futures-CVD im Lage-Abruf jetzt in Dollar) ist reine Anzeige. E43.2
   (`bein_richtung: "bias"`) hat die vorab festgelegte Entscheidungsregel erfüllt (beide
@@ -80,8 +87,9 @@ und nicht bei den Stops. Vorschlag: E42 (Ausbruch mit Rücktest) als Partner von
 auf Kaisers Antworten** (Abschnitt 10 im Plan). **E44.1 (Coinalyze-Archiv) und E44.2
 (Wechselwirkungen, Monats-Probe) sind seit 26.09.2026 in `main`** (Kaisers Go), 545 Tests
 grün. cron-job.org-Aufträge für Archiv und Flush-Wache: Anleitung Schritt 5, Kaiser richtet
-ein. Kaiser will Shorts im fallenden Markt (E44.6). E44.3 (E42): Kaiser hat die drei Werte bestätigt,
-**bereit zum Bau** (nächster Schritt). Startprompt je Etappe: Plan, Abschnitt 9a.
+ein. Kaiser will Shorts im fallenden Markt (E44.6). **E44.3 (E42) ist gebaut** (Zweig
+`claude/e44-3-ausbruch-ruecktest-k7m2qx`, 585 Tests, wartet auf Go). **Nächster Schritt: E44.4**
+(`verkauf_faktor`), danach E44.5 (Gitter messen). Startprompt je Etappe: Plan, Abschnitt 9a.
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
    E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 gebaut, gemessen und seit
@@ -102,8 +110,8 @@ ein. Kaiser will Shorts im fallenden Markt (E44.6). E44.3 (E42): Kaiser hat die 
 1. **E41.6** — ein pfadunabhängiges Risikomaß je Position (Bauplan-Abschnitt in
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
    Ausschalt-Regel schlägt auf der neuen Live-Basis nicht mehr an.
-2. **E42** — Kaisers zweite Regel: Ausbruch über das letzte Hoch mit Rücktest
-   (zurückkaufen oder Rest halten). Vorgemerkt in `02_status/OFFENE-PUNKTE.md`.
+2. **E42** — Kaisers zweite Regel: Ausbruch über das letzte Hoch mit Rücktest. **Als E44.3
+   gebaut (27.09.2026, Zweig, Schalter aus)**, gemessen wird in E44.5.
 3. Alles weitere: `02_status/OFFENE-PUNKTE.md`, nach Nutzwert sortiert.
 
 ## Die drei Sätze, die man nie vergessen darf
