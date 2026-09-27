@@ -1,0 +1,33 @@
+{
+  "seconds": 69.26600000000326,
+  "files": [
+    {
+      "file": "BERICHT.md",
+      "original_sha256": "48400ba7b1075e51f12a8f7245bdcc6f5c432ab29f666c4b7d5abc473273ee28",
+      "replay_sha256": "0da82f40f9bb1f5f7c9389de621db6d8d8c691493f4c040e465ed8f295712b0e",
+      "byte_equal": false,
+      "text_equal": true
+    },
+    {
+      "file": "eingaben.json",
+      "original_sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+      "replay_sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+      "byte_equal": true,
+      "text_equal": true
+    },
+    {
+      "file": "ergebnis.json",
+      "original_sha256": "670463bfb6d82d3d30a8cd6b83981d216102c21401111d4d1f9ff27807b3204d",
+      "replay_sha256": "a3f6fe9798fc0eec22e8c11179f29fc1bdd5d5167fea31f9b3778c197b7c743f",
+      "byte_equal": false,
+      "text_equal": true
+    },
+    {
+      "file": "signale.json",
+      "original_sha256": "7ddfb03c05c12cb65dd869c735d40c42ee801d16359e05258b3a208cd3b797ec",
+      "replay_sha256": "7ddfb03c05c12cb65dd869c735d40c42ee801d16359e05258b3a208cd3b797ec",
+      "byte_equal": true,
+      "text_equal": true
+    }
+  ]
+}

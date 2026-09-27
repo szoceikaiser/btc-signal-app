@@ -1,0 +1,1398 @@
+{
+  "zeilen": [
+    {
+      "label": "LIVE-heute +Bein in Handelsrichtung",
+      "rolle": "Basis",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": false,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": false,
+        "ruecktest_fenster": 12,
+        "verkauf_faktor": 1.0
+      },
+      "rendite": 36.14,
+      "h1": 23.61,
+      "h2": 10.13,
+      "dd": -9.94,
+      "monate": [
+        {
+          "monat": "2026-01",
+          "ende": 9678.36,
+          "gewinn": -321.64,
+          "rendite_pct": -3.22,
+          "btc_pct": -15.94
+        },
+        {
+          "monat": "2026-02",
+          "ende": 10033.13,
+          "gewinn": 354.77,
+          "rendite_pct": 3.67,
+          "btc_pct": -14.94
+        },
+        {
+          "monat": "2026-03",
+          "ende": 11140.2,
+          "gewinn": 1107.07,
+          "rendite_pct": 11.03,
+          "btc_pct": 1.96
+        },
+        {
+          "monat": "2026-04",
+          "ende": 11854.0,
+          "gewinn": 713.8,
+          "rendite_pct": 6.41,
+          "btc_pct": 11.81
+        },
+        {
+          "monat": "2026-05",
+          "ende": 12360.97,
+          "gewinn": 506.97,
+          "rendite_pct": 4.28,
+          "btc_pct": -3.5
+        },
+        {
+          "monat": "2026-06",
+          "ende": 12375.78,
+          "gewinn": 14.81,
+          "rendite_pct": 0.12,
+          "btc_pct": -20.43
+        },
+        {
+          "monat": "2026-07",
+          "ende": 12779.51,
+          "gewinn": 403.73,
+          "rendite_pct": 3.26,
+          "btc_pct": 7.27
+        },
+        {
+          "monat": "2026-08",
+          "ende": 13079.44,
+          "gewinn": 299.93,
+          "rendite_pct": 2.35,
+          "btc_pct": 24.95
+        },
+        {
+          "monat": "2026-09",
+          "ende": 13613.75,
+          "gewinn": 534.31,
+          "rendite_pct": 4.09,
+          "btc_pct": 7.93
+        }
+      ],
+      "urteil": null,
+      "signale": 245,
+      "rueckkaeufe": 0,
+      "alter_gemessen": 0,
+      "alte_marken": 0,
+      "max_alter": 0,
+      "beteiligung": {
+        "auf_monate": 5,
+        "ab_monate": 4,
+        "auf_btc": 53.9,
+        "auf_engine": 27.1,
+        "ab_btc": -54.8,
+        "ab_engine": 4.8,
+        "auf_pct": 50,
+        "ab_pct": -9
+      }
+    },
+    {
+      "label": "LIVE-heute +Rest halten (E43.6)",
+      "rolle": "Erklaerung",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": true,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": false,
+        "ruecktest_fenster": 12,
+        "verkauf_faktor": 1.0
+      },
+      "rendite": 35.41,
+      "h1": 19.35,
+      "h2": 13.46,
+      "dd": -9.94,
+      "monate": [
+        {
+          "monat": "2026-01",
+          "ende": 9678.36,
+          "gewinn": -321.64,
+          "rendite_pct": -3.22,
+          "btc_pct": -15.94
+        },
+        {
+          "monat": "2026-02",
+          "ende": 10033.13,
+          "gewinn": 354.77,
+          "rendite_pct": 3.67,
+          "btc_pct": -14.94
+        },
+        {
+          "monat": "2026-03",
+          "ende": 10980.15,
+          "gewinn": 947.02,
+          "rendite_pct": 9.44,
+          "btc_pct": 1.96
+        },
+        {
+          "monat": "2026-04",
+          "ende": 11539.59,
+          "gewinn": 559.44,
+          "rendite_pct": 5.1,
+          "btc_pct": 11.81
+        },
+        {
+          "monat": "2026-05",
+          "ende": 11934.95,
+          "gewinn": 395.36,
+          "rendite_pct": 3.43,
+          "btc_pct": -3.5
+        },
+        {
+          "monat": "2026-06",
+          "ende": 11949.25,
+          "gewinn": 14.3,
+          "rendite_pct": 0.12,
+          "btc_pct": -20.43
+        },
+        {
+          "monat": "2026-07",
+          "ende": 12346.07,
+          "gewinn": 396.82,
+          "rendite_pct": 3.32,
+          "btc_pct": 7.27
+        },
+        {
+          "monat": "2026-08",
+          "ende": 12858.35,
+          "gewinn": 512.28,
+          "rendite_pct": 4.15,
+          "btc_pct": 24.95
+        },
+        {
+          "monat": "2026-09",
+          "ende": 13541.49,
+          "gewinn": 683.14,
+          "rendite_pct": 5.31,
+          "btc_pct": 7.93
+        }
+      ],
+      "urteil": {
+        "h1": -4.26,
+        "h2": 3.33,
+        "dd": 0.0,
+        "grenze": 2.0,
+        "monats_probe": {
+          "monate": 9,
+          "summe": -0.67,
+          "min_ohne_einen": -2.47,
+          "kritischer_monat": "2026-08",
+          "haelt": false
+        },
+        "vollstaendig": true,
+        "bestanden": false
+      },
+      "signale": 237,
+      "rueckkaeufe": 0,
+      "alter_gemessen": 0,
+      "alte_marken": 0,
+      "max_alter": 0,
+      "beteiligung": {
+        "auf_monate": 5,
+        "ab_monate": 4,
+        "auf_btc": 53.9,
+        "auf_engine": 27.3,
+        "ab_btc": -54.8,
+        "ab_engine": 4.0,
+        "auf_pct": 51,
+        "ab_pct": -7
+      }
+    },
+    {
+      "label": "LIVE-heute +kleinere Verkaeufe",
+      "rolle": "Erklaerung",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": false,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": false,
+        "ruecktest_fenster": 12,
+        "verkauf_faktor": 0.67
+      },
+      "rendite": 36.15,
+      "h1": 24.66,
+      "h2": 9.22,
+      "dd": -9.94,
+      "monate": [
+        {
+          "monat": "2026-01",
+          "ende": 9666.97,
+          "gewinn": -333.03,
+          "rendite_pct": -3.33,
+          "btc_pct": -15.94
+        },
+        {
+          "monat": "2026-02",
+          "ende": 10003.72,
+          "gewinn": 336.75,
+          "rendite_pct": 3.48,
+          "btc_pct": -14.94
+        },
+        {
+          "monat": "2026-03",
+          "ende": 11079.44,
+          "gewinn": 1075.72,
+          "rendite_pct": 10.75,
+          "btc_pct": 1.96
+        },
+        {
+          "monat": "2026-04",
+          "ende": 11920.71,
+          "gewinn": 841.26,
+          "rendite_pct": 7.59,
+          "btc_pct": 11.81
+        },
+        {
+          "monat": "2026-05",
+          "ende": 12465.74,
+          "gewinn": 545.04,
+          "rendite_pct": 4.57,
+          "btc_pct": -3.5
+        },
+        {
+          "monat": "2026-06",
+          "ende": 12479.76,
+          "gewinn": 14.02,
+          "rendite_pct": 0.11,
+          "btc_pct": -20.43
+        },
+        {
+          "monat": "2026-07",
+          "ende": 12788.72,
+          "gewinn": 308.96,
+          "rendite_pct": 2.48,
+          "btc_pct": 7.27
+        },
+        {
+          "monat": "2026-08",
+          "ende": 13114.1,
+          "gewinn": 325.38,
+          "rendite_pct": 2.54,
+          "btc_pct": 24.95
+        },
+        {
+          "monat": "2026-09",
+          "ende": 13614.52,
+          "gewinn": 500.42,
+          "rendite_pct": 3.82,
+          "btc_pct": 7.93
+        }
+      ],
+      "urteil": {
+        "h1": 1.05,
+        "h2": -0.91,
+        "dd": 0.0,
+        "grenze": 2.0,
+        "monats_probe": {
+          "monate": 9,
+          "summe": 0.02,
+          "min_ohne_einen": -1.16,
+          "kritischer_monat": "2026-04",
+          "haelt": false
+        },
+        "vollstaendig": true,
+        "bestanden": false
+      },
+      "signale": 245,
+      "rueckkaeufe": 0,
+      "alter_gemessen": 0,
+      "alte_marken": 0,
+      "max_alter": 0,
+      "beteiligung": {
+        "auf_monate": 5,
+        "ab_monate": 4,
+        "auf_btc": 53.9,
+        "auf_engine": 27.2,
+        "ab_btc": -54.8,
+        "ab_engine": 4.8,
+        "auf_pct": 50,
+        "ab_pct": -9
+      }
+    },
+    {
+      "label": "LIVE-heute +kleinere Verkaeufe +Rest halten",
+      "rolle": "Erklaerung",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": true,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": false,
+        "ruecktest_fenster": 12,
+        "verkauf_faktor": 0.67
+      },
+      "rendite": 37.91,
+      "h1": 18.16,
+      "h2": 16.72,
+      "dd": -12.55,
+      "monate": [
+        {
+          "monat": "2026-01",
+          "ende": 9666.97,
+          "gewinn": -333.03,
+          "rendite_pct": -3.33,
+          "btc_pct": -15.94
+        },
+        {
+          "monat": "2026-02",
+          "ende": 10003.72,
+          "gewinn": 336.75,
+          "rendite_pct": 3.48,
+          "btc_pct": -14.94
+        },
+        {
+          "monat": "2026-03",
+          "ende": 10556.72,
+          "gewinn": 553.0,
+          "rendite_pct": 5.53,
+          "btc_pct": 1.96
+        },
+        {
+          "monat": "2026-04",
+          "ende": 11470.1,
+          "gewinn": 913.38,
+          "rendite_pct": 8.65,
+          "btc_pct": 11.81
+        },
+        {
+          "monat": "2026-05",
+          "ende": 11815.77,
+          "gewinn": 345.67,
+          "rendite_pct": 3.01,
+          "btc_pct": -3.5
+        },
+        {
+          "monat": "2026-06",
+          "ende": 11916.53,
+          "gewinn": 100.76,
+          "rendite_pct": 0.85,
+          "btc_pct": -20.43
+        },
+        {
+          "monat": "2026-07",
+          "ende": 12225.38,
+          "gewinn": 308.85,
+          "rendite_pct": 2.59,
+          "btc_pct": 7.27
+        },
+        {
+          "monat": "2026-08",
+          "ende": 13274.02,
+          "gewinn": 1048.64,
+          "rendite_pct": 8.58,
+          "btc_pct": 24.95
+        },
+        {
+          "monat": "2026-09",
+          "ende": 13791.32,
+          "gewinn": 517.31,
+          "rendite_pct": 3.9,
+          "btc_pct": 7.93
+        }
+      ],
+      "urteil": {
+        "h1": -5.45,
+        "h2": 6.59,
+        "dd": -2.61,
+        "grenze": 2.0,
+        "monats_probe": {
+          "monate": 9,
+          "summe": 1.27,
+          "min_ohne_einen": -4.96,
+          "kritischer_monat": "2026-08",
+          "haelt": false
+        },
+        "vollstaendig": true,
+        "bestanden": false
+      },
+      "signale": 237,
+      "rueckkaeufe": 0,
+      "alter_gemessen": 0,
+      "alte_marken": 0,
+      "max_alter": 0,
+      "beteiligung": {
+        "auf_monate": 5,
+        "ab_monate": 4,
+        "auf_btc": 53.9,
+        "auf_engine": 29.2,
+        "ab_btc": -54.8,
+        "ab_engine": 4.0,
+        "auf_pct": 54,
+        "ab_pct": -7
+      }
+    },
+    {
+      "label": "LIVE-heute +E42",
+      "rolle": "Hauptzeile",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": false,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": true,
+        "ruecktest_fenster": 12,
+        "verkauf_faktor": 1.0
+      },
+      "rendite": 35.93,
+      "h1": 25.37,
+      "h2": 8.42,
+      "dd": -9.94,
+      "monate": [
+        {
+          "monat": "2026-01",
+          "ende": 9678.36,
+          "gewinn": -321.64,
+          "rendite_pct": -3.22,
+          "btc_pct": -15.94
+        },
+        {
+          "monat": "2026-02",
+          "ende": 9979.85,
+          "gewinn": 301.49,
+          "rendite_pct": 3.12,
+          "btc_pct": -14.94
+        },
+        {
+          "monat": "2026-03",
+          "ende": 11157.15,
+          "gewinn": 1177.3,
+          "rendite_pct": 11.8,
+          "btc_pct": 1.96
+        },
+        {
+          "monat": "2026-04",
+          "ende": 11934.71,
+          "gewinn": 777.56,
+          "rendite_pct": 6.97,
+          "btc_pct": 11.81
+        },
+        {
+          "monat": "2026-05",
+          "ende": 12537.41,
+          "gewinn": 602.7,
+          "rendite_pct": 5.05,
+          "btc_pct": -3.5
+        },
+        {
+          "monat": "2026-06",
+          "ende": 12558.11,
+          "gewinn": 20.7,
+          "rendite_pct": 0.17,
+          "btc_pct": -20.43
+        },
+        {
+          "monat": "2026-07",
+          "ende": 12890.99,
+          "gewinn": 332.88,
+          "rendite_pct": 2.65,
+          "btc_pct": 7.27
+        },
+        {
+          "monat": "2026-08",
+          "ende": 13112.29,
+          "gewinn": 221.29,
+          "rendite_pct": 1.72,
+          "btc_pct": 24.95
+        },
+        {
+          "monat": "2026-09",
+          "ende": 13593.32,
+          "gewinn": 481.03,
+          "rendite_pct": 3.67,
+          "btc_pct": 7.93
+        }
+      ],
+      "urteil": {
+        "h1": 1.76,
+        "h2": -1.71,
+        "dd": 0.0,
+        "grenze": 1.0,
+        "monats_probe": {
+          "monate": 9,
+          "summe": -0.06,
+          "min_ohne_einen": -0.83,
+          "kritischer_monat": "2026-03",
+          "haelt": false
+        },
+        "vollstaendig": true,
+        "bestanden": false
+      },
+      "signale": 283,
+      "rueckkaeufe": 16,
+      "alter_gemessen": 16,
+      "alte_marken": 2,
+      "max_alter": 74,
+      "beteiligung": {
+        "auf_monate": 5,
+        "ab_monate": 4,
+        "auf_btc": 53.9,
+        "auf_engine": 26.8,
+        "ab_btc": -54.8,
+        "ab_engine": 5.1,
+        "auf_pct": 50,
+        "ab_pct": -9
+      }
+    },
+    {
+      "label": "LIVE-heute +E42 +Rest halten",
+      "rolle": "Erklaerung",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": true,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": true,
+        "ruecktest_fenster": 12,
+        "verkauf_faktor": 1.0
+      },
+      "rendite": 34.58,
+      "h1": 20.51,
+      "h2": 11.67,
+      "dd": -11.13,
+      "monate": [
+        {
+          "monat": "2026-01",
+          "ende": 9678.36,
+          "gewinn": -321.64,
+          "rendite_pct": -3.22,
+          "btc_pct": -15.94
+        },
+        {
+          "monat": "2026-02",
+          "ende": 9979.85,
+          "gewinn": 301.49,
+          "rendite_pct": 3.12,
+          "btc_pct": -14.94
+        },
+        {
+          "monat": "2026-03",
+          "ende": 10852.22,
+          "gewinn": 872.38,
+          "rendite_pct": 8.74,
+          "btc_pct": 1.96
+        },
+        {
+          "monat": "2026-04",
+          "ende": 11651.56,
+          "gewinn": 799.34,
+          "rendite_pct": 7.37,
+          "btc_pct": 11.81
+        },
+        {
+          "monat": "2026-05",
+          "ende": 12050.79,
+          "gewinn": 399.23,
+          "rendite_pct": 3.43,
+          "btc_pct": -3.5
+        },
+        {
+          "monat": "2026-06",
+          "ende": 12110.78,
+          "gewinn": 59.99,
+          "rendite_pct": 0.5,
+          "btc_pct": -20.43
+        },
+        {
+          "monat": "2026-07",
+          "ende": 12446.8,
+          "gewinn": 336.02,
+          "rendite_pct": 2.77,
+          "btc_pct": 7.27
+        },
+        {
+          "monat": "2026-08",
+          "ende": 12825.64,
+          "gewinn": 378.84,
+          "rendite_pct": 3.04,
+          "btc_pct": 24.95
+        },
+        {
+          "monat": "2026-09",
+          "ende": 13457.57,
+          "gewinn": 631.93,
+          "rendite_pct": 4.93,
+          "btc_pct": 7.93
+        }
+      ],
+      "urteil": {
+        "h1": -3.1,
+        "h2": 1.54,
+        "dd": -1.19,
+        "grenze": 2.0,
+        "monats_probe": {
+          "monate": 9,
+          "summe": -1.31,
+          "min_ohne_einen": -2.27,
+          "kritischer_monat": "2026-04",
+          "haelt": false
+        },
+        "vollstaendig": true,
+        "bestanden": false
+      },
+      "signale": 255,
+      "rueckkaeufe": 11,
+      "alter_gemessen": 11,
+      "alte_marken": 1,
+      "max_alter": 15,
+      "beteiligung": {
+        "auf_monate": 5,
+        "ab_monate": 4,
+        "auf_btc": 53.9,
+        "auf_engine": 26.9,
+        "ab_btc": -54.8,
+        "ab_engine": 3.8,
+        "auf_pct": 50,
+        "ab_pct": -7
+      }
+    },
+    {
+      "label": "LIVE-heute +E42 +kleinere Verkaeufe",
+      "rolle": "Erklaerung",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": false,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": true,
+        "ruecktest_fenster": 12,
+        "verkauf_faktor": 0.67
+      },
+      "rendite": 34.86,
+      "h1": 25.25,
+      "h2": 7.67,
+      "dd": -9.94,
+      "monate": [
+        {
+          "monat": "2026-01",
+          "ende": 9666.97,
+          "gewinn": -333.03,
+          "rendite_pct": -3.33,
+          "btc_pct": -15.94
+        },
+        {
+          "monat": "2026-02",
+          "ende": 9949.7,
+          "gewinn": 282.73,
+          "rendite_pct": 2.92,
+          "btc_pct": -14.94
+        },
+        {
+          "monat": "2026-03",
+          "ende": 11079.3,
+          "gewinn": 1129.6,
+          "rendite_pct": 11.35,
+          "btc_pct": 1.96
+        },
+        {
+          "monat": "2026-04",
+          "ende": 11977.49,
+          "gewinn": 898.19,
+          "rendite_pct": 8.11,
+          "btc_pct": 11.81
+        },
+        {
+          "monat": "2026-05",
+          "ende": 12525.13,
+          "gewinn": 547.63,
+          "rendite_pct": 4.57,
+          "btc_pct": -3.5
+        },
+        {
+          "monat": "2026-06",
+          "ende": 12544.87,
+          "gewinn": 19.75,
+          "rendite_pct": 0.16,
+          "btc_pct": -20.43
+        },
+        {
+          "monat": "2026-07",
+          "ende": 12729.31,
+          "gewinn": 184.43,
+          "rendite_pct": 1.47,
+          "btc_pct": 7.27
+        },
+        {
+          "monat": "2026-08",
+          "ende": 13043.27,
+          "gewinn": 313.96,
+          "rendite_pct": 2.47,
+          "btc_pct": 24.95
+        },
+        {
+          "monat": "2026-09",
+          "ende": 13486.18,
+          "gewinn": 442.91,
+          "rendite_pct": 3.4,
+          "btc_pct": 7.93
+        }
+      ],
+      "urteil": {
+        "h1": 1.64,
+        "h2": -2.46,
+        "dd": 0.0,
+        "grenze": 2.0,
+        "monats_probe": {
+          "monate": 9,
+          "summe": -0.87,
+          "min_ohne_einen": -2.57,
+          "kritischer_monat": "2026-04",
+          "haelt": false
+        },
+        "vollstaendig": true,
+        "bestanden": false
+      },
+      "signale": 280,
+      "rueckkaeufe": 14,
+      "alter_gemessen": 14,
+      "alte_marken": 1,
+      "max_alter": 15,
+      "beteiligung": {
+        "auf_monate": 5,
+        "ab_monate": 4,
+        "auf_btc": 53.9,
+        "auf_engine": 26.8,
+        "ab_btc": -54.8,
+        "ab_engine": 4.3,
+        "auf_pct": 50,
+        "ab_pct": -8
+      }
+    },
+    {
+      "label": "LIVE-heute +E42 +kleinere Verkaeufe +Rest halten",
+      "rolle": "Erklaerung",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": true,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": true,
+        "ruecktest_fenster": 12,
+        "verkauf_faktor": 0.67
+      },
+      "rendite": 34.67,
+      "h1": 17.63,
+      "h2": 14.49,
+      "dd": -13.11,
+      "monate": [
+        {
+          "monat": "2026-01",
+          "ende": 9666.97,
+          "gewinn": -333.03,
+          "rendite_pct": -3.33,
+          "btc_pct": -15.94
+        },
+        {
+          "monat": "2026-02",
+          "ende": 9949.7,
+          "gewinn": 282.73,
+          "rendite_pct": 2.92,
+          "btc_pct": -14.94
+        },
+        {
+          "monat": "2026-03",
+          "ende": 10485.12,
+          "gewinn": 535.42,
+          "rendite_pct": 5.38,
+          "btc_pct": 1.96
+        },
+        {
+          "monat": "2026-04",
+          "ende": 11419.02,
+          "gewinn": 933.9,
+          "rendite_pct": 8.91,
+          "btc_pct": 11.81
+        },
+        {
+          "monat": "2026-05",
+          "ende": 11763.16,
+          "gewinn": 344.13,
+          "rendite_pct": 3.01,
+          "btc_pct": -3.5
+        },
+        {
+          "monat": "2026-06",
+          "ende": 11844.92,
+          "gewinn": 81.76,
+          "rendite_pct": 0.7,
+          "btc_pct": -20.43
+        },
+        {
+          "monat": "2026-07",
+          "ende": 12090.4,
+          "gewinn": 245.48,
+          "rendite_pct": 2.07,
+          "btc_pct": 7.27
+        },
+        {
+          "monat": "2026-08",
+          "ende": 13010.94,
+          "gewinn": 920.55,
+          "rendite_pct": 7.61,
+          "btc_pct": 24.95
+        },
+        {
+          "monat": "2026-09",
+          "ende": 13467.16,
+          "gewinn": 456.21,
+          "rendite_pct": 3.51,
+          "btc_pct": 7.93
+        }
+      ],
+      "urteil": {
+        "h1": -5.98,
+        "h2": 4.36,
+        "dd": -3.17,
+        "grenze": 2.0,
+        "monats_probe": {
+          "monate": 9,
+          "summe": -1.21,
+          "min_ohne_einen": -6.47,
+          "kritischer_monat": "2026-08",
+          "haelt": false
+        },
+        "vollstaendig": true,
+        "bestanden": false
+      },
+      "signale": 253,
+      "rueckkaeufe": 10,
+      "alter_gemessen": 10,
+      "alte_marken": 1,
+      "max_alter": 15,
+      "beteiligung": {
+        "auf_monate": 5,
+        "ab_monate": 4,
+        "auf_btc": 53.9,
+        "auf_engine": 27.5,
+        "ab_btc": -54.8,
+        "ab_engine": 3.3,
+        "auf_pct": 51,
+        "ab_pct": -6
+      }
+    },
+    {
+      "label": "LIVE-heute +E42 (6 Kerzen, Robustheit)",
+      "rolle": "Robustheit",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": false,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": true,
+        "ruecktest_fenster": 6,
+        "verkauf_faktor": 1.0
+      },
+      "rendite": 36.51,
+      "h1": 25.9,
+      "h2": 8.42,
+      "dd": -9.94,
+      "monate": [
+        {
+          "monat": "2026-01",
+          "ende": 9678.36,
+          "gewinn": -321.64,
+          "rendite_pct": -3.22,
+          "btc_pct": -15.94
+        },
+        {
+          "monat": "2026-02",
+          "ende": 9979.85,
+          "gewinn": 301.49,
+          "rendite_pct": 3.12,
+          "btc_pct": -14.94
+        },
+        {
+          "monat": "2026-03",
+          "ende": 11204.38,
+          "gewinn": 1224.53,
+          "rendite_pct": 12.27,
+          "btc_pct": 1.96
+        },
+        {
+          "monat": "2026-04",
+          "ende": 11985.24,
+          "gewinn": 780.86,
+          "rendite_pct": 6.97,
+          "btc_pct": 11.81
+        },
+        {
+          "monat": "2026-05",
+          "ende": 12590.49,
+          "gewinn": 605.25,
+          "rendite_pct": 5.05,
+          "btc_pct": -3.5
+        },
+        {
+          "monat": "2026-06",
+          "ende": 12611.27,
+          "gewinn": 20.79,
+          "rendite_pct": 0.17,
+          "btc_pct": -20.43
+        },
+        {
+          "monat": "2026-07",
+          "ende": 12945.57,
+          "gewinn": 334.29,
+          "rendite_pct": 2.65,
+          "btc_pct": 7.27
+        },
+        {
+          "monat": "2026-08",
+          "ende": 13167.8,
+          "gewinn": 222.23,
+          "rendite_pct": 1.72,
+          "btc_pct": 24.95
+        },
+        {
+          "monat": "2026-09",
+          "ende": 13650.87,
+          "gewinn": 483.07,
+          "rendite_pct": 3.67,
+          "btc_pct": 7.93
+        }
+      ],
+      "urteil": null,
+      "signale": 281,
+      "rueckkaeufe": 15,
+      "alter_gemessen": 15,
+      "alte_marken": 2,
+      "max_alter": 74,
+      "beteiligung": {
+        "auf_monate": 5,
+        "ab_monate": 4,
+        "auf_btc": 53.9,
+        "auf_engine": 27.3,
+        "ab_btc": -54.8,
+        "ab_engine": 5.1,
+        "auf_pct": 51,
+        "ab_pct": -9
+      }
+    }
+  ],
+  "wechselwirkungen": [
+    {
+      "basis": "LIVE-heute +Bein in Handelsrichtung",
+      "a": "rest_halten",
+      "b": "verkauf_faktor",
+      "ab": "LIVE-heute +kleinere Verkaeufe +Rest halten",
+      "voll": 2.49,
+      "h1": -2.24,
+      "h2": 4.17
+    },
+    {
+      "basis": "LIVE-heute +Bein in Handelsrichtung",
+      "a": "rest_halten",
+      "b": "ausbruch_ruecktest",
+      "ab": "LIVE-heute +E42 +Rest halten",
+      "voll": -0.62,
+      "h1": -0.6,
+      "h2": -0.08
+    },
+    {
+      "basis": "LIVE-heute +Bein in Handelsrichtung",
+      "a": "verkauf_faktor",
+      "b": "ausbruch_ruecktest",
+      "ab": "LIVE-heute +E42 +kleinere Verkaeufe",
+      "voll": -1.08,
+      "h1": -1.17,
+      "h2": 0.16
+    },
+    {
+      "basis": "LIVE-heute +Rest halten (E43.6)",
+      "a": "verkauf_faktor",
+      "b": "ausbruch_ruecktest",
+      "ab": "LIVE-heute +E42 +kleinere Verkaeufe +Rest halten",
+      "voll": -2.41,
+      "h1": -1.69,
+      "h2": -0.44
+    },
+    {
+      "basis": "LIVE-heute +kleinere Verkaeufe",
+      "a": "rest_halten",
+      "b": "ausbruch_ruecktest",
+      "ab": "LIVE-heute +E42 +kleinere Verkaeufe +Rest halten",
+      "voll": -1.95,
+      "h1": -1.12,
+      "h2": -0.68
+    },
+    {
+      "basis": "LIVE-heute +E42",
+      "a": "rest_halten",
+      "b": "verkauf_faktor",
+      "ab": "LIVE-heute +E42 +kleinere Verkaeufe +Rest halten",
+      "voll": 1.16,
+      "h1": -2.76,
+      "h2": 3.57
+    }
+  ],
+  "daten": {
+    "start": 1768766400000,
+    "ende": 1790497748840,
+    "erzeugt": "2026-09-27T08:29:16.179427+00:00",
+    "archiv": {
+      "oi_nur_archiv": 6
+    },
+    "punkte": {
+      "kerzen": 2481,
+      "funding": 8825,
+      "oi": 1510,
+      "liq": 1511,
+      "fut": 2009,
+      "ls": 2009
+    }
+  }
+}

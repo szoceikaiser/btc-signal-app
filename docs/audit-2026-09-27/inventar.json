@@ -1,0 +1,6498 @@
+{
+  "created": "2026-09-27T14:44:25.617491+00:00",
+  "head": "f9d2e31b175fd23cbb6018683ea9a5a60e139fb1",
+  "refs": "eeb4eea72e3ac2baa5b713c57337801b1b8bc291 refs/heads/claude/e44-4-verkauf-faktor\ne2b0051199c2e0c38723cc3a23c00ea3bd320601 refs/heads/claude/e44-5-kombinationsgitter\nf9d2e31b175fd23cbb6018683ea9a5a60e139fb1 refs/heads/codex/audit-2026-09-27\n5a50fd81765ef9472df9f0371e95ff7240a1b200 refs/heads/main\n89885adc9fb6d2eae60f7a64f9452760a4e33cd9 refs/remotes/origin/HEAD\n86fd08fe2f123325aba68bc47975f18d6a323673 refs/remotes/origin/claude/a5-pivot-hoch-messung-y1q5fr\n432165466897d3076d3461f287df4335c8881f61 refs/remotes/origin/claude/blissful-maxwell-9uwt6x\nbc694b571f85172b4c4eaa8067d2ab294820e2e6 refs/remotes/origin/claude/btc-signal-engine-start-hyiqny\n70af8ddc66666e649454e7fef62b3048999ee3e3 refs/remotes/origin/claude/dazzling-noether-1w087b\nf1e7da9c5abf6f2c2ccf76e5aecd4d676b75862b refs/remotes/origin/claude/e43-2-backtest-eval-9q2lmr\ne354d8f346cab1bd9d4d66c3191350e26aab6ea6 refs/remotes/origin/claude/e43-4-open-interest-9mmh0l\n5bc10309a4cbf3104361a4195582c9604c659915 refs/remotes/origin/claude/e43-6-gitterzeilen-eo6mzb\n411f103e4e26d07b362c9c825f23a6d85a399c32 refs/remotes/origin/claude/e43-6-nachmessung-vier-schalter\n74685be26b6da83b8f431f556becf64c462f3c19 refs/remotes/origin/claude/e43-8-nachmessung-be-im-plus-release-stale-rest\ncb00d2eb382d44e0dae2ea5346c3cb2ffde1896d refs/remotes/origin/claude/e44-3-ausbruch-ruecktest-k7m2qx\neeb4eea72e3ac2baa5b713c57337801b1b8bc291 refs/remotes/origin/claude/e44-4-verkauf-faktor\ne2b0051199c2e0c38723cc3a23c00ea3bd320601 refs/remotes/origin/claude/e44-5-kombinationsgitter\n4b22c8c852391ef30585cacc6ae77b572aac8290 refs/remotes/origin/claude/upbeat-allen-fchwgh\nf9d2e31b175fd23cbb6018683ea9a5a60e139fb1 refs/remotes/origin/codex/audit-2026-09-27\n89885adc9fb6d2eae60f7a64f9452760a4e33cd9 refs/remotes/origin/main\n",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 682,
+      "sha256": "a1084ee7aac1da9cef061b66e38921bf180b9c2d4848db1694bb409adccb947c",
+      "lines": 18
+    },
+    {
+      "path": ".github/workflows/archiv.yml",
+      "bytes": 1167,
+      "sha256": "df0641d366a4d1ca1e754595b8e4099ddc77e17d481a66043639591df5de4da5",
+      "lines": 37
+    },
+    {
+      "path": ".github/workflows/backtest.yml",
+      "bytes": 1517,
+      "sha256": "db8b7f2f3ea9f6c5012d6ceebe16867356340b41677bcc1a1a126f665e547965",
+      "lines": 36
+    },
+    {
+      "path": ".github/workflows/coinalyze-test.yml",
+      "bytes": 645,
+      "sha256": "740338396682de5b0588a3a4bab3a28f7521b900496ab18d7b9fd588793cdaf1",
+      "lines": 26
+    },
+    {
+      "path": ".github/workflows/e445.yml",
+      "bytes": 1638,
+      "sha256": "01d20e0e5a5ecd328fc44d086e8d60a74fbbc4bd3ed12ee9c69d1feac9e43525",
+      "lines": 52
+    },
+    {
+      "path": ".github/workflows/lage.yml",
+      "bytes": 1590,
+      "sha256": "00fa0de04d86c1661327b9af1d400556bbfeaef12d97fe1f5c2d6510b3f44c63",
+      "lines": 42
+    },
+    {
+      "path": ".github/workflows/pages.yml",
+      "bytes": 1327,
+      "sha256": "8e47d99bd2c59780911a834d5fdff238f66cd1f630a03766804c7cef27fff32b",
+      "lines": 43
+    },
+    {
+      "path": ".github/workflows/signal.yml",
+      "bytes": 3856,
+      "sha256": "c74ec04a7513eb6d417e15015d9199ef2e2ea466a906f1567df32505b7cef66c",
+      "lines": 89
+    },
+    {
+      "path": ".github/workflows/tests.yml",
+      "bytes": 217,
+      "sha256": "63f4117c5871bcf1d9afaa02be5b1953ceca82f8f6890cfe260131d23787caac",
+      "lines": 13
+    },
+    {
+      "path": ".github/workflows/watch.yml",
+      "bytes": 1953,
+      "sha256": "69e28686f9323bb1a85923c2490b7852cf6db7928452294dbf00bd8e38a6446b",
+      "lines": 53
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 176,
+      "sha256": "8898916bffc823467037c05d3db232d1e8218a81e2d38ba43ea1f0dc77702d7b",
+      "lines": 6
+    },
+    {
+      "path": "ANLEITUNG-COINALYZE.md",
+      "bytes": 3304,
+      "sha256": "39ddd4254439d23851460fb8d996dc61723d1efba627335c9eeae7bd708580eb",
+      "lines": 74
+    },
+    {
+      "path": "ANLEITUNG-E8.2-MESSUNG.md",
+      "bytes": 3377,
+      "sha256": "ed3639004b28e65a4363423c4eada656cfacb273ca90739979744b4a68cdc5df",
+      "lines": 79
+    },
+    {
+      "path": "ANLEITUNG-EINSTELLUNGEN.md",
+      "bytes": 12052,
+      "sha256": "8508f70c47d1e80bda84a8e988421122a88180e20cab5e5e5849ef29e11d9702",
+      "lines": 232
+    },
+    {
+      "path": "ANLEITUNG-HEATMAP-TEST.md",
+      "bytes": 4627,
+      "sha256": "3736490826213b362a74d2a1af8bad709e731ea73ef3c3b19f17b3177a45f458",
+      "lines": 98
+    },
+    {
+      "path": "ANLEITUNG-PUENKTLICHER-START.md",
+      "bytes": 8237,
+      "sha256": "0b66e3f924f1a2be282663c188af48cb2492bf8816d810c79181b78acc960169",
+      "lines": 196
+    },
+    {
+      "path": "ANLEITUNG-TELEGRAM.md",
+      "bytes": 5333,
+      "sha256": "2087120c944d64fadb9b2de208f6325876a9ed334d4a8af302e90be82859f33d",
+      "lines": 102
+    },
+    {
+      "path": "BACKTEST.md",
+      "bytes": 55925,
+      "sha256": "dcfa819750e52ea66019b151b1d582f70634041d127ed25ade91732168a10d17",
+      "lines": 701
+    },
+    {
+      "path": "PLAN-E8.5-KI-MAKRO-BIAS.md",
+      "bytes": 7045,
+      "sha256": "a104a56a4d4b60cfeae4238c0a4fc0c5dc1948ba1798fe1de6ce8c8f65a4d196",
+      "lines": 113
+    },
+    {
+      "path": "PLAN-E9-ORDERFLOW-DATEN.md",
+      "bytes": 31899,
+      "sha256": "0d29a04e129bcf9fc80e580086f2b71632c6ae7520c2be715ecb44528ee6ac4d",
+      "lines": 435
+    },
+    {
+      "path": "PRUEFPROMPT.md",
+      "bytes": 4317,
+      "sha256": "7161b975582a5f68dd344a6bb681a6cc516dc46f83497287d6d60fde30dbeac2",
+      "lines": 83
+    },
+    {
+      "path": "README.md",
+      "bytes": 6221,
+      "sha256": "ce38b6179dabac14dfc1ec4a105c33ddbe5098b24bc4d4b66497fed3a603c867",
+      "lines": 108
+    },
+    {
+      "path": "STARTPROMPT.md",
+      "bytes": 10482,
+      "sha256": "e4d0f60e0329fddf7e517bb5db8d42b4b3827fbf74730cd07de5412244925cab",
+      "lines": 179
+    },
+    {
+      "path": "docs/ARCHITEKTUR.md",
+      "bytes": 7608,
+      "sha256": "b1733c36d5986388ea38a30c3472d48c76ab19fafddef35c14af19af2d5e13de",
+      "lines": 109
+    },
+    {
+      "path": "docs/E44-4-PRUEFPROTOKOLL.txt",
+      "bytes": 1665,
+      "sha256": "07cfa8848a1f886d7d15dcf40ef190f5d3b2d500347ee8ac1f7a08441efb2a2b",
+      "lines": 24
+    },
+    {
+      "path": "docs/E44-5-FOLGEPROMPT.txt",
+      "bytes": 674,
+      "sha256": "a5a29ebaebd605ae89e0217c3b5b29ce6aae6d5e0b1b14a3fa98cd92cc43ffee",
+      "lines": 10
+    },
+    {
+      "path": "docs/E44-5-PRUEFPROTOKOLL.txt",
+      "bytes": 3896,
+      "sha256": "762624a4322d18fda3058006e5ba366f9bcb81ac21f0d93a40df03842c91691b",
+      "lines": 60
+    },
+    {
+      "path": "docs/ETAPPENPLAN.md",
+      "bytes": 129959,
+      "sha256": "7f04e308a1c08fde8244a1df6526262c379a240093967db95eb533a8d993b072",
+      "lines": 1979
+    },
+    {
+      "path": "docs/FURKAN-UPDATE-2026-07-B.md",
+      "bytes": 8436,
+      "sha256": "2365de1395bc1b38f1ce9e8c3232ef6512b9f4f1d2918a3f1244b2cca8e26dc1",
+      "lines": 150
+    },
+    {
+      "path": "docs/FURKAN-UPDATE-2026-07.md",
+      "bytes": 12917,
+      "sha256": "7b17c67ccad5a713a3eb45763631524f233b46fc6dbcfd5626731705f70b21ae",
+      "lines": 222
+    },
+    {
+      "path": "docs/FURKAN-UPDATE-2026-08-02.md",
+      "bytes": 10250,
+      "sha256": "98783e10065ad62cbfaea1153ae28c524fbf67bcba29eca57ba1b0f0b9b8cf3b",
+      "lines": 190
+    },
+    {
+      "path": "docs/FURKAN-UPDATE-2026-08-03.md",
+      "bytes": 5498,
+      "sha256": "8ab5a9d423168659f4f9b17787d9990917ffdf61974b3d230402d5a2b2c2b11d",
+      "lines": 90
+    },
+    {
+      "path": "docs/GEGENCHECK.md",
+      "bytes": 5121,
+      "sha256": "b933f08102b8f2d3c6011141b4e1e3c36f5c1e4debe4dba1e91ae4bc6b056b82",
+      "lines": 76
+    },
+    {
+      "path": "docs/PLAN-E18-MECHANIK-FIXES.md",
+      "bytes": 6051,
+      "sha256": "d2716be4c44aae5d419d095f17012c6468e9e81283fb827bffba296f212e6f68",
+      "lines": 101
+    },
+    {
+      "path": "docs/PLAN-E23-1D-ZONENSATZ.md",
+      "bytes": 4200,
+      "sha256": "30c7b767b2aeebed49b515963ae600d32d63b64de4786dd9cfc89da8db59aae5",
+      "lines": 79
+    },
+    {
+      "path": "docs/PLAN-E24-CHART-UND-PLAN.md",
+      "bytes": 3551,
+      "sha256": "5747a4a84dfa5bb591b3a2594c56b78471d7daeb21828e44a8afabbcf60e3e0a",
+      "lines": 72
+    },
+    {
+      "path": "docs/PLAN-E28-BREAKEVEN-NACH-AUFSTOCKUNG.md",
+      "bytes": 6291,
+      "sha256": "9f2917f96f0e2b6c7bd240d2e41f1d88b26a15bf3766dc54c3ef2a18321af446",
+      "lines": 120
+    },
+    {
+      "path": "docs/PLAN-E30-ZONEN-NACHZIEHEN.md",
+      "bytes": 8870,
+      "sha256": "7f7a6309081feaeb107be63dff9514ff6b1f726645868f1ed04a7e1166a4a20b",
+      "lines": 164
+    },
+    {
+      "path": "docs/PLAN-E32-LAGEZEILE.md",
+      "bytes": 12695,
+      "sha256": "6bafb541c519cd570a0adb3ef291586b739ae4fba2be6207d3b966449643b210",
+      "lines": 272
+    },
+    {
+      "path": "docs/PLAN-E33-UEBERGEORDNETER-TREND.md",
+      "bytes": 9966,
+      "sha256": "d8bdec2ac906ca78d1dfe150515c8ee59308baaf4cd7fac8cfad8f626e67378f",
+      "lines": 195
+    },
+    {
+      "path": "docs/PLAN-E34-AMPEL.md",
+      "bytes": 15132,
+      "sha256": "28ea721918e04a63c6949aeffbf0a7a857dc86408c131345761b3df66c919a28",
+      "lines": 300
+    },
+    {
+      "path": "docs/PLAN-E35-LAGE-ABRUF.md",
+      "bytes": 8387,
+      "sha256": "82493f6cdb62c8cf3665c28e84e6c7a88693e333ef866ccb4bd1b032c59d4d54",
+      "lines": 167
+    },
+    {
+      "path": "docs/PLAN-E36-ORDERFLOW-ROHWERTE.md",
+      "bytes": 15631,
+      "sha256": "73ac32555682f92e656f592ea4783f8bbc9058883a196f56460695a2fd0485a2",
+      "lines": 341
+    },
+    {
+      "path": "docs/PLAN-E37-AGGREGATION.md",
+      "bytes": 42803,
+      "sha256": "64185eb2479218ed2add63cd5a7015f3670c1cf364a6af95c4833bcd2cd091c4",
+      "lines": 775
+    },
+    {
+      "path": "docs/PLAN-E38-MUSTER5.md",
+      "bytes": 19433,
+      "sha256": "a28c574788f9e1b49e6a6d0371ee116711c95fb26342cf08ec391a687f69d8ce",
+      "lines": 343
+    },
+    {
+      "path": "docs/PLAN-E39-E40.md",
+      "bytes": 15419,
+      "sha256": "aa83e0038ce502a29e3cb908c691bf6e802c8ca1fc1aa990b021d7890c134d29",
+      "lines": 267
+    },
+    {
+      "path": "docs/PLAN-E41-STOP.md",
+      "bytes": 28994,
+      "sha256": "5f3bd284bdb5c3e2cabd6b186b3d1bdfe05f918168ecce3e1a313b4704b6fa0f",
+      "lines": 474
+    },
+    {
+      "path": "docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md",
+      "bytes": 68664,
+      "sha256": "74994b1426ddbba037482aceaafa47ea8f77f6585692df40ae38dcd5e4bfe66f",
+      "lines": 1047
+    },
+    {
+      "path": "docs/PLAN-E44-KOMBINATIONEN.md",
+      "bytes": 37413,
+      "sha256": "95b123e551cb72c1b3d11e855056d417c680c71d2701d36d1136b1a8b3a271fd",
+      "lines": 515
+    },
+    {
+      "path": "docs/PRUEFUNG-1D-EBENE.md",
+      "bytes": 7807,
+      "sha256": "5552b30f233691cca08f97da746b577396bb22ce6b0da5196268eac00b80e823",
+      "lines": 151
+    },
+    {
+      "path": "docs/PRUEFUNG-2026-09-26-GESAMT.md",
+      "bytes": 21874,
+      "sha256": "63f556bacecb4b29c9bf096aa5aa04e1433c521cbb47627573fe13f0e0658b62",
+      "lines": 309
+    },
+    {
+      "path": "docs/STRATEGIE.md",
+      "bytes": 11790,
+      "sha256": "72cc97f13b02d10dfac726d42e63ab9740be0ad3205b436a1f9dc3aa82535e43",
+      "lines": 198
+    },
+    {
+      "path": "docs/VERLUST-ANALYSE-2026-07-27.md",
+      "bytes": 24553,
+      "sha256": "2b465f3fdd347b440a9abcf057402020d68c5fc911ccacb08f76f5eb8ff6084c",
+      "lines": 479
+    },
+    {
+      "path": "docs/audit-2026-09-27/ABDECKUNG.md",
+      "bytes": 2082,
+      "sha256": "4474d91990cb05dfd5ae06b48ff70a33133f8419d36da62e24a0dd7d6a2f2d92",
+      "lines": 28
+    },
+    {
+      "path": "docs/audit-2026-09-27/PLAN.md",
+      "bytes": 6788,
+      "sha256": "40b1313b17b5a0a3efd77c7cc370017adddb7ea4f87540cb0706e04295ad961e",
+      "lines": 105
+    },
+    {
+      "path": "docs/audit-2026-09-27/STATUS.md",
+      "bytes": 447,
+      "sha256": "a643a7dab1c3bc998e8872ab30992a34fd504a15c63b7ed3b1a93c34c4a5e3d4",
+      "lines": 9
+    },
+    {
+      "path": "docs/audit-2026-09-27/tests-original.log",
+      "bytes": 76466,
+      "sha256": "b60c307ac320268ec3709f88fc15ef5a149f355dd5bf8d14bfec0bfe46615136",
+      "lines": 1575
+    },
+    {
+      "path": "docs/e445/BERICHT.md",
+      "bytes": 3487,
+      "sha256": "48400ba7b1075e51f12a8f7245bdcc6f5c432ab29f666c4b7d5abc473273ee28",
+      "lines": 49
+    },
+    {
+      "path": "docs/e445/eingaben.json",
+      "bytes": 818727,
+      "sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+      "lines": 1
+    },
+    {
+      "path": "docs/e445/ergebnis.json",
+      "bytes": 35096,
+      "sha256": "670463bfb6d82d3d30a8cd6b83981d216102c21401111d4d1f9ff27807b3204d",
+      "lines": 1398
+    },
+    {
+      "path": "docs/e445/signale.json",
+      "bytes": 540499,
+      "sha256": "7ddfb03c05c12cb65dd869c735d40c42ee801d16359e05258b3a208cd3b797ec",
+      "lines": 1
+    },
+    {
+      "path": "engine/archiv.py",
+      "bytes": 4246,
+      "sha256": "9d0f5942cf1600d6c8cf7fcca26f9f3f15bcec13a1a84843cbbde7408b169a55",
+      "lines": 109
+    },
+    {
+      "path": "engine/backtest.py",
+      "bytes": 226301,
+      "sha256": "b340b2719994b1dc4301ab69ced39a63f9e66dfe90ce9c049b49601891a0cd36",
+      "lines": 3981
+    },
+    {
+      "path": "engine/coinalyze.py",
+      "bytes": 52211,
+      "sha256": "09b8d8ca8d9057086c08b2a8aeb392063ab8d4fb251f8ccf1db5f5d8ef18037e",
+      "lines": 1047
+    },
+    {
+      "path": "engine/e445.py",
+      "bytes": 8805,
+      "sha256": "a7221bf0353eccdf59e90b04ea7d02e50651b0b2065698735162228d796b857f",
+      "lines": 148
+    },
+    {
+      "path": "engine/main.py",
+      "bytes": 59009,
+      "sha256": "28f696c368db64c895f26bc200c105bb1e4f80607a376dc24a6fd86f6436c219",
+      "lines": 1157
+    },
+    {
+      "path": "engine/run_tests.py",
+      "bytes": 781,
+      "sha256": "7b52df2e7e5eea9ec5185155cc6d76b22ae1bc7f3ff6a406632f6cb2a201005d",
+      "lines": 24
+    },
+    {
+      "path": "engine/sabotage_e38.py",
+      "bytes": 8448,
+      "sha256": "c85dc9778649e41b80affcea8ede02af3e238d537d3279b4d8508748527ef1f3",
+      "lines": 168
+    },
+    {
+      "path": "engine/sabotage_e381.py",
+      "bytes": 5721,
+      "sha256": "45972200d825ae99a218a08af5a35e678b45613ac9b0301af29cb2db8a6242f5",
+      "lines": 132
+    },
+    {
+      "path": "engine/sabotage_e39.py",
+      "bytes": 8244,
+      "sha256": "e0a8139ea731dedae3996254c16cda5790d4d018e0edb7e1ac8b3a4636cfe4ec",
+      "lines": 161
+    },
+    {
+      "path": "engine/sabotage_e40.py",
+      "bytes": 7691,
+      "sha256": "832ec4b9dfc8b62767423788a7bb404dda7789eafd9c2a2cca9d95b38e66dc15",
+      "lines": 142
+    },
+    {
+      "path": "engine/sabotage_e41.py",
+      "bytes": 14070,
+      "sha256": "7f34e8ad0a3f248488137e171dc15da8463283b96cb24f533e713bbf5bd97760",
+      "lines": 240
+    },
+    {
+      "path": "engine/sabotage_e43.py",
+      "bytes": 3452,
+      "sha256": "93e713d9103e1f759e87a208dd88ed468bc2d6ca78e88f8e297dc2cbc855be11",
+      "lines": 81
+    },
+    {
+      "path": "engine/sabotage_e433.py",
+      "bytes": 9049,
+      "sha256": "d54b2690bee3ec4d23d9b36bb5036db14cece9bf2f490b75d8dc340be174aa12",
+      "lines": 161
+    },
+    {
+      "path": "engine/sabotage_e434.py",
+      "bytes": 10528,
+      "sha256": "569906ebb840c0d0756268b8395c310f0300738be5a6cc894b5fe1396f805bdb",
+      "lines": 182
+    },
+    {
+      "path": "engine/sabotage_e434b.py",
+      "bytes": 4402,
+      "sha256": "f9cb0001fbf446927d37bbd65699f4f9fd5943b6a6b887384b978549f12760fe",
+      "lines": 93
+    },
+    {
+      "path": "engine/sabotage_e441.py",
+      "bytes": 3052,
+      "sha256": "e46237229a2d9d2272bda8807a876df1d3cefac312116d8d6ef59b3cf0b6c3c5",
+      "lines": 77
+    },
+    {
+      "path": "engine/sabotage_e442.py",
+      "bytes": 3244,
+      "sha256": "ccd620dfd743fedd259daaae3c40d211d9786204ceda79bfe2bb539a36c8f349",
+      "lines": 73
+    },
+    {
+      "path": "engine/sabotage_e443.py",
+      "bytes": 11061,
+      "sha256": "65ae24c0a53db21e07c7c5db6588bd7cb9dcbbc3f62c2bd7741f8815570d480f",
+      "lines": 194
+    },
+    {
+      "path": "engine/sabotage_e444.py",
+      "bytes": 5958,
+      "sha256": "f6ba03f69998261705dbde0fbd6ce75df3db195a4869d2d91478d26ed148e18a",
+      "lines": 123
+    },
+    {
+      "path": "engine/sabotage_e445.py",
+      "bytes": 4064,
+      "sha256": "7aa94d86f10c7d839724d17058868fabfcba1fc7eef05cf2f7b063b1644465ad",
+      "lines": 74
+    },
+    {
+      "path": "engine/strategy_core.py",
+      "bytes": 147517,
+      "sha256": "e69541732f1e8dc374231a97f6d4cc4d140c2409ced7796e25307c07bab3385b",
+      "lines": 2652
+    },
+    {
+      "path": "engine/telegram_notify.py",
+      "bytes": 32984,
+      "sha256": "db017bb46e340ed79338d6d815919fe25ec750b5c6ce55bb7c19a13cffa14fc2",
+      "lines": 674
+    },
+    {
+      "path": "engine/test_archiv.py",
+      "bytes": 3204,
+      "sha256": "2354c69f3d1b2edeeceaab53f54ed3e557a53279b4dc86ff0730a4657a59551f",
+      "lines": 83
+    },
+    {
+      "path": "engine/test_backtest.py",
+      "bytes": 110326,
+      "sha256": "7ddf63d999dd84a31869dc9562749f9771ed3ba3abbd535dafd62503e915d7ef",
+      "lines": 2304
+    },
+    {
+      "path": "engine/test_coinalyze.py",
+      "bytes": 44654,
+      "sha256": "e6fe6a517d90b0689e946e19652916437b27e29554d3570b7ed62711f9fe9ed3",
+      "lines": 976
+    },
+    {
+      "path": "engine/test_e442.py",
+      "bytes": 4433,
+      "sha256": "323f73af3d2320f3f165c7f4845e2047a93023ec38881f20847ee7198eeadec0",
+      "lines": 103
+    },
+    {
+      "path": "engine/test_e443.py",
+      "bytes": 35237,
+      "sha256": "5e1a729399886893dd3539b775cd2fd1e15aa562d4a5db109984b6384337e573",
+      "lines": 690
+    },
+    {
+      "path": "engine/test_e444.py",
+      "bytes": 9356,
+      "sha256": "0038c03f2ac51e65c655a9fb9950e0165d09598f10804154dfe26782a4d160d3",
+      "lines": 213
+    },
+    {
+      "path": "engine/test_e445.py",
+      "bytes": 4782,
+      "sha256": "278c83fc4b44d3dc57471a4e10b4add0562ae4e1cf36fc4daa0234d9a63bc16a",
+      "lines": 119
+    },
+    {
+      "path": "engine/test_main.py",
+      "bytes": 63829,
+      "sha256": "852ba88d30728972300a400bbb734805481032c1b35f7c0d8d6c14473969f6f7",
+      "lines": 1344
+    },
+    {
+      "path": "engine/test_strategy_core.py",
+      "bytes": 169185,
+      "sha256": "c5ac7241f72c1b840871bf830538748bef23e8549096ad70c976c93916181e20",
+      "lines": 3440
+    },
+    {
+      "path": "engine/test_telegram_notify.py",
+      "bytes": 16319,
+      "sha256": "dd78a1f0e51d958170e85b107790510ab0c7af1b4c3d8e3bf1d02990366b5aec",
+      "lines": 330
+    },
+    {
+      "path": "site/BACKTEST.md",
+      "bytes": 55925,
+      "sha256": "dcfa819750e52ea66019b151b1d582f70634041d127ed25ade91732168a10d17",
+      "lines": 701
+    },
+    {
+      "path": "site/BACKTEST.txt",
+      "bytes": 55925,
+      "sha256": "dcfa819750e52ea66019b151b1d582f70634041d127ed25ade91732168a10d17",
+      "lines": 701
+    },
+    {
+      "path": "site/data/archiv/coinalyze_4h.json",
+      "bytes": 241407,
+      "sha256": "09ffc86778aeab9819cf547455332d1434213c4f06d1c95e84fffce13a5ccfb9",
+      "lines": 1
+    },
+    {
+      "path": "site/data/backtest.json",
+      "bytes": 4700,
+      "sha256": "884204a5ef59ac8e5491b565e32b29896b6cf371918c99726fa53c23e14c727b",
+      "lines": 240
+    },
+    {
+      "path": "site/data/backtest_signals.json",
+      "bytes": 61690,
+      "sha256": "d81ba2f7177ce9454098e64e37c9072d49ea6e95bc1cf1c7c5be05f7654dbcbd",
+      "lines": 2447
+    },
+    {
+      "path": "site/data/coinalyze_probe.json",
+      "bytes": 42460,
+      "sha256": "ea81515b4105a70288e6810a39a3fca1e530f3296f28d2c402465e7f5fd8a8fd",
+      "lines": 1873
+    },
+    {
+      "path": "site/data/config.json",
+      "bytes": 30061,
+      "sha256": "1667cfa0a423995c8eff21a9c56469ca8f4a911bb8b866c0b5575ba701b3b7d6",
+      "lines": 85
+    },
+    {
+      "path": "site/data/oi_history.json",
+      "bytes": 884,
+      "sha256": "e50f2e8bd85b52b555faa9883850ce131cc36e791c682bef06ca0d1e2f2b0d83",
+      "lines": 1
+    },
+    {
+      "path": "site/data/signals.json",
+      "bytes": 10228,
+      "sha256": "9f980706a12f5fb5400ded897744c3999257666bd758d51f7b6735f4ba9b7b55",
+      "lines": 409
+    },
+    {
+      "path": "site/data/state.json",
+      "bytes": 4987,
+      "sha256": "518f97ad3878bd0427b544ba028ebfae56f20f672e5492f94766c031737b82b3",
+      "lines": 225
+    },
+    {
+      "path": "site/index.html",
+      "bytes": 29506,
+      "sha256": "7a6bb3c3d91ccd547147e2df3627fac0360a0c217dbeeea3e214b8b048e06919",
+      "lines": 539
+    },
+    {
+      "path": "wissens-layer/00_STAND.md",
+      "bytes": 9323,
+      "sha256": "4a89fe60deeaa413dd2cd9455d782c82d46486d3ef5ee042546cf895f8d4fbcd",
+      "lines": 122
+    },
+    {
+      "path": "wissens-layer/01_produkt/ZIEL-UND-NICHT-ZIELE.md",
+      "bytes": 3639,
+      "sha256": "628cf0afefcc0d78d1cfc3f3cdb06639fb0f63280b502da418427274bd887108",
+      "lines": 53
+    },
+    {
+      "path": "wissens-layer/02_status/GEMESSEN-UND-ENTSCHIEDEN.md",
+      "bytes": 48011,
+      "sha256": "1bf0eb60df600df523f8ad470de067c2a652ecf6aa2c7d2530a57251251c3665",
+      "lines": 661
+    },
+    {
+      "path": "wissens-layer/02_status/OFFENE-PUNKTE.md",
+      "bytes": 15095,
+      "sha256": "db70c15358a735b5e44073cd70c0300fede8214952414aea4ee2e39b89ba7f9d",
+      "lines": 214
+    },
+    {
+      "path": "wissens-layer/02_status/UEBERGABE.md",
+      "bytes": 56606,
+      "sha256": "91ea6dab95614df02f71455230f34accc58af830007716eac07bbc93de2af2b0",
+      "lines": 945
+    },
+    {
+      "path": "wissens-layer/03_architektur/UEBERBLICK.md",
+      "bytes": 8424,
+      "sha256": "e1898cbd86b5ebe754aac7c87845a694e4343ff437ebfaf3c4ee64c873cadbb7",
+      "lines": 129
+    },
+    {
+      "path": "wissens-layer/04_konventionen/ARBEITSREGELN.md",
+      "bytes": 12482,
+      "sha256": "659704fb4ce6fb6b142a24d88b891781e169508dddb6646aecb1dd63a4144a99",
+      "lines": 197
+    },
+    {
+      "path": "wissens-layer/04_konventionen/BEKANNTE-PROBLEME.md",
+      "bytes": 6916,
+      "sha256": "522e5cf6b2a21db376ce67cb28c659173e644096af10f43f25e8e95331af1ba9",
+      "lines": 101
+    },
+    {
+      "path": "wissens-layer/05_quellen/MASSGEBLICHE-QUELLEN.md",
+      "bytes": 6217,
+      "sha256": "30523010300a25d8b9a7634e5e311c998876475af99059081546251e49ac4592",
+      "lines": 87
+    },
+    {
+      "path": "wissens-layer/06_entwicklung/BEFEHLE.md",
+      "bytes": 4939,
+      "sha256": "1d6dc3bceba214330a821320af9150f229d349ab2b425b5e9dc606dc9da4160c",
+      "lines": 106
+    },
+    {
+      "path": "wissens-layer/START-HIER.md",
+      "bytes": 4968,
+      "sha256": "b65c40992f3cf93f60d7cb93055cb0d1fcbcd0e59599720be85f1740a1dbd203",
+      "lines": 91
+    }
+  ],
+  "private_transcripts": [
+    {
+      "path": "Videos/060727/260727_TRanskript.txt",
+      "bytes": 28180,
+      "sha256": "4faaf907ed3f297bbfec280bc8011a724ee084ec03dd003ac712e181112edf40",
+      "lines": 1239
+    },
+    {
+      "path": "Videos/260802/260802_Transkript.txt",
+      "bytes": 24228,
+      "sha256": "8571c96ce07f50ca63cbcb07836236f044aa8b039fbf52bbdb813088ced6b6f3",
+      "lines": 408
+    },
+    {
+      "path": "Videos/260803/260803_Transkript.txt",
+      "bytes": 18502,
+      "sha256": "6bce692ff6876a13cd649bbe8f557865a9b687aa83831192124cd81e74446559",
+      "lines": 104
+    },
+    {
+      "path": "Videos/260910/260910.txt",
+      "bytes": 32415,
+      "sha256": "433ac5cb34888ae808733479768e4688f16d42898025f2e9056ad404421d2fef",
+      "lines": 1422
+    },
+    {
+      "path": "Videos/260913/260913.txt",
+      "bytes": 27275,
+      "sha256": "a904e39538730016d2da30e83f218411019a7b652e0afbe2ee19643e5a92c445",
+      "lines": 429
+    },
+    {
+      "path": "Videos/ORderFLow-Transkript.md",
+      "bytes": 34040,
+      "sha256": "06dfb273e2fa3fe6a22a49d9b2c8c047f788427573bda71569a3c5a64ce6549c",
+      "lines": 1497
+    }
+  ],
+  "functions": [
+    {
+      "file": "engine/archiv.py",
+      "name": "nur_abgeschlossen",
+      "line": 33,
+      "end": 35
+    },
+    {
+      "file": "engine/archiv.py",
+      "name": "zusammen",
+      "line": 38,
+      "end": 42
+    },
+    {
+      "file": "engine/archiv.py",
+      "name": "laden",
+      "line": 45,
+      "end": 57
+    },
+    {
+      "file": "engine/archiv.py",
+      "name": "speichern",
+      "line": 60,
+      "end": 66
+    },
+    {
+      "file": "engine/archiv.py",
+      "name": "mit_archiv",
+      "line": 69,
+      "end": 71
+    },
+    {
+      "file": "engine/archiv.py",
+      "name": "abrufen",
+      "line": 74,
+      "end": 88
+    },
+    {
+      "file": "engine/archiv.py",
+      "name": "main",
+      "line": 91,
+      "end": 105
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "V",
+      "line": 113,
+      "end": 118
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "fetch_candles_range",
+      "line": 666,
+      "end": 680
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "archiv_mischen",
+      "line": 683,
+      "end": 691
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "besser_in_beiden_haelften",
+      "line": 694,
+      "end": 708
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "abschnitt_oder_grund",
+      "line": 711,
+      "end": 732
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "build_series",
+      "line": 735,
+      "end": 789
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "run_backtest",
+      "line": 792,
+      "end": 809
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "to_date",
+      "line": 812,
+      "end": 813
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "run_half",
+      "line": 816,
+      "end": 842
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "score",
+      "line": 845,
+      "end": 878
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "simulate",
+      "line": 881,
+      "end": 1132
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "beteiligung",
+      "line": 1135,
+      "end": 1170
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "gegengeschaefte",
+      "line": 1173,
+      "end": 1214
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "furkan_pnl",
+      "line": 1217,
+      "end": 1271
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "_med",
+      "line": 1280,
+      "end": 1285
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "muster_nachlauf",
+      "line": 1288,
+      "end": 1364
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "muster_abschnitt",
+      "line": 1367,
+      "end": 1462
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "stop_nachlauf",
+      "line": 1470,
+      "end": 1538
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "stop_abschnitt",
+      "line": 1541,
+      "end": 1601
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "sth_abgleich",
+      "line": 1624,
+      "end": 1642
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "sth_je_kerze",
+      "line": 1645,
+      "end": 1657
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "sth_vorfrage",
+      "line": 1663,
+      "end": 1733
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "sth_abschnitt",
+      "line": 1736,
+      "end": 1802
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "_stops",
+      "line": 1830,
+      "end": 1831
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e41_ausschalten",
+      "line": 1834,
+      "end": 1856
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "_naechstes",
+      "line": 1859,
+      "end": 1863
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "_datum",
+      "line": 1866,
+      "end": 1867
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e41_abschnitt",
+      "line": 1870,
+      "end": 1966
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e433_einschalten",
+      "line": 1980,
+      "end": 1993
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e433_umklassifiziert",
+      "line": 1996,
+      "end": 2037
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e433_abschnitt",
+      "line": 2040,
+      "end": 2104
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e434_einschalten",
+      "line": 2128,
+      "end": 2141
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e434_umklassifiziert",
+      "line": 2144,
+      "end": 2187
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e434_abschnitt",
+      "line": 2190,
+      "end": 2256
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "a5_next_pivot_beyond",
+      "line": 2268,
+      "end": 2293
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "a5_einschalten",
+      "line": 2300,
+      "end": 2307
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "a5_abschnitt",
+      "line": 2310,
+      "end": 2373
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e436_einschalten",
+      "line": 2388,
+      "end": 2395
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e436_rest_halten_vorprobe",
+      "line": 2398,
+      "end": 2404
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e436_strict_confirm_vorprobe",
+      "line": 2407,
+      "end": 2425
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e436_confirm_t1_vorprobe",
+      "line": 2428,
+      "end": 2446
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e436_cooldown_vorprobe",
+      "line": 2453,
+      "end": 2466
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e436_abschnitt",
+      "line": 2469,
+      "end": 2553
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e438_einschalten",
+      "line": 2567,
+      "end": 2574
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e438_signale_verschieden",
+      "line": 2577,
+      "end": 2585
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e438_abschnitt",
+      "line": 2588,
+      "end": 2653
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "_e442_cfg",
+      "line": 2662,
+      "end": 2663
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e442_vierergruppen",
+      "line": 2666,
+      "end": 2712
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e442_wechselwirkung",
+      "line": 2715,
+      "end": 2717
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "monats_probe",
+      "line": 2720,
+      "end": 2739
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e442_abschnitt",
+      "line": 2742,
+      "end": 2787
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "e445_abschnitt",
+      "line": 2790,
+      "end": 2795
+    },
+    {
+      "file": "engine/backtest.py",
+      "name": "main",
+      "line": 2798,
+      "end": 3977
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "build_url",
+      "line": 58,
+      "end": 60
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "get_json",
+      "line": 63,
+      "end": 69
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "fetch_history",
+      "line": 72,
+      "end": 82
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_history_points",
+      "line": 93,
+      "end": 102
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "oi_by_ts",
+      "line": 105,
+      "end": 108
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "funding_by_ts",
+      "line": 111,
+      "end": 114
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "liquidations_by_ts",
+      "line": 117,
+      "end": 121
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "fut_delta_by_ts",
+      "line": 124,
+      "end": 152
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "long_short_by_ts",
+      "line": 155,
+      "end": 165
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_ablehnungsgrund",
+      "line": 198,
+      "end": 219
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_ist_btc_dollar_markt",
+      "line": 222,
+      "end": 224
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_kandidaten_je_boerse",
+      "line": 227,
+      "end": 240
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_abgelehnte_je_boerse",
+      "line": 243,
+      "end": 258
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_groesster_je_boerse",
+      "line": 261,
+      "end": 286
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_einheit_einschaetzen",
+      "line": 289,
+      "end": 304
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_mit_wiederholung",
+      "line": 313,
+      "end": 340
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_reihe_auswerten",
+      "line": 343,
+      "end": 364
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_hole_reihen_roh",
+      "line": 370,
+      "end": 454
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_pruefe_symbole",
+      "line": 457,
+      "end": 466
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "spot_auswahl",
+      "line": 481,
+      "end": 504
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "spot_symbole",
+      "line": 507,
+      "end": 509
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_summiere_vollstaendig",
+      "line": 512,
+      "end": 543
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "spot_delta_aggregiert",
+      "line": 546,
+      "end": 576
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_perp_ablehnungsgrund",
+      "line": 598,
+      "end": 612
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_perp_kandidaten_je_boerse",
+      "line": 615,
+      "end": 621
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "perp_auswahl",
+      "line": 624,
+      "end": 657
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_nach_denominierung",
+      "line": 660,
+      "end": 679
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "fut_delta_aggregiert",
+      "line": 682,
+      "end": 696
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_werte_je_symbol",
+      "line": 699,
+      "end": 705
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "oi_je_symbol",
+      "line": 708,
+      "end": 714
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "oi_aggregiert",
+      "line": 717,
+      "end": 722
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "gewichtetes_mittel",
+      "line": 736,
+      "end": 779
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "funding_aggregiert",
+      "line": 782,
+      "end": 794
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "long_short_aggregiert",
+      "line": 797,
+      "end": 808
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "skalen_vergleich",
+      "line": 811,
+      "end": 839
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "liq_aggregiert",
+      "line": 842,
+      "end": 861
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "spot_probe",
+      "line": 864,
+      "end": 948
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "_sample",
+      "line": 955,
+      "end": 979
+    },
+    {
+      "file": "engine/coinalyze.py",
+      "name": "probe",
+      "line": 982,
+      "end": 1043
+    },
+    {
+      "file": "engine/e445.py",
+      "name": "regel",
+      "line": 17,
+      "end": 31
+    },
+    {
+      "file": "engine/e445.py",
+      "name": "auswerten",
+      "line": 34,
+      "end": 67
+    },
+    {
+      "file": "engine/e445.py",
+      "name": "bericht",
+      "line": 70,
+      "end": 96
+    },
+    {
+      "file": "engine/e445.py",
+      "name": "messen",
+      "line": 99,
+      "end": 112
+    },
+    {
+      "file": "engine/e445.py",
+      "name": "main",
+      "line": 115,
+      "end": 144
+    },
+    {
+      "file": "engine/main.py",
+      "name": "_get_json",
+      "line": 68,
+      "end": 78
+    },
+    {
+      "file": "engine/main.py",
+      "name": "_sth_holen",
+      "line": 95,
+      "end": 107
+    },
+    {
+      "file": "engine/main.py",
+      "name": "sth_bitview",
+      "line": 110,
+      "end": 125
+    },
+    {
+      "file": "engine/main.py",
+      "name": "sth_bgeometrics",
+      "line": 128,
+      "end": 140
+    },
+    {
+      "file": "engine/main.py",
+      "name": "sth_kostenbasis",
+      "line": 143,
+      "end": 160
+    },
+    {
+      "file": "engine/main.py",
+      "name": "fetch_spot",
+      "line": 163,
+      "end": 193
+    },
+    {
+      "file": "engine/main.py",
+      "name": "_iso_to_ms",
+      "line": 196,
+      "end": 197
+    },
+    {
+      "file": "engine/main.py",
+      "name": "_latest_leq",
+      "line": 200,
+      "end": 207
+    },
+    {
+      "file": "engine/main.py",
+      "name": "fetch_oi_snapshot",
+      "line": 212,
+      "end": 219
+    },
+    {
+      "file": "engine/main.py",
+      "name": "fetch_funding_8h",
+      "line": 222,
+      "end": 229
+    },
+    {
+      "file": "engine/main.py",
+      "name": "fetch_market_data",
+      "line": 232,
+      "end": 315
+    },
+    {
+      "file": "engine/main.py",
+      "name": "eval_params",
+      "line": 369,
+      "end": 394
+    },
+    {
+      "file": "engine/main.py",
+      "name": "pos_to_state",
+      "line": 399,
+      "end": 442
+    },
+    {
+      "file": "engine/main.py",
+      "name": "pos_from_state",
+      "line": 445,
+      "end": 487
+    },
+    {
+      "file": "engine/main.py",
+      "name": "zonen_vorschau",
+      "line": 490,
+      "end": 559
+    },
+    {
+      "file": "engine/main.py",
+      "name": "widerstand_marken",
+      "line": 562,
+      "end": 588
+    },
+    {
+      "file": "engine/main.py",
+      "name": "positions_plan",
+      "line": 591,
+      "end": 740
+    },
+    {
+      "file": "engine/main.py",
+      "name": "plan_geaendert",
+      "line": 743,
+      "end": 777
+    },
+    {
+      "file": "engine/main.py",
+      "name": "watch_flush",
+      "line": 780,
+      "end": 875
+    },
+    {
+      "file": "engine/main.py",
+      "name": "lage_abruf",
+      "line": 880,
+      "end": 951
+    },
+    {
+      "file": "engine/main.py",
+      "name": "e41_meldung",
+      "line": 954,
+      "end": 982
+    },
+    {
+      "file": "engine/main.py",
+      "name": "run_engine",
+      "line": 985,
+      "end": 1114
+    },
+    {
+      "file": "engine/main.py",
+      "name": "send_testnachricht",
+      "line": 1117,
+      "end": 1121
+    },
+    {
+      "file": "engine/main.py",
+      "name": "resend_all_signals",
+      "line": 1124,
+      "end": 1140
+    },
+    {
+      "file": "engine/sabotage_e38.py",
+      "name": "lauf",
+      "line": 133,
+      "end": 139
+    },
+    {
+      "file": "engine/sabotage_e381.py",
+      "name": "lauf",
+      "line": 95,
+      "end": 103
+    },
+    {
+      "file": "engine/sabotage_e39.py",
+      "name": "lauf",
+      "line": 126,
+      "end": 132
+    },
+    {
+      "file": "engine/sabotage_e40.py",
+      "name": "lauf",
+      "line": 107,
+      "end": 113
+    },
+    {
+      "file": "engine/sabotage_e41.py",
+      "name": "lauf",
+      "line": 205,
+      "end": 211
+    },
+    {
+      "file": "engine/sabotage_e43.py",
+      "name": "lauf",
+      "line": 46,
+      "end": 52
+    },
+    {
+      "file": "engine/sabotage_e433.py",
+      "name": "lauf",
+      "line": 126,
+      "end": 132
+    },
+    {
+      "file": "engine/sabotage_e434.py",
+      "name": "lauf",
+      "line": 147,
+      "end": 153
+    },
+    {
+      "file": "engine/sabotage_e434b.py",
+      "name": "lauf",
+      "line": 58,
+      "end": 64
+    },
+    {
+      "file": "engine/sabotage_e441.py",
+      "name": "lauf",
+      "line": 42,
+      "end": 48
+    },
+    {
+      "file": "engine/sabotage_e442.py",
+      "name": "lauf",
+      "line": 38,
+      "end": 44
+    },
+    {
+      "file": "engine/sabotage_e443.py",
+      "name": "lauf",
+      "line": 158,
+      "end": 164
+    },
+    {
+      "file": "engine/sabotage_e444.py",
+      "name": "main",
+      "line": 83,
+      "end": 119
+    },
+    {
+      "file": "engine/sabotage_e445.py",
+      "name": "main",
+      "line": 38,
+      "end": 70
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "Candle",
+      "line": 18,
+      "end": 23
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "FlowPoint",
+      "line": 27,
+      "end": 38
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "Pattern",
+      "line": 42,
+      "end": 57
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "SignalType",
+      "line": 60,
+      "end": 86
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "Signal",
+      "line": 90,
+      "end": 103
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "Pivot",
+      "line": 107,
+      "end": 111
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "Impulse",
+      "line": 115,
+      "end": 126
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "FibZones",
+      "line": 130,
+      "end": 142
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "atr",
+      "line": 148,
+      "end": 157
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "find_pivots",
+      "line": 160,
+      "end": 186
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "last_significant_impulse",
+      "line": 210,
+      "end": 263
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "fib_zones",
+      "line": 266,
+      "end": 281
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "ema",
+      "line": 291,
+      "end": 299
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "resample_daily",
+      "line": 302,
+      "end": 316
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "daily_trend",
+      "line": 319,
+      "end": 340
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "trend_lage",
+      "line": 343,
+      "end": 369
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "daily_fib_zone",
+      "line": 372,
+      "end": 405
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "gleiches_bein",
+      "line": 408,
+      "end": 419
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "trend_intakt",
+      "line": 422,
+      "end": 433
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "gegen_zonen",
+      "line": 436,
+      "end": 461
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_slope",
+      "line": 467,
+      "end": 471
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_muster2_dollar",
+      "line": 474,
+      "end": 501
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "oi_in_btc",
+      "line": 504,
+      "end": 521
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "oi_aenderung",
+      "line": 524,
+      "end": 537
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_median",
+      "line": 590,
+      "end": 596
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_of_richtung",
+      "line": 599,
+      "end": 608
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_of_reihe",
+      "line": 611,
+      "end": 625
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "spot_nachfrage",
+      "line": 628,
+      "end": 659
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_p",
+      "line": 662,
+      "end": 664
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_usd_kurz",
+      "line": 667,
+      "end": 681
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_fut_cvd_usd",
+      "line": 684,
+      "end": 706
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "orderflow_detail",
+      "line": 709,
+      "end": 858
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "lage_bericht",
+      "line": 861,
+      "end": 929
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "ampel_richtung",
+      "line": 975,
+      "end": 994
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "ampel",
+      "line": 997,
+      "end": 1044
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "classify_pattern",
+      "line": 1047,
+      "end": 1136
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "PosState",
+      "line": 1142,
+      "end": 1148
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "Position",
+      "line": 1152,
+      "end": 1204
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_reset_position",
+      "line": 1207,
+      "end": 1230
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "kuerze_einstiege",
+      "line": 1248,
+      "end": 1265
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "confirm_ok",
+      "line": 1356,
+      "end": 1372
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "next_pivot_beyond",
+      "line": 1375,
+      "end": 1381
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "liq_cascade",
+      "line": 1384,
+      "end": 1398
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "liq_levels",
+      "line": 1401,
+      "end": 1422
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "in_liq_zone",
+      "line": 1425,
+      "end": 1431
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "stop_entscheidung",
+      "line": 1434,
+      "end": 1499
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "muster5_haelt_zurueck",
+      "line": 1502,
+      "end": 1525
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "ruecktest_schritt",
+      "line": 1536,
+      "end": 1567
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "kerzen_seit",
+      "line": 1570,
+      "end": 1582
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "_StopMerker",
+      "line": 1586,
+      "end": 1591
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "ruecktest_teil_stop",
+      "line": 1594,
+      "end": 1616
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "bestand_nach",
+      "line": 1619,
+      "end": 1635
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "verkauf_faktor_wert",
+      "line": 1638,
+      "end": 1646
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "verkauf_tranche",
+      "line": 1649,
+      "end": 1652
+    },
+    {
+      "file": "engine/strategy_core.py",
+      "name": "evaluate",
+      "line": 1655,
+      "end": 2652
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_lage_zeilen",
+      "line": 54,
+      "end": 84
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_ampel_zeilen",
+      "line": 87,
+      "end": 108
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "format_vorschau",
+      "line": 111,
+      "end": 151
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "format_plan",
+      "line": 154,
+      "end": 244
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "send_plan",
+      "line": 247,
+      "end": 255
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_fmt_usd",
+      "line": 258,
+      "end": 259
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_fmt_ts",
+      "line": 262,
+      "end": 264
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "format_signal",
+      "line": 267,
+      "end": 285
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "format_flush_warnung",
+      "line": 288,
+      "end": 316
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "format_flush_aufloesung",
+      "line": 319,
+      "end": 345
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "format_stop_rueckeroberung",
+      "line": 348,
+      "end": 384
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_dauer",
+      "line": 387,
+      "end": 392
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "format_ruecktest",
+      "line": 395,
+      "end": 464
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "send_text",
+      "line": 467,
+      "end": 475
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "send_telegram",
+      "line": 478,
+      "end": 487
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "send_signals",
+      "line": 490,
+      "end": 504
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_umbruch",
+      "line": 518,
+      "end": 525
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_orderflow_zeilen",
+      "line": 528,
+      "end": 546
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_lage_kurz",
+      "line": 549,
+      "end": 567
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_ampel_kurz",
+      "line": 570,
+      "end": 581
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "_sth_zeilen",
+      "line": 584,
+      "end": 604
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "format_lage",
+      "line": 607,
+      "end": 650
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "send_lage",
+      "line": 653,
+      "end": 662
+    },
+    {
+      "file": "engine/telegram_notify.py",
+      "name": "send_vorschau",
+      "line": 665,
+      "end": 674
+    },
+    {
+      "file": "engine/test_archiv.py",
+      "name": "test_zusammen_neu_gewinnt_alt_bleibt",
+      "line": 11,
+      "end": 18
+    },
+    {
+      "file": "engine/test_archiv.py",
+      "name": "test_zusammen_mit_leeren_karten",
+      "line": 21,
+      "end": 24
+    },
+    {
+      "file": "engine/test_archiv.py",
+      "name": "test_nur_abgeschlossene_kerzen",
+      "line": 27,
+      "end": 32
+    },
+    {
+      "file": "engine/test_archiv.py",
+      "name": "test_speichern_und_laden_behaelt_liquidations_paare",
+      "line": 35,
+      "end": 44
+    },
+    {
+      "file": "engine/test_archiv.py",
+      "name": "test_fehlende_oder_kaputte_datei_ist_kein_fehler",
+      "line": 47,
+      "end": 53
+    },
+    {
+      "file": "engine/test_archiv.py",
+      "name": "test_backtest_mischt_das_archiv_wirklich_dazu",
+      "line": 56,
+      "end": 65
+    },
+    {
+      "file": "engine/test_archiv.py",
+      "name": "test_backtest_ruft_archiv_mischen_im_hauptlauf_auf",
+      "line": 68,
+      "end": 73
+    },
+    {
+      "file": "engine/test_archiv.py",
+      "name": "test_archiv_ohne_key_tut_nichts",
+      "line": 76,
+      "end": 83
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_ts",
+      "line": 9,
+      "end": 10
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_score_trifft_mit_toleranz",
+      "line": 13,
+      "end": 26
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_score_short_zuordnung",
+      "line": 29,
+      "end": 38
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_simulate_long_zyklus_ohne_gebuehr",
+      "line": 41,
+      "end": 56
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_simulate_stoploss_verlust",
+      "line": 59,
+      "end": 69
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_simulate_short_gewinn",
+      "line": 72,
+      "end": 82
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_score_fehltreffer_druecken_praezision",
+      "line": 85,
+      "end": 91
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_monatsuebersicht_zerlegt_das_ergebnis",
+      "line": 94,
+      "end": 119
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_run_half_schneidet_haelfte_1_hinten_ab",
+      "line": 122,
+      "end": 140
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_deploy_pct_haelt_reserve_zurueck",
+      "line": 143,
+      "end": 155
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_reserve_laesst_geld_fuer_die_tiefere_tranche",
+      "line": 158,
+      "end": 176
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_max_drawdown_wird_berechnet",
+      "line": 179,
+      "end": 189
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_score_ignoriert_signale_nach_dem_letzten_trigger",
+      "line": 192,
+      "end": 204
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_tageskerzen",
+      "line": 209,
+      "end": 214
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_furkan_pnl_rechnet_kauf_und_verkauf_korrekt",
+      "line": 217,
+      "end": 224
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_furkan_pnl_gebuehr_wird_abgezogen",
+      "line": 227,
+      "end": 233
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_furkan_pnl_verkauf_ohne_position_tut_nichts",
+      "line": 236,
+      "end": 239
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_furkan_pnl_rotationstag_verkauft_erst_dann_kauft",
+      "line": 242,
+      "end": 254
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_furkan_pnl_fenster_wird_beachtet",
+      "line": 257,
+      "end": 264
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_furkan_pnl_ohne_kerzen_im_fenster_liefert_leer",
+      "line": 267,
+      "end": 270
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_rohkerzen",
+      "line": 275,
+      "end": 279
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_build_series_summiert_futures_delta_auf",
+      "line": 282,
+      "end": 292
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_build_series_ohne_futures_daten_bleibt_bei_null",
+      "line": 295,
+      "end": 300
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_build_series_uebernimmt_long_anteil",
+      "line": 303,
+      "end": 308
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_simulate_fill_close_nutzt_den_kerzenschluss",
+      "line": 313,
+      "end": 331
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_simulate_fill_aendert_nichts_bei_kerzenschluss_signalen",
+      "line": 334,
+      "end": 345
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_simulate_fill_default_ist_level",
+      "line": 348,
+      "end": 355
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_simulate_fill_close_faellt_auf_signalpreis_zurueck",
+      "line": 358,
+      "end": 364
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_panel_variante_entspricht_der_live_einstellung",
+      "line": 367,
+      "end": 397
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_beteiligung_rechnet_auf_und_abwaerts_getrennt",
+      "line": 402,
+      "end": 416
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_beteiligung_erkennt_das_muster_grosser_anstiege",
+      "line": 419,
+      "end": 430
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_simulate_schreibt_die_btc_rendite_je_monat_mit",
+      "line": 433,
+      "end": 444
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_sig",
+      "line": 449,
+      "end": 450
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_gegengeschaeft_wird_je_kerze_gezaehlt_nicht_je_signal",
+      "line": 453,
+      "end": 465
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_vollstaendiger_ausstieg_ist_kein_gegengeschaeft",
+      "line": 468,
+      "end": 479
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_no_flip_variante_gegen_die_live_einstellung_existiert",
+      "line": 482,
+      "end": 495
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_neustart_varianten_unterscheiden_sich_nur_im_gemeinten_punkt",
+      "line": 500,
+      "end": 519
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_beteiligung_steht_im_pnl_dict_fuer_die_tabellenspalte",
+      "line": 522,
+      "end": 550
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_tabellenkopf_und_trennlinie_haben_gleich_viele_spalten",
+      "line": 553,
+      "end": 574
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_rueckgang_zwischen_den_signalen_wird_mitgemessen",
+      "line": 579,
+      "end": 599
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_rueckgang_nutzt_das_kerzentief_nicht_den_schluss",
+      "line": 602,
+      "end": 615
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_rueckgang_short_nutzt_das_kerzenhoch",
+      "line": 618,
+      "end": 629
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_ohne_flush_zeile_unterscheidet_sich_nur_im_flush",
+      "line": 632,
+      "end": 649
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_ampel_zeilen_unterscheiden_sich_von_der_live_zeile_in_genau_einem_punkt",
+      "line": 652,
+      "end": 669
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_ampel_filter_kommt_im_backtest_ueberhaupt_an",
+      "line": 672,
+      "end": 679
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_build_series_ohne_spot_map_rechnet_wie_bisher",
+      "line": 684,
+      "end": 692
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_build_series_mit_spot_map_ERSETZT_die_binance_rechnung",
+      "line": 695,
+      "end": 708
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_build_series_leere_spot_map_haelt_das_cvd_flach_statt_binance_zu_nehmen",
+      "line": 711,
+      "end": 721
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_build_series_fehlende_kerze_in_der_spot_map_aendert_das_cvd_nicht",
+      "line": 724,
+      "end": 732
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_abschnitt_oder_grund_baut_bei_daten_den_echten_abschnitt",
+      "line": 737,
+      "end": 739
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_abschnitt_oder_grund_nennt_den_grund_statt_zu_verschwinden",
+      "line": 742,
+      "end": 749
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_abschnitt_oder_grund_sagt_auch_wenn_niemand_einen_grund_festhielt",
+      "line": 752,
+      "end": 755
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_abschnitt_oder_grund_rechnet_im_fehlerfall_NICHT",
+      "line": 758,
+      "end": 769
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_besser_in_beiden_haelften_verlangt_BEIDE",
+      "line": 774,
+      "end": 784
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_besser_in_beiden_haelften_zaehlt_gleichstand_NICHT_als_besser",
+      "line": 787,
+      "end": 790
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_besser_in_beiden_haelften_behauptet_nichts_ohne_basis",
+      "line": 793,
+      "end": 798
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_besser_in_beiden_haelften_nennt_alle_gewinner_nicht_nur_den_ersten",
+      "line": 801,
+      "end": 803
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_reihe",
+      "line": 811,
+      "end": 818
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_stat",
+      "line": 821,
+      "end": 838
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_nachlauf_grundrate_enthaelt_jede_bewertete_kerze",
+      "line": 841,
+      "end": 847
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_nachlauf_laesst_kerzen_ohne_vollen_nachlauf_aus",
+      "line": 850,
+      "end": 855
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_nachlauf_alle_horizonte_teilen_dieselbe_stichprobe",
+      "line": 858,
+      "end": 864
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_nachlauf_wertet_kerzen_vor_dem_start_nicht",
+      "line": 867,
+      "end": 870
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_nachlauf_zaehlt_episoden_nicht_kerzen",
+      "line": 873,
+      "end": 880
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_nachlauf_median_widersteht_einem_ausreisser",
+      "line": 883,
+      "end": 895
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_abschnitt_nennt_den_abstand_zur_grundrate",
+      "line": 898,
+      "end": 902
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_abschnitt_warnt_bei_zu_wenigen_episoden",
+      "line": 905,
+      "end": 910
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_abschnitt_sagt_es_wenn_muster5_gar_nicht_vorkam",
+      "line": 913,
+      "end": 916
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_abschnitt_warnt_nicht_bei_genug_episoden",
+      "line": 919,
+      "end": 923
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_abschnitt_sagt_dass_es_keine_ertragsaussage_ist",
+      "line": 926,
+      "end": 930
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_abschnitt_leer_bei_leerer_statistik",
+      "line": 933,
+      "end": 934
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_nachlauf_misst_nach_vorn_nicht_nach_hinten",
+      "line": 937,
+      "end": 944
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_muster_nachlauf_misst_den_rueckgang_als_rueckgang",
+      "line": 947,
+      "end": 952
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_median_mittelt_bei_gerader_anzahl",
+      "line": 955,
+      "end": 960
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_zeile",
+      "line": 973,
+      "end": 976
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live",
+      "line": 979,
+      "end": 991
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e43_bein_richtung_ist_live_und_das_panel_ist_mitgewandert",
+      "line": 994,
+      "end": 1004
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e43_alte_bein_richtung_unterscheidet_sich_in_genau_einem_punkt",
+      "line": 1007,
+      "end": 1016
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e38_die_beiden_halten_zeilen_messen_wirklich_verschiedenes",
+      "line": 1019,
+      "end": 1024
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e38_gegenprobe_bremse_ist_im_gitter",
+      "line": 1027,
+      "end": 1032
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e38_schalter_stehen_in_eval_keys_und_kommen_so_ueberhaupt_an",
+      "line": 1035,
+      "end": 1043
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_gegenprobe_zaehlt_nur_episodenbeginne",
+      "line": 1046,
+      "end": 1055
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_gegenprobe_tabelle_nennt_die_episodenzahl_nicht_die_kerzenzahl",
+      "line": 1058,
+      "end": 1065
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_gegenprobe_vergleicht_gegen_dieselbe_grundrate_wie_oben",
+      "line": 1068,
+      "end": 1076
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_gegenprobe_zeile_steht_im_gitter_und_heisst_wie_erwartet",
+      "line": 1079,
+      "end": 1087
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_stopreihe",
+      "line": 1092,
+      "end": 1101
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_stop",
+      "line": 1104,
+      "end": 1105
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_misst_ab_dem_stop_preis_nach_vorn",
+      "line": 1108,
+      "end": 1115
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_tiefster_punkt_ist_das_minimum_bis_zum_horizont",
+      "line": 1118,
+      "end": 1128
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_schaut_nicht_auf_die_stop_kerze_selbst",
+      "line": 1131,
+      "end": 1139
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_zaehlt_nur_stops",
+      "line": 1142,
+      "end": 1149
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_trennt_invalidierung_und_nachgezogenen_stop",
+      "line": 1152,
+      "end": 1163
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_ordnet_nach_dem_muster_in_der_stop_kerze",
+      "line": 1166,
+      "end": 1170
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_stops_am_fensterende_zaehlen_nicht_mit_aber_nicht_still",
+      "line": 1173,
+      "end": 1177
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_alle_horizonte_teilen_dieselbe_stichprobe",
+      "line": 1180,
+      "end": 1186
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_ohne_stops_liefert_keine_gruppe",
+      "line": 1189,
+      "end": 1193
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_stopstat",
+      "line": 1196,
+      "end": 1202
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_abschnitt_zeigt_den_tiefsten_punkt_in_jeder_zelle",
+      "line": 1205,
+      "end": 1208
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_abschnitt_markiert_duenne_gruppen",
+      "line": 1211,
+      "end": 1215
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_abschnitt_warnt_bei_zu_wenigen_stops_insgesamt",
+      "line": 1218,
+      "end": 1220
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_abschnitt_sagt_was_wieder_drueber_nicht_heisst",
+      "line": 1223,
+      "end": 1228
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_abschnitt_nennt_die_grundrate_wenn_vorhanden",
+      "line": 1231,
+      "end": 1236
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_abschnitt_nennt_keinen_namen",
+      "line": 1239,
+      "end": 1242
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e39_misst_die_live_einstellung_und_nicht_die_beste_variante",
+      "line": 1245,
+      "end": 1254
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_schlimmster_fall_ist_das_minimum_ueber_alle_stops",
+      "line": 1257,
+      "end": 1270
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_stop_nachlauf_gleichstand_ist_nicht_wieder_drueber",
+      "line": 1273,
+      "end": 1279
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_holen",
+      "line": 1288,
+      "end": 1296
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_bitview_antwort",
+      "line": 1299,
+      "end": 1301
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_bitview_index_null_ist_der_1_januar_2009",
+      "line": 1304,
+      "end": 1310
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_bitview_beachtet_den_startindex",
+      "line": 1313,
+      "end": 1315
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_bgeometrics_wandelt_text_in_zahlen",
+      "line": 1318,
+      "end": 1323
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_quellen_halten_fehler_fest_statt_abzustuerzen",
+      "line": 1326,
+      "end": 1332
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_bgeometrics_wird_genau_einmal_gefragt",
+      "line": 1335,
+      "end": 1339
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_reihe_sth",
+      "line": 1342,
+      "end": 1343
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_abgleich_findet_versatz_null_bei_gleichen_reihen",
+      "line": 1346,
+      "end": 1349
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_abgleich_erkennt_einen_verschobenen_tag",
+      "line": 1352,
+      "end": 1359
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_abgleich_ohne_gemeinsame_tage",
+      "line": 1362,
+      "end": 1363
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_je_kerze_nimmt_den_wert_des_vortags",
+      "line": 1366,
+      "end": 1373
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_stufen_kerzen",
+      "line": 1376,
+      "end": 1377
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_vorfrage_trennt_unter_und_ueber",
+      "line": 1380,
+      "end": 1386
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_vorfrage_misst_einstiege_ab_einstiegspreis_nach_vorn",
+      "line": 1389,
+      "end": 1400
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_vorfrage_ohne_sth_wert_kein_raten",
+      "line": 1403,
+      "end": 1407
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_abschnitt_warnt_bei_zweifelhafter_zuordnung",
+      "line": 1410,
+      "end": 1416
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_abschnitt_ohne_gegenpruefung_sagt_es",
+      "line": 1419,
+      "end": 1421
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_abschnitt_nennt_vortag_und_warnt_bei_duennen_gruppen",
+      "line": 1424,
+      "end": 1434
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_vorfrage_einstiege_am_fensterende_zaehlen_nicht_still_mit",
+      "line": 1437,
+      "end": 1446
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_ist_im_bericht_verdrahtet_und_die_probe_weg",
+      "line": 1449,
+      "end": 1455
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_sth_vorfrage_nutzt_die_live_einstellung",
+      "line": 1458,
+      "end": 1462
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_rueckeroberung_ist_live_und_das_panel_ist_mitgewandert",
+      "line": 1467,
+      "end": 1473
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_alter_stop_und_b3_unterscheiden_sich_in_genau_einem_punkt",
+      "line": 1476,
+      "end": 1486
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_labels_stimmen_mit_dem_bericht_ueberein",
+      "line": 1489,
+      "end": 1495
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter",
+      "line": 1498,
+      "end": 1509
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_schalter_kommen_an",
+      "line": 1512,
+      "end": 1514
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_kz",
+      "line": 1517,
+      "end": 1518
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_ausschalten_bleibt_an_bei_den_zahlen_vom_umschalttag",
+      "line": 1521,
+      "end": 1527
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_ausschalten_alter_stop_muss_in_beiden_haelften_klar_besser_sein",
+      "line": 1530,
+      "end": 1535
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_ausschalten_bei_zu_tiefem_rueckgang",
+      "line": 1538,
+      "end": 1544
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_greift_nicht_ist_kein_ausschaltgrund",
+      "line": 1547,
+      "end": 1549
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_t",
+      "line": 1552,
+      "end": 1554
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_e41_results",
+      "line": 1557,
+      "end": 1573
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_e41_text",
+      "line": 1576,
+      "end": 1578
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_vorprobe_die_zeilen_sind_da",
+      "line": 1581,
+      "end": 1587
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_bleibt_an_und_sagt_warum",
+      "line": 1590,
+      "end": 1594
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_meldet_ausschalten_bei_klar_besserem_alten_stop",
+      "line": 1597,
+      "end": 1600
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_nennt_die_ueberstimmung_nur_bei_ausschalten",
+      "line": 1603,
+      "end": 1612
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_meldet_ausschalten_bei_zu_tiefem_rueckgang",
+      "line": 1615,
+      "end": 1617
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_zeigt_was_aus_der_position_wurde_samt_wiedereinstieg",
+      "line": 1620,
+      "end": 1627
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_wiedereinstieg_nach_dem_live_ausstieg_zaehlt_nicht",
+      "line": 1630,
+      "end": 1638
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_kein_ausstieg_bis_fensterende",
+      "line": 1641,
+      "end": 1643
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_hinweis_wenn_die_regel_nicht_greift",
+      "line": 1646,
+      "end": 1654
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_abschnitt_leer_ohne_basis_oder_ohne_alten_stop",
+      "line": 1657,
+      "end": 1661
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e41_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis",
+      "line": 1664,
+      "end": 1667
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e433_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live",
+      "line": 1672,
+      "end": 1683
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e433_live_konfig_steht_auf_alt",
+      "line": 1686,
+      "end": 1696
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_hz",
+      "line": 1699,
+      "end": 1700
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e433_einschalten_nur_wenn_beide_haelften_klar_besser",
+      "line": 1703,
+      "end": 1708
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e433_einschalten_nicht_bei_zu_tiefem_rueckgang",
+      "line": 1711,
+      "end": 1718
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_pump_reihe",
+      "line": 1721,
+      "end": 1730
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e433_vorprobe_im_bericht_zaehlt_umklassifizierte_kerzen",
+      "line": 1733,
+      "end": 1739
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e433_vorprobe_zeigt_live_gegen_backtest",
+      "line": 1742,
+      "end": 1757
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e433_vorprobe_zaehlt_nur_nachstellbare_kerzen_fuer_live",
+      "line": 1760,
+      "end": 1765
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e433_abschnitt_meldet_urteil_und_kein_urteil_ohne_umklassifizierung",
+      "line": 1768,
+      "end": 1787
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e433_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis",
+      "line": 1790,
+      "end": 1794
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_rohkerzen_kurs",
+      "line": 1799,
+      "end": 1804
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_e434_oi_mit_luecken",
+      "line": 1807,
+      "end": 1812
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_build_series_rechnet_um_und_fuellt_dann_kontrakte_auf",
+      "line": 1815,
+      "end": 1828
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_build_series_ohne_oi_map_hat_keine_kontrakt_reihe",
+      "line": 1831,
+      "end": 1838
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live",
+      "line": 1841,
+      "end": 1851
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_live_konfig_steht_auf_usd",
+      "line": 1854,
+      "end": 1864
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_einschalten_nur_wenn_beide_haelften_klar_besser",
+      "line": 1867,
+      "end": 1872
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_einschalten_nicht_bei_zu_tiefem_rueckgang",
+      "line": 1875,
+      "end": 1881
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_vorprobe_zaehlt_a3_je_muster",
+      "line": 1884,
+      "end": 1897
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_vorprobe_im_pump_szenario_findet_umklassifizierte_kerzen",
+      "line": 1900,
+      "end": 1911
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_vorprobe_ohne_oi_daten_misst_nichts",
+      "line": 1914,
+      "end": 1920
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_abschnitt_meldet_urteil_und_kein_urteil",
+      "line": 1923,
+      "end": 1946
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e434_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis",
+      "line": 1949,
+      "end": 1953
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_a5_kerzen",
+      "line": 1958,
+      "end": 1966
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_zaehlt_kerzen_ausserhalb_des_nachstellbaren_bereichs_nicht",
+      "line": 1969,
+      "end": 1974
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_findet_einen_unterschied_wenn_die_live_historie_das_alte_hoch_verliert",
+      "line": 1977,
+      "end": 1986
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_keine_kerzen_nachstellbar_ohne_1300_kerzen_vorlauf",
+      "line": 1989,
+      "end": 1992
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_ohne_jeden_unterschied_gleiche_pivots_ueberall",
+      "line": 1995,
+      "end": 2001
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_abschnitt_meldet_null_treffer_als_kein_befund",
+      "line": 2004,
+      "end": 2008
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_abschnitt_meldet_treffer_ohne_gitter_als_nicht_gemessen",
+      "line": 2011,
+      "end": 2015
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_a5_grid_daten",
+      "line": 2018,
+      "end": 2028
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_abschnitt_meldet_urteil_und_kein_urteil",
+      "line": 2031,
+      "end": 2039
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_abschnitt_ohne_zeile_im_gitter_sagt_nicht_gemessen",
+      "line": 2042,
+      "end": 2044
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_einschalten_folgt_derselben_regel_wie_e43",
+      "line": 2047,
+      "end": 2051
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live",
+      "line": 2054,
+      "end": 2062
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_live_konfig_steht_auf_voll",
+      "line": 2065,
+      "end": 2074
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_a5_ist_im_bericht_verdrahtet",
+      "line": 2077,
+      "end": 2081
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_vier_zeilen_haben_genau_einen_unterschied_zur_panel_zeile",
+      "line": 2086,
+      "end": 2097
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_rest_halten_vorprobe_zaehlt_gegen_muster_verkaeufe",
+      "line": 2100,
+      "end": 2107
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_e436_flach",
+      "line": 2110,
+      "end": 2116
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_strict_confirm_vorprobe_findet_den_unterschied",
+      "line": 2119,
+      "end": 2123
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_strict_confirm_vorprobe_ohne_unterschied_bei_negativem_funding",
+      "line": 2126,
+      "end": 2130
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_confirm_t1_vorprobe_zaehlt_einstiege_ohne_bestaetigung",
+      "line": 2133,
+      "end": 2139
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_confirm_t1_vorprobe_zaehlt_nur_0_5_level_einstiege",
+      "line": 2142,
+      "end": 2146
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_cooldown_vorprobe_zaehlt_einstiege_kurz_nach_einem_stop",
+      "line": 2149,
+      "end": 2156
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_cooldown_vorprobe_ohne_vorherigen_stop_kein_treffer",
+      "line": 2159,
+      "end": 2162
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_einschalten_folgt_derselben_regel_wie_e43",
+      "line": 2165,
+      "end": 2169
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_e436_grid_daten",
+      "line": 2172,
+      "end": 2182
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_abschnitt_ohne_treffer_meldet_kein_urteil",
+      "line": 2185,
+      "end": 2193
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_abschnitt_meldet_urteil_je_zeile",
+      "line": 2196,
+      "end": 2213
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_abschnitt_ohne_panel_zeile_kein_urteil",
+      "line": 2216,
+      "end": 2218
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e436_ist_im_bericht_verdrahtet",
+      "line": 2221,
+      "end": 2228
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e438_zwei_zeilen_haben_genau_einen_unterschied_zur_panel_zeile",
+      "line": 2233,
+      "end": 2242
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e438_signale_verschieden_zaehlt_symmetrische_differenz",
+      "line": 2245,
+      "end": 2250
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e438_einschalten_folgt_derselben_regel_wie_e43",
+      "line": 2253,
+      "end": 2257
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "_e438_grid",
+      "line": 2260,
+      "end": 2269
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e438_abschnitt_ohne_unterschied_meldet_kein_urteil",
+      "line": 2272,
+      "end": 2277
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e438_abschnitt_meldet_urteil_je_zeile",
+      "line": 2280,
+      "end": 2293
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e438_abschnitt_ohne_panel_zeile_kein_urteil",
+      "line": 2296,
+      "end": 2298
+    },
+    {
+      "file": "engine/test_backtest.py",
+      "name": "test_e438_ist_im_bericht_verdrahtet",
+      "line": 2301,
+      "end": 2304
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_build_url_enthaelt_endpoint_und_params",
+      "line": 9,
+      "end": 14
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_FakeResp",
+      "line": 17,
+      "end": 23
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_get_json_nutzt_injizierten_opener_und_key",
+      "line": 26,
+      "end": 39
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_sample_kuerzt_history_auf_letzte_drei",
+      "line": 42,
+      "end": 46
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_fake",
+      "line": 49,
+      "end": 52
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_oi_by_ts_nimmt_close_und_wandelt_in_ms",
+      "line": 56,
+      "end": 61
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_liquidations_by_ts_long_und_short",
+      "line": 64,
+      "end": 68
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_history_points_findet_symbol",
+      "line": 71,
+      "end": 74
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_mit_antwort",
+      "line": 99,
+      "end": 103
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_fut_delta_rechnet_kaeufe_minus_verkaeufe",
+      "line": 106,
+      "end": 118
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_long_short_liest_den_long_anteil",
+      "line": 121,
+      "end": 127
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_parser_ueberspringen_unvollstaendige_punkte",
+      "line": 130,
+      "end": 142
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_markt",
+      "line": 152,
+      "end": 154
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_ablehnungsgrund_nennt_den_grund_statt_nur_nein",
+      "line": 157,
+      "end": 176
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_kandidaten_je_boerse_behaelt_ALLE_maerkte_nicht_nur_einen",
+      "line": 179,
+      "end": 187
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_abgelehnte_je_boerse_erklaert_warum_okx_leer_ausgeht",
+      "line": 190,
+      "end": 202
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_groesster_je_boerse_schlaegt_die_alte_usdt_rangfolge",
+      "line": 205,
+      "end": 215
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_groesster_je_boerse_nimmt_keinen_markt_den_wir_nicht_lesen_koennen",
+      "line": 218,
+      "end": 231
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_reihe_auswerten_summiert_das_volumen_ueber_alle_punkte",
+      "line": 234,
+      "end": 242
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_einheit_einschaetzen_unterscheidet_btc_von_dollar",
+      "line": 245,
+      "end": 249
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_punkte",
+      "line": 252,
+      "end": 258
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_opener",
+      "line": 261,
+      "end": 274
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_pruefe_symbole_teilt_in_bloecke_und_sammelt_alle_reihen",
+      "line": 277,
+      "end": 284
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_pruefe_symbole_ein_kaputter_block_reisst_den_rest_nicht_mit",
+      "line": 287,
+      "end": 304
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_spot_probe_waehlt_nach_volumen_und_nennt_fehlende_boersen",
+      "line": 307,
+      "end": 334
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_spot_probe_meldet_fehlenden_endpunkt_als_klares_nein",
+      "line": 337,
+      "end": 346
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_symbol_konstante_ist_binance_nicht_aggregiert",
+      "line": 349,
+      "end": 355
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_sample_deckelt_lange_listen_und_sagt_wie_viele_fehlen",
+      "line": 358,
+      "end": 365
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_ohlcv_opener",
+      "line": 370,
+      "end": 379
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_pkt",
+      "line": 382,
+      "end": 383
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_spot_delta_summiert_ueber_die_boersen",
+      "line": 386,
+      "end": 395
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_spot_delta_laesst_unvollstaendige_zeitpunkte_aus_und_zaehlt_sie",
+      "line": 398,
+      "end": 412
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_spot_delta_meldet_symbole_ohne_antwort",
+      "line": 415,
+      "end": 422
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_spot_delta_ueberspringt_punkte_ohne_v_oder_bv",
+      "line": 425,
+      "end": 430
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_spot_symbole_groesster_gegen_alle_dollar",
+      "line": 433,
+      "end": 448
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_spot_symbole_nimmt_bei_alle_dollar_nur_lesbare_reihen",
+      "line": 451,
+      "end": 461
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_spot_auswahl_holt_die_marktliste_nur_EINMAL",
+      "line": 464,
+      "end": 481
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_perp",
+      "line": 486,
+      "end": 489
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_perp_ablehnungsgrund_nennt_den_grund",
+      "line": 492,
+      "end": 505
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_nach_denominierung_trennt_einheiten_und_das_volumen_entscheidet",
+      "line": 508,
+      "end": 526
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_nach_denominierung_laesst_alle_drin_wenn_die_einheit_gleich_ist",
+      "line": 529,
+      "end": 534
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_hist_opener",
+      "line": 537,
+      "end": 553
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_oi_aggregiert_summiert_und_laesst_luecken_aus",
+      "line": 556,
+      "end": 573
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_liq_aggregiert_haelt_long_und_short_auf_denselben_zeitpunkten",
+      "line": 576,
+      "end": 588
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_fut_delta_aggregiert_rechnet_wie_das_spot_delta",
+      "line": 591,
+      "end": 597
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_perp_auswahl_waehlt_nach_volumen_und_gibt_die_denominierung_mit",
+      "line": 600,
+      "end": 616
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_summiere_vollstaendig_ist_die_EINE_regel_fuer_alle_vier_werte",
+      "line": 619,
+      "end": 631
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_perp_auswahl_liefert_die_einheiten_trennung_gleich_mit",
+      "line": 634,
+      "end": 647
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_auswahl_misst_nur_30_tage_die_datenabfrage_aber_das_volle_fenster",
+      "line": 650,
+      "end": 673
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_hole_reihen_faellt_auf_einzelabruf_zurueck",
+      "line": 678,
+      "end": 698
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_hole_reihen_fragt_nicht_einzeln_nach_wenn_alles_kam",
+      "line": 701,
+      "end": 713
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_taktung_haengt_nicht_mehr_daran_ob_kw_leer_ist",
+      "line": 716,
+      "end": 727
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_rueckfall_greift_auch_wenn_die_ANZAHL_stimmt_aber_ein_symbol_fehlt",
+      "line": 730,
+      "end": 749
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "_http429",
+      "line": 756,
+      "end": 760
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_wiederholt_bei_429_und_haelt_sich_an_retry_after",
+      "line": 763,
+      "end": 777
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_ohne_retry_after_wird_die_wartezeit_verdoppelt",
+      "line": 780,
+      "end": 795
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_wartezeit_wird_gedeckelt_und_andere_fehler_fliegen_sofort",
+      "line": 798,
+      "end": 827
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_gibt_nach_MAX_VERSUCHEN_auf_statt_ewig_zu_warten",
+      "line": 830,
+      "end": 846
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_der_echte_abruf_benutzt_die_wiederholung_auch_wirklich",
+      "line": 849,
+      "end": 871
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_gewichtetes_mittel_ist_KEIN_einfacher_durchschnitt",
+      "line": 878,
+      "end": 890
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_gewichte_werden_normiert",
+      "line": 893,
+      "end": 900
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_gewichtetes_mittel_laesst_zeitpunkte_ohne_gewicht_aus",
+      "line": 903,
+      "end": 910
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_gewichtetes_mittel_ueberspringt_zeitpunkte_mit_gewicht_null",
+      "line": 913,
+      "end": 919
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_funding_und_long_short_holen_die_richtigen_endpunkte_und_felder",
+      "line": 922,
+      "end": 941
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_skalen_vergleich_findet_einen_faktor_und_das_vorzeichen",
+      "line": 944,
+      "end": 952
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_skalen_vergleich_meldet_wenn_es_nichts_zu_vergleichen_gibt",
+      "line": 955,
+      "end": 957
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_skalen_vergleich_zeigt_abweichende_vorzeichen",
+      "line": 960,
+      "end": 964
+    },
+    {
+      "file": "engine/test_coinalyze.py",
+      "name": "test_gewichtetes_mittel_meldet_symbole_ganz_ohne_gewichtsreihe",
+      "line": 967,
+      "end": 976
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "_g",
+      "line": 5,
+      "end": 6
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "_mini_gitter",
+      "line": 9,
+      "end": 18
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_vierergruppe_wird_gefunden_und_auf_die_aus_ecke_ausgerichtet",
+      "line": 21,
+      "end": 28
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_zeilen_mit_zwei_unterschieden_bilden_keine_gruppe",
+      "line": 31,
+      "end": 35
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_ohne_a_plus_b_keine_gruppe",
+      "line": 38,
+      "end": 40
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_wechselwirkung_rechnet_richtig",
+      "line": 43,
+      "end": 46
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_echtes_gitter_hat_die_16_gruppen_der_analyse",
+      "line": 49,
+      "end": 55
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "_m",
+      "line": 58,
+      "end": 59
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_monats_probe_kippt_bei_einem_ausreisser",
+      "line": 62,
+      "end": 69
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_monats_probe_haelt_bei_breitem_vorsprung",
+      "line": 72,
+      "end": 74
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_monats_probe_ohne_gemeinsame_monate",
+      "line": 77,
+      "end": 78
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_abschnitt_zeigt_tabelle_und_probe",
+      "line": 81,
+      "end": 96
+    },
+    {
+      "file": "engine/test_e442.py",
+      "name": "test_abschnitt_ist_im_bericht_verdrahtet",
+      "line": 99,
+      "end": 103
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "bau",
+      "line": 41,
+      "end": 52
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "lauf",
+      "line": 55,
+      "end": 62
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "typen",
+      "line": 65,
+      "end": 66
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "an",
+      "line": 69,
+      "end": 70
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "spiegel",
+      "line": 73,
+      "end": 75
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "_k",
+      "line": 80,
+      "end": 83
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_ausbruch_nur_bei_schluss_ueber_der_marke_nicht_beim_docht",
+      "line": 86,
+      "end": 89
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_ruecktest_zone_und_docht_regel",
+      "line": 92,
+      "end": 98
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_ruecktest_fenster_zaehlt_zwoelf_kerzen",
+      "line": 101,
+      "end": 108
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_ruecktest_schritt_short_spiegelbildlich",
+      "line": 111,
+      "end": 116
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_kerzen_seit_zaehlt_in_der_liste",
+      "line": 119,
+      "end": 124
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_bestand_nach_kaeufe_teilverkaeufe_und_voller_ausstieg",
+      "line": 127,
+      "end": 135
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_default_aus_exakt_dieselben_signale_und_keine_beobachtung",
+      "line": 140,
+      "end": 149
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_rueckkauf_nach_teilverkauf_am_hoch_ausbruch_und_ruecktest",
+      "line": 152,
+      "end": 166
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_rueckkauf_aendert_weder_einstand_noch_hauptstop",
+      "line": 169,
+      "end": 179
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_die_ausbruchskerze_selbst_ist_nie_der_ruecktest",
+      "line": 182,
+      "end": 195
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_schluss_unter_der_marke_im_fenster_scheitert_dann_neuer_ausbruch",
+      "line": 198,
+      "end": 204
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_die_verkaufskerze_ist_nie_der_ruecktest_auch_ohne_no_flip",
+      "line": 207,
+      "end": 215
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "_beobachtung",
+      "line": 218,
+      "end": 224
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_nach_gescheitertem_ausbruch_braucht_es_einen_neuen",
+      "line": 227,
+      "end": 241
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_ruecktest_nach_dem_fenster_kauft_nicht",
+      "line": 244,
+      "end": 253
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_stop_nur_fuer_den_rueckkauf_teil_mit_rueckeroberung",
+      "line": 256,
+      "end": 269
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_zurueckeroberte_marke_ist_geprueft_naechster_bruch_sofort",
+      "line": 272,
+      "end": 278
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_teil_stop_harter_boden_sofort",
+      "line": 281,
+      "end": 284
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_kein_zweiter_rueckkauf_auf_dieselbe_marke",
+      "line": 287,
+      "end": 301
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_keine_beobachtung_einer_marke_auf_die_schon_zurueckgekauft_wurde",
+      "line": 304,
+      "end": 312
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_no_flip_kein_nachkauf_in_der_kerze_des_teil_stops",
+      "line": 315,
+      "end": 332
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "_voll_pos",
+      "line": 335,
+      "end": 343
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_nicht_wenn_schon_voll_investiert",
+      "line": 346,
+      "end": 357
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_no_flip_kein_rueckkauf_in_einer_kerze_mit_teilverkauf",
+      "line": 360,
+      "end": 374
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_hauptstop_nimmt_den_rueckkauf_teil_mit",
+      "line": 377,
+      "end": 386
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_nach_einem_stop_keine_beobachtung",
+      "line": 389,
+      "end": 398
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "_flat_pfad",
+      "line": 403,
+      "end": 414
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position",
+      "line": 423,
+      "end": 434
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_aus_flat_stop_des_teils_ist_voller_ausstieg",
+      "line": 437,
+      "end": 450
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_aus_flat_ohne_passendes_bein_kein_rueckkauf",
+      "line": 453,
+      "end": 460
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_short_spiegelbildlich",
+      "line": 465,
+      "end": 476
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_zustand_ueberlebt_den_neustart_der_live_engine",
+      "line": 481,
+      "end": 494
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "_live",
+      "line": 497,
+      "end": 517
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "line": 523,
+      "end": 538
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat",
+      "line": 541,
+      "end": 549
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_live_meldungen_stehen_je_kerze_vor_ihren_signalen",
+      "line": 552,
+      "end": 562
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_plan_nennt_den_stop_des_rueckkauf_teils",
+      "line": 565,
+      "end": 582
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_plan_ohne_e42_unveraendert",
+      "line": 585,
+      "end": 592
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "_m",
+      "line": 597,
+      "end": 599
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_meldungen_sagen_was_passiert_und_passen_aufs_handy",
+      "line": 602,
+      "end": 620
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_meldung_short_und_nur_rueckkauf",
+      "line": 623,
+      "end": 628
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "_cs",
+      "line": 633,
+      "end": 634
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "_sig",
+      "line": 637,
+      "end": 638
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_simulate_stop_des_teils_verkauft_genau_den_rueckkauf",
+      "line": 641,
+      "end": 653
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_simulate_teilverkauf_nimmt_den_rueckkauf_anteilig_mit",
+      "line": 656,
+      "end": 665
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_simulate_short_rueckteil",
+      "line": 668,
+      "end": 680
+    },
+    {
+      "file": "engine/test_e443.py",
+      "name": "test_gegengeschaeft_zaehlt_rueckkauf_und_stop_des_teils_mit",
+      "line": 683,
+      "end": 690
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "pfad",
+      "line": 22,
+      "end": 24
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_defaults_und_neutraler_pfad",
+      "line": 27,
+      "end": 41
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_faktor_validierung",
+      "line": 44,
+      "end": 49
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "_skalierung",
+      "line": 52,
+      "end": 65
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_long_alle_teilgewinn_typen",
+      "line": 68,
+      "end": 69
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_short_alle_teilgewinn_typen",
+      "line": 72,
+      "end": 73
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_kauf_rueckkauf_und_stops_bleiben_unskaliert",
+      "line": 76,
+      "end": 84
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_plan_und_telegram_nennen_die_reduzierten_mengen",
+      "line": 87,
+      "end": 100
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_backtest_reicht_faktor_an_engine_weiter",
+      "line": 103,
+      "end": 109
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "_abrechnung",
+      "line": 112,
+      "end": 132
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_simulate_long_bucht_signalmenge_und_ganzen_rest",
+      "line": 135,
+      "end": 136
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_simulate_short_bucht_signalmenge_und_ganzen_rest",
+      "line": 139,
+      "end": 140
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_bruchteile_ueberleben_state_json",
+      "line": 143,
+      "end": 149
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "_prozesse",
+      "line": 172,
+      "end": 188
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_getrennte_prozesse_gleiche_signale_telegram_und_state",
+      "line": 191,
+      "end": 205
+    },
+    {
+      "file": "engine/test_e444.py",
+      "name": "test_rest_meldung_verspricht_keine_feste_20_prozent",
+      "line": 208,
+      "end": 213
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "_kz",
+      "line": 8,
+      "end": 10
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_gitter_acht_ecken_genau_live_basis",
+      "line": 13,
+      "end": 24
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_robustheit_nur_sechs_statt_zwoelf",
+      "line": 27,
+      "end": 32
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_hauptzeile_beide_haelften_und_exakte_grenze",
+      "line": 35,
+      "end": 40
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_kombination_braucht_zwei_punkte",
+      "line": 43,
+      "end": 47
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_rueckgang_verhindert_positive_renditeentscheidung",
+      "line": 50,
+      "end": 53
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_monatsprobe_ausreisser_null_und_fehlende_monate",
+      "line": 56,
+      "end": 60
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "_messung",
+      "line": 63,
+      "end": 70
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_auswertung_rollen_wechselwirkungen_und_bericht",
+      "line": 73,
+      "end": 85
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_fehlende_haelfte_keine_entscheidung",
+      "line": 88,
+      "end": 97
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_alter_aus_echter_engine_ohne_signalveraenderung",
+      "line": 100,
+      "end": 109
+    },
+    {
+      "file": "engine/test_e445.py",
+      "name": "test_alte_marken_grenze_im_bericht",
+      "line": 112,
+      "end": 119
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_c",
+      "line": 18,
+      "end": 19
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "szenario",
+      "line": 22,
+      "end": 42
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_run_engine_erzeugt_signal_und_dateien",
+      "line": 45,
+      "end": 59
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_zweiter_lauf_ist_idempotent",
+      "line": 62,
+      "end": 69
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_state_roundtrip",
+      "line": 72,
+      "end": 80
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_demo_state_wird_verworfen",
+      "line": 83,
+      "end": 91
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_vorschau_kerzen",
+      "line": 96,
+      "end": 101
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_zonen_vorschau_auch_ohne_position",
+      "line": 104,
+      "end": 116
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_zonen_vorschau_ohne_impuls_ist_none",
+      "line": 119,
+      "end": 123
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_state_enthaelt_vorschau_auch_im_zustand_flat",
+      "line": 126,
+      "end": 136
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_lauf",
+      "line": 139,
+      "end": 144
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_vorschau_wird_nur_bei_NEUER_struktur_gesendet",
+      "line": 147,
+      "end": 165
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_vorschau_abschaltbar",
+      "line": 168,
+      "end": 179
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_vorschau_nachricht_enthaelt_die_wichtigen_zahlen",
+      "line": 182,
+      "end": 190
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_vorschau_warnt_bei_zu_engem_stop",
+      "line": 193,
+      "end": 202
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_rohkerze",
+      "line": 210,
+      "end": 212
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_wache_szenario",
+      "line": 215,
+      "end": 228
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_wache",
+      "line": 231,
+      "end": 241
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_flush_wache_warnt_wenn_kurs_durch_das_golden_pocket_faellt",
+      "line": 244,
+      "end": 251
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_flush_wache_schweigt_ohne_durchbruch",
+      "line": 254,
+      "end": 258
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_flush_wache_schweigt_unter_der_invalidierung",
+      "line": 261,
+      "end": 267
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_flush_wache_warnt_nur_einmal_je_kerze",
+      "line": 270,
+      "end": 278
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_flush_wache_schweigt_bei_offener_position",
+      "line": 281,
+      "end": 289
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_flush_wache_beachtet_mindest_stopabstand",
+      "line": 292,
+      "end": 298
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_flush_wache_abschaltbar",
+      "line": 301,
+      "end": 305
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_flush_aufloesung_meldet_nicht_bestaetigt",
+      "line": 308,
+      "end": 313
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_alle_evaluate_parameter_werden_durchgereicht",
+      "line": 318,
+      "end": 338
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_eval_params_uebernimmt_config_und_ignoriert_hinweise",
+      "line": 341,
+      "end": 348
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_eval_params_faengt_unbrauchbare_werte_ab",
+      "line": 351,
+      "end": 354
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_leere_config_ergibt_bisheriges_verhalten",
+      "line": 357,
+      "end": 363
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_ziel_extrem_ueberlebt_den_neustart",
+      "line": 366,
+      "end": 375
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_be_aktiv_ueberlebt_den_neustart",
+      "line": 378,
+      "end": 386
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_widerstand_marken_liefert_die_zweite_zonenreihe",
+      "line": 389,
+      "end": 401
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_plan_szenario",
+      "line": 406,
+      "end": 417
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_plan_nennt_nachkauf_teilgewinn_und_stop",
+      "line": 420,
+      "end": 429
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_plan_marken_stimmen_mit_der_engine_ueberein",
+      "line": 432,
+      "end": 459
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_plan_nachricht_wird_nur_bei_aenderung_gesendet",
+      "line": 462,
+      "end": 482
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_plan_nachricht_ist_lesbar",
+      "line": 485,
+      "end": 490
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_plan_zeigt_die_widerstandszone_auch_ohne_aktiven_schalter",
+      "line": 493,
+      "end": 504
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_plan_meldet_verschobene_marken_weiterhin",
+      "line": 507,
+      "end": 528
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_fetch_spot_paginiert_ueber_1000_kerzen",
+      "line": 531,
+      "end": 570
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_hauptlauf_laedt_mehr_historie_als_die_flush_wache",
+      "line": 573,
+      "end": 579
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_fetch_spot_bricht_ab_wenn_die_api_nicht_vorankommt",
+      "line": 582,
+      "end": 610
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_fetch_spot_gibt_zurueck_was_da_ist_wenn_die_api_versiegt",
+      "line": 613,
+      "end": 633
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_eval_defaults_hat_keinen_doppelten_schluessel",
+      "line": 636,
+      "end": 656
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_ampel_steht_in_plan_und_vorschau",
+      "line": 659,
+      "end": 676
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_lage_kerzen",
+      "line": 681,
+      "end": 694
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_lage_lauf",
+      "line": 697,
+      "end": 705
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_lage_abruf_fasst_den_zustand_nicht_an",
+      "line": 708,
+      "end": 719
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_lage_abruf_sucht_immer_ein_aufwaerts_bein",
+      "line": 722,
+      "end": 736
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_lage_abruf_erfindet_kein_bein_wenn_keins_da_ist",
+      "line": 739,
+      "end": 748
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_lage_abruf_rechnet_die_ampel_fuer_long",
+      "line": 751,
+      "end": 767
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_vorschau_ampel_folgt_dem_bias_nicht_dem_bein",
+      "line": 770,
+      "end": 791
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_lage_abruf_enthaelt_furkans_rohwerte",
+      "line": 794,
+      "end": 823
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e434b_oi_zeile_in_kontrakten_steht_handytauglich_in_der_nachricht",
+      "line": 827,
+      "end": 838
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_lage_nachricht_bleibt_handy_tauglich",
+      "line": 840,
+      "end": 889
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_spot_cvd_zeigt_beide_zeitebenen_wenn_sie_sich_unterscheiden",
+      "line": 892,
+      "end": 922
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_futures_cvd_zeigt_das_verhaeltnis_zum_spot",
+      "line": 925,
+      "end": 952
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_futures_cvd_rechnet_jede_kerze_mit_ihrem_eigenen_kurs",
+      "line": 955,
+      "end": 974
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_futures_cvd_ohne_passende_kerze_entfaellt",
+      "line": 977,
+      "end": 989
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_kurze_spot_ebene_zeigt_das_vorzeichen_nicht_den_massstab",
+      "line": 992,
+      "end": 1020
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_kurze_spot_ebene_nutzt_dasselbe_fenster_wie_die_lage_zeile",
+      "line": 1023,
+      "end": 1031
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_warten_ueberlebt_den_neustart_der_live_engine",
+      "line": 1034,
+      "end": 1044
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_e41_engine",
+      "line": 1049,
+      "end": 1074
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_live_vorprobe_ohne_regel_kommt_der_knappe_stop",
+      "line": 1077,
+      "end": 1082
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch",
+      "line": 1085,
+      "end": 1090
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_live_stop_kommt_spaeter_als_ohne_regel",
+      "line": 1093,
+      "end": 1096
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze",
+      "line": 1099,
+      "end": 1108
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_live_wartemeldung_steht_vor_dem_stop_wenn_ein_lauf_nachholt",
+      "line": 1111,
+      "end": 1115
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_e41_pos",
+      "line": 1118,
+      "end": 1122
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_meldung_wartet",
+      "line": 1125,
+      "end": 1130
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_meldung_zaehlt_bei_drei_kerzen_herunter",
+      "line": 1133,
+      "end": 1136
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_meldung_zurueckerobert_nur_fuer_genau_diese_marke",
+      "line": 1139,
+      "end": 1145
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e41_meldung_schweigt_beim_stop_ohne_warten_und_ohne_position",
+      "line": 1148,
+      "end": 1155
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_plan_fuehrt_die_rueckeroberung_nur_wenn_sie_an_ist",
+      "line": 1158,
+      "end": 1168
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_lage_abruf_uebernimmt_die_sth_kostenbasis",
+      "line": 1176,
+      "end": 1180
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_lage_abruf_ueberlebt_einen_sth_fehler",
+      "line": 1183,
+      "end": 1190
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_lage_abruf_holt_die_sth_im_normalfall_selbst",
+      "line": 1193,
+      "end": 1197
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_sth_quellen",
+      "line": 1200,
+      "end": 1209
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_sth_kostenbasis_nimmt_den_juengsten_wert",
+      "line": 1212,
+      "end": 1216
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_sth_kostenbasis_faellt_auf_die_zweite_quelle_zurueck",
+      "line": 1219,
+      "end": 1224
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_sth_kostenbasis_ohne_quelle_ist_none",
+      "line": 1227,
+      "end": 1228
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_plan_nachgezogener_stop_bleibt_ohne_rueckeroberung",
+      "line": 1231,
+      "end": 1241
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e433_anzeige_rechnet_muster2_wie_der_handel",
+      "line": 1244,
+      "end": 1255
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e434_anzeige_rechnet_das_oi_wie_der_handel",
+      "line": 1258,
+      "end": 1269
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_Ersetzt",
+      "line": 1272,
+      "end": 1300
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "_e434_live_flow",
+      "line": 1303,
+      "end": 1317
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e434_live_und_backtest_rechnen_dieselben_kontrakte",
+      "line": 1320,
+      "end": 1333
+    },
+    {
+      "file": "engine/test_main.py",
+      "name": "test_e434_kraken_rueckfall_hat_keine_kontrakt_reihe",
+      "line": 1336,
+      "end": 1344
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "c",
+      "line": 24,
+      "end": 25
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "video_impulse",
+      "line": 30,
+      "end": 32
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_fib_zones_gegen_video_werte",
+      "line": 35,
+      "end": 41
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_extension_ziel_trifft_jan14_hoch",
+      "line": 44,
+      "end": 50
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_fib_zones_short_richtung",
+      "line": 53,
+      "end": 61
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "zigzag_candles",
+      "line": 66,
+      "end": 72
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_find_pivots_und_impuls",
+      "line": 75,
+      "end": 82
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "flow_series",
+      "line": 87,
+      "end": 89
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "flat_candles",
+      "line": 92,
+      "end": 93
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "trend_candles",
+      "line": 96,
+      "end": 102
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_kompass_muster4_capitulation",
+      "line": 105,
+      "end": 113
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_kompass_muster2_derivate_pump",
+      "line": 116,
+      "end": 124
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_kompass_muster2_ohne_futures_cvd",
+      "line": 127,
+      "end": 136
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_kompass_muster3_short_covering",
+      "line": 139,
+      "end": 147
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_kompass_muster1_gesunder_trend",
+      "line": 150,
+      "end": 158
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "neg_funding_flow",
+      "line": 163,
+      "end": 164
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "run_incremental",
+      "line": 167,
+      "end": 172
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_long_lebenszyklus_kauf1_kauf2_tp1_tp2",
+      "line": 175,
+      "end": 192
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_tp_ladder_gestaffelte_teilgewinne",
+      "line": 195,
+      "end": 223
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_capitulation_einstieg_modus_t1",
+      "line": 226,
+      "end": 236
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_flush_off_kein_signal",
+      "line": 239,
+      "end": 243
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_capitulation_einstieg_modus_core_und_off",
+      "line": 246,
+      "end": 254
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_kein_capitulation_einstieg_bei_schluss_unter_invalidierung",
+      "line": 257,
+      "end": 263
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_long_stoploss_bei_schluss_unter_invalidierung",
+      "line": 266,
+      "end": 275
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_short_einstieg_am_05_level",
+      "line": 278,
+      "end": 289
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_dedupe_gleiche_kerze_keine_doppelsignale",
+      "line": 292,
+      "end": 298
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_resample_daily_und_ema",
+      "line": 303,
+      "end": 313
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_daily_trend_richtung",
+      "line": 316,
+      "end": 322
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "pos_funding_cvdup_flow",
+      "line": 325,
+      "end": 328
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_strict_confirm_verlangt_beide_bestaetigungen",
+      "line": 331,
+      "end": 342
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_downtrend_long_series",
+      "line": 345,
+      "end": 365
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_trend_filter_blockt_long_gegen_1d_trend",
+      "line": 368,
+      "end": 383
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_trend_filter_blockt_nichts_wenn_die_historie_nicht_reicht",
+      "line": 386,
+      "end": 405
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster4_via_long_liq_kaskade_ohne_oi_wipeout",
+      "line": 408,
+      "end": 419
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster3_via_short_liq_kaskade",
+      "line": 422,
+      "end": 428
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_daily_fib_zone_liefert_zone",
+      "line": 431,
+      "end": 438
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "bearish_flow",
+      "line": 443,
+      "end": 445
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_conditional_stop_nachkauf_wenn_flow_bullisch",
+      "line": 448,
+      "end": 458
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_conditional_stop_stoppt_bei_hartem_boden",
+      "line": 461,
+      "end": 468
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_conditional_stop_stoppt_wenn_flow_kippt",
+      "line": 471,
+      "end": 478
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_buy_ladder_nachkauf_bei_neuen_tiefkerzen_in_zone",
+      "line": 483,
+      "end": 502
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_tp1_dann_neue_struktur",
+      "line": 507,
+      "end": 517
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_release_stale_rest_gibt_restposition_frei",
+      "line": 520,
+      "end": 530
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ohne_release_bleibt_rest_in_tp_haengen",
+      "line": 533,
+      "end": 542
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_trail_stop_zieht_auf_einstand_und_sichert_gewinn",
+      "line": 545,
+      "end": 568
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_trail_stop_lockert_den_stop_nie",
+      "line": 571,
+      "end": 584
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_einstand_ist_tranchengewichtet",
+      "line": 587,
+      "end": 599
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_liq_flow",
+      "line": 602,
+      "end": 606
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_liq_exit_spike_verkauft_in_die_kaskade",
+      "line": 609,
+      "end": 626
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_liq_levels_findet_nur_ausreisser",
+      "line": 629,
+      "end": 636
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_liq_cascade_erkennt_nur_ausschlag",
+      "line": 639,
+      "end": 644
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_liq_exit_zone_nutzt_keine_zukunft",
+      "line": 647,
+      "end": 656
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "run_incremental_flow",
+      "line": 659,
+      "end": 666
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_liq_entry_pfad",
+      "line": 669,
+      "end": 682
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_liq_flow_long",
+      "line": 685,
+      "end": 689
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_liq_entry_boost_stockt_bei_konfluenz_auf",
+      "line": 692,
+      "end": 708
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_liq_entry_filter_blockt_einstieg_ohne_konfluenz",
+      "line": 711,
+      "end": 723
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_liq_entry_nutzt_nur_vergangene_kerzen",
+      "line": 726,
+      "end": 736
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_next_pivot_beyond",
+      "line": 739,
+      "end": 744
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_high_exit_verkauft_kurz_unter_dem_letzten_hoch",
+      "line": 747,
+      "end": 763
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_high_exit_weak_nur_ohne_spot_nachfrage",
+      "line": 766,
+      "end": 783
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_high_exit_hist_live_beschraenkt_die_pivotsuche_auf_die_live_historie",
+      "line": 786,
+      "end": 810
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_high_exit_hist_default_ist_voll_wie_bisher",
+      "line": 813,
+      "end": 828
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_release_stale_rest_greift_nicht_vor_teilgewinn",
+      "line": 831,
+      "end": 842
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_stoploss_setzt_alle_zaehler_zurueck",
+      "line": 845,
+      "end": 877
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_kompass_muster5_ungesunder_abverkauf",
+      "line": 882,
+      "end": 897
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_weicht_der_kapitulation",
+      "line": 900,
+      "end": 910
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "e13_szenario",
+      "line": 913,
+      "end": 930
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "e13_lauf",
+      "line": 933,
+      "end": 939
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_warnlicht_sperrt_long_im_ungesunden_abverkauf",
+      "line": 942,
+      "end": 947
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_warnlicht_sperrt_NICHT_bei_bloss_neutralem_markt",
+      "line": 950,
+      "end": 959
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_confirm_t1_prueft_den_05_einstieg",
+      "line": 962,
+      "end": 969
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_min_stop_pct_verwirft_zu_enge_stops",
+      "line": 972,
+      "end": 978
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_cooldown_sperrt_wiedereinstieg_nach_stop",
+      "line": 981,
+      "end": 1004
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_last_stop_ts_ueberlebt_den_positions_reset",
+      "line": 1007,
+      "end": 1016
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e13_hebel_sind_default_aus",
+      "line": 1019,
+      "end": 1038
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster2_nutzt_echtes_futures_cvd_wenn_vorhanden",
+      "line": 1041,
+      "end": 1082
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_flowpoint_long_pct_ist_optional",
+      "line": 1085,
+      "end": 1090
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_e18_pfad_nachkauf_und_teilgewinn",
+      "line": 1097,
+      "end": 1107
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ohne_no_flip_kauft_und_verkauft_die_engine_in_derselben_kerze",
+      "line": 1110,
+      "end": 1117
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_no_flip_sperrt_teilverkauf_nach_nachkauf_in_derselben_kerze",
+      "line": 1120,
+      "end": 1127
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_no_flip_sperrt_nachkauf_nach_teilverkauf_in_derselben_kerze",
+      "line": 1130,
+      "end": 1147
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_no_flip_laesst_den_stop_immer_durch",
+      "line": 1150,
+      "end": 1159
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_no_flip_kennt_nur_aufbau_und_teilverkauf",
+      "line": 1162,
+      "end": 1168
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_e18_pfad_ziel_wandert",
+      "line": 1171,
+      "end": 1185
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ohne_freeze_targets_wandert_das_zweite_ziel_nach_unten",
+      "line": 1188,
+      "end": 1196
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_freeze_targets_haelt_das_ziel_fest",
+      "line": 1199,
+      "end": 1208
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_freeze_targets_wird_beim_positionsende_zurueckgesetzt",
+      "line": 1211,
+      "end": 1217
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_e19_zwei_beine",
+      "line": 1225,
+      "end": 1233
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ohne_schalter_gewinnt_das_juengste_kleine_bein",
+      "line": 1236,
+      "end": 1241
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_min_bein_pct_ueberspringt_das_kleine_bein",
+      "line": 1244,
+      "end": 1248
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_bein_wahl_groesstes_nimmt_die_groesste_spanne",
+      "line": 1251,
+      "end": 1255
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_bein_richtung_ueberspringt_gegenlaeufiges_bein",
+      "line": 1258,
+      "end": 1263
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_evaluate_bein_richtung_bias_macht_die_engine_wieder_handlungsfaehig",
+      "line": 1266,
+      "end": 1290
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_be_im_plus_zieht_den_stop_auf_den_einstand",
+      "line": 1293,
+      "end": 1319
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_be_im_plus_zieht_NICHT_wenn_die_position_im_minus_steht",
+      "line": 1322,
+      "end": 1333
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_e20_pfad",
+      "line": 1341,
+      "end": 1349
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_e20_pfad_mit_neuem_hoch",
+      "line": 1352,
+      "end": 1360
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_gegen_zonen_nimmt_das_bein_entgegen_der_richtung",
+      "line": 1363,
+      "end": 1380
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_e20_position",
+      "line": 1383,
+      "end": 1387
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_widerstand_exit_nimmt_teilgewinn_am_golden_pocket_der_gegenbewegung",
+      "line": 1390,
+      "end": 1405
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_widerstand_exit_feuert_nicht_wenn_die_zone_schon_hinter_uns_liegt",
+      "line": 1408,
+      "end": 1416
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_e21_pfad_bis_tp1",
+      "line": 1424,
+      "end": 1431
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_gegenmuster_flow",
+      "line": 1434,
+      "end": 1437
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ohne_rest_halten_wird_der_rest_beim_gegenmuster_verkauft",
+      "line": 1440,
+      "end": 1448
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_rest_halten_laesst_die_position_weiterlaufen",
+      "line": 1451,
+      "end": 1459
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_rest_halten_haelt_den_stop_trotzdem_scharf",
+      "line": 1462,
+      "end": 1470
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_neustart_mit_rest_erlaubt_einen_einstieg_waehrend_der_rest_laeuft",
+      "line": 1473,
+      "end": 1501
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_zwei_ebenen_serie",
+      "line": 1506,
+      "end": 1530
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_zonen_1d_die_ebenen_zeichnen_wirklich_verschiedene_beine",
+      "line": 1533,
+      "end": 1545
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_zonen_1d_liefert_einstieg_den_die_4h_ebene_verpasst",
+      "line": 1548,
+      "end": 1563
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_zonen_1d_gilt_nicht_als_umgehung_der_sicherungen",
+      "line": 1566,
+      "end": 1579
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_zonen_1d_kein_doppelsignal_wenn_beide_ebenen_dasselbe_bein_sehen",
+      "line": 1582,
+      "end": 1604
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_gleiches_bein_vergleicht_preise_nicht_zeitstempel",
+      "line": 1607,
+      "end": 1613
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_trend_intakt_erkennt_fortsetzung_und_bruch",
+      "line": 1618,
+      "end": 1633
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_intakter_trend_pfad",
+      "line": 1636,
+      "end": 1647
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_gebrochener_trend_pfad",
+      "line": 1650,
+      "end": 1659
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_lauf",
+      "line": 1662,
+      "end": 1669
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_zonen_nachziehen_bei_intaktem_trend",
+      "line": 1672,
+      "end": 1681
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ohne_schalter_bleiben_die_zonen_eingefroren",
+      "line": 1684,
+      "end": 1689
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_zonen_nachziehen_nicht_bei_gebrochener_struktur",
+      "line": 1692,
+      "end": 1701
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_zonen_nachziehen_erzeugt_kein_gegengeschaeft",
+      "line": 1704,
+      "end": 1717
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_teilverkauf_und_neustart_in_einer_kerze",
+      "line": 1722,
+      "end": 1735
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_no_flip_deckt_auch_den_neustart_mit_rest_ab",
+      "line": 1738,
+      "end": 1761
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_flow_cvd",
+      "line": 1766,
+      "end": 1768
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_spot_nachfrage_vier_zustaende",
+      "line": 1771,
+      "end": 1781
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_spot_nachfrage_ohne_genug_daten_ist_none",
+      "line": 1784,
+      "end": 1788
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_lage_struktur_intakt_unveraendert_gebrochen",
+      "line": 1791,
+      "end": 1809
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_lage_muster_wird_uebersetzt",
+      "line": 1812,
+      "end": 1825
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_lage_aendert_keine_signale",
+      "line": 1828,
+      "end": 1844
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_tageskerzen_gross_und_klein",
+      "line": 1849,
+      "end": 1868
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_pivot_n_1d_waehlt_die_groebere_ebene",
+      "line": 1871,
+      "end": 1886
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_pivot_n_1d_null_ist_das_alte_verhalten",
+      "line": 1889,
+      "end": 1900
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_pivot_n_1d_wirkt_nur_mit_zonen_1d",
+      "line": 1903,
+      "end": 1914
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_pivot_n_1d_kommt_durch_evaluate_an",
+      "line": 1917,
+      "end": 1939
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_lange_serie",
+      "line": 1944,
+      "end": 1952
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_live_einstellung",
+      "line": 1955,
+      "end": 1966
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_flow_ab",
+      "line": 1969,
+      "end": 1985
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_mehr_historie_aendert_die_signale_nicht",
+      "line": 1988,
+      "end": 2018
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_pump_szenario",
+      "line": 2026,
+      "end": 2052
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_muster_je_fenster",
+      "line": 2055,
+      "end": 2060
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e435_szenario_erreicht_den_muster2_zweig",
+      "line": 2063,
+      "end": 2084
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e435_befund_a2_mehr_historie_dreht_muster2",
+      "line": 2087,
+      "end": 2105
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_demo_slope",
+      "line": 2110,
+      "end": 2123
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e433_vorprobe_demo_slope_alt_verschieden_usd_gleich",
+      "line": 2129,
+      "end": 2143
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e433_usd_erkennt_den_pump_in_dollar",
+      "line": 2146,
+      "end": 2160
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e433_usd_rechnet_jedes_delta_mit_dem_kurs_seiner_kerze",
+      "line": 2163,
+      "end": 2176
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e433_fallende_futures_sind_kein_pump",
+      "line": 2179,
+      "end": 2193
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e433_ohne_kerze_zum_flowpunkt_kein_pump",
+      "line": 2196,
+      "end": 2207
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e433_mehr_historie_aendert_muster2_nicht_bei_usd",
+      "line": 2210,
+      "end": 2249
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e433_muster_cvd_kommt_in_evaluate_an",
+      "line": 2252,
+      "end": 2267
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_oi_lage",
+      "line": 2272,
+      "end": 2291
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434_vorprobe_demo_oi_usd_erkennt_am_kurs",
+      "line": 2300,
+      "end": 2310
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434_btc_erkennt_echte_kontrakt_aenderung",
+      "line": 2313,
+      "end": 2322
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434_btc_wirkt_in_allen_mustern_die_das_oi_lesen",
+      "line": 2325,
+      "end": 2343
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434_oi_in_btc_rechnet_jeden_punkt_mit_dem_kurs_seiner_kerze",
+      "line": 2346,
+      "end": 2352
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434_ohne_oi_daten_rechnen_usd_und_btc_gleich",
+      "line": 2355,
+      "end": 2366
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434_usd_rechnet_wie_vor_e434",
+      "line": 2369,
+      "end": 2377
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_mit_kontrakten",
+      "line": 2380,
+      "end": 2385
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434_muster_oi_kommt_in_evaluate_an",
+      "line": 2388,
+      "end": 2410
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_oi_zeile_serie",
+      "line": 2415,
+      "end": 2438
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_oi_zeile",
+      "line": 2441,
+      "end": 2443
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434b_kurs_allein_heisst_nicht_neues_geld",
+      "line": 2446,
+      "end": 2457
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434b_kursrutsch_heisst_nicht_positionen_werden_geschlossen",
+      "line": 2460,
+      "end": 2467
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434b_echte_kontrakt_aenderung_bleibt_sichtbar",
+      "line": 2470,
+      "end": 2482
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e434b_ohne_kontrakt_reihe_bleibt_die_zeile_wie_bisher",
+      "line": 2485,
+      "end": 2492
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ema200_braucht_echte_historie",
+      "line": 2495,
+      "end": 2512
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_trend_lage_liefert_klartext_oder_nichts",
+      "line": 2515,
+      "end": 2525
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_lage_bericht_nimmt_den_trend_auf",
+      "line": 2528,
+      "end": 2538
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_stufen_nach_einfacher_mehrheit",
+      "line": 2543,
+      "end": 2561
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_schweigt_bei_zu_duenner_lage",
+      "line": 2564,
+      "end": 2573
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_kapitulation_spricht_fuer_den_long",
+      "line": 2576,
+      "end": 2583
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_spiegelt_fuer_short_aber_nicht_die_struktur",
+      "line": 2586,
+      "end": 2601
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "e34_signale",
+      "line": 2604,
+      "end": 2621
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_tranchen",
+      "line": 2624,
+      "end": 2625
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_filter_aus_aendert_nichts",
+      "line": 2628,
+      "end": 2632
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_filter_klein_halbiert_bei_unguenstiger_lage",
+      "line": 2635,
+      "end": 2644
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "e34_szenario_mit_ausstieg",
+      "line": 2647,
+      "end": 2660
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_kuerzen_laesst_ausstiege_unberuehrt",
+      "line": 2663,
+      "end": 2686
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_kuerzen_fragt_je_signal_nach_der_richtung",
+      "line": 2689,
+      "end": 2704
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_filter_laesst_ausstiege_auch_im_lauf_unberuehrt",
+      "line": 2707,
+      "end": 2719
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_filter_gegenprobe_und_nullhypothese",
+      "line": 2722,
+      "end": 2740
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_filter_bei_guenstiger_lage_genau_andersherum",
+      "line": 2743,
+      "end": 2756
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_filter_haelt_still_wenn_die_ampel_schweigt",
+      "line": 2759,
+      "end": 2773
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_vergleicht_nicht_das_bein_mit_sich_selbst",
+      "line": 2776,
+      "end": 2790
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_richtung_folgt_dem_bias_nicht_dem_bein",
+      "line": 2795,
+      "end": 2812
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_nennt_die_richtung_im_ergebnis",
+      "line": 2815,
+      "end": 2819
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_dreht_sich_mit_der_richtung_echter_livestand",
+      "line": 2822,
+      "end": 2834
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_of_serie",
+      "line": 2839,
+      "end": 2856
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_orderflow_detail_zeigt_furkans_sieben_groessen",
+      "line": 2859,
+      "end": 2866
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_orderflow_detail_zeigt_fehlende_daten_nicht_als_null",
+      "line": 2869,
+      "end": 2881
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_orderflow_detail_nutzt_dasselbe_fenster_wie_das_muster",
+      "line": 2884,
+      "end": 2890
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_orderflow_richtung_kennt_flach",
+      "line": 2893,
+      "end": 2922
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_orderflow_detail_ist_reine_anzeige",
+      "line": 2925,
+      "end": 2930
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_ist_im_default_aus_immer_wirkungslos",
+      "line": 2938,
+      "end": 2943
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_greift_nur_bei_muster_5",
+      "line": 2946,
+      "end": 2949
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_greift_nicht_beim_short",
+      "line": 2952,
+      "end": 2957
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_leiter_laesst_die_geplanten_ziele_durch",
+      "line": 2960,
+      "end": 2965
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_alle_haelt_auch_die_ziele",
+      "line": 2968,
+      "end": 2971
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_unterscheidet_leiter_und_alle_wirklich",
+      "line": 2974,
+      "end": 2978
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_m5_lage",
+      "line": 2981,
+      "end": 3003
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_signale",
+      "line": 3006,
+      "end": 3012
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_m5_szenario_handelt_ueberhaupt_und_zwar_bei_muster_5",
+      "line": 3015,
+      "end": 3030
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_schalter_im_default_aendern_kein_einziges_signal",
+      "line": 3033,
+      "end": 3041
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_leiter_entfernt_den_zwischenverkauf_nicht_das_ziel",
+      "line": 3044,
+      "end": 3050
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_alle_entfernt_auch_das_ziel",
+      "line": 3053,
+      "end": 3057
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_verbraucht_keine_leiterstufe_beim_zurueckhalten",
+      "line": 3060,
+      "end": 3070
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_m5_absturz",
+      "line": 3073,
+      "end": 3089
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_unterdrueckt_niemals_den_stop",
+      "line": 3092,
+      "end": 3104
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_stop_zweige_fragen_den_teilverkauf_waechter_gar_nicht_erst",
+      "line": 3107,
+      "end": 3114
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_alle_verhindert_den_stop_nachzug_BEKANNTE_FOLGE",
+      "line": 3117,
+      "end": 3131
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_entry_macht_muster_5_zur_starken_bestaetigung",
+      "line": 3134,
+      "end": 3142
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_entry_erzeugt_nie_mehr_einstiege_als_ohne_fib_zone_moeglich",
+      "line": 3145,
+      "end": 3153
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster5_halten_behandelt_beide_ziele_gleich",
+      "line": 3156,
+      "end": 3170
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_zaehlt_muster_5_fuer_keine_seite",
+      "line": 3175,
+      "end": 3186
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ampel_behaelt_die_uebrigen_muster_wie_bisher",
+      "line": 3189,
+      "end": 3193
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster_hinweis_nur_wo_gemessen_und_ohne_namen",
+      "line": 3196,
+      "end": 3202
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_muster_hinweis_nennt_den_zeitraum_der_messung_fest",
+      "line": 3205,
+      "end": 3211
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_lage_ohne_muster_5_hat_keinen_hinweis",
+      "line": 3214,
+      "end": 3221
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_k",
+      "line": 3231,
+      "end": 3234
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_stop_puffer_ignoriert_knappe_schluesse",
+      "line": 3237,
+      "end": 3242
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_rueckeroberung_1_stoppt_bei_zweitem_schluss_darunter",
+      "line": 3245,
+      "end": 3250
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_rueckeroberung_3_gibt_drei_kerzen_zeit",
+      "line": 3253,
+      "end": 3257
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_rueckeroberung_macht_die_marke_geprueft_und_der_naechste_bruch_stoppt_sofort",
+      "line": 3260,
+      "end": 3268
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_ohne_vorheriges_unterschreiten_ist_die_marke_nicht_geprueft",
+      "line": 3271,
+      "end": 3274
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_rueckeroberung_harter_boden_stoppt_sofort",
+      "line": 3277,
+      "end": 3282
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_rueckeroberung_neue_marke_zaehlt_neu",
+      "line": 3285,
+      "end": 3290
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_rueckeroberung_gilt_fuer_short_spiegelbildlich",
+      "line": 3293,
+      "end": 3298
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_docht_stoppt_schon_beim_kerzentief_zum_stopkurs",
+      "line": 3301,
+      "end": 3309
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_reset_raeumt_die_e41_merker_ab",
+      "line": 3312,
+      "end": 3318
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_e41_szenario",
+      "line": 3323,
+      "end": 3333
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "_e41_lauf",
+      "line": 3336,
+      "end": 3342
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e41_szenario_hat_einen_knappen_live_stop",
+      "line": 3348,
+      "end": 3353
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e41_im_default_aus_exakt_dieselben_signale",
+      "line": 3356,
+      "end": 3362
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e41_rueckeroberung_ueberlebt_den_stich_und_stoppt_beim_zweiten_bruch",
+      "line": 3365,
+      "end": 3371
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e41_position_bleibt_bei_langsamem_abverkauf_nicht_haengen",
+      "line": 3374,
+      "end": 3381
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e41_kein_nachkauf_waehrend_des_wartens_und_der_rueckeroberung",
+      "line": 3384,
+      "end": 3392
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e41_nachkauf_nach_rueckeroberung_zum_erreichbaren_preis",
+      "line": 3395,
+      "end": 3403
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e41_laesst_den_nachgezogenen_stop_unberuehrt",
+      "line": 3406,
+      "end": 3415
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e41_docht_stoppt_frueher_als_live",
+      "line": 3418,
+      "end": 3424
+    },
+    {
+      "file": "engine/test_strategy_core.py",
+      "name": "test_e41_preiskorrektur_aendert_ohne_e41_nichts",
+      "line": 3427,
+      "end": 3440
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_format_kauf2_enthaelt_alle_bausteine",
+      "line": 14,
+      "end": 22
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_format_stoploss",
+      "line": 25,
+      "end": 28
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_flush_signal_wird_markiert",
+      "line": 31,
+      "end": 37
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_alle_signaltypen_haben_style",
+      "line": 40,
+      "end": 42
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_send_signals_dry_run_ohne_netz",
+      "line": 45,
+      "end": 47
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_lage_erscheint_in_plan_und_vorschau",
+      "line": 50,
+      "end": 78
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_vorschau_nennt_das_bein_nicht_doppelt",
+      "line": 81,
+      "end": 93
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_uebergeordneter_trend_steht_in_den_nachrichten",
+      "line": 96,
+      "end": 123
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_ampel_steht_in_den_nachrichten_mit_dem_schlusssatz",
+      "line": 126,
+      "end": 168
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "_lage_m5",
+      "line": 171,
+      "end": 177
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_lage_abruf_zeigt_muster_5_mit_hinweis_und_handytauglich",
+      "line": 180,
+      "end": 190
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_plan_und_vorschau_zeigen_muster_5_umbrochen_mit_hinweis",
+      "line": 193,
+      "end": 206
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "_e41_m",
+      "line": 211,
+      "end": 218
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_stop_wartet_nachricht_sagt_was_passiert_und_was_als_naechstes",
+      "line": 221,
+      "end": 230
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_stop_wartet_nennt_den_harten_boden_nur_wenn_er_noch_zaehlt",
+      "line": 233,
+      "end": 240
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_marke_zurueckerobert_nachricht",
+      "line": 243,
+      "end": 248
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_e41_nachrichten_short_spiegelbildlich",
+      "line": 251,
+      "end": 257
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_e41_nachrichten_sind_handybreit",
+      "line": 260,
+      "end": 265
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "_e41_plan",
+      "line": 268,
+      "end": 270
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_plan_stop_zeile_folgt_der_rueckeroberungs_regel",
+      "line": 273,
+      "end": 283
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_plan_warnt_wenn_die_engine_gerade_wartet",
+      "line": 286,
+      "end": 289
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_plan_nennt_die_gepruefte_marke",
+      "line": 292,
+      "end": 296
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "_lage_mit_sth",
+      "line": 301,
+      "end": 303
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_lage_abruf_zeigt_die_sth_kostenbasis_mit_abstand_und_stand",
+      "line": 306,
+      "end": 316
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_lage_abruf_ohne_sth_hat_keine_leere_zeile_dafuer",
+      "line": 319,
+      "end": 322
+    },
+    {
+      "file": "engine/test_telegram_notify.py",
+      "name": "test_sth_zeile_ist_handybreit",
+      "line": 325,
+      "end": 330
+    }
+  ],
+  "backtest_history": "93bcf560d363f767e006811b6f99dd5b54065015 2026-09-26T15:18:58Z Backtest-Bericht aktualisiert\ndd0218e7ebaf61c8b0dd8f171e94c7548909d700 2026-09-26T14:58:21Z Backtest-Bericht aktualisiert\n41f575b840af2aaa29aeac17236e0cf6ae2d908e 2026-09-26T14:34:24Z Backtest-Bericht aktualisiert\n1a6cc1d111c52cb3b58a93390f6e9da198992b4d 2026-09-26T14:15:28Z Backtest-Bericht aktualisiert\n7433652d57898475bf6028fe4c75b7aeaae93a36 2026-09-26T13:16:03Z Backtest-Bericht aktualisiert\n770699b2fa22f6bc7f6a69afef1f7dd820cc0080 2026-09-26T13:02:27Z Backtest-Bericht aktualisiert\n455d47ca2acb306117fc8f19ebaa6f69afa3ec8b 2026-09-26T10:50:58Z Backtest-Bericht aktualisiert\n9fb6e9a02d48f363d4352e37adb1b16a11e18f06 2026-09-26T09:51:45Z Backtest-Bericht aktualisiert\n70af8ddc66666e649454e7fef62b3048999ee3e3 2026-09-26T08:23:27Z Backtest-Bericht aktualisiert\ne1075f385a67ee0b8e680407f1c0344ce0097d7c 2026-09-23T18:40:50Z Backtest-Bericht aktualisiert\n04d12b160d171160fc494f4391231653d9aa55d8 2026-09-21T13:56:18Z Backtest-Bericht aktualisiert\n3098de563493cfa36ce7df66e6d04921d73f5487 2026-09-21T07:41:47Z Backtest-Bericht aktualisiert\nd484233bd9ebb1a2b19635ffdca493d1b328746b 2026-09-21T07:16:03Z Backtest-Bericht aktualisiert\nd0f93be7fdf029298069fb33edb9045f57fdaa08 2026-09-21T06:24:58Z Backtest-Bericht aktualisiert\n9c23add73276f6667c65e0ac71801791bd345f03 2026-09-20T19:13:35Z Backtest-Bericht aktualisiert\n2e3bbcd6900d485cd40388a7fd566652b0cd6de7 2026-09-20T15:18:49Z Backtest-Bericht aktualisiert\nf924630ad2b0c5866c3e076f430134604d8078f3 2026-09-20T14:21:19Z Backtest-Bericht aktualisiert\n664e04469c54d62cbc4f0fc28a8acfc7614856ef 2026-09-20T13:54:51Z Backtest-Bericht aktualisiert\nf82f833033d5c4e001ab26df8cea8da6a7d3884d 2026-09-20T11:31:40Z Backtest-Bericht aktualisiert\n25b2c13708d358f22d0125d4fe05eb8b56fd23b4 2026-09-20T10:52:12Z Backtest-Bericht aktualisiert\ndc1002606e9471f5f4cb91d1abd8af86bfad0ea1 2026-09-20T10:07:39Z Backtest-Bericht aktualisiert\n472222f27c8e0b044d0669028283d94f51587a69 2026-09-20T09:25:04Z Backtest-Bericht aktualisiert\ndd43af680fe204aac7596727f263dddd89158845 2026-09-19T19:16:06Z Backtest-Bericht aktualisiert\nec73f73e0e6ed3bd8d735ada1b42ae98a721f909 2026-09-13T12:57:45Z Backtest-Bericht aktualisiert\n6ed57843d691d34077d8aaf8736d06bbfbe94765 2026-09-13T08:23:37Z Backtest-Bericht aktualisiert\n32c3efda68ef7b63835d80c5db88f45668cbb340 2026-09-06T19:00:23Z Backtest-Bericht aktualisiert\n479eca263fa7c6c8e271db2186c98dd72094455c 2026-09-06T13:11:10Z Backtest-Bericht aktualisiert\n58bf84225243f19445512bff4fb041098800b437 2026-09-05T21:50:54Z Backtest-Bericht aktualisiert\n5aa7056383df1ff352e351d35dbd17393adc1de3 2026-09-05T15:40:26Z Backtest-Bericht aktualisiert\nafb52660ccfbaf6042f0fbd3ca5faf8f931d1291 2026-08-28T18:17:50Z Backtest-Bericht aktualisiert\n4808c9400f832705d57e72177572d0e4aeb1fa46 2026-08-28T11:56:08Z Backtest-Bericht aktualisiert\n2bd78fdc1a62041c043a535d6d2fbeb59730f906 2026-08-28T11:32:16Z Backtest-Bericht aktualisiert\n0bb2289c7f5db1f881c25440a256fb9f06669a25 2026-08-28T11:02:57Z Backtest-Bericht aktualisiert\n80ecb9464716e330d5e588e9ca6ca91588f02bc8 2026-08-28T10:46:09Z Backtest-Bericht aktualisiert\n85c57f673fea420f9f56292ece1203fff46e4795 2026-08-28T07:50:36Z Backtest-Bericht aktualisiert\n4284427051f785db15d4e32d0b1dd221474f19df 2026-08-28T07:03:09Z Backtest-Bericht aktualisiert\n2fce4b22c4608ed9474c3fc2defe353857703758 2026-08-28T05:34:55Z Backtest-Bericht aktualisiert\n0e9b7c65214ba2554b48297750a239680d875635 2026-08-27T19:52:50Z Backtest-Bericht aktualisiert\n34241fda6c3e7c15e0be45b3d25c2eb094a042e0 2026-08-27T14:39:06Z Backtest-Bericht aktualisiert\n3d13eb36c88497da87ba5fe5853eb197976810b2 2026-08-27T13:26:33Z Backtest-Bericht aktualisiert\ne74baca9575f10987f0118e43c609ecaead04aad 2026-08-27T11:45:12Z Backtest-Bericht aktualisiert\nfe109be4dc874f14e18d87289ea817cdc5f9caef 2026-08-27T10:52:10Z Backtest-Bericht aktualisiert\n8e6f8e6f631d6ae48eea61013600769603c3d37d 2026-08-13T20:15:03Z Backtest-Bericht aktualisiert\n01e975e197ee7a93cf554bd4a8e200b5df04d04b 2026-08-03T17:11:59Z Backtest-Bericht aktualisiert\n55092552ef63b09e03964b8b1618182f98d5aa18 2026-07-29T16:08:09Z Backtest-Bericht aktualisiert\na49f2896e68327703430d81a2e6a350780cc3e1b 2026-07-28T15:01:24Z Backtest-Bericht aktualisiert\n23db566cd4e2d3fb15651072b3abff9cee8216e7 2026-07-28T14:35:00Z Backtest-Bericht aktualisiert\ncf5a9e932b73f35ed5782c1aac675a3c1c4f7d84 2026-07-28T14:27:41Z Backtest-Bericht aktualisiert\n9e4f65a70333a7a9889dbcdb9414c26abb326961 2026-07-28T14:11:42Z Backtest-Bericht aktualisiert\n0bf4ec2a4f528f13b04301e38180b4303472b629 2026-07-28T13:51:42Z Backtest-Bericht aktualisiert\n61dbff3533f0ab60faec58b47c20d501c60c4a7e 2026-07-28T13:25:15Z Backtest-Bericht aktualisiert\n9c78e40818ba5dedd240c957445d03a7edbf1424 2026-07-28T13:14:12Z Backtest-Bericht aktualisiert\n705257114f3bc137c727971a882fad0ea80f0d1c 2026-07-28T12:54:52Z Backtest-Bericht aktualisiert\n63e4f748b50ed62cc0bc5d856e9ac8de75e68e31 2026-07-28T08:08:42Z Backtest-Bericht aktualisiert\n8c4cc3bc879521d4eb09da15746c90fd726bb38c 2026-07-27T19:56:36Z Backtest-Bericht aktualisiert\ndbbcfba2bc440219a33181691f12fefd8022a694 2026-07-27T19:21:01Z Backtest-Bericht aktualisiert\n458f522b26529f06e9cd6b464b199bf99082563d 2026-07-27T18:53:17Z Backtest-Bericht aktualisiert\nc74a4541508abbb451807e5977c24be8051575b3 2026-07-27T18:40:16Z Backtest-Bericht aktualisiert\n860fe469be28419b44c74fa9199ca9e3bf6c68ac 2026-07-27T18:25:15Z Backtest-Bericht aktualisiert\n988fc2f8f3f7b8ab151d6910e2779462481acfd1 2026-07-27T17:51:38Z Backtest-Bericht aktualisiert\n8952d261940f0a809f450d5fa6995a4e3d95fa0c 2026-07-27T17:29:56Z Backtest-Bericht aktualisiert\n8f697ff1aaea79f784edd9cdb57bd958c15478a6 2026-07-26T21:48:42Z Backtest-Bericht aktualisiert\n0fc48a75d336e65a63db83e41f0267c4c3405c2b 2026-07-26T21:28:02Z Backtest-Bericht aktualisiert\n8369d12c5151218167e7c57b8535a1163992ee4c 2026-07-26T21:09:12Z Backtest-Bericht aktualisiert\nb49ebf0c25fe691cfb570ea82ebffec5d7e2567b 2026-07-26T20:49:25Z Backtest-Bericht aktualisiert\nd49083abf4a86e3914b4cbeedfa25e06d8075a1e 2026-07-24T20:09:06Z Backtest-Bericht aktualisiert\n8001930185da522fd6f0f5f5d57461b5fdb6974d 2026-07-24T19:54:19Z Backtest-Bericht aktualisiert\n93bc36e7fd730037130353f1e9dff9e439a6b3c8 2026-07-24T19:37:40Z Backtest-Bericht aktualisiert\n43c2d194e705b60b21f8203e69df2676aafc0244 2026-07-24T19:19:49Z Backtest-Bericht aktualisiert\nc5a43624b927b11b9937cd2e2bbe4b922ac134bf 2026-07-24T14:40:00Z Backtest-Bericht aktualisiert\nd590834ea6c5e284ffbe9f5981c926fca7d47414 2026-07-24T13:59:22Z Backtest-Bericht aktualisiert\ndfde79cf99927cfe16343bd61a28f5778920afd2 2026-07-24T13:54:22Z Backtest-Bericht aktualisiert\nc91376b7c12d5ae09b3b575a1905d7c5ae8f77ac 2026-07-24T10:24:54Z Backtest-Bericht aktualisiert\n2cb40ad0b45353c5137bddc3ff0182b7b6e120d3 2026-07-24T09:35:33Z Backtest-Bericht aktualisiert\n7222a96d7b1e49886735314fe422d8ad5dd5afb8 2026-07-24T09:02:19Z Backtest-Bericht aktualisiert\nf86b59462eb4fab3d8c2c98d62289ee39547f190 2026-07-23T19:37:37Z Backtest-Bericht aktualisiert\nab68d46ceafb70dd7b9af7d6f837d3e203afe7ba 2026-07-23T19:25:59Z Backtest-Bericht aktualisiert\n850d064c3352ddfd97ad2cada240e36f5232389d 2026-07-23T05:24:25Z Backtest-Bericht aktualisiert\ncdb0009f67ad86489724087de6f017d47c55a41f 2026-07-22T21:19:12Z Backtest-Bericht aktualisiert\n36178e93842fc13ef60923381238d83b2888c048 2026-07-22T20:48:17Z Backtest-Bericht aktualisiert\n"
+}

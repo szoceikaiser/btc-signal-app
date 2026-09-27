@@ -1,0 +1,154 @@
+BASIS: 12 Tests gruen
+01 GEFANGEN: Default aktiviert -> test_defaults_und_neutraler_pfad
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 30, in test_defaults_und_neutraler_pfad
+    assert cfg["verkauf_faktor"] == main.EVAL_DEFAULTS["verkauf_faktor"] == 1.0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+02 GEFANGEN: Ungueltiger Faktor erlaubt -> test_faktor_validierung
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 48, in test_faktor_validierung
+    assert main.eval_params({"verkauf_faktor": wert})["verkauf_faktor"] == 1.0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+03 GEFANGEN: Long unskaliert -> test_long_alle_teilgewinn_typen
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 69, in test_long_alle_teilgewinn_typen
+    _skalierung(False)
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 64, in _skalierung
+    assert t.tranche_pct == (round(s.tranche_pct * .67, 8) if s.type.name in TEIL
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+04 GEFANGEN: Short unskaliert -> test_short_alle_teilgewinn_typen
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 73, in test_short_alle_teilgewinn_typen
+    _skalierung(True)
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 64, in _skalierung
+    assert t.tranche_pct == (round(s.tranche_pct * .67, 8) if s.type.name in TEIL
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+05 GEFANGEN: Kaeufe und Stops auch gekuerzt -> test_kauf_rueckkauf_und_stops_bleiben_unskaliert
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 83, in test_kauf_rueckkauf_und_stops_bleiben_unskaliert
+    assert [(i, s) for i, s in a if s.type.name not in TEIL] == \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+06 GEFANGEN: Plan behaelt alte Mengen -> test_plan_und_telegram_nennen_die_reduzierten_mengen
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 95, in test_plan_und_telegram_nennen_die_reduzierten_mengen
+    assert [x["tranche"] for x in b["teilgewinn"]] == \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+07 GEFANGEN: Backtest verwirft Parameter -> test_backtest_reicht_faktor_an_engine_weiter
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 109, in test_backtest_reicht_faktor_an_engine_weiter
+    assert [s["tranche_pct"] for s in sig if s["type"] == "TEILVERKAUF_1"] == [26.8]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+08 GEFANGEN: Long Leiter verkauft weiter 15 -> test_simulate_long_bucht_signalmenge_und_ganzen_rest
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 136, in test_simulate_long_bucht_signalmenge_und_ganzen_rest
+    _abrechnung(False)
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 128, in _abrechnung
+    assert abs(rest["offene_position"] - voll * (1 - menge / 100)) < 1e-6
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+09 GEFANGEN: Long TP verkauft weiter 40 -> test_simulate_long_bucht_signalmenge_und_ganzen_rest
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 136, in test_simulate_long_bucht_signalmenge_und_ganzen_rest
+    _abrechnung(False)
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 128, in _abrechnung
+    assert abs(rest["offene_position"] - voll * (1 - menge / 100)) < 1e-6
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+10 GEFANGEN: Short Leiter deckt weiter 15 -> test_simulate_short_bucht_signalmenge_und_ganzen_rest
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 140, in test_simulate_short_bucht_signalmenge_und_ganzen_rest
+    _abrechnung(True)
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 128, in _abrechnung
+    assert abs(rest["offene_position"] - voll * (1 - menge / 100)) < 1e-6
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+11 GEFANGEN: Short TP deckt weiter 40 -> test_simulate_short_bucht_signalmenge_und_ganzen_rest
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 140, in test_simulate_short_bucht_signalmenge_und_ganzen_rest
+    _abrechnung(True)
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 128, in _abrechnung
+    assert abs(rest["offene_position"] - voll * (1 - menge / 100)) < 1e-6
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+12 GEFANGEN: State verliert Bruchteile -> test_bruchteile_ueberleben_state_json
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 149, in test_bruchteile_ueberleben_state_json
+    assert main.pos_from_state(gespeichert).bestand_pct == pos.bestand_pct
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+13 GEFANGEN: Neustart verliert Bruchteile -> test_getrennte_prozesse_gleiche_signale_telegram_und_state
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 205, in test_getrennte_prozesse_gleiche_signale_telegram_und_state
+    assert z3[-1]["bestand_pct"] == z4[-1]["bestand_pct"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+14 GEFANGEN: Restmeldung behauptet 20 Prozent -> test_rest_meldung_verspricht_keine_feste_20_prozent
+C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e444-sabotage-9ikgs509\engine\test_e444.py", line 213, in test_rest_meldung_verspricht_keine_feste_20_prozent
+    assert "gesamter Rest der Position" in text and "20 %" not in text
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+ERGEBNIS: 14/14 gefangen; 12 Tests abgedeckt

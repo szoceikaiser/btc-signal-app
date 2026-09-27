@@ -1,0 +1,455 @@
+{
+  "D01_inputs": {
+    "candles": 2481,
+    "flow": 2481,
+    "gaps": [],
+    "invalid_ohlc": [],
+    "aligned": true,
+    "duplicates": 0,
+    "unfinished": [
+      {
+        "ts": 1790496000000,
+        "open": 84790.99,
+        "high": 84864.01,
+        "low": 84732.07,
+        "close": 84810.02
+      }
+    ],
+    "recorded_end": 1790497748840,
+    "funding_zeros": 0,
+    "nonfinite": 0
+  },
+  "F01_dd_sale_before_low": {
+    "production": 0.0,
+    "expected": -50.0,
+    "signals": [
+      {
+        "ts": 0,
+        "type": "KAUF_1",
+        "price": 100,
+        "tranche_pct": 100
+      },
+      {
+        "ts": 14400000,
+        "type": "STOPLOSS",
+        "price": 100,
+        "tranche_pct": 100
+      }
+    ],
+    "candles": [
+      {
+        "ts": 0,
+        "open": 100,
+        "high": 100,
+        "low": 100,
+        "close": 100
+      },
+      {
+        "ts": 14400000,
+        "open": 100,
+        "high": 100,
+        "low": 50,
+        "close": 100
+      }
+    ]
+  },
+  "F02_short_margin": {
+    "production_return": 20.0,
+    "unlevered_max_return": 10,
+    "implied_exposure_pct": 200
+  },
+  "F03_trail_can_fall": {
+    "prior_stop": 115,
+    "next_close": 110,
+    "new_computed_stop": 100,
+    "first_signals": [],
+    "next_signals": [],
+    "state": "TP1"
+  },
+  "F04_entry_average": {
+    "production": 188.53333333333333,
+    "capital_weighted_cost_per_coin": 186.10966057441252,
+    "first_price": 220,
+    "second_price": 172.8,
+    "capital_amounts": [
+      25,
+      50
+    ],
+    "fee_excluded": true
+  },
+  "F05_state_missing": {
+    "field": "widerstand_exits",
+    "before": 1,
+    "after": 0
+  },
+  "F06_cvd_offset": {
+    "original": "DERIVATE_PUMP",
+    "shifted": "GESUNDER_TREND",
+    "corrected_original": "DERIVATE_PUMP",
+    "corrected_shifted": "DERIVATE_PUMP"
+  },
+  "F07_future_fallback": {
+    "first_candle": 0,
+    "first_oi_time": 28800000,
+    "value_in_past": 12345
+  },
+  "F08_partial_daily": {
+    "hours_observed": 8,
+    "returned_daily_bars": 1,
+    "returned_close": 102
+  },
+  "P01_pivot_confirmation": "PASS: no pivot is returned before n right-hand bars",
+  "P02_independent_reconciliation": {
+    "LIVE-heute +Bein in Handelsrichtung": {
+      "end": 13613.752083804098,
+      "production_end": 13613.75,
+      "tolerance_end": 13613.75,
+      "difference_usd": 0.0020838040982198436,
+      "impossible_ohlc_fills": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)",
+          "low": 71168.65,
+          "high": 73063.38
+        },
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)",
+          "low": 63726.57,
+          "high": 63984.53
+        }
+      ],
+      "zero_orders": 14,
+      "fees": 546.3410534045722,
+      "orders": 192,
+      "cycles": 22,
+      "original_dd": -9.94,
+      "dd_close": -8.289712539871452
+    },
+    "LIVE-heute +Rest halten (E43.6)": {
+      "end": 13671.878007405256,
+      "production_end": 13541.49,
+      "tolerance_end": 13671.88,
+      "difference_usd": 130.38800740525585,
+      "impossible_ohlc_fills": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)",
+          "low": 71168.65,
+          "high": 73063.38
+        },
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)",
+          "low": 63726.57,
+          "high": 63984.53
+        }
+      ],
+      "zero_orders": 14,
+      "fees": 518.61689210913,
+      "orders": 184,
+      "cycles": 14,
+      "original_dd": -9.94,
+      "dd_close": -8.563660564208197
+    },
+    "LIVE-heute +kleinere Verkaeufe": {
+      "end": 13614.518774129967,
+      "production_end": 13614.52,
+      "tolerance_end": 13614.52,
+      "difference_usd": -0.0012258700335223693,
+      "impossible_ohlc_fills": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 26.8,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)",
+          "low": 71168.65,
+          "high": 73063.38
+        },
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 10.05,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)",
+          "low": 63726.57,
+          "high": 63984.53
+        }
+      ],
+      "zero_orders": 15,
+      "fees": 522.2736411833068,
+      "orders": 191,
+      "cycles": 21,
+      "original_dd": -9.94,
+      "dd_close": -8.632015853906772
+    },
+    "LIVE-heute +kleinere Verkaeufe +Rest halten": {
+      "end": 13791.323041978036,
+      "production_end": 13791.32,
+      "tolerance_end": 13791.32,
+      "difference_usd": 0.003041978035980719,
+      "impossible_ohlc_fills": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 26.8,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)",
+          "low": 71168.65,
+          "high": 73063.38
+        },
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 10.05,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)",
+          "low": 63726.57,
+          "high": 63984.53
+        }
+      ],
+      "zero_orders": 22,
+      "fees": 441.2147433028816,
+      "orders": 176,
+      "cycles": 10,
+      "original_dd": -12.55,
+      "dd_close": -11.069025639758824
+    },
+    "LIVE-heute +E42": {
+      "end": 13542.220759753433,
+      "production_end": 13593.32,
+      "tolerance_end": 13542.22,
+      "difference_usd": -51.099240246567206,
+      "impossible_ohlc_fills": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)",
+          "low": 71168.65,
+          "high": 73063.38
+        },
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)",
+          "low": 63726.57,
+          "high": 63984.53
+        }
+      ],
+      "zero_orders": 14,
+      "fees": 632.3336078723203,
+      "orders": 228,
+      "cycles": 26,
+      "original_dd": -9.94,
+      "dd_close": -8.67939599125821
+    },
+    "LIVE-heute +E42 +Rest halten": {
+      "end": 13457.567847021866,
+      "production_end": 13457.57,
+      "tolerance_end": 13457.57,
+      "difference_usd": -0.0021529781333811115,
+      "impossible_ohlc_fills": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)",
+          "low": 71168.65,
+          "high": 73063.38
+        },
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)",
+          "low": 63726.57,
+          "high": 63984.53
+        }
+      ],
+      "zero_orders": 13,
+      "fees": 565.1016468793486,
+      "orders": 203,
+      "cycles": 13,
+      "original_dd": -11.13,
+      "dd_close": -9.887802287095848
+    },
+    "LIVE-heute +E42 +kleinere Verkaeufe": {
+      "end": 13486.175483866296,
+      "production_end": 13486.18,
+      "tolerance_end": 13486.18,
+      "difference_usd": -0.004516133703873493,
+      "impossible_ohlc_fills": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 26.8,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)",
+          "low": 71168.65,
+          "high": 73063.38
+        },
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 10.05,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)",
+          "low": 63726.57,
+          "high": 63984.53
+        }
+      ],
+      "zero_orders": 16,
+      "fees": 593.4302638821562,
+      "orders": 223,
+      "cycles": 25,
+      "original_dd": -9.94,
+      "dd_close": -9.05651148456278
+    },
+    "LIVE-heute +E42 +kleinere Verkaeufe +Rest halten": {
+      "end": 13467.15533271177,
+      "production_end": 13467.16,
+      "tolerance_end": 13467.16,
+      "difference_usd": -0.004667288229029509,
+      "impossible_ohlc_fills": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 26.8,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)",
+          "low": 71168.65,
+          "high": 73063.38
+        },
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 10.05,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)",
+          "low": 63726.57,
+          "high": 63984.53
+        }
+      ],
+      "zero_orders": 25,
+      "fees": 472.1797231490761,
+      "orders": 189,
+      "cycles": 10,
+      "original_dd": -13.11,
+      "dd_close": -11.59950667345553
+    },
+    "LIVE-heute +E42 (6 Kerzen, Robustheit)": {
+      "end": 13599.549718371643,
+      "production_end": 13650.87,
+      "tolerance_end": 13599.55,
+      "difference_usd": -51.32028162835741,
+      "impossible_ohlc_fills": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)",
+          "low": 71168.65,
+          "high": 73063.38
+        },
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)",
+          "low": 63726.57,
+          "high": 63984.53
+        }
+      ],
+      "zero_orders": 14,
+      "fees": 628.6801428628062,
+      "orders": 226,
+      "cycles": 26,
+      "original_dd": -9.94,
+      "dd_close": -8.292803923303804
+    }
+  },
+  "F09_float_dust": {
+    "description": "Exact units == 0 check leaves a 2.78e-17 BTC remainder after a nominal full partial sale on 2026-04-06. Next purchase incorrectly keeps the old allocation and peak BTC. See debug_book.py.",
+    "affected": {
+      "LIVE-heute +Rest halten (E43.6)": 130.38800740525585,
+      "LIVE-heute +E42": -51.099240246567206,
+      "LIVE-heute +E42 (6 Kerzen, Robustheit)": -51.32028162835741
+    }
+  },
+  "P03_independent_oracle_sabotage": "CAUGHT"
+}

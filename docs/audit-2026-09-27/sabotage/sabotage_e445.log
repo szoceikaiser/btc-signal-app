@@ -1,0 +1,111 @@
+BASIS: 10 Tests gruen
+01 GEFANGEN: K2 falsch -> test_gitter_acht_ecken_genau_live_basis
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 17, in test_gitter_acht_ecken_genau_live_basis
+    assert {tuple(c[k] for k in keys) for c in bt.E445_GRID[:8]} == set(product((False, True), (1.0, .67), (False, True)))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+02 GEFANGEN: Robustheit falsch -> test_robustheit_nur_sechs_statt_zwoelf
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 31, in test_robustheit_nur_sechs_statt_zwoelf
+    assert r["ruecktest_fenster"] == 6
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+03 GEFANGEN: H2 ignoriert -> test_hauptzeile_beide_haelften_und_exakte_grenze
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 40, in test_hauptzeile_beide_haelften_und_exakte_grenze
+    assert not e445.regel(live, schwach, True)["bestanden"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+04 GEFANGEN: Kombination zu leicht -> test_kombination_braucht_zwei_punkte
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 47, in test_kombination_braucht_zwei_punkte
+    assert not e445.regel(live, dict(var, **{k: var[k] - .01}))["bestanden"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+05 GEFANGEN: Rueckgang ignoriert -> test_rueckgang_verhindert_positive_renditeentscheidung
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 53, in test_rueckgang_verhindert_positive_renditeentscheidung
+    assert not e445.regel(live, dict(var, dd=-6.01), True)["bestanden"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+06 GEFANGEN: Monatsprobe ignoriert -> test_monatsprobe_ausreisser_null_und_fehlende_monate
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 60, in test_monatsprobe_ausreisser_null_und_fehlende_monate
+    assert not e445.regel(live, _kz(15, 25, -5, werte), True)["bestanden"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+07 GEFANGEN: Fehlende Monate erlaubt -> test_monatsprobe_ausreisser_null_und_fehlende_monate
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 60, in test_monatsprobe_ausreisser_null_und_fehlende_monate
+    assert not e445.regel(live, _kz(15, 25, -5, werte), True)["bestanden"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+08 GEFANGEN: Hauptrolle vertauscht -> test_auswertung_rollen_wechselwirkungen_und_bericht
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 82, in test_auswertung_rollen_wechselwirkungen_und_bericht
+    assert z["urteil"]["bestanden"] == (z["label"] == bt.E445_HAUPT)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+09 GEFANGEN: Fehlende Haelfte ignoriert -> test_fehlende_haelfte_keine_entscheidung
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 97, in test_fehlende_haelfte_keine_entscheidung
+    raise AssertionError("Unvollstaendige Messung akzeptiert")
+AssertionError: Unvollstaendige Messung akzeptiert
+
+10 GEFANGEN: Alter immer null -> test_alter_aus_echter_engine_ohne_signalveraenderung
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 107, in test_alter_aus_echter_engine_ohne_signalveraenderung
+    assert rk[0]["beobachtung_kerzen"] == 1
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+11 GEFANGEN: Altersgrenze verschoben -> test_alte_marken_grenze_im_bericht
+C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\backtest.py:1177: SyntaxWarning: invalid escape sequence '\$'
+  bei 0:00 = 79089\$" — und: "ich moechte kein gegengeschaeft sehen".
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "C:\Users\oeztu\AppData\Local\Temp\e445-sabotage-mcbe1dbd\engine\test_e445.py", line 118, in test_alte_marken_grenze_im_bericht
+    assert z["alte_marken"] == 2 and z["max_alter"] == 50
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+ERGEBNIS: 11/11 gefangen; 10 Tests abgedeckt

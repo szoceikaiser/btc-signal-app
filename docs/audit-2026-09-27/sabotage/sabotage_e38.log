@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\oeztu\BTC-Trading\audit-work\engine\sabotage_e38.py", line 142, in <module>
+    signal.signal(signal.SIGALRM, lambda *_: (_ for _ in ()).throw(TimeoutError()))
+                  ^^^^^^^^^^^^^^
+AttributeError: module 'signal' has no attribute 'SIGALRM'. Did you mean: 'SIGABRT'?
