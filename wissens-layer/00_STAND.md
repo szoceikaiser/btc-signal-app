@@ -4,7 +4,7 @@
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.
 >
-> Stand: **27.09.2026 (19)**
+> Stand: **27.09.2026 (20)**
 
 ## Lage
 
@@ -15,12 +15,13 @@
 - Die Engine **läuft live** und handelt nicht selbst: sie sendet Telegram-Signale,
   Kaiser platziert die Orders. Webseite: `szoceikaiser.github.io/btc-signal-app`.
 - **E44.3 ist in main** (5a50fd8, Kaisers Go 27.09.2026), **585 Tests gruen**.
-  `ausbruch_ruecktest` bleibt aus; noch nicht gemessen.
+  `ausbruch_ruecktest` bleibt aus; E44.5 gemessen, Regel nicht erfuellt.
 - **E44.4 fertig auf `claude/e44-4-verkauf-faktor`**, **597 Tests gruen**,
   **14/14 Sabotagen gefangen**. `verkauf_faktor` Default 1.0, Messwert 0.67.
   Bruchteile in state.json, Signale/Telegram am Stueck und in getrennten Prozessen gleich.
-  Nicht in main, nicht aktiviert, nicht gemessen. Naechster Schritt: **E44.5**, Aufwand mittel.
-  Einzelheiten: Plan E44 Abschnitt 9a und UEBERGABE (27).
+  Nicht in main, nicht aktiviert. In E44.5 gemessen: keine Regel erfuellt, Faktor bleibt 1.0.
+  Einzelheiten: Plan E44 Abschnitt 9a und UEBERGABE (29).
+- **E44.5 gemessen auf `claude/e44-5-kombinationsgitter`**: 8 Kombinationen + Robustheit, 607 Tests gruen, 11/11 neue Sabotagen. E42 H1 +1,76 / H2 -1,71 Punkte gegen live; Monatsprobe -0,83. **Keine Zeile besteht, nichts aktivieren.** Abschliessender Replay/Speichercheck noch offen. Bericht `docs/e445/BERICHT.md`. Danach E44.6-Bauplan (Shorts), Aufwand hoch.
 - **Kaisers Go 26.09.2026: E43.1 und E43.2 live.** Arbeitszweig nach `main` gemerged.
   E43.1 (Futures-CVD im Lage-Abruf jetzt in Dollar) ist reine Anzeige. E43.2
   (`bein_richtung: "bias"`) hat die vorab festgelegte Entscheidungsregel erfüllt (beide
@@ -85,7 +86,7 @@ und nicht bei den Stops. Vorschlag: E42 (Ausbruch mit Rücktest) als Partner von
 auf Kaisers Antworten** (Abschnitt 10 im Plan). **E44.1 (Coinalyze-Archiv) und E44.2
 (Wechselwirkungen, Monats-Probe) sind seit 26.09.2026 in `main`** (Kaisers Go), 545 Tests
 grün. cron-job.org-Aufträge für Archiv und Flush-Wache: Anleitung Schritt 5, Kaiser richtet
-ein. Kaiser will Shorts im fallenden Markt (E44.6). **E44.3 ist in main; E44.4 ist auf dem Arbeitszweig fertig. Nächster Schritt: E44.5** (Gitter messen). Startprompt je Etappe: Plan, Abschnitt 9a.
+ein. Kaiser will Shorts im fallenden Markt (E44.6). **E44.3 ist in main; E44.4 ist auf dem Arbeitszweig fertig. E44.5 ist gemessen, keine Zeile besteht. Nächster Schritt: E44.6-Bauplan**. Startprompt je Etappe: Plan, Abschnitt 9a.
 
 0. **E43 — Korrekturen aus der Gesamtprüfung** (`docs\PLAN-E43-PRUEFUNGS-KORREKTUREN.md`).
    E43.1 und E43.2 live seit 26.09.2026. E43.5 und E43.3 gebaut, gemessen und seit
@@ -107,7 +108,7 @@ ein. Kaiser will Shorts im fallenden Markt (E44.6). **E44.3 ist in main; E44.4 i
    `docs\PLAN-E41-STOP.md`, nicht gebaut). Seit 26.09.2026 weniger dringend: Die
    Ausschalt-Regel schlägt auf der neuen Live-Basis nicht mehr an.
 2. **E42** — Kaisers zweite Regel: Ausbruch über das letzte Hoch mit Rücktest. **Als E44.3
-   gebaut (27.09.2026, Zweig, Schalter aus)**, gemessen wird in E44.5.
+   gebaut (27.09.2026, Zweig, Schalter aus)**. E44.5 gemessen: Regel nicht erfuellt, bleibt aus.
 3. Alles weitere: `02_status/OFFENE-PUNKTE.md`, nach Nutzwert sortiert.
 
 ## Die drei Sätze, die man nie vergessen darf

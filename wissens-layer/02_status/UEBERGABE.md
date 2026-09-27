@@ -1,5 +1,43 @@
 # Laufende Übergabe
 
+## 27.09.2026 (29) — E44.5 gemessen: keine Zeile besteht, Replay laeuft als Abschluss
+
+- GitHub-Schreibzugriff bestaetigt, Arbeit auf `claude/e44-5-kombinationsgitter`
+  ab E44.4. `main` unveraendert. Kein Go zum Merge von E44.4, nichts aktiviert.
+- 607 Tests gruen (10 neu), 11/11 neue Sabotagen gefangen, E44.4 erneut 14/14.
+  Signale UND Telegram in getrennten Prozessen unveraendert, volle Suite gruen.
+  Protokoll: `docs/E44-5-PRUEFPROTOKOLL.txt`.
+- 8 Ecken + Robustheit gemessen, Bericht: `docs/e445/BERICHT.md`;
+  `ergebnis.json`, `eingaben.json`, `signale.json` sind die vollstaendigen Belege.
+- Hauptzeile E42: +35,93 % gegen live +36,14 %, H1 +1,76 / H2 -1,71 Punkte,
+  DD beide -9,94 %, Monatsprobe -0,83. **Regel nicht erfuellt, bleibt aus.**
+  Keine der sechs Erklaerungszeilen besteht. Faktor bleibt 1,0, Rest halten aus.
+  Robustheit 6 Kerzen aendert das schlechte H2-Ergebnis nicht.
+- E42: 16 Rueckkaeufe, 2 Marken seit mehr als 12 Kerzen beobachtet, Maximum 74.
+  Wechselwirkungen und Einordnung: Plan E44, Abschnitt 9a und Messbericht.
+- Messlauf 36306294148: Berechnung erfolgreich, nur Git-Sicherung gescheitert
+  (flacher Checkout). Artefakt gesichert, volle Git-Historie im Workflow korrigiert.
+  Abschliessend Replay derselben Eingaben mit Dateivergleich, Lauf-ID folgt.
+- Keine Live-Dateien geaendert. Eigener Workflow statt bestehendem Backtest,
+  damit keine Pages-Veroeffentlichung angestossen wird.
+
+**Folgeprompt (nach abgeschlossenem Replay):**
+
+```text
+Repo szoceikaiser/btc-signal-app. Deutsch, kurz.
+Pruefe zuerst GitHub-Schreibzugriff. Lies wissens-layer/00_STAND.md und nur den
+juengsten Abschnitt von wissens-layer/02_status/UEBERGABE.md auf
+claude/e44-5-kombinationsgitter. E44.5 gemessen: keine Zeile besteht die Regel.
+Kein Merge-Go fuer E44.4/E44.5 und nichts aktivieren.
+Naechster Schritt E44.6: zuerst den Bauplan fuer Shorts im Abwaerts-Regime
+ausarbeiten, anhand docs/PLAN-E44-KOMBINATIONEN.md K4, 9a und 10.
+Kaisers Ja zu Shorts liegt vor. Noch nicht bauen oder live schalten.
+Aufwand hoch; gegenueber E44.5 (mittel) auf hoch wechseln.
+```
+
+---
+
+
 ## 27.09.2026 (28) — E44.5 gebaut, vor Pruefung und Messung gesichert
 
 - GitHub-Schreibzugriff ueber API bestaetigt (`push: true`). Neuer Zweig

@@ -47,3 +47,5 @@ BASIS: 12 Tests gruen
 13 GEFANGEN: Neustart verliert Bruchteile -> test_getrennte_prozesse_gleiche_signale_telegram_und_state
 14 GEFANGEN: Restmeldung behauptet 20 Prozent -> test_rest_meldung_verspricht_keine_feste_20_prozent
 ERGEBNIS: 14/14 gefangen; 12 Tests abgedeckt
+
+Messlauf 36306294148: Tests/Sabotage/Messung gruen; Git-Sicherung scheiterte an shallow checkout. Vollstaendiges Artefakt gesichert. Workflow fetch-depth=0, Replay mit identischen Eingaben folgt.

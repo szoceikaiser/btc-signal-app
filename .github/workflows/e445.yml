@@ -1,9 +1,11 @@
 name: E44.5 Kombinationsmessung
 on:
   workflow_dispatch:
-  push:
-    branches: [claude/e44-5-kombinationsgitter]
-    paths: [.github/workflows/e445.yml]
+    inputs:
+      replay:
+        description: Gesicherten Eingabestand ohne neue Marktdaten wiederholen
+        type: boolean
+        default: false
 permissions:
   contents: write
 jobs:
@@ -13,6 +15,8 @@ jobs:
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Tests vor Messung
         run: cd engine && python3 run_tests.py
       - name: Sabotage-Proben
@@ -20,7 +24,17 @@ jobs:
       - name: Gitter messen
         env:
           COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
-        run: cd engine && python3 -u e445.py
+          E445_REPLAY: ${{ inputs.replay }}
+        run: |
+          cd engine
+          if [ "$E445_REPLAY" = "true" ]; then
+            python3 -u e445.py --replay ../docs/e445/eingaben.json
+          else
+            python3 -u e445.py
+          fi
+      - name: Wiederholung ist identisch
+        if: inputs.replay
+        run: git diff --exit-code -- docs/e445/
       - uses: actions/upload-artifact@v4
         if: always()
         with:

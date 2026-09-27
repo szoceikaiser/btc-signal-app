@@ -374,7 +374,7 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 | E44.2 Wechselwirkungen + Monats-Probe im Bericht | **GEBAUT** 26.09.2026 auf demselben Zweig, 545 Tests, `sabotage_e442.py` 8/8 gefangen. Findet im echten Gitter dieselben 16 Gruppen wie Abschnitt 2. Wirkt erst im nächsten Backtest-Lauf (neuer Berichtsabschnitt „E44“). **IN `main` seit 26.09.2026** (Kaisers Go). Erscheint im nächsten Backtest |
 | E44.3 E42 Ausbruch mit Ruecktest | **IN main** (5a50fd8, Kaisers Go 27.09.2026), 585 Tests gruen. Schalter bleibt aus; nicht gemessen. |
 | E44.4 `verkauf_faktor` | **FERTIG auf `claude/e44-4-verkauf-faktor`**, 597 Tests gruen (12 neu), **14/14 Sabotagen gefangen** (Lauf `e444-20260927-03`, Protokoll `docs/E44-4-PRUEFPROTOKOLL.txt`). Neustart mit Signalen UND Telegram geprueft. Default 1.0; 0.67 erst in E44.5 messen. Nicht in main, keine Aktivierung/Messung. |
-| E44.5 2³-Gitter messen | GEBAUT auf `claude/e44-5-kombinationsgitter`, 27.09.2026. 8 Ecken + 6-Kerzen-Robustheit, automatische Regel und Markenalter. 607 Tests gruen (10 neu), 11/11 Sabotagen gefangen (e445-20260927-01; Gesamttests korrigiert in Lauf 02). Eigener Workflow ohne Pages-Ausloesung, Messung noch offen. |
+| E44.5 2³-Gitter messen | GEMESSEN 27.09.2026 auf `claude/e44-5-kombinationsgitter`. 607 Tests gruen, 11/11 neue und erneut 14/14 E44.4-Sabotagen gefangen. Hauptzeile H1 +1,76 / H2 -1,71 Punkte, Monatsprobe -0,83: Regel nicht erfuellt; auch keine Erklaerungszeile besteht. Replay/Speicherabschluss noch offen. Bericht `docs/e445/BERICHT.md`. Kein Merge/keine Aktivierung. |
 | E44.6 Shorts im Abwärts-Regime | OFFEN, **Kaisers Ja am 26.09.2026**. Zuerst eigener Bauplan-Abschnitt (Punkte a und b in Abschnitt 10) |
 
 **So beginnt ein neuer Chat mit einer Etappe (spart Tokens):** Den Kurzprompt aus
@@ -391,6 +391,38 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
   Backtest auf dem Zweig anstossen, Urteil nach der vorab festgelegten Regel.` Aufwand: niedrig bis mittel.
 - **E44.6:** nur nach Kaisers Ja, eigener Bauplan-Abschnitt zuerst. Aufwand: hoch.
 
+### E44.5 Messung 27.09.2026
+
+- Arbeitszweig `claude/e44-5-kombinationsgitter`, Code `68e15ae`, Lauf 36306294148.
+  Zeitraum 18.01.2026 20:00 UTC bis 27.09.2026 08:29 UTC, identische Daten fuer alle
+  neun Zeilen und beide separat gestarteten Haelften. 1.510 OI-Punkte (6 nur Archiv),
+  2.481 Kerzen einschliesslich Warmup. Eingaben, Signale und Ergebnis unter `docs/e445/`.
+- **Hauptzeile E42: Regel nicht erfuellt.** Live +36,14 %, E42 +35,93 %.
+  H1 +23,61 -> +25,37 % (**+1,76 Punkte**), H2 +10,13 -> +8,42 % (**-1,71 Punkte**).
+  Rueckgang beider -9,94 %. Monatsprobe ohne Maerz: **-0,83 Punkte**.
+  E42 bleibt aus; keine Aktivierung und kein Merge-Go fuer E44.4.
+- **Keine der sechs uebrigen Erklaerungszeilen besteht die strengere Regel.**
+  Faktor 0,67 allein: +36,15 %, H1 +1,05 / H2 -0,91 Punkte gegen live.
+  Hoechste Vollfenster-Rendite im Gitter: Faktor 0,67 + Rest halten, +37,91 %;
+  aber H1 -5,45 Punkte, Rueckgang -12,55 % (2,61 tiefer), Monatsprobe -4,96.
+  Die Rangfolge ist damit ausdruecklich kein Grund zur Auswahl.
+- Wechselwirkungen auf Live-Basis: E42 x Rest halten -0,62 Punkte;
+  E42 x kleiner verkaufen -1,08; kleiner verkaufen x Rest halten +2,49.
+  Letztere kippt zwischen H1 (-2,24) und H2 (+4,17). Die Kombination liefert
+  keine Verbesserung in beiden Haelften; E42 schliesst die diagnostizierte Luecke
+  in diesem Fenster nicht mit einem regelkonformen Renditevorteil.
+- Robustheit 6 statt 12 Kerzen: +36,51 %, H1 +25,90 / H2 +8,42 %, DD -9,94 %.
+  H2 bleibt unter live; diese Zeile entscheidet ohnehin nichts. Keine Nachjustierung.
+- Offene K1-Zaehlung erledigt: E42 16 Rueckkaeufe, davon 2 auf seit mehr als
+  12 Kerzen beobachtete Marken; Maximum 74 Kerzen. Schwelle vor Messung im Code
+  gesetzt, nur Diagnose, kein Filter und kein Nachweis einer Verlustursache.
+- Lauf 36306294148 hat alle Werte berechnet und als Artefakt gesichert, scheiterte
+  erst beim anschliessenden Git-Vergleich (shallow Checkout, keine merge base).
+  Ergebnisse aus Artefakt gerettet; Checkout auf volle Historie korrigiert.
+  Ein Replay auf genau denselben Eingaben prueft auch identische Ergebnisdateien.
+- Neuer Workflow `E44.5 Kombinationsmessung` loest keine Pages-Veröffentlichung aus
+  und verweigert main. Bestehender Backtest-Bericht enthaelt jetzt dieselbe Regel.
+  Bei spaeterem Go gilt die unveraenderte Ausschalt-Regel aus Abschnitt 8.
 ### 9b. E44.1 im Detail: Coinalyze-Archiv
 
 - **Problem:** Coinalyze liefert nur rund 1.500 bis 2.000 4h-Werte. Das Messfenster wandert
