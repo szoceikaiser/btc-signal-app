@@ -1964,3 +1964,12 @@ verstärkt diesen Unterschied, statt ihn zu schließen.
 
 `zonen_1d` bleibt aus, `pivot_n_1d` bleibt 0. Der Parameter bleibt im Code (Default 0 =
 altes Verhalten, getestet), damit die Messung dauerhaft nachvollziehbar ist.
+
+## E44.3 — E42 „Ausbruch mit Rücktest“ als Schalter (27.09.2026)
+
+Status: **GEBAUT, Default aus, noch nicht gemessen.** Zweig `claude/e44-3-ausbruch-ruecktest-k7m2qx`,
+585 Tests grün (40 neu in `engine/test_e443.py`), `engine/sabotage_e443.py` 42 von 42 gefangen.
+Bauplan, Kaisers Werte und die Bau-Auslegung: `docs/PLAN-E44-KOMBINATIONEN.md`, Abschnitt 6 K1
+und 10. Abweichung vom Bauplan: keine Werte geändert; Kaiser hat am 27.09.2026 zusätzlich
+entschieden, dass der Stop an der Marke nur für die zurückgekauften 25 % gilt. Gemessen wird in
+E44.5 (Hauptzeile „LIVE-heute +E42“).

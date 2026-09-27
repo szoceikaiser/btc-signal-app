@@ -175,7 +175,9 @@ Swing-Weite deutlich schlechter. Siehe `wissens-layer/02_status/GEMESSEN-UND-ENT
   Hälfte 2 nicht (+0,2 Punkte) und rettet keine Position mehr als B1. Ein Wechsel ist nur
   nach der im Plan festgelegten Regel zulässig (zwei Läufe, vier Wochen Abstand, in
   beiden Hälften ≥ 1 Punkt besser, Rückgang nicht tiefer).
-- **E42 — Ausbruch mit Rücktest (Kaisers Regel, 21.09.2026), vorgemerkt.** Die Engine
+- **E42 — Ausbruch mit Rücktest (Kaisers Regel, 21.09.2026). GEBAUT 27.09.2026 als E44.3**
+  (Schalter `ausbruch_ruecktest`, Default aus, Zweig `claude/e44-3-ausbruch-ruecktest-k7m2qx`),
+  gemessen wird in E44.5. Ursprünglicher Eintrag: Die Engine
   verkauft live unter dem letzten Hoch (`high_exit: on`). Bricht der Kurs dort durch
   und hält beim Rücktest (Schluss nicht mehr darunter, höchstens der Docht), sind
   weitere Gewinne zu erwarten — zurückkaufen oder den Rest halten? Eigene Etappe, weil

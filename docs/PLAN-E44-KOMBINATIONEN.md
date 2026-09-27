@@ -220,6 +220,49 @@ Regel (aus Kaisers Worten, Werte **vorab** festgelegt, keine Nachjustierung):
 `state.json`, sonst tut der Backtest etwas, das live nie passiert. Prüfweg wie immer:
 dieselbe Kursfolge am Stück und Kerze für Kerze, Signale und Telegram-Meldungen gleich.
 
+**Bau-Auslegung E44.3 (27.09.2026).** Was die Regel oben offen ließ, wurde beim Bau so
+festgelegt (Kaisers Entscheidung ausdrücklich markiert, der Rest ist Auslegung und steht hier,
+damit niemand sie später für gemessen hält):
+
+- **Stop nur für den Rückkauf-Teil — Kaiser 27.09.2026:** *„Nur die 25 %“.* Schließt der Kurs
+  unter der Marke (mit Rückeroberung 1 Kerze, harter Boden 5 %), wird nur der zurückgekaufte
+  Teil verkauft (neues Signal `RUECKKAUF_STOP`). Der Rest der Position behält Stop und Einstand.
+  Deshalb zählt der Rückkauf **nicht** in den Durchschnitts-Einstand (sonst wanderte der
+  nachgezogene Stop der übrigen Position, gegen Abschnitt 7 „nichts an den Stops“). Gerechnet
+  wird der Teil-Stop von derselben `stop_entscheidung()` wie der Hauptstop.
+- **Eigene Signaltypen:** `RUECKKAUF` und `RUECKKAUF_STOP` (Short: `SHORT_RUECKTEST`,
+  `SHORT_RUECKTEST_STOP`). Der Backtest bucht den Rückkauf als Kauf und verkauft beim Stop
+  genau diese Einheiten; Teilverkäufe der Position nehmen den Teil anteilig mit.
+- **„Vollständiger Ausstieg durch Teilgewinn oder Rest-Verkauf“:** In der Engine endet eine
+  Position nur durch Stop oder `VERKAUF_REST` (Teilgewinne lassen immer einen Rest). Beobachtet
+  wird also nach jedem Teilverkauf am letzten Hoch und nach jedem Rest-Verkauf (auch dem aus
+  `release_stale_rest`), nie nach einem Stop. Ein Stop beendet eine laufende Beobachtung.
+- **Marke beim Rest-Verkauf:** nächstes Pivot-Hoch über dem Schlusskurs, aus derselben
+  Pivot-Liste wie `high_exit` (auch `high_exit_hist` gilt). Gibt es keins, beginnt keine
+  Beobachtung (eine laufende bleibt).
+- **Schließt schon die Verkaufskerze über der Marke,** ist sie der Ausbruch (die Regel sagt
+  „eine 4h-Kerze schließt darüber“). Die Ausbruchskerze selbst ist nie der Rücktest.
+- **Schluss unter der Marke im Fenster** = Ausbruch gescheitert. Die Engine wartet danach auf
+  einen neuen Ausbruch (neues Fenster). **Fenster ohne Rücktest abgelaufen** = Beobachtung
+  beendet. Solange es keinen Ausbruch gibt, läuft die Beobachtung ohne Frist weiter (bis Stop,
+  Rückkauf oder eine neue Marke). *Offen für E44.5: zählen, wie oft ein Rückkauf auf eine
+  alte Marke kam.*
+- **„Voll investiert“:** neues Feld `bestand_pct` (Käufe +, Teilverkäufe −, voller Ausstieg 0,
+  höchstens 100). `entry_pct` taugt nicht, es zählt nur Käufe. Bei 100 kein Rückkauf.
+- **Aus FLAT** (nach einem Rest-Verkauf) eröffnet der Rückkauf eine neue Position (Zustand wie
+  nach KAUF 1) auf dem aktuellen Bein, damit die vorhandene Extension-Logik die Ziele stellt,
+  gemessen vom Rücktest-Extrem. Gibt es kein Bein in dieser Richtung, kein Rückkauf. Besteht die
+  Position nur aus dem Rückkauf, ist sein Stop ein vollständiger Ausstieg (`STOPLOSS`).
+- **Keine zusätzlichen Filter** (kein Muster, keine Ampel, kein Trendfilter): nicht in Kaisers
+  Regel, und Abschnitt 7 schließt neue Filter aus. `no_flip` (live) gilt: in einer Kerze mit
+  Teilverkauf kein Rückkauf, das Fenster läuft weiter.
+- **Spiegelbildlich für Short** gebaut und getestet (für E44.6).
+- **Telegram:** Verkaufsgrund nennt die beobachtete Marke; eigene Meldungen für Ausbruch,
+  gescheiterten Ausbruch, abgelaufenes Fenster, Rücktest ohne Rückkauf (mit Grund), Warten und
+  Rückeroberung des Teil-Stops. Der Plan nennt den Stop des Rückkauf-Teils. Holt ein Lauf
+  mehrere Kerzen nach, kommen Meldungen und Signale jetzt **je Kerze** in der richtigen Folge
+  (vorher: erst alle E41-Meldungen, dann alle Signale).
+
 ### K2: Verkaufs-Tranchen nach oben kleiner (Furkan, Juli-B 19:14)
 
 Ein Parameter `verkauf_faktor` (live 1,0; Messwert **0,67**, also ein Drittel weniger je
@@ -319,7 +362,7 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
 |---|---|
 | E44.1 Coinalyze-Archiv | **GEBAUT** 26.09.2026 auf Zweig `claude/blissful-maxwell-9uwt6x`, 535 Tests, `sabotage_e441.py` 8/8. **IN `main` seit 26.09.2026** (Kaisers Go). Täglicher Anstoß über cron-job.org, Anleitung `ANLEITUNG-PUENKTLICHER-START.md` Schritt 5 (Kaiser richtet ein) |
 | E44.2 Wechselwirkungen + Monats-Probe im Bericht | **GEBAUT** 26.09.2026 auf demselben Zweig, 545 Tests, `sabotage_e442.py` 8/8 gefangen. Findet im echten Gitter dieselben 16 Gruppen wie Abschnitt 2. Wirkt erst im nächsten Backtest-Lauf (neuer Berichtsabschnitt „E44“). **IN `main` seit 26.09.2026** (Kaisers Go). Erscheint im nächsten Backtest |
-| E44.3 E42 Ausbruch mit Rücktest | **BEREIT ZUM BAU**: Kaiser hat die drei Werte am 26.09.2026 bestätigt (Abschnitt 10) |
+| E44.3 E42 Ausbruch mit Rücktest | **GEBAUT** 27.09.2026 auf Zweig `claude/e44-3-ausbruch-ruecktest-k7m2qx`, Schalter `ausbruch_ruecktest` (Default aus) + `ruecktest_fenster` (12), 582 Tests grün (37 neu in `test_e443.py`), Sabotage `sabotage_e443.py` siehe UEBERGABE. Kaiser 27.09.: Stop nur für die 25 %. Auslegung: Abschnitt 6 K1 „Bau-Auslegung“. **Noch nicht live, noch nicht gemessen** (E44.5). Wartet auf Kaisers Go für `main` (Handelsverhalten unverändert, Schalter aus) |
 | E44.4 `verkauf_faktor` | OFFEN |
 | E44.5 2³-Gitter messen | OFFEN, braucht E44.2 bis E44.4 |
 | E44.6 Shorts im Abwärts-Regime | OFFEN, **Kaisers Ja am 26.09.2026**. Zuerst eigener Bauplan-Abschnitt (Punkte a und b in Abschnitt 10) |
@@ -405,6 +448,9 @@ E44.1 und E44.2 sind unabhängig und sofort machbar. E44.3 ist der Kern.
   abgelegt, Haupttranskript `ORderFLow-Transkript.md`, dazu 260727, 260802, 260803, 260910,
   260913. Ausgewertet für E42 und Shorts (Zitate oben). Danach auf Kaisers Wunsch wieder aus
   dem öffentlichen Repo gelöscht (26.09.2026); bei Bedarf lädt Kaiser sie in den Chat hoch.
+- **Frage 4 (E42-Stop), 27.09.2026:** Gefragt: Wenn nach dem Rückkauf ein Schluss unter der
+  Marke kommt (ohne Rückeroberung), was verkauft die Engine: nur die 25 % oder die ganze
+  Position? **Kaiser 27.09.2026: „Nur die 25 %“.** Umgesetzt in E44.3.
 
 **Frage 1 einfach erklärt (für Kaiser):** Die Engine verkauft heute einen Teil kurz unter
 dem letzten Hoch. Beispiel: letztes Hoch 70.000, Verkauf bei 69.650. Steigt der Kurs danach
