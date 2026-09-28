@@ -1,5 +1,6 @@
 """Read-only metadata for this repository. Credentials never printed or saved."""
 import json,os,subprocess,urllib.request
+from datetime import datetime,timezone
 from inventory import ROOT,OUT
 
 def main():
@@ -18,6 +19,8 @@ def main():
                 main=get('/branches/main'),branches=get('/branches?per_page=100'),
                 workflows=get('/actions/workflows'),artifacts=get('/actions/artifacts?per_page=100'),
                 runs=get('/actions/runs?per_page=100'))
+    result['retrieved_at']=datetime.now(timezone.utc).isoformat()
+    result['compare_frozen_main']=get('/compare/89885adc9fb6d2eae60f7a64f9452760a4e33cd9...'+result['main']['commit']['sha'])
     (OUT/'github-metadaten.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
     print('permissions',result['permissions'],'artifacts',result['artifacts']['total_count'],
           'runs',len(result['runs']['workflow_runs']),'main',result['main']['commit']['sha'])

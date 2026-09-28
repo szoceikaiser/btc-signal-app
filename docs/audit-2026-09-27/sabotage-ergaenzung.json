@@ -1,0 +1,809 @@
+[
+  {
+    "group": "original E44.3",
+    "name": "Ausbruch schon beim Docht",
+    "file": "strategy_core.py",
+    "old": "        jenseits, diesseits = cur.close > marke, cur.close < marke",
+    "new": "        jenseits, diesseits = cur.high > marke, cur.close < marke",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_ausbruch_nur_bei_schluss_ueber_der_marke_nicht_beim_docht"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Schluss unter der Marke zaehlt doch als Ruecktest",
+    "file": "strategy_core.py",
+    "old": "    if diesseits:\n        return \"gescheitert\"",
+    "new": "    if False:\n        return \"gescheitert\"",
+    "exit_code": 1,
+    "summary": "--- 603 passed, 4 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_nach_gescheitertem_ausbruch_braucht_es_einen_neuen",
+      "FAIL test_e443::test_ruecktest_schritt_short_spiegelbildlich",
+      "FAIL test_e443::test_ruecktest_zone_und_docht_regel",
+      "FAIL test_e443::test_schluss_unter_der_marke_im_fenster_scheitert_dann_neuer_ausbruch"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Zone ohne die 0,5 %",
+    "file": "strategy_core.py",
+    "old": "        beruehrt = cur.low <= marke * (1 + RUECKTEST_TOL)",
+    "new": "        beruehrt = cur.low <= marke",
+    "exit_code": 1,
+    "summary": "--- 581 passed, 26 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position",
+      "FAIL test_e443::test_aus_flat_ohne_passendes_bein_kein_rueckkauf",
+      "FAIL test_e443::test_aus_flat_stop_des_teils_ist_voller_ausstieg",
+      "FAIL test_e443::test_default_aus_exakt_dieselben_signale_und_keine_beobachtung",
+      "FAIL test_e443::test_die_verkaufskerze_ist_nie_der_ruecktest_auch_ohne_no_flip",
+      "FAIL test_e443::test_hauptstop_nimmt_den_rueckkauf_teil_mit",
+      "FAIL test_e443::test_kein_zweiter_rueckkauf_auf_dieselbe_marke",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "FAIL test_e443::test_live_meldungen_stehen_je_kerze_vor_ihren_signalen",
+      "FAIL test_e443::test_nach_gescheitertem_ausbruch_braucht_es_einen_neuen",
+      "FAIL test_e443::test_nicht_wenn_schon_voll_investiert",
+      "FAIL test_e443::test_no_flip_kein_rueckkauf_in_einer_kerze_mit_teilverkauf",
+      "FAIL test_e443::test_plan_nennt_den_stop_des_rueckkauf_teils",
+      "FAIL test_e443::test_rueckkauf_aendert_weder_einstand_noch_hauptstop",
+      "FAIL test_e443::test_rueckkauf_nach_teilverkauf_am_hoch_ausbruch_und_ruecktest",
+      "FAIL test_e443::test_ruecktest_fenster_zaehlt_zwoelf_kerzen",
+      "FAIL test_e443::test_ruecktest_nach_dem_fenster_kauft_nicht",
+      "FAIL test_e443::test_ruecktest_zone_und_docht_regel",
+      "FAIL test_e443::test_schluss_unter_der_marke_im_fenster_scheitert_dann_neuer_ausbruch",
+      "FAIL test_e443::test_stop_nur_fuer_den_rueckkauf_teil_mit_rueckeroberung",
+      "FAIL test_e443::test_teil_stop_harter_boden_sofort",
+      "FAIL test_e443::test_zurueckeroberte_marke_ist_geprueft_naechster_bruch_sofort",
+      "FAIL test_e444::test_getrennte_prozesse_gleiche_signale_telegram_und_state",
+      "FAIL test_e444::test_kauf_rueckkauf_und_stops_bleiben_unskaliert",
+      "FAIL test_e445::test_alter_aus_echter_engine_ohne_signalveraenderung"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Fenster eine Kerze zu lang",
+    "file": "strategy_core.py",
+    "old": "    return \"verfallen\" if seit >= fenster else \"\"",
+    "new": "    return \"\"",
+    "exit_code": 1,
+    "summary": "--- 604 passed, 3 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_die_ausbruchskerze_selbst_ist_nie_der_ruecktest",
+      "FAIL test_e443::test_ruecktest_fenster_zaehlt_zwoelf_kerzen",
+      "FAIL test_e443::test_ruecktest_nach_dem_fenster_kauft_nicht"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Fenster eine Kerze zu kurz",
+    "file": "strategy_core.py",
+    "old": "    if seit > fenster:\n        return \"verfallen\"",
+    "new": "    if seit >= fenster:\n        return \"verfallen\"",
+    "exit_code": 1,
+    "summary": "--- 605 passed, 2 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_ruecktest_fenster_zaehlt_zwoelf_kerzen",
+      "FAIL test_e443::test_ruecktest_nach_dem_fenster_kauft_nicht"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Short-Seite rechnet wie Long",
+    "file": "strategy_core.py",
+    "old": "        jenseits, diesseits = cur.close < marke, cur.close > marke",
+    "new": "        jenseits, diesseits = cur.close > marke, cur.close < marke",
+    "exit_code": 1,
+    "summary": "--- 605 passed, 2 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_ruecktest_schritt_short_spiegelbildlich",
+      "FAIL test_e443::test_short_spiegelbildlich"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Ausbruchskerze zaehlt als Ruecktest",
+    "file": "strategy_core.py",
+    "old": "        return \"ausbruch\" if jenseits else \"\"",
+    "new": "        return (\"ruecktest\" if beruehrt else \"ausbruch\") if jenseits else \"\"",
+    "exit_code": 1,
+    "summary": "--- 600 passed, 7 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position",
+      "FAIL test_e443::test_aus_flat_ohne_passendes_bein_kein_rueckkauf",
+      "FAIL test_e443::test_aus_flat_stop_des_teils_ist_voller_ausstieg",
+      "FAIL test_e443::test_ausbruch_nur_bei_schluss_ueber_der_marke_nicht_beim_docht",
+      "FAIL test_e443::test_die_ausbruchskerze_selbst_ist_nie_der_ruecktest",
+      "FAIL test_e443::test_nach_gescheitertem_ausbruch_braucht_es_einen_neuen",
+      "FAIL test_e443::test_ruecktest_schritt_short_spiegelbildlich"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "kerzen_seit zaehlt die Ausbruchskerze mit",
+    "file": "strategy_core.py",
+    "old": "        if candles[-k].ts == ts:\n            return k - 1",
+    "new": "        if candles[-k].ts == ts:\n            return k",
+    "exit_code": 1,
+    "summary": "--- 604 passed, 3 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_die_ausbruchskerze_selbst_ist_nie_der_ruecktest",
+      "FAIL test_e443::test_kerzen_seit_zaehlt_in_der_liste",
+      "FAIL test_e443::test_ruecktest_nach_dem_fenster_kauft_nicht"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Verkaufskerze wird schon als Fenster bewertet",
+    "file": "strategy_core.py",
+    "old": "    if pos.e42_marke is not None and pos.e42_start_ts != cur.ts:",
+    "new": "    if pos.e42_marke is not None:",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_die_verkaufskerze_ist_nie_der_ruecktest_auch_ohne_no_flip"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Gescheiterter Ausbruch bleibt stehen",
+    "file": "strategy_core.py",
+    "old": "            pos.e42_ausbruch_ts = -1                     # auf einen neuen Ausbruch warten",
+    "new": "            pass",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_nach_gescheitertem_ausbruch_braucht_es_einen_neuen"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Stop beendet die Beobachtung nicht",
+    "file": "strategy_core.py",
+    "old": "            _e42_ende()                      # E44.3: nach einem Stop wird nicht beobachtet",
+    "new": "            pass",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_nach_einem_stop_keine_beobachtung"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Kein Rest-Verkauf startet eine Beobachtung",
+    "file": "strategy_core.py",
+    "old": "                    # E44.3: Rest-Verkauf (kein Stop) -> naechstes Pivot jenseits beobachten\n                    signals[-1].reason += _e42_beobachten(",
+    "new": "                    # E44.3: Rest-Verkauf (kein Stop) -> naechstes Pivot jenseits beobachten\n                    signals[-1].reason += '' and _e42_beobachten(",
+    "exit_code": 1,
+    "summary": "--- 603 passed, 4 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position",
+      "FAIL test_e443::test_aus_flat_ohne_passendes_bein_kein_rueckkauf",
+      "FAIL test_e443::test_aus_flat_stop_des_teils_ist_voller_ausstieg",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Beobachtung auch auf eine schon gekaufte Marke",
+    "file": "strategy_core.py",
+    "old": "        if not ausbruch_ruecktest or marke is None or marke == pos.e42_gekauft:",
+    "new": "        if not ausbruch_ruecktest or marke is None:",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_keine_beobachtung_einer_marke_auf_die_schon_zurueckgekauft_wurde"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Kaufen trotz voller Investition",
+    "file": "strategy_core.py",
+    "old": "            elif bestand_nach(_bestand_start, signals) >= 100:",
+    "new": "            elif False:",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_nicht_wenn_schon_voll_investiert"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Zweiter Rueckkauf auf dieselbe Marke",
+    "file": "strategy_core.py",
+    "old": "            elif _m == pos.e42_gekauft:",
+    "new": "            elif False:",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_kein_zweiter_rueckkauf_auf_dieselbe_marke"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Aus FLAT ohne passendes Bein gekauft",
+    "file": "strategy_core.py",
+    "old": "            elif _flat and (imp is None or imp.up != _lang):",
+    "new": "            elif _flat and imp is None:",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_ohne_passendes_bein_kein_rueckkauf"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Rueckkauf zum Markenpreis statt zum Schluss",
+    "file": "strategy_core.py",
+    "old": "                    cur.ts, rt, cur.close, RUECKKAUF_TRANCHE,",
+    "new": "                    cur.ts, rt, _m, RUECKKAUF_TRANCHE,",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_rueckkauf_nach_teilverkauf_am_hoch_ausbruch_und_ruecktest"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Aus FLAT: Ziele nicht vom Ruecktest-Extrem",
+    "file": "strategy_core.py",
+    "old": "                    pos.retrace_extreme = cur.low if _lang else cur.high\n                rt = SignalType.RUECKKAUF",
+    "new": "                    pos.retrace_extreme = imp.start.price\n                rt = SignalType.RUECKKAUF",
+    "exit_code": 1,
+    "summary": "--- 605 passed, 2 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position",
+      "FAIL test_e443::test_aus_flat_stop_des_teils_ist_voller_ausstieg"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Beobachtung laeuft nach dem Rueckkauf weiter",
+    "file": "strategy_core.py",
+    "old": "                pos.e42_gekauft = _m\n                _e42_ende()",
+    "new": "                pos.e42_gekauft = _m",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_rueckkauf_nach_teilverkauf_am_hoch_ausbruch_und_ruecktest"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Rueckkauf zaehlt in den Einstand (Stop der Position wandert)",
+    "file": "strategy_core.py",
+    "old": "        if s.type in _ENTRY_TYPES and s.tranche_pct > 0:",
+    "new": "        if (s.type in _ENTRY_TYPES or s.type in _RUECKKAUF_TYPES) and s.tranche_pct > 0:",
+    "exit_code": 1,
+    "summary": "--- 603 passed, 4 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position",
+      "FAIL test_e443::test_aus_flat_stop_des_teils_ist_voller_ausstieg",
+      "FAIL test_e443::test_rueckkauf_aendert_weder_einstand_noch_hauptstop",
+      "FAIL test_e443::test_stop_nur_fuer_den_rueckkauf_teil_mit_rueckeroberung"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Bestand wird nicht fortgeschrieben",
+    "file": "strategy_core.py",
+    "old": "    pos.bestand_pct = bestand_nach(_bestand_start, signals)\n",
+    "new": "",
+    "exit_code": 1,
+    "summary": "--- 603 passed, 4 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position",
+      "FAIL test_e443::test_rueckkauf_aendert_weder_einstand_noch_hauptstop",
+      "FAIL test_e444::test_bruchteile_ueberleben_state_json",
+      "FAIL test_e444::test_getrennte_prozesse_gleiche_signale_telegram_und_state"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "no_flip sieht den Stop des Teils nicht",
+    "file": "strategy_core.py",
+    "old": "        return not (no_flip and any(x.type in _TEILVERKAUF_TYPES\n                                    or x.type in _RUECKKAUF_STOP_TYPES for x in signals))",
+    "new": "        return not (no_flip and any(x.type in _TEILVERKAUF_TYPES for x in signals))",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_no_flip_kein_nachkauf_in_der_kerze_des_teil_stops"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Stop des Teils verkauft die ganze Position",
+    "file": "strategy_core.py",
+    "old": "        elif _teil_stop and pos.entry_pct == 0:",
+    "new": "        elif _teil_stop:",
+    "exit_code": 1,
+    "summary": "--- 598 passed, 9 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "FAIL test_e443::test_live_meldungen_stehen_je_kerze_vor_ihren_signalen",
+      "FAIL test_e443::test_no_flip_kein_nachkauf_in_der_kerze_des_teil_stops",
+      "FAIL test_e443::test_short_spiegelbildlich",
+      "FAIL test_e443::test_stop_nur_fuer_den_rueckkauf_teil_mit_rueckeroberung",
+      "FAIL test_e443::test_teil_stop_harter_boden_sofort",
+      "FAIL test_e443::test_zurueckeroberte_marke_ist_geprueft_naechster_bruch_sofort",
+      "FAIL test_e444::test_getrennte_prozesse_gleiche_signale_telegram_und_state",
+      "FAIL test_e444::test_kauf_rueckkauf_und_stops_bleiben_unskaliert"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Stop des Teils ohne Rueckeroberungs-Regel",
+    "file": "strategy_core.py",
+    "old": "    hit, _preis, grund = stop_entscheidung(m, cur, marke, lang,\n                                           rueckeroberung=rueckeroberung)",
+    "new": "    hit, _preis, grund = stop_entscheidung(m, cur, marke, lang,\n                                           rueckeroberung=0)",
+    "exit_code": 1,
+    "summary": "--- 601 passed, 6 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_stop_des_teils_ist_voller_ausstieg",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "FAIL test_e443::test_live_meldungen_stehen_je_kerze_vor_ihren_signalen",
+      "FAIL test_e443::test_short_spiegelbildlich",
+      "FAIL test_e443::test_stop_nur_fuer_den_rueckkauf_teil_mit_rueckeroberung",
+      "FAIL test_e443::test_zurueckeroberte_marke_ist_geprueft_naechster_bruch_sofort"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Merker des Teils werden nicht zurueckgeschrieben",
+    "file": "strategy_core.py",
+    "old": "    pos.e42_teil_wartet, pos.e42_teil_wartet_inv, pos.e42_teil_geprueft = \\\n        m.stop_wartet, m.stop_wartet_inv, m.stop_geprueft",
+    "new": "    pass",
+    "exit_code": 1,
+    "summary": "--- 599 passed, 8 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_stop_des_teils_ist_voller_ausstieg",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "FAIL test_e443::test_live_meldungen_stehen_je_kerze_vor_ihren_signalen",
+      "FAIL test_e443::test_short_spiegelbildlich",
+      "FAIL test_e443::test_stop_nur_fuer_den_rueckkauf_teil_mit_rueckeroberung",
+      "FAIL test_e443::test_zurueckeroberte_marke_ist_geprueft_naechster_bruch_sofort",
+      "FAIL test_e444::test_getrennte_prozesse_gleiche_signale_telegram_und_state",
+      "FAIL test_e444::test_kauf_rueckkauf_und_stops_bleiben_unskaliert"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Aus FLAT: Stop des Teils laesst eine leere Position stehen",
+    "file": "strategy_core.py",
+    "old": "                                  + _teil_grund))\n            _reset_position(pos)",
+    "new": "                                  + _teil_grund))\n            pass",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_aus_flat_stop_des_teils_ist_voller_ausstieg"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Reset vergisst den Rueckkauf-Teil",
+    "file": "strategy_core.py",
+    "old": "    pos.e42_teil_marke = None\n    pos.e42_teil_wartet = 0\n",
+    "new": "    pos.e42_teil_wartet = 0\n",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_hauptstop_nimmt_den_rueckkauf_teil_mit"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Live-Engine speichert das Warten des Teils nicht",
+    "file": "main.py",
+    "old": "         \"e42_teil_wartet\": pos.e42_teil_wartet,\n",
+    "new": "",
+    "exit_code": 1,
+    "summary": "--- 603 passed, 4 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "FAIL test_e443::test_zustand_ueberlebt_den_neustart_der_live_engine",
+      "FAIL test_e444::test_getrennte_prozesse_gleiche_signale_telegram_und_state"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Live-Engine liest den Ausbruch nicht",
+    "file": "main.py",
+    "old": "    pos.e42_ausbruch_ts = int(d.get(\"e42_ausbruch_ts\", -1))",
+    "new": "    pos.e42_ausbruch_ts = -1",
+    "exit_code": 1,
+    "summary": "--- 603 passed, 4 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "FAIL test_e443::test_zustand_ueberlebt_den_neustart_der_live_engine",
+      "FAIL test_e444::test_getrennte_prozesse_gleiche_signale_telegram_und_state"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Live-Engine speichert die gekaufte Marke nicht",
+    "file": "main.py",
+    "old": "         \"e42_gekauft\": pos.e42_gekauft, ",
+    "new": "         ",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_zustand_ueberlebt_den_neustart_der_live_engine"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Live-Engine speichert den Bestand nicht",
+    "file": "main.py",
+    "old": "         \"bestand_pct\": pos.bestand_pct,\n",
+    "new": "",
+    "exit_code": 1,
+    "summary": "--- 604 passed, 3 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_zustand_ueberlebt_den_neustart_der_live_engine",
+      "FAIL test_e444::test_bruchteile_ueberleben_state_json",
+      "FAIL test_e444::test_getrennte_prozesse_gleiche_signale_telegram_und_state"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Altbestand ohne Bestand gilt als leer",
+    "file": "main.py",
+    "old": "int(d.get(\"bestand_pct\", min(100, pos.entry_pct or 0)) or 0)",
+    "new": "int(d.get(\"bestand_pct\", 0) or 0)",
+    "missing": true,
+    "caught": false,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "E42-Meldungen werden nicht gesendet",
+    "file": "main.py",
+    "old": "        for m in m42:\n            send_text(format_ruecktest(m), dry_run=dry_run)\n",
+    "new": "",
+    "exit_code": 1,
+    "summary": "--- 605 passed, 2 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "FAIL test_e443::test_live_meldungen_stehen_je_kerze_vor_ihren_signalen"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Signale wieder gesammelt nach allen Meldungen",
+    "file": "main.py",
+    "old": "        if sigs:\n            send_signals(sigs, dry_run=dry_run)\n",
+    "new": "    for _a, _b, sigs in pakete:\n        if sigs:\n            send_signals(sigs, dry_run=dry_run)\n",
+    "exit_code": 1,
+    "summary": "--- 603 passed, 4 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "FAIL test_e443::test_live_meldungen_stehen_je_kerze_vor_ihren_signalen",
+      "FAIL test_e444::test_getrennte_prozesse_gleiche_signale_telegram_und_state"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Plan nennt den Stop des Teils nicht",
+    "file": "main.py",
+    "old": "        plan[\"rueckkauf_teil\"] = teil\n",
+    "new": "",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_plan_nennt_den_stop_des_rueckkauf_teils"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Plan meldet sich nicht, wenn der Teil dazukommt",
+    "file": "main.py",
+    "old": "            out.append((\"rueckkauf-stop\", (p[\"rueckkauf_teil\"][\"marke\"],)))",
+    "new": "            pass",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_plan_nennt_den_stop_des_rueckkauf_teils"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Rueckkauf wird nicht gebucht",
+    "file": "backtest.py",
+    "old": "        if t in (\"KAUF_1\", \"KAUF_2\", \"NACHKAUF\", \"RUECKKAUF\"):",
+    "new": "        if t in (\"KAUF_1\", \"KAUF_2\", \"NACHKAUF\"):",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_simulate_stop_des_teils_verkauft_genau_den_rueckkauf"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Stop des Teils verkauft einen Anteil am Hoechstbestand",
+    "file": "backtest.py",
+    "old": "                sell = min(units, rk_units)",
+    "new": "                sell = min(units, LADDER_TRANCHE / 100.0 * peak_units)",
+    "exit_code": 1,
+    "summary": "--- 605 passed, 2 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_simulate_stop_des_teils_verkauft_genau_den_rueckkauf",
+      "FAIL test_e443::test_simulate_teilverkauf_nimmt_den_rueckkauf_anteilig_mit"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Teilverkaeufe nehmen den Teil nicht anteilig mit",
+    "file": "backtest.py",
+    "old": "                rk_units *= (units - sell) / units",
+    "new": "                pass",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_simulate_teilverkauf_nimmt_den_rueckkauf_anteilig_mit"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Short-Rueckteil wird nicht gefuehrt",
+    "file": "backtest.py",
+    "old": "                rk_s_units += new_units",
+    "new": "                pass",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_simulate_short_rueckteil"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Gegengeschaeft kennt den Stop des Teils nicht",
+    "file": "backtest.py",
+    "old": "              \"RUECKKAUF_STOP\", \"SHORT_RUECKTEST_STOP\"}",
+    "new": "              }",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_gegengeschaeft_zaehlt_rueckkauf_und_stop_des_teils_mit"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "original E44.3",
+    "name": "Ausbruchs-Meldung nennt das Fenster falsch",
+    "file": "telegram_notify.py",
+    "old": "        zeilen += _umbruch(f\"Kommt der Kurs in den naechsten {n} Kerzen ({_dauer(n)}) bis \"",
+    "new": "        zeilen += _umbruch(f\"Kommt der Kurs in den naechsten {n} Kerzen ({_dauer(n + 1)}) bis \"",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_meldungen_sagen_was_passiert_und_passen_aufs_handy"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "refreshed template",
+    "name": "E443 Altbestand ohne Bestand gilt als leer",
+    "file": "main.py",
+    "old": "float(d.get(\"bestand_pct\", min(100, pos.entry_pct or 0)) or 0)",
+    "new": "float(d.get(\"bestand_pct\", 0) or 0)",
+    "exit_code": 1,
+    "summary": "--- 606 passed, 1 failed",
+    "failing_tests": [
+      "FAIL test_e443::test_zustand_ueberlebt_den_neustart_der_live_engine"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "refreshed template",
+    "name": "E41 Kauf trotz Warten",
+    "file": "strategy_core.py",
+    "old": "        if _e41_sperre:\n            return False",
+    "new": "        if False:\n            return False",
+    "exit_code": 1,
+    "summary": "--- 605 passed, 2 failed",
+    "failing_tests": [
+      "FAIL test_strategy_core::test_e41_kein_nachkauf_waehrend_des_wartens_und_der_rueckeroberung",
+      "FAIL test_strategy_core::test_e41_nachkauf_nach_rueckeroberung_zum_erreichbaren_preis"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "refreshed template",
+    "name": "E41 Wartemeldung fehlt",
+    "file": "main.py",
+    "old": "        if m41:\n            send_text(format_stop_rueckeroberung(m41), dry_run=dry_run)",
+    "new": "        if False:\n            send_text(format_stop_rueckeroberung(m41), dry_run=dry_run)",
+    "exit_code": 1,
+    "summary": "--- 604 passed, 3 failed",
+    "failing_tests": [
+      "FAIL test_main::test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze",
+      "FAIL test_main::test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch",
+      "FAIL test_main::test_e41_live_wartemeldung_steht_vor_dem_stop_wenn_ein_lauf_nachholt"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "refreshed template",
+    "name": "E41 Wartemeldung nach Signal",
+    "file": "main.py",
+    "old": "    for m41, m42, sigs in pakete:\n        if m41:\n            send_text(format_stop_rueckeroberung(m41), dry_run=dry_run)\n        for m in m42:\n            send_text(format_ruecktest(m), dry_run=dry_run)\n        if sigs:\n            send_signals(sigs, dry_run=dry_run)",
+    "new": "    for m41, m42, sigs in pakete:\n        for m in m42:\n            send_text(format_ruecktest(m), dry_run=dry_run)\n        if sigs:\n            send_signals(sigs, dry_run=dry_run)\n        if m41:\n            send_text(format_stop_rueckeroberung(m41), dry_run=dry_run)",
+    "exit_code": 0,
+    "summary": "--- 607 passed, 0 failed",
+    "failing_tests": [],
+    "caught": false,
+    "import_error": false
+  },
+  {
+    "group": "refreshed template",
+    "name": "E433 muster_cvd in EVAL_KEYS fehlt",
+    "file": "backtest.py",
+    "old": "\"ampel_filter\", \"muster_cvd\", \"muster_oi\",",
+    "new": "\"ampel_filter\", \"muster_oi\",",
+    "exit_code": 1,
+    "summary": "--- 605 passed, 2 failed",
+    "failing_tests": [
+      "FAIL test_backtest::test_e433_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live",
+      "FAIL test_backtest::test_panel_variante_entspricht_der_live_einstellung"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "refreshed template",
+    "name": "E434 muster_oi in EVAL_DEFAULTS fehlt",
+    "file": "main.py",
+    "old": "    \"muster_oi\": \"usd\",\n",
+    "new": "",
+    "exit_code": 1,
+    "summary": "--- 567 passed, 40 failed",
+    "failing_tests": [
+      "FAIL test_backtest::test_panel_variante_entspricht_der_live_einstellung",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat",
+      "FAIL test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit",
+      "FAIL test_e443::test_live_meldungen_stehen_je_kerze_vor_ihren_signalen",
+      "FAIL test_e443::test_plan_nennt_den_stop_des_rueckkauf_teils",
+      "FAIL test_e443::test_plan_ohne_e42_unveraendert",
+      "FAIL test_e444::test_getrennte_prozesse_gleiche_signale_telegram_und_state",
+      "FAIL test_e444::test_plan_und_telegram_nennen_die_reduzierten_mengen",
+      "FAIL test_main::test_alle_evaluate_parameter_werden_durchgereicht",
+      "FAIL test_main::test_demo_state_wird_verworfen",
+      "FAIL test_main::test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze",
+      "FAIL test_main::test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch",
+      "FAIL test_main::test_e41_live_stop_kommt_spaeter_als_ohne_regel",
+      "FAIL test_main::test_e41_live_vorprobe_ohne_regel_kommt_der_knappe_stop",
+      "FAIL test_main::test_e41_live_wartemeldung_steht_vor_dem_stop_wenn_ein_lauf_nachholt",
+      "FAIL test_main::test_e434_anzeige_rechnet_das_oi_wie_der_handel",
+      "FAIL test_main::test_e434b_oi_zeile_in_kontrakten_steht_handytauglich_in_der_nachricht",
+      "FAIL test_main::test_lage_abruf_enthaelt_furkans_rohwerte",
+      "FAIL test_main::test_lage_abruf_erfindet_kein_bein_wenn_keins_da_ist",
+      "FAIL test_main::test_lage_abruf_fasst_den_zustand_nicht_an",
+      "FAIL test_main::test_lage_abruf_rechnet_die_ampel_fuer_long",
+      "FAIL test_main::test_lage_abruf_sucht_immer_ein_aufwaerts_bein",
+      "FAIL test_main::test_lage_abruf_ueberlebt_einen_sth_fehler",
+      "FAIL test_main::test_lage_abruf_uebernimmt_die_sth_kostenbasis",
+      "FAIL test_main::test_lage_nachricht_bleibt_handy_tauglich",
+      "FAIL test_main::test_plan_fuehrt_die_rueckeroberung_nur_wenn_sie_an_ist",
+      "FAIL test_main::test_plan_marken_stimmen_mit_der_engine_ueberein",
+      "FAIL test_main::test_plan_meldet_verschobene_marken_weiterhin",
+      "FAIL test_main::test_plan_nachgezogener_stop_bleibt_ohne_rueckeroberung",
+      "FAIL test_main::test_plan_nachricht_ist_lesbar",
+      "FAIL test_main::test_plan_nachricht_wird_nur_bei_aenderung_gesendet",
+      "FAIL test_main::test_plan_nennt_nachkauf_teilgewinn_und_stop",
+      "FAIL test_main::test_plan_zeigt_die_widerstandszone_auch_ohne_aktiven_schalter",
+      "FAIL test_main::test_run_engine_erzeugt_signal_und_dateien",
+      "FAIL test_main::test_state_enthaelt_vorschau_auch_im_zustand_flat",
+      "FAIL test_main::test_state_roundtrip",
+      "FAIL test_main::test_vorschau_abschaltbar",
+      "FAIL test_main::test_vorschau_ampel_folgt_dem_bias_nicht_dem_bein",
+      "FAIL test_main::test_vorschau_wird_nur_bei_NEUER_struktur_gesendet",
+      "FAIL test_main::test_zweiter_lauf_ist_idempotent"
+    ],
+    "caught": true,
+    "import_error": false
+  },
+  {
+    "group": "refreshed template",
+    "name": "E434 muster_oi in EVAL_KEYS fehlt",
+    "file": "backtest.py",
+    "old": "\"ampel_filter\", \"muster_cvd\", \"muster_oi\",",
+    "new": "\"ampel_filter\", \"muster_cvd\",",
+    "exit_code": 1,
+    "summary": "--- 605 passed, 2 failed",
+    "failing_tests": [
+      "FAIL test_backtest::test_e434_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live",
+      "FAIL test_backtest::test_panel_variante_entspricht_der_live_einstellung"
+    ],
+    "caught": true,
+    "import_error": false
+  }
+]

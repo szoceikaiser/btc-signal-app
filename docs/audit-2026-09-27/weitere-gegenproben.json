@@ -1,0 +1,71 @@
+{
+  "F14_missing_entire_market": {
+    "requested": [
+      "A",
+      "B"
+    ],
+    "values": {
+      "0": 10.0,
+      "1": 11.0
+    },
+    "report": {
+      "symbole": [
+        "A"
+      ],
+      "ohne_antwort": [
+        "B"
+      ],
+      "punkte_gesamt": 2,
+      "punkte_vollstaendig": 2,
+      "punkte_ausgelassen": 0,
+      "je_symbol_punkte": {
+        "A": 2
+      },
+      "bloecke": [],
+      "einheit": "USD"
+    },
+    "expected_for_claimed_all_market_rule": {}
+  },
+  "F15_incomparable_volume_units": {
+    "selected": [
+      "USD-denominated"
+    ],
+    "excluded": [
+      {
+        "symbol": "BTC-denominated",
+        "boerse": null,
+        "denominierung": "BTC",
+        "grund": "rechnet in 'BTC', die Mehrheit in 'USD' — summieren wuerde zwei Einheiten mischen"
+      }
+    ],
+    "btc_volume": 1000,
+    "usd_volume": 2000,
+    "example_price_usd": 60000,
+    "independent_dollar_volumes": [
+      60000000,
+      2000
+    ]
+  },
+  "F16_atr_short_history": {
+    "production": 2.0,
+    "independent_true_ranges": [
+      21,
+      31
+    ],
+    "independent_atr": 26,
+    "scope": "len(candles)<=period; live standard long warm-up not affected"
+  },
+  "D02_missing_flow_confirmation": {
+    "neutral_zero_funding_allows_long": true,
+    "scope": "Missing values use the same zero as true neutral observations; this can satisfy the OR entry confirmation"
+  },
+  "F13_failed_delivery_not_retried": {
+    "first_signal_count": 1,
+    "first_attempts": 1,
+    "retry_signal_count": 0,
+    "retry_attempts": 0,
+    "persisted_last_signal_ts": 14400000,
+    "all_send_attempts_returned": false
+  },
+  "P04_future_pivot_sabotage": "CAUGHT"
+}
