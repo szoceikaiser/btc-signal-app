@@ -1665,6 +1665,45 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              high_exit_hist: str = "voll",
              ausbruch_ruecktest: bool = False,
              ruecktest_fenster: int = RUECKTEST_FENSTER) -> list[Signal]:
+    """Live signal observer / historical diagnostic, without broker fills.
+
+    Offline V1 uses execution_v1.run_v1 and confirms each trading block only
+    after a booked fill. This wrapper deliberately preserves the live API.
+    """
+    return _evaluate(**locals())
+
+
+def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
+             bias_long: bool = True, bias_short: bool = True,
+             pivot_n: int = 5, k_atr: float = 2.0,
+             flush_entry: str = "core", tp_ladder: bool = True,
+             trend_filter: bool = False, trend_ema: int = 200,
+             strict_confirm: bool = False, confluence: bool = False,
+             conditional_stop: bool = False, buy_ladder: bool = True,
+             release_stale_rest: bool = False, trail_stop: bool = False,
+             liq_exit: str = "off", high_exit: str = "off",
+             liq_entry: str = "off", block_unhealthy: bool = False,
+             muster5_entry: bool = False, muster5_halten: str = "off",
+             stop_puffer_pct: float = 0.0, stop_rueckeroberung: int = 0,
+             stop_auf_docht: bool = False,
+             confirm_t1: bool = False, cooldown_h: float = 0.0,
+             min_stop_pct: float = 0.0,
+             no_flip: bool = False, freeze_targets: bool = False,
+             min_bein_pct: float = 0.0, bein_wahl: str = "juengstes",
+             be_im_plus: bool = False, bein_richtung: str = "auto",
+             widerstand_exit: str = "off",
+             rest_halten: bool = False,
+             neustart_mit_rest: bool = False,
+             zonen_1d: bool = False,
+             zonen_nachziehen: bool = False,
+             pivot_n_1d: int = 0,
+             ampel_filter: str = "off",
+             muster_cvd: str = "alt",
+             muster_oi: str = "usd",
+             high_exit_hist: str = "voll",
+             ausbruch_ruecktest: bool = False,
+             ruecktest_fenster: int = RUECKTEST_FENSTER,
+             _execution_gate=None, _execution_sizes=None) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -1854,6 +1893,17 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     _bestand_start = pos.bestand_pct
 
     signals: list[Signal] = []
+    # V1/offline: gate each complete trading block BEFORE its state writes.
+    # Default None preserves the live observer and historical diagnostic API.
+    # A declined block leaves its trading markers untouched. Time observations
+    # (E41, extremes, dedupe) still advance. No broker confirmation is implied.
+    _actions = []
+
+    def _allow(action: str) -> bool:
+        if _execution_gate is None or _execution_gate(action):
+            _actions.append(action)
+            return True
+        return False
     # E41: in dieser Kerze kein Aufstocken, weil auf eine Rueckeroberung gewartet wird
     # oder gerade zurueckerobert wurde. Wird im Stop-Block gesetzt.
     _e41_sperre = False
@@ -2036,7 +2086,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if (cur.low <= z.level_05 and cur.low > z.gp_upper
                     and _trend_ok(True) and _confluence_ok(cur.low)
                     and _liq_entry_ok(cur.low, True)
-                    and _t1_ok(True) and _stop_weit_genug(z.level_05, z)):
+                    and _t1_ok(True) and _stop_weit_genug(z.level_05, z)
+                    and _allow("entry_t1")):
                 pos.direction, pos.state, pos.zones = "LONG", PosState.T1, z
                 pos.retrace_extreme = cur.low
                 signals.append(Signal(cur.ts, SignalType.KAUF_1, z.level_05, TRANCHEN["T1"],
@@ -2045,7 +2096,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             elif z.gp_lower <= cur.low <= z.gp_upper:
                 if (_confirm_long() and _trend_ok(True) and _confluence_ok(cur.low)
                         and _liq_entry_ok(cur.low, True)
-                        and _stop_weit_genug(z.gp_upper, z)):
+                        and _stop_weit_genug(z.gp_upper, z) and _allow("entry_gp")):
                     pos.direction, pos.state, pos.zones = "LONG", PosState.CORE, z
                     pos.retrace_extreme = cur.low
                     signals.append(Signal(cur.ts, SignalType.KAUF_2, z.gp_upper,
@@ -2057,7 +2108,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 # Capitulation-Einstieg (E8.1): Kerze durchschlaegt das GP nach unten
                 # (Flush-Tage wie 10.10./04.11.), schliesst aber ueber der Invalidierung
                 if (_confirm_long() and _trend_ok(True) and _liq_entry_ok(cur.low, True)
-                        and _stop_weit_genug(cur.close, z)):
+                        and _stop_weit_genug(cur.close, z) and _allow("entry_flush")):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.KAUF_1 if small else SignalType.KAUF_2
@@ -2205,6 +2256,9 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 hard_break = cur.close > z.invalidation * (1 + DIP_FLOOR_PCT)
                 flow_ok = _confirm_short()
             if flow_ok and not hard_break and pos.dip_buys < MAX_DIP_BUYS:
+                # The strategy replaces the main stop even if this buy is rejected.
+                stop_hit = False
+            if flow_ok and not hard_break and pos.dip_buys < MAX_DIP_BUYS and _allow("dip"):
                 nk = SignalType.NACHKAUF if long_side else SignalType.SHORT_NACHLEGEN
                 signals.append(Signal(cur.ts, nk, cur.close, DIP_TRANCHE,
                                       f"Bedingter Nachkauf: Dip haelt, Order-Flow bestaetigt Trend ({pattern.name})",
@@ -2232,51 +2286,54 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 _e42_melden("teil_zurueck", _teil_marke, long_side,
                             nur_rueckkauf=pos.entry_pct == 0)
         if stop_hit:
-            st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
-            if trail_note and trail_note != "Invalidierung":
-                reason = ("Nachgezogener Stop ({}) {:.0f} — Kerzenschluss {}, "
-                          "Gewinn gesichert".format(trail_note, stop_level,
-                                                    'darunter' if long_side else 'darueber'))
-            elif stop_grund:
-                reason = stop_grund                          # E41: warum genau jetzt
-            else:
-                reason = ("Kerzenschluss {} Invalidierung {:.0f}".format(
-                    'unter' if long_side else 'ueber', z.invalidation)
-                    + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
-            signals.append(Signal(cur.ts, st, stop_preis, 100, reason))
-            # BUGFIX 2026-07-27: hier stand eine handgeschriebene Teil-Ruecksetzung, die
-            # entry_ref/entry_pct/liq_exits/high_exits/liq_entries VERGESSEN hat. Folge:
-            # (1) entry_pct wuchs ueber alle gestoppten Positionen hinweg immer weiter, der
-            # Durchschnitts-Einstand blieb am Preis einer laengst geschlossenen Position
-            # haengen -> der nachgezogene Stop (trail_stop) rechnete mit einem falschen
-            # Break-even. (2) Die Zaehler liq_exits/high_exits/liq_entries liefen gegen ihr
-            # Maximum und schalteten die zugehoerigen Mechanismen still ab, bis zufaellig
-            # einmal ueber VERKAUF_REST geschlossen wurde. Jetzt derselbe Reset wie ueberall.
-            _reset_position(pos)
-            pos.last_stop_ts = cur.ts        # E13: Merker fuer die Sperrfrist (cooldown_h)
-            _e42_ende()                      # E44.3: nach einem Stop wird nicht beobachtet
+            if _allow("stop"):
+                st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
+                if trail_note and trail_note != "Invalidierung":
+                    reason = ("Nachgezogener Stop ({}) {:.0f} — Kerzenschluss {}, "
+                              "Gewinn gesichert".format(trail_note, stop_level,
+                                                        'darunter' if long_side else 'darueber'))
+                elif stop_grund:
+                    reason = stop_grund                          # E41: warum genau jetzt
+                else:
+                    reason = ("Kerzenschluss {} Invalidierung {:.0f}".format(
+                        'unter' if long_side else 'ueber', z.invalidation)
+                        + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
+                signals.append(Signal(cur.ts, st, stop_preis, 100, reason))
+                # BUGFIX 2026-07-27: hier stand eine handgeschriebene Teil-Ruecksetzung, die
+                # entry_ref/entry_pct/liq_exits/high_exits/liq_entries VERGESSEN hat. Folge:
+                # (1) entry_pct wuchs ueber alle gestoppten Positionen hinweg immer weiter, der
+                # Durchschnitts-Einstand blieb am Preis einer laengst geschlossenen Position
+                # haengen -> der nachgezogene Stop (trail_stop) rechnete mit einem falschen
+                # Break-even. (2) Die Zaehler liq_exits/high_exits/liq_entries liefen gegen ihr
+                # Maximum und schalteten die zugehoerigen Mechanismen still ab, bis zufaellig
+                # einmal ueber VERKAUF_REST geschlossen wurde. Jetzt derselbe Reset wie ueberall.
+                _reset_position(pos)
+                pos.last_stop_ts = cur.ts        # E13: Merker fuer die Sperrfrist (cooldown_h)
+                _e42_ende()                      # E44.3: nach einem Stop wird nicht beobachtet
         elif _teil_stop and pos.entry_pct == 0:
-            # E44.3: Die Position besteht NUR aus dem Rueckkauf (aus FLAT eroeffnet, seither
-            # kein anderer Kauf) - dann ist der Stop des Teils ein vollstaendiger Ausstieg.
-            # Sonst bliebe eine leere Position mit Zonen stehen, die spaeter "aufstockt".
-            st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
-            signals.append(Signal(cur.ts, st, cur.close, 100,
-                                  ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
-                                  + _teil_grund))
-            _reset_position(pos)
-            pos.last_stop_ts = cur.ts
-            _e42_ende()
+            if _allow("part_full"):
+                # E44.3: Die Position besteht NUR aus dem Rueckkauf (aus FLAT eroeffnet, seither
+                # kein anderer Kauf) - dann ist der Stop des Teils ein vollstaendiger Ausstieg.
+                # Sonst bliebe eine leere Position mit Zonen stehen, die spaeter "aufstockt".
+                st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
+                signals.append(Signal(cur.ts, st, cur.close, 100,
+                                      ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
+                                      + _teil_grund))
+                _reset_position(pos)
+                pos.last_stop_ts = cur.ts
+                _e42_ende()
         else:
             if _teil_stop:
-                # E44.3: nur der Rueckkauf-Teil geht, der Rest behaelt seinen Stop.
-                ts_ = SignalType.RUECKKAUF_STOP if long_side else SignalType.SHORT_RUECKTEST_STOP
-                signals.append(Signal(cur.ts, ts_, cur.close, RUECKKAUF_TRANCHE,
-                                      ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
-                                      + _teil_grund
-                                      + " - der Rest der Position behaelt seinen Stop"))
-                pos.e42_teil_marke = None
-                pos.e42_teil_wartet, pos.e42_teil_wartet_inv = 0, None
-                pos.e42_teil_geprueft = None
+                if _allow("part_stop"):
+                    # E44.3: nur der Rueckkauf-Teil geht, der Rest behaelt seinen Stop.
+                    ts_ = SignalType.RUECKKAUF_STOP if long_side else SignalType.SHORT_RUECKTEST_STOP
+                    signals.append(Signal(cur.ts, ts_, cur.close, RUECKKAUF_TRANCHE,
+                                          ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
+                                          + _teil_grund
+                                          + " - der Rest der Position behaelt seinen Stop"))
+                    pos.e42_teil_marke = None
+                    pos.e42_teil_wartet, pos.e42_teil_wartet_inv = 0, None
+                    pos.e42_teil_geprueft = None
             # Mehrtages-Kaufleiter (E9.5): neue Tiefkerze IN der Retracement-Zone (ueber
             # Invalidierung, unter 0.5) mit Flow-Bestaetigung -> kleine Tranche nachlegen.
             if buy_ladder and made_new_extreme and pos.buy_rungs < MAX_BUY_RUNGS \
@@ -2293,7 +2350,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 # E13: In einen ungesunden Abverkauf wird auch nicht NACHgekauft. Genau
                 # das war Kaisers Beispiel 16.06.: Ersteinstieg, dann drei Nachkaeufe in
                 # einen weiter fallenden Markt, dann Stop.
-                if in_zone and ladder_ok and _healthy(long_side):
+                if in_zone and ladder_ok and _healthy(long_side) and _allow("buy_ladder"):
                     signals.append(Signal(cur.ts, nk, cur.close, BUY_LADDER_TRANCHE,
                                           f"Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt ({pattern.name})",
                                           stop_ref=z.invalidation))
@@ -2315,7 +2372,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     in_struct = z.level_05 <= cur.high < z.invalidation
                     flow_ok = _confirm_short()
                     nk = SignalType.SHORT_NACHLEGEN
-                if treffer is not None and in_struct and flow_ok:
+                if treffer is not None and in_struct and flow_ok and _allow("liq_buy"):
                     signals.append(Signal(cur.ts, nk, cur.close, LIQ_ENTRY_TRANCHE,
                                           f"Konfluenz: Fib-Zone + Liquidationszone {treffer:.0f} "
                                           f"— aufstocken ({pattern.name})",
@@ -2338,7 +2395,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     treffer = in_liq_zone(cur.high if long_side else cur.low, lv)
                     if treffer is not None:
                         grund = f"Liquidationszone {treffer:.0f} erreicht (historische Kaskade)"
-                if grund is not None:
+                if grund is not None and _allow("liq_sell"):
                     lt = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
                     signals.append(Signal(cur.ts, lt, cur.close, LADDER_TRANCHE,
                                           f"Teilgewinn an Liquidationen: {grund}"))
@@ -2357,7 +2414,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     erreicht = (cur.high >= lo) if long_side else (cur.low <= hi)
                     # nur sinnvoll, wenn die Zone ueberhaupt vor uns liegt
                     davor = (lo > cur.open) if long_side else (hi < cur.open)
-                    if erreicht and davor:
+                    if erreicht and davor and _allow("resistance"):
                         wt = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
                         signals.append(Signal(cur.ts, wt, lo if long_side else hi,
                                               LADDER_TRANCHE,
@@ -2382,7 +2439,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     else:
                         spot_traegt = len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd
                     ok = nah and (high_exit == "on" or not spot_traegt)
-                    if ok:
+                    if ok and _allow("high"):
                         ht = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
                         zusatz = "" if high_exit == "on" else ", Anlauf ohne Spot-Nachfrage"
                         signals.append(Signal(cur.ts, ht, cur.close, LADDER_TRANCHE,
@@ -2397,7 +2454,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     else (z.gp_upper <= cur.high <= z.gp_lower)
                 if in_gp:
                     if long_side:
-                        if _confirm_long():
+                        if _confirm_long() and _allow("upgrade_gp"):
                             signals.append(Signal(cur.ts, SignalType.KAUF_2, z.gp_upper,
                                                   TRANCHEN["CORE"],
                                                   f"Golden Pocket {z.gp_lower:.0f}-{z.gp_upper:.0f} + Bestaetigung ({pattern.name})",
@@ -2413,7 +2470,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             # Nachkauf am 0.786
             if pos.state in (PosState.T1, PosState.CORE) and _darf_aufstocken():
                 touch = (cur.low <= z.level_0786) if long_side else (cur.high >= z.level_0786)
-                if touch:
+                if touch and _allow("upgrade_full"):
                     nk = SignalType.NACHKAUF if long_side else SignalType.SHORT_NACHLEGEN
                     # E41: Nach einer Rueckeroberung kommt der Kurs von UNTEN an die
                     # 0.786-Zone. Eine Limit-Order dort waere zum Eroeffnungskurs gefuellt
@@ -2435,7 +2492,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     and pos.tp_rungs < len(LADDER_FACTORS) and _darf_teilverkaufen():
                 rung_ext = z.ext_target(pos.retrace_extreme, LADDER_FACTORS[pos.tp_rungs])
                 rung_hit = (cur.high >= rung_ext) if long_side else (cur.low <= rung_ext)
-                if rung_hit:
+                if rung_hit and _allow("tp_ladder"):
                     lt = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
                     signals.append(Signal(cur.ts, lt, rung_ext, LADDER_TRANCHE,
                                           f"Leiter-Teilgewinn an Extension {LADDER_FACTORS[pos.tp_rungs]:.1f} ({rung_ext:.0f})"))
@@ -2445,14 +2502,14 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
                     and _darf_teilverkaufen(ziel=True):
                 hit1 = (cur.high >= ext1) if long_side else (cur.low <= ext1)
-                if hit1:
+                if hit1 and _allow("tp1"):
                     tp = SignalType.TEILVERKAUF_1 if long_side else SignalType.SHORT_TP_1
                     signals.append(Signal(cur.ts, tp, ext1, TRANCHEN["TP1"],
                                           f"Extension 1.0 erreicht ({ext1:.0f})"))
                     pos.state = PosState.TP1
             if pos.state == PosState.TP1 and _darf_teilverkaufen(ziel=True):
                 hit2 = (cur.high >= ext2) if long_side else (cur.low <= ext2)
-                if hit2:
+                if hit2 and _allow("tp2"):
                     tp = SignalType.TEILVERKAUF_2 if long_side else SignalType.SHORT_TP_2
                     signals.append(Signal(cur.ts, tp, ext2, TRANCHEN["TP2"],
                                           f"Extension 1.618 erreicht ({ext2:.0f})"))
@@ -2461,7 +2518,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if pos.state in (PosState.TP1, PosState.TP2):
                 exit_pat = (pattern in (Pattern.DERIVATE_PUMP, Pattern.SHORT_COVERING)) if long_side \
                     else (pattern in (Pattern.CAPITULATION_RESET, Pattern.GESUNDER_TREND))
-                if exit_pat and not rest_halten:
+                if exit_pat and not rest_halten and _allow("rest_pattern"):
                     ex = SignalType.VERKAUF_REST if long_side else SignalType.SHORT_COVER_REST
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Gegen-Muster am Ziel: {pattern.name}"))
@@ -2474,7 +2531,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if release_stale_rest and pos.state in (PosState.TP1, PosState.TP2) \
                     and imp is not None and pos.zones is not None:
                 alt = (pos.zones.impulse.start.ts, pos.zones.impulse.end.ts)
-                if (imp.start.ts, imp.end.ts) != alt:
+                if (imp.start.ts, imp.end.ts) != alt and _allow("rest_stale"):
                     ex = SignalType.VERKAUF_REST if long_side else SignalType.SHORT_COVER_REST
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Struktur veraltet: neuer Impuls bestaetigt "
@@ -2557,7 +2614,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 if _seit is not None and _seit >= ruecktest_fenster:
                     _e42_ende()
                     _e42_melden("verfallen", _m, _lang, fenster=ruecktest_fenster)
-            else:
+            elif _allow("e42_buy"):
                 if _flat:
                     # Aus FLAT: neue Position auf dem aktuellen Bein, damit die vorhandene
                     # Extension-Logik die Ziele stellt (vom Ruecktest-Extrem aus).
@@ -2604,6 +2661,14 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             return a["stufe"] == ("guenstig" if ampel_filter == "gross" else "unguenstig")
 
         kuerze_einstiege(signals, _halbieren)
+
+    if _execution_gate is not None:
+        trades = [s for s in signals if s.type != SignalType.WARNUNG]
+        assert len(trades) == len(_actions), (trades, _actions)
+        for sig, action in zip(trades, _actions):
+            sig.execution_action = action
+            if _execution_sizes is not None and action in _execution_sizes:
+                sig.tranche_pct = _execution_sizes[action]
 
     # Durchschnitts-Einstand fortschreiben (E9.10): tranchengewichtet ueber alle
     # Einstiegs-Signale dieser Kerze. Zentral hier, damit kein Einstiegspfad vergessen

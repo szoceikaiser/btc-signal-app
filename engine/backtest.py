@@ -786,7 +786,10 @@ def build_series(raw: list, funding: list[tuple[int, float]],
 
 
 def run_backtest(candles, flow, cfg: dict, start_ms: int = START_MS) -> list[dict]:
-    """Signale ab `start_ms` (Voll-Daten-Fenster). Vorher nur Warmup (kein Signal)."""
+    """Legacy signal-band diagnostic; no execution feedback. For V1 use run_execution.
+
+    Preserved for historical reports and regression tests, not corrected V1 P&L.
+    """
     params = {k: cfg[k] for k in EVAL_KEYS if k in cfg}
     pos = Position()
     signals = []
@@ -797,6 +800,25 @@ def run_backtest(candles, flow, cfg: dict, start_ms: int = START_MS) -> list[dic
         for s in evaluate(candles[:i + 1], flow[:i + 1], pos, **params):
             signals.append(s.to_dict())
     return signals
+
+
+def run_execution(candles, flow, cfg: dict, *, start_ms: int, end_ms: int,
+                  fee: float = .001, slippage: float = 0., start_capital: float = 10000.):
+    """V1 closed-loop Long/Spot, using the frozen input's explicit D01 cutoff.
+
+    Return signal candidates AND execution ledger together. Recompute this path
+    separately for every cost scenario; never pass an old signal band to it.
+    No network access, site writes or workflow dispatch.
+    """
+    from execution_v1 import run_v1
+    return run_v1(candles, flow, cfg, start_ms=start_ms, end_ms=end_ms,
+                  fee=fee, slippage=slippage, start_capital=start_capital)
+
+
+def run_execution_half(candles, flow, cfg: dict, *, start_ms: int, end_ms: int,
+                       **costs):
+    """Fresh V1 half: historical warmup only, no transferred orders or holdings."""
+    return run_execution(candles, flow, cfg, start_ms=start_ms, end_ms=end_ms, **costs)
 
 
 def to_date(ts_ms: int) -> date:
@@ -865,7 +887,14 @@ def score(signals: list[dict], tol_days: int = 1, start_ms: int = START_MS) -> d
 def simulate(signals: list[dict], candles, fee: float = 0.001,
              start_capital: float = 10000.0, start_ms: int | None = None,
              deploy_pct: float = 1.0, fill: str = "level") -> dict:
-    """Tranchen-genaue P&L-Simulation der Signale.
+    """LEGACY DIAGNOSTIC: historical signal-band accounting, not contract V1.
+
+    Level/close prices are retrospective assumptions, not evidence of prior
+    orders or attainable Telegram fills. Their difference is neither the value
+    of a prior order nor a guaranteed lower bound. This function deliberately
+    preserves historical arithmetic/tests; run_execution is the corrected path.
+
+    Tranchen-genaue P&L-Simulation der Signale.
 
     Annahmen (dokumentiert): kein Hebel; Kauf-Tranchen als %-Anteil des beim
     Ladder-Start verfuegbaren Kapitals (aus tranche_pct des Signals); Teilverkaeufe
@@ -886,24 +915,10 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     Monatsuebersicht im Bericht — Kaisers Frage "was haette ich Monat fuer Monat verdient
     oder verloren?".
 
-    `fill` (E17, Kaisers Frage 2026-07-29 "was ist die Vorab-Info wert?"):
-    - "level"  = zum genannten Preis abgerechnet. Das sind bei Einstiegen am 0.5-Level,
-                 im Golden Pocket, an der 0.786-Zone und bei den Extension-Zielen
-                 FIB-LEVELS, die die Kerze nur BERUEHRT hat — moeglicherweise in Stunde 2
-                 einer 4h-Kerze. Diese Preise bekommt nur, wer die Limit-Order VORHER
-                 dort liegen hat.
-    - "close"  = alles zum SCHLUSSKURS der ausloesenden Kerze. Das bildet ab, dass man
-                 erst nach der Telegram-Nachricht reagiert, der Kurs sich also vom Level
-                 wieder wegbewegt haben kann.
-    Der Unterschied beider Laeufe IST der Wert der Vorab-Order. Signale, die ohnehin zum
-    Kerzenschluss feuern (Stop, Restverkauf, Flush, Kaufleiter), sind in beiden Faellen
-    identisch — der Effekt isoliert also genau die Level-Signale.
-
-    EINORDNUNG, damit die Zahl nicht ueberschaetzt wird: "close" ist noch freundlich
-    gerechnet. Es unterstellt, dass man GENAU zum Kerzenschluss handelt. Tatsaechlich
-    laeuft die Engine 1 bis 3 Stunden spaeter (GitHub-Verzoegerung, gemessen 29.07.2026),
-    der reale Preis liegt also noch einmal weiter weg. Die gemessene Luecke ist damit
-    eine UNTERGRENZE fuer den Wert der Vorab-Order.
+    Legacy price variants: "level" uses signal.price; "close" uses the same
+    signal candle's close. Neither schedules fills or confirms holdings to the
+    strategy. Legacy max_drawdown_pct uses the old time-inconsistent inventory
+    and is kept under its old name solely for historical comparisons.
     """
     schluss_je_ts = {c.ts: c.close for c in candles}
 

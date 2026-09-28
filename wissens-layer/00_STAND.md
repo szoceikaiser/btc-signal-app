@@ -1,5 +1,24 @@
 # 00 STAND — Kurzstand in einer halben Minute
 
+## Aktueller Arbeitsstand 28.09.2026: Etappe 3b abgeschlossen
+
+- F01/F12-Vertrag V1 umgesetzt im neuen Offline-Pfad `backtest.run_execution`:
+  Schlusswissen → direkt folgendes zulässiges Open, Cash/BTC-Reservierungen,
+  echte Fills/Ablehnungen vor der nächsten Entscheidung, D2-Ausgangspriorität.
+- **638 Tests**, **19/19 neue Sabotagen**, 16 Handfälle; D01 6/6, F09 3/3 erhalten.
+  Zwei vorab begrenzte eingefrorene Zeilen × drei Slippage-Szenarien lokal gemessen;
+  jeder Fill, Close-Bestand, Monatsstand, Gebühren und DD gegen unabhängige Lose geprüft.
+- Schluss-DD und **obere Intrabar-Grenze** als neue positive Verlustfelder.
+  Alte Schwellen nicht übertragen. Live-Basis ohne Slippage: 13.431,45 USD,
+  Close-DD 7,9166 %, obere Grenze 9,9428 %; kein Strategie-/Live-Go.
+- Zweig `codex/etappe-3b-f01-f12`, Arbeitsbaum `etappe-3b-work`, Basis exakt `67c8e62`.
+  Bericht `docs/nacharbeit-2026-09-28/F01-F12-UMSETZUNG.md`; exakte Abschluss-SHA/CI
+  und Bundle-Wiederherstellung lokal `audit-backups/3b-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+- Bisheriger Signalband-/Backtest-Workflow bleibt historische Diagnostik, kein V1-Beleg.
+  Main/site/Live-Schalter/Workflows/Originale/Sicherungstag unverändert durch 3b.
+  F03/F04/Persistenz offen; nächster getrennter Auftrag **Etappe 4, GPT-6 Astra / hoch**
+  für Entwurf/Prüfung, danach Sol / hoch für klare Umsetzung. 3b beenden.
+
 ## Aktueller Arbeitsstand 28.09.2026: Etappe 3a abgeschlossen
 
 - Ausführungs-/Risikovertrag F01/F12 festgelegt, **keine 3b-Umsetzung**.

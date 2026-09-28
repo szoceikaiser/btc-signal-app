@@ -41,6 +41,19 @@ den individuellen Codex-Tarif.
 
 ## Aktueller Stand
 
+**Etappe 3b abgeschlossen** auf `codex/etappe-3b-f01-f12`, direkt aus gesichertem
+3a `67c8e62`. Neuer kausaler V1-Pfad `backtest.run_execution` mit Ereignis-Ledger,
+Reservierungen, Fill-Rückkopplung und Schluss-/Intrabar-Risiko. **638 Tests**,
+**19/19 Sabotagen**, 16 unabhängige Handfälle; D01/F09 erhalten. Sechs eng begrenzte
+lokale Läufe (zwei vorhandene Zeilen × drei Slippages), jeder Fill und Bestand gegen
+unabhängige Losrechnung geprüft. [Umsetzung/Abnahme](F01-F12-UMSETZUNG.md).
+Alte Signalband-/Workflow-Zugänge sind historische Diagnostik, kein korrigierter V1-Beleg.
+Kein main-/Live-Go; Originale/Sicherungstag unverändert. F03/F04/Persistenz offen.
+Nächster getrennter Auftrag **Etappe 4, GPT-6 Astra / hoch** für Entwurf und Prüfung,
+anschließend Sol / hoch für eindeutig begrenzte Umsetzung. Etappe 3b hier beenden.
+
+### Historischer Abschluss 3a
+
 **Etappe 3a abgeschlossen** auf `codex/etappe-3a-ausfuehrungsvertrag`, aus D01
 `5fabe2b`, ohne Produktionsänderung. [F01/F12-Vertrag](F01-F12-VERTRAG.md):
 Nutzer bestätigt D1-A (nächstes Open), D2-A (Ausstiege vor Käufen, kein Kauf bei

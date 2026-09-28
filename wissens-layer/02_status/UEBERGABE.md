@@ -1,5 +1,53 @@
 # Laufende Übergabe
 
+## 28.09.2026 — Etappe 3b F01/F12 abgeschlossen auf eigenem Zweig
+
+Arbeitsbaum `etappe-3b-work`, Zweig `codex/etappe-3b-f01-f12`, direkt vom exakten
+3a-Abschluss `67c8e624de3cc1b854a78dced755a5702b1a9c9a`. Remotes, Zweige und alle
+Arbeitsbäume geprüft; fremde ungetrackte E44-Artefakte erhalten. Privates Backup-Repo
+nicht committet. Keine neueren main-/E44.4-/E44.5-Commits übernommen.
+
+Neuer V1-Zugang `backtest.run_execution`/`run_execution_half`: getrennte Kauf-/
+Verkaufskandidaten auf gleichem gebuchtem Vorzustand; Reservierung und Fill am nächsten
+zulässigen Open; echte Fills/Ablehnungen vor neuer Entscheidung zurückgekoppelt.
+Teilfinanzierung skaliert nur bestehende Tranche; kein Phantomverbrauch von Leiter-
+stufen. Haupt-/Gesamtausstieg vor Teilstop vor Teilverkauf; Verkauf sperrt Paketkäufe.
+F09-Zyklusreset/Wiederanlage, bestehende Tranchen und D01-Stichtag erhalten.
+
+**638/638 Tests** (600 alt, 38 neu), **19/19 Sabotagen**, 16 unabhängige Handfälle
+(zwölf V1, drei ausgeschlossene V2-Fälle, H14 ausgeschlossene E41.6-Arithmetik).
+Echte Konflikte, Rückkopplung, Cash/Reservierungen, Datenende/Lücken, Präfixe und
+Risikozeitpunkte erreicht. D01 6/6 und F09 3/3 bestehende Mutationen ebenfalls erkannt.
+Zwei Quelltext-Assertions zeigen wegen Auslagerung auf `_evaluate`, sonst alte
+Erwartungen unverändert. Bericht `docs/nacharbeit-2026-09-28/F01-F12-UMSETZUNG.md`.
+
+Genau Live-Basis und bestehendes E42 (zwölf Kerzen), pro Zeile 0/0,1/0,5 % Slippage
+je Seite, nur lokal auf unveränderten Audit-Inputs. Gebühren 0,1 % je Fill.
+Jeder Fill und Cash/BTC-Close-Pfad, Monatsstände, Los-PnL, Kosten und Risikofelder
+gegen unverändertes unabhängiges Losbuch abgeglichen. Endwerte ohne Slippage:
+13.431,45 / 13.250,88 USD gegenüber 3a-Level 13.613,09 / 13.541,56 USD.
+Schluss-DD 7,9166 / 8,4177 %, **obere Intrabar-Grenze jeweils 9,9428 %**.
+Alle neuen Kandidatenbänder unterscheiden sich vom alten Signalband; Buchführung
+ist Erfolg, keine gewünschte Rendite. Ergebnisse ausschließlich separate `3b-*`.
+
+F03/F04-Einstand/Stop-Nachzug und Persistenz bleiben offen; ursprüngliche Referenz-
+Einstandsformel erhalten und kann Strategie weiter beeinflussen. Keine untrennbare
+Etappe-4-Korrektur benötigt. Live-Observer und bisherige Signalband-/Workflow-Zugänge
+bleiben historische Diagnostik ohne V1-Zertifizierung. Neue Messungen ausdrücklich
+mit `run_execution`, keine still umgedeuteten alten Drawdown-Werte/Schwellen.
+
+Originaldaten/Ergebnisse, site/Workflows, Live-Schalter, privates Backup und Sicherungstag
+unverändert; kein Merge/main-Push, Dispatch, Telegram, Order oder Deployment.
+Eigener GitHub-Zweig plus CI zur exakten Abschluss-SHA und frischer Bundle-Clone lokal
+unter `audit-backups/3b-abschluss-<Kurz-SHA>/ABSCHLUSS.json` nachgewiesen.
+
+Nächster separater Auftrag **Etappe 4: GPT-6 Astra / hoch** für Einstands-/Stop-/
+Persistenzvertrag und kritische Prüfung; Sol / hoch für danach klar begrenzte Umsetzung.
+Neue DD-Schwellen vor späterer Strategiebewertung; V2/Short-Margin/Funding/E41.6 getrennt.
+Etappe 3b beenden; keine Folgeetappe automatisch starten.
+
+---
+
 ## 28.09.2026 — Etappe 3a F01/F12 abgeschlossen, Umsetzung 3b noch nicht begonnen
 
 Eigener Arbeitsbaum `vertrag-3a-work`, Zweig `codex/etappe-3a-ausfuehrungsvertrag`,

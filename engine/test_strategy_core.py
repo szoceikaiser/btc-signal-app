@@ -2926,7 +2926,7 @@ def test_orderflow_detail_ist_reine_anzeige():
     """Die Engine darf diese Funktion nicht aufrufen - sonst waere sie eine Regel."""
     import inspect
     from strategy_core import evaluate
-    quelle = inspect.getsource(evaluate)
+    quelle = inspect.getsource(__import__('strategy_core')._evaluate)
     assert "orderflow_detail" not in quelle
 
 
@@ -3163,7 +3163,7 @@ def test_muster5_halten_behandelt_beide_ziele_gleich():
     Einstufung selbst ist eine strukturelle Aussage, also wird sie strukturell geprueft.
     """
     import inspect
-    quelle = inspect.getsource(evaluate)
+    quelle = inspect.getsource(__import__('strategy_core')._evaluate)
     assert quelle.count("_darf_teilverkaufen(ziel=True)") == 2, (
         "Genau zwei Stellen sind geplante Ziele (Extension 1.0 und 1.618) — "
         "alles andere sind Zwischenverkaeufe")
