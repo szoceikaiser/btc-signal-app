@@ -24,6 +24,7 @@ Detailauswertung der besten). Ausfuehren: python3 backtest.py
 from __future__ import annotations
 
 import json
+import math
 import os
 import time
 import urllib.request
@@ -986,6 +987,12 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                 sell = min(units, LADDER_TRANCHE / 100.0 * peak_units)
             else:
                 sell = min(units, 0.4 * peak_units)
+            # F09: Prozentuale Teilverkaeufe koennen nach rechnerisch 100 % einen
+            # Float-Rest lassen. Nur wenige Rundungsschritte der Positionsgroesse
+            # ausgleichen, keinen festen BTC-Mindestbestand abschneiden. Den Rest
+            # mitverkaufen, damit Cash, Gebuehr und Rueckkauf-Anteil konsistent sind.
+            if sell > 0 and 0 < units - sell <= 8 * math.ulp(peak_units):
+                sell = units
             if t == "RUECKKAUF_STOP" or sell >= units:
                 rk_units = 0.0
             elif units > 0:

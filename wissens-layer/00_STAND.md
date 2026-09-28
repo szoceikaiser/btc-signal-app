@@ -1,5 +1,19 @@
 # 00 STAND — Kurzstand in einer halben Minute
 
+## Aktueller Arbeitsstand 28.09.2026: Audit-Nacharbeit, Etappe 1
+
+- Arbeitszweig `codex/fix-f09-wiederanlage`, aus main `469be65`.
+- F09 (Rundungsrest verhindert Wiederanlage) ist isoliert korrigiert: 589 Tests,
+  drei von drei gezielten Sabotagen erkannt, fuenf eingefrorene Vergleiche mit
+  unabhaengiger Buchfuehrung abgeglichen. Hauptbericht: `docs/nacharbeit-2026-09-28/F09.md`.
+- Main/Live bleiben unveraendert; E44.4/E44.5 nicht uebernommen. Sicherungstag:
+  `sicherung/vor-audit-korrekturen-2026-09-28`. Main-Basissuite hier: 585 Tests.
+- Naechste getrennte Etappe: D01, nur abgeschlossene Kerzen. Empfehlung:
+  **GPT-6 Sol, Aufwand mittel**. Etappen und Startauftrag: `docs/nacharbeit-2026-09-28/ETAPPEN.md`.
+- Originalaudit liegt separat auf `codex/audit-2026-09-27`, Abschluss `ccf2b01`.
+
+## Aelterer Kurzstand (historische Referenz, nicht der aktuelle Arbeitsstand)
+
 > **Diese Datei wird zuerst gelesen, auch von jeder KI.** Sie ist bewusst kurz und wird
 > nach jeder abgeschlossenen Arbeit fortgeschrieben (Datum, was fertig, was als
 > Nächstes). Ausführlich: `START-HIER.md`, dann `02_status/UEBERGABE.md`.

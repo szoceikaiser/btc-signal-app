@@ -1,0 +1,5 @@
+PASS test_echte_kleine_restposition_wird_nicht_auf_null_gerundet
+FAIL test_neue_verkaufsleiter_nutzt_den_hoechstbestand_des_neuen_zyklus
+FAIL test_neuer_kauf_nutzt_das_kapital_nach_vollstaendigem_teilverkauf
+FAIL test_verkaufter_rueckkauf_erzeugt_keinen_zusaetzlichen_geister_stop Kein sechster Verkauf eines Rundungsrestes
+1 passed, 3 failed (vor Korrektur)

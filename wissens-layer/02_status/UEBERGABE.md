@@ -1,5 +1,28 @@
 # Laufende Übergabe
 
+## 28.09.2026 — Audit-Nacharbeit, Etappe 1 (F09), nur Arbeitszweig
+
+Aus gesichertem aktuellem main `469be65` wurde `codex/fix-f09-wiederanlage`
+angelegt. Der Long-Abrechner verkauft numerische Rundungsreste bei einem eigentlich
+vollstaendigen Teilverkauf mit. Dadurch verwenden Folgekaeufe neues Cash und neue
+Hoechstbestaende. Keine Strategie-Schalter und keine Signalregeln veraendert.
+
+585 alte plus vier neue Tests bestehen. Drei der neuen Tests scheiterten zuvor;
+alle drei gezielten Sabotagen werden erkannt. Fuenf historische Zeilen stimmen
+nach der Korrektur mit dem unabhaengigen Audit-Losbuch ueberein. F09 kann die
+Rendite je nach Variante erhoehen oder senken. D01/F01/F12 bleiben offen.
+
+Bericht: `docs/nacharbeit-2026-09-28/F09.md`. Etappen, Modellempfehlungen und
+Startauftrag: `docs/nacharbeit-2026-09-28/ETAPPEN.md`.
+Naechste Etappe D01: **GPT-6 Sol, Aufwand mittel**. Die Modelleinstellung wurde
+durch die Arbeit nicht automatisch umgestellt. Jede Etappe getrennt abschliessen.
+
+Kein Merge-Go, kein main-Push, keine Telegram-Nachricht, kein Messworkflow und
+kein Deployment. E44.4/E44.5 sind nicht Teil dieses Korrekturzweigs. Rueckkehrpunkt:
+`sicherung/vor-audit-korrekturen-2026-09-28`, lokal als Bundle/ZIP erfolgreich geprueft.
+
+---
+
 > Was zuletzt passiert ist, was offen liegt, was eine neue Session als Erstes wissen
 > muss. **Jüngster Abschnitt oben.** Nach jeder abgeschlossenen Arbeit einen datierten
 > Abschnitt hier ergänzen — nicht erst am Ende eines Vorhabens.
