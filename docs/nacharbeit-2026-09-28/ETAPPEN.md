@@ -41,7 +41,11 @@ den individuellen Codex-Tarif.
 
 ## Aktueller Stand
 
-Etappe 1 ist auf `codex/fix-f09-wiederanlage` umgesetzt und lokal geprueft.
+Etappe 2 ist auf `codex/fix-d01-kerzenschluss` aus dem abgeschlossenen F09-Commit
+`6edb941` umgesetzt: 600 Tests, 6/6 D01-Sabotagen, fuenf eingefrorene Vergleiche
+mit unabhaengigem Losbuch. Bericht: [D01.md](D01.md). Etappe 2 ist beendet.
+
+Etappe 1 ist auf `codex/fix-f09-wiederanlage` umgesetzt und geprueft.
 Ausgangspunkt ist der gesicherte aktuelle main-Commit; E44.4/E44.5 werden nicht
 mitgenommen. Bericht und Grenzen: [F09.md](F09.md).
 
@@ -52,7 +56,20 @@ Kein neues Kombinationsgitter in dieser Etappe und keine Aktivierung eines Schal
 
 ## Start fuer die naechste Etappe
 
-Empfohlen: **GPT-6 Sol, Aufwand mittel**. Auftrag:
+Empfohlen: **GPT-6 Astra, Aufwand hoch** fuer Etappe 3a. Nach klarem Vertrag
+Etappe 3b mit **GPT-6 Sol, Aufwand hoch**. Grund: Ausfuehrungsreihenfolge und
+Risikobegriff erfordern erst eine fachlich eindeutige Entscheidung. Auftrag:
+
+> Bearbeite ausschliesslich Etappe 3a (F01/F12), noch keine Umsetzung 3b.
+> Beginne beim abgeschlossenen D01-Zweig und lies D01.md, Kurzstand und Uebergabe.
+> Lege den Ausfuehrungs- und Risikovertrag eindeutig fest: Zeitpunkt des Signals,
+> verfuegbares Wissen, Fill-Zeit/Preis, Reihenfolge bei Kauf/Stop/Verkauf,
+> Kursluecken und Bestand vor/nach Ereignissen. Leite unabhaengige Handfaelle ab.
+> Fasse benoetigte Nutzerentscheidungen konkret zusammen. Kein main-Merge,
+> keine Schalter, Nachrichten, Orders, Deployments oder Backtest-Workflows.
+> Schliess diese Etappe mit gesicherten Unterlagen und aktualisierter Empfehlung ab.
+
+### Historischer Startauftrag Etappe 2 (abgeschlossen, nicht erneut ausfuehren)
 
 > Bearbeite Etappe 2 (D01) aus docs/nacharbeit-2026-09-28/ETAPPEN.md.
 > Pruefe Remotes, Zweige und den unveraenderten Sicherungstag zuerst.

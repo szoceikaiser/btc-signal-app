@@ -655,7 +655,8 @@ def fetch_candles_range(start_ms: int, end_ms: int) -> list:
         if len(chunk) < 1000:
             break
         time.sleep(0.3)
-    return out
+    # API endTime begrenzt den Anfang, nicht den Abschluss der letzten Kerze.
+    return [k for k in out if int(k[0]) + CANDLE_MS <= end_ms]
 
 
 def archiv_mischen(oi_map: dict, liq_map: dict, fut_map: dict, ls_map: dict,
@@ -710,10 +711,23 @@ def abschnitt_oder_grund(titel: str, daten, fehler: str, bauen) -> list:
     ]
 
 
+def closed_series(candles, flow, *, end_ms: int):
+    """Gespeicherte 4h-Reihen am DAMALIGEN Stichtag gemeinsam abgrenzen.
+
+    ts ist der UTC-Kerzenanfang in Millisekunden. Das Intervall [ts, ts+4h)
+    ist genau bei ts+4h abgeschlossen; Binance closeTime ist dagegen Ende-1ms.
+    Eingaben bleiben unveraendert. Fehlende/falsch gepaarte Reihen sind ein Fehler.
+    """
+    if len(candles) != len(flow) or any(c.ts != f.ts for c, f in zip(candles, flow)):
+        raise ValueError('Kerzen und Flow muessen zeitlich identisch gepaart sein')
+    pairs = [(c, f) for c, f in zip(candles, flow) if c.ts + CANDLE_MS <= end_ms]
+    return [c for c, _ in pairs], [f for _, f in pairs]
+
+
 def build_series(raw: list, funding: list[tuple[int, float]],
                  oi_map: dict | None = None, liq_map: dict | None = None,
                  fut_map: dict | None = None, ls_map: dict | None = None,
-                 spot_map: dict | None = None):
+                 spot_map: dict | None = None, *, end_ms: int | None = None):
     """OI aus oi_map (Coinalyze, E9.1) je Kerze; ohne oi_map bleibt OI konstant (neutral).
     liq_map liefert (long_liq, short_liq) je Kerzen-Open-ts.
     fut_map (E16) liefert das Futures-Taker-Delta je Kerze -> wird hier zum Futures-CVD
@@ -734,6 +748,10 @@ def build_series(raw: list, funding: list[tuple[int, float]],
     jeder OI-Punkt mit dem Schlusskurs SEINER Kerze umgerechnet (oi_in_btc), erst dann
     aufgefuellt, genau wie live in main.fetch_market_data. Ohne oi_map bleibt sie 0.0
     (keine Daten), waehrend das Dollar-OI konstant 1.0 steht - beides neutral."""
+    # Ein Messlauf hat einen festen Stichtag (END_MS); Replays geben ihren
+    # gespeicherten Stichtag explizit an, niemals die heutige Uhrzeit.
+    cutoff = END_MS if end_ms is None else end_ms
+    raw = [k for k in raw if int(k[0]) + CANDLE_MS <= cutoff]
     candles, flow, spot_cvd, fut_cvd = [], [], 0.0, 0.0
     oi_pairs = sorted(oi_map.items()) if oi_map else []
     first_oi = oi_pairs[0][1] if oi_pairs else 1.0
@@ -800,13 +818,7 @@ def run_half(candles, flow, cfg: dict, start_ms: int, end_ms: int | None = None)
     """
     cs, fl = candles, flow
     if end_ms is not None:
-        cut = 0
-        for i, c in enumerate(candles):
-            if c.ts <= end_ms:
-                cut = i + 1
-            else:
-                break
-        cs, fl = candles[:cut], flow[:cut]
+        cs, fl = closed_series(candles, flow, end_ms=end_ms)
     if not cs:
         return [], None
     sigs = run_backtest(cs, fl, cfg, start_ms=start_ms)
@@ -2910,6 +2922,8 @@ def main():
                                    f"Bloecke: {_bl}")
 
     candles, flow = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map)
+    if not candles:
+        raise ValueError('Keine abgeschlossene 4h-Kerze am Messstichtag')
 
     # --- E37.5: ALLE Datenvarianten an EINER Stelle ---------------------------------
     # Bis hierher baute jeder Vergleichsabschnitt seine Reihen selbst. Fuer die

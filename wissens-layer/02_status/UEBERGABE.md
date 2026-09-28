@@ -1,5 +1,32 @@
 # Laufende Übergabe
 
+## 28.09.2026 — Audit-Nacharbeit, Etappe 2 (D01), nur eigener Arbeitszweig
+
+`codex/fix-d01-kerzenschluss` in `fix-d01-work` basiert auf abgeschlossenem F09
+`6edb941b10e4220f4634e4570de8de25261d58b2`. Abruf/Aufbau verwenden Kerzenabschluss
+<= festen Messstichtag. Gespeicherte Reihen werden am damaligen `ende` gemeinsam
+abgegrenzt; Teilfenster haben denselben Vertrag. Keine Signalregel geaendert.
+
+**600 Tests bestanden**, sechs konkrete alte Messpfade durch Gegenfaelle erreicht,
+**6/6 Sabotagen erkannt**. Originalfall selbst bestaetigt: 2.481 Kerzen, letzte
+27.09.2026 08:00 UTC bei Stichtag 08:29:08.840 offen; jetzt 2.480 abgeschlossene,
+1.509 im Handelsfenster. Fuenf eingefrorene Varianten gegen F09 allein neu gerechnet:
+je ein Teilverkauf weniger, Endwerte 0,36 bis 0,66 USD niedriger, mit unabhaengigem
+Losbuch abgeglichen; H1-Endwerte gleich. Keine Mindestrendite als Erfolgskriterium.
+
+Bericht und Wiederholung: `docs/nacharbeit-2026-09-28/D01.md`; Zahlen separat
+`d01-ergebnis.json`. Audit/F09/Originalinputs bleiben unveraendert. Eigener Zweig
+wird auf GitHub gesichert und ausschliesslich `Tests` fuer exakte HEAD-SHA geprueft.
+Lokaler CI-Beleg und Abschlussbundle liegen getrennt unter `audit-backups`.
+
+Keine E44.4/E44.5-Uebernahme, main-/Live-Schalter, Nachrichten, Orders oder Deployments.
+Sicherungstag unveraendert auf `469be65`. F01/F12 und weitere Auditfehler bleiben offen.
+Naechster Auftrag: **3a, GPT-6 Astra / hoch**, Vertrag fuer Ausfuehrung/Risiko und
+Handfaelle; danach **3b, GPT-6 Sol / hoch**, klare Umsetzung. Die Empfehlung ist
+aufgabenbezogen und stellt das Modell nicht automatisch um. D01 danach beenden.
+
+---
+
 ## 28.09.2026 — Audit-Nacharbeit, Etappe 1 (F09), nur Arbeitszweig
 
 Aus gesichertem aktuellem main `469be65` wurde `codex/fix-f09-wiederanlage`

@@ -1,6 +1,19 @@
 # 00 STAND — Kurzstand in einer halben Minute
 
-## Aktueller Arbeitsstand 28.09.2026: Audit-Nacharbeit, Etappe 1
+## Aktueller Arbeitsstand 28.09.2026: Audit-Nacharbeit, Etappe 2
+
+- D01 abgeschlossen auf `codex/fix-d01-kerzenschluss`, aus F09 `6edb941`:
+  nur am Messstichtag abgeschlossene 4h-Kerzen; gespeicherte Daten verwenden ihr
+  damaliges `ende`. OHLC/Flow und Teilfenster gemeinsam abgegrenzt.
+- **600 Tests**, sechs von sechs D01-Sabotagen erkannt. Eingefrorene Daten:
+  2.481 -> 2.480 Kerzen; fuenf Varianten jeweils ein Signal weniger; Endwert
+  gegen F09 allein um 0,36 bis 0,66 USD niedriger. Unabhaengiges Losbuch passt.
+- Bericht: `docs/nacharbeit-2026-09-28/D01.md`. Originale/F09-Ergebnisse unveraendert.
+- Main/Live und Sicherungstag unveraendert durch diese Arbeit; kein Merge-Go.
+  Naechste getrennte Etappe 3a F01/F12: **GPT-6 Astra / hoch** fuer den Vertrag,
+  danach Umsetzung 3b **GPT-6 Sol / hoch**. D01 hier beenden.
+
+## Abgeschlossene Etappe 1 (historische Referenz)
 
 - Arbeitszweig `codex/fix-f09-wiederanlage`, aus main `469be65`.
 - F09 (Rundungsrest verhindert Wiederanlage) ist isoliert korrigiert: 589 Tests,
