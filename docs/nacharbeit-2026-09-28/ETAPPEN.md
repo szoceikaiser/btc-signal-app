@@ -41,6 +41,16 @@ den individuellen Codex-Tarif.
 
 ## Aktueller Stand
 
+**Etappe 3a abgeschlossen** auf `codex/etappe-3a-ausfuehrungsvertrag`, aus D01
+`5fabe2b`, ohne Produktionsänderung. [F01/F12-Vertrag](F01-F12-VERTRAG.md):
+Nutzer bestätigt D1-A (nächstes Open), D2-A (Ausstiege vor Käufen, kein Kauf bei
+Verkauf im Paket) und D3 (Long/Spot, Schluss-DD + Intrabar-Grenzen, Kostenpaket).
+16 Handfälle, 27 rationale Identitäten, acht negative Kontrollen und drei gezielte
+Ist-Proben; 600 bestehende Tests bestanden. F01/F12 sind vertraglich geklärt,
+**im Produktionscode noch nicht behoben**. Neuer Chat für 3b mit GPT-6 Sol / hoch;
+vollständiger aktueller Auftrag: [START-3B.md](START-3B.md).
+Neue DD-Schwellen, V2, E41.6 und Shorts bleiben getrennte Entscheidungen.
+
 Etappe 2 ist auf `codex/fix-d01-kerzenschluss` aus dem abgeschlossenen F09-Commit
 `6edb941` umgesetzt: 600 Tests, 6/6 D01-Sabotagen, fuenf eingefrorene Vergleiche
 mit unabhaengigem Losbuch. Bericht: [D01.md](D01.md). Etappe 2 ist beendet.
@@ -54,7 +64,7 @@ Sie ersetzt keine historischen Kriterien rueckwirkend. Fuer eine reine
 Buchungskorrektur gilt ein richtiges Ergebnis als Erfolg, keine Mindestrendite.
 Kein neues Kombinationsgitter in dieser Etappe und keine Aktivierung eines Schalters.
 
-## Start fuer die naechste Etappe
+## Historischer Startauftrag Etappe 3a (abgeschlossen, nicht erneut ausführen)
 
 Empfohlen: **GPT-6 Astra, Aufwand hoch** fuer Etappe 3a. Nach klarem Vertrag
 Etappe 3b mit **GPT-6 Sol, Aufwand hoch**. Grund: Ausfuehrungsreihenfolge und

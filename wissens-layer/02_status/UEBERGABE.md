@@ -1,5 +1,44 @@
 # Laufende Übergabe
 
+## 28.09.2026 — Etappe 3a F01/F12 abgeschlossen, Umsetzung 3b noch nicht begonnen
+
+Eigener Arbeitsbaum `vertrag-3a-work`, Zweig `codex/etappe-3a-ausfuehrungsvertrag`,
+direkt aus D01 `5fabe2bae1506546fc31708ceecef2034365300f` (enthält F09).
+Remotes, saubere Ausgangsarbeitsbäume und unveränderten Sicherungstag geprüft.
+Privates Backup-Repo nicht committet; main nur lesend aktualisiert/beobachtet.
+
+Vertrag: `docs/nacharbeit-2026-09-28/F01-F12-VERTRAG.md`. Nutzer hat alle drei
+fachlichen Fragen ausdrücklich beantwortet: D1-A nächstes Open, D2-A Ausstiege
+vor Käufen (bei Verkauf kein Kauf im selben Paket), D3 Risikopaket Long/Spot,
+Schluss-DD und Intrabar-Grenzen, 0,1 % Gebühr, 0/0,1/0,5 % Slippage je Seite.
+Next-Open bleibt idealisierte Null-Latenz-Ausführung. Keine Vorab-Limit-Orders
+unterstellen. Signalzeit, Fill und Zustand müssen in 3b kausal getrennt werden.
+Kein bloßes Umrechnen des alten Signalbands als vollständige Korrektur ausgeben.
+
+16 Handfälle mit 27 rationalen Identitäten, acht negative Kontrollwerte erkannt,
+drei erreichte Ist-Proben. F01 Verkauf nach Tief: bisher 0 statt 50 % DD; Kauf nach
+Tief: bisher 50 statt 0 %; F12 neues Ziel derselben Kerze reproduziert. Diese Proben
+bestätigen offene Fehler, sie reparieren nichts. Unveränderte Suite: **600/600**.
+Prüfartefakte `3a-pruefung.json`, `3a-tests.log`, Skript `tools/verify_3a_contract.py`.
+
+Keine Änderungen an Engine, site, Workflows, Live-Schaltern, Originaldaten oder
+früheren Ergebnissen. Kein Gesamtaudit, E44.4/E44.5, Merge, main-Push, Telegram,
+Order, Deployment oder Backtest-Workflow. Eigener Zweig wird gesichert; GitHub-CI
+und Remote-HEAD zur exakten SHA sowie Bundle-Wiederherstellung werden lokal unter
+`audit-backups/3a-abschluss-<Kurz-SHA>` nachgewiesen (ABSCHLUSS.json).
+
+Für V1/3b keine offene fachliche Auswahl mehr. Neue quantitative DD-Schwellen und
+Abschaltregeln vor späterer Strategiebewertung, E41.6-Budget, V2 und Shorts bleiben
+eigene Entscheidungen. F03/F04/Persistenz bleiben Etappe 4; Abhängigkeiten bei
+Fill-Rückkopplung konkret melden, nicht still in 3b mitreparieren.
+
+Neuer Chat sinnvoll: **GPT-6 Sol / hoch**, Aufwand hoch beibehalten, von der
+3a-Empfehlung Astra auf Sol wechseln. Auftrag `docs/nacharbeit-2026-09-28/START-3B.md`.
+Vor neuem Schreibzugriff gesicherten 3a-Commit prüfen, eigenen Folgearbeitsbaum
+anlegen. Etappe 3a danach beendet; dieser Abschluss startet 3b nicht.
+
+---
+
 ## 28.09.2026 — Audit-Nacharbeit, Etappe 2 (D01), nur eigener Arbeitszweig
 
 `codex/fix-d01-kerzenschluss` in `fix-d01-work` basiert auf abgeschlossenem F09

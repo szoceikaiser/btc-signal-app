@@ -1,0 +1,77 @@
+{
+  "scope": "Etappe 3a: Handidentitaeten und gezielte Ist-Proben, keine 3b-Umsetzung",
+  "arithmetic_checks": 27,
+  "hand_cases": 16,
+  "values": {
+    "H01_sale_after_low_dd": "1/2",
+    "H02_cash_before_buy_dd": "0",
+    "H03_low_high_close_dd": "1/2",
+    "H03_high_low_close_dd": "3/4",
+    "H04_next_open_buy_units": "80",
+    "H04_next_open_buy_close_equity": "8000",
+    "H05_gap_sale_equity": "7000",
+    "H06_buy_limit_gap_units": "1000/9",
+    "H06_sell_limit_gap_cash": "13000",
+    "H07_stop_first_cash": "9000",
+    "H07_target_first_cash": "11000",
+    "H08_extension_before": "200",
+    "H08_extension_after": "170",
+    "H09_full_exit_cash": "10000",
+    "H09_partial_exit_cash": "7000",
+    "H09_partial_exit_units": "30",
+    "H10_buy_units_fee": "999/10",
+    "H10_roundtrip_cash_fee": "998001/100",
+    "H10_roundtrip_loss": "1999/1000000",
+    "H11_no_successor_no_fill_units": "0",
+    "H12_gap_stop_before_cancel_cash": "8000",
+    "H13_half_sale_remaining_units": "50",
+    "H13_low_after_sale_equity": "7500",
+    "H14_frozen_cohort_extra_loss": "3/10",
+    "H15_return_to_low_upper_dd": "3/4",
+    "H16_cash_cap_after_first_buy": "2500",
+    "H16_second_buy_capped": "2500"
+  },
+  "negative_controls_rejected": [
+    "F01_post_sale_inventory",
+    "F01_new_buy_on_old_low",
+    "F01_fixed_low_high_is_exact",
+    "F12_retroactive_level",
+    "gap_stop_at_threshold",
+    "fee_omitted",
+    "last_signal_invented_fill",
+    "cash_overspent"
+  ],
+  "production_probes": {
+    "sale_after_low": {
+      "actual_dd_pct": 0.0,
+      "close_fill_expected_dd_pct": -50
+    },
+    "buy_after_low": {
+      "actual_dd_pct": -50.0,
+      "close_fill_expected_dd_pct": 0
+    },
+    "new_target_same_bar": {
+      "old_target": 200,
+      "new_target": 170,
+      "ohlc": [
+        140,
+        190,
+        90,
+        140
+      ],
+      "signals": [
+        {
+          "ts": 28800000,
+          "type": "TEILVERKAUF_1",
+          "price": 170.0,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (170)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        }
+      ]
+    }
+  },
+  "result": "PASS: Rechenvertrag geprueft; Produktionsfehler weiterhin vorhanden"
+}

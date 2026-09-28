@@ -1,6 +1,24 @@
 # 00 STAND — Kurzstand in einer halben Minute
 
-## Aktueller Arbeitsstand 28.09.2026: Audit-Nacharbeit, Etappe 2
+## Aktueller Arbeitsstand 28.09.2026: Etappe 3a abgeschlossen
+
+- Ausführungs-/Risikovertrag F01/F12 festgelegt, **keine 3b-Umsetzung**.
+  Basis D01 `5fabe2b`, eigener Zweig `codex/etappe-3a-ausfuehrungsvertrag`
+  in `vertrag-3a-work`.
+- Nutzer bestätigt: Schluss-Signale zum nächsten Open; Gesamtausstieg vor
+  Teilstop vor Teilverkauf, bei Verkauf kein Kauf im selben Paket; Long/Spot,
+  Schluss-DD plus Intrabar-Grenzen, Gebühr 0,1 %, Slippage 0/0,1/0,5 % je Seite.
+- 16 Handfälle, 27 rationale Rechenprüfungen, acht falsche Kontrollwerte erkannt;
+  drei gezielte Ist-Proben bestätigen weiterhin F01/F12. **600 Tests bestanden**.
+  Produktionscode, Live-Konfiguration und historische Ergebnisse unverändert.
+- Bericht: `docs/nacharbeit-2026-09-28/F01-F12-VERTRAG.md`.
+  Neue DD-Schwellen, E41.6 und bedingte Vorab-Orders bleiben getrennte Entscheidungen.
+- Nächster eigener Chat: **3b, GPT-6 Sol / hoch**, Aufwand hoch beibehalten.
+  Vollständiger Auftrag: `docs/nacharbeit-2026-09-28/START-3B.md`.
+  Kein main-/Live-Go. Abschluss auf eigenem GitHub-Zweig, lokale Sicherung unter
+  `audit-backups/3a-abschluss-<Kurz-SHA>`. Etappe 3a hier beenden.
+
+## Abgeschlossener Arbeitsstand 28.09.2026: Audit-Nacharbeit, Etappe 2
 
 - D01 abgeschlossen auf `codex/fix-d01-kerzenschluss`, aus F09 `6edb941`:
   nur am Messstichtag abgeschlossene 4h-Kerzen; gespeicherte Daten verwenden ihr
