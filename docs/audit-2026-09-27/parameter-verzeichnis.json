@@ -52,7 +52,11 @@
       "origin": "E4",
       "default": 5,
       "live": "5",
-      "single_rows": [],
+      "single_rows": [
+        "S000",
+        "S002",
+        "S006"
+      ],
       "configuration_present": true,
       "source_lines": [
         372,
@@ -77,7 +81,9 @@
       "origin": "E4",
       "default": 2.0,
       "live": "2.0",
-      "single_rows": [],
+      "single_rows": [
+        "S005"
+      ],
       "configuration_present": true,
       "source_lines": [
         211,

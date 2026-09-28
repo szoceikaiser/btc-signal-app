@@ -14,6 +14,7 @@ Stand 28.09.2026. Die Originaldateien unter `docs/e445/` bleiben unverändert. E
 | 79 vollständig festgelegte Parameterzeilen | Commit `e7e92d30fc2c97784fdbe86079910ac27d926cec`, [gitter-plan.json](gitter-plan.json) |
 | Ergebnisse des Hauptgitters gesichert | Commit `3d341ef` |
 | Zusätzliche Kapitalquoten vorher festgelegt | Commit `9b916f0`, [ERGAENZUNGSPLAN.md](ERGAENZUNGSPLAN.md) |
+| Frühere E4-Pivot-/ATR-Werte separat vorher festgelegt | Commit `098a65d`, [STRUKTURPLAN.md](STRUKTURPLAN.md), acht Zeilen / sieben weitere eindeutige Konfigurationen |
 | Originaleingaben | SHA-256 `ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a` |
 | Erzeugungszeit laut Datei | 27.09.2026, 08:29:16.179427 UTC |
 | Ursprüngliche GitHub-Messung | Lauf `36306294148`, Artefakt `10927810839` |
@@ -31,6 +32,7 @@ Diese GitHub-Läufe bestanden bereits. Der Audit hat keinen Messworkflow gestart
 | audit-20260927-03 | Unabhängige Berechnungen, Sabotagen, E42, Parität | gegenproben*.json, weitere-gegenproben.json, sabotage*, e42-faelle.json, live-backtest-paritaet.json, chart-gegenprobe.json, telegram-reihenfolge.json |
 | audit-20260927-04-V000 bis V078 | Vorab definierte gemeinsame Konfigurationen, vier Ausführungsszenarien, zwei Hälften | grid/Vxxx.json, grid-run.log, gitter-vergleich.json |
 | audit-20260928-05 | Vorgeplante Zusatzrechnung der Kapitalquoten und beschreibender Buy-and-Hold-Vergleich | kapital.json, KAPITAL.md |
+| audit-20260928-06-S000 bis S007 | Separat vorgeplantes historisches 4×2-Strukturgitter | struktur/Sxxx.json, STRUKTUR.md, struktur-run.log |
 
 ## Exakte Reproduktion von E44.5
 
@@ -76,6 +78,8 @@ Die mathematische Hälftengrenze ist 2026-05-24T14:14:34.420000+00:00. Zuordnung
 
 Die ursprüngliche Suite hat **607 bestandene Tests, null Fehler**. Konfiguration und site/data lagen vollständig neben engine. Der unveränderte Test-Workflow war auch auf den Audit-Commits f9d2e31 (Lauf 36326950218) und e7e92d3 (36339867356) erfolgreich.
 
+Die Abschlussprüfung bestätigt unveränderten Produktionscode, unveränderte Vorfestlegungen, 86 eindeutige Handelskonfigurationen (davon 85 Long), E42-Loserhaltung und gültige lokale Berichtslinks. Das Dateimanifest enthält exakte Byte-Hashes und für Text zusätzlich `sha256_lf`, weil die vorhandene Git-Konfiguration CRLF/LF vereinheitlicht. Binärdateien werden ausschließlich bytegenau geprüft. Das Manifest lässt sich mit `python audit/verify_artifacts.py --verify-manifest` kontrollieren.
+
 Alle 14 vorhandenen Sabotageskripte wurden berücksichtigt. Zwölf scheiterten zunächst an der unter Windows fehlenden SIGALRM-Funktion. Das ist eine Umgebungsgrenze, kein gefangener Strategiefehler. Die Originalprotokolle bleiben unter `sabotage/` erhalten. Anschließend liefen die Eingriffe in isolierten Kopien; nur die äußere SIGALRM-Hülle wurde für Windows ersetzt, der Subprozess behielt seine Zeitbegrenzung. E44.3 wurde nach einer Laufunterbrechung separat vollständig beendet.
 
 | Gruppe | Erkannte Eingriffe | Nicht passende alte Vorlagen | Überlebende erreichte Eingriffe |
@@ -108,6 +112,7 @@ python audit/measure.py
 python audit/summarize.py
 python audit/uncertainty.py
 python audit/capital.py
+python audit/structure.py
 python audit/telegram_order.py
 node audit/chart_probe.cjs
 python audit/repro_report.py
@@ -121,4 +126,4 @@ Die langen Sabotageläufe sind separat mit `run_portable_sabotage.py` und `mutat
 
 Git liefert 80 verschiedene historische Berichtstände und 38 Revisionen der Live-Konfiguration. Die Tabellen und Beleg-Commits wurden vollständig extrahiert. Ein Commit des Berichts ist nicht automatisch der Commit, den der damalige Runner vor seinem Datenabruf ausgecheckt hatte.
 
-Unter den bei der GitHub-Abfrage noch gelisteten 14 Artefakten waren zwölf Pages-Artefakte und die beiden E44.5-Pakete. Für frühere Renditeläufe wurde kein vollständiges damaliges Eingabepaket gefunden. Das aktuelle Archiv enthält nur einen Teil der benötigten Daten und bewahrt keine vollständige Abruf-/Revisionsgeschichte. Diese älteren Zahlen sind **rekonstruiert, nicht unabhängig reproduziert**. Die 79 neuen Zeilen beantworten stattdessen die getrennte Frage nach denselben Einstellungen auf gemeinsamer Basis.
+Unter den bei der ersten gespeicherten GitHub-Abfrage noch gelisteten 14 Artefakten waren zwölf Pages-Artefakte und die beiden E44.5-Pakete. Die spätere Abschlussabfrage listet zwölf Artefakte; zwei ältere Pages-Pakete sind inzwischen nicht mehr gelistet. Beide Momentaufnahmen sind erhalten. Für frühere Renditeläufe wurde kein vollständiges damaliges Eingabepaket gefunden. Das aktuelle Archiv enthält nur einen Teil der benötigten Daten und bewahrt keine vollständige Abruf-/Revisionsgeschichte. Diese älteren Zahlen sind **rekonstruiert, nicht unabhängig reproduziert**. Die 79 neuen Zeilen beantworten stattdessen die getrennte Frage nach denselben Einstellungen auf gemeinsamer Basis.

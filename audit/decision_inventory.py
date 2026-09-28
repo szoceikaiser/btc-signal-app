@@ -62,11 +62,14 @@ def main():
     plan=json.loads((OUT/'gitter-plan.json').read_text(encoding='utf-8'))
     cfg=json.loads(git('show',plan['base_main']+':site/data/config.json'))
     hist=json.loads((OUT/'historie.json').read_text(encoding='utf-8'))
-    rows=plan['rows'];base=plan['base'];source=(ROOT/'engine/strategy_core.py').read_text(encoding='utf-8').splitlines()
+    rows=list(plan['rows']);base=plan['base'];source=(ROOT/'engine/strategy_core.py').read_text(encoding='utf-8').splitlines()
+    for path in sorted((OUT/'struktur').glob('S*.json')):
+        r=json.loads(path.read_text(encoding='utf-8'))
+        rows.append(dict(id=r['id'],diff={k:v for k,v in r['params'].items() if v!=base[k]}))
     assert set(PURPOSE)==set(live.EVAL_DEFAULTS)
     registry=[]
     lines=['# Vollständiges Parameter- und Vergleichsverzeichnis','',
-        'Die Tabelle enthält alle 45 aktuellen `evaluate`-Parameter. **Code-Default ist nicht Live-Einstellung.** Maßgeblich für die konfigurierte Live-Engine ist `main` 89885adc. Am 28.09. wurde remote bis 97e375b geprüft: seit der eingefrorenen Basis änderten sich nur `state.json` und `signals.json`, nicht der Code oder die Konfiguration. Eine tatsächlich manuell ausgeführte Order folgt daraus nicht.',
+        'Die Tabelle enthält alle 45 `evaluate`-Parameter des geprüften E44.5-Zweigs (44 auf main, verkauf_faktor nur im Zweig). **Code-Default ist nicht Live-Einstellung.** Maßgeblich für die konfigurierte Live-Engine ist `main` 89885adc. Am 28.09. wurde remote bis 930da500 geprüft: seit der eingefrorenen Basis änderten sich nur `state.json` und `signals.json`, nicht der Code oder die Konfiguration. Eine tatsächlich manuell ausgeführte Order folgt daraus nicht.',
         '', 'Implementierung: [strategy_core.evaluate](../../engine/strategy_core.py#L1655), Durchreichung [main.EVAL_DEFAULTS/eval_params](../../engine/main.py#L331), historische Definitionen und Datenstände in [ENTSCHEIDUNGEN.md](ENTSCHEIDUNGEN.md). Die Test-Suite umfasst alle vorhandenen `test_*.py`; spezifische zusätzliche Gegenproben sind im Abschlussbericht genannt. Einzelgegenprobe = nur dieser Parameter gegen die gemeinsame heutige Basis. Abhängige Einstellungen werden zusätzlich gemeinsam mit ihrem Hauptschalter geprüft.',
         '', '| Parameter | Zweck / Herkunft | Code-Default | effektiv live | neue Einzelprobe(n) |',
         '|---|---|---|---|---|']
@@ -98,7 +101,7 @@ def main():
     for key in const_names:lines.append(f'| `{key}` | `{val(getattr(sc,key))}` |')
     lines+=['', 'Weitere fest kodierte Mustergrenzen stehen in `classify_pattern` (u. a. starke Preisbewegung 4 %, halbe Schwelle 2 %, OI +3/−5 % sowie −2/−1 % in weiteren Mustern, Funding 0,0001), ATR als einfacher 14-Kerzen-Mittelwert, grundlegende Impuls-Untergrenze 3 % alternativ zum ATR-Kriterium. Diese Zahlen sind keine vollständig aus dem Transkript belegten Regeln. Die neuen Messungen variieren sie nicht nachträglich.',
         '', '## Jede bestehende Gitterzeile: Entfernung zur heutigen Basis','',
-        'Diese Tabelle rekonstruiert **alle 85 bestehenden Code-Konfigurationen**, unabhängig davon, ob ihr Name noch „LIVE“ enthält. Änderungen werden aus den effektiven Parametern berechnet. Mehrere Unterschiede sind keine Einzelgegenprobe. Der heutige 79-Zeilen-Audit übernimmt die alten Parameterwerte, setzt sie aber auf dieselbe Basis; er ist deshalb ausdrücklich keine Reproduktion des alten Laufs.',
+        'Diese Tabelle rekonstruiert **alle 85 bestehenden Code-Konfigurationen**, unabhängig davon, ob ihr Name noch „LIVE“ enthält. Änderungen werden aus den effektiven Parametern berechnet. Mehrere Unterschiede sind keine Einzelgegenprobe. Der heutige 79-Zeilen-Audit übernimmt diese Parameterwerte auf gemeinsamer Basis. Separat ergänzt [STRUKTUR.md](STRUKTUR.md) das frühe E4-Gitter mit sieben weiteren eindeutigen Konfigurationen. Das sind ausdrücklich keine Reproduktionen der alten Läufe.',
         '', '| alte Gitterzeile | Anzahl Unterschiede | wirkliche Unterschiede zu heute |','|---|---:|---|']
     old=[]
     for r in bt.GRID:

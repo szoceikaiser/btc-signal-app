@@ -1,0 +1,82 @@
+[
+  {
+    "id": "S000",
+    "half_deltas": [
+      -17.07211106696966,
+      0.8115010014127861
+    ],
+    "both_halves_at_least_2": false,
+    "min_compounded_leave_one_month_out": -18.894661060466845,
+    "technical_release": false
+  },
+  {
+    "id": "S001",
+    "half_deltas": [
+      -17.07211106696966,
+      0.8115010014127861
+    ],
+    "both_halves_at_least_2": false,
+    "min_compounded_leave_one_month_out": -18.894661060466845,
+    "technical_release": false
+  },
+  {
+    "id": "S002",
+    "half_deltas": [
+      0.4670287668123514,
+      -0.9681294739597206
+    ],
+    "both_halves_at_least_2": false,
+    "min_compounded_leave_one_month_out": -1.4085275020371713,
+    "technical_release": false
+  },
+  {
+    "id": "S003",
+    "half_deltas": [
+      0.4670287668123514,
+      -0.9681294739597206
+    ],
+    "both_halves_at_least_2": false,
+    "min_compounded_leave_one_month_out": -1.4085275020371713,
+    "technical_release": false
+  },
+  {
+    "id": "S004",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "both_halves_at_least_2": false,
+    "min_compounded_leave_one_month_out": 0.0,
+    "technical_release": false
+  },
+  {
+    "id": "S005",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "both_halves_at_least_2": false,
+    "min_compounded_leave_one_month_out": 0.0,
+    "technical_release": false
+  },
+  {
+    "id": "S006",
+    "half_deltas": [
+      -3.3906464737042157,
+      5.718987446737245
+    ],
+    "both_halves_at_least_2": false,
+    "min_compounded_leave_one_month_out": -4.341976464128705,
+    "technical_release": false
+  },
+  {
+    "id": "S007",
+    "half_deltas": [
+      -3.3906464737042157,
+      5.718987446737245
+    ],
+    "both_halves_at_least_2": false,
+    "min_compounded_leave_one_month_out": -4.341976464128705,
+    "technical_release": false
+  }
+]

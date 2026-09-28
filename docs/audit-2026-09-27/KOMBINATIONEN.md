@@ -177,4 +177,8 @@ Kosten: 0,1 % pro Order. Nächste Eröffnung: zusätzlich 0,05 % ungünstigerer 
 
 Ein bestandener Hälftenfilter ist keine Erfolgswahrscheinlichkeit. Die 79 Zeilen sind korreliert; schon früher wurden viele Varianten auf diesen Daten gewählt. 5 % pro Zeile wären bei unabhängigen 79 Nullhypothesen etwa vier zufällige Treffer. Die unbekannte Gesamtzahl historischer Versuche verhindert eine seriöse exakte nachträgliche Korrektur.
 
-Nicht untersucht: das vollständige kartesische Produkt aller Schalter, neue nach Ergebnis ausgewählte Schwellen, Kombinationen mit archivisch nicht verfügbaren Mehrbörsen-/On-Chain-Rohdaten, echte Tick-Ausführung, Short-Funding. Neue Kombinationen außerhalb der fünf begründeten Gitter bedürfen einer eigenen Vorfestlegung und möglichst neuer Daten.
+## Getrennt vorab geplante Ergänzungen
+
+Das ursprüngliche E4-Gitter n=3/4/5/6 × k=2/3 wurde nach dem Vollständigkeitsabgleich separat vorab festgeschrieben (098a65d) und vollständig auf derselben Basis gemessen: [STRUKTUR.md](STRUKTUR.md). Eine Zeile ist V000; sieben Konfigurationen kommen hinzu, somit 86 eindeutige Handelskonfigurationen. Die ergänzenden Kapitalquoten 100/60/50 % sind in [KAPITAL.md](KAPITAL.md) ausgewiesen. Beide Ergänzungen werden nicht rückwirkend dem anfänglichen 79-Zeilen-Plan zugeschrieben.
+
+Nicht untersucht: das vollständige kartesische Produkt aller Schalter, neue nach Ergebnis ausgewählte Schwellen, Kombinationen mit archivisch nicht verfügbaren Mehrbörsen-/On-Chain-Rohdaten, echte Tick-Ausführung, Short-Funding. Weitere Kombinationen außerhalb der fünf begründeten Gitter und der historischen E4-Ergänzung benötigen eine eigene Vorfestlegung und möglichst neue Daten.

@@ -65,6 +65,13 @@ def main():
             assert abs(row['scenarios'][0]['end']-row['tolerance']['ende'])<.011
             assert row['scenarios'][0]['fees']>=0
     assert sum(r['long_only'] for r in rows)==78
+    structure=[read('struktur/'+f'S{i:03}.json') for i in range(8)]
+    assert (OUT/'STRUKTURPLAN.md').read_text(encoding='utf-8')==git('show','098a65d:docs/audit-2026-09-27/STRUKTURPLAN.md')
+    for r,(n,k) in zip(structure,((n,k) for n in (3,4,5,6) for k in (2.,3.))):
+        assert r['params']==dict(plan['base'],pivot_n=n,k_atr=k)
+        assert r['input_sha256']==EXPECTED
+        assert abs(r['scenarios'][0]['end']-r['tolerance']['ende'])<.011
+    assert len({json.dumps(r['params'],sort_keys=True) for r in rows+structure})==86
     for group in ('G1','G2','G3','G4','G5'):
         assert sum(group in r['groups'] for r in rows)==8,group
     assert len(read('parameter-verzeichnis.json')['parameters'])==45
@@ -116,8 +123,9 @@ def main():
     result=dict(checked_at=datetime.now(timezone.utc).isoformat(),
                 head_before_snapshot_commit=git('rev-parse','HEAD').strip(),
                 production_base=START,production_unchanged=True,input_sha256=EXPECTED,
-                preregistration_unchanged=True,configurations=79,long_ledgers_reconciled=78,
-                complete_factorial_grids=5,json_files_parsed=len(jsons),markdown_links_valid=True,
+                preregistration_unchanged=True,configurations=86,long_ledgers_reconciled=85,
+                main_configurations=79,supplementary_structure_rows=8,
+                complete_factorial_grids=6,json_files_parsed=len(jsons),markdown_links_valid=True,
                 original_tests='607 passed, 0 failed',e42_observations=57,e42_breakouts=33,
                 same_bar_replaced=1,e42_lots=16,independent_profile_matches=True,
                 private_full_transcripts_added=False,credential_scan='No matching tokens')

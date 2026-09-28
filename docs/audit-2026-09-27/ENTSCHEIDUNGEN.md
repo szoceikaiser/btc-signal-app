@@ -44,7 +44,7 @@ dort verlinkten Pläne, `config.json`-Hinweise und die jeweiligen Git-Berichte.
 | E1 Regeln aus Furkan ableiten | S/Quellen; keine Renditebasis | Fibonacci, Bestätigung, Stop, Stufenkäufe formalisiert | Grundformeln nachvollziehbar. Feste 4h, n=5, Prozenttranchen und numerische Musterschwellen sind zusätzliche Entwicklerregeln. Kein vollständiges Abbild der Originalstrategie. |
 | E2 notierte Kauf-/Verkaufstage gegen Markt prüfen | H, manuelle Datenlisten; keine Größen/Ausführungen | Datumsnähe und Marktverlauf; teilweise Tief der Folgewoche | Nur rückblickende Plausibilität. Echte Furkan-Rendite und damals erreichbare Preise nicht belegt. Doppelte Tage und Kauf/Short-Deckung dürfen nicht als unabhängige Trades zählen. |
 | E3–E7 Engine, Webseite, Automatisierung, Telegram | S, teilweise L; Demo-/Funktionsfälle | Ausgabe, Persistenz, Verbindung; dokumentierte API-451-Ausfälle und Kraken-Ersatz | Betrieb nachgewiesen, kein Renditenachweis. Der Audit versendet nichts. Aktuell F05/F10/F13 und Datenqualitätsgrenzen. |
-| E4 Pivot-/ATR-Kalibrierung | H, 8 Kombinationen n=3…6 und k=2/3, W0 | n=5/k=2: etwa 45 % Recall, 54 % Präzision; Ziel ≥70 % nicht erreicht | Gewählt als Datumsnäherung. Die Ziele waren nicht Nettorendite oder unabhängige Vorhersagekraft; ±1 Tag erlaubt viel Zufall. Heute Ausschalt-/Parameterproben, keine rückwirkende Neuerfindung des ursprünglichen Kalibrierlaufs. |
+| E4 Pivot-/ATR-Kalibrierung | H, 8 Kombinationen n=3…6 und k=2/3, W0 | n=5/k=2: etwa 45 % Recall, 54 % Präzision; Ziel ≥70 % nicht erreicht | Gewählt als Datumsnäherung. Die Ziele waren nicht Nettorendite oder unabhängige Vorhersagekraft; ±1 Tag erlaubt viel Zufall. Audit S000–S007: vollständiges altes 4×2-Gitter auf heutiger Basis, keine Reproduktion der alten Kalibrierung; kein robuster Vorteil beider Hälften. |
 | E8.1 Kapitulation/Flush | H, frühere Long+Short-Basis, W0, teilweise ohne echtes OI | Ohne Flush ca. −6 %, T1 ca. −8,7 %, Core ca. −9,8 % | Damals zunächst aus. Gilt nicht gegen heutige Basis; E9 führte auf neuer Datenbasis zum gegenteiligen Ergebnis. |
 | E8.2/3/4 Zwischenverkäufe und Bestätigung | H/S, W0 | Leiter 0,8/0,9 mit 15-%-Tranchen etwa −5,3 % statt −6 %; Recall kaum verändert | Leiter aktiv, gewählte Größen sind Setzungen. Softwaretests prüfen die gewählte Mechanik, keinen statistisch gesicherten Mehrertrag. |
 | E8.5 nur Long | H, bisher Long+Short, W0 | ungefähr +2,5 % statt −5,3 % | Long-only aktiv. Heutiger Short-Vergleich durch F02 nicht als unverschuldete Anlagebilanz interpretierbar. „Shorts generell ungeeignet“ folgt daraus nicht. |
@@ -146,6 +146,15 @@ high_exit aus, trail_stop wahlweise aus/an) erreichen +1,29/+1,28 Punkte; sie
 verfehlen die vorab strengere Kombinationsregel ≥2. Das ist eine begründete offene
 Hypothese, keine Freigabe.
 
+Der Vollständigkeitsabgleich ergänzte anschließend nach eigener Vorfestlegung das
+frühe E4-Gitter: acht Zeilen, sieben weitere eindeutige Konfigurationen, insgesamt
+**86 Handelskonfigurationen**. n=6 erhöht die Gesamtrendite auf 39,27 %, hat aber
+−3,39/+5,72 Punkte Hälftendifferenz. Keine neue Zeile besteht. k=2/3 ist durch die
+harte 5-%-Beinuntergrenze und die alternative 3-%-Schwelle logisch redundant.
+Siehe [STRUKTUR.md](STRUKTUR.md); Werte und Prüfung waren vor dem Lauf in 098a65d
+festgehalten. Dieser Zusatz ist keine nachträgliche Erweiterung des ursprünglichen
+79-Zeilen-Plans.
+
 Alle aktuellen Renditen, Risiken, Kosten, Orderzahlen, Kapitalbindungen, Hälften,
 Monatsproben und Ausführungsstress stehen ohne Auswahl in
 [KOMBINATIONEN.md](KOMBINATIONEN.md). Für genaue alte → neue Schalterzuordnung
@@ -160,7 +169,8 @@ explizite Nutzerentscheidungen und die hier reproduzierten Fehlerbeispiele.
 **Belastbar als bedingte historische Beschreibung:** Ein bestimmter Satz Signale
 liefert unter ausdrücklich genannten Buchungs-/Kostenannahmen einen bestimmten
 Portfoliopfad. Die unabhängige Kontrollrechnung stimmt nach F09-Korrektur für alle
-78 Long-Konfigurationen überein. Das bestätigt die Rechnung, nicht die damalige
+78 Long-Konfigurationen des Hauptgitters und sieben zusätzlichen Strukturvarianten
+überein. Das bestätigt die Rechnung, nicht die damalige
 Ausführbarkeit oder die Zukunftsrendite.
 
 **Nicht belegt:** Ein durch viele Entwicklungsrunden ausgewählter Schalter hat

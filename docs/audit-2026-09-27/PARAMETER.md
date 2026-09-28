@@ -1,6 +1,6 @@
 # Vollständiges Parameter- und Vergleichsverzeichnis
 
-Die Tabelle enthält alle 45 aktuellen `evaluate`-Parameter. **Code-Default ist nicht Live-Einstellung.** Maßgeblich für die konfigurierte Live-Engine ist `main` 89885adc. Am 28.09. wurde remote bis 97e375b geprüft: seit der eingefrorenen Basis änderten sich nur `state.json` und `signals.json`, nicht der Code oder die Konfiguration. Eine tatsächlich manuell ausgeführte Order folgt daraus nicht.
+Die Tabelle enthält alle 45 `evaluate`-Parameter des geprüften E44.5-Zweigs (44 auf main, verkauf_faktor nur im Zweig). **Code-Default ist nicht Live-Einstellung.** Maßgeblich für die konfigurierte Live-Engine ist `main` 89885adc. Am 28.09. wurde remote bis 930da500 geprüft: seit der eingefrorenen Basis änderten sich nur `state.json` und `signals.json`, nicht der Code oder die Konfiguration. Eine tatsächlich manuell ausgeführte Order folgt daraus nicht.
 
 Implementierung: [strategy_core.evaluate](../../engine/strategy_core.py#L1655), Durchreichung [main.EVAL_DEFAULTS/eval_params](../../engine/main.py#L331), historische Definitionen und Datenstände in [ENTSCHEIDUNGEN.md](ENTSCHEIDUNGEN.md). Die Test-Suite umfasst alle vorhandenen `test_*.py`; spezifische zusätzliche Gegenproben sind im Abschlussbericht genannt. Einzelgegenprobe = nur dieser Parameter gegen die gemeinsame heutige Basis. Abhängige Einstellungen werden zusätzlich gemeinsam mit ihrem Hauptschalter geprüft.
 
@@ -8,8 +8,8 @@ Implementierung: [strategy_core.evaluate](../../engine/strategy_core.py#L1655), 
 |---|---|---|---|---|
 | `bias_long` | Long-Einstiege erlauben; E8.5 | `true` | true | V034 |
 | `bias_short` | Short-Einstiege erlauben; E8.5/E10; F02 | `true` | false | V035 |
-| `pivot_n` | Bestätigungsweite links/rechts für Hochs und Tiefs; E4 | `5` | 5 | keine abweichende Einzelzeile |
-| `k_atr` | Mindestgröße eines Impulses relativ zur Schwankung; E4 | `2.0` | 2.0 | keine abweichende Einzelzeile |
+| `pivot_n` | Bestätigungsweite links/rechts für Hochs und Tiefs; E4 | `5` | 5 | S000, S002, S006 |
+| `k_atr` | Mindestgröße eines Impulses relativ zur Schwankung; E4 | `2.0` | 2.0 | S005 |
 | `flush_entry` | Einstieg bei Durchstich des GP und bestätigter Kapitulation; E8/E9 | `"core"` | "core" | V026, V036 |
 | `tp_ladder` | Zwischenverkäufe vor den Hauptzielen; E8 | `true` | true | V037 |
 | `strict_confirm` | Strengere Kombination von Flow-Bestätigungen; E8.5/E43.6 | `false` | false | V040 |
@@ -106,7 +106,7 @@ Weitere fest kodierte Mustergrenzen stehen in `classify_pattern` (u. a. starke P
 
 ## Jede bestehende Gitterzeile: Entfernung zur heutigen Basis
 
-Diese Tabelle rekonstruiert **alle 85 bestehenden Code-Konfigurationen**, unabhängig davon, ob ihr Name noch „LIVE“ enthält. Änderungen werden aus den effektiven Parametern berechnet. Mehrere Unterschiede sind keine Einzelgegenprobe. Der heutige 79-Zeilen-Audit übernimmt die alten Parameterwerte, setzt sie aber auf dieselbe Basis; er ist deshalb ausdrücklich keine Reproduktion des alten Laufs.
+Diese Tabelle rekonstruiert **alle 85 bestehenden Code-Konfigurationen**, unabhängig davon, ob ihr Name noch „LIVE“ enthält. Änderungen werden aus den effektiven Parametern berechnet. Mehrere Unterschiede sind keine Einzelgegenprobe. Der heutige 79-Zeilen-Audit übernimmt diese Parameterwerte auf gemeinsamer Basis. Separat ergänzt [STRUKTUR.md](STRUKTUR.md) das frühe E4-Gitter mit sieben weiteren eindeutigen Konfigurationen. Das sind ausdrücklich keine Reproduktionen der alten Läufe.
 
 | alte Gitterzeile | Anzahl Unterschiede | wirkliche Unterschiede zu heute |
 |---|---:|---|

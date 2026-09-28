@@ -26,9 +26,10 @@ unabhängiger Buchführung verdienen diese Lose zusammen 13,45 USD; das Gesamtpo
 liegt trotzdem 71,53 USD hinter E42 aus. Das ist kein Widerspruch: Rückkäufe verändern
 Cash, weitere Kaufgrößen, Teilverkäufe und den späteren Strategiepfad.
 
-Die gemeinsame Neuberechnung umfasst **79 vorab festgelegte Konfigurationen**, darunter
-fünf vollständige kleine Kombinationsgitter, sowie separat vorab dokumentierte
-Kapitalquoten. Keine neue Kombination erfüllt die strengere Regel von mindestens
+Die gemeinsame Neuberechnung umfasst **86 vorab festgelegte Handelskonfigurationen**:
+79 im Hauptgitter mit fünf vollständigen kleinen Kombinationsgittern sowie sieben
+zusätzliche Konfigurationen aus der separat vorgeplanten frühen Pivot-/ATR-Auswahl.
+Hinzu kommen separat vorab dokumentierte Kapitalquoten. Keine neue Kombination erfüllt die strengere Regel von mindestens
 zwei Prozentpunkten Vorteil in beiden Hälften. E42 zusammen mit abgeschaltetem
 Hoch-Verkauf ist eine interessante Wechselwirkung mit rund 1,29/1,28 Punkten Vorteil
 in den Hälften. Das ist ein Anlass für einen späteren sauberen Vorwärtstest, kein Go.
@@ -40,7 +41,7 @@ in den Hälften. Das ist ein Anlass für einen späteren sauberen Vorwärtstest,
 | Welche Entscheidungen wurden wann, womit und gegen welche Basis getroffen? | [ENTSCHEIDUNGEN.md](ENTSCHEIDUNGEN.md), [PARAMETER.md](PARAMETER.md), [HISTORISCHE-BELEGE.md](HISTORISCHE-BELEGE.md) |
 | Was sagt Furkan tatsächlich, und was ist Entwicklerinterpretation? | [FURKAN-QUELLEN.md](FURKAN-QUELLEN.md) |
 | Was geschah in jedem E42-Fall? | [E42.md](E42.md), [vollständiger Ereignis- und Losdatensatz](e42-faelle.json) |
-| Welche Kombinationen wurden wie gemessen? | [KOMBINATIONEN.md](KOMBINATIONEN.md), [KAPITAL.md](KAPITAL.md), [Vorfestlegung](PLAN.md) |
+| Welche Kombinationen wurden wie gemessen? | [KOMBINATIONEN.md](KOMBINATIONEN.md), [STRUKTUR.md](STRUKTUR.md), [KAPITAL.md](KAPITAL.md), [Vorfestlegung](PLAN.md) |
 | Was ist reproduziert, was korrigiert, wie wiederholen? | [REPRODUKTION.md](REPRODUKTION.md) |
 | Welche Daten sind tatsächlich belegt? | [DATEN.md](DATEN.md) |
 | Welche externe Evidenz passt zum Projekt? | [FORSCHUNG.md](FORSCHUNG.md) |
@@ -199,8 +200,9 @@ geprüfte Code-Parität, aber nicht die tatsächliche historische API-/Live-Pari
 Ein eigenes Losbuch wurde mit einer von Hand berechenbaren Kauf-/Verkaufsfolge
 geprüft. Eine absichtlich ausgelassene Gebühr wird erkannt. Bei allen 78 auswertbaren
 Long-Zeilen stimmt es nach F09-Korrektur mit der isoliert korrigierten Originalrechnung
-bis auf deren Cent-Rundung überein. V035 mit Short-Anteilen bleibt ausdrücklich
-außerhalb dieses Nachweises.
+bis auf deren Cent-Rundung überein. Die zusätzliche Strukturprüfung ergänzt sieben
+weitere eindeutige Long-Konfigurationen mit demselben erfolgreichen Abgleich.
+V035 mit Short-Anteilen bleibt ausdrücklich außerhalb dieses Nachweises.
 
 ## Gemeinsame Renditemessung und Entscheidungsregeln
 
@@ -238,6 +240,14 @@ Eine geringere Roh-Rendite macht eine Reserve deshalb nicht automatisch schlecht
 Buy-and-Hold im gleichen angeschnittenen Fenster liegt nach Einstiegsgebühr bei
 −9,57 %, mit wesentlich größerem Schluss-Drawdown. Dieser Vergleich validiert die
 Signalstrategie wegen ihrer Ausführungs- und Datengrenzen noch nicht.
+
+Die ergänzende vollständige frühe Pivot-Auswahl n=3/4/5/6 × ATR-Faktor 2/3
+bestätigt die Empfindlichkeit der Strategie: n=6 ergibt zwar 39,27 % Gesamtrendite,
+verliert aber gegenüber Live 3,39 Punkte in H1 und gewinnt 5,72 in H2. Keine
+Zusatzzeile erfüllt die Regel. Der ATR-Faktor ändert hier nichts: Ein mindestens
+5 % großes Bein erfüllt bereits die alternativ verlangten 3 %. Diese doppelte
+Grenze macht den ATR-Faktor in der aktuellen Impulsauswahl wirkungslos;
+gleiche Ergebnisse sind deshalb keine unabhängigen Bestätigungen.
 
 Die ursprüngliche E44.5-Regel ergibt im originalen Replay weiterhin „keine Variante
 bestanden“. Nach der gemeinsamen Korrektur ergibt sich weiterhin kein qualifizierter
@@ -305,7 +315,7 @@ Eingefrorenes main: `89885adc9fb6d2eae60f7a64f9452760a4e33cd9`.
 E44.4: `eeb4eea72e3ac2baa5b713c57337801b1b8bc291`.
 E44.5: `e2b0051199c2e0c38723cc3a23c00ea3bd320601`.
 Originaler Messcode `68e15ae` hat gegenüber diesem E44.5-Stand keine Engine-Differenz.
-Die später geprüften main-Änderungen bis `ce8e713fc75291b57154138a71aad319c01ad2d4`
+Die später geprüften main-Änderungen bis `930da50021cf8d6db6a2496e161a46040ecebbb6`
 betreffen nur automatisch aktualisierte `state.json` und `signals.json`.
 Die Abschlussabfrage steht getrennt in [github-abschluss.json](github-abschluss.json).
 

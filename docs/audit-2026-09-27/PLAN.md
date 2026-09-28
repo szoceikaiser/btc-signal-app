@@ -101,6 +101,7 @@ begrenzen Aussagen. Bei zu kurzer Historie bleibt ein echter Vorwärtstest offen
 | audit-20260927-03 | unabhängige Gegenproben und E42-Lose | erledigt, Befunde und Grenzen dokumentiert |
 | audit-20260927-04 | vorab festgelegte gemeinsame Gitter | erledigt, 79 Konfigurationen |
 | audit-20260928-05 | separat vorher festgelegte Kapitalquoten | erledigt, siehe ERGAENZUNGSPLAN.md |
+| audit-20260928-06 | separat vorher festgelegtes frühes E4-Gitter | erledigt, acht Zeilen / sieben zusätzliche Konfigurationen |
 
 Zwischenstände werden regelmäßig auf diesem Zweig gesichert. Kein alter Befund
 wird durch Überschreiben seiner Ursprungsdatei scheinbar korrigiert.
@@ -112,4 +113,6 @@ gelockert. G1 übernimmt die ursprünglichen Rollen (+1 Hauptzeile, +2 erklären
 Kombinationen); neue G2–G5-Kombinationen werden nach der vorab strengeren +2-Regel
 eingeordnet. Alle 79 Parameterzeilen waren vor dem Lauf in e7e92d3 festgeschrieben.
 Die ergänzende Kapitalquotenrechnung wurde separat in 9b916f0 vor ihrer Berechnung
-begründet. Detailergebnisse: BERICHT.md, ABDECKUNG.md und REPRODUKTION.md.
+begründet. Das frühe E4-Strukturgitter wurde separat in 098a65d vor der Berechnung
+festgeschrieben; es ergänzt sieben eindeutige Konfigurationen auf insgesamt 86.
+Detailergebnisse: BERICHT.md, ABDECKUNG.md und REPRODUKTION.md.

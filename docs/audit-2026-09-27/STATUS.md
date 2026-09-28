@@ -9,7 +9,8 @@ sie sind keine durch weitere Rechnungen ersetzbaren Arbeitsschritte.
 
 - 607 vorhandene Tests erfolgreich, zu Beginn und am Abschluss.
 - E44.5 inhaltlich exakt reproduziert; korrigierte Messungen getrennt dokumentiert.
-- 79 vorab festgelegte Konfigurationen, 78 gültige Long-Buchführungsvergleiche;
+- 79 vorab festgelegte Hauptkonfigurationen plus separat vorgeplante sieben weitere
+  Strukturkonfigurationen: zusammen 86, davon 85 gültige Long-Buchführungsvergleiche;
   Short-Marginfehler ausdrücklich ausgenommen. Zusätzlich Kapitalquoten 100/60/50 %.
 - Alle sechs privaten Transkripte vollständig geprüft; öffentliche Berichte enthalten
   Fundstellen und Zusammenfassungen, keine privaten Volltranskripte.
