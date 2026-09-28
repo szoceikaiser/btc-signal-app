@@ -1,0 +1,117 @@
+OK  Rueckeroberung: Stop kommt nie (Zaehler laeuft nicht)
+    -> --- 586 passed, 21 failed  | test_aus_flat_stop_des_teils_ist_voller_ausstieg, test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit, test_live_meldungen_stehen_je_kerze_vor_ihren_signalen
+OK  Rueckeroberung stoppt eine Kerze zu frueh
+    -> --- 591 passed, 16 failed  | test_aus_flat_stop_des_teils_ist_voller_ausstieg, test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit, test_live_meldungen_stehen_je_kerze_vor_ihren_signalen
+OK  Zurueckeroberte Marke wird nicht als geprueft gefuehrt
+    -> --- 599 passed, 8 failed  | test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit, test_zurueckeroberte_marke_ist_geprueft_naechster_bruch_sofort, test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze
+OK  Geprueft wird ignoriert (zweite Schonfrist)
+    -> --- 601 passed, 6 failed  | test_zurueckeroberte_marke_ist_geprueft_naechster_bruch_sofort, test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze, test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch
+OK  Harter Boden faellt weg
+    -> --- 602 passed, 5 failed  | test_hauptstop_nimmt_den_rueckkauf_teil_mit, test_nach_einem_stop_keine_beobachtung, test_no_flip_kein_nachkauf_in_der_kerze_des_teil_stops
+OK  Neue Marke erbt das Warten der alten
+    -> --- 606 passed, 1 failed  | test_rueckeroberung_neue_marke_zaehlt_neu
+OK  Rueckeroberung gilt nur fuer Long
+    -> --- 605 passed, 2 failed  | test_short_spiegelbildlich, test_rueckeroberung_gilt_fuer_short_spiegelbildlich
+OK  Puffer wird ignoriert
+    -> --- 606 passed, 1 failed  | test_stop_puffer_ignoriert_knappe_schluesse
+OK  Docht-Stop zum Schlusskurs (geschoent)
+    -> --- 605 passed, 2 failed  | test_docht_stoppt_schon_beim_kerzentief_zum_stopkurs, test_e41_docht_stoppt_frueher_als_live
+OK  Docht-Stop bei Luecke zum Stopkurs statt zum Eroeffnungskurs
+    -> --- 606 passed, 1 failed  | test_docht_stoppt_schon_beim_kerzentief_zum_stopkurs
+OK  E41 greift auch beim nachgezogenen Stop
+    -> --- 606 passed, 1 failed  | test_e41_laesst_den_nachgezogenen_stop_unberuehrt
+!! VORLAGE NICHT GEFUNDEN: Waehrend des Wartens wird nachgekauft
+OK  In der Kerze der Rueckeroberung wird nachgekauft
+    -> --- 606 passed, 1 failed  | test_e41_kein_nachkauf_waehrend_des_wartens_und_der_rueckeroberung
+OK  Nachkauf nach Rueckeroberung zum teuren Levelpreis
+    -> --- 606 passed, 1 failed  | test_e41_nachkauf_nach_rueckeroberung_zum_erreichbaren_preis
+OK  Preiskorrektur gilt auch ohne E41 (Live-Zahlen aendern sich)
+    -> --- 606 passed, 1 failed  | test_e41_preiskorrektur_aendert_ohne_e41_nichts
+OK  Stop-Grund aus E41 geht verloren
+    -> --- 605 passed, 2 failed  | test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch, test_e41_rueckeroberung_ueberlebt_den_stich_und_stoppt_beim_zweiten_bruch
+OK  Stop-Preis aus E41 geht verloren
+    -> --- 606 passed, 1 failed  | test_e41_docht_stoppt_frueher_als_live
+OK  Reset vergisst die Merker
+    -> --- 606 passed, 1 failed  | test_reset_raeumt_die_e41_merker_ab
+OK  Live-Engine speichert das Warten nicht
+    -> --- 603 passed, 4 failed  | test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze, test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch, test_e41_live_stop_kommt_spaeter_als_ohne_regel
+OK  Live-Engine liest das Warten nicht
+    -> --- 604 passed, 3 failed  | test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze, test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch, test_e41_warten_ueberlebt_den_neustart_der_live_engine
+OK  Live-Engine reicht die Schalter nicht durch
+    -> --- 597 passed, 10 failed  | test_panel_variante_entspricht_der_live_einstellung, test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit, test_live_meldungen_stehen_je_kerze_vor_ihren_signalen
+OK  Schalter fehlt in EVAL_KEYS
+    -> --- 601 passed, 6 failed  | test_e41_alter_stop_und_b3_unterscheiden_sich_in_genau_einem_punkt, test_e41_schalter_kommen_an, test_panel_variante_entspricht_der_live_einstellung
+OK  Panel bleibt beim alten Stop stehen
+    -> --- 606 passed, 1 failed  | test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter
+OK  Alter Stop misst in Wahrheit live
+    -> --- 603 passed, 4 failed  | test_e41_alter_stop_und_b3_unterscheiden_sich_in_genau_einem_punkt, test_alte_marken_grenze_im_bericht, test_auswertung_rollen_wechselwirkungen_und_bericht
+OK  B3 misst in Wahrheit B1
+    -> --- 603 passed, 4 failed  | test_e41_alter_stop_und_b3_unterscheiden_sich_in_genau_einem_punkt, test_alte_marken_grenze_im_bericht, test_auswertung_rollen_wechselwirkungen_und_bericht
+OK  Ohne-Flush-Zeile wandert nicht mit
+    -> --- 605 passed, 2 failed  | test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter, test_ohne_flush_zeile_unterscheidet_sich_nur_im_flush
+OK  Eine Ampel-Zeile wandert nicht mit
+    -> --- 605 passed, 2 failed  | test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter, test_ampel_zeilen_unterscheiden_sich_von_der_live_zeile_in_genau_einem_punkt
+OK  Eine Trendfilter-Zeile wandert nicht mit
+    -> --- 606 passed, 1 failed  | test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter
+OK  Eine Muster-5-Zeile wandert nicht mit
+    -> --- 605 passed, 2 failed  | test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter, test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live
+OK  Ausschalten: ohne Rauschgrenze
+    -> --- 606 passed, 1 failed  | test_e41_ausschalten_alter_stop_muss_in_beiden_haelften_klar_besser_sein
+OK  Ausschalten: eine Haelfte reicht
+    -> --- 606 passed, 1 failed  | test_e41_ausschalten_alter_stop_muss_in_beiden_haelften_klar_besser_sein
+OK  Ausschalten: Rueckgangsgrenze falsch herum
+    -> --- 600 passed, 7 failed  | test_e41_abschnitt_bleibt_an_und_sagt_warum, test_e41_abschnitt_meldet_ausschalten_bei_zu_tiefem_rueckgang, test_e41_abschnitt_nennt_die_ueberstimmung_nur_bei_ausschalten
+OK  Ausschalten: Rueckgang zaehlt nicht
+    -> --- 605 passed, 2 failed  | test_e41_abschnitt_meldet_ausschalten_bei_zu_tiefem_rueckgang, test_e41_ausschalten_bei_zu_tiefem_rueckgang
+OK  Ausschalten: 'greift nicht' wird zum Ausschaltgrund
+    -> --- 604 passed, 3 failed  | test_e41_ausschalten_alter_stop_muss_in_beiden_haelften_klar_besser_sein, test_e41_ausschalten_bei_zu_tiefem_rueckgang, test_e41_greift_nicht_ist_kein_ausschaltgrund
+OK  Bericht meldet AUSSCHALTEN nie
+    -> --- 604 passed, 3 failed  | test_e41_abschnitt_meldet_ausschalten_bei_klar_besserem_alten_stop, test_e41_abschnitt_meldet_ausschalten_bei_zu_tiefem_rueckgang, test_e41_abschnitt_nennt_die_ueberstimmung_nur_bei_ausschalten
+OK  Ueberstimmung vom 23.09.2026 wird verschwiegen
+    -> --- 606 passed, 1 failed  | test_e41_abschnitt_nennt_die_ueberstimmung_nur_bei_ausschalten
+OK  Ueberstimmung ersetzt die Ausschalt-Meldung
+    -> --- 604 passed, 3 failed  | test_e41_abschnitt_meldet_ausschalten_bei_klar_besserem_alten_stop, test_e41_abschnitt_meldet_ausschalten_bei_zu_tiefem_rueckgang, test_e41_abschnitt_nennt_die_ueberstimmung_nur_bei_ausschalten
+OK  Bericht verschweigt, dass die Regel nicht greift
+    -> --- 606 passed, 1 failed  | test_e41_abschnitt_hinweis_wenn_die_regel_nicht_greift
+OK  Liste: Wiedereinstieg des alten Stops fehlt
+    -> --- 606 passed, 1 failed  | test_e41_abschnitt_zeigt_was_aus_der_position_wurde_samt_wiedereinstieg
+OK  Liste: Wiedereinstieg auch nach dem Live-Ausstieg
+    -> --- 606 passed, 1 failed  | test_e41_abschnitt_wiedereinstieg_nach_dem_live_ausstieg_zaehlt_nicht
+OK  Liste: 'gleich gestoppt' fehlt
+    -> --- 606 passed, 1 failed  | test_e41_abschnitt_zeigt_was_aus_der_position_wurde_samt_wiedereinstieg
+OK  E41 misst gegen die beste Variante statt gegen live
+    -> --- 606 passed, 1 failed  | test_e41_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis
+!! VORLAGE NICHT GEFUNDEN: Live-Engine sendet die Wartemeldung nicht
+!! VORLAGE NICHT GEFUNDEN: Wartemeldung kommt erst nach dem Stop
+OK  Meldung erkennt das Warten nicht
+    -> --- 602 passed, 5 failed  | test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze, test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch, test_e41_live_wartemeldung_steht_vor_dem_stop_wenn_ein_lauf_nachholt
+OK  Meldung auch in der Stop-Kerze
+    -> --- 606 passed, 1 failed  | test_e41_meldung_schweigt_beim_stop_ohne_warten_und_ohne_position
+OK  Rueckeroberung wird nicht gemeldet
+    -> --- 604 passed, 3 failed  | test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze, test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch, test_e41_meldung_zurueckerobert_nur_fuer_genau_diese_marke
+OK  Rueckeroberung auch fuer eine andere Marke
+    -> --- 606 passed, 1 failed  | test_e41_meldung_zurueckerobert_nur_fuer_genau_diese_marke
+OK  Meldung zaehlt die Kerzen nicht herunter
+    -> --- 606 passed, 1 failed  | test_e41_meldung_zaehlt_bei_drei_kerzen_herunter
+OK  Harter Boden auf der falschen Seite
+    -> --- 606 passed, 1 failed  | test_e41_meldung_wartet
+OK  Plan verspricht die Schonfrist auch beim nachgezogenen Stop
+    -> --- 606 passed, 1 failed  | test_plan_nachgezogener_stop_bleibt_ohne_rueckeroberung
+OK  Plan kennt die gepruefte Marke nicht
+    -> --- 606 passed, 1 failed  | test_plan_fuehrt_die_rueckeroberung_nur_wenn_sie_an_ist
+OK  Nachricht: unter und ueber vertauscht
+    -> --- 603 passed, 4 failed  | test_e41_nachrichten_short_spiegelbildlich, test_marke_zurueckerobert_nachricht, test_stop_wartet_nachricht_sagt_was_passiert_und_was_als_naechstes
+OK  Nachricht: harter Boden auch bei einer Kerze
+    -> --- 606 passed, 1 failed  | test_stop_wartet_nennt_den_harten_boden_nur_wenn_er_noch_zaehlt
+OK  Nachricht: Nachkaufsperre wird verschwiegen
+    -> --- 606 passed, 1 failed  | test_stop_wartet_nachricht_sagt_was_passiert_und_was_als_naechstes
+OK  Plan-Nachricht: alte Stop-Zeile trotz Regel
+    -> --- 605 passed, 2 failed  | test_plan_stop_zeile_folgt_der_rueckeroberungs_regel, test_plan_warnt_wenn_die_engine_gerade_wartet
+OK  Plan-Nachricht: Warten wird nicht angezeigt
+    -> --- 606 passed, 1 failed  | test_plan_warnt_wenn_die_engine_gerade_wartet
+OK  Plan-Nachricht: gepruefte Marke wird nicht genannt
+    -> --- 606 passed, 1 failed  | test_plan_nennt_die_gepruefte_marke
+
+============================================================
+nach Wiederherstellung: --- 607 passed, 0 failed
+ungefangen: ['Waehrend des Wartens wird nachgekauft [Vorlage fehlt]', 'Live-Engine sendet die Wartemeldung nicht [Vorlage fehlt]', 'Wartemeldung kommt erst nach dem Stop [Vorlage fehlt]']

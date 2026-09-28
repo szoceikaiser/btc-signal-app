@@ -1,0 +1,79 @@
+V000 {} original 36.13 independent 36.1309 seconds 7.8
+V001 {'rest_halten': True} original 35.41 independent 36.7151 seconds 7.8
+V002 {'verkauf_faktor': 0.67} original 36.13 independent 36.1342 seconds 7.8
+V003 {'rest_halten': True, 'verkauf_faktor': 0.67} original 37.9 independent 37.8962 seconds 7.8
+V004 {'ausbruch_ruecktest': True} original 35.93 independent 35.4156 seconds 7.8
+V005 {'rest_halten': True, 'ausbruch_ruecktest': True} original 34.57 independent 34.5721 seconds 7.8
+V006 {'ausbruch_ruecktest': True, 'verkauf_faktor': 0.67} original 34.85 independent 34.8509 seconds 7.8
+V007 {'rest_halten': True, 'ausbruch_ruecktest': True, 'verkauf_faktor': 0.67} original 34.66 independent 34.6551 seconds 7.8
+V008 {'trail_stop': False, 'high_exit': 'off'} original 37.57 independent 37.5678 seconds 7.7
+V009 {'high_exit': 'off'} original 37.57 independent 37.5678 seconds 7.8
+V010 {'trail_stop': False} original 36.13 independent 36.1309 seconds 7.9
+V011 {'trail_stop': False, 'high_exit': 'off', 'ausbruch_ruecktest': True} original 39.14 independent 39.1419 seconds 7.8
+V012 {'high_exit': 'off', 'ausbruch_ruecktest': True} original 39.14 independent 39.1419 seconds 7.8
+V013 {'trail_stop': False, 'ausbruch_ruecktest': True} original 35.93 independent 35.4156 seconds 8.0
+V014 {'stop_rueckeroberung': 0, 'bein_richtung': 'auto', 'zonen_nachziehen': False} original 23.71 independent 23.713 seconds 7.8
+V015 {'stop_rueckeroberung': 0, 'bein_richtung': 'auto'} original 23.3 independent 23.3031 seconds 7.8
+V016 {'stop_rueckeroberung': 0, 'zonen_nachziehen': False} original 32.8 independent 32.2485 seconds 7.8
+V017 {'stop_rueckeroberung': 0} original 31.54 independent 31.5366 seconds 7.8
+V018 {'bein_richtung': 'auto', 'zonen_nachziehen': False} original 26.29 independent 26.286 seconds 7.8
+V019 {'bein_richtung': 'auto'} original 25.87 independent 25.8676 seconds 7.8
+V020 {'zonen_nachziehen': False} original 30.55 independent 30.554 seconds 7.8
+V021 {'flush_entry': 'off', 'buy_ladder': False, 'liq_entry': 'off'} original 20.14 independent 20.1308 seconds 7.7
+V022 {'flush_entry': 'off', 'buy_ladder': False} original 20.45 independent 20.1852 seconds 7.8
+V023 {'buy_ladder': False, 'liq_entry': 'off'} original 31.38 independent 31.3759 seconds 7.9
+V024 {'buy_ladder': False} original 35.78 independent 35.782 seconds 7.8
+V025 {'flush_entry': 'off', 'liq_entry': 'off'} original 26.84 independent 26.6431 seconds 7.8
+V026 {'flush_entry': 'off'} original 21.88 independent 21.8822 seconds 7.8
+V027 {'liq_entry': 'off'} original 37.5 independent 37.5037 seconds 7.8
+V028 {'muster_oi': 'btc'} original 36.13 independent 36.1309 seconds 7.8
+V029 {'muster_cvd': 'usd'} original 36.13 independent 36.1309 seconds 7.8
+V030 {'muster_cvd': 'usd', 'muster_oi': 'btc'} original 36.13 independent 36.1309 seconds 7.8
+V031 {'muster_oi': 'btc', 'ausbruch_ruecktest': True} original 36.12 independent 35.6036 seconds 7.9
+V032 {'muster_cvd': 'usd', 'ausbruch_ruecktest': True} original 35.93 independent 35.4156 seconds 7.9
+V033 {'muster_cvd': 'usd', 'muster_oi': 'btc', 'ausbruch_ruecktest': True} original 36.12 independent 35.6036 seconds 7.9
+V034 {'bias_long': False} original 0.0 independent 0.0 seconds 7.8
+V035 {'bias_short': True} original -7.14 independent SHORT-MARGIN-INVALID seconds 7.7
+V036 {'flush_entry': 't1'} original 31.56 independent 31.5611 seconds 7.8
+V037 {'tp_ladder': False} original 36.88 independent 36.8803 seconds 7.8
+V038 {'trend_filter': True} original 11.7 independent 11.6969 seconds 10.3
+V039 {'trend_ema': 50} original 36.13 independent 36.1309 seconds 7.8
+V040 {'strict_confirm': True} original 28.78 independent 28.7646 seconds 7.8
+V041 {'confluence': True} original 14.73 independent 14.6995 seconds 11.5
+V042 {'conditional_stop': True} original 31.72 independent 31.2373 seconds 7.8
+V043 {'release_stale_rest': True} original 35.38 independent 34.89 seconds 7.8
+V044 {'liq_exit': 'spike'} original 33.56 independent 33.5617 seconds 8.2
+V045 {'liq_exit': 'zone'} original 28.51 independent 28.5086 seconds 8.2
+V046 {'liq_exit': 'both'} original 27.63 independent 27.6325 seconds 7.8
+V047 {'high_exit': 'weak'} original 33.05 independent 33.0527 seconds 7.8
+V048 {'liq_entry': 'filter'} original 31.9 independent 31.8324 seconds 7.8
+V049 {'block_unhealthy': True} original 36.13 independent 36.1309 seconds 7.8
+V050 {'muster5_entry': True} original 35.99 independent 35.494 seconds 7.8
+V051 {'muster5_halten': 'leiter'} original 36.13 independent 36.1309 seconds 7.8
+V052 {'muster5_halten': 'alle'} original 36.13 independent 36.1309 seconds 7.8
+V053 {'stop_puffer_pct': 0.005} original 37.01 independent 37.0093 seconds 7.8
+V054 {'stop_rueckeroberung': 3} original 34.97 independent 34.4828 seconds 7.8
+V055 {'stop_auf_docht': True} original 33.7 independent 33.2415 seconds 7.8
+V056 {'confirm_t1': True} original 35.91 independent 35.9088 seconds 7.8
+V057 {'cooldown_h': 48} original 34.16 independent 34.1638 seconds 7.8
+V058 {'cooldown_h': 48.0} original 34.16 independent 34.1638 seconds 7.8
+V059 {'min_stop_pct': 0.0} original 20.49 independent 20.4886 seconds 7.8
+V060 {'no_flip': False} original 36.62 independent 36.6231 seconds 7.8
+V061 {'freeze_targets': True} original 30.32 independent 30.3168 seconds 7.8
+V062 {'min_bein_pct': 0.0} original 27.94 independent 27.9392 seconds 7.8
+V063 {'bein_wahl': 'groesstes'} original 15.43 independent 15.4308 seconds 7.8
+V064 {'be_im_plus': True} original 18.52 independent 18.5242 seconds 7.8
+V065 {'widerstand_exit': 'on'} original 29.12 independent 29.1242 seconds 7.8
+V066 {'neustart_mit_rest': False} original 36.83 independent 36.8259 seconds 7.8
+V067 {'zonen_1d': True} original 31.51 independent 31.5125 seconds 11.5
+V068 {'pivot_n_1d': 8} original 36.13 independent 36.1309 seconds 7.8
+V069 {'pivot_n_1d': 12} original 36.13 independent 36.1309 seconds 7.8
+V070 {'ampel_filter': 'klein'} original 31.77 independent 31.5391 seconds 8.0
+V071 {'ampel_filter': 'gross'} original 36.19 independent 36.1913 seconds 8.0
+V072 {'ampel_filter': 'immer'} original 25.75 independent 25.5352 seconds 7.8
+V073 {'high_exit_hist': 'live'} original 36.13 independent 36.1309 seconds 8.3
+V074 {'ruecktest_fenster': 6} original 36.13 independent 36.1309 seconds 7.8
+V075 {'zonen_1d': True, 'pivot_n_1d': 8} original 11.62 independent 11.6214 seconds 11.6
+V076 {'zonen_1d': True, 'pivot_n_1d': 12} original 16.58 independent 16.5762 seconds 11.7
+V077 {'trend_filter': True, 'trend_ema': 50} original 8.78 independent 8.7813 seconds 10.3
+V078 {'ausbruch_ruecktest': True, 'ruecktest_fenster': 6} original 36.5 independent 35.9889 seconds 7.8

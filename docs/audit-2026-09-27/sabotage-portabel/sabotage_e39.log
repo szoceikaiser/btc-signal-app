@@ -1,0 +1,54 @@
+OK  Muster 5 zaehlt wieder GEGEN den Long
+    -> --- 604 passed, 3 failed  | test_ampel_behaelt_die_uebrigen_muster_wie_bisher, test_ampel_zaehlt_muster_5_fuer_keine_seite, test_ampel_steht_in_den_nachrichten_mit_dem_schlusssatz
+OK  Muster 5 zaehlt FUER den Long
+    -> --- 603 passed, 4 failed  | test_ampel_behaelt_die_uebrigen_muster_wie_bisher, test_ampel_spiegelt_fuer_short_aber_nicht_die_struktur, test_ampel_zaehlt_muster_5_fuer_keine_seite
+OK  Alter, wertender Text kommt zurueck
+    -> --- 606 passed, 1 failed  | test_lage_muster_wird_uebersetzt
+OK  Name im Hinweis
+    -> --- 606 passed, 1 failed  | test_muster_hinweis_nur_wo_gemessen_und_ohne_namen
+OK  Hinweis behauptet einen offenen Zeitraum
+    -> --- 606 passed, 1 failed  | test_muster_hinweis_nennt_den_zeitraum_der_messung_fest
+OK  Hinweis verschweigt das 'nicht immer'
+    -> --- 605 passed, 2 failed  | test_lage_muster_wird_uebersetzt, test_muster_hinweis_nennt_den_zeitraum_der_messung_fest
+OK  Hinweis erscheint bei jedem Muster
+    -> --- 606 passed, 1 failed  | test_lage_ohne_muster_5_hat_keinen_hinweis
+OK  Lage-Abruf zeigt den Hinweis nicht
+    -> --- 606 passed, 1 failed  | test_lage_abruf_zeigt_muster_5_mit_hinweis_und_handytauglich
+OK  Plan/Vorschau zeigen den Hinweis nicht
+    -> --- 606 passed, 1 failed  | test_plan_und_vorschau_zeigen_muster_5_umbrochen_mit_hinweis
+OK  Plan-Umbruch vergisst den Vorsatz (Zeilen zu lang)
+    -> --- 606 passed, 1 failed  | test_plan_und_vorschau_zeigen_muster_5_umbrochen_mit_hinweis
+OK  Woerter werden wieder am Bindestrich getrennt
+    -> --- 606 passed, 1 failed  | test_lage_abruf_zeigt_muster_5_mit_hinweis_und_handytauglich
+OK  Zaehlt jeden Ausstieg, nicht nur Stops
+    -> --- 606 passed, 1 failed  | test_stop_nachlauf_zaehlt_nur_stops
+OK  Nachlauf zeigt nach hinten
+    -> --- 606 passed, 1 failed  | test_stop_nachlauf_misst_ab_dem_stop_preis_nach_vorn
+OK  Tiefster Punkt schliesst die Stop-Kerze ein
+    -> --- 606 passed, 1 failed  | test_stop_nachlauf_schaut_nicht_auf_die_stop_kerze_selbst
+OK  Tiefster Punkt ist in Wahrheit der hoechste
+    -> --- 605 passed, 2 failed  | test_stop_nachlauf_schlimmster_fall_ist_das_minimum_ueber_alle_stops, test_stop_nachlauf_tiefster_punkt_ist_das_minimum_bis_zum_horizont
+OK  Schlimmster Fall ist der Median
+    -> --- 606 passed, 1 failed  | test_stop_nachlauf_schlimmster_fall_ist_das_minimum_ueber_alle_stops
+OK  Nachgezogene Stops gelten als Invalidierung
+    -> --- 606 passed, 1 failed  | test_stop_nachlauf_trennt_invalidierung_und_nachgezogenen_stop
+OK  Stops ohne vollen Nachlauf zaehlen mit
+    -> --- 605 passed, 2 failed  | test_stop_nachlauf_alle_horizonte_teilen_dieselbe_stichprobe, test_stop_nachlauf_stops_am_fensterende_zaehlen_nicht_mit_aber_nicht_still
+OK  Stops ohne Nachlauf verschwinden still
+    -> --- 605 passed, 2 failed  | test_stop_nachlauf_alle_horizonte_teilen_dieselbe_stichprobe, test_stop_nachlauf_stops_am_fensterende_zaehlen_nicht_mit_aber_nicht_still
+OK  'wieder drueber' zaehlt auch Gleichstand
+    -> --- 606 passed, 1 failed  | test_stop_nachlauf_gleichstand_ist_nicht_wieder_drueber
+OK  Duenne Gruppen werden nicht markiert
+    -> --- 606 passed, 1 failed  | test_stop_abschnitt_markiert_duenne_gruppen
+OK  Warnung bei zu wenigen Stops faellt weg
+    -> --- 606 passed, 1 failed  | test_stop_abschnitt_warnt_bei_zu_wenigen_stops_insgesamt
+OK  Der Lesehinweis 'wieder drueber heisst nicht ...' verschwindet
+    -> --- 606 passed, 1 failed  | test_stop_abschnitt_sagt_was_wieder_drueber_nicht_heisst
+OK  Tiefster Punkt fehlt in der Zelle
+    -> --- 606 passed, 1 failed  | test_stop_abschnitt_zeigt_den_tiefsten_punkt_in_jeder_zelle
+OK  E39 misst die beste Variante statt der Live-Einstellung
+    -> --- 606 passed, 1 failed  | test_e39_misst_die_live_einstellung_und_nicht_die_beste_variante
+
+============================================================
+nach Wiederherstellung: --- 607 passed, 0 failed
+ungefangen: keine

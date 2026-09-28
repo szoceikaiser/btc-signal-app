@@ -1,0 +1,20 @@
+OK  Alt gewinnt statt neu
+    -> --- 605 passed, 2 failed  | test_backtest_mischt_das_archiv_wirklich_dazu, test_zusammen_neu_gewinnt_alt_bleibt
+OK  Alte Zeitpunkte gehen verloren
+    -> --- 604 passed, 3 failed  | test_backtest_mischt_das_archiv_wirklich_dazu, test_zusammen_mit_leeren_karten, test_zusammen_neu_gewinnt_alt_bleibt
+OK  Laufende Kerze wird mitgespeichert
+    -> --- 606 passed, 1 failed  | test_nur_abgeschlossene_kerzen
+OK  Liquidationen kommen als Liste statt Tupel zurueck
+    -> --- 606 passed, 1 failed  | test_speichern_und_laden_behaelt_liquidations_paare
+OK  Kaputte Datei bricht ab
+    -> --- 606 passed, 1 failed  | test_fehlende_oder_kaputte_datei_ist_kein_fehler
+OK  Backtest mischt das Archiv nicht
+    -> --- 606 passed, 1 failed  | test_backtest_mischt_das_archiv_wirklich_dazu
+OK  Backtest ruft das Mischen im Hauptlauf nicht auf
+    -> --- 606 passed, 1 failed  | test_backtest_ruft_archiv_mischen_im_hauptlauf_auf
+OK  Zaehlung 'nur im Archiv' falsch
+    -> --- 606 passed, 1 failed  | test_backtest_mischt_das_archiv_wirklich_dazu
+
+============================================================
+nach Wiederherstellung: --- 607 passed, 0 failed
+ungefangen: keine

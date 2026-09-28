@@ -1,0 +1,52 @@
+OK  STOPLOSS zaehlt als Teilverkauf (Position bleibt im Fall liegen)
+    -> --- 604 passed, 3 failed  | test_kauf_rueckkauf_und_stops_bleiben_unskaliert, test_no_flip_kennt_nur_aufbau_und_teilverkauf, test_stop_zweige_fragen_den_teilverkauf_waechter_gar_nicht_erst
+OK  Schalter wirkt auch im Default 'off'
+    -> --- 603 passed, 4 failed  | test_m5_szenario_handelt_ueberhaupt_und_zwar_bei_muster_5, test_muster5_halten_ist_im_default_aus_immer_wirkungslos, test_muster5_halten_leiter_entfernt_den_zwischenverkauf_nicht_das_ziel
+OK  Schalter greift bei JEDEM Muster
+    -> --- 606 passed, 1 failed  | test_muster5_halten_greift_nur_bei_muster_5
+OK  Schalter greift auf dem falschen Muster (4 statt 5)
+    -> --- 598 passed, 9 failed  | test_muster5_halten_alle_entfernt_auch_das_ziel, test_muster5_halten_alle_haelt_auch_die_ziele, test_muster5_halten_alle_verhindert_den_stop_nachzug_BEKANNTE_FOLGE
+OK  Schalter greift auch beim Short
+    -> --- 606 passed, 1 failed  | test_muster5_halten_greift_nicht_beim_short
+OK  'leiter' haelt auch die geplanten Ziele zurueck
+    -> --- 604 passed, 3 failed  | test_muster5_halten_leiter_entfernt_den_zwischenverkauf_nicht_das_ziel, test_muster5_halten_leiter_laesst_die_geplanten_ziele_durch, test_muster5_halten_unterscheidet_leiter_und_alle_wirklich
+OK  'alle' laesst die Ziele durch (wie 'leiter')
+    -> --- 603 passed, 4 failed  | test_muster5_halten_alle_entfernt_auch_das_ziel, test_muster5_halten_alle_haelt_auch_die_ziele, test_muster5_halten_alle_verhindert_den_stop_nachzug_BEKANNTE_FOLGE
+OK  Waechter ruft die Regel gar nicht auf
+    -> --- 603 passed, 4 failed  | test_muster5_halten_alle_entfernt_auch_das_ziel, test_muster5_halten_alle_verhindert_den_stop_nachzug_BEKANNTE_FOLGE, test_muster5_halten_leiter_entfernt_den_zwischenverkauf_nicht_das_ziel
+OK  no_flip-Pruefung faellt beim Umbau heraus
+    -> --- 606 passed, 1 failed  | test_no_flip_sperrt_teilverkauf_nach_nachkauf_in_derselben_kerze
+OK  Das 1.0-Ziel gilt nicht mehr als Ziel
+    -> --- 605 passed, 2 failed  | test_muster5_halten_behandelt_beide_ziele_gleich, test_muster5_halten_leiter_entfernt_den_zwischenverkauf_nicht_das_ziel
+OK  Das 1.618-Ziel gilt nicht mehr als Ziel
+    -> --- 606 passed, 1 failed  | test_muster5_halten_behandelt_beide_ziele_gleich
+OK  Die Leiter wird faelschlich als Ziel gefuehrt
+    -> --- 605 passed, 2 failed  | test_muster5_halten_behandelt_beide_ziele_gleich, test_muster5_halten_leiter_entfernt_den_zwischenverkauf_nicht_das_ziel
+OK  Der Teilverkauf am letzten Hoch gilt als Ziel
+    -> --- 605 passed, 2 failed  | test_muster5_halten_behandelt_beide_ziele_gleich, test_muster5_halten_leiter_entfernt_den_zwischenverkauf_nicht_das_ziel
+OK  Muster 5 bestaetigt Kaeufe auch im Default 'aus'
+    -> --- 599 passed, 8 failed  | test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch, test_e41_live_stop_kommt_spaeter_als_ohne_regel, test_e41_live_vorprobe_ohne_regel_kommt_der_knappe_stop
+OK  Muster 4 faellt aus der starken Bestaetigung heraus
+    -> --- 606 passed, 1 failed  | test_muster5_entry_macht_muster_5_zur_starken_bestaetigung
+OK  muster5_entry steht nicht in EVAL_KEYS (Gitterzeile = Kopie der Basis)
+    -> --- 601 passed, 6 failed  | test_e38_schalter_stehen_in_eval_keys_und_kommen_so_ueberhaupt_an, test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live, test_panel_variante_entspricht_der_live_einstellung
+OK  muster5_halten steht nicht in EVAL_KEYS
+    -> --- 601 passed, 6 failed  | test_e38_schalter_stehen_in_eval_keys_und_kommen_so_ueberhaupt_an, test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live, test_panel_variante_entspricht_der_live_einstellung
+OK  Live-Engine reicht die Schalter nicht durch
+    -> --- 605 passed, 2 failed  | test_panel_variante_entspricht_der_live_einstellung, test_alle_evaluate_parameter_werden_durchgereicht
+OK  Live-Engine bekommt einen anderen Vorgabewert
+    -> --- 601 passed, 6 failed  | test_panel_variante_entspricht_der_live_einstellung, test_alle_evaluate_parameter_werden_durchgereicht, test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch
+OK  Eine E38-Zeile weicht in einem zweiten Punkt ab
+    -> --- 606 passed, 1 failed  | test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live
+OK  Beide Halten-Zeilen messen dasselbe
+    -> --- 606 passed, 1 failed  | test_e38_die_beiden_halten_zeilen_messen_wirklich_verschiedenes
+OK  Die Gegenprobe (Bremse) verschwindet aus dem Gitter
+    -> --- 604 passed, 3 failed  | test_e38_gegenprobe_bremse_ist_im_gitter, test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live, test_gegenprobe_zeile_steht_im_gitter_und_heisst_wie_erwartet
+OK  Episoden-Gegenprobe nimmt doch alle Kerzen
+    -> --- 606 passed, 1 failed  | test_gegenprobe_zaehlt_nur_episodenbeginne
+OK  Gegenprobe zeigt die Kerzen- statt der Episodenzahl
+    -> --- 606 passed, 1 failed  | test_gegenprobe_tabelle_nennt_die_episodenzahl_nicht_die_kerzenzahl
+
+============================================================
+nach Wiederherstellung: --- 607 passed, 0 failed
+ungefangen: keine

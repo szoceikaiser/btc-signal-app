@@ -1,0 +1,61 @@
+OK  Test schneidet wieder EINE vorgerechnete Summe aus
+    -> --- 605 passed, 2 failed  | test_e433_mehr_historie_aendert_muster2_nicht_bei_usd, test_e435_befund_a2_mehr_historie_dreht_muster2
+OK  Szenario ohne Pump-Phase
+    -> --- 601 passed, 6 failed  | test_e433_vorprobe_im_bericht_zaehlt_umklassifizierte_kerzen, test_e433_vorprobe_zeigt_live_gegen_backtest, test_e433_mehr_historie_aendert_muster2_nicht_bei_usd
+OK  Szenario mit zu schwachem OI-Anstieg (wie der alte Test)
+    -> --- 601 passed, 6 failed  | test_e433_vorprobe_im_bericht_zaehlt_umklassifizierte_kerzen, test_e433_vorprobe_zeigt_live_gegen_backtest, test_e433_mehr_historie_aendert_muster2_nicht_bei_usd
+OK  _slope ohne Division (alt rechnet nicht mehr wie bisher)
+    -> --- 599 passed, 8 failed  | test_e433_vorprobe_zeigt_live_gegen_backtest, test_e434_vorprobe_zaehlt_a3_je_muster, test_e433_mehr_historie_aendert_muster2_nicht_bei_usd
+OK  Muster 2 unerreichbar (OI-Schwelle zehnfach)
+    -> --- 591 passed, 16 failed  | test_e433_vorprobe_im_bericht_zaehlt_umklassifizierte_kerzen, test_e433_vorprobe_zeigt_live_gegen_backtest, test_e434_vorprobe_zaehlt_a3_je_muster
+OK  usd rechnet das Futures-Delta nicht in Dollar um (bleibt BTC)
+    -> --- 602 passed, 5 failed  | test_e433_fallende_futures_sind_kein_pump, test_e433_mehr_historie_aendert_muster2_nicht_bei_usd, test_e433_ohne_kerze_zum_flowpunkt_kein_pump
+OK  usd nimmt einen Kurs fuer das ganze Fenster
+    -> --- 605 passed, 2 failed  | test_e433_usd_erkennt_den_pump_in_dollar, test_e433_usd_rechnet_jedes_delta_mit_dem_kurs_seiner_kerze
+OK  usd summiert den kumulierten Stand statt des Deltas
+    -> --- 602 passed, 5 failed  | test_e433_fallende_futures_sind_kein_pump, test_e433_ohne_kerze_zum_flowpunkt_kein_pump, test_e433_usd_erkennt_den_pump_in_dollar
+OK  usd nimmt beim Spot doch wieder den Stand am Fensteranfang
+    -> --- 605 passed, 2 failed  | test_e433_usd_erkennt_den_pump_in_dollar, test_e433_vorprobe_demo_slope_alt_verschieden_usd_gleich
+OK  fehlende Kerze wird mit Ersatzkurs gerechnet
+    -> --- 606 passed, 1 failed  | test_e433_ohne_kerze_zum_flowpunkt_kein_pump
+OK  Vergleich falsch herum
+    -> --- 600 passed, 7 failed  | test_e433_vorprobe_im_bericht_zaehlt_umklassifizierte_kerzen, test_e433_fallende_futures_sind_kein_pump, test_e433_mehr_historie_aendert_muster2_nicht_bei_usd
+OK  Faktor 3 vergessen
+    -> --- 606 passed, 1 failed  | test_e433_usd_erkennt_den_pump_in_dollar
+OK  'Futures steigt' fehlt bei usd
+    -> --- 606 passed, 1 failed  | test_e433_fallende_futures_sind_kein_pump
+OK  usd faellt still auf die alte Rechnung zurueck
+    -> --- 600 passed, 7 failed  | test_e433_vorprobe_im_bericht_zaehlt_umklassifizierte_kerzen, test_e433_vorprobe_zeigt_live_gegen_backtest, test_e433_mehr_historie_aendert_muster2_nicht_bei_usd
+OK  evaluate reicht muster_cvd nicht an classify_pattern weiter
+    -> --- 605 passed, 2 failed  | test_e433_mehr_historie_aendert_muster2_nicht_bei_usd, test_e433_muster_cvd_kommt_in_evaluate_an
+!! VORLAGE NICHT GEFUNDEN: muster_cvd fehlt in EVAL_KEYS (Zeile laeuft still mit alt)
+OK  Gitterzeile misst nichts (alt statt usd)
+    -> --- 606 passed, 1 failed  | test_e433_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live
+OK  Gitterzeile mit zweitem Unterschied (alter Stop)
+    -> --- 605 passed, 2 failed  | test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter, test_e433_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live
+OK  usd still als Vorgabe (live eingeschaltet ohne Messung)
+    -> --- 604 passed, 3 failed  | test_alle_evaluate_parameter_werden_durchgereicht, test_e433_anzeige_rechnet_muster2_wie_der_handel, test_leere_config_ergibt_bisheriges_verhalten
+OK  Anzeige rechnet Muster 2 anders als der Handel
+    -> --- 605 passed, 2 failed  | test_e433_anzeige_rechnet_muster2_wie_der_handel, test_e434_anzeige_rechnet_das_oi_wie_der_handel
+OK  config.json schaltet usd ohne Go ein
+    -> --- 605 passed, 2 failed  | test_e433_live_konfig_steht_auf_alt, test_panel_variante_entspricht_der_live_einstellung
+OK  Regel: eine Haelfte genuegt
+    -> --- 605 passed, 2 failed  | test_e433_abschnitt_meldet_urteil_und_kein_urteil_ohne_umklassifizierung, test_e433_einschalten_nur_wenn_beide_haelften_klar_besser
+OK  Regel: 'besser' ohne Rauschgrenze
+    -> --- 606 passed, 1 failed  | test_e433_einschalten_nur_wenn_beide_haelften_klar_besser
+OK  Regel: Rueckgang falsch herum
+    -> --- 604 passed, 3 failed  | test_e433_abschnitt_meldet_urteil_und_kein_urteil_ohne_umklassifizierung, test_e433_einschalten_nicht_bei_zu_tiefem_rueckgang, test_e433_einschalten_nur_wenn_beide_haelften_klar_besser
+OK  Regel: Rueckgang zaehlt nicht
+    -> --- 606 passed, 1 failed  | test_e433_einschalten_nicht_bei_zu_tiefem_rueckgang
+OK  Vorprobe: Live-Stand wird nicht abgezogen
+    -> --- 606 passed, 1 failed  | test_e433_vorprobe_zeigt_live_gegen_backtest
+OK  Vorprobe: nicht nachstellbare Kerzen zaehlen als live gleich
+    -> --- 606 passed, 1 failed  | test_e433_vorprobe_zaehlt_nur_nachstellbare_kerzen_fuer_live
+OK  Bericht urteilt auch ohne umklassifizierte Kerze
+    -> --- 606 passed, 1 failed  | test_e433_abschnitt_meldet_urteil_und_kein_urteil_ohne_umklassifizierung
+OK  Bericht-Abschnitt nicht verdrahtet
+    -> --- 606 passed, 1 failed  | test_e433_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis
+
+============================================================
+nach Wiederherstellung: --- 607 passed, 0 failed
+ungefangen: ['muster_cvd fehlt in EVAL_KEYS (Zeile laeuft still mit alt) [Vorlage fehlt]']

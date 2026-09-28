@@ -66,6 +66,13 @@
     "next_signals": [],
     "state": "TP1"
   },
+  "F10_plan_stop": {
+    "engine_stop_before_drop": 115,
+    "telegram_plan_stop": {
+      "preis": 100,
+      "grund": "Einstand (nachgezogen)"
+    }
+  },
   "F04_entry_average": {
     "production": 188.53333333333333,
     "capital_weighted_cost_per_coin": 186.10966057441252,
@@ -81,6 +88,9 @@
     "field": "widerstand_exits",
     "before": 1,
     "after": 0
+  },
+  "F11_config_types": {
+    "string_false": true
   },
   "F06_cvd_offset": {
     "original": "DERIVATE_PUMP",

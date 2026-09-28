@@ -1,0 +1,56 @@
+OK  Ausbruch schon beim Docht
+    -> --- 606 passed, 1 failed  | test_ausbruch_nur_bei_schluss_ueber_der_marke_nicht_beim_docht
+OK  Schluss unter der Marke zaehlt doch als Ruecktest
+    -> --- 603 passed, 4 failed  | test_nach_gescheitertem_ausbruch_braucht_es_einen_neuen, test_ruecktest_schritt_short_spiegelbildlich, test_ruecktest_zone_und_docht_regel
+OK  Zone ohne die 0,5 %
+    -> --- 581 passed, 26 failed  | test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position, test_aus_flat_ohne_passendes_bein_kein_rueckkauf, test_aus_flat_stop_des_teils_ist_voller_ausstieg
+OK  Fenster eine Kerze zu lang
+    -> --- 604 passed, 3 failed  | test_die_ausbruchskerze_selbst_ist_nie_der_ruecktest, test_ruecktest_fenster_zaehlt_zwoelf_kerzen, test_ruecktest_nach_dem_fenster_kauft_nicht
+OK  Fenster eine Kerze zu kurz
+    -> --- 605 passed, 2 failed  | test_ruecktest_fenster_zaehlt_zwoelf_kerzen, test_ruecktest_nach_dem_fenster_kauft_nicht
+OK  Short-Seite rechnet wie Long
+    -> --- 605 passed, 2 failed  | test_ruecktest_schritt_short_spiegelbildlich, test_short_spiegelbildlich
+OK  Ausbruchskerze zaehlt als Ruecktest
+    -> --- 600 passed, 7 failed  | test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position, test_aus_flat_ohne_passendes_bein_kein_rueckkauf, test_aus_flat_stop_des_teils_ist_voller_ausstieg
+OK  kerzen_seit zaehlt die Ausbruchskerze mit
+    -> --- 604 passed, 3 failed  | test_die_ausbruchskerze_selbst_ist_nie_der_ruecktest, test_kerzen_seit_zaehlt_in_der_liste, test_ruecktest_nach_dem_fenster_kauft_nicht
+OK  Verkaufskerze wird schon als Fenster bewertet
+    -> --- 606 passed, 1 failed  | test_die_verkaufskerze_ist_nie_der_ruecktest_auch_ohne_no_flip
+OK  Gescheiterter Ausbruch bleibt stehen
+    -> --- 606 passed, 1 failed  | test_nach_gescheitertem_ausbruch_braucht_es_einen_neuen
+OK  Stop beendet die Beobachtung nicht
+    -> --- 606 passed, 1 failed  | test_nach_einem_stop_keine_beobachtung
+OK  Kein Rest-Verkauf startet eine Beobachtung
+    -> --- 603 passed, 4 failed  | test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position, test_aus_flat_ohne_passendes_bein_kein_rueckkauf, test_aus_flat_stop_des_teils_ist_voller_ausstieg
+OK  Beobachtung auch auf eine schon gekaufte Marke
+    -> --- 606 passed, 1 failed  | test_keine_beobachtung_einer_marke_auf_die_schon_zurueckgekauft_wurde
+OK  Kaufen trotz voller Investition
+    -> --- 606 passed, 1 failed  | test_nicht_wenn_schon_voll_investiert
+OK  Zweiter Rueckkauf auf dieselbe Marke
+    -> --- 606 passed, 1 failed  | test_kein_zweiter_rueckkauf_auf_dieselbe_marke
+OK  Aus FLAT ohne passendes Bein gekauft
+    -> --- 606 passed, 1 failed  | test_aus_flat_ohne_passendes_bein_kein_rueckkauf
+OK  Rueckkauf zum Markenpreis statt zum Schluss
+    -> --- 606 passed, 1 failed  | test_rueckkauf_nach_teilverkauf_am_hoch_ausbruch_und_ruecktest
+OK  Aus FLAT: Ziele nicht vom Ruecktest-Extrem
+    -> --- 605 passed, 2 failed  | test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position, test_aus_flat_stop_des_teils_ist_voller_ausstieg
+OK  Beobachtung laeuft nach dem Rueckkauf weiter
+    -> --- 606 passed, 1 failed  | test_rueckkauf_nach_teilverkauf_am_hoch_ausbruch_und_ruecktest
+OK  Rueckkauf zaehlt in den Einstand (Stop der Position wandert)
+    -> --- 603 passed, 4 failed  | test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position, test_aus_flat_stop_des_teils_ist_voller_ausstieg, test_rueckkauf_aendert_weder_einstand_noch_hauptstop
+OK  Bestand wird nicht fortgeschrieben
+    -> --- 603 passed, 4 failed  | test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position, test_rueckkauf_aendert_weder_einstand_noch_hauptstop, test_bruchteile_ueberleben_state_json
+OK  no_flip sieht den Stop des Teils nicht
+    -> --- 606 passed, 1 failed  | test_no_flip_kein_nachkauf_in_der_kerze_des_teil_stops
+OK  Stop des Teils verkauft die ganze Position
+    -> --- 598 passed, 9 failed  | test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit, test_live_meldungen_stehen_je_kerze_vor_ihren_signalen, test_no_flip_kein_nachkauf_in_der_kerze_des_teil_stops
+OK  Stop des Teils ohne Rueckeroberungs-Regel
+    -> --- 601 passed, 6 failed  | test_aus_flat_stop_des_teils_ist_voller_ausstieg, test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit, test_live_meldungen_stehen_je_kerze_vor_ihren_signalen
+OK  Merker des Teils werden nicht zurueckgeschrieben
+    -> --- 599 passed, 8 failed  | test_aus_flat_stop_des_teils_ist_voller_ausstieg, test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit, test_live_meldungen_stehen_je_kerze_vor_ihren_signalen
+OK  Aus FLAT: Stop des Teils laesst eine leere Position stehen
+    -> --- 606 passed, 1 failed  | test_aus_flat_stop_des_teils_ist_voller_ausstieg
+OK  Reset vergisst den Rueckkauf-Teil
+    -> --- 606 passed, 1 failed  | test_hauptstop_nimmt_den_rueckkauf_teil_mit
+OK  Live-Engine speichert das Warten des Teils nicht
+    -> --- 603 passed, 4 failed  | test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat, test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit, test_zustand_ueberlebt_den_neustart_der_live_engine

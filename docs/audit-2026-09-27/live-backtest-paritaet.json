@@ -1,0 +1,27 @@
+{
+  "main_default_parity": "PASS: exact signals from frozen main and E44.5 default",
+  "cases": {
+    "restart_every_bar": {
+      "pattern_bars_changed": 0,
+      "signals": 244,
+      "added": [],
+      "removed": [],
+      "return_pct": 36.130924832553625
+    },
+    "rolling_1300": {
+      "pattern_bars_changed": 0,
+      "signals": 244,
+      "added": [],
+      "removed": [],
+      "return_pct": 36.130924832553625
+    },
+    "rolling_cvd_90d": {
+      "pattern_bars_changed": 1,
+      "signals": 244,
+      "added": [],
+      "removed": [],
+      "return_pct": 36.130924832553625
+    }
+  },
+  "description": "Only frozen derived input data. Rolling emulation is not a reproduction of actual live API availability, revisions or past configuration changes."
+}

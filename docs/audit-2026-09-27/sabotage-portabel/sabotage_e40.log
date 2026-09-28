@@ -1,0 +1,58 @@
+OK  bitview um einen Tag verschoben
+    -> --- 605 passed, 2 failed  | test_sth_bitview_beachtet_den_startindex, test_sth_bitview_index_null_ist_der_1_januar_2009
+OK  bitview ignoriert den Startindex
+    -> --- 605 passed, 2 failed  | test_sth_bitview_beachtet_den_startindex, test_sth_kostenbasis_nimmt_den_juengsten_wert
+OK  bitview behaelt Nullwerte
+    -> --- 606 passed, 1 failed  | test_sth_bitview_index_null_ist_der_1_januar_2009
+OK  bitcoin-data: Text wird nicht in Zahlen gewandelt
+    -> --- 605 passed, 2 failed  | test_sth_bgeometrics_wandelt_text_in_zahlen, test_sth_kostenbasis_faellt_auf_die_zweite_quelle_zurueck
+OK  bitcoin-data wird zweimal gefragt (Tageslimit)
+    -> --- 606 passed, 1 failed  | test_sth_bgeometrics_wird_genau_einmal_gefragt
+OK  STH des selben Tages (kennt die Zukunft)
+    -> --- 606 passed, 1 failed  | test_sth_je_kerze_nimmt_den_wert_des_vortags
+OK  Abgleich waehlt den schlechtesten Versatz
+    -> --- 605 passed, 2 failed  | test_sth_abgleich_erkennt_einen_verschobenen_tag, test_sth_abgleich_findet_versatz_null_bei_gleichen_reihen
+OK  Abgleich verschiebt in die falsche Richtung
+    -> --- 606 passed, 1 failed  | test_sth_abgleich_erkennt_einen_verschobenen_tag
+OK  Vorfrage: unter und ueber vertauscht
+    -> --- 606 passed, 1 failed  | test_sth_vorfrage_trennt_unter_und_ueber
+OK  Vorfrage: Einstiegs-Nachlauf zeigt nach hinten
+    -> --- 606 passed, 1 failed  | test_sth_vorfrage_misst_einstiege_ab_einstiegspreis_nach_vorn
+OK  Vorfrage: Teilverkaeufe zaehlen als Einstieg
+    -> --- 606 passed, 1 failed  | test_sth_vorfrage_misst_einstiege_ab_einstiegspreis_nach_vorn
+OK  Vorfrage: Wechsel werden nicht gezaehlt
+    -> --- 606 passed, 1 failed  | test_sth_vorfrage_trennt_unter_und_ueber
+OK  Vorfrage: Einstiege ohne Nachlauf zaehlen mit
+    -> --- 606 passed, 1 failed  | test_sth_vorfrage_einstiege_am_fensterende_zaehlen_nicht_still_mit
+OK  Zweifelhafte Zuordnung wird nicht gemeldet
+    -> --- 606 passed, 1 failed  | test_sth_abschnitt_warnt_bei_zweifelhafter_zuordnung
+OK  Duenne Gruppen werden nicht gemeldet
+    -> --- 606 passed, 1 failed  | test_sth_abschnitt_nennt_vortag_und_warnt_bei_duennen_gruppen
+OK  Hinweis 'Nachlauf ist nicht Ertrag' verschwindet
+    -> --- 606 passed, 1 failed  | test_sth_abschnitt_nennt_vortag_und_warnt_bei_duennen_gruppen
+OK  Vorfrage misst die beste Variante statt live
+    -> --- 606 passed, 1 failed  | test_sth_vorfrage_nutzt_die_live_einstellung
+OK  Abruf: nimmt den AELTESTEN statt den juengsten Wert
+    -> --- 605 passed, 2 failed  | test_sth_kostenbasis_faellt_auf_die_zweite_quelle_zurueck, test_sth_kostenbasis_nimmt_den_juengsten_wert
+OK  Abruf: keine zweite Quelle
+    -> --- 606 passed, 1 failed  | test_sth_kostenbasis_faellt_auf_die_zweite_quelle_zurueck
+OK  Abruf: Ausfall der ersten Quelle reisst alles mit
+    -> --- 606 passed, 1 failed  | test_sth_kostenbasis_faellt_auf_die_zweite_quelle_zurueck
+OK  Lage-Abruf: STH-Fehler bricht den ganzen Abruf ab
+    -> --- 606 passed, 1 failed  | test_lage_abruf_ueberlebt_einen_sth_fehler
+OK  Lage-Abruf: STH wird nie eingetragen
+    -> --- 606 passed, 1 failed  | test_lage_abruf_uebernimmt_die_sth_kostenbasis
+OK  Lage-Abruf: holt die STH im Normalfall nicht
+    -> --- 606 passed, 1 failed  | test_lage_abruf_holt_die_sth_im_normalfall_selbst
+OK  Nachricht: STH-Zeile fehlt
+    -> --- 606 passed, 1 failed  | test_lage_abruf_zeigt_die_sth_kostenbasis_mit_abstand_und_stand
+OK  Nachricht: darueber und darunter vertauscht
+    -> --- 606 passed, 1 failed  | test_lage_abruf_zeigt_die_sth_kostenbasis_mit_abstand_und_stand
+OK  Nachricht: Abstand gegen den Kurs statt gegen die Marke
+    -> --- 606 passed, 1 failed  | test_lage_abruf_zeigt_die_sth_kostenbasis_mit_abstand_und_stand
+OK  Nachricht: leere STH zeigt eine Zeile
+    -> --- 606 passed, 1 failed  | test_lage_abruf_ohne_sth_hat_keine_leere_zeile_dafuer
+
+============================================================
+nach Wiederherstellung: --- 607 passed, 0 failed
+ungefangen: keine

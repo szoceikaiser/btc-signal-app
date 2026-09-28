@@ -1,0 +1,122 @@
+{
+  "D01_inputs": {
+    "candles": 2481,
+    "flow": 2481,
+    "gaps": [],
+    "invalid_ohlc": [],
+    "aligned": true,
+    "duplicates": 0,
+    "unfinished": [
+      {
+        "ts": 1790496000000,
+        "open": 84790.99,
+        "high": 84864.01,
+        "low": 84732.07,
+        "close": 84810.02
+      }
+    ],
+    "recorded_end": 1790497748840,
+    "funding_zeros": 0,
+    "nonfinite": 0
+  },
+  "F01_dd_sale_before_low": {
+    "production": 0.0,
+    "expected": -50.0,
+    "signals": [
+      {
+        "ts": 0,
+        "type": "KAUF_1",
+        "price": 100,
+        "tranche_pct": 100
+      },
+      {
+        "ts": 14400000,
+        "type": "STOPLOSS",
+        "price": 100,
+        "tranche_pct": 100
+      }
+    ],
+    "candles": [
+      {
+        "ts": 0,
+        "open": 100,
+        "high": 100,
+        "low": 100,
+        "close": 100
+      },
+      {
+        "ts": 14400000,
+        "open": 100,
+        "high": 100,
+        "low": 50,
+        "close": 100
+      }
+    ]
+  },
+  "F02_short_margin": {
+    "production_return": 20.0,
+    "unlevered_max_return": 10,
+    "implied_exposure_pct": 200
+  },
+  "F03_trail_can_fall": {
+    "prior_stop": 115,
+    "next_close": 110,
+    "new_computed_stop": 100,
+    "first_signals": [],
+    "next_signals": [],
+    "state": "TP1"
+  },
+  "F10_plan_stop": {
+    "engine_stop_before_drop": 115,
+    "telegram_plan_stop": {
+      "preis": 100,
+      "grund": "Einstand (nachgezogen)"
+    }
+  },
+  "F04_entry_average": {
+    "production": 188.53333333333333,
+    "capital_weighted_cost_per_coin": 186.10966057441252,
+    "first_price": 220,
+    "second_price": 172.8,
+    "capital_amounts": [
+      25,
+      50
+    ],
+    "fee_excluded": true
+  },
+  "F05_state_missing": {
+    "field": "widerstand_exits",
+    "before": 1,
+    "after": 0
+  },
+  "F11_config_types": {
+    "string_false": true
+  },
+  "F06_cvd_offset": {
+    "original": "DERIVATE_PUMP",
+    "shifted": "GESUNDER_TREND",
+    "corrected_original": "DERIVATE_PUMP",
+    "corrected_shifted": "DERIVATE_PUMP"
+  },
+  "F07_future_fallback": {
+    "first_candle": 0,
+    "first_oi_time": 28800000,
+    "value_in_past": 12345
+  },
+  "F08_partial_daily": {
+    "hours_observed": 8,
+    "returned_daily_bars": 1,
+    "returned_close": 102
+  },
+  "P01_pivot_confirmation": "PASS: no pivot is returned before n right-hand bars",
+  "F09_float_dust": {
+    "description": "Exact units == 0 check leaves a 2.78e-17 BTC remainder after a nominal full partial sale on 2026-04-06. Next purchase incorrectly keeps the old allocation and peak BTC. See debug_book.py.",
+    "affected": {
+      "LIVE-heute +Rest halten (E43.6)": 130.38800740525585,
+      "LIVE-heute +E42": -51.099240246567206,
+      "LIVE-heute +E42 (6 Kerzen, Robustheit)": -51.32028162835741
+    }
+  },
+  "P03_independent_oracle_sabotage": "CAUGHT"
+}
+Independent reconciliation: all 9 portfolios match after isolated F09 tolerance correction within 0.011 USD; originals retained separately

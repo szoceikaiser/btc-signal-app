@@ -1,0 +1,76 @@
+OK  btc faellt still auf Dollar zurueck
+    -> --- 602 passed, 5 failed  | test_e434_vorprobe_im_pump_szenario_findet_umklassifizierte_kerzen, test_e434_vorprobe_zaehlt_a3_je_muster, test_e434_btc_wirkt_in_allen_mustern_die_das_oi_lesen
+OK  classify_pattern ignoriert muster_oi
+    -> --- 602 passed, 5 failed  | test_e434_vorprobe_im_pump_szenario_findet_umklassifizierte_kerzen, test_e434_vorprobe_zaehlt_a3_je_muster, test_e434_btc_wirkt_in_allen_mustern_die_das_oi_lesen
+OK  Leer-Waechter fehlt (keine Kontrakt-Reihe -> Division durch null)
+    -> --- 605 passed, 2 failed  | test_e434_vorprobe_ohne_oi_daten_misst_nichts, test_e434_ohne_oi_daten_rechnen_usd_und_btc_gleich
+OK  usd rechnet im Randfall anders als vor E43.4
+    -> --- 606 passed, 1 failed  | test_e434_usd_rechnet_wie_vor_e434
+OK  oi_in_btc: ein Kurs fuer alle Punkte
+    -> --- 595 passed, 12 failed  | test_e434_build_series_rechnet_um_und_fuellt_dann_kontrakte_auf, test_e434_vorprobe_im_pump_szenario_findet_umklassifizierte_kerzen, test_e434_vorprobe_zaehlt_a3_je_muster
+OK  oi_in_btc: Punkt ohne Kerze bekommt einen Ersatzkurs
+    -> --- 606 passed, 1 failed  | test_e434_oi_in_btc_rechnet_jeden_punkt_mit_dem_kurs_seiner_kerze
+OK  oi_in_btc multipliziert statt zu teilen
+    -> --- 597 passed, 10 failed  | test_e434_build_series_rechnet_um_und_fuellt_dann_kontrakte_auf, test_e434_vorprobe_zaehlt_a3_je_muster, test_e434_live_und_backtest_rechnen_dieselben_kontrakte
+OK  Muster 4 liest weiter Dollar
+    -> --- 605 passed, 2 failed  | test_e434_vorprobe_zaehlt_a3_je_muster, test_e434_vorprobe_demo_oi_usd_erkennt_am_kurs
+OK  Muster 5 liest weiter Dollar
+    -> --- 604 passed, 3 failed  | test_e434_vorprobe_zaehlt_a3_je_muster, test_e434_btc_wirkt_in_allen_mustern_die_das_oi_lesen, test_e434_vorprobe_demo_oi_usd_erkennt_am_kurs
+OK  Muster 3 liest weiter Dollar
+    -> --- 606 passed, 1 failed  | test_e434_btc_wirkt_in_allen_mustern_die_das_oi_lesen
+OK  Muster 2 liest weiter Dollar
+    -> --- 605 passed, 2 failed  | test_e434_vorprobe_zaehlt_a3_je_muster, test_e434_vorprobe_demo_oi_usd_erkennt_am_kurs
+OK  Muster 1 liest weiter Dollar
+    -> --- 606 passed, 1 failed  | test_e434_btc_wirkt_in_allen_mustern_die_das_oi_lesen
+OK  evaluate reicht muster_oi nicht an classify_pattern weiter
+    -> --- 606 passed, 1 failed  | test_e434_muster_oi_kommt_in_evaluate_an
+OK  Backtest fuellt Dollar auf und teilt dann durch den Kurs (naiver Weg)
+    -> --- 605 passed, 2 failed  | test_e434_build_series_rechnet_um_und_fuellt_dann_kontrakte_auf, test_e434_live_und_backtest_rechnen_dieselben_kontrakte
+OK  Backtest rechnet mit dem Eroeffnungs- statt dem Schlusskurs
+    -> --- 605 passed, 2 failed  | test_e434_build_series_rechnet_um_und_fuellt_dann_kontrakte_auf, test_e434_live_und_backtest_rechnen_dieselben_kontrakte
+OK  Backtest ohne OI-Daten erfindet eine Kontrakt-Reihe (1.0 durch den Kurs)
+    -> --- 605 passed, 2 failed  | test_e434_build_series_ohne_oi_map_hat_keine_kontrakt_reihe, test_e434_vorprobe_ohne_oi_daten_misst_nichts
+OK  Live fuellt Dollar auf und teilt dann durch den Kurs (naiver Weg)
+    -> --- 606 passed, 1 failed  | test_e434_live_und_backtest_rechnen_dieselben_kontrakte
+OK  Live rechnet mit dem Kurs der Folgekerze
+    -> --- 606 passed, 1 failed  | test_e434_live_und_backtest_rechnen_dieselben_kontrakte
+OK  Kraken-Rueckfall teilt doch durch den Kurs
+    -> --- 606 passed, 1 failed  | test_e434_kraken_rueckfall_hat_keine_kontrakt_reihe
+!! VORLAGE NICHT GEFUNDEN: muster_oi fehlt in EVAL_DEFAULTS
+OK  btc still als Vorgabe (live eingeschaltet ohne Messung)
+    -> --- 603 passed, 4 failed  | test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat, test_alle_evaluate_parameter_werden_durchgereicht, test_e434_anzeige_rechnet_das_oi_wie_der_handel
+OK  Anzeige rechnet das OI anders als der Handel
+    -> --- 606 passed, 1 failed  | test_e434_anzeige_rechnet_das_oi_wie_der_handel
+OK  config.json schaltet btc ohne Go ein
+    -> --- 605 passed, 2 failed  | test_e434_live_konfig_steht_auf_usd, test_panel_variante_entspricht_der_live_einstellung
+!! VORLAGE NICHT GEFUNDEN: muster_oi fehlt in EVAL_KEYS (Zeile laeuft still mit usd)
+OK  Gitterzeile misst nichts (usd statt btc)
+    -> --- 606 passed, 1 failed  | test_e434_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live
+OK  Gitterzeile mit zweitem Unterschied (muster_cvd)
+    -> --- 606 passed, 1 failed  | test_e434_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live
+OK  Regel: eine Haelfte genuegt
+    -> --- 605 passed, 2 failed  | test_e434_abschnitt_meldet_urteil_und_kein_urteil, test_e434_einschalten_nur_wenn_beide_haelften_klar_besser
+OK  Regel: 'besser' ohne Rauschgrenze
+    -> --- 606 passed, 1 failed  | test_e434_einschalten_nur_wenn_beide_haelften_klar_besser
+OK  Regel: Rueckgang falsch herum
+    -> --- 604 passed, 3 failed  | test_e434_abschnitt_meldet_urteil_und_kein_urteil, test_e434_einschalten_nicht_bei_zu_tiefem_rueckgang, test_e434_einschalten_nur_wenn_beide_haelften_klar_besser
+OK  Regel: Rueckgang zaehlt nicht
+    -> --- 606 passed, 1 failed  | test_e434_einschalten_nicht_bei_zu_tiefem_rueckgang
+OK  Vorprobe vergleicht usd mit usd
+    -> --- 605 passed, 2 failed  | test_e434_vorprobe_im_pump_szenario_findet_umklassifizierte_kerzen, test_e434_vorprobe_zaehlt_a3_je_muster
+OK  Vorprobe: Kontrakt-Spalte zaehlt Dollar
+    -> --- 606 passed, 1 failed  | test_e434_vorprobe_zaehlt_a3_je_muster
+OK  Vorprobe: jede Kerze zaehlt als echter OI-Punkt
+    -> --- 606 passed, 1 failed  | test_e434_vorprobe_ohne_oi_daten_misst_nichts
+OK  Vorprobe bekommt die OI-Punkte nicht
+    -> --- 606 passed, 1 failed  | test_e434_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis
+OK  Bericht urteilt ohne echten OI-Punkt
+    -> --- 606 passed, 1 failed  | test_e434_abschnitt_meldet_urteil_und_kein_urteil
+OK  Bericht urteilt ohne umklassifizierte Kerze
+    -> --- 606 passed, 1 failed  | test_e434_abschnitt_meldet_urteil_und_kein_urteil
+OK  Bericht-Abschnitt nicht verdrahtet
+    -> --- 606 passed, 1 failed  | test_e434_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis
+
+============================================================
+nach Wiederherstellung: --- 607 passed, 0 failed
+ungefangen: ['muster_oi fehlt in EVAL_DEFAULTS [Vorlage fehlt]', 'muster_oi fehlt in EVAL_KEYS (Zeile laeuft still mit usd) [Vorlage fehlt]']

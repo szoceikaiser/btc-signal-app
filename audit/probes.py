@@ -69,6 +69,10 @@ def main():
                                       first_signals=[x.to_dict() for x in a],
                                       next_signals=[x.to_dict() for x in b],state=p.state.value)
     assert not a and not b and p.state==sc.PosState.TP1
+    with patch.object(live,'find_pivots',return_value=[low]):
+        plan=live.positions_plan([sc.Candle(2*step,120,121,119,120)],[],kwargs,p)
+    evidence['F10_plan_stop']=dict(engine_stop_before_drop=115,telegram_plan_stop=plan['stop'])
+    assert plan['stop']['preis']==100
 
     z2=sc.fib_zones(sc.Impulse(sc.Pivot(0,0,20,'L'),sc.Pivot(1,step,420,'H')))
     p2=sc.Position(direction='LONG',state=sc.PosState.T1,zones=z2,retrace_extreme=220,
@@ -87,6 +91,8 @@ def main():
     restored=live.pos_from_state(saved)
     evidence['F05_state_missing']=dict(field='widerstand_exits',before=1,after=restored.widerstand_exits)
     assert restored.widerstand_exits==0
+    evidence['F11_config_types']=dict(string_false=live.eval_params({'bias_short':'false'})['bias_short'])
+    assert evidence['F11_config_types']['string_false'] is True
 
     candles=[sc.Candle(i*step,100+i,101+i,99+i,100+i) for i in range(12)]
     flows=[sc.FlowPoint(i*step,100000+i*10,100+i*30,100+i*.4,.00001+i*.000001) for i in range(12)]

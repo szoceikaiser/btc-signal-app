@@ -1,0 +1,1718 @@
+[
+  {
+    "id": "V000",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V001",
+    "half_deltas": [
+      -3.1110141157558715,
+      3.328137277567956
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": -1.5951566684182072,
+      "2026-04": -0.30053873007185317,
+      "2026-05": -0.8506633639467909,
+      "2026-06": 0.0,
+      "2026-07": 0.05857643352875641,
+      "2026-08": 1.8023718765354912,
+      "2026-09": 1.2299755503276222
+    },
+    "min_compounded_leave_one_month_out": -1.7408724352891314,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V002",
+    "half_deltas": [
+      1.0477167585689635,
+      -0.9229905134628726
+    ],
+    "monthly_deltas": {
+      "2026-01": -0.11396333252325919,
+      "2026-02": -0.18202963136990657,
+      "2026-03": -0.28089778721396286,
+      "2026-04": 1.1855491371772997,
+      "2026-05": 0.29541805866304394,
+      "2026-06": -0.007324883495751777,
+      "2026-07": -0.7865907493949331,
+      "2026-08": 0.19727285020330054,
+      "2026-09": -0.27255793318512467
+    },
+    "min_compounded_leave_one_month_out": -1.4066393092990737,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V003",
+    "half_deltas": [
+      -5.452043522188376,
+      6.5755779491088795
+    ],
+    "monthly_deltas": {
+      "2026-01": -0.11396333252325919,
+      "2026-02": -0.18202963136990657,
+      "2026-03": -5.506176638859106,
+      "2026-04": 2.2446332813255596,
+      "2026-05": -1.2631157003149873,
+      "2026-06": 0.7329558178095885,
+      "2026-07": -0.6704923149856823,
+      "2026-08": 6.2306081468060714,
+      "2026-09": -0.1958012040794488
+    },
+    "min_compounded_leave_one_month_out": -6.006811215237495,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V004",
+    "half_deltas": [
+      1.7644061253299093,
+      -2.1203836506492593
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -0.5505196481813801,
+      "2026-03": 0.7626643205855146,
+      "2026-04": 0.5617285691342122,
+      "2026-05": 0.7731842430356073,
+      "2026-06": 0.04529863123610145,
+      "2026-07": -0.9974100823992638,
+      "2026-08": -0.6303213483167092,
+      "2026-09": -0.4165220267403624
+    },
+    "min_compounded_leave_one_month_out": -1.6417451606634659,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V005",
+    "half_deltas": [
+      -3.1018167011712237,
+      1.541123055695028
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -0.5505196481813801,
+      "2026-03": -2.2927514509186295,
+      "2026-04": 0.9581654682189411,
+      "2026-05": -0.8503631776523468,
+      "2026-06": 0.3780330537863641,
+      "2026-07": -0.48772609979854664,
+      "2026-08": 0.6967078366082902,
+      "2026-09": 0.8441778303051928
+    },
+    "min_compounded_leave_one_month_out": -2.593623091325603,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V006",
+    "half_deltas": [
+      1.6415401966118033,
+      -2.4653493484772184
+    ],
+    "monthly_deltas": {
+      "2026-01": -0.11396333252325919,
+      "2026-02": -0.7408398816352246,
+      "2026-03": 0.3189978281207484,
+      "2026-04": 1.699460485631632,
+      "2026-05": 0.29541805866302173,
+      "2026-06": 0.03787148863263479,
+      "2026-07": -1.7920679055892563,
+      "2026-08": 0.1194747886855918,
+      "2026-09": -0.69275497365473
+    },
+    "min_compounded_leave_one_month_out": -3.1952071768243773,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V007",
+    "half_deltas": [
+      -5.978170261302072,
+      4.342264618723602
+    ],
+    "monthly_deltas": {
+      "2026-01": -0.11396333252325919,
+      "2026-02": -0.7408398816352246,
+      "2026-03": -5.652820079464238,
+      "2026-04": 2.499453080375514,
+      "2026-05": -1.263117997509977,
+      "2026-06": 0.575295826529354,
+      "2026-07": -1.1898304479346589,
+      "2026-08": 5.266892361786724,
+      "2026-09": -0.5863818815639243
+    },
+    "min_compounded_leave_one_month_out": -7.881250002253437,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V008",
+    "half_deltas": [
+      0.4394124339797827,
+      0.7682016819869908
+    ],
+    "monthly_deltas": {
+      "2026-01": -0.34534343188871164,
+      "2026-02": -0.6162330639712943,
+      "2026-03": 0.699697292032365,
+      "2026-04": 1.8644487133600007,
+      "2026-05": -1.0960530244509048,
+      "2026-06": -0.3622867301939836,
+      "2026-07": 0.2636894854504579,
+      "2026-08": 0.043462425924611914,
+      "2026-09": 0.7941696846655466
+    },
+    "min_compounded_leave_one_month_out": -0.8759297376455866,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V009",
+    "half_deltas": [
+      0.4394124339797827,
+      0.7682016819869908
+    ],
+    "monthly_deltas": {
+      "2026-01": -0.34534343188871164,
+      "2026-02": -0.6162330639712943,
+      "2026-03": 0.699697292032365,
+      "2026-04": 1.8644487133600007,
+      "2026-05": -1.0960530244509048,
+      "2026-06": -0.3622867301939836,
+      "2026-07": 0.2636894854504579,
+      "2026-08": 0.043462425924611914,
+      "2026-09": 0.7941696846655466
+    },
+    "min_compounded_leave_one_month_out": -0.8759297376455866,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V010",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V011",
+    "half_deltas": [
+      1.2876822255578873,
+      1.2752998170484808
+    ],
+    "monthly_deltas": {
+      "2026-01": -0.34534343188871164,
+      "2026-02": -0.6162330639712943,
+      "2026-03": 0.7810428553550519,
+      "2026-04": 1.725041328360688,
+      "2026-05": -0.33222674051516243,
+      "2026-06": -0.3622867301939836,
+      "2026-07": -0.25768622114967776,
+      "2026-08": 1.0322960175752405,
+      "2026-09": 0.7941696846655688
+    },
+    "min_compounded_leave_one_month_out": 0.7435582405117103,
+    "both_halves_at_least_1": true,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V012",
+    "half_deltas": [
+      1.2876822255578873,
+      1.2752998170484808
+    ],
+    "monthly_deltas": {
+      "2026-01": -0.34534343188871164,
+      "2026-02": -0.6162330639712943,
+      "2026-03": 0.7810428553550519,
+      "2026-04": 1.725041328360688,
+      "2026-05": -0.33222674051516243,
+      "2026-06": -0.3622867301939836,
+      "2026-07": -0.25768622114967776,
+      "2026-08": 1.0322960175752405,
+      "2026-09": 0.7941696846655688
+    },
+    "min_compounded_leave_one_month_out": 0.7435582405117103,
+    "both_halves_at_least_1": true,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V013",
+    "half_deltas": [
+      1.7644061253299093,
+      -2.1203836506492593
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -0.5505196481813801,
+      "2026-03": 0.7626643205855146,
+      "2026-04": 0.5617285691342122,
+      "2026-05": 0.7731842430356073,
+      "2026-06": 0.04529863123610145,
+      "2026-07": -0.9974100823992638,
+      "2026-08": -0.6303213483167092,
+      "2026-09": -0.4165220267403624
+    },
+    "min_compounded_leave_one_month_out": -1.6417451606634659,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V014",
+    "half_deltas": [
+      -6.871179884725919,
+      -4.1551692663728925
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.8719646638688738,
+      "2026-02": -4.50520085918672,
+      "2026-03": -6.008928422243853,
+      "2026-04": 3.5953863420628887,
+      "2026-05": 0.0706013253452431,
+      "2026-06": 0.5577887715889185,
+      "2026-07": -0.3443207307963103,
+      "2026-08": 0.0845717163341142,
+      "2026-09": -4.2310969337439825
+    },
+    "min_compounded_leave_one_month_out": -15.470140995800197,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V015",
+    "half_deltas": [
+      -5.853735880820963,
+      -5.41891982645326
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.8719646638688738,
+      "2026-02": -4.50520085918672,
+      "2026-03": -5.093572899016574,
+      "2026-04": 3.5953863420628887,
+      "2026-05": 0.07060132534526531,
+      "2026-06": -0.6427963391100078,
+      "2026-07": -0.3443207307962437,
+      "2026-08": 0.0845717163341364,
+      "2026-09": -4.2310969337439825
+    },
+    "min_compounded_leave_one_month_out": -15.842777817733932,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V016",
+    "half_deltas": [
+      -4.741762615842738,
+      1.126988198815404
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.8719646638688738,
+      "2026-02": 0.0,
+      "2026-03": -4.8756735231285875,
+      "2026-04": -0.4096271446371924,
+      "2026-05": 0.07060132534526531,
+      "2026-06": 0.5577887715889185,
+      "2026-07": -0.3443207307963103,
+      "2026-08": 0.08457171633415861,
+      "2026-09": 0.7457437426815039
+    },
+    "min_compounded_leave_one_month_out": -5.231568572234946,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V017",
+    "half_deltas": [
+      -3.9547373120370146,
+      -0.19975234539128905
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.8719646638688738,
+      "2026-02": 0.0,
+      "2026-03": -4.1727978463143245,
+      "2026-04": -0.4096271446372368,
+      "2026-05": 0.0706013253452431,
+      "2026-06": -0.6427963391099967,
+      "2026-07": -0.3443207307962881,
+      "2026-08": 0.0845717163341364,
+      "2026-09": 0.7457437426815705
+    },
+    "min_compounded_leave_one_month_out": -5.960552435747113,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V018",
+    "half_deltas": [
+      -4.659408277266827,
+      -3.962604264770885
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -5.4811186835636905,
+      "2026-03": -1.9078291138626469,
+      "2026-04": 3.5953863420628887,
+      "2026-05": 0.0,
+      "2026-06": 1.2083430014629526,
+      "2026-07": -2.220446049250313e-14,
+      "2026-08": -2.220446049250313e-14,
+      "2026-09": -4.9414348190263695
+    },
+    "min_compounded_leave_one_month_out": -13.131138366685136,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V019",
+    "half_deltas": [
+      -3.622687402578137,
+      -5.228651171841036
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -5.4811186835636905,
+      "2026-03": -0.9567301344973078,
+      "2026-04": 3.595386342062956,
+      "2026-05": 2.220446049250313e-14,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": -4.9414348190263695
+    },
+    "min_compounded_leave_one_month_out": -13.511525246859811,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V020",
+    "half_deltas": [
+      -6.477591951767401,
+      1.3291513495912408
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": -5.8185863069248445,
+      "2026-04": 2.220446049250313e-14,
+      "2026-05": 2.220446049250313e-14,
+      "2026-06": 1.2083430014629082,
+      "2026-07": 0.0,
+      "2026-08": -2.220446049250313e-14,
+      "2026-09": 2.220446049250313e-14
+    },
+    "min_compounded_leave_one_month_out": -7.125212025367644,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V021",
+    "half_deltas": [
+      -7.98946557143314,
+      -6.228449668891599
+    ],
+    "monthly_deltas": {
+      "2026-01": 1.0604062608705611,
+      "2026-02": 0.24411524672884877,
+      "2026-03": -4.284852883060664,
+      "2026-04": -1.818640048428688,
+      "2026-05": -2.4192054730745705,
+      "2026-06": -0.5507135916541284,
+      "2026-07": -2.1879349458486796,
+      "2026-08": -1.0880942444929653,
+      "2026-09": -2.121909545452527
+    },
+    "min_compounded_leave_one_month_out": -17.877056306212012,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V022",
+    "half_deltas": [
+      -7.739834802431499,
+      -6.405392908390061
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.3258121743102693,
+      "2026-03": -5.479666915148718,
+      "2026-04": -0.19314262613638888,
+      "2026-05": -1.5906796372869403,
+      "2026-06": -0.31769158591716806,
+      "2026-07": -0.4074303888784492,
+      "2026-08": -1.312233508208882,
+      "2026-09": -4.0696813635888285
+    },
+    "min_compounded_leave_one_month_out": -16.475693604379305,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V023",
+    "half_deltas": [
+      -2.54064315954896,
+      -1.6164851107731462
+    ],
+    "monthly_deltas": {
+      "2026-01": 1.0604062608705611,
+      "2026-02": 0.24411524672884877,
+      "2026-03": -0.29615101381004294,
+      "2026-04": -1.8447929815922137,
+      "2026-05": -1.4349959522598654,
+      "2026-06": -0.5507135916541284,
+      "2026-07": -2.187934945848702,
+      "2026-08": -1.1129282823327369,
+      "2026-09": 2.429930232650812
+    },
+    "min_compounded_leave_one_month_out": -7.448387643175214,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V024",
+    "half_deltas": [
+      -0.16942248222313339,
+      -0.13152931797073464
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.3258121743102693,
+      "2026-03": 0.4308937595871356,
+      "2026-04": -0.7383816780867747,
+      "2026-05": -0.14790495653635993,
+      "2026-06": -0.31769158591715696,
+      "2026-07": -0.4074303888784492,
+      "2026-08": -0.2880400469327471,
+      "2026-09": 0.9152048595790774
+    },
+    "min_compounded_leave_one_month_out": -1.4724295394491937,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V025",
+    "half_deltas": [
+      -1.9682636009172612,
+      -6.017796769635363
+    ],
+    "monthly_deltas": {
+      "2026-01": 1.0604062608705611,
+      "2026-02": 0.0,
+      "2026-03": -2.6285474016807022,
+      "2026-04": 0.7443362069375903,
+      "2026-05": -1.0335427111206386,
+      "2026-06": -0.5995105464841499,
+      "2026-07": -1.3186757420372786,
+      "2026-08": -0.5937737179700475,
+      "2026-09": -3.2290052270754988
+    },
+    "min_compounded_leave_one_month_out": -11.221217124282434,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V026",
+    "half_deltas": [
+      -5.973712073212823,
+      -6.520005014852369
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": -4.34674925226044,
+      "2026-04": 0.5490490075433785,
+      "2026-05": -1.5263697480339289,
+      "2026-06": 0.0,
+      "2026-07": 2.220446049250313e-14,
+      "2026-08": -1.2599134113441046,
+      "2026-09": -4.941434819026346
+    },
+    "min_compounded_leave_one_month_out": -14.722223151374504,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V027",
+    "half_deltas": [
+      2.9796134803191876,
+      -1.5077383116458556
+    ],
+    "monthly_deltas": {
+      "2026-01": 1.0604062608705611,
+      "2026-02": 0.0,
+      "2026-03": 1.8160706259334738,
+      "2026-04": -0.5262033233181196,
+      "2026-05": 0.17282381966343685,
+      "2026-06": -0.5995105464841832,
+      "2026-07": -1.3186757420372563,
+      "2026-08": -0.7228180733455547,
+      "2026-09": 1.2734091576338757
+    },
+    "min_compounded_leave_one_month_out": -0.7565351825018496,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V028",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V029",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V030",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V031",
+    "half_deltas": [
+      1.7644061253299093,
+      -1.9704572299835235
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -0.5505196481813801,
+      "2026-03": 0.7626643205855146,
+      "2026-04": 0.5617285691342122,
+      "2026-05": 0.7731842430356073,
+      "2026-06": 0.18433667908279716,
+      "2026-07": -0.9974100823992638,
+      "2026-08": -0.6303213483166203,
+      "2026-09": -0.41652202674038463
+    },
+    "min_compounded_leave_one_month_out": -1.4628122693204348,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V032",
+    "half_deltas": [
+      1.7644061253299093,
+      -2.1203836506492593
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -0.5505196481813801,
+      "2026-03": 0.7626643205855146,
+      "2026-04": 0.5617285691342122,
+      "2026-05": 0.7731842430356073,
+      "2026-06": 0.04529863123610145,
+      "2026-07": -0.9974100823992638,
+      "2026-08": -0.6303213483167092,
+      "2026-09": -0.4165220267403624
+    },
+    "min_compounded_leave_one_month_out": -1.6417451606634659,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V033",
+    "half_deltas": [
+      1.7644061253299093,
+      -1.9704572299835235
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -0.5505196481813801,
+      "2026-03": 0.7626643205855146,
+      "2026-04": 0.5617285691342122,
+      "2026-05": 0.7731842430356073,
+      "2026-06": 0.18433667908279716,
+      "2026-07": -0.9974100823992638,
+      "2026-08": -0.6303213483166203,
+      "2026-09": -0.41652202674038463
+    },
+    "min_compounded_leave_one_month_out": -1.4628122693204348,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V034",
+    "half_deltas": [
+      -23.60972034971367,
+      -10.12962770841581
+    ],
+    "monthly_deltas": {
+      "2026-01": 3.2163800331223458,
+      "2026-02": -3.6655650041557797,
+      "2026-03": -11.03413607789907,
+      "2026-04": -6.407467921550913,
+      "2026-05": -4.27678105634095,
+      "2026-06": -0.11979819763616728,
+      "2026-07": -3.262268517386069,
+      "2026-08": -2.346965486484409,
+      "2026-09": -4.0800694250866965
+    },
+    "min_compounded_leave_one_month_out": -40.65492164804525,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V036",
+    "half_deltas": [
+      -0.35737665193613566,
+      -3.3883868805259167
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 1.5849480940414153,
+      "2026-04": -1.2004401418778787,
+      "2026-05": -0.5950922169358774,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": -0.23945437881374154,
+      "2026-09": -2.965687964366359
+    },
+    "min_compounded_leave_one_month_out": -5.783241899773284,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V037",
+    "half_deltas": [
+      1.235317919686942,
+      -0.48947572384203575
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": -0.8665841574015953,
+      "2026-04": 0.8346830574239128,
+      "2026-05": 1.0443927975952283,
+      "2026-06": 0.2633445949839608,
+      "2026-07": -0.5089200450613784,
+      "2026-08": 0.32504609271655216,
+      "2026-09": -0.5513633375128002
+    },
+    "min_compounded_leave_one_month_out": -0.5830411280170811,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V038",
+    "half_deltas": [
+      -16.545707543320873,
+      -5.802376876633652
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": -4.323640704894971,
+      "2026-04": -6.407467921550913,
+      "2026-05": -4.27678105634095,
+      "2026-06": -0.11979819763616728,
+      "2026-07": -3.262268517386069,
+      "2026-08": -2.109473901341552,
+      "2026-09": 6.661338147750939e-14
+    },
+    "min_compounded_leave_one_month_out": -25.245990643684223,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V039",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V040",
+    "half_deltas": [
+      2.4226798166202776,
+      -7.961781752041918
+    ],
+    "monthly_deltas": {
+      "2026-01": 1.0604062608705611,
+      "2026-02": -0.19388436127807385,
+      "2026-03": 2.7969357889623616,
+      "2026-04": -0.6623813568088499,
+      "2026-05": -0.8565827672848858,
+      "2026-06": -1.3456838683618244,
+      "2026-07": -3.046432466451554,
+      "2026-08": -0.09326885383951211,
+      "2026-09": -3.14183090886897
+    },
+    "min_compounded_leave_one_month_out": -9.483752467062146,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V041",
+    "half_deltas": [
+      -15.947868925958918,
+      -3.5928085185838334
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -11.030205945553963,
+      "2026-03": 0.853040237071534,
+      "2026-04": -1.118025633291464,
+      "2026-05": -2.3430187787192525,
+      "2026-06": -3.65367675611471,
+      "2026-07": -0.19122231621249153,
+      "2026-08": 0.871432157042662,
+      "2026-09": -0.27200064645869215
+    },
+    "min_compounded_leave_one_month_out": -22.143636342737615,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V042",
+    "half_deltas": [
+      -4.221136414168903,
+      -0.20509164889574905
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": -0.1813699306619334,
+      "2026-04": -2.7064036544099723,
+      "2026-05": -0.7633576197324965,
+      "2026-06": -0.34391754346217995,
+      "2026-07": 4.440892098500626e-14,
+      "2026-08": 0.16152465244805292,
+      "2026-09": 6.661338147750939e-14
+    },
+    "min_compounded_leave_one_month_out": -5.056204588183433,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V043",
+    "half_deltas": [
+      -1.1267701597330593,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": -0.9505398516790331,
+      "2026-06": 0.0,
+      "2026-07": 2.220446049250313e-14,
+      "2026-08": -2.220446049250313e-14,
+      "2026-09": 6.661338147750939e-14
+    },
+    "min_compounded_leave_one_month_out": -1.2821464856016984,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V044",
+    "half_deltas": [
+      -4.749633781821736,
+      2.239223722216721
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.3836204562226442,
+      "2026-02": 1.6412813636762502,
+      "2026-03": -3.6201697096754026,
+      "2026-04": -2.49016650178413,
+      "2026-05": -0.2102801051701686,
+      "2026-06": -0.15557502137735213,
+      "2026-07": -0.5145553987199181,
+      "2026-08": 0.9578588328951865,
+      "2026-09": 1.82300751587261
+    },
+    "min_compounded_leave_one_month_out": -4.677487214186327,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V045",
+    "half_deltas": [
+      -3.6802524352902637,
+      -2.976112100329175
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.81120243322651,
+      "2026-02": 0.5413871585088881,
+      "2026-03": -0.44289534779817785,
+      "2026-04": -4.081686109839944,
+      "2026-05": -0.06984351698804403,
+      "2026-06": -0.7055003803400517,
+      "2026-07": -1.2395685566013892,
+      "2026-08": -1.1162892531829227,
+      "2026-09": 0.283427922748003
+    },
+    "min_compounded_leave_one_month_out": -8.979246689042842,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V046",
+    "half_deltas": [
+      -3.850003045616532,
+      -3.555800639298811
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.6730647348343277,
+      "2026-02": 0.5413871585088881,
+      "2026-03": -0.44289534779817785,
+      "2026-04": -4.081686109839966,
+      "2026-05": -0.06984351698802183,
+      "2026-06": -0.7055003803400184,
+      "2026-07": -1.2395685566014558,
+      "2026-08": -1.116289253182945,
+      "2026-09": -0.28116692937609766
+    },
+    "min_compounded_leave_one_month_out": -9.691597368361737,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V047",
+    "half_deltas": [
+      -2.634027102886783,
+      -0.14661179561914395
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.13042818121132838,
+      "2026-02": -0.04956613651099229,
+      "2026-03": 0.16774980829818986,
+      "2026-04": -0.9772318808436431,
+      "2026-05": -1.5207703152116503,
+      "2026-06": 0.05393110962477188,
+      "2026-07": 0.19848377879718715,
+      "2026-08": -0.08065512126642638,
+      "2026-09": -0.3120415535651899
+    },
+    "min_compounded_leave_one_month_out": -3.3655208885564614,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V048",
+    "half_deltas": [
+      -2.9140151940854935,
+      -0.9025481267889823
+    ],
+    "monthly_deltas": {
+      "2026-01": -0.6030910553953661,
+      "2026-02": 2.220446049250313e-14,
+      "2026-03": 1.0765965905071173,
+      "2026-04": -2.5336696518015067,
+      "2026-05": -0.32859067502266637,
+      "2026-06": -0.599510546484161,
+      "2026-07": -0.7506938914239702,
+      "2026-08": -0.7228180733455547,
+      "2026-09": 1.2734091576338757
+    },
+    "min_compounded_leave_one_month_out": -5.661017683993963,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V049",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V050",
+    "half_deltas": [
+      -1.4977471936209454,
+      0.8291971841416057
+    ],
+    "monthly_deltas": {
+      "2026-01": -1.1388351398310848,
+      "2026-02": 0.0,
+      "2026-03": 8.881784197001252e-14,
+      "2026-04": -2.220446049250313e-14,
+      "2026-05": -0.0369236186414712,
+      "2026-06": 0.8281774357170146,
+      "2026-07": -0.07605154707783779,
+      "2026-08": -6.661338147750939e-14,
+      "2026-09": 6.661338147750939e-14
+    },
+    "min_compounded_leave_one_month_out": -1.7464153801535875,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V051",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V052",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V053",
+    "half_deltas": [
+      -1.3564865749454036,
+      1.9404929425050685
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.674860749440831,
+      "2026-02": 0.0,
+      "2026-03": -0.4134573316000534,
+      "2026-04": 2.220446049250313e-14,
+      "2026-05": -1.4756786198372174,
+      "2026-06": 2.220446049250313e-14,
+      "2026-07": -0.028536130441514374,
+      "2026-08": 1.5854843588641643,
+      "2026-09": 0.24701729543106232
+    },
+    "min_compounded_leave_one_month_out": -1.183864134287571,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V054",
+    "half_deltas": [
+      -1.6984346191915662,
+      0.18237234414837467
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.5281697061501056,
+      "2026-02": 0.0,
+      "2026-03": 0.6501252861796925,
+      "2026-04": -2.639254380674738,
+      "2026-05": 0.0,
+      "2026-06": -0.1960177775821803,
+      "2026-07": -0.028536130441558782,
+      "2026-08": 0.23333590073826294,
+      "2026-09": 0.16806752429627814
+    },
+    "min_compounded_leave_one_month_out": -2.457095843994339,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V055",
+    "half_deltas": [
+      -0.7711554148207114,
+      -1.6608504706274942
+    ],
+    "monthly_deltas": {
+      "2026-01": 1.14245440337023,
+      "2026-02": 0.0,
+      "2026-03": -2.909886530293072,
+      "2026-04": 0.8392531435109207,
+      "2026-05": 0.07376856254135422,
+      "2026-06": 0.8049908776565973,
+      "2026-07": -1.9655871730720698,
+      "2026-08": 0.37633192810346827,
+      "2026-09": -0.7937682953092606
+    },
+    "min_compounded_leave_one_month_out": -4.5915797667466896,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V056",
+    "half_deltas": [
+      -0.7974553380708045,
+      0.5342507770892624
+    ],
+    "monthly_deltas": {
+      "2026-01": -1.0918530566516704,
+      "2026-02": 2.220446049250313e-14,
+      "2026-03": 0.10555857449274697,
+      "2026-04": 0.41503094572958865,
+      "2026-05": 0.0031453413774862327,
+      "2026-06": 0.13532397968818444,
+      "2026-07": 0.16705868614121933,
+      "2026-08": -2.220446049250313e-14,
+      "2026-09": 0.19503805063811885
+    },
+    "min_compounded_leave_one_month_out": -0.7049762292715034,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V057",
+    "half_deltas": [
+      -1.7862080197061232,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": -1.5376288533003102,
+      "2026-05": 2.220446049250313e-14,
+      "2026-06": 2.220446049250313e-14,
+      "2026-07": 2.220446049250313e-14,
+      "2026-08": -2.220446049250313e-14,
+      "2026-09": 4.440892098500626e-14
+    },
+    "min_compounded_leave_one_month_out": -2.0325177368581526,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V058",
+    "half_deltas": [
+      -1.7862080197061232,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": -1.5376288533003102,
+      "2026-05": 2.220446049250313e-14,
+      "2026-06": 2.220446049250313e-14,
+      "2026-07": 2.220446049250313e-14,
+      "2026-08": -2.220446049250313e-14,
+      "2026-09": 4.440892098500626e-14
+    },
+    "min_compounded_leave_one_month_out": -2.0325177368581526,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V059",
+    "half_deltas": [
+      -5.325221688817681,
+      -8.266211604999206
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": -6.246687878765811,
+      "2026-04": 2.1003863892835364,
+      "2026-05": -3.1228051189887474,
+      "2026-06": -5.5188080355491165,
+      "2026-07": 4.440892098500626e-14,
+      "2026-08": 0.5653486335366109,
+      "2026-09": -0.219283712887397
+    },
+    "min_compounded_leave_one_month_out": -16.892227956766902,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V060",
+    "half_deltas": [
+      0.0014392679775774297,
+      0.39689692565871937
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0784119193445676,
+      "2026-04": 1.1319305712513605,
+      "2026-05": -1.169201974454781,
+      "2026-06": 2.220446049250313e-14,
+      "2026-07": 0.27456408061614646,
+      "2026-08": 0.12336155838919005,
+      "2026-09": -0.02732206045237273
+    },
+    "min_compounded_leave_one_month_out": -0.888907514361903,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V061",
+    "half_deltas": [
+      -3.58412919117783,
+      -1.5554082130436946
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.39652936671319416,
+      "2026-04": -1.7001342095283478,
+      "2026-05": -1.7456736845786525,
+      "2026-06": 2.220446049250313e-14,
+      "2026-07": -0.9222707568154354,
+      "2026-08": 0.01195629903754103,
+      "2026-09": -0.5573564563967848
+    },
+    "min_compounded_leave_one_month_out": -6.007293423677251,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V062",
+    "half_deltas": [
+      -3.0701330043715984,
+      -3.9908536191650015
+    ],
+    "monthly_deltas": {
+      "2026-01": -2.991808463810231,
+      "2026-02": 0.0,
+      "2026-03": 3.137715231934667,
+      "2026-04": 3.928135537950639,
+      "2026-05": -8.783503090293854,
+      "2026-06": -1.133724836373362,
+      "2026-07": 3.0886835880476804,
+      "2026-08": -3.6279119863768083,
+      "2026-09": 1.1743508137681102
+    },
+    "min_compounded_leave_one_month_out": -11.978989627215174,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V063",
+    "half_deltas": [
+      -6.3699132849105204,
+      -11.67258717244518
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 1.9768195606312702,
+      "2026-04": -5.951016519614294,
+      "2026-05": -1.3471694506748788,
+      "2026-06": 1.804341346057159,
+      "2026-07": -5.041133819912624,
+      "2026-08": -5.00587557644031,
+      "2026-09": -3.045831044499092
+    },
+    "min_compounded_leave_one_month_out": -22.71631439764532,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V064",
+    "half_deltas": [
+      -15.530502912582776,
+      -0.4654719648474952
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -1.6792158210355623,
+      "2026-03": -1.8960302289127604,
+      "2026-04": -8.385913832440073,
+      "2026-05": -1.9238490136147313,
+      "2026-06": -1.6430307914692466,
+      "2026-07": -0.5978283288785802,
+      "2026-08": 0.6793843716913495,
+      "2026-09": 1.2039747556773062
+    },
+    "min_compounded_leave_one_month_out": -18.218805578124943,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V065",
+    "half_deltas": [
+      -5.532508648513556,
+      -0.7738761786136195
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.030600096582023006,
+      "2026-03": -3.1129701413078026,
+      "2026-04": -1.9342127917212792,
+      "2026-05": 0.0725757677262795,
+      "2026-06": -0.562762655486404,
+      "2026-07": -0.9200101440347108,
+      "2026-08": 0.763275987156109,
+      "2026-09": 0.010856795581926093
+    },
+    "min_compounded_leave_one_month_out": -7.779954828101077,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V066",
+    "half_deltas": [
+      0.0,
+      0.5622319468558743
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": -1.06620538466482,
+      "2026-08": 0.0,
+      "2026-09": 1.6227524715399344
+    },
+    "min_compounded_leave_one_month_out": -1.3504808544696711,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V067",
+    "half_deltas": [
+      4.697943057282128,
+      -8.186187393516065
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 2.429630798526672,
+      "2026-04": 6.929999989611413,
+      "2026-05": -8.619258987291733,
+      "2026-06": -6.143379332727805,
+      "2026-07": 0.0,
+      "2026-08": 3.153052266001044,
+      "2026-09": 4.440892098500626e-14
+    },
+    "min_compounded_leave_one_month_out": -11.897454960823307,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V068",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V069",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V070",
+    "half_deltas": [
+      -1.6646533861541144,
+      -2.2621455796464343
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -0.10340499268164383,
+      "2026-03": -0.3551832727301871,
+      "2026-04": -0.9648892821104038,
+      "2026-05": -0.02578452960821931,
+      "2026-06": -0.6176559509037838,
+      "2026-07": -0.6937035754048138,
+      "2026-08": -0.797823597316949,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": -4.744451096468216,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V071",
+    "half_deltas": [
+      0.5589783486631639,
+      -0.4471293326483199
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.5302031304352695,
+      "2026-02": 0.12372060072780577,
+      "2026-03": 0.8941031539106525,
+      "2026-04": -0.7296636322893457,
+      "2026-05": -0.34182917762981546,
+      "2026-06": 0.21460025720192455,
+      "2026-07": 0.3509317868720885,
+      "2026-08": 0.07944059122337865,
+      "2026-09": -1.0745585036126437
+    },
+    "min_compounded_leave_one_month_out": -0.9254046402525029,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V072",
+    "half_deltas": [
+      -5.00039739788842,
+      -4.290379679429978
+    ],
+    "monthly_deltas": {
+      "2026-01": 1.6513094920062033,
+      "2026-02": -0.12585640979019264,
+      "2026-03": -1.1332465449824358,
+      "2026-04": -3.32835527387223,
+      "2026-05": -1.5483216340513417,
+      "2026-06": -0.21821808155941813,
+      "2026-07": -1.2307758954075432,
+      "2026-08": -1.3950925652021384,
+      "2026-09": -1.2249843978054287
+    },
+    "min_compounded_leave_one_month_out": -13.1237533985479,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V073",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V074",
+    "half_deltas": [
+      0.0,
+      0.0
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": 0.0,
+      "2026-03": 0.0,
+      "2026-04": 0.0,
+      "2026-05": 0.0,
+      "2026-06": 0.0,
+      "2026-07": 0.0,
+      "2026-08": 0.0,
+      "2026-09": 0.0
+    },
+    "min_compounded_leave_one_month_out": 0.0,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V075",
+    "half_deltas": [
+      -4.912033487019539,
+      -16.09126441837573
+    ],
+    "monthly_deltas": {
+      "2026-01": -7.553101700296538,
+      "2026-02": 0.0,
+      "2026-03": 3.3875328352790604,
+      "2026-04": 1.139563407901245,
+      "2026-05": -0.028913621872606043,
+      "2026-06": -16.35986916368939,
+      "2026-07": 1.2349677072965415,
+      "2026-08": 0.9093967018340088,
+      "2026-09": 2.220446049250313e-14
+    },
+    "min_compounded_leave_one_month_out": -25.050125694309845,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V076",
+    "half_deltas": [
+      -1.1276735263125772,
+      -14.95145138874987
+    ],
+    "monthly_deltas": {
+      "2026-01": -3.606759057499242,
+      "2026-02": 0.0,
+      "2026-03": 2.0338884161374082,
+      "2026-04": 1.140552371526038,
+      "2026-05": -0.028913621872628248,
+      "2026-06": -13.898564616879426,
+      "2026-07": -2.220446049250313e-14,
+      "2026-08": 0.3918014558196292,
+      "2026-09": 2.220446049250313e-14
+    },
+    "min_compounded_leave_one_month_out": -19.54070415488607,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V077",
+    "half_deltas": [
+      -19.123294167068437,
+      -6.0192109543778285
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -3.6655650041557797,
+      "2026-03": -10.943544511987092,
+      "2026-04": -2.9701762694586575,
+      "2026-05": 2.220446049250313e-14,
+      "2026-06": -0.11979819763616728,
+      "2026-07": -5.0044460682682645,
+      "2026-08": -0.5442232902122646,
+      "2026-09": 4.440892098500626e-14
+    },
+    "min_compounded_leave_one_month_out": -28.258574221300382,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  },
+  {
+    "id": "V078",
+    "half_deltas": [
+      2.2951586685052945,
+      -2.1203836506492593
+    ],
+    "monthly_deltas": {
+      "2026-01": 0.0,
+      "2026-02": -0.5505196481813801,
+      "2026-03": 1.2359392920541445,
+      "2026-04": 0.5617285691341678,
+      "2026-05": 0.7731842430355851,
+      "2026-06": 0.045298631236079245,
+      "2026-07": -0.9974100823992416,
+      "2026-08": -0.630321348316687,
+      "2026-09": -0.4165220267403624
+    },
+    "min_compounded_leave_one_month_out": -1.4761837087396978,
+    "both_halves_at_least_1": false,
+    "technical_release": false,
+    "reason": "Known fill/stop/data-model issues; repeated development sample"
+  }
+]

@@ -1,0 +1,5208 @@
+{
+  "id": "V055",
+  "params": {
+    "bias_long": true,
+    "bias_short": false,
+    "pivot_n": 5,
+    "k_atr": 2.0,
+    "flush_entry": "core",
+    "tp_ladder": true,
+    "strict_confirm": false,
+    "confluence": false,
+    "conditional_stop": false,
+    "buy_ladder": true,
+    "release_stale_rest": false,
+    "trail_stop": true,
+    "liq_exit": "off",
+    "high_exit": "on",
+    "liq_entry": "boost",
+    "block_unhealthy": false,
+    "muster5_entry": false,
+    "muster5_halten": "off",
+    "stop_puffer_pct": 0.0,
+    "stop_rueckeroberung": 1,
+    "stop_auf_docht": true,
+    "confirm_t1": false,
+    "cooldown_h": 0.0,
+    "min_stop_pct": 0.02,
+    "no_flip": true,
+    "freeze_targets": false,
+    "min_bein_pct": 0.05,
+    "bein_wahl": "juengstes",
+    "be_im_plus": false,
+    "bein_richtung": "bias",
+    "widerstand_exit": "off",
+    "rest_halten": false,
+    "neustart_mit_rest": true,
+    "zonen_1d": false,
+    "zonen_nachziehen": true,
+    "pivot_n_1d": 0,
+    "trend_filter": false,
+    "trend_ema": 200,
+    "ampel_filter": "off",
+    "muster_cvd": "alt",
+    "muster_oi": "usd",
+    "high_exit_hist": "voll",
+    "ausbruch_ruecktest": false,
+    "ruecktest_fenster": 12,
+    "verkauf_faktor": 1.0
+  },
+  "labels": [
+    "Einzeln stop_auf_docht=True"
+  ],
+  "groups": [
+    "single"
+  ],
+  "diff": {
+    "stop_auf_docht": true
+  },
+  "run_id": "audit-20260927-04-V055",
+  "input_sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+  "candles": 2480,
+  "start": 1768766400000,
+  "last_open": 1790481600000,
+  "mid": 1779632074420,
+  "long_only": true,
+  "signals": [
+    {
+      "ts": 1768766400000,
+      "type": "KAUF_1",
+      "price": 94026.465,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 90128->97924",
+      "stop_ref": 90128.44,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1768780800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 92690.09,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 93836",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1768795200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 92841.62,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 93092",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1768809600000,
+      "type": "NACHKAUF",
+      "price": 93191.96,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 92385 — aufstocken (NEUTRAL)",
+      "stop_ref": 90128.44,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1768881600000,
+      "type": "NACHKAUF",
+      "price": 91796.7947,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 90128.44,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1768910400000,
+      "type": "STOPLOSS",
+      "price": 90128.44,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 90128 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1770811200000,
+      "type": "KAUF_1",
+      "price": 66135.705,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 60000->72271",
+      "stop_ref": 60000.0,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1770984000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 68692.12,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 68411",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1771185600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 68832.58,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 68411",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1771804800000,
+      "type": "NACHKAUF",
+      "price": 64934.17,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (CAPITULATION_RESET)",
+      "stop_ref": 60000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1771819200000,
+      "type": "KAUF_2",
+      "price": 64687.67862,
+      "tranche_pct": 50,
+      "reason": "Golden Pocket 64295-64688 + Bestaetigung (NEUTRAL)",
+      "stop_ref": 60000.0,
+      "tag": "",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1771905600000,
+      "type": "NACHKAUF",
+      "price": 63192.96,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 60000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1771934400000,
+      "type": "NACHKAUF",
+      "price": 63973.97,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 60000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1771934400000,
+      "type": "NACHKAUF",
+      "price": 63973.97,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 62345 — aufstocken (NEUTRAL)",
+      "stop_ref": 60000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1771934400000,
+      "type": "NACHKAUF",
+      "price": 62626.08174,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 60000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1772006400000,
+      "type": "NACHKAUF",
+      "price": 65430.04,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 65200 — aufstocken (NEUTRAL)",
+      "stop_ref": 60000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1772064000000,
+      "type": "WARNUNG",
+      "price": 68216.86,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1772078400000,
+      "type": "WARNUNG",
+      "price": 67825.04,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1772107200000,
+      "type": "WARNUNG",
+      "price": 67382.0,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1772121600000,
+      "type": "WARNUNG",
+      "price": 67589.22,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1772496000000,
+      "type": "WARNUNG",
+      "price": 68377.94,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1772510400000,
+      "type": "WARNUNG",
+      "price": 68172.8,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1772611200000,
+      "type": "WARNUNG",
+      "price": 71111.4,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1772625600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 72327.408,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (72327)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1772640000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 73554.549,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.9 (73555)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1772697600000,
+      "type": "WARNUNG",
+      "price": 72915.79,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1772712000000,
+      "type": "TEILVERKAUF_1",
+      "price": 70402.28,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (70402)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1772712000000,
+      "type": "VERKAUF_REST",
+      "price": 71652.77,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1772798400000,
+      "type": "KAUF_2",
+      "price": 68504.71,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 68176), Schluss ueber Invalidierung (NEUTRAL)",
+      "stop_ref": 66158.0,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1772812800000,
+      "type": "NACHKAUF",
+      "price": 68131.79,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 66158.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1772812800000,
+      "type": "NACHKAUF",
+      "price": 67846.888,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 66158.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1772827200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 68114.02,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 68200",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1772841600000,
+      "type": "NACHKAUF",
+      "price": 68095.5,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 — aufstocken (CAPITULATION_RESET)",
+      "stop_ref": 66158.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1772856000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 67842.67,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 68200",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1772884800000,
+      "type": "NACHKAUF",
+      "price": 67877.45,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 67300 — aufstocken (NEUTRAL)",
+      "stop_ref": 66158.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1772928000000,
+      "type": "NACHKAUF",
+      "price": 67000.26,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 66158.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1772942400000,
+      "type": "NACHKAUF",
+      "price": 67319.91,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 66158.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1773000000000,
+      "type": "STOPLOSS",
+      "price": 66158.0,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 66158 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1773028800000,
+      "type": "KAUF_2",
+      "price": 67555.13,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 66853), Schluss ueber Invalidierung (NEUTRAL)",
+      "stop_ref": 66158.0,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1773043200000,
+      "type": "NACHKAUF",
+      "price": 67764.98,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 67077 — aufstocken (NEUTRAL)",
+      "stop_ref": 66158.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1773043200000,
+      "type": "NACHKAUF",
+      "price": 67846.888,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 66158.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1773057600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 68863.66,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 68200",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1773072000000,
+      "type": "NACHKAUF",
+      "price": 68991.93,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 — aufstocken (GESUNDER_TREND)",
+      "stop_ref": 66158.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1773100800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 69429.85,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 68476",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1773244800000,
+      "type": "WARNUNG",
+      "price": 70641.82,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773331200000,
+      "type": "WARNUNG",
+      "price": 70432.32,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773345600000,
+      "type": "WARNUNG",
+      "price": 70541.34,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773374400000,
+      "type": "WARNUNG",
+      "price": 71612.22,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773388800000,
+      "type": "WARNUNG",
+      "price": 72228.82,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773403200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 73167.08,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (73167)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1773403200000,
+      "type": "WARNUNG",
+      "price": 71831.46,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773417600000,
+      "type": "WARNUNG",
+      "price": 71189.95,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773432000000,
+      "type": "WARNUNG",
+      "price": 70930.0,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773446400000,
+      "type": "WARNUNG",
+      "price": 71081.3,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773619200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 73956.28,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.9 (73956)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1773633600000,
+      "type": "WARNUNG",
+      "price": 73456.68,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773648000000,
+      "type": "WARNUNG",
+      "price": 73552.77,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773662400000,
+      "type": "WARNUNG",
+      "price": 73274.76,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773676800000,
+      "type": "WARNUNG",
+      "price": 73963.0,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1773691200000,
+      "type": "TEILVERKAUF_1",
+      "price": 74745.48,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (74745)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1773691200000,
+      "type": "VERKAUF_REST",
+      "price": 74884.67,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1773820800000,
+      "type": "KAUF_1",
+      "price": 73158.5,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 70317->76000",
+      "stop_ref": 70317.0,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1773835200000,
+      "type": "NACHKAUF",
+      "price": 71533.162,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 70317.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1773849600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 71072.38,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 71777",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1773864000000,
+      "type": "NACHKAUF",
+      "price": 71246.54,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (CAPITULATION_RESET)",
+      "stop_ref": 70317.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1773878400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 71215.39,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 71777",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1773892800000,
+      "type": "STOPLOSS",
+      "price": 70317.0,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 70317 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1774353600000,
+      "type": "KAUF_1",
+      "price": 69588.875,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 67361->71817",
+      "stop_ref": 67360.66,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1774368000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 69377.33,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 69989",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1774382400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 70556.74,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 69989",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1774540800000,
+      "type": "NACHKAUF",
+      "price": 68314.33602,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 67360.66,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1774569600000,
+      "type": "NACHKAUF",
+      "price": 68767.51,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 68793 — aufstocken (NEUTRAL)",
+      "stop_ref": 67360.66,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1774584000000,
+      "type": "NACHKAUF",
+      "price": 68540.48,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 — aufstocken (NEUTRAL)",
+      "stop_ref": 67360.66,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1774598400000,
+      "type": "STOPLOSS",
+      "price": 67360.66,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 67361 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1775044800000,
+      "type": "KAUF_2",
+      "price": 68918.52,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 67919), Schluss ueber Invalidierung (GESUNDER_TREND)",
+      "stop_ref": 67360.66,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1775059200000,
+      "type": "NACHKAUF",
+      "price": 68176.84,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 — aufstocken (NEUTRAL)",
+      "stop_ref": 67360.66,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1775059200000,
+      "type": "NACHKAUF",
+      "price": 68314.33602,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 67360.66,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1775073600000,
+      "type": "NACHKAUF",
+      "price": 68113.92,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 — aufstocken (NEUTRAL)",
+      "stop_ref": 67360.66,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1775088000000,
+      "type": "STOPLOSS",
+      "price": 67360.66,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 67361 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1775102400000,
+      "type": "KAUF_2",
+      "price": 66930.79,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 66217), Schluss ueber Invalidierung (NEUTRAL)",
+      "stop_ref": 65000.0,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1775116800000,
+      "type": "NACHKAUF",
+      "price": 66220.28,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 65000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1775131200000,
+      "type": "NACHKAUF",
+      "price": 66852.91,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 65000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1775131200000,
+      "type": "NACHKAUF",
+      "price": 66852.91,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 65618 — aufstocken (NEUTRAL)",
+      "stop_ref": 65000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1775131200000,
+      "type": "NACHKAUF",
+      "price": 65922.34,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 65000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1775145600000,
+      "type": "NACHKAUF",
+      "price": 66975.99,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 66500 — aufstocken (NEUTRAL)",
+      "stop_ref": 65000.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1775160000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 66901.99,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 67289",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1775174400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 66579.97,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 67289",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1775433600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 69160.12,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (69160)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1775448000000,
+      "type": "WARNUNG",
+      "price": 69115.91,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1775462400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 69591.12,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.9 (69591)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1775462400000,
+      "type": "TEILVERKAUF_1",
+      "price": 70022.12,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (70022)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1775462400000,
+      "type": "VERKAUF_REST",
+      "price": 69614.91,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1775563200000,
+      "type": "KAUF_2",
+      "price": 68168.1,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 67732), Schluss ueber Invalidierung (GESUNDER_TREND)",
+      "stop_ref": 66611.66,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1775577600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 69011.29,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 68200",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1775592000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 71924.22,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 69310",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1775592000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 70723.84999999999,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (70724)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1775592000000,
+      "type": "TEILVERKAUF_1",
+      "price": 71471.81,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (71472)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1775592000000,
+      "type": "VERKAUF_REST",
+      "price": 71924.22,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1776513600000,
+      "type": "KAUF_1",
+      "price": 75821.425,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 73310->78333",
+      "stop_ref": 73309.85,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1776528000000,
+      "type": "NACHKAUF",
+      "price": 75649.85,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (GESUNDER_TREND)",
+      "stop_ref": 73309.85,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1776528000000,
+      "type": "NACHKAUF",
+      "price": 75649.85,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 75764 — aufstocken (GESUNDER_TREND)",
+      "stop_ref": 73309.85,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1776542400000,
+      "type": "NACHKAUF",
+      "price": 75691.76,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 75764 — aufstocken (GESUNDER_TREND)",
+      "stop_ref": 73309.85,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1776556800000,
+      "type": "NACHKAUF",
+      "price": 75515.77,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 73309.85,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1776571200000,
+      "type": "NACHKAUF",
+      "price": 75252.34,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 73309.85,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1776585600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 75604.11,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 75425",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1776600000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 75846.63,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 76000",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1776628800000,
+      "type": "NACHKAUF",
+      "price": 74384.80410000001,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 73309.85,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1776816000000,
+      "type": "WARNUNG",
+      "price": 77521.48,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1776830400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 77742.82999999999,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (77743)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1776830400000,
+      "type": "WARNUNG",
+      "price": 78012.79,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1776844800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 78245.14499999999,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.9 (78245)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1776844800000,
+      "type": "WARNUNG",
+      "price": 78300.0,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1776859200000,
+      "type": "TEILVERKAUF_1",
+      "price": 78747.45999999999,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (78747)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1776859200000,
+      "type": "VERKAUF_REST",
+      "price": 79272.9,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1777291200000,
+      "type": "KAUF_1",
+      "price": 76598.565,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 73724->79473",
+      "stop_ref": 73724.31,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1777348800000,
+      "type": "NACHKAUF",
+      "price": 76879.28,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 73724.31,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1777348800000,
+      "type": "NACHKAUF",
+      "price": 76879.28,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 76564 — aufstocken (NEUTRAL)",
+      "stop_ref": 73724.31,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1777363200000,
+      "type": "NACHKAUF",
+      "price": 76229.0,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 73724.31,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1777363200000,
+      "type": "NACHKAUF",
+      "price": 76229.0,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 75764 — aufstocken (NEUTRAL)",
+      "stop_ref": 73724.31,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1777377600000,
+      "type": "NACHKAUF",
+      "price": 76066.38,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 73724.31,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1777478400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 75563.86,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 76000",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1777492800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 75780.0,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 76000",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1777536000000,
+      "type": "KAUF_2",
+      "price": 75920.24082,
+      "tranche_pct": 50,
+      "reason": "Golden Pocket 75736-75920 + Bestaetigung (NEUTRAL)",
+      "stop_ref": 73724.31,
+      "tag": "",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1777708800000,
+      "type": "WARNUNG",
+      "price": 78143.08,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1777723200000,
+      "type": "WARNUNG",
+      "price": 78487.67,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1777737600000,
+      "type": "WARNUNG",
+      "price": 78486.0,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1777752000000,
+      "type": "WARNUNG",
+      "price": 78686.85,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1777852800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 79536.32800000001,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (79536)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1777867200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 80111.17900000002,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.9 (80111)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1777910400000,
+      "type": "TEILVERKAUF_1",
+      "price": 80686.03000000001,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (80686)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1778054400000,
+      "type": "VERKAUF_REST",
+      "price": 82522.89,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1778155200000,
+      "type": "KAUF_2",
+      "price": 79890.63,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 79700), Schluss ueber Invalidierung (NEUTRAL)",
+      "stop_ref": 78084.08,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1778227200000,
+      "type": "NACHKAUF",
+      "price": 80231.22,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 79700 — aufstocken (NEUTRAL)",
+      "stop_ref": 78084.08,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1778241600000,
+      "type": "NACHKAUF",
+      "price": 80142.14,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 79700 — aufstocken (NEUTRAL)",
+      "stop_ref": 78084.08,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1778443200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 82210.07,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 82850",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1778515200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 81961.99,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 82479",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1778673600000,
+      "type": "NACHKAUF",
+      "price": 79103.98688,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 78084.08,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1778846400000,
+      "type": "NACHKAUF",
+      "price": 79150.27,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 78084.08,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1778904000000,
+      "type": "STOPLOSS",
+      "price": 78084.08,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 78084 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1781035200000,
+      "type": "KAUF_1",
+      "price": 61682.795,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 59131->64235",
+      "stop_ref": 59130.91,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1781049600000,
+      "type": "NACHKAUF",
+      "price": 61549.64,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 59130.91,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1781049600000,
+      "type": "NACHKAUF",
+      "price": 61549.64,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 61384 — aufstocken (NEUTRAL)",
+      "stop_ref": 59130.91,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1781107200000,
+      "type": "NACHKAUF",
+      "price": 61942.44,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 61384 — aufstocken (NEUTRAL)",
+      "stop_ref": 59130.91,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1781193600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63605.68,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64235",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1781251200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63766.01,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64235",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1781337600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63666.552,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1781352000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64030.496,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.9 (64030)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1781380800000,
+      "type": "TEILVERKAUF_1",
+      "price": 64394.44,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (64394)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1781395200000,
+      "type": "VERKAUF_REST",
+      "price": 64545.3,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1781611200000,
+      "type": "KAUF_1",
+      "price": 65485.49,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 63679->67292",
+      "stop_ref": 63678.83,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1781654400000,
+      "type": "NACHKAUF",
+      "price": 65851.99,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 65426 — aufstocken (NEUTRAL)",
+      "stop_ref": 63678.83,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1781683200000,
+      "type": "NACHKAUF",
+      "price": 64810.01,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 63678.83,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1781712000000,
+      "type": "NACHKAUF",
+      "price": 64301.85,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 63678.83,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1781712000000,
+      "type": "NACHKAUF",
+      "price": 64301.85,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 64092 — aufstocken (NEUTRAL)",
+      "stop_ref": 63678.83,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1781712000000,
+      "type": "NACHKAUF",
+      "price": 64452.08048,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 63678.83,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1781726400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64509.4,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64763",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1781740800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64282.82,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64763",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1781784000000,
+      "type": "STOPLOSS",
+      "price": 63678.83,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 63679 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1783584000000,
+      "type": "KAUF_1",
+      "price": 63003.42,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 61307->64700",
+      "stop_ref": 61306.84,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1783598400000,
+      "type": "NACHKAUF",
+      "price": 62868.05,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 61306.84,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1783598400000,
+      "type": "NACHKAUF",
+      "price": 62868.05,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 62294 — aufstocken (NEUTRAL)",
+      "stop_ref": 61306.84,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1783612800000,
+      "type": "NACHKAUF",
+      "price": 63248.1,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 62294 — aufstocken (NEUTRAL)",
+      "stop_ref": 61306.84,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1783612800000,
+      "type": "KAUF_2",
+      "price": 62603.02712,
+      "tranche_pct": 50,
+      "reason": "Golden Pocket 62494-62603 + Bestaetigung (NEUTRAL)",
+      "stop_ref": 61306.84,
+      "tag": "",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1783627200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63230.0,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 63462",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1783641600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63947.2,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 63239",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1783641600000,
+      "type": "WARNUNG",
+      "price": 63947.2,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1783656000000,
+      "type": "WARNUNG",
+      "price": 63963.0,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1783756800000,
+      "type": "WARNUNG",
+      "price": 64198.0,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1783958400000,
+      "type": "NACHKAUF",
+      "price": 62032.976239999996,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 61306.84,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1784030400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64539.49800000001,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (64539)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1784044800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64878.814000000006,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.9 (64879)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1784059200000,
+      "type": "WARNUNG",
+      "price": 65043.98,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1784073600000,
+      "type": "WARNUNG",
+      "price": 64792.01,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1784088000000,
+      "type": "TEILVERKAUF_1",
+      "price": 65218.130000000005,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (65218)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1784088000000,
+      "type": "VERKAUF_REST",
+      "price": 64549.34,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1784246400000,
+      "type": "KAUF_1",
+      "price": 63712.485,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 61825->65600",
+      "stop_ref": 61824.97,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1784275200000,
+      "type": "NACHKAUF",
+      "price": 63298.01,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 61824.97,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1784275200000,
+      "type": "NACHKAUF",
+      "price": 63298.01,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 62741 — aufstocken (NEUTRAL)",
+      "stop_ref": 61824.97,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1784289600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63452.0,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 63462",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1784304000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64160.8,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 63462",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1784534400000,
+      "type": "WARNUNG",
+      "price": 65002.01,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1784548800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 65557.584,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (65558)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1784548800000,
+      "type": "WARNUNG",
+      "price": 65598.75,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1784606400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 65935.087,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.9 (65935)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1784620800000,
+      "type": "TEILVERKAUF_1",
+      "price": 66312.59,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (66313)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1784808000000,
+      "type": "KAUF_1",
+      "price": 65028.075,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 63100->66956",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1784822400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64846.94,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64967",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1784836800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 65098.97,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64967",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1784894400000,
+      "type": "NACHKAUF",
+      "price": 63925.2161,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1784937600000,
+      "type": "NACHKAUF",
+      "price": 64085.36,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 63740 — aufstocken (UNGESUNDER_ABVERKAUF)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1784952000000,
+      "type": "NACHKAUF",
+      "price": 64003.2,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 63740 — aufstocken (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1785196800000,
+      "type": "STOPLOSS",
+      "price": 63100.0,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 63100 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1785297600000,
+      "type": "KAUF_2",
+      "price": 64561.0,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 63598), Schluss ueber Invalidierung (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1785312000000,
+      "type": "NACHKAUF",
+      "price": 64507.54,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 64418 — aufstocken (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1785326400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63964.01,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64693",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1785340800000,
+      "type": "NACHKAUF",
+      "price": 63589.46,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1785340800000,
+      "type": "NACHKAUF",
+      "price": 63589.46,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 63606 — aufstocken (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1785340800000,
+      "type": "NACHKAUF",
+      "price": 63925.2161,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1785355200000,
+      "type": "NACHKAUF",
+      "price": 63984.28,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1785369600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64161.98,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 63999",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1785398400000,
+      "type": "WARNUNG",
+      "price": 64788.0,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1785499200000,
+      "type": "STOPLOSS",
+      "price": 63100.0,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 63100 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1785931200000,
+      "type": "KAUF_2",
+      "price": 64388.01,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 63880), Schluss ueber Invalidierung (GESUNDER_TREND)",
+      "stop_ref": 63100.0,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1785945600000,
+      "type": "NACHKAUF",
+      "price": 64840.28,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 64418 — aufstocken (SHORT_COVERING)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1785960000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64665.23,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64967",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1785974400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64531.03,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64693",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1786017600000,
+      "type": "NACHKAUF",
+      "price": 64631.87,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 64418 — aufstocken (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1786377600000,
+      "type": "NACHKAUF",
+      "price": 64045.7,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1786377600000,
+      "type": "NACHKAUF",
+      "price": 63925.2161,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1786449600000,
+      "type": "NACHKAUF",
+      "price": 63609.87,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1786464000000,
+      "type": "NACHKAUF",
+      "price": 63536.0,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1786636800000,
+      "type": "STOPLOSS",
+      "price": 63100.0,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 63100 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1786996800000,
+      "type": "KAUF_2",
+      "price": 64532.1,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 64266), Schluss ueber Invalidierung (SHORT_COVERING)",
+      "stop_ref": 63100.0,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1787011200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64185.01,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64693",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1787025600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64198.97,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 64235",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1787054400000,
+      "type": "NACHKAUF",
+      "price": 64855.06,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (SHORT_COVERING)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1787054400000,
+      "type": "NACHKAUF",
+      "price": 64855.06,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 63740 — aufstocken (SHORT_COVERING)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1787068800000,
+      "type": "NACHKAUF",
+      "price": 64643.26,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 64418 — aufstocken (NEUTRAL)",
+      "stop_ref": 63100.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1787140800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 67112.76999999999,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (67113)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1787140800000,
+      "type": "TEILVERKAUF_1",
+      "price": 67884.0,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (67884)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1787140800000,
+      "type": "VERKAUF_REST",
+      "price": 68554.0,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1787688000000,
+      "type": "KAUF_1",
+      "price": 78409.14499999999,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 75546->81273",
+      "stop_ref": 75545.67,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1787702400000,
+      "type": "NACHKAUF",
+      "price": 79088.62,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 78121 — aufstocken (GESUNDER_TREND)",
+      "stop_ref": 75545.67,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1787716800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 78925.56,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 79199",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1787731200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 78487.26,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 79199",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1787774400000,
+      "type": "NACHKAUF",
+      "price": 79023.75,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 77851 — aufstocken (NEUTRAL)",
+      "stop_ref": 75545.67,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1787904000000,
+      "type": "WARNUNG",
+      "price": 79604.13,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1788177600000,
+      "type": "KAUF_2",
+      "price": 77733.3649,
+      "tranche_pct": 50,
+      "reason": "Golden Pocket 77550-77733 + Bestaetigung (NEUTRAL)",
+      "stop_ref": 75545.67,
+      "tag": "",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1788278400000,
+      "type": "NACHKAUF",
+      "price": 76771.2373,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 75545.67,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1788336000000,
+      "type": "NACHKAUF",
+      "price": 76828.76,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 75545.67,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1788436800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 80845.56,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (80846)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1788451200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 81418.255,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.9 (81418)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1788465600000,
+      "type": "TEILVERKAUF_1",
+      "price": 81990.95,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (81991)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1788696000000,
+      "type": "KAUF_1",
+      "price": 79282.0,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 76264->82300",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1788710400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 79829.99,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 80200",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1788724800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 80341.83,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 80200",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1788753600000,
+      "type": "NACHKAUF",
+      "price": 79397.83,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1788753600000,
+      "type": "NACHKAUF",
+      "price": 79397.83,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 78660 — aufstocken (NEUTRAL)",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1788768000000,
+      "type": "NACHKAUF",
+      "price": 79420.16,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 79369 — aufstocken (NEUTRAL)",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1788840000000,
+      "type": "NACHKAUF",
+      "price": 78482.0,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1789041600000,
+      "type": "NACHKAUF",
+      "price": 77555.704,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1789070400000,
+      "type": "NACHKAUF",
+      "price": 76568.72,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1789128000000,
+      "type": "STOPLOSS",
+      "price": 76264.0,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 76264 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1789358400000,
+      "type": "KAUF_2",
+      "price": 77892.24,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 77379), Schluss ueber Invalidierung (NEUTRAL)",
+      "stop_ref": 76264.0,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1789372800000,
+      "type": "NACHKAUF",
+      "price": 77776.0,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 77851 — aufstocken (NEUTRAL)",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1789387200000,
+      "type": "NACHKAUF",
+      "price": 78578.02,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 77851 — aufstocken (GESUNDER_TREND)",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1789387200000,
+      "type": "NACHKAUF",
+      "price": 77555.704,
+      "tranche_pct": 25,
+      "reason": "0.786-Zone erreicht, Struktur intakt",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1789401600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 78982.0,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 78600",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1789416000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 78189.21,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 79199",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1789459200000,
+      "type": "NACHKAUF",
+      "price": 76940.01,
+      "tranche_pct": 15,
+      "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1789473600000,
+      "type": "STOPLOSS",
+      "price": 76264.0,
+      "tranche_pct": 100,
+      "reason": "Kerzentief unter Invalidierung 76264 (Docht) - Ausstieg zum Stopkurs",
+      "stop_ref": null,
+      "tag": "",
+      "label": "STOPLOSS"
+    },
+    {
+      "ts": 1789718400000,
+      "type": "KAUF_2",
+      "price": 78062.0,
+      "tranche_pct": 75,
+      "reason": "Capitulation: GP durchschlagen (Tief 77660), Schluss ueber Invalidierung (GESUNDER_TREND)",
+      "stop_ref": 76264.0,
+      "tag": "FLUSH",
+      "label": "KAUF 2 (Kernposition im Golden Pocket)"
+    },
+    {
+      "ts": 1789732800000,
+      "type": "NACHKAUF",
+      "price": 80725.6,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 77851 — aufstocken (SHORT_COVERING)",
+      "stop_ref": 76264.0,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1789747200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 81204.76,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 81273",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1789761600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 80883.87,
+      "tranche_pct": 15,
+      "reason": "Teilgewinn am letzten Hoch 81273",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1789790400000,
+      "type": "WARNUNG",
+      "price": 81100.16,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1789804800000,
+      "type": "WARNUNG",
+      "price": 81302.63,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1789848000000,
+      "type": "WARNUNG",
+      "price": 81249.99,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1789862400000,
+      "type": "WARNUNG",
+      "price": 80486.38,
+      "tranche_pct": 0,
+      "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+      "stop_ref": null,
+      "tag": "",
+      "label": "WARNUNG (Derivate-Pump aktiv)"
+    },
+    {
+      "ts": 1789977600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 82488.8,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (82489)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 1789977600000,
+      "type": "TEILVERKAUF_1",
+      "price": 83696.0,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (83696)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    },
+    {
+      "ts": 1789977600000,
+      "type": "VERKAUF_REST",
+      "price": 84887.19,
+      "tranche_pct": 20,
+      "reason": "Gegen-Muster am Ziel: SHORT_COVERING",
+      "stop_ref": null,
+      "tag": "",
+      "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+    },
+    {
+      "ts": 1790179200000,
+      "type": "KAUF_1",
+      "price": 83760.855,
+      "tranche_pct": 25,
+      "reason": "0.5-Retracement des Impulses 80126->87396",
+      "stop_ref": 80126.04,
+      "tag": "",
+      "label": "KAUF 1 (Teilposition am 0.5-Level)"
+    },
+    {
+      "ts": 1790308800000,
+      "type": "NACHKAUF",
+      "price": 84043.96,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 83864 — aufstocken (NEUTRAL)",
+      "stop_ref": 80126.04,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    },
+    {
+      "ts": 1790337600000,
+      "type": "NACHKAUF",
+      "price": 83796.01,
+      "tranche_pct": 20,
+      "reason": "Konfluenz: Fib-Zone + Liquidationszone 82875 — aufstocken (NEUTRAL)",
+      "stop_ref": 80126.04,
+      "tag": "",
+      "label": "NACHKAUF (0.786-Zone)"
+    }
+  ],
+  "original": {
+    "start": 10000.0,
+    "ende": 13369.67,
+    "rendite_pct": 33.7,
+    "buyhold_pct": -9.48,
+    "trades": 99,
+    "gewinn_trades": 64,
+    "long_profit": 3282.41,
+    "long_trades": 99,
+    "long_wins": 64,
+    "short_profit": 0.0,
+    "short_trades": 0,
+    "short_wins": 0,
+    "fee_pct": 0.1,
+    "equity": [
+      {
+        "ts": 1768766400000,
+        "equity": 9997.5
+      },
+      {
+        "ts": 1768780800000,
+        "equity": 9961.63
+      },
+      {
+        "ts": 1768795200000,
+        "equity": 9964.69
+      },
+      {
+        "ts": 1768809600000,
+        "equity": 9969.2
+      },
+      {
+        "ts": 1768881600000,
+        "equity": 9910.85
+      },
+      {
+        "ts": 1768910400000,
+        "equity": 9792.61
+      },
+      {
+        "ts": 1770811200000,
+        "equity": 9790.16
+      },
+      {
+        "ts": 1770984000000,
+        "equity": 9884.31
+      },
+      {
+        "ts": 1771185600000,
+        "equity": 9888.35
+      },
+      {
+        "ts": 1771804800000,
+        "equity": 9785.96
+      },
+      {
+        "ts": 1771819200000,
+        "equity": 9769.12
+      },
+      {
+        "ts": 1771905600000,
+        "equity": 9582.15
+      },
+      {
+        "ts": 1771934400000,
+        "equity": 9696.94
+      },
+      {
+        "ts": 1771934400000,
+        "equity": 9696.94
+      },
+      {
+        "ts": 1771934400000,
+        "equity": 9492.63
+      },
+      {
+        "ts": 1772006400000,
+        "equity": 9917.65
+      },
+      {
+        "ts": 1772064000000,
+        "equity": 10340.06
+      },
+      {
+        "ts": 1772078400000,
+        "equity": 10280.67
+      },
+      {
+        "ts": 1772107200000,
+        "equity": 10213.52
+      },
+      {
+        "ts": 1772121600000,
+        "equity": 10244.93
+      },
+      {
+        "ts": 1772496000000,
+        "equity": 10364.48
+      },
+      {
+        "ts": 1772510400000,
+        "equity": 10333.38
+      },
+      {
+        "ts": 1772611200000,
+        "equity": 10778.81
+      },
+      {
+        "ts": 1772625600000,
+        "equity": 10961.48
+      },
+      {
+        "ts": 1772640000000,
+        "equity": 11117.91
+      },
+      {
+        "ts": 1772697600000,
+        "equity": 11050.14
+      },
+      {
+        "ts": 1772712000000,
+        "equity": 10779.18
+      },
+      {
+        "ts": 1772712000000,
+        "equity": 10832.78
+      },
+      {
+        "ts": 1772798400000,
+        "equity": 10824.66
+      },
+      {
+        "ts": 1772812800000,
+        "equity": 10778.85
+      },
+      {
+        "ts": 1772812800000,
+        "equity": 10737.22
+      },
+      {
+        "ts": 1772827200000,
+        "equity": 10777.88
+      },
+      {
+        "ts": 1772841600000,
+        "equity": 10773.77
+      },
+      {
+        "ts": 1772856000000,
+        "equity": 10732.16
+      },
+      {
+        "ts": 1772884800000,
+        "equity": 10735.23
+      },
+      {
+        "ts": 1772928000000,
+        "equity": 10596.5
+      },
+      {
+        "ts": 1772942400000,
+        "equity": 10647.05
+      },
+      {
+        "ts": 1773000000000,
+        "equity": 10452.83
+      },
+      {
+        "ts": 1773028800000,
+        "equity": 10444.99
+      },
+      {
+        "ts": 1773043200000,
+        "equity": 10467.22
+      },
+      {
+        "ts": 1773043200000,
+        "equity": 10478.72
+      },
+      {
+        "ts": 1773057600000,
+        "equity": 10634.16
+      },
+      {
+        "ts": 1773072000000,
+        "equity": 10649.41
+      },
+      {
+        "ts": 1773100800000,
+        "equity": 10715.4
+      },
+      {
+        "ts": 1773244800000,
+        "equity": 10874.39
+      },
+      {
+        "ts": 1773331200000,
+        "equity": 10846.91
+      },
+      {
+        "ts": 1773345600000,
+        "equity": 10861.21
+      },
+      {
+        "ts": 1773374400000,
+        "equity": 11001.7
+      },
+      {
+        "ts": 1773388800000,
+        "equity": 11082.59
+      },
+      {
+        "ts": 1773403200000,
+        "equity": 11203.99
+      },
+      {
+        "ts": 1773403200000,
+        "equity": 11059.71
+      },
+      {
+        "ts": 1773417600000,
+        "equity": 10990.41
+      },
+      {
+        "ts": 1773432000000,
+        "equity": 10962.33
+      },
+      {
+        "ts": 1773446400000,
+        "equity": 10978.68
+      },
+      {
+        "ts": 1773619200000,
+        "equity": 11287.53
+      },
+      {
+        "ts": 1773633600000,
+        "equity": 11245.13
+      },
+      {
+        "ts": 1773648000000,
+        "equity": 11253.29
+      },
+      {
+        "ts": 1773662400000,
+        "equity": 11229.7
+      },
+      {
+        "ts": 1773676800000,
+        "equity": 11288.1
+      },
+      {
+        "ts": 1773691200000,
+        "equity": 11349.88
+      },
+      {
+        "ts": 1773691200000,
+        "equity": 11351.36
+      },
+      {
+        "ts": 1773820800000,
+        "equity": 11348.52
+      },
+      {
+        "ts": 1773835200000,
+        "equity": 11282.7
+      },
+      {
+        "ts": 1773849600000,
+        "equity": 11245.75
+      },
+      {
+        "ts": 1773864000000,
+        "equity": 11255.65
+      },
+      {
+        "ts": 1773878400000,
+        "equity": 11251.86
+      },
+      {
+        "ts": 1773892800000,
+        "equity": 11177.35
+      },
+      {
+        "ts": 1774353600000,
+        "equity": 11174.55
+      },
+      {
+        "ts": 1774368000000,
+        "equity": 11165.65
+      },
+      {
+        "ts": 1774382400000,
+        "equity": 11205.44
+      },
+      {
+        "ts": 1774540800000,
+        "equity": 11139.68
+      },
+      {
+        "ts": 1774569600000,
+        "equity": 11168.68
+      },
+      {
+        "ts": 1774584000000,
+        "equity": 11143.42
+      },
+      {
+        "ts": 1774598400000,
+        "equity": 10976.3
+      },
+      {
+        "ts": 1775044800000,
+        "equity": 10968.07
+      },
+      {
+        "ts": 1775059200000,
+        "equity": 10877.37
+      },
+      {
+        "ts": 1775059200000,
+        "equity": 10897.65
+      },
+      {
+        "ts": 1775073600000,
+        "equity": 10865.68
+      },
+      {
+        "ts": 1775088000000,
+        "equity": 10734.77
+      },
+      {
+        "ts": 1775102400000,
+        "equity": 10726.72
+      },
+      {
+        "ts": 1775116800000,
+        "equity": 10639.73
+      },
+      {
+        "ts": 1775131200000,
+        "equity": 10730.05
+      },
+      {
+        "ts": 1775131200000,
+        "equity": 10730.05
+      },
+      {
+        "ts": 1775131200000,
+        "equity": 10580.69
+      },
+      {
+        "ts": 1775145600000,
+        "equity": 10749.8
+      },
+      {
+        "ts": 1775160000000,
+        "equity": 10736.31
+      },
+      {
+        "ts": 1775174400000,
+        "equity": 10690.78
+      },
+      {
+        "ts": 1775433600000,
+        "equity": 10979.0
+      },
+      {
+        "ts": 1775448000000,
+        "equity": 10975.09
+      },
+      {
+        "ts": 1775462400000,
+        "equity": 11015.37
+      },
+      {
+        "ts": 1775462400000,
+        "equity": 11038.54
+      },
+      {
+        "ts": 1775462400000,
+        "equity": 11038.54
+      },
+      {
+        "ts": 1775563200000,
+        "equity": 11030.26
+      },
+      {
+        "ts": 1775577600000,
+        "equity": 11131.31
+      },
+      {
+        "ts": 1775592000000,
+        "equity": 11430.41
+      },
+      {
+        "ts": 1775592000000,
+        "equity": 11327.17
+      },
+      {
+        "ts": 1775592000000,
+        "equity": 11373.62
+      },
+      {
+        "ts": 1775592000000,
+        "equity": 11380.54
+      },
+      {
+        "ts": 1776513600000,
+        "equity": 11377.69
+      },
+      {
+        "ts": 1776528000000,
+        "equity": 11369.56
+      },
+      {
+        "ts": 1776528000000,
+        "equity": 11367.28
+      },
+      {
+        "ts": 1776542400000,
+        "equity": 11368.78
+      },
+      {
+        "ts": 1776556800000,
+        "equity": 11345.93
+      },
+      {
+        "ts": 1776571200000,
+        "equity": 11307.77
+      },
+      {
+        "ts": 1776585600000,
+        "equity": 11358.92
+      },
+      {
+        "ts": 1776600000000,
+        "equity": 11388.19
+      },
+      {
+        "ts": 1776628800000,
+        "equity": 11231.58
+      },
+      {
+        "ts": 1776816000000,
+        "equity": 11681.37
+      },
+      {
+        "ts": 1776830400000,
+        "equity": 11711.36
+      },
+      {
+        "ts": 1776830400000,
+        "equity": 11743.98
+      },
+      {
+        "ts": 1776844800000,
+        "equity": 11770.3
+      },
+      {
+        "ts": 1776844800000,
+        "equity": 11775.69
+      },
+      {
+        "ts": 1776859200000,
+        "equity": 11814.95
+      },
+      {
+        "ts": 1776859200000,
+        "equity": 11832.0
+      },
+      {
+        "ts": 1777291200000,
+        "equity": 11829.04
+      },
+      {
+        "ts": 1777348800000,
+        "equity": 11838.1
+      },
+      {
+        "ts": 1777348800000,
+        "equity": 11835.73
+      },
+      {
+        "ts": 1777363200000,
+        "equity": 11773.88
+      },
+      {
+        "ts": 1777363200000,
+        "equity": 11771.51
+      },
+      {
+        "ts": 1777377600000,
+        "equity": 11747.07
+      },
+      {
+        "ts": 1777478400000,
+        "equity": 11667.71
+      },
+      {
+        "ts": 1777492800000,
+        "equity": 11694.33
+      },
+      {
+        "ts": 1777536000000,
+        "equity": 11705.99
+      },
+      {
+        "ts": 1777708800000,
+        "equity": 12048.72
+      },
+      {
+        "ts": 1777723200000,
+        "equity": 12101.85
+      },
+      {
+        "ts": 1777737600000,
+        "equity": 12101.6
+      },
+      {
+        "ts": 1777752000000,
+        "equity": 12132.56
+      },
+      {
+        "ts": 1777852800000,
+        "equity": 12261.7
+      },
+      {
+        "ts": 1777867200000,
+        "equity": 12335.16
+      },
+      {
+        "ts": 1777910400000,
+        "equity": 12392.18
+      },
+      {
+        "ts": 1778054400000,
+        "equity": 12473.03
+      },
+      {
+        "ts": 1778155200000,
+        "equity": 12463.68
+      },
+      {
+        "ts": 1778227200000,
+        "equity": 12501.03
+      },
+      {
+        "ts": 1778241600000,
+        "equity": 12487.21
+      },
+      {
+        "ts": 1778443200000,
+        "equity": 12807.5
+      },
+      {
+        "ts": 1778515200000,
+        "equity": 12772.73
+      },
+      {
+        "ts": 1778673600000,
+        "equity": 12457.89
+      },
+      {
+        "ts": 1778846400000,
+        "equity": 12464.05
+      },
+      {
+        "ts": 1778904000000,
+        "equity": 12283.86
+      },
+      {
+        "ts": 1781035200000,
+        "equity": 12280.79
+      },
+      {
+        "ts": 1781049600000,
+        "equity": 12272.32
+      },
+      {
+        "ts": 1781049600000,
+        "equity": 12269.86
+      },
+      {
+        "ts": 1781107200000,
+        "equity": 12314.35
+      },
+      {
+        "ts": 1781193600000,
+        "equity": 12577.52
+      },
+      {
+        "ts": 1781251200000,
+        "equity": 12597.69
+      },
+      {
+        "ts": 1781337600000,
+        "equity": 12585.09
+      },
+      {
+        "ts": 1781352000000,
+        "equity": 12615.42
+      },
+      {
+        "ts": 1781380800000,
+        "equity": 12634.49
+      },
+      {
+        "ts": 1781395200000,
+        "equity": 12634.49
+      },
+      {
+        "ts": 1781611200000,
+        "equity": 12631.33
+      },
+      {
+        "ts": 1781654400000,
+        "equity": 12646.46
+      },
+      {
+        "ts": 1781683200000,
+        "equity": 12554.41
+      },
+      {
+        "ts": 1781712000000,
+        "equity": 12493.71
+      },
+      {
+        "ts": 1781712000000,
+        "equity": 12491.18
+      },
+      {
+        "ts": 1781712000000,
+        "equity": 12518.26
+      },
+      {
+        "ts": 1781726400000,
+        "equity": 12527.51
+      },
+      {
+        "ts": 1781740800000,
+        "equity": 12488.23
+      },
+      {
+        "ts": 1781784000000,
+        "equity": 12397.46
+      },
+      {
+        "ts": 1783584000000,
+        "equity": 12394.36
+      },
+      {
+        "ts": 1783598400000,
+        "equity": 12385.84
+      },
+      {
+        "ts": 1783598400000,
+        "equity": 12383.37
+      },
+      {
+        "ts": 1783612800000,
+        "equity": 12425.77
+      },
+      {
+        "ts": 1783612800000,
+        "equity": 12321.85
+      },
+      {
+        "ts": 1783627200000,
+        "equity": 12443.38
+      },
+      {
+        "ts": 1783641600000,
+        "equity": 12561.48
+      },
+      {
+        "ts": 1783641600000,
+        "equity": 12561.48
+      },
+      {
+        "ts": 1783656000000,
+        "equity": 12563.66
+      },
+      {
+        "ts": 1783756800000,
+        "equity": 12596.04
+      },
+      {
+        "ts": 1783958400000,
+        "equity": 12294.65
+      },
+      {
+        "ts": 1784030400000,
+        "equity": 12763.19
+      },
+      {
+        "ts": 1784044800000,
+        "equity": 12814.95
+      },
+      {
+        "ts": 1784059200000,
+        "equity": 12836.19
+      },
+      {
+        "ts": 1784073600000,
+        "equity": 12803.78
+      },
+      {
+        "ts": 1784088000000,
+        "equity": 12853.46
+      },
+      {
+        "ts": 1784088000000,
+        "equity": 12816.86
+      },
+      {
+        "ts": 1784246400000,
+        "equity": 12813.65
+      },
+      {
+        "ts": 1784275200000,
+        "equity": 12790.91
+      },
+      {
+        "ts": 1784275200000,
+        "equity": 12788.34
+      },
+      {
+        "ts": 1784289600000,
+        "equity": 12805.83
+      },
+      {
+        "ts": 1784304000000,
+        "equity": 12877.59
+      },
+      {
+        "ts": 1784534400000,
+        "equity": 12948.86
+      },
+      {
+        "ts": 1784548800000,
+        "equity": 12994.75
+      },
+      {
+        "ts": 1784548800000,
+        "equity": 12997.49
+      },
+      {
+        "ts": 1784606400000,
+        "equity": 13018.68
+      },
+      {
+        "ts": 1784620800000,
+        "equity": 13033.75
+      },
+      {
+        "ts": 1784808000000,
+        "equity": 13030.54
+      },
+      {
+        "ts": 1784822400000,
+        "equity": 13020.45
+      },
+      {
+        "ts": 1784836800000,
+        "equity": 13027.1
+      },
+      {
+        "ts": 1784894400000,
+        "equity": 13008.74
+      },
+      {
+        "ts": 1784937600000,
+        "equity": 13016.26
+      },
+      {
+        "ts": 1784952000000,
+        "equity": 13005.24
+      },
+      {
+        "ts": 1785196800000,
+        "equity": 12867.1
+      },
+      {
+        "ts": 1785297600000,
+        "equity": 12857.45
+      },
+      {
+        "ts": 1785312000000,
+        "equity": 12846.89
+      },
+      {
+        "ts": 1785326400000,
+        "equity": 12742.25
+      },
+      {
+        "ts": 1785340800000,
+        "equity": 12680.09
+      },
+      {
+        "ts": 1785340800000,
+        "equity": 12679.57
+      },
+      {
+        "ts": 1785340800000,
+        "equity": 12746.52
+      },
+      {
+        "ts": 1785355200000,
+        "equity": 12758.29
+      },
+      {
+        "ts": 1785369600000,
+        "equity": 12791.81
+      },
+      {
+        "ts": 1785398400000,
+        "equity": 12897.91
+      },
+      {
+        "ts": 1785499200000,
+        "equity": 12601.12
+      },
+      {
+        "ts": 1785931200000,
+        "equity": 12591.67
+      },
+      {
+        "ts": 1785945600000,
+        "equity": 12655.47
+      },
+      {
+        "ts": 1785960000000,
+        "equity": 12621.2
+      },
+      {
+        "ts": 1785974400000,
+        "equity": 12598.25
+      },
+      {
+        "ts": 1786017600000,
+        "equity": 12608.82
+      },
+      {
+        "ts": 1786377600000,
+        "equity": 12508.19
+      },
+      {
+        "ts": 1786377600000,
+        "equity": 12484.66
+      },
+      {
+        "ts": 1786449600000,
+        "equity": 12423.07
+      },
+      {
+        "ts": 1786464000000,
+        "equity": 12408.64
+      },
+      {
+        "ts": 1786636800000,
+        "equity": 12311.17
+      },
+      {
+        "ts": 1786996800000,
+        "equity": 12301.94
+      },
+      {
+        "ts": 1787011200000,
+        "equity": 12250.95
+      },
+      {
+        "ts": 1787025600000,
+        "equity": 12251.27
+      },
+      {
+        "ts": 1787054400000,
+        "equity": 12315.07
+      },
+      {
+        "ts": 1787054400000,
+        "equity": 12312.61
+      },
+      {
+        "ts": 1787068800000,
+        "equity": 12275.84
+      },
+      {
+        "ts": 1787140800000,
+        "equity": 12742.89
+      },
+      {
+        "ts": 1787140800000,
+        "equity": 12862.22
+      },
+      {
+        "ts": 1787140800000,
+        "equity": 12913.62
+      },
+      {
+        "ts": 1787688000000,
+        "equity": 12910.39
+      },
+      {
+        "ts": 1787702400000,
+        "equity": 12935.75
+      },
+      {
+        "ts": 1787716800000,
+        "equity": 12922.85
+      },
+      {
+        "ts": 1787731200000,
+        "equity": 12894.51
+      },
+      {
+        "ts": 1787774400000,
+        "equity": 12919.62
+      },
+      {
+        "ts": 1787904000000,
+        "equity": 12968.54
+      },
+      {
+        "ts": 1788177600000,
+        "equity": 12804.61
+      },
+      {
+        "ts": 1788278400000,
+        "equity": 12646.13
+      },
+      {
+        "ts": 1788336000000,
+        "equity": 12655.6
+      },
+      {
+        "ts": 1788436800000,
+        "equity": 13315.27
+      },
+      {
+        "ts": 1788451200000,
+        "equity": 13393.44
+      },
+      {
+        "ts": 1788465600000,
+        "equity": 13454.08
+      },
+      {
+        "ts": 1788696000000,
+        "equity": 13316.98
+      },
+      {
+        "ts": 1788710400000,
+        "equity": 13364.38
+      },
+      {
+        "ts": 1788724800000,
+        "equity": 13395.86
+      },
+      {
+        "ts": 1788753600000,
+        "equity": 13355.52
+      },
+      {
+        "ts": 1788753600000,
+        "equity": 13352.94
+      },
+      {
+        "ts": 1788768000000,
+        "equity": 13352.54
+      },
+      {
+        "ts": 1788840000000,
+        "equity": 13228.61
+      },
+      {
+        "ts": 1789041600000,
+        "equity": 13084.23
+      },
+      {
+        "ts": 1789070400000,
+        "equity": 12917.72
+      },
+      {
+        "ts": 1789128000000,
+        "equity": 12853.44
+      },
+      {
+        "ts": 1789358400000,
+        "equity": 12843.8
+      },
+      {
+        "ts": 1789372800000,
+        "equity": 12826.86
+      },
+      {
+        "ts": 1789387200000,
+        "equity": 12951.86
+      },
+      {
+        "ts": 1789387200000,
+        "equity": 12783.35
+      },
+      {
+        "ts": 1789401600000,
+        "equity": 13016.49
+      },
+      {
+        "ts": 1789416000000,
+        "equity": 12903.49
+      },
+      {
+        "ts": 1789459200000,
+        "equity": 12757.43
+      },
+      {
+        "ts": 1789473600000,
+        "equity": 12651.8
+      },
+      {
+        "ts": 1789718400000,
+        "equity": 12642.31
+      },
+      {
+        "ts": 1789732800000,
+        "equity": 12963.23
+      },
+      {
+        "ts": 1789747200000,
+        "equity": 13034.56
+      },
+      {
+        "ts": 1789761600000,
+        "equity": 12991.04
+      },
+      {
+        "ts": 1789790400000,
+        "equity": 13014.17
+      },
+      {
+        "ts": 1789804800000,
+        "equity": 13035.82
+      },
+      {
+        "ts": 1789848000000,
+        "equity": 13030.19
+      },
+      {
+        "ts": 1789862400000,
+        "equity": 12948.54
+      },
+      {
+        "ts": 1789977600000,
+        "equity": 13160.76
+      },
+      {
+        "ts": 1789977600000,
+        "equity": 13257.06
+      },
+      {
+        "ts": 1789977600000,
+        "equity": 13282.41
+      },
+      {
+        "ts": 1790179200000,
+        "equity": 13279.09
+      },
+      {
+        "ts": 1790308800000,
+        "equity": 13287.64
+      },
+      {
+        "ts": 1790337600000,
+        "equity": 13267.34
+      }
+    ],
+    "deploy_pct": 100,
+    "max_drawdown_pct": -9.94,
+    "monate": [
+      {
+        "monat": "2026-01",
+        "ende": 9792.61,
+        "gewinn": -207.39,
+        "rendite_pct": -2.07,
+        "btc_pct": -15.94
+      },
+      {
+        "monat": "2026-02",
+        "ende": 10151.56,
+        "gewinn": 358.95,
+        "rendite_pct": 3.67,
+        "btc_pct": -14.94
+      },
+      {
+        "monat": "2026-03",
+        "ende": 10976.3,
+        "gewinn": 824.74,
+        "rendite_pct": 8.12,
+        "btc_pct": 1.96
+      },
+      {
+        "monat": "2026-04",
+        "ende": 11771.72,
+        "gewinn": 795.42,
+        "rendite_pct": 7.25,
+        "btc_pct": 11.81
+      },
+      {
+        "monat": "2026-05",
+        "ende": 12283.86,
+        "gewinn": 512.13,
+        "rendite_pct": 4.35,
+        "btc_pct": -3.5
+      },
+      {
+        "monat": "2026-06",
+        "ende": 12397.46,
+        "gewinn": 113.6,
+        "rendite_pct": 0.92,
+        "btc_pct": -20.43
+      },
+      {
+        "monat": "2026-07",
+        "ende": 12601.12,
+        "gewinn": 203.66,
+        "rendite_pct": 1.64,
+        "btc_pct": 7.27
+      },
+      {
+        "monat": "2026-08",
+        "ende": 12944.29,
+        "gewinn": 343.17,
+        "rendite_pct": 2.72,
+        "btc_pct": 24.95
+      },
+      {
+        "monat": "2026-09",
+        "ende": 13369.67,
+        "gewinn": 425.39,
+        "rendite_pct": 3.29,
+        "btc_pct": 7.9
+      }
+    ],
+    "beteiligung": {
+      "auf_monate": 5,
+      "ab_monate": 4,
+      "auf_btc": 53.9,
+      "auf_engine": 23.0,
+      "ab_btc": -54.8,
+      "ab_engine": 6.9,
+      "auf_pct": 43,
+      "ab_pct": -13
+    },
+    "offene_position": 8720.83
+  },
+  "tolerance": {
+    "start": 10000.0,
+    "ende": 13324.15,
+    "rendite_pct": 33.24,
+    "buyhold_pct": -9.48,
+    "trades": 99,
+    "gewinn_trades": 64,
+    "long_profit": 3237.18,
+    "long_trades": 99,
+    "long_wins": 64,
+    "short_profit": 0.0,
+    "short_trades": 0,
+    "short_wins": 0,
+    "fee_pct": 0.1,
+    "equity": [
+      {
+        "ts": 1768766400000,
+        "equity": 9997.5
+      },
+      {
+        "ts": 1768780800000,
+        "equity": 9961.63
+      },
+      {
+        "ts": 1768795200000,
+        "equity": 9964.69
+      },
+      {
+        "ts": 1768809600000,
+        "equity": 9969.2
+      },
+      {
+        "ts": 1768881600000,
+        "equity": 9910.85
+      },
+      {
+        "ts": 1768910400000,
+        "equity": 9792.61
+      },
+      {
+        "ts": 1770811200000,
+        "equity": 9790.16
+      },
+      {
+        "ts": 1770984000000,
+        "equity": 9884.31
+      },
+      {
+        "ts": 1771185600000,
+        "equity": 9888.35
+      },
+      {
+        "ts": 1771804800000,
+        "equity": 9785.96
+      },
+      {
+        "ts": 1771819200000,
+        "equity": 9769.12
+      },
+      {
+        "ts": 1771905600000,
+        "equity": 9582.15
+      },
+      {
+        "ts": 1771934400000,
+        "equity": 9696.94
+      },
+      {
+        "ts": 1771934400000,
+        "equity": 9696.94
+      },
+      {
+        "ts": 1771934400000,
+        "equity": 9492.63
+      },
+      {
+        "ts": 1772006400000,
+        "equity": 9917.65
+      },
+      {
+        "ts": 1772064000000,
+        "equity": 10340.06
+      },
+      {
+        "ts": 1772078400000,
+        "equity": 10280.67
+      },
+      {
+        "ts": 1772107200000,
+        "equity": 10213.52
+      },
+      {
+        "ts": 1772121600000,
+        "equity": 10244.93
+      },
+      {
+        "ts": 1772496000000,
+        "equity": 10364.48
+      },
+      {
+        "ts": 1772510400000,
+        "equity": 10333.38
+      },
+      {
+        "ts": 1772611200000,
+        "equity": 10778.81
+      },
+      {
+        "ts": 1772625600000,
+        "equity": 10961.48
+      },
+      {
+        "ts": 1772640000000,
+        "equity": 11117.91
+      },
+      {
+        "ts": 1772697600000,
+        "equity": 11050.14
+      },
+      {
+        "ts": 1772712000000,
+        "equity": 10779.18
+      },
+      {
+        "ts": 1772712000000,
+        "equity": 10832.78
+      },
+      {
+        "ts": 1772798400000,
+        "equity": 10824.66
+      },
+      {
+        "ts": 1772812800000,
+        "equity": 10778.85
+      },
+      {
+        "ts": 1772812800000,
+        "equity": 10737.22
+      },
+      {
+        "ts": 1772827200000,
+        "equity": 10777.88
+      },
+      {
+        "ts": 1772841600000,
+        "equity": 10773.77
+      },
+      {
+        "ts": 1772856000000,
+        "equity": 10732.16
+      },
+      {
+        "ts": 1772884800000,
+        "equity": 10735.23
+      },
+      {
+        "ts": 1772928000000,
+        "equity": 10596.5
+      },
+      {
+        "ts": 1772942400000,
+        "equity": 10647.05
+      },
+      {
+        "ts": 1773000000000,
+        "equity": 10452.83
+      },
+      {
+        "ts": 1773028800000,
+        "equity": 10444.99
+      },
+      {
+        "ts": 1773043200000,
+        "equity": 10467.22
+      },
+      {
+        "ts": 1773043200000,
+        "equity": 10478.72
+      },
+      {
+        "ts": 1773057600000,
+        "equity": 10634.16
+      },
+      {
+        "ts": 1773072000000,
+        "equity": 10649.41
+      },
+      {
+        "ts": 1773100800000,
+        "equity": 10715.4
+      },
+      {
+        "ts": 1773244800000,
+        "equity": 10874.39
+      },
+      {
+        "ts": 1773331200000,
+        "equity": 10846.91
+      },
+      {
+        "ts": 1773345600000,
+        "equity": 10861.21
+      },
+      {
+        "ts": 1773374400000,
+        "equity": 11001.7
+      },
+      {
+        "ts": 1773388800000,
+        "equity": 11082.59
+      },
+      {
+        "ts": 1773403200000,
+        "equity": 11203.99
+      },
+      {
+        "ts": 1773403200000,
+        "equity": 11059.71
+      },
+      {
+        "ts": 1773417600000,
+        "equity": 10990.41
+      },
+      {
+        "ts": 1773432000000,
+        "equity": 10962.33
+      },
+      {
+        "ts": 1773446400000,
+        "equity": 10978.68
+      },
+      {
+        "ts": 1773619200000,
+        "equity": 11287.53
+      },
+      {
+        "ts": 1773633600000,
+        "equity": 11245.13
+      },
+      {
+        "ts": 1773648000000,
+        "equity": 11253.29
+      },
+      {
+        "ts": 1773662400000,
+        "equity": 11229.7
+      },
+      {
+        "ts": 1773676800000,
+        "equity": 11288.1
+      },
+      {
+        "ts": 1773691200000,
+        "equity": 11349.88
+      },
+      {
+        "ts": 1773691200000,
+        "equity": 11351.36
+      },
+      {
+        "ts": 1773820800000,
+        "equity": 11348.52
+      },
+      {
+        "ts": 1773835200000,
+        "equity": 11282.7
+      },
+      {
+        "ts": 1773849600000,
+        "equity": 11245.75
+      },
+      {
+        "ts": 1773864000000,
+        "equity": 11255.65
+      },
+      {
+        "ts": 1773878400000,
+        "equity": 11251.86
+      },
+      {
+        "ts": 1773892800000,
+        "equity": 11177.35
+      },
+      {
+        "ts": 1774353600000,
+        "equity": 11174.55
+      },
+      {
+        "ts": 1774368000000,
+        "equity": 11165.65
+      },
+      {
+        "ts": 1774382400000,
+        "equity": 11205.44
+      },
+      {
+        "ts": 1774540800000,
+        "equity": 11139.68
+      },
+      {
+        "ts": 1774569600000,
+        "equity": 11168.68
+      },
+      {
+        "ts": 1774584000000,
+        "equity": 11143.42
+      },
+      {
+        "ts": 1774598400000,
+        "equity": 10976.3
+      },
+      {
+        "ts": 1775044800000,
+        "equity": 10968.07
+      },
+      {
+        "ts": 1775059200000,
+        "equity": 10877.37
+      },
+      {
+        "ts": 1775059200000,
+        "equity": 10897.65
+      },
+      {
+        "ts": 1775073600000,
+        "equity": 10865.68
+      },
+      {
+        "ts": 1775088000000,
+        "equity": 10734.77
+      },
+      {
+        "ts": 1775102400000,
+        "equity": 10726.72
+      },
+      {
+        "ts": 1775116800000,
+        "equity": 10639.73
+      },
+      {
+        "ts": 1775131200000,
+        "equity": 10730.05
+      },
+      {
+        "ts": 1775131200000,
+        "equity": 10730.05
+      },
+      {
+        "ts": 1775131200000,
+        "equity": 10580.69
+      },
+      {
+        "ts": 1775145600000,
+        "equity": 10749.8
+      },
+      {
+        "ts": 1775160000000,
+        "equity": 10736.31
+      },
+      {
+        "ts": 1775174400000,
+        "equity": 10690.78
+      },
+      {
+        "ts": 1775433600000,
+        "equity": 10979.0
+      },
+      {
+        "ts": 1775448000000,
+        "equity": 10975.09
+      },
+      {
+        "ts": 1775462400000,
+        "equity": 11015.37
+      },
+      {
+        "ts": 1775462400000,
+        "equity": 11038.54
+      },
+      {
+        "ts": 1775462400000,
+        "equity": 11038.54
+      },
+      {
+        "ts": 1775563200000,
+        "equity": 11030.26
+      },
+      {
+        "ts": 1775577600000,
+        "equity": 11131.31
+      },
+      {
+        "ts": 1775592000000,
+        "equity": 11430.41
+      },
+      {
+        "ts": 1775592000000,
+        "equity": 11327.17
+      },
+      {
+        "ts": 1775592000000,
+        "equity": 11373.62
+      },
+      {
+        "ts": 1775592000000,
+        "equity": 11380.54
+      },
+      {
+        "ts": 1776513600000,
+        "equity": 11377.69
+      },
+      {
+        "ts": 1776528000000,
+        "equity": 11369.56
+      },
+      {
+        "ts": 1776528000000,
+        "equity": 11367.28
+      },
+      {
+        "ts": 1776542400000,
+        "equity": 11368.78
+      },
+      {
+        "ts": 1776556800000,
+        "equity": 11345.93
+      },
+      {
+        "ts": 1776571200000,
+        "equity": 11307.77
+      },
+      {
+        "ts": 1776585600000,
+        "equity": 11358.92
+      },
+      {
+        "ts": 1776600000000,
+        "equity": 11388.19
+      },
+      {
+        "ts": 1776628800000,
+        "equity": 11231.58
+      },
+      {
+        "ts": 1776816000000,
+        "equity": 11681.37
+      },
+      {
+        "ts": 1776830400000,
+        "equity": 11711.36
+      },
+      {
+        "ts": 1776830400000,
+        "equity": 11743.98
+      },
+      {
+        "ts": 1776844800000,
+        "equity": 11770.3
+      },
+      {
+        "ts": 1776844800000,
+        "equity": 11775.69
+      },
+      {
+        "ts": 1776859200000,
+        "equity": 11814.95
+      },
+      {
+        "ts": 1776859200000,
+        "equity": 11832.0
+      },
+      {
+        "ts": 1777291200000,
+        "equity": 11829.04
+      },
+      {
+        "ts": 1777348800000,
+        "equity": 11838.1
+      },
+      {
+        "ts": 1777348800000,
+        "equity": 11835.73
+      },
+      {
+        "ts": 1777363200000,
+        "equity": 11773.88
+      },
+      {
+        "ts": 1777363200000,
+        "equity": 11771.51
+      },
+      {
+        "ts": 1777377600000,
+        "equity": 11747.07
+      },
+      {
+        "ts": 1777478400000,
+        "equity": 11667.71
+      },
+      {
+        "ts": 1777492800000,
+        "equity": 11694.33
+      },
+      {
+        "ts": 1777536000000,
+        "equity": 11705.99
+      },
+      {
+        "ts": 1777708800000,
+        "equity": 12048.72
+      },
+      {
+        "ts": 1777723200000,
+        "equity": 12101.85
+      },
+      {
+        "ts": 1777737600000,
+        "equity": 12101.6
+      },
+      {
+        "ts": 1777752000000,
+        "equity": 12132.56
+      },
+      {
+        "ts": 1777852800000,
+        "equity": 12261.7
+      },
+      {
+        "ts": 1777867200000,
+        "equity": 12335.16
+      },
+      {
+        "ts": 1777910400000,
+        "equity": 12392.18
+      },
+      {
+        "ts": 1778054400000,
+        "equity": 12473.03
+      },
+      {
+        "ts": 1778155200000,
+        "equity": 12463.68
+      },
+      {
+        "ts": 1778227200000,
+        "equity": 12501.03
+      },
+      {
+        "ts": 1778241600000,
+        "equity": 12487.21
+      },
+      {
+        "ts": 1778443200000,
+        "equity": 12807.5
+      },
+      {
+        "ts": 1778515200000,
+        "equity": 12772.73
+      },
+      {
+        "ts": 1778673600000,
+        "equity": 12457.89
+      },
+      {
+        "ts": 1778846400000,
+        "equity": 12464.05
+      },
+      {
+        "ts": 1778904000000,
+        "equity": 12283.86
+      },
+      {
+        "ts": 1781035200000,
+        "equity": 12280.79
+      },
+      {
+        "ts": 1781049600000,
+        "equity": 12272.32
+      },
+      {
+        "ts": 1781049600000,
+        "equity": 12269.86
+      },
+      {
+        "ts": 1781107200000,
+        "equity": 12314.35
+      },
+      {
+        "ts": 1781193600000,
+        "equity": 12577.52
+      },
+      {
+        "ts": 1781251200000,
+        "equity": 12597.69
+      },
+      {
+        "ts": 1781337600000,
+        "equity": 12585.09
+      },
+      {
+        "ts": 1781352000000,
+        "equity": 12615.42
+      },
+      {
+        "ts": 1781380800000,
+        "equity": 12634.49
+      },
+      {
+        "ts": 1781395200000,
+        "equity": 12634.49
+      },
+      {
+        "ts": 1781611200000,
+        "equity": 12631.33
+      },
+      {
+        "ts": 1781654400000,
+        "equity": 12646.46
+      },
+      {
+        "ts": 1781683200000,
+        "equity": 12554.41
+      },
+      {
+        "ts": 1781712000000,
+        "equity": 12493.71
+      },
+      {
+        "ts": 1781712000000,
+        "equity": 12491.18
+      },
+      {
+        "ts": 1781712000000,
+        "equity": 12518.26
+      },
+      {
+        "ts": 1781726400000,
+        "equity": 12527.51
+      },
+      {
+        "ts": 1781740800000,
+        "equity": 12488.23
+      },
+      {
+        "ts": 1781784000000,
+        "equity": 12397.46
+      },
+      {
+        "ts": 1783584000000,
+        "equity": 12394.36
+      },
+      {
+        "ts": 1783598400000,
+        "equity": 12385.84
+      },
+      {
+        "ts": 1783598400000,
+        "equity": 12383.37
+      },
+      {
+        "ts": 1783612800000,
+        "equity": 12425.77
+      },
+      {
+        "ts": 1783612800000,
+        "equity": 12321.85
+      },
+      {
+        "ts": 1783627200000,
+        "equity": 12443.38
+      },
+      {
+        "ts": 1783641600000,
+        "equity": 12561.48
+      },
+      {
+        "ts": 1783641600000,
+        "equity": 12561.48
+      },
+      {
+        "ts": 1783656000000,
+        "equity": 12563.66
+      },
+      {
+        "ts": 1783756800000,
+        "equity": 12596.04
+      },
+      {
+        "ts": 1783958400000,
+        "equity": 12294.65
+      },
+      {
+        "ts": 1784030400000,
+        "equity": 12763.19
+      },
+      {
+        "ts": 1784044800000,
+        "equity": 12814.95
+      },
+      {
+        "ts": 1784059200000,
+        "equity": 12836.19
+      },
+      {
+        "ts": 1784073600000,
+        "equity": 12803.78
+      },
+      {
+        "ts": 1784088000000,
+        "equity": 12853.46
+      },
+      {
+        "ts": 1784088000000,
+        "equity": 12816.86
+      },
+      {
+        "ts": 1784246400000,
+        "equity": 12813.65
+      },
+      {
+        "ts": 1784275200000,
+        "equity": 12790.91
+      },
+      {
+        "ts": 1784275200000,
+        "equity": 12788.34
+      },
+      {
+        "ts": 1784289600000,
+        "equity": 12805.83
+      },
+      {
+        "ts": 1784304000000,
+        "equity": 12877.59
+      },
+      {
+        "ts": 1784534400000,
+        "equity": 12948.86
+      },
+      {
+        "ts": 1784548800000,
+        "equity": 12994.75
+      },
+      {
+        "ts": 1784548800000,
+        "equity": 12997.49
+      },
+      {
+        "ts": 1784606400000,
+        "equity": 13018.68
+      },
+      {
+        "ts": 1784620800000,
+        "equity": 13033.75
+      },
+      {
+        "ts": 1784808000000,
+        "equity": 13030.49
+      },
+      {
+        "ts": 1784822400000,
+        "equity": 13020.93
+      },
+      {
+        "ts": 1784836800000,
+        "equity": 13031.17
+      },
+      {
+        "ts": 1784894400000,
+        "equity": 12986.78
+      },
+      {
+        "ts": 1784937600000,
+        "equity": 12997.94
+      },
+      {
+        "ts": 1784952000000,
+        "equity": 12984.93
+      },
+      {
+        "ts": 1785196800000,
+        "equity": 12823.29
+      },
+      {
+        "ts": 1785297600000,
+        "equity": 12813.67
+      },
+      {
+        "ts": 1785312000000,
+        "equity": 12803.15
+      },
+      {
+        "ts": 1785326400000,
+        "equity": 12698.86
+      },
+      {
+        "ts": 1785340800000,
+        "equity": 12636.92
+      },
+      {
+        "ts": 1785340800000,
+        "equity": 12636.39
+      },
+      {
+        "ts": 1785340800000,
+        "equity": 12703.11
+      },
+      {
+        "ts": 1785355200000,
+        "equity": 12714.85
+      },
+      {
+        "ts": 1785369600000,
+        "equity": 12748.25
+      },
+      {
+        "ts": 1785398400000,
+        "equity": 12853.99
+      },
+      {
+        "ts": 1785499200000,
+        "equity": 12558.21
+      },
+      {
+        "ts": 1785931200000,
+        "equity": 12548.79
+      },
+      {
+        "ts": 1785945600000,
+        "equity": 12612.37
+      },
+      {
+        "ts": 1785960000000,
+        "equity": 12578.23
+      },
+      {
+        "ts": 1785974400000,
+        "equity": 12555.35
+      },
+      {
+        "ts": 1786017600000,
+        "equity": 12565.89
+      },
+      {
+        "ts": 1786377600000,
+        "equity": 12465.6
+      },
+      {
+        "ts": 1786377600000,
+        "equity": 12442.15
+      },
+      {
+        "ts": 1786449600000,
+        "equity": 12380.77
+      },
+      {
+        "ts": 1786464000000,
+        "equity": 12366.39
+      },
+      {
+        "ts": 1786636800000,
+        "equity": 12269.25
+      },
+      {
+        "ts": 1786996800000,
+        "equity": 12260.05
+      },
+      {
+        "ts": 1787011200000,
+        "equity": 12209.23
+      },
+      {
+        "ts": 1787025600000,
+        "equity": 12209.55
+      },
+      {
+        "ts": 1787054400000,
+        "equity": 12273.13
+      },
+      {
+        "ts": 1787054400000,
+        "equity": 12270.68
+      },
+      {
+        "ts": 1787068800000,
+        "equity": 12234.04
+      },
+      {
+        "ts": 1787140800000,
+        "equity": 12699.5
+      },
+      {
+        "ts": 1787140800000,
+        "equity": 12818.42
+      },
+      {
+        "ts": 1787140800000,
+        "equity": 12869.64
+      },
+      {
+        "ts": 1787688000000,
+        "equity": 12866.43
+      },
+      {
+        "ts": 1787702400000,
+        "equity": 12891.71
+      },
+      {
+        "ts": 1787716800000,
+        "equity": 12878.85
+      },
+      {
+        "ts": 1787731200000,
+        "equity": 12850.6
+      },
+      {
+        "ts": 1787774400000,
+        "equity": 12875.63
+      },
+      {
+        "ts": 1787904000000,
+        "equity": 12924.38
+      },
+      {
+        "ts": 1788177600000,
+        "equity": 12761.01
+      },
+      {
+        "ts": 1788278400000,
+        "equity": 12603.06
+      },
+      {
+        "ts": 1788336000000,
+        "equity": 12612.51
+      },
+      {
+        "ts": 1788436800000,
+        "equity": 13269.93
+      },
+      {
+        "ts": 1788451200000,
+        "equity": 13347.84
+      },
+      {
+        "ts": 1788465600000,
+        "equity": 13408.27
+      },
+      {
+        "ts": 1788696000000,
+        "equity": 13271.63
+      },
+      {
+        "ts": 1788710400000,
+        "equity": 13318.87
+      },
+      {
+        "ts": 1788724800000,
+        "equity": 13350.25
+      },
+      {
+        "ts": 1788753600000,
+        "equity": 13310.05
+      },
+      {
+        "ts": 1788753600000,
+        "equity": 13307.47
+      },
+      {
+        "ts": 1788768000000,
+        "equity": 13307.07
+      },
+      {
+        "ts": 1788840000000,
+        "equity": 13183.56
+      },
+      {
+        "ts": 1789041600000,
+        "equity": 13039.67
+      },
+      {
+        "ts": 1789070400000,
+        "equity": 12873.73
+      },
+      {
+        "ts": 1789128000000,
+        "equity": 12809.67
+      },
+      {
+        "ts": 1789358400000,
+        "equity": 12800.07
+      },
+      {
+        "ts": 1789372800000,
+        "equity": 12783.18
+      },
+      {
+        "ts": 1789387200000,
+        "equity": 12907.76
+      },
+      {
+        "ts": 1789387200000,
+        "equity": 12739.82
+      },
+      {
+        "ts": 1789401600000,
+        "equity": 12972.17
+      },
+      {
+        "ts": 1789416000000,
+        "equity": 12859.55
+      },
+      {
+        "ts": 1789459200000,
+        "equity": 12713.99
+      },
+      {
+        "ts": 1789473600000,
+        "equity": 12608.72
+      },
+      {
+        "ts": 1789718400000,
+        "equity": 12599.26
+      },
+      {
+        "ts": 1789732800000,
+        "equity": 12919.09
+      },
+      {
+        "ts": 1789747200000,
+        "equity": 12990.17
+      },
+      {
+        "ts": 1789761600000,
+        "equity": 12946.81
+      },
+      {
+        "ts": 1789790400000,
+        "equity": 12969.85
+      },
+      {
+        "ts": 1789804800000,
+        "equity": 12991.43
+      },
+      {
+        "ts": 1789848000000,
+        "equity": 12985.82
+      },
+      {
+        "ts": 1789862400000,
+        "equity": 12904.45
+      },
+      {
+        "ts": 1789977600000,
+        "equity": 13115.94
+      },
+      {
+        "ts": 1789977600000,
+        "equity": 13211.92
+      },
+      {
+        "ts": 1789977600000,
+        "equity": 13237.18
+      },
+      {
+        "ts": 1790179200000,
+        "equity": 13233.87
+      },
+      {
+        "ts": 1790308800000,
+        "equity": 13242.4
+      },
+      {
+        "ts": 1790337600000,
+        "equity": 13222.16
+      }
+    ],
+    "deploy_pct": 100,
+    "max_drawdown_pct": -9.94,
+    "monate": [
+      {
+        "monat": "2026-01",
+        "ende": 9792.61,
+        "gewinn": -207.39,
+        "rendite_pct": -2.07,
+        "btc_pct": -15.94
+      },
+      {
+        "monat": "2026-02",
+        "ende": 10151.56,
+        "gewinn": 358.95,
+        "rendite_pct": 3.67,
+        "btc_pct": -14.94
+      },
+      {
+        "monat": "2026-03",
+        "ende": 10976.3,
+        "gewinn": 824.74,
+        "rendite_pct": 8.12,
+        "btc_pct": 1.96
+      },
+      {
+        "monat": "2026-04",
+        "ende": 11771.72,
+        "gewinn": 795.42,
+        "rendite_pct": 7.25,
+        "btc_pct": 11.81
+      },
+      {
+        "monat": "2026-05",
+        "ende": 12283.86,
+        "gewinn": 512.13,
+        "rendite_pct": 4.35,
+        "btc_pct": -3.5
+      },
+      {
+        "monat": "2026-06",
+        "ende": 12397.46,
+        "gewinn": 113.6,
+        "rendite_pct": 0.92,
+        "btc_pct": -20.43
+      },
+      {
+        "monat": "2026-07",
+        "ende": 12558.21,
+        "gewinn": 160.76,
+        "rendite_pct": 1.3,
+        "btc_pct": 7.27
+      },
+      {
+        "monat": "2026-08",
+        "ende": 12900.21,
+        "gewinn": 342.0,
+        "rendite_pct": 2.72,
+        "btc_pct": 24.95
+      },
+      {
+        "monat": "2026-09",
+        "ende": 13324.15,
+        "gewinn": 423.94,
+        "rendite_pct": 3.29,
+        "btc_pct": 7.9
+      }
+    ],
+    "beteiligung": {
+      "auf_monate": 5,
+      "ab_monate": 4,
+      "auf_btc": 53.9,
+      "auf_engine": 22.7,
+      "ab_btc": -54.8,
+      "ab_engine": 6.9,
+      "auf_pct": 42,
+      "ab_pct": -13
+    },
+    "offene_position": 8691.14
+  },
+  "scenarios": [
+    {
+      "scenario": {
+        "fee": 0.001,
+        "slip": 0,
+        "fill": "level"
+      },
+      "end": 13324.148936132504,
+      "return_pct": 33.24148936132505,
+      "dd_close_pct": -7.945481036463509,
+      "fees": 601.602595481767,
+      "dd_intrabar_range_pct": null,
+      "turnover": 601602.5954817665,
+      "orders": 203,
+      "zero_orders": 20,
+      "cycles": 24,
+      "avg_exposure_pct": 32.89201932197538,
+      "month_ends": {
+        "2026-01": 9792.607437024788,
+        "2026-02": 10151.561828230724,
+        "2026-03": 10976.300044135702,
+        "2026-04": 11771.721891598474,
+        "2026-05": 12283.856493489297,
+        "2026-06": 12397.456256365727,
+        "2026-07": 12558.21175881151,
+        "2026-08": 12900.209214957697,
+        "2026-09": 13324.148936132504
+      },
+      "unexecuted": []
+    },
+    {
+      "scenario": {
+        "fee": 0.001,
+        "slip": 0,
+        "fill": "close"
+      },
+      "end": 13238.744071376992,
+      "return_pct": 32.38744071376991,
+      "dd_close_pct": -8.256832130989677,
+      "fees": 590.1222860534504,
+      "dd_intrabar_range_pct": [
+        -9.942772296665058,
+        -9.942772296665058
+      ],
+      "turnover": 590122.2860534508,
+      "orders": 203,
+      "zero_orders": 20,
+      "cycles": 24,
+      "avg_exposure_pct": 32.89675573526346,
+      "month_ends": {
+        "2026-01": 9855.856661682614,
+        "2026-02": 10104.189129689032,
+        "2026-03": 10854.806665202097,
+        "2026-04": 11558.209664571727,
+        "2026-05": 12085.959577627764,
+        "2026-06": 12021.668906951381,
+        "2026-07": 12082.240110267587,
+        "2026-08": 12489.254590670476,
+        "2026-09": 13238.744071376992
+      },
+      "unexecuted": []
+    },
+    {
+      "scenario": {
+        "fee": 0.001,
+        "slip": 0.0005,
+        "fill": "next_open"
+      },
+      "end": 12909.654987067088,
+      "return_pct": 29.096549870670874,
+      "dd_close_pct": -8.587047743326881,
+      "fees": 582.4684176035241,
+      "dd_intrabar_range_pct": [
+        -9.942772296665048,
+        -9.942772296665048
+      ],
+      "turnover": 582468.4176035249,
+      "orders": 203,
+      "zero_orders": 20,
+      "cycles": 24,
+      "avg_exposure_pct": 32.855381692252834,
+      "month_ends": {
+        "2026-01": 9849.003919434112,
+        "2026-02": 10091.325844019426,
+        "2026-03": 10792.392976295341,
+        "2026-04": 11436.766666125868,
+        "2026-05": 11937.375948525856,
+        "2026-06": 11852.4524449284,
+        "2026-07": 11865.89690442545,
+        "2026-08": 12227.107827300699,
+        "2026-09": 12909.654987067088
+      },
+      "unexecuted": []
+    },
+    {
+      "scenario": {
+        "fee": 0.002,
+        "slip": 0.001,
+        "fill": "delay_4h"
+      },
+      "end": 11692.717933320011,
+      "return_pct": 16.927179333200115,
+      "dd_close_pct": -8.330133265273975,
+      "fees": 1125.0814785682205,
+      "dd_intrabar_range_pct": [
+        -9.942772296665048,
+        -9.942772296665048
+      ],
+      "turnover": 562540.7392841105,
+      "orders": 203,
+      "zero_orders": 20,
+      "cycles": 24,
+      "avg_exposure_pct": 32.820781259262986,
+      "month_ends": {
+        "2026-01": 9793.00879788704,
+        "2026-02": 9931.249625515522,
+        "2026-03": 10619.07891852166,
+        "2026-04": 11227.693986920849,
+        "2026-05": 11441.919515332858,
+        "2026-06": 11375.420465563206,
+        "2026-07": 11382.617612498496,
+        "2026-08": 11590.728088371725,
+        "2026-09": 11692.717933320011
+      },
+      "unexecuted": []
+    }
+  ],
+  "halves": [
+    {
+      "start": 1768766400000,
+      "end": 1779632074420,
+      "original_return": 22.84,
+      "independent": {
+        "end": 12283.856493489297,
+        "return_pct": 22.838564934892958,
+        "dd_close_pct": -7.549813683021556,
+        "fees": 276.3281685596156,
+        "dd_intrabar_range_pct": null,
+        "turnover": 276328.16855961573,
+        "orders": 100,
+        "zero_orders": 10,
+        "cycles": 12,
+        "avg_exposure_pct": 34.75833753874086,
+        "month_ends": {
+          "2026-01": 9792.607437024788,
+          "2026-02": 10151.561828230724,
+          "2026-03": 10976.300044135702,
+          "2026-04": 11771.721891598474,
+          "2026-05": 12283.856493489297
+        },
+        "unexecuted": []
+      }
+    },
+    {
+      "start": 1779632074420,
+      "end": 1790497748840,
+      "original_return": 8.84,
+      "independent": {
+        "end": 10846.87772377883,
+        "return_pct": 8.468777237788316,
+        "dd_close_pct": -7.945481036463519,
+        "fees": 264.79829611698375,
+        "dd_intrabar_range_pct": null,
+        "turnover": 264798.2961169836,
+        "orders": 103,
+        "zero_orders": 10,
+        "cycles": 12,
+        "avg_exposure_pct": 31.023225882110744,
+        "month_ends": {
+          "2026-05": 10000.0,
+          "2026-06": 10092.47890752928,
+          "2026-07": 10223.346198702033,
+          "2026-08": 10501.758321415655,
+          "2026-09": 10846.87772377883
+        },
+        "unexecuted": []
+      }
+    }
+  ],
+  "seconds": 7.782000000006519
+}

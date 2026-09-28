@@ -1,0 +1,18 @@
+OK  Anzeige nimmt wieder die BTC-Reihe
+    -> --- 604 passed, 3 failed  | test_futures_cvd_ohne_passende_kerze_entfaellt, test_futures_cvd_rechnet_jede_kerze_mit_ihrem_eigenen_kurs, test_futures_cvd_zeigt_das_verhaeltnis_zum_spot
+OK  Delta wird nicht mit dem Kurs multipliziert
+    -> --- 605 passed, 2 failed  | test_futures_cvd_rechnet_jede_kerze_mit_ihrem_eigenen_kurs, test_futures_cvd_zeigt_das_verhaeltnis_zum_spot
+OK  ein einziger Kurs fuer die ganze Reihe
+    -> --- 606 passed, 1 failed  | test_futures_cvd_rechnet_jede_kerze_mit_ihrem_eigenen_kurs
+OK  kumulierter Wert statt Delta
+    -> --- 605 passed, 2 failed  | test_futures_cvd_rechnet_jede_kerze_mit_ihrem_eigenen_kurs, test_futures_cvd_zeigt_das_verhaeltnis_zum_spot
+OK  fehlende Kerze wird mit Ersatzkurs gerechnet
+    -> --- 606 passed, 1 failed  | test_e433_ohne_kerze_zum_flowpunkt_kein_pump
+OK  Gitterzeile misst nichts (auto statt bias)
+    -> --- 589 passed, 18 failed  | test_a5_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live, test_ampel_zeilen_unterscheiden_sich_von_der_live_zeile_in_genau_einem_punkt, test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live
+OK  Gitterzeile mit zweitem Unterschied (alter Stop)
+    -> --- 591 passed, 16 failed  | test_a5_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live, test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter, test_ampel_zeilen_unterscheiden_sich_von_der_live_zeile_in_genau_einem_punkt
+
+============================================================
+nach Wiederherstellung: --- 607 passed, 0 failed
+ungefangen: keine

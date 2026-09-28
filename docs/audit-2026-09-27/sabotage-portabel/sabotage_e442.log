@@ -1,0 +1,20 @@
+OK  Wechselwirkung mit falschem Vorzeichen der Basis
+    -> --- 604 passed, 3 failed  | test_abschnitt_zeigt_tabelle_und_probe, test_wechselwirkung_rechnet_richtig, test_auswertung_rollen_wechselwirkungen_und_bericht
+OK  Auch Zeilen mit zwei Unterschieden zaehlen als A
+    -> --- 600 passed, 7 failed  | test_abschnitt_zeigt_tabelle_und_probe, test_echtes_gitter_hat_die_16_gruppen_der_analyse, test_ohne_a_plus_b_keine_gruppe
+OK  Keine Ausrichtung auf die Aus-Ecke
+    -> --- 606 passed, 1 failed  | test_vierergruppe_wird_gefunden_und_auf_die_aus_ecke_ausgerichtet
+OK  Gruppen werden mehrfach geliefert
+    -> --- 605 passed, 2 failed  | test_vierergruppe_wird_gefunden_und_auf_die_aus_ecke_ausgerichtet, test_auswertung_rollen_wechselwirkungen_und_bericht
+OK  Monats-Probe laesst den unguenstigsten statt den guenstigsten Monat weg
+    -> --- 605 passed, 2 failed  | test_monats_probe_kippt_bei_einem_ausreisser, test_monatsprobe_ausreisser_null_und_fehlende_monate
+OK  Monats-Probe prueft nur die Summe
+    -> --- 605 passed, 2 failed  | test_monats_probe_kippt_bei_einem_ausreisser, test_monatsprobe_ausreisser_null_und_fehlende_monate
+OK  H1/H2-Spalten aus der falschen Haelfte
+    -> --- 606 passed, 1 failed  | test_abschnitt_zeigt_tabelle_und_probe
+OK  Abschnitt nicht im Bericht
+    -> --- 606 passed, 1 failed  | test_abschnitt_ist_im_bericht_verdrahtet
+
+============================================================
+nach Wiederherstellung: --- 607 passed, 0 failed
+ungefangen: keine

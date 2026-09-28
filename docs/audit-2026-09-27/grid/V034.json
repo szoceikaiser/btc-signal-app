@@ -1,0 +1,435 @@
+{
+  "id": "V034",
+  "params": {
+    "bias_long": false,
+    "bias_short": false,
+    "pivot_n": 5,
+    "k_atr": 2.0,
+    "flush_entry": "core",
+    "tp_ladder": true,
+    "strict_confirm": false,
+    "confluence": false,
+    "conditional_stop": false,
+    "buy_ladder": true,
+    "release_stale_rest": false,
+    "trail_stop": true,
+    "liq_exit": "off",
+    "high_exit": "on",
+    "liq_entry": "boost",
+    "block_unhealthy": false,
+    "muster5_entry": false,
+    "muster5_halten": "off",
+    "stop_puffer_pct": 0.0,
+    "stop_rueckeroberung": 1,
+    "stop_auf_docht": false,
+    "confirm_t1": false,
+    "cooldown_h": 0.0,
+    "min_stop_pct": 0.02,
+    "no_flip": true,
+    "freeze_targets": false,
+    "min_bein_pct": 0.05,
+    "bein_wahl": "juengstes",
+    "be_im_plus": false,
+    "bein_richtung": "bias",
+    "widerstand_exit": "off",
+    "rest_halten": false,
+    "neustart_mit_rest": true,
+    "zonen_1d": false,
+    "zonen_nachziehen": true,
+    "pivot_n_1d": 0,
+    "trend_filter": false,
+    "trend_ema": 200,
+    "ampel_filter": "off",
+    "muster_cvd": "alt",
+    "muster_oi": "usd",
+    "high_exit_hist": "voll",
+    "ausbruch_ruecktest": false,
+    "ruecktest_fenster": 12,
+    "verkauf_faktor": 1.0
+  },
+  "labels": [
+    "Einzeln bias_long=False"
+  ],
+  "groups": [
+    "single"
+  ],
+  "diff": {
+    "bias_long": false
+  },
+  "run_id": "audit-20260927-04-V034",
+  "input_sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+  "candles": 2480,
+  "start": 1768766400000,
+  "last_open": 1790481600000,
+  "mid": 1779632074420,
+  "long_only": true,
+  "signals": [],
+  "original": {
+    "start": 10000.0,
+    "ende": 10000.0,
+    "rendite_pct": 0.0,
+    "buyhold_pct": -9.48,
+    "trades": 0,
+    "gewinn_trades": 0,
+    "long_profit": 0.0,
+    "long_trades": 0,
+    "long_wins": 0,
+    "short_profit": 0.0,
+    "short_trades": 0,
+    "short_wins": 0,
+    "fee_pct": 0.1,
+    "equity": [],
+    "deploy_pct": 100,
+    "max_drawdown_pct": 0.0,
+    "monate": [
+      {
+        "monat": "2026-01",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": -15.94
+      },
+      {
+        "monat": "2026-02",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": -14.94
+      },
+      {
+        "monat": "2026-03",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 1.96
+      },
+      {
+        "monat": "2026-04",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 11.81
+      },
+      {
+        "monat": "2026-05",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": -3.5
+      },
+      {
+        "monat": "2026-06",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": -20.43
+      },
+      {
+        "monat": "2026-07",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 7.27
+      },
+      {
+        "monat": "2026-08",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 24.95
+      },
+      {
+        "monat": "2026-09",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 7.9
+      }
+    ],
+    "beteiligung": {
+      "auf_monate": 5,
+      "ab_monate": 4,
+      "auf_btc": 53.9,
+      "auf_engine": 0.0,
+      "ab_btc": -54.8,
+      "ab_engine": 0.0,
+      "auf_pct": 0,
+      "ab_pct": 0
+    },
+    "offene_position": 0.0
+  },
+  "tolerance": {
+    "start": 10000.0,
+    "ende": 10000.0,
+    "rendite_pct": 0.0,
+    "buyhold_pct": -9.48,
+    "trades": 0,
+    "gewinn_trades": 0,
+    "long_profit": 0.0,
+    "long_trades": 0,
+    "long_wins": 0,
+    "short_profit": 0.0,
+    "short_trades": 0,
+    "short_wins": 0,
+    "fee_pct": 0.1,
+    "equity": [],
+    "deploy_pct": 100,
+    "max_drawdown_pct": 0.0,
+    "monate": [
+      {
+        "monat": "2026-01",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": -15.94
+      },
+      {
+        "monat": "2026-02",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": -14.94
+      },
+      {
+        "monat": "2026-03",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 1.96
+      },
+      {
+        "monat": "2026-04",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 11.81
+      },
+      {
+        "monat": "2026-05",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": -3.5
+      },
+      {
+        "monat": "2026-06",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": -20.43
+      },
+      {
+        "monat": "2026-07",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 7.27
+      },
+      {
+        "monat": "2026-08",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 24.95
+      },
+      {
+        "monat": "2026-09",
+        "ende": 10000.0,
+        "gewinn": 0.0,
+        "rendite_pct": 0.0,
+        "btc_pct": 7.9
+      }
+    ],
+    "beteiligung": {
+      "auf_monate": 5,
+      "ab_monate": 4,
+      "auf_btc": 53.9,
+      "auf_engine": 0.0,
+      "ab_btc": -54.8,
+      "ab_engine": 0.0,
+      "auf_pct": 0,
+      "ab_pct": 0
+    },
+    "offene_position": 0.0
+  },
+  "scenarios": [
+    {
+      "scenario": {
+        "fee": 0.001,
+        "slip": 0,
+        "fill": "level"
+      },
+      "end": 10000.0,
+      "return_pct": 0.0,
+      "dd_close_pct": 0.0,
+      "fees": 0.0,
+      "dd_intrabar_range_pct": null,
+      "turnover": 0.0,
+      "orders": 0,
+      "zero_orders": 0,
+      "cycles": 0,
+      "avg_exposure_pct": 0.0,
+      "month_ends": {
+        "2026-01": 10000.0,
+        "2026-02": 10000.0,
+        "2026-03": 10000.0,
+        "2026-04": 10000.0,
+        "2026-05": 10000.0,
+        "2026-06": 10000.0,
+        "2026-07": 10000.0,
+        "2026-08": 10000.0,
+        "2026-09": 10000.0
+      },
+      "unexecuted": []
+    },
+    {
+      "scenario": {
+        "fee": 0.001,
+        "slip": 0,
+        "fill": "close"
+      },
+      "end": 10000.0,
+      "return_pct": 0.0,
+      "dd_close_pct": 0.0,
+      "fees": 0.0,
+      "dd_intrabar_range_pct": [
+        0.0,
+        0.0
+      ],
+      "turnover": 0.0,
+      "orders": 0,
+      "zero_orders": 0,
+      "cycles": 0,
+      "avg_exposure_pct": 0.0,
+      "month_ends": {
+        "2026-01": 10000.0,
+        "2026-02": 10000.0,
+        "2026-03": 10000.0,
+        "2026-04": 10000.0,
+        "2026-05": 10000.0,
+        "2026-06": 10000.0,
+        "2026-07": 10000.0,
+        "2026-08": 10000.0,
+        "2026-09": 10000.0
+      },
+      "unexecuted": []
+    },
+    {
+      "scenario": {
+        "fee": 0.001,
+        "slip": 0.0005,
+        "fill": "next_open"
+      },
+      "end": 10000.0,
+      "return_pct": 0.0,
+      "dd_close_pct": 0.0,
+      "fees": 0.0,
+      "dd_intrabar_range_pct": [
+        0.0,
+        0.0
+      ],
+      "turnover": 0.0,
+      "orders": 0,
+      "zero_orders": 0,
+      "cycles": 0,
+      "avg_exposure_pct": 0.0,
+      "month_ends": {
+        "2026-01": 10000.0,
+        "2026-02": 10000.0,
+        "2026-03": 10000.0,
+        "2026-04": 10000.0,
+        "2026-05": 10000.0,
+        "2026-06": 10000.0,
+        "2026-07": 10000.0,
+        "2026-08": 10000.0,
+        "2026-09": 10000.0
+      },
+      "unexecuted": []
+    },
+    {
+      "scenario": {
+        "fee": 0.002,
+        "slip": 0.001,
+        "fill": "delay_4h"
+      },
+      "end": 10000.0,
+      "return_pct": 0.0,
+      "dd_close_pct": 0.0,
+      "fees": 0.0,
+      "dd_intrabar_range_pct": [
+        0.0,
+        0.0
+      ],
+      "turnover": 0.0,
+      "orders": 0,
+      "zero_orders": 0,
+      "cycles": 0,
+      "avg_exposure_pct": 0.0,
+      "month_ends": {
+        "2026-01": 10000.0,
+        "2026-02": 10000.0,
+        "2026-03": 10000.0,
+        "2026-04": 10000.0,
+        "2026-05": 10000.0,
+        "2026-06": 10000.0,
+        "2026-07": 10000.0,
+        "2026-08": 10000.0,
+        "2026-09": 10000.0
+      },
+      "unexecuted": []
+    }
+  ],
+  "halves": [
+    {
+      "start": 1768766400000,
+      "end": 1779632074420,
+      "original_return": 0.0,
+      "independent": {
+        "end": 10000.0,
+        "return_pct": 0.0,
+        "dd_close_pct": 0.0,
+        "fees": 0.0,
+        "dd_intrabar_range_pct": null,
+        "turnover": 0.0,
+        "orders": 0,
+        "zero_orders": 0,
+        "cycles": 0,
+        "avg_exposure_pct": 0.0,
+        "month_ends": {
+          "2026-01": 10000.0,
+          "2026-02": 10000.0,
+          "2026-03": 10000.0,
+          "2026-04": 10000.0,
+          "2026-05": 10000.0
+        },
+        "unexecuted": []
+      }
+    },
+    {
+      "start": 1779632074420,
+      "end": 1790497748840,
+      "original_return": 0.0,
+      "independent": {
+        "end": 10000.0,
+        "return_pct": 0.0,
+        "dd_close_pct": 0.0,
+        "fees": 0.0,
+        "dd_intrabar_range_pct": null,
+        "turnover": 0.0,
+        "orders": 0,
+        "zero_orders": 0,
+        "cycles": 0,
+        "avg_exposure_pct": 0.0,
+        "month_ends": {
+          "2026-05": 10000.0,
+          "2026-06": 10000.0,
+          "2026-07": 10000.0,
+          "2026-08": 10000.0,
+          "2026-09": 10000.0
+        },
+        "unexecuted": []
+      }
+    }
+  ],
+  "seconds": 7.827999999979511
+}
