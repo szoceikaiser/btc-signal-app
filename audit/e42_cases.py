@@ -1,5 +1,5 @@
 """Reconstruct every original E42 observation and breakout episode; separate lot P&L."""
-import dataclasses,json,sys
+import dataclasses,hashlib,json,sys
 from pathlib import Path
 from datetime import datetime,timezone
 from collections import Counter
@@ -94,6 +94,30 @@ def main():
     if active and active['terminal'] is None: active['terminal']='am_datenende_offen'
     for obs in observations.values():
         if 'end' not in obs: obs['end_reason']='am_datenende_offen'
+    # A final state alone misses an observation created AND replaced within one bar.
+    # Independently profiled nested begin/end calls provide the actual lifetime.
+    trace=json.loads((OUT/'e42-ablaufkontrolle.json').read_text())
+    assert trace['signals_exact']
+    assert trace['input_sha256']==hashlib.sha256((ROOT/'docs/e445/eingaben.json').read_bytes()).hexdigest()
+    assert trace['engine_sha256']==hashlib.sha256((ROOT/'engine/strategy_core.py').read_bytes()).hexdigest()
+    traced={o['key']:o for o in trace['observations']}
+    assert set(traced)==set(observations), 'Every runtime observation must be represented'
+    lifetime_corrections=[]
+    for k,obs in observations.items():
+        checked=traced[k]
+        if (obs.get('end'),obs['end_reason'])!=(checked.get('end'),checked['end_reason']):
+            lifetime_corrections.append(dict(observation=obs['id'],previous_end=obs.get('end'),
+                previous_reason=obs['end_reason'],end=checked.get('end'),reason=checked['end_reason']))
+        obs['end_reason']=checked['end_reason']
+        if 'end' in checked:obs['end']=checked['end']
+    by_id={o['id']:o for o in observations.values()}
+    for episode in episodes:
+        obs=by_id[episode['observation']]
+        if obs.get('end') is not None and episode.get('end') is not None and episode['end']>obs['end']:
+            assert episode['terminal']=='ersetzt' and not episode['retest_bars']
+            episode['end']=obs['end']
+        episode['replaced_same_bar']=episode['terminal']=='ersetzt' and episode['end']==episode['breakout']
+        assert episode['end'] is None or episode['end']>=episode['breakout']
     saved=json.loads((ROOT/'docs/e445/signale.json').read_text())
     original=saved['LIVE-heute +E42']
     clean=lambda rows:[{k:v for k,v in s.items() if k not in ('audit_episode','beobachtung_kerzen')} for s in rows]
@@ -111,9 +135,11 @@ def main():
     difference=book['end']-baseline['end']
     result=dict(run_id='audit-20260927-03-e42',basis='Exact original saved candles; F09 independent ledger correction, no production logic edits',
         observations=list(observations.values()),episodes=episodes,journal=journal,lots=lots,
+        audit_lifetime_corrections=lifetime_corrections,
         counts=dict(observations=len(observations),breakouts=len(episodes),terminal=dict(Counter(x['terminal'] for x in episodes)),
                     episodes_with_retest=sum(bool(x['first_retest']) for x in episodes),
                     retest_bars=sum(len(x['retest_bars']) for x in episodes),buys=len(lots),
+                    breakouts_replaced_same_bar=sum(x['replaced_same_bar'] for x in episodes),
                     positive_lots=sum(x['pnl']>0 for x in lots),negative_lots=sum(x['pnl']<0 for x in lots)),
         portfolio=dict(e42_end=book['end'],base_end=baseline['end'],difference=difference,
                        direct_rk_pnl=direct,other_lots_difference=difference-direct,

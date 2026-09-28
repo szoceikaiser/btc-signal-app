@@ -18,6 +18,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -40,6 +41,7 @@
     },
     "min_compounded_leave_one_month_out": -1.7408724352891314,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -62,6 +64,7 @@
     },
     "min_compounded_leave_one_month_out": -1.4066393092990737,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -84,6 +87,7 @@
     },
     "min_compounded_leave_one_month_out": -6.006811215237495,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -106,6 +110,7 @@
     },
     "min_compounded_leave_one_month_out": -1.6417451606634659,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -128,6 +133,7 @@
     },
     "min_compounded_leave_one_month_out": -2.593623091325603,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -150,6 +156,7 @@
     },
     "min_compounded_leave_one_month_out": -3.1952071768243773,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -172,6 +179,7 @@
     },
     "min_compounded_leave_one_month_out": -7.881250002253437,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -194,6 +202,7 @@
     },
     "min_compounded_leave_one_month_out": -0.8759297376455866,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -216,6 +225,7 @@
     },
     "min_compounded_leave_one_month_out": -0.8759297376455866,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -238,6 +248,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -260,6 +271,7 @@
     },
     "min_compounded_leave_one_month_out": 0.7435582405117103,
     "both_halves_at_least_1": true,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -282,6 +294,7 @@
     },
     "min_compounded_leave_one_month_out": 0.7435582405117103,
     "both_halves_at_least_1": true,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -304,6 +317,7 @@
     },
     "min_compounded_leave_one_month_out": -1.6417451606634659,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -326,6 +340,7 @@
     },
     "min_compounded_leave_one_month_out": -15.470140995800197,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -348,6 +363,7 @@
     },
     "min_compounded_leave_one_month_out": -15.842777817733932,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -370,6 +386,7 @@
     },
     "min_compounded_leave_one_month_out": -5.231568572234946,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -392,6 +409,7 @@
     },
     "min_compounded_leave_one_month_out": -5.960552435747113,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -414,6 +432,7 @@
     },
     "min_compounded_leave_one_month_out": -13.131138366685136,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -436,6 +455,7 @@
     },
     "min_compounded_leave_one_month_out": -13.511525246859811,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -458,6 +478,7 @@
     },
     "min_compounded_leave_one_month_out": -7.125212025367644,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -480,6 +501,7 @@
     },
     "min_compounded_leave_one_month_out": -17.877056306212012,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -502,6 +524,7 @@
     },
     "min_compounded_leave_one_month_out": -16.475693604379305,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -524,6 +547,7 @@
     },
     "min_compounded_leave_one_month_out": -7.448387643175214,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -546,6 +570,7 @@
     },
     "min_compounded_leave_one_month_out": -1.4724295394491937,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -568,6 +593,7 @@
     },
     "min_compounded_leave_one_month_out": -11.221217124282434,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -590,6 +616,7 @@
     },
     "min_compounded_leave_one_month_out": -14.722223151374504,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -612,6 +639,7 @@
     },
     "min_compounded_leave_one_month_out": -0.7565351825018496,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -634,6 +662,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -656,6 +685,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -678,6 +708,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -700,6 +731,7 @@
     },
     "min_compounded_leave_one_month_out": -1.4628122693204348,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -722,6 +754,7 @@
     },
     "min_compounded_leave_one_month_out": -1.6417451606634659,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -744,6 +777,7 @@
     },
     "min_compounded_leave_one_month_out": -1.4628122693204348,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -766,6 +800,7 @@
     },
     "min_compounded_leave_one_month_out": -40.65492164804525,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -788,6 +823,7 @@
     },
     "min_compounded_leave_one_month_out": -5.783241899773284,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -810,6 +846,7 @@
     },
     "min_compounded_leave_one_month_out": -0.5830411280170811,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -832,6 +869,7 @@
     },
     "min_compounded_leave_one_month_out": -25.245990643684223,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -854,6 +892,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -876,6 +915,7 @@
     },
     "min_compounded_leave_one_month_out": -9.483752467062146,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -898,6 +938,7 @@
     },
     "min_compounded_leave_one_month_out": -22.143636342737615,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -920,6 +961,7 @@
     },
     "min_compounded_leave_one_month_out": -5.056204588183433,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -942,6 +984,7 @@
     },
     "min_compounded_leave_one_month_out": -1.2821464856016984,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -964,6 +1007,7 @@
     },
     "min_compounded_leave_one_month_out": -4.677487214186327,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -986,6 +1030,7 @@
     },
     "min_compounded_leave_one_month_out": -8.979246689042842,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1008,6 +1053,7 @@
     },
     "min_compounded_leave_one_month_out": -9.691597368361737,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1030,6 +1076,7 @@
     },
     "min_compounded_leave_one_month_out": -3.3655208885564614,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1052,6 +1099,7 @@
     },
     "min_compounded_leave_one_month_out": -5.661017683993963,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1074,6 +1122,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1096,6 +1145,7 @@
     },
     "min_compounded_leave_one_month_out": -1.7464153801535875,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1118,6 +1168,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1140,6 +1191,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1162,6 +1214,7 @@
     },
     "min_compounded_leave_one_month_out": -1.183864134287571,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1184,6 +1237,7 @@
     },
     "min_compounded_leave_one_month_out": -2.457095843994339,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1206,6 +1260,7 @@
     },
     "min_compounded_leave_one_month_out": -4.5915797667466896,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1228,6 +1283,7 @@
     },
     "min_compounded_leave_one_month_out": -0.7049762292715034,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1250,6 +1306,7 @@
     },
     "min_compounded_leave_one_month_out": -2.0325177368581526,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1272,6 +1329,7 @@
     },
     "min_compounded_leave_one_month_out": -2.0325177368581526,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1294,6 +1352,7 @@
     },
     "min_compounded_leave_one_month_out": -16.892227956766902,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1316,6 +1375,7 @@
     },
     "min_compounded_leave_one_month_out": -0.888907514361903,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1338,6 +1398,7 @@
     },
     "min_compounded_leave_one_month_out": -6.007293423677251,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1360,6 +1421,7 @@
     },
     "min_compounded_leave_one_month_out": -11.978989627215174,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1382,6 +1444,7 @@
     },
     "min_compounded_leave_one_month_out": -22.71631439764532,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1404,6 +1467,7 @@
     },
     "min_compounded_leave_one_month_out": -18.218805578124943,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1426,6 +1490,7 @@
     },
     "min_compounded_leave_one_month_out": -7.779954828101077,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1448,6 +1513,7 @@
     },
     "min_compounded_leave_one_month_out": -1.3504808544696711,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1470,6 +1536,7 @@
     },
     "min_compounded_leave_one_month_out": -11.897454960823307,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1492,6 +1559,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1514,6 +1582,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1536,6 +1605,7 @@
     },
     "min_compounded_leave_one_month_out": -4.744451096468216,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1558,6 +1628,7 @@
     },
     "min_compounded_leave_one_month_out": -0.9254046402525029,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1580,6 +1651,7 @@
     },
     "min_compounded_leave_one_month_out": -13.1237533985479,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1602,6 +1674,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1624,6 +1697,7 @@
     },
     "min_compounded_leave_one_month_out": 0.0,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1646,6 +1720,7 @@
     },
     "min_compounded_leave_one_month_out": -25.050125694309845,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1668,6 +1743,7 @@
     },
     "min_compounded_leave_one_month_out": -19.54070415488607,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1690,6 +1766,7 @@
     },
     "min_compounded_leave_one_month_out": -28.258574221300382,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   },
@@ -1712,6 +1789,7 @@
     },
     "min_compounded_leave_one_month_out": -1.4761837087396978,
     "both_halves_at_least_1": false,
+    "both_halves_at_least_2": false,
     "technical_release": false,
     "reason": "Known fill/stop/data-model issues; repeated development sample"
   }

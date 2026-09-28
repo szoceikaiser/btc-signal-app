@@ -102,7 +102,7 @@ Feste Strategiegrößen (zusätzlich zu den Schaltern, nicht alle empirisch kali
 | `RUECKTEST_TOL` | `0.005` |
 | `RUECKKAUF_TRANCHE` | `25` |
 
-Weitere fest kodierte Mustergrenzen stehen in `classify_pattern` (u. a. Preis ±1/2 %, OI +3/−5 %, Funding 0,0001), ATR als einfacher 14-Kerzen-Mittelwert, grundlegende Impuls-Untergrenze 3 % alternativ zum ATR-Kriterium. Diese Zahlen sind keine vollständig aus dem Transkript belegten Regeln. Die neuen Messungen variieren sie nicht nachträglich.
+Weitere fest kodierte Mustergrenzen stehen in `classify_pattern` (u. a. starke Preisbewegung 4 %, halbe Schwelle 2 %, OI +3/−5 % sowie −2/−1 % in weiteren Mustern, Funding 0,0001), ATR als einfacher 14-Kerzen-Mittelwert, grundlegende Impuls-Untergrenze 3 % alternativ zum ATR-Kriterium. Diese Zahlen sind keine vollständig aus dem Transkript belegten Regeln. Die neuen Messungen variieren sie nicht nachträglich.
 
 ## Jede bestehende Gitterzeile: Entfernung zur heutigen Basis
 

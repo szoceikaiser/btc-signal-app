@@ -1,0 +1,36 @@
+{
+  "current": [
+    "E41_WARTET",
+    "TEILVERKAUF_LADDER",
+    "TEILVERKAUF_1"
+  ],
+  "mutated": [
+    "TEILVERKAUF_LADDER",
+    "TEILVERKAUF_1",
+    "E41_WARTET"
+  ],
+  "signals": [
+    {
+      "ts": 28800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 143.0,
+      "tranche_pct": 15,
+      "reason": "Leiter-Teilgewinn an Extension 0.8 (143)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+    },
+    {
+      "ts": 28800000,
+      "type": "TEILVERKAUF_1",
+      "price": 159.0,
+      "tranche_pct": 40,
+      "reason": "Extension 1.0 erreicht (159)",
+      "stop_ref": null,
+      "tag": "",
+      "label": "TEILVERKAUF 1 (Extension 1.0)"
+    }
+  ],
+  "finding": "Existing 607-test suite misses this ordering mutation. Independent reached-case check catches it.",
+  "production_behavior": "Correct on this case; missing regression coverage, not a current ordering defect"
+}

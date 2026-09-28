@@ -1,0 +1,7155 @@
+{
+  "description": "Runtime profile of actual nested begin/end calls; no production edits",
+  "input_sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+  "engine_sha256": "e69541732f1e8dc374231a97f6d4cc4d140c2409ced7796e25307c07bab3385b",
+  "signals_exact": true,
+  "observations": [
+    {
+      "key": "1768780800000:93836.01",
+      "start": 1768780800000,
+      "mark": 93836.01,
+      "end": 1768795200000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1768795200000:93092.0",
+      "start": 1768795200000,
+      "mark": 93092.0,
+      "end": 1768939200000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1770984000000:68410.52",
+      "start": 1770984000000,
+      "mark": 68410.52,
+      "end": 1770998400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1772712000000:72271.41",
+      "start": 1772712000000,
+      "mark": 72271.41,
+      "end": 1772827200000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1772827200000:68199.99",
+      "start": 1772827200000,
+      "mark": 68199.99,
+      "end": 1772856000000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1772856000000:68199.99",
+      "start": 1772856000000,
+      "mark": 68199.99,
+      "end": 1773072000000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1773403200000:72271.41",
+      "start": 1773403200000,
+      "mark": 72271.41,
+      "end": 1773489600000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1773489600000:70983.0",
+      "start": 1773489600000,
+      "mark": 70983.0,
+      "end": 1773504000000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1773504000000:70983.0",
+      "start": 1773504000000,
+      "mark": 70983.0,
+      "end": 1773532800000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1773705600000:79360.0",
+      "start": 1773705600000,
+      "mark": 79360.0,
+      "end": 1773849600000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1773849600000:71777.0",
+      "start": 1773849600000,
+      "mark": 71777.0,
+      "end": 1773878400000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1773878400000:71777.0",
+      "start": 1773878400000,
+      "mark": 71777.0,
+      "end": 1773907200000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1774368000000:69988.83",
+      "start": 1774368000000,
+      "mark": 69988.83,
+      "end": 1774382400000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1774382400000:69988.83",
+      "start": 1774382400000,
+      "mark": 69988.83,
+      "end": 1774497600000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1775088000000:68199.99",
+      "start": 1775088000000,
+      "mark": 68199.99,
+      "end": 1775102400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1775174400000:67288.94",
+      "start": 1775174400000,
+      "mark": 67288.94,
+      "end": 1775188800000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1775188800000:67288.94",
+      "start": 1775188800000,
+      "mark": 67288.94,
+      "end": 1775404800000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1775462400000:69988.83",
+      "start": 1775462400000,
+      "mark": 69988.83,
+      "end": 1775577600000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1775577600000:68199.99",
+      "start": 1775577600000,
+      "mark": 68199.99,
+      "end": 1775592000000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1775592000000:69310.0",
+      "start": 1775592000000,
+      "mark": 69310.0,
+      "end": 1775592000000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1775592000000:72026.09",
+      "start": 1775592000000,
+      "mark": 72026.09,
+      "end": 1775750400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1775764800000:72271.41",
+      "start": 1775764800000,
+      "mark": 72271.41,
+      "end": 1775779200000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1776585600000:75425.0",
+      "start": 1776585600000,
+      "mark": 75425.0,
+      "end": 1776600000000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1776600000000:76000.0",
+      "start": 1776600000000,
+      "mark": 76000.0,
+      "end": 1776758400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1776859200000:79360.0",
+      "start": 1776859200000,
+      "mark": 79360.0,
+      "end": 1777924800000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1778054400000:89228.0",
+      "start": 1778054400000,
+      "mark": 89228.0,
+      "end": 1778443200000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1778443200000:82850.0",
+      "start": 1778443200000,
+      "mark": 82850.0,
+      "end": 1778515200000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1778515200000:82479.32",
+      "start": 1778515200000,
+      "mark": 82479.32,
+      "end": 1778976000000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1781193600000:64234.68",
+      "start": 1781193600000,
+      "mark": 64234.68,
+      "end": 1781251200000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1781251200000:64234.68",
+      "start": 1781251200000,
+      "mark": 64234.68,
+      "end": 1781366400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1781395200000:67288.94",
+      "start": 1781395200000,
+      "mark": 67288.94,
+      "end": 1781726400000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1781726400000:64762.77",
+      "start": 1781726400000,
+      "mark": 64762.77,
+      "end": 1781740800000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1781740800000:64762.77",
+      "start": 1781740800000,
+      "mark": 64762.77,
+      "end": 1781798400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1783627200000:63461.99",
+      "start": 1783627200000,
+      "mark": 63461.99,
+      "end": 1783641600000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1783641600000:63239.06",
+      "start": 1783641600000,
+      "mark": 63239.06,
+      "end": 1783814400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1784088000000:64692.83",
+      "start": 1784088000000,
+      "mark": 64692.83,
+      "end": 1784116800000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1784131200000:65622.83",
+      "start": 1784131200000,
+      "mark": 65622.83,
+      "end": 1784160000000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1784160000000:64762.77",
+      "start": 1784160000000,
+      "mark": 64762.77,
+      "end": 1784174400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1784289600000:63461.99",
+      "start": 1784289600000,
+      "mark": 63461.99,
+      "end": 1784304000000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1784304000000:63461.99",
+      "start": 1784304000000,
+      "mark": 63461.99,
+      "end": 1784476800000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1784822400000:64967.25",
+      "start": 1784822400000,
+      "mark": 64967.25,
+      "end": 1784836800000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1784836800000:64967.25",
+      "start": 1784836800000,
+      "mark": 64967.25,
+      "end": 1784851200000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1785974400000:64692.83",
+      "start": 1785974400000,
+      "mark": 64692.83,
+      "end": 1786104000000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1787025600000:64234.68",
+      "start": 1787025600000,
+      "mark": 64234.68,
+      "end": 1787054400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1787140800000:68698.7",
+      "start": 1787140800000,
+      "mark": 68698.7,
+      "end": 1787184000000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1787198400000:69310.0",
+      "start": 1787198400000,
+      "mark": 69310.0,
+      "end": 1787212800000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1787212800000:69988.83",
+      "start": 1787212800000,
+      "mark": 69988.83,
+      "end": 1787284800000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1787284800000:77904.93",
+      "start": 1787284800000,
+      "mark": 77904.93,
+      "end": 1787356800000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1787371200000:78599.99",
+      "start": 1787371200000,
+      "mark": 78599.99,
+      "end": 1787385600000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1787716800000:79199.48",
+      "start": 1787716800000,
+      "mark": 79199.48,
+      "end": 1787731200000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1787731200000:79199.48",
+      "start": 1787731200000,
+      "mark": 79199.48,
+      "end": 1787832000000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1788710400000:80200.0",
+      "start": 1788710400000,
+      "mark": 80200.0,
+      "end": 1788724800000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1788724800000:80200.0",
+      "start": 1788724800000,
+      "mark": 80200.0,
+      "end": 1789502400000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1789747200000:81272.62",
+      "start": 1789747200000,
+      "mark": 81272.62,
+      "end": 1789761600000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1789761600000:81272.62",
+      "start": 1789761600000,
+      "mark": 81272.62,
+      "end": 1789819200000,
+      "end_reason": "beobachtung_beendet"
+    },
+    {
+      "key": "1789977600000:89228.0",
+      "start": 1789977600000,
+      "mark": 89228.0,
+      "end": 1790496000000,
+      "end_reason": "neue_beobachtung"
+    },
+    {
+      "key": "1790496000000:85255.0",
+      "start": 1790496000000,
+      "mark": 85255.0,
+      "end_reason": "am_datenende_offen"
+    }
+  ],
+  "timeline": [
+    {
+      "ts": 1768766400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1768766400000,
+          "type": "KAUF_1",
+          "price": 94026.465,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 90128->97924",
+          "stop_ref": 90128.44,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1768780800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 93836.01,
+          "start": 1768780800000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1768780800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 92690.09,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 93836 - beobachte Ausbruch ueber 93836 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 93836.01,
+      "final_start": 1768780800000
+    },
+    {
+      "ts": 1768795200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 93092.0,
+          "start": 1768795200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1768795200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 92841.62,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 93092 - beobachte Ausbruch ueber 93092 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 93092.0,
+      "final_start": 1768795200000
+    },
+    {
+      "ts": 1768809600000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 93092.0,
+          "start": 1768795200000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1768809600000,
+          "type": "NACHKAUF",
+          "price": 93191.96,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 92385 — aufstocken (NEUTRAL)",
+          "stop_ref": 90128.44,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1768809600000,
+          "kurs": 93191.96,
+          "marke": 93092.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 93557.45999999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 93092.0,
+      "final_start": 1768795200000
+    },
+    {
+      "ts": 1768824000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "gescheitert",
+          "mark": 93092.0,
+          "start": 1768795200000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "gescheitert",
+          "ts": 1768824000000,
+          "kurs": 93068.62,
+          "marke": 93092.0,
+          "lang": true
+        }
+      ],
+      "final_mark": 93092.0,
+      "final_start": 1768795200000
+    },
+    {
+      "ts": 1768838400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 93092.0,
+          "start": 1768795200000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1768838400000,
+          "kurs": 93105.85,
+          "marke": 93092.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 93557.45999999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 93092.0,
+      "final_start": 1768795200000
+    },
+    {
+      "ts": 1768852800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "gescheitert",
+          "mark": 93092.0,
+          "start": 1768795200000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "gescheitert",
+          "ts": 1768852800000,
+          "kurs": 92631.0,
+          "marke": 93092.0,
+          "lang": true
+        }
+      ],
+      "final_mark": 93092.0,
+      "final_start": 1768795200000
+    },
+    {
+      "ts": 1768881600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1768881600000,
+          "type": "NACHKAUF",
+          "price": 91796.7947,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 90128.44,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 93092.0,
+      "final_start": 1768795200000
+    },
+    {
+      "ts": 1768939200000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1768939200000,
+          "type": "STOPLOSS",
+          "price": 88427.66,
+          "tranche_pct": 100,
+          "reason": "Kerzenschluss unter Invalidierung 90128 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1770811200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1770811200000,
+          "type": "KAUF_1",
+          "price": 66135.705,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 60000->72271",
+          "stop_ref": 60000.0,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1770984000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 68410.52,
+          "start": 1770984000000,
+          "breakout": 1770984000000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1770984000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 68692.12,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 68411 - beobachte Ausbruch ueber 68411 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1770984000000,
+          "kurs": 68692.12,
+          "marke": 68410.52,
+          "lang": true,
+          "fenster": 12,
+          "zone": 68752.5726,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 68410.52,
+      "final_start": 1770984000000
+    },
+    {
+      "ts": 1770998400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 68410.52,
+          "start": 1770984000000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1770998400000,
+          "type": "RUECKKAUF",
+          "price": 68938.91,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 68411, Ruecktest gehalten (Tief 68541, Schluss 68939) - Stop fuer diesen Teil bei Schluss unter 68411",
+          "stop_ref": 68410.52,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1771171200000,
+      "calls": [],
+      "signals": [],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1771171200000,
+          "kurs": 68286.63,
+          "marke": 68410.52,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 64989.994,
+          "nur_rueckkauf": false
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1771185600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1771185600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 68832.58,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 68411",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "teil_zurueck",
+          "ts": 1771185600000,
+          "kurs": 68832.58,
+          "marke": 68410.52,
+          "lang": true,
+          "nur_rueckkauf": false
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1771243200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1771243200000,
+          "type": "RUECKKAUF_STOP",
+          "price": 67539.52,
+          "tranche_pct": 25,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 68411 - die Marke war schon einmal unterschritten und zurueckerobert, jetzt echter Bruch - der Rest der Position behaelt seinen Stop",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOP Rueckkauf-Teil (Schluss unter der Ausbruchsmarke)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1771804800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1771804800000,
+          "type": "NACHKAUF",
+          "price": 64934.17,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (CAPITULATION_RESET)",
+          "stop_ref": 60000.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1771819200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1771819200000,
+          "type": "KAUF_2",
+          "price": 64687.67862,
+          "tranche_pct": 50,
+          "reason": "Golden Pocket 64295-64688 + Bestaetigung (NEUTRAL)",
+          "stop_ref": 60000.0,
+          "tag": "",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1771905600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1771905600000,
+          "type": "NACHKAUF",
+          "price": 63192.96,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 60000.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1771934400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1771934400000,
+          "type": "NACHKAUF",
+          "price": 63973.97,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 60000.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1771934400000,
+          "type": "NACHKAUF",
+          "price": 63973.97,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 62345 — aufstocken (NEUTRAL)",
+          "stop_ref": 60000.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1771934400000,
+          "type": "NACHKAUF",
+          "price": 62626.08174,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 60000.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772006400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772006400000,
+          "type": "NACHKAUF",
+          "price": 65430.04,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 65200 — aufstocken (NEUTRAL)",
+          "stop_ref": 60000.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772064000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772064000000,
+          "type": "WARNUNG",
+          "price": 68216.86,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772078400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772078400000,
+          "type": "WARNUNG",
+          "price": 67825.04,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772107200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772107200000,
+          "type": "WARNUNG",
+          "price": 67382.0,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772121600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772121600000,
+          "type": "WARNUNG",
+          "price": 67589.22,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772496000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772496000000,
+          "type": "WARNUNG",
+          "price": 68377.94,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772510400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772510400000,
+          "type": "WARNUNG",
+          "price": 68172.8,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772611200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772611200000,
+          "type": "WARNUNG",
+          "price": 71111.4,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772625600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772625600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 72327.408,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (72327)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772640000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772640000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 73554.549,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (73555)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772697600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772697600000,
+          "type": "WARNUNG",
+          "price": 72915.79,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1772712000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 72271.41,
+          "start": 1772712000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1772712000000,
+          "type": "TEILVERKAUF_1",
+          "price": 70402.28,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (70402)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        },
+        {
+          "ts": 1772712000000,
+          "type": "VERKAUF_REST",
+          "price": 71652.77,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP - beobachte Ausbruch ueber 72271 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 72271.41,
+      "final_start": 1772712000000
+    },
+    {
+      "ts": 1772798400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772798400000,
+          "type": "KAUF_2",
+          "price": 68504.71,
+          "tranche_pct": 75,
+          "reason": "Capitulation: GP durchschlagen (Tief 68176), Schluss ueber Invalidierung (NEUTRAL)",
+          "stop_ref": 66158.0,
+          "tag": "FLUSH",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 72271.41,
+      "final_start": 1772712000000
+    },
+    {
+      "ts": 1772812800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772812800000,
+          "type": "NACHKAUF",
+          "price": 68131.79,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 66158.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1772812800000,
+          "type": "NACHKAUF",
+          "price": 67846.888,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 66158.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 72271.41,
+      "final_start": 1772712000000
+    },
+    {
+      "ts": 1772827200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 68199.99,
+          "start": 1772827200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1772827200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 68114.02,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 68200 - beobachte Ausbruch ueber 68200 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 68199.99,
+      "final_start": 1772827200000
+    },
+    {
+      "ts": 1772841600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772841600000,
+          "type": "NACHKAUF",
+          "price": 68095.5,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 — aufstocken (CAPITULATION_RESET)",
+          "stop_ref": 66158.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 68199.99,
+      "final_start": 1772827200000
+    },
+    {
+      "ts": 1772856000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 68199.99,
+          "start": 1772856000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1772856000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 67842.67,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 68200 - beobachte Ausbruch ueber 68200 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 68199.99,
+      "final_start": 1772856000000
+    },
+    {
+      "ts": 1772884800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772884800000,
+          "type": "NACHKAUF",
+          "price": 67877.45,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 67300 — aufstocken (NEUTRAL)",
+          "stop_ref": 66158.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 68199.99,
+      "final_start": 1772856000000
+    },
+    {
+      "ts": 1772928000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772928000000,
+          "type": "NACHKAUF",
+          "price": 67000.26,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 66158.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 68199.99,
+      "final_start": 1772856000000
+    },
+    {
+      "ts": 1772942400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1772942400000,
+          "type": "NACHKAUF",
+          "price": 67319.91,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 66158.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 68199.99,
+      "final_start": 1772856000000
+    },
+    {
+      "ts": 1773057600000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 68199.99,
+          "start": 1772856000000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1773057600000,
+          "kurs": 68863.66,
+          "marke": 68199.99,
+          "lang": true,
+          "fenster": 12,
+          "zone": 68540.98995,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 68199.99,
+      "final_start": 1772856000000
+    },
+    {
+      "ts": 1773072000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 68199.99,
+          "start": 1772856000000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ohne_kauf",
+          "ts": 1773072000000,
+          "kurs": 68991.93,
+          "marke": 68199.99,
+          "lang": true,
+          "grund": "die Engine ist schon voll investiert"
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773244800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773244800000,
+          "type": "WARNUNG",
+          "price": 70641.82,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773331200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773331200000,
+          "type": "WARNUNG",
+          "price": 70432.32,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773345600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773345600000,
+          "type": "WARNUNG",
+          "price": 70541.34,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773360000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773360000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 71932.09000000001,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (71932)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773374400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773374400000,
+          "type": "WARNUNG",
+          "price": 71612.22,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773388800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773388800000,
+          "type": "WARNUNG",
+          "price": 72228.82,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773403200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 72271.41,
+          "start": 1773403200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1773403200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 72721.29000000001,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (72721)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1773403200000,
+          "type": "TEILVERKAUF_1",
+          "price": 73510.49,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (73510)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        },
+        {
+          "ts": 1773403200000,
+          "type": "VERKAUF_REST",
+          "price": 71831.46,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP - beobachte Ausbruch ueber 72271 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 72271.41,
+      "final_start": 1773403200000
+    },
+    {
+      "ts": 1773475200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773475200000,
+          "type": "KAUF_2",
+          "price": 70751.42,
+          "tranche_pct": 75,
+          "reason": "Capitulation: GP durchschlagen (Tief 70389), Schluss ueber Invalidierung (NEUTRAL)",
+          "stop_ref": 68977.91,
+          "tag": "FLUSH",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 72271.41,
+      "final_start": 1773403200000
+    },
+    {
+      "ts": 1773489600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 70983.0,
+          "start": 1773489600000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1773489600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 70580.09,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 70983 - beobachte Ausbruch ueber 70983 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 70983.0,
+      "final_start": 1773489600000
+    },
+    {
+      "ts": 1773504000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 70983.0,
+          "start": 1773504000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1773504000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 70700.0,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 70983 - beobachte Ausbruch ueber 70983 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 70983.0,
+      "final_start": 1773504000000
+    },
+    {
+      "ts": 1773518400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 70983.0,
+          "start": 1773504000000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1773518400000,
+          "kurs": 71211.95,
+          "marke": 70983.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 71337.915,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 70983.0,
+      "final_start": 1773504000000
+    },
+    {
+      "ts": 1773532800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 70983.0,
+          "start": 1773504000000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1773532800000,
+          "type": "RUECKKAUF",
+          "price": 71363.14,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 70983, Ruecktest gehalten (Tief 70859, Schluss 71363) - Stop fuer diesen Teil bei Schluss unter 70983",
+          "stop_ref": 70983.0,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773604800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773604800000,
+          "type": "NACHKAUF",
+          "price": 72815.24,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 71736 — aufstocken (SHORT_COVERING)",
+          "stop_ref": 68977.91,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773633600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773633600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 74337.744,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (74338)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1773633600000,
+          "type": "WARNUNG",
+          "price": 73456.68,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773648000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773648000000,
+          "type": "WARNUNG",
+          "price": 73552.77,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773662400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773662400000,
+          "type": "WARNUNG",
+          "price": 73274.76,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773676800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773676800000,
+          "type": "WARNUNG",
+          "price": 73963.0,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773691200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773691200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 74831.327,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (74831)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1773691200000,
+          "type": "WARNUNG",
+          "price": 74884.67,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1773705600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 79360.0,
+          "start": 1773705600000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1773705600000,
+          "type": "TEILVERKAUF_1",
+          "price": 75324.91,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (75325)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        },
+        {
+          "ts": 1773705600000,
+          "type": "VERKAUF_REST",
+          "price": 74463.98,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP - beobachte Ausbruch ueber 79360 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1773705600000
+    },
+    {
+      "ts": 1773820800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773820800000,
+          "type": "KAUF_1",
+          "price": 73158.5,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 70317->76000",
+          "stop_ref": 70317.0,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1773705600000
+    },
+    {
+      "ts": 1773835200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773835200000,
+          "type": "NACHKAUF",
+          "price": 71533.162,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 70317.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1773705600000
+    },
+    {
+      "ts": 1773849600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 71777.0,
+          "start": 1773849600000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1773849600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 71072.38,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 71777 - beobachte Ausbruch ueber 71777 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 71777.0,
+      "final_start": 1773849600000
+    },
+    {
+      "ts": 1773864000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1773864000000,
+          "type": "NACHKAUF",
+          "price": 71246.54,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (CAPITULATION_RESET)",
+          "stop_ref": 70317.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 71777.0,
+      "final_start": 1773849600000
+    },
+    {
+      "ts": 1773878400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 71777.0,
+          "start": 1773878400000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1773878400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 71215.39,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 71777 - beobachte Ausbruch ueber 71777 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 71777.0,
+      "final_start": 1773878400000
+    },
+    {
+      "ts": 1773907200000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1773907200000,
+          "type": "STOPLOSS",
+          "price": 69952.75,
+          "tranche_pct": 100,
+          "reason": "Kerzenschluss unter Invalidierung 70317 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1774353600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1774353600000,
+          "type": "KAUF_1",
+          "price": 69588.875,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 67361->71817",
+          "stop_ref": 67360.66,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1774368000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 69988.83,
+          "start": 1774368000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1774368000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 69377.33,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 69989 - beobachte Ausbruch ueber 69989 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 69988.83,
+      "final_start": 1774368000000
+    },
+    {
+      "ts": 1774382400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 69988.83,
+          "start": 1774382400000,
+          "breakout": 1774382400000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1774382400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 70556.74,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 69989 - beobachte Ausbruch ueber 69989 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1774382400000,
+          "kurs": 70556.74,
+          "marke": 69988.83,
+          "lang": true,
+          "fenster": 12,
+          "zone": 70338.77415,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 69988.83,
+      "final_start": 1774382400000
+    },
+    {
+      "ts": 1774497600000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 69988.83,
+          "start": 1774382400000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1774497600000,
+          "type": "RUECKKAUF",
+          "price": 70087.44,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 69989, Ruecktest gehalten (Tief 69805, Schluss 70087) - Stop fuer diesen Teil bei Schluss unter 69989",
+          "stop_ref": 69988.83,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1774512000000,
+      "calls": [],
+      "signals": [],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1774512000000,
+          "kurs": 69276.01,
+          "marke": 69988.83,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 66489.3885,
+          "nur_rueckkauf": false
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1774526400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1774526400000,
+          "type": "RUECKKAUF_STOP",
+          "price": 69082.64,
+          "tranche_pct": 25,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 69989 - nach 1 Kerze(n) nicht zurueckerobert - der Rest der Position behaelt seinen Stop",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOP Rueckkauf-Teil (Schluss unter der Ausbruchsmarke)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1774540800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1774540800000,
+          "type": "NACHKAUF",
+          "price": 68314.33602,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 67360.66,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1774569600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1774569600000,
+          "type": "NACHKAUF",
+          "price": 68767.51,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 68793 — aufstocken (NEUTRAL)",
+          "stop_ref": 67360.66,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1774584000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1774584000000,
+          "type": "NACHKAUF",
+          "price": 68540.48,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 — aufstocken (NEUTRAL)",
+          "stop_ref": 67360.66,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1774612800000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1774612800000,
+          "type": "STOPLOSS",
+          "price": 66112.82,
+          "tranche_pct": 100,
+          "reason": "Kerzenschluss unter Invalidierung 67361 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775044800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1775044800000,
+          "type": "KAUF_2",
+          "price": 68918.52,
+          "tranche_pct": 75,
+          "reason": "Capitulation: GP durchschlagen (Tief 67919), Schluss ueber Invalidierung (GESUNDER_TREND)",
+          "stop_ref": 67360.66,
+          "tag": "FLUSH",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775059200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1775059200000,
+          "type": "NACHKAUF",
+          "price": 68176.84,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 — aufstocken (NEUTRAL)",
+          "stop_ref": 67360.66,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1775059200000,
+          "type": "NACHKAUF",
+          "price": 68314.33602,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 67360.66,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775073600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1775073600000,
+          "type": "NACHKAUF",
+          "price": 68113.92,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 68176 — aufstocken (NEUTRAL)",
+          "stop_ref": 67360.66,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775088000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 68199.99,
+          "start": 1775088000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775088000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 66576.25,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 68200 - beobachte Ausbruch ueber 68200 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 68199.99,
+      "final_start": 1775088000000
+    },
+    {
+      "ts": 1775102400000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775102400000,
+          "type": "STOPLOSS",
+          "price": 66930.79,
+          "tranche_pct": 100,
+          "reason": "Kerzenschluss unter Invalidierung 67361 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775131200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1775131200000,
+          "type": "KAUF_2",
+          "price": 66852.91,
+          "tranche_pct": 75,
+          "reason": "Capitulation: GP durchschlagen (Tief 65712), Schluss ueber Invalidierung (NEUTRAL)",
+          "stop_ref": 65000.0,
+          "tag": "FLUSH",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775145600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1775145600000,
+          "type": "NACHKAUF",
+          "price": 66975.99,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 66500 — aufstocken (NEUTRAL)",
+          "stop_ref": 65000.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775160000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1775160000000,
+          "type": "NACHKAUF",
+          "price": 66901.99,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 66500 — aufstocken (NEUTRAL)",
+          "stop_ref": 65000.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775174400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 67288.94,
+          "start": 1775174400000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775174400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 66579.97,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 67289 - beobachte Ausbruch ueber 67289 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 67288.94,
+      "final_start": 1775174400000
+    },
+    {
+      "ts": 1775188800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 67288.94,
+          "start": 1775188800000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775188800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 67042.08,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 67289 - beobachte Ausbruch ueber 67289 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 67288.94,
+      "final_start": 1775188800000
+    },
+    {
+      "ts": 1775304000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 67288.94,
+          "start": 1775188800000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1775304000000,
+          "kurs": 67383.66,
+          "marke": 67288.94,
+          "lang": true,
+          "fenster": 12,
+          "zone": 67625.3847,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 67288.94,
+      "final_start": 1775188800000
+    },
+    {
+      "ts": 1775318400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "gescheitert",
+          "mark": 67288.94,
+          "start": 1775188800000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "gescheitert",
+          "ts": 1775318400000,
+          "kurs": 67288.42,
+          "marke": 67288.94,
+          "lang": true
+        }
+      ],
+      "final_mark": 67288.94,
+      "final_start": 1775188800000
+    },
+    {
+      "ts": 1775332800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 67288.94,
+          "start": 1775188800000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1775332800000,
+          "kurs": 67300.42,
+          "marke": 67288.94,
+          "lang": true,
+          "fenster": 12,
+          "zone": 67625.3847,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 67288.94,
+      "final_start": 1775188800000
+    },
+    {
+      "ts": 1775347200000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "gescheitert",
+          "mark": 67288.94,
+          "start": 1775188800000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "gescheitert",
+          "ts": 1775347200000,
+          "kurs": 67145.98,
+          "marke": 67288.94,
+          "lang": true
+        }
+      ],
+      "final_mark": 67288.94,
+      "final_start": 1775188800000
+    },
+    {
+      "ts": 1775390400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 67288.94,
+          "start": 1775188800000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1775390400000,
+          "kurs": 67306.64,
+          "marke": 67288.94,
+          "lang": true,
+          "fenster": 12,
+          "zone": 67625.3847,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 67288.94,
+      "final_start": 1775188800000
+    },
+    {
+      "ts": 1775404800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 67288.94,
+          "start": 1775188800000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775404800000,
+          "type": "RUECKKAUF",
+          "price": 67361.01,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 67289, Ruecktest gehalten (Tief 67173, Schluss 67361) - Stop fuer diesen Teil bei Schluss unter 67289",
+          "stop_ref": 67288.94,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775433600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1775433600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 69160.12,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (69160)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775448000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1775448000000,
+          "type": "WARNUNG",
+          "price": 69115.91,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775462400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 69988.83,
+          "start": 1775462400000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775462400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 69591.12,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (69591)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1775462400000,
+          "type": "TEILVERKAUF_1",
+          "price": 70022.12,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (70022)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        },
+        {
+          "ts": 1775462400000,
+          "type": "VERKAUF_REST",
+          "price": 69614.91,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: SHORT_COVERING - beobachte Ausbruch ueber 69989 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 69988.83,
+      "final_start": 1775462400000
+    },
+    {
+      "ts": 1775563200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1775563200000,
+          "type": "KAUF_2",
+          "price": 68168.1,
+          "tranche_pct": 75,
+          "reason": "Capitulation: GP durchschlagen (Tief 67732), Schluss ueber Invalidierung (GESUNDER_TREND)",
+          "stop_ref": 66611.66,
+          "tag": "FLUSH",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 69988.83,
+      "final_start": 1775462400000
+    },
+    {
+      "ts": 1775577600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 68199.99,
+          "start": 1775577600000,
+          "breakout": 1775577600000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775577600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 69011.29,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 68200 - beobachte Ausbruch ueber 68200 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1775577600000,
+          "kurs": 69011.29,
+          "marke": 68199.99,
+          "lang": true,
+          "fenster": 12,
+          "zone": 68540.98995,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 68199.99,
+      "final_start": 1775577600000
+    },
+    {
+      "ts": 1775592000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 69310.0,
+          "start": 1775592000000,
+          "breakout": 1775592000000
+        },
+        {
+          "kind": "begin",
+          "mark": 72026.09,
+          "start": 1775592000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775592000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 71924.22,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 69310 - beobachte Ausbruch ueber 69310 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1775592000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 70723.84999999999,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (70724)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1775592000000,
+          "type": "TEILVERKAUF_1",
+          "price": 71471.81,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (71472)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        },
+        {
+          "ts": 1775592000000,
+          "type": "VERKAUF_REST",
+          "price": 71924.22,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: SHORT_COVERING - beobachte Ausbruch ueber 72026 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1775592000000,
+          "kurs": 71924.22,
+          "marke": 69310.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 69656.54999999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 72026.09,
+      "final_start": 1775592000000
+    },
+    {
+      "ts": 1775736000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 72026.09,
+          "start": 1775592000000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1775736000000,
+          "kurs": 72141.99,
+          "marke": 72026.09,
+          "lang": true,
+          "fenster": 12,
+          "zone": 72386.22045,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 72026.09,
+      "final_start": 1775592000000
+    },
+    {
+      "ts": 1775750400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 72026.09,
+          "start": 1775592000000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775750400000,
+          "type": "RUECKKAUF",
+          "price": 72096.32,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 72026, Ruecktest gehalten (Tief 71730, Schluss 72096) - Stop fuer diesen Teil bei Schluss unter 72026",
+          "stop_ref": 72026.09,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1775764800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 72271.41,
+          "start": 1775764800000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775764800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 71787.97,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 72271 - beobachte Ausbruch ueber 72271 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1775764800000,
+          "kurs": 71787.97,
+          "marke": 72026.09,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 68424.7855,
+          "nur_rueckkauf": true
+        }
+      ],
+      "final_mark": 72271.41,
+      "final_start": 1775764800000
+    },
+    {
+      "ts": 1775779200000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1775779200000,
+          "type": "STOPLOSS",
+          "price": 71868.67,
+          "tranche_pct": 100,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 72026 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776513600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776513600000,
+          "type": "KAUF_1",
+          "price": 75821.425,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 73310->78333",
+          "stop_ref": 73309.85,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776528000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776528000000,
+          "type": "NACHKAUF",
+          "price": 75649.85,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (GESUNDER_TREND)",
+          "stop_ref": 73309.85,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1776528000000,
+          "type": "NACHKAUF",
+          "price": 75649.85,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 75764 — aufstocken (GESUNDER_TREND)",
+          "stop_ref": 73309.85,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776542400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776542400000,
+          "type": "NACHKAUF",
+          "price": 75691.76,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 75764 — aufstocken (GESUNDER_TREND)",
+          "stop_ref": 73309.85,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776556800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776556800000,
+          "type": "NACHKAUF",
+          "price": 75515.77,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 73309.85,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776571200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776571200000,
+          "type": "NACHKAUF",
+          "price": 75252.34,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 73309.85,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776585600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 75425.0,
+          "start": 1776585600000,
+          "breakout": 1776585600000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1776585600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 75604.11,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 75425 - beobachte Ausbruch ueber 75425 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1776585600000,
+          "kurs": 75604.11,
+          "marke": 75425.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 75802.12499999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 75425.0,
+      "final_start": 1776585600000
+    },
+    {
+      "ts": 1776600000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 76000.0,
+          "start": 1776600000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1776600000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 75846.63,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 76000 - beobachte Ausbruch ueber 76000 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 76000.0,
+      "final_start": 1776600000000
+    },
+    {
+      "ts": 1776628800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776628800000,
+          "type": "NACHKAUF",
+          "price": 74384.80410000001,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 73309.85,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 76000.0,
+      "final_start": 1776600000000
+    },
+    {
+      "ts": 1776700800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 76000.0,
+          "start": 1776600000000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1776700800000,
+          "kurs": 76296.96,
+          "marke": 76000.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 76379.99999999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 76000.0,
+      "final_start": 1776600000000
+    },
+    {
+      "ts": 1776715200000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "gescheitert",
+          "mark": 76000.0,
+          "start": 1776600000000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "gescheitert",
+          "ts": 1776715200000,
+          "kurs": 75840.97,
+          "marke": 76000.0,
+          "lang": true
+        }
+      ],
+      "final_mark": 76000.0,
+      "final_start": 1776600000000
+    },
+    {
+      "ts": 1776744000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 76000.0,
+          "start": 1776600000000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1776744000000,
+          "kurs": 76084.34,
+          "marke": 76000.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 76379.99999999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 76000.0,
+      "final_start": 1776600000000
+    },
+    {
+      "ts": 1776758400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 76000.0,
+          "start": 1776600000000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1776758400000,
+          "type": "RUECKKAUF",
+          "price": 76452.94,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 76000, Ruecktest gehalten (Tief 76064, Schluss 76453) - Stop fuer diesen Teil bei Schluss unter 76000",
+          "stop_ref": 76000.0,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776772800000,
+      "calls": [],
+      "signals": [],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1776772800000,
+          "kurs": 75834.65,
+          "marke": 76000.0,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 72200.0,
+          "nur_rueckkauf": false
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776787200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776787200000,
+          "type": "RUECKKAUF_STOP",
+          "price": 75023.43,
+          "tranche_pct": 25,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 76000 - nach 1 Kerze(n) nicht zurueckerobert - der Rest der Position behaelt seinen Stop",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOP Rueckkauf-Teil (Schluss unter der Ausbruchsmarke)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776816000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776816000000,
+          "type": "WARNUNG",
+          "price": 77521.48,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776830400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776830400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 77742.82999999999,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (77743)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1776830400000,
+          "type": "WARNUNG",
+          "price": 78012.79,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776844800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1776844800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 78245.14499999999,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (78245)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1776844800000,
+          "type": "WARNUNG",
+          "price": 78300.0,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1776859200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 79360.0,
+          "start": 1776859200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1776859200000,
+          "type": "TEILVERKAUF_1",
+          "price": 78747.45999999999,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (78747)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        },
+        {
+          "ts": 1776859200000,
+          "type": "VERKAUF_REST",
+          "price": 79272.9,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: SHORT_COVERING - beobachte Ausbruch ueber 79360 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777291200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777291200000,
+          "type": "KAUF_1",
+          "price": 76598.565,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 73724->79473",
+          "stop_ref": 73724.31,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777348800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777348800000,
+          "type": "NACHKAUF",
+          "price": 76879.28,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 73724.31,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1777348800000,
+          "type": "NACHKAUF",
+          "price": 76879.28,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 76564 — aufstocken (NEUTRAL)",
+          "stop_ref": 73724.31,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777363200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777363200000,
+          "type": "NACHKAUF",
+          "price": 76229.0,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 73724.31,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1777363200000,
+          "type": "NACHKAUF",
+          "price": 76229.0,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 75764 — aufstocken (NEUTRAL)",
+          "stop_ref": 73724.31,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777377600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777377600000,
+          "type": "NACHKAUF",
+          "price": 76066.38,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 73724.31,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777478400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777478400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 75563.86,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 76000",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777492800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777492800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 75780.0,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 76000",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777536000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777536000000,
+          "type": "KAUF_2",
+          "price": 75920.24082,
+          "tranche_pct": 50,
+          "reason": "Golden Pocket 75736-75920 + Bestaetigung (NEUTRAL)",
+          "stop_ref": 73724.31,
+          "tag": "",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777708800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777708800000,
+          "type": "WARNUNG",
+          "price": 78143.08,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777723200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777723200000,
+          "type": "WARNUNG",
+          "price": 78487.67,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777737600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777737600000,
+          "type": "WARNUNG",
+          "price": 78486.0,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777752000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1777752000000,
+          "type": "WARNUNG",
+          "price": 78686.85,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777852800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 79360.0,
+          "start": 1776859200000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1777852800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 79536.32800000001,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (79536)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1777852800000,
+          "kurs": 80316.31,
+          "marke": 79360.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 79756.79999999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777867200000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 79360.0,
+          "start": 1776859200000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1777867200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 80111.17900000002,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (80111)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777881600000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "gescheitert",
+          "mark": 79360.0,
+          "start": 1776859200000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "gescheitert",
+          "ts": 1777881600000,
+          "kurs": 78793.67,
+          "marke": 79360.0,
+          "lang": true
+        }
+      ],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777896000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 79360.0,
+          "start": 1776859200000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1777896000000,
+          "kurs": 80028.85,
+          "marke": 79360.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 79756.79999999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777910400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 79360.0,
+          "start": 1776859200000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1777910400000,
+          "type": "TEILVERKAUF_1",
+          "price": 80686.03000000001,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (80686)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79360.0,
+      "final_start": 1776859200000
+    },
+    {
+      "ts": 1777924800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 79360.0,
+          "start": 1776859200000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1777924800000,
+          "type": "RUECKKAUF",
+          "price": 79861.01,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 79360, Ruecktest gehalten (Tief 79745, Schluss 79861) - Stop fuer diesen Teil bei Schluss unter 79360",
+          "stop_ref": 79360.0,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1778054400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 89228.0,
+          "start": 1778054400000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1778054400000,
+          "type": "VERKAUF_REST",
+          "price": 82522.89,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: SHORT_COVERING - beobachte Ausbruch ueber 89228 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 89228.0,
+      "final_start": 1778054400000
+    },
+    {
+      "ts": 1778155200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1778155200000,
+          "type": "KAUF_2",
+          "price": 79890.63,
+          "tranche_pct": 75,
+          "reason": "Capitulation: GP durchschlagen (Tief 79700), Schluss ueber Invalidierung (NEUTRAL)",
+          "stop_ref": 78084.08,
+          "tag": "FLUSH",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 89228.0,
+      "final_start": 1778054400000
+    },
+    {
+      "ts": 1778227200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1778227200000,
+          "type": "NACHKAUF",
+          "price": 80231.22,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 79700 — aufstocken (NEUTRAL)",
+          "stop_ref": 78084.08,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 89228.0,
+      "final_start": 1778054400000
+    },
+    {
+      "ts": 1778241600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1778241600000,
+          "type": "NACHKAUF",
+          "price": 80142.14,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 79700 — aufstocken (NEUTRAL)",
+          "stop_ref": 78084.08,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 89228.0,
+      "final_start": 1778054400000
+    },
+    {
+      "ts": 1778443200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 82850.0,
+          "start": 1778443200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1778443200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 82210.07,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 82850 - beobachte Ausbruch ueber 82850 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 82850.0,
+      "final_start": 1778443200000
+    },
+    {
+      "ts": 1778515200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 82479.32,
+          "start": 1778515200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1778515200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 81961.99,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 82479 - beobachte Ausbruch ueber 82479 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 82479.32,
+      "final_start": 1778515200000
+    },
+    {
+      "ts": 1778673600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1778673600000,
+          "type": "NACHKAUF",
+          "price": 79103.98688,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 78084.08,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 82479.32,
+      "final_start": 1778515200000
+    },
+    {
+      "ts": 1778846400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1778846400000,
+          "type": "NACHKAUF",
+          "price": 79150.27,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 78084.08,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 82479.32,
+      "final_start": 1778515200000
+    },
+    {
+      "ts": 1778976000000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1778976000000,
+          "type": "STOPLOSS",
+          "price": 78028.88,
+          "tranche_pct": 100,
+          "reason": "Kerzenschluss unter Invalidierung 78084 - die Marke war schon einmal unterschritten und zurueckerobert, jetzt echter Bruch",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1781035200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1781035200000,
+          "type": "KAUF_1",
+          "price": 61682.795,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 59131->64235",
+          "stop_ref": 59130.91,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1781049600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1781049600000,
+          "type": "NACHKAUF",
+          "price": 61549.64,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 59130.91,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1781049600000,
+          "type": "NACHKAUF",
+          "price": 61549.64,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 61384 — aufstocken (NEUTRAL)",
+          "stop_ref": 59130.91,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1781107200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1781107200000,
+          "type": "NACHKAUF",
+          "price": 61942.44,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 61384 — aufstocken (NEUTRAL)",
+          "stop_ref": 59130.91,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1781193600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64234.68,
+          "start": 1781193600000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1781193600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63605.68,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64235 - beobachte Ausbruch ueber 64235 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64234.68,
+      "final_start": 1781193600000
+    },
+    {
+      "ts": 1781251200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64234.68,
+          "start": 1781251200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1781251200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63766.01,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64235 - beobachte Ausbruch ueber 64235 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64234.68,
+      "final_start": 1781251200000
+    },
+    {
+      "ts": 1781337600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1781337600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63666.552,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (63667)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64234.68,
+      "final_start": 1781251200000
+    },
+    {
+      "ts": 1781352000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 64234.68,
+          "start": 1781251200000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1781352000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64030.496,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (64030)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1781352000000,
+          "kurs": 64296.15,
+          "marke": 64234.68,
+          "lang": true,
+          "fenster": 12,
+          "zone": 64555.85339999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 64234.68,
+      "final_start": 1781251200000
+    },
+    {
+      "ts": 1781366400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 64234.68,
+          "start": 1781251200000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1781366400000,
+          "type": "RUECKKAUF",
+          "price": 64296.59,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 64235, Ruecktest gehalten (Tief 63920, Schluss 64297) - Stop fuer diesen Teil bei Schluss unter 64235",
+          "stop_ref": 64234.68,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1781380800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1781380800000,
+          "type": "TEILVERKAUF_1",
+          "price": 64394.44,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (64394)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1781395200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 67288.94,
+          "start": 1781395200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1781395200000,
+          "type": "VERKAUF_REST",
+          "price": 64545.3,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP - beobachte Ausbruch ueber 67289 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 67288.94,
+      "final_start": 1781395200000
+    },
+    {
+      "ts": 1781524800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 67288.94,
+          "start": 1781395200000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1781524800000,
+          "kurs": 67292.14,
+          "marke": 67288.94,
+          "lang": true,
+          "fenster": 12,
+          "zone": 67625.3847,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 67288.94,
+      "final_start": 1781395200000
+    },
+    {
+      "ts": 1781539200000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "gescheitert",
+          "mark": 67288.94,
+          "start": 1781395200000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "gescheitert",
+          "ts": 1781539200000,
+          "kurs": 66614.35,
+          "marke": 67288.94,
+          "lang": true
+        }
+      ],
+      "final_mark": 67288.94,
+      "final_start": 1781395200000
+    },
+    {
+      "ts": 1781611200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1781611200000,
+          "type": "KAUF_1",
+          "price": 65485.49,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 63679->67292",
+          "stop_ref": 63678.83,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 67288.94,
+      "final_start": 1781395200000
+    },
+    {
+      "ts": 1781654400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1781654400000,
+          "type": "NACHKAUF",
+          "price": 65851.99,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 65426 — aufstocken (NEUTRAL)",
+          "stop_ref": 63678.83,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 67288.94,
+      "final_start": 1781395200000
+    },
+    {
+      "ts": 1781683200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1781683200000,
+          "type": "NACHKAUF",
+          "price": 64810.01,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 63678.83,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 67288.94,
+      "final_start": 1781395200000
+    },
+    {
+      "ts": 1781712000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1781712000000,
+          "type": "NACHKAUF",
+          "price": 64301.85,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 63678.83,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1781712000000,
+          "type": "NACHKAUF",
+          "price": 64301.85,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 64092 — aufstocken (NEUTRAL)",
+          "stop_ref": 63678.83,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1781712000000,
+          "type": "NACHKAUF",
+          "price": 64452.08048,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 63678.83,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 67288.94,
+      "final_start": 1781395200000
+    },
+    {
+      "ts": 1781726400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64762.77,
+          "start": 1781726400000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1781726400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64509.4,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64763 - beobachte Ausbruch ueber 64763 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64762.77,
+      "final_start": 1781726400000
+    },
+    {
+      "ts": 1781740800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64762.77,
+          "start": 1781740800000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1781740800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64282.82,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64763 - beobachte Ausbruch ueber 64763 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64762.77,
+      "final_start": 1781740800000
+    },
+    {
+      "ts": 1781798400000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1781798400000,
+          "type": "STOPLOSS",
+          "price": 62950.79,
+          "tranche_pct": 100,
+          "reason": "Kerzenschluss unter Invalidierung 63679 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1783584000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1783584000000,
+          "type": "KAUF_1",
+          "price": 63003.42,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 61307->64700",
+          "stop_ref": 61306.84,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1783598400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1783598400000,
+          "type": "NACHKAUF",
+          "price": 62868.05,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 61306.84,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1783598400000,
+          "type": "NACHKAUF",
+          "price": 62868.05,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 62294 — aufstocken (NEUTRAL)",
+          "stop_ref": 61306.84,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1783612800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1783612800000,
+          "type": "NACHKAUF",
+          "price": 63248.1,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 62294 — aufstocken (NEUTRAL)",
+          "stop_ref": 61306.84,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1783612800000,
+          "type": "KAUF_2",
+          "price": 62603.02712,
+          "tranche_pct": 50,
+          "reason": "Golden Pocket 62494-62603 + Bestaetigung (NEUTRAL)",
+          "stop_ref": 61306.84,
+          "tag": "",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1783627200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 63461.99,
+          "start": 1783627200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1783627200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63230.0,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 63462 - beobachte Ausbruch ueber 63462 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 63461.99,
+      "final_start": 1783627200000
+    },
+    {
+      "ts": 1783641600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 63239.06,
+          "start": 1783641600000,
+          "breakout": 1783641600000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1783641600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63947.2,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 63239 - beobachte Ausbruch ueber 63239 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1783641600000,
+          "type": "WARNUNG",
+          "price": 63947.2,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1783641600000,
+          "kurs": 63947.2,
+          "marke": 63239.06,
+          "lang": true,
+          "fenster": 12,
+          "zone": 63555.25529999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 63239.06,
+      "final_start": 1783641600000
+    },
+    {
+      "ts": 1783656000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1783656000000,
+          "type": "WARNUNG",
+          "price": 63963.0,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 63239.06,
+      "final_start": 1783641600000
+    },
+    {
+      "ts": 1783756800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1783756800000,
+          "type": "WARNUNG",
+          "price": 64198.0,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 63239.06,
+      "final_start": 1783641600000
+    },
+    {
+      "ts": 1783814400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "verfallen",
+          "mark": 63239.06,
+          "start": 1783641600000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "verfallen",
+          "ts": 1783814400000,
+          "kurs": 64223.73,
+          "marke": 63239.06,
+          "lang": true,
+          "fenster": 12
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1783958400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1783958400000,
+          "type": "NACHKAUF",
+          "price": 62032.976239999996,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 61306.84,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784030400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784030400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64539.49800000001,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (64539)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784044800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784044800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64878.814000000006,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (64879)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784059200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784059200000,
+          "type": "WARNUNG",
+          "price": 65043.98,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784073600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784073600000,
+          "type": "WARNUNG",
+          "price": 64792.01,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784088000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64692.83,
+          "start": 1784088000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784088000000,
+          "type": "TEILVERKAUF_1",
+          "price": 65218.130000000005,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (65218)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        },
+        {
+          "ts": 1784088000000,
+          "type": "VERKAUF_REST",
+          "price": 64549.34,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP - beobachte Ausbruch ueber 64693 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64692.83,
+      "final_start": 1784088000000
+    },
+    {
+      "ts": 1784102400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 64692.83,
+          "start": 1784088000000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1784102400000,
+          "kurs": 64732.15,
+          "marke": 64692.83,
+          "lang": true,
+          "fenster": 12,
+          "zone": 65016.294149999994,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 64692.83,
+      "final_start": 1784088000000
+    },
+    {
+      "ts": 1784116800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 64692.83,
+          "start": 1784088000000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784116800000,
+          "type": "RUECKKAUF",
+          "price": 65427.61,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 64693, Ruecktest gehalten (Tief 64606, Schluss 65428) - Stop fuer diesen Teil bei Schluss unter 64693",
+          "stop_ref": 64692.83,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784131200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 65622.83,
+          "start": 1784131200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784131200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64977.34,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 65623 - beobachte Ausbruch ueber 65623 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 65622.83,
+      "final_start": 1784131200000
+    },
+    {
+      "ts": 1784160000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64762.77,
+          "start": 1784160000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784160000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64619.95,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64763 - beobachte Ausbruch ueber 64763 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1784160000000,
+          "kurs": 64619.95,
+          "marke": 64692.83,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 61458.1885,
+          "nur_rueckkauf": true
+        }
+      ],
+      "final_mark": 64762.77,
+      "final_start": 1784160000000
+    },
+    {
+      "ts": 1784174400000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784174400000,
+          "type": "STOPLOSS",
+          "price": 64238.0,
+          "tranche_pct": 100,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 64693 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784246400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784246400000,
+          "type": "KAUF_1",
+          "price": 63712.485,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 61825->65600",
+          "stop_ref": 61824.97,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784275200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784275200000,
+          "type": "NACHKAUF",
+          "price": 63298.01,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 61824.97,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1784275200000,
+          "type": "NACHKAUF",
+          "price": 63298.01,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 62741 — aufstocken (NEUTRAL)",
+          "stop_ref": 61824.97,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784289600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 63461.99,
+          "start": 1784289600000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784289600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 63452.0,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 63462 - beobachte Ausbruch ueber 63462 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 63461.99,
+      "final_start": 1784289600000
+    },
+    {
+      "ts": 1784304000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 63461.99,
+          "start": 1784304000000,
+          "breakout": 1784304000000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784304000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64160.8,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 63462 - beobachte Ausbruch ueber 63462 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1784304000000,
+          "kurs": 64160.8,
+          "marke": 63461.99,
+          "lang": true,
+          "fenster": 12,
+          "zone": 63779.29994999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 63461.99,
+      "final_start": 1784304000000
+    },
+    {
+      "ts": 1784476800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "verfallen",
+          "mark": 63461.99,
+          "start": 1784304000000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "verfallen",
+          "ts": 1784476800000,
+          "kurs": 64462.58,
+          "marke": 63461.99,
+          "lang": true,
+          "fenster": 12
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784534400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784534400000,
+          "type": "WARNUNG",
+          "price": 65002.01,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784548800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784548800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 65557.584,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (65558)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1784548800000,
+          "type": "WARNUNG",
+          "price": 65598.75,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784606400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784606400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 65935.087,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (65935)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784620800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784620800000,
+          "type": "TEILVERKAUF_1",
+          "price": 66312.59,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (66313)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784808000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784808000000,
+          "type": "KAUF_1",
+          "price": 65028.075,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 63100->66956",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784822400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64967.25,
+          "start": 1784822400000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784822400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64846.94,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64967 - beobachte Ausbruch ueber 64967 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64967.25,
+      "final_start": 1784822400000
+    },
+    {
+      "ts": 1784836800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64967.25,
+          "start": 1784836800000,
+          "breakout": 1784836800000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784836800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 65098.97,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64967 - beobachte Ausbruch ueber 64967 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1784836800000,
+          "kurs": 65098.97,
+          "marke": 64967.25,
+          "lang": true,
+          "fenster": 12,
+          "zone": 65292.08624999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 64967.25,
+      "final_start": 1784836800000
+    },
+    {
+      "ts": 1784851200000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 64967.25,
+          "start": 1784836800000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1784851200000,
+          "type": "RUECKKAUF",
+          "price": 65456.7,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 64967, Ruecktest gehalten (Tief 64762, Schluss 65457) - Stop fuer diesen Teil bei Schluss unter 64967",
+          "stop_ref": 64967.25,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784894400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784894400000,
+          "type": "NACHKAUF",
+          "price": 63925.2161,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1784894400000,
+          "kurs": 64093.85,
+          "marke": 64967.25,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 61718.8875,
+          "nur_rueckkauf": false
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784908800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784908800000,
+          "type": "RUECKKAUF_STOP",
+          "price": 64225.32,
+          "tranche_pct": 25,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 64967 - nach 1 Kerze(n) nicht zurueckerobert - der Rest der Position behaelt seinen Stop",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOP Rueckkauf-Teil (Schluss unter der Ausbruchsmarke)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784937600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784937600000,
+          "type": "NACHKAUF",
+          "price": 64085.36,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 63740 — aufstocken (UNGESUNDER_ABVERKAUF)",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1784952000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1784952000000,
+          "type": "NACHKAUF",
+          "price": 64003.2,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 63740 — aufstocken (NEUTRAL)",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1785398400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1785398400000,
+          "type": "WARNUNG",
+          "price": 64788.0,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1785513600000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1785513600000,
+          "type": "STOPLOSS",
+          "price": 62972.0,
+          "tranche_pct": 100,
+          "reason": "Kerzenschluss unter Invalidierung 63100 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1785931200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1785931200000,
+          "type": "KAUF_2",
+          "price": 64388.01,
+          "tranche_pct": 75,
+          "reason": "Capitulation: GP durchschlagen (Tief 63880), Schluss ueber Invalidierung (GESUNDER_TREND)",
+          "stop_ref": 63100.0,
+          "tag": "FLUSH",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1785945600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1785945600000,
+          "type": "NACHKAUF",
+          "price": 64840.28,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 64418 — aufstocken (SHORT_COVERING)",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1785960000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1785960000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64665.23,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64967",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1785974400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64692.83,
+          "start": 1785974400000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1785974400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64531.03,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64693 - beobachte Ausbruch ueber 64693 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64692.83,
+      "final_start": 1785974400000
+    },
+    {
+      "ts": 1785988800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 64692.83,
+          "start": 1785974400000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1785988800000,
+          "kurs": 64809.7,
+          "marke": 64692.83,
+          "lang": true,
+          "fenster": 12,
+          "zone": 65016.294149999994,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 64692.83,
+      "final_start": 1785974400000
+    },
+    {
+      "ts": 1786003200000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "gescheitert",
+          "mark": 64692.83,
+          "start": 1785974400000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "gescheitert",
+          "ts": 1786003200000,
+          "kurs": 64622.09,
+          "marke": 64692.83,
+          "lang": true
+        }
+      ],
+      "final_mark": 64692.83,
+      "final_start": 1785974400000
+    },
+    {
+      "ts": 1786017600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1786017600000,
+          "type": "NACHKAUF",
+          "price": 64631.87,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 64418 — aufstocken (NEUTRAL)",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64692.83,
+      "final_start": 1785974400000
+    },
+    {
+      "ts": 1786089600000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 64692.83,
+          "start": 1785974400000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1786089600000,
+          "kurs": 65029.98,
+          "marke": 64692.83,
+          "lang": true,
+          "fenster": 12,
+          "zone": 65016.294149999994,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 64692.83,
+      "final_start": 1785974400000
+    },
+    {
+      "ts": 1786104000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 64692.83,
+          "start": 1785974400000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1786104000000,
+          "type": "RUECKKAUF",
+          "price": 64912.72,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 64693, Ruecktest gehalten (Tief 64788, Schluss 64913) - Stop fuer diesen Teil bei Schluss unter 64693",
+          "stop_ref": 64692.83,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1786363200000,
+      "calls": [],
+      "signals": [],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1786363200000,
+          "kurs": 64299.99,
+          "marke": 64692.83,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 61458.1885,
+          "nur_rueckkauf": false
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1786377600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1786377600000,
+          "type": "RUECKKAUF_STOP",
+          "price": 64045.7,
+          "tranche_pct": 25,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 64693 - nach 1 Kerze(n) nicht zurueckerobert - der Rest der Position behaelt seinen Stop",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOP Rueckkauf-Teil (Schluss unter der Ausbruchsmarke)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1786392000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1786392000000,
+          "type": "NACHKAUF",
+          "price": 63925.2161,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1786449600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1786449600000,
+          "type": "NACHKAUF",
+          "price": 63609.87,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1786464000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1786464000000,
+          "type": "NACHKAUF",
+          "price": 63536.0,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1786694400000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1786694400000,
+          "type": "STOPLOSS",
+          "price": 62868.83,
+          "tranche_pct": 100,
+          "reason": "Kerzenschluss unter Invalidierung 63100 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1786996800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1786996800000,
+          "type": "KAUF_2",
+          "price": 64532.1,
+          "tranche_pct": 75,
+          "reason": "Capitulation: GP durchschlagen (Tief 64266), Schluss ueber Invalidierung (SHORT_COVERING)",
+          "stop_ref": 63100.0,
+          "tag": "FLUSH",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787011200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1787011200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64185.01,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64693",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787025600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 64234.68,
+          "start": 1787025600000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787025600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 64198.97,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 64235 - beobachte Ausbruch ueber 64235 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 64234.68,
+      "final_start": 1787025600000
+    },
+    {
+      "ts": 1787040000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 64234.68,
+          "start": 1787025600000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1787040000000,
+          "kurs": 64351.19,
+          "marke": 64234.68,
+          "lang": true,
+          "fenster": 12,
+          "zone": 64555.85339999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 64234.68,
+      "final_start": 1787025600000
+    },
+    {
+      "ts": 1787054400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 64234.68,
+          "start": 1787025600000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787054400000,
+          "type": "NACHKAUF",
+          "price": 64855.06,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (SHORT_COVERING)",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1787054400000,
+          "type": "NACHKAUF",
+          "price": 64855.06,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 63740 — aufstocken (SHORT_COVERING)",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1787054400000,
+          "type": "RUECKKAUF",
+          "price": 64855.06,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 64235, Ruecktest gehalten (Tief 64028, Schluss 64855) - Stop fuer diesen Teil bei Schluss unter 64235",
+          "stop_ref": 64234.68,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787068800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1787068800000,
+          "type": "NACHKAUF",
+          "price": 64643.26,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 64418 — aufstocken (NEUTRAL)",
+          "stop_ref": 63100.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787140800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 68698.7,
+          "start": 1787140800000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787140800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 67112.76999999999,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (67113)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1787140800000,
+          "type": "TEILVERKAUF_1",
+          "price": 67884.0,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (67884)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        },
+        {
+          "ts": 1787140800000,
+          "type": "VERKAUF_REST",
+          "price": 68554.0,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: SHORT_COVERING - beobachte Ausbruch ueber 68699 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 68698.7,
+      "final_start": 1787140800000
+    },
+    {
+      "ts": 1787169600000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 68698.7,
+          "start": 1787140800000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1787169600000,
+          "kurs": 69334.79,
+          "marke": 68698.7,
+          "lang": true,
+          "fenster": 12,
+          "zone": 69042.1935,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 68698.7,
+      "final_start": 1787140800000
+    },
+    {
+      "ts": 1787184000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 68698.7,
+          "start": 1787140800000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787184000000,
+          "type": "RUECKKAUF",
+          "price": 69195.64,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 68699, Ruecktest gehalten (Tief 68902, Schluss 69196) - Stop fuer diesen Teil bei Schluss unter 68699",
+          "stop_ref": 68698.7,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787198400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 69310.0,
+          "start": 1787198400000,
+          "breakout": 1787198400000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787198400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 69816.45,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 69310 - beobachte Ausbruch ueber 69310 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1787198400000,
+          "type": "WARNUNG",
+          "price": 69816.45,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1787198400000,
+          "kurs": 69816.45,
+          "marke": 69310.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 69656.54999999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 69310.0,
+      "final_start": 1787198400000
+    },
+    {
+      "ts": 1787212800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 69988.83,
+          "start": 1787212800000,
+          "breakout": 1787212800000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787212800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 71927.07,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 69989 - beobachte Ausbruch ueber 69989 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1787212800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 71987.14,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (71987)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1787212800000,
+          "kurs": 71927.07,
+          "marke": 69988.83,
+          "lang": true,
+          "fenster": 12,
+          "zone": 70338.77415,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 69988.83,
+      "final_start": 1787212800000
+    },
+    {
+      "ts": 1787227200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1787227200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 72372.75499999999,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (72373)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1787227200000,
+          "type": "TEILVERKAUF_1",
+          "price": 72758.37,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (72758)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 69988.83,
+      "final_start": 1787212800000
+    },
+    {
+      "ts": 1787270400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1787270400000,
+          "type": "TEILVERKAUF_2",
+          "price": 75141.47069999999,
+          "tranche_pct": 40,
+          "reason": "Extension 1.618 erreicht (75141)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 2 (Extension 1.618)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 69988.83,
+      "final_start": 1787212800000
+    },
+    {
+      "ts": 1787284800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 77904.93,
+          "start": 1787284800000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787284800000,
+          "type": "VERKAUF_REST",
+          "price": 76308.65,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP - beobachte Ausbruch ueber 77905 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 77904.93,
+      "final_start": 1787284800000
+    },
+    {
+      "ts": 1787342400000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 77904.93,
+          "start": 1787284800000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1787342400000,
+          "kurs": 78338.03,
+          "marke": 77904.93,
+          "lang": true,
+          "fenster": 12,
+          "zone": 78294.45464999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 77904.93,
+      "final_start": 1787284800000
+    },
+    {
+      "ts": 1787356800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 77904.93,
+          "start": 1787284800000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787356800000,
+          "type": "RUECKKAUF",
+          "price": 78410.98,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 77905, Ruecktest gehalten (Tief 77683, Schluss 78411) - Stop fuer diesen Teil bei Schluss unter 77905",
+          "stop_ref": 77904.93,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787371200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 78599.99,
+          "start": 1787371200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787371200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 77289.18,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 78600 - beobachte Ausbruch ueber 78600 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1787371200000,
+          "type": "WARNUNG",
+          "price": 77289.18,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1787371200000,
+          "kurs": 77289.18,
+          "marke": 77904.93,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 74009.68349999998,
+          "nur_rueckkauf": true
+        }
+      ],
+      "final_mark": 78599.99,
+      "final_start": 1787371200000
+    },
+    {
+      "ts": 1787385600000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787385600000,
+          "type": "STOPLOSS",
+          "price": 77130.02,
+          "tranche_pct": 100,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 77905 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787688000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1787688000000,
+          "type": "KAUF_1",
+          "price": 78409.14499999999,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 75546->81273",
+          "stop_ref": 75545.67,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787702400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1787702400000,
+          "type": "NACHKAUF",
+          "price": 79088.62,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 78121 — aufstocken (GESUNDER_TREND)",
+          "stop_ref": 75545.67,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787716800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 79199.48,
+          "start": 1787716800000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787716800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 78925.56,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 79199 - beobachte Ausbruch ueber 79199 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79199.48,
+      "final_start": 1787716800000
+    },
+    {
+      "ts": 1787731200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 79199.48,
+          "start": 1787731200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787731200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 78487.26,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 79199 - beobachte Ausbruch ueber 79199 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79199.48,
+      "final_start": 1787731200000
+    },
+    {
+      "ts": 1787774400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1787774400000,
+          "type": "NACHKAUF",
+          "price": 79023.75,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 77851 — aufstocken (NEUTRAL)",
+          "stop_ref": 75545.67,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 79199.48,
+      "final_start": 1787731200000
+    },
+    {
+      "ts": 1787817600000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 79199.48,
+          "start": 1787731200000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1787817600000,
+          "kurs": 79477.67,
+          "marke": 79199.48,
+          "lang": true,
+          "fenster": 12,
+          "zone": 79595.47739999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 79199.48,
+      "final_start": 1787731200000
+    },
+    {
+      "ts": 1787832000000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 79199.48,
+          "start": 1787731200000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1787832000000,
+          "type": "RUECKKAUF",
+          "price": 80302.32,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 79199, Ruecktest gehalten (Tief 78920, Schluss 80302) - Stop fuer diesen Teil bei Schluss unter 79199",
+          "stop_ref": 79199.48,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787904000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1787904000000,
+          "type": "WARNUNG",
+          "price": 79604.13,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787918400000,
+      "calls": [],
+      "signals": [],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1787918400000,
+          "kurs": 78331.13,
+          "marke": 79199.48,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 75239.506,
+          "nur_rueckkauf": false
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1787932800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1787932800000,
+          "type": "RUECKKAUF_STOP",
+          "price": 77580.03,
+          "tranche_pct": 25,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 79199 - nach 1 Kerze(n) nicht zurueckerobert - der Rest der Position behaelt seinen Stop",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOP Rueckkauf-Teil (Schluss unter der Ausbruchsmarke)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1788177600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788177600000,
+          "type": "KAUF_2",
+          "price": 77733.3649,
+          "tranche_pct": 50,
+          "reason": "Golden Pocket 77550-77733 + Bestaetigung (NEUTRAL)",
+          "stop_ref": 75545.67,
+          "tag": "",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1788278400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788278400000,
+          "type": "NACHKAUF",
+          "price": 76771.2373,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 75545.67,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1788336000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788336000000,
+          "type": "NACHKAUF",
+          "price": 76828.76,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 75545.67,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1788436800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788436800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 80845.56,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (80846)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1788451200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788451200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 81418.255,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.9 (81418)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1788465600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788465600000,
+          "type": "TEILVERKAUF_1",
+          "price": 81990.95,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (81991)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1788696000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788696000000,
+          "type": "KAUF_1",
+          "price": 79282.0,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 76264->82300",
+          "stop_ref": 76264.0,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1788710400000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 80200.0,
+          "start": 1788710400000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1788710400000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 79829.99,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 80200 - beobachte Ausbruch ueber 80200 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 80200.0,
+      "final_start": 1788710400000
+    },
+    {
+      "ts": 1788724800000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 80200.0,
+          "start": 1788724800000,
+          "breakout": 1788724800000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1788724800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 80341.83,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 80200 - beobachte Ausbruch ueber 80200 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1788724800000,
+          "kurs": 80341.83,
+          "marke": 80200.0,
+          "lang": true,
+          "fenster": 12,
+          "zone": 80600.99999999999,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 80200.0,
+      "final_start": 1788724800000
+    },
+    {
+      "ts": 1788739200000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "gescheitert",
+          "mark": 80200.0,
+          "start": 1788724800000
+        }
+      ],
+      "signals": [],
+      "messages": [
+        {
+          "art": "gescheitert",
+          "ts": 1788739200000,
+          "kurs": 79596.39,
+          "marke": 80200.0,
+          "lang": true
+        }
+      ],
+      "final_mark": 80200.0,
+      "final_start": 1788724800000
+    },
+    {
+      "ts": 1788753600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788753600000,
+          "type": "NACHKAUF",
+          "price": 79397.83,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 76264.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        {
+          "ts": 1788753600000,
+          "type": "NACHKAUF",
+          "price": 79397.83,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 78660 — aufstocken (NEUTRAL)",
+          "stop_ref": 76264.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 80200.0,
+      "final_start": 1788724800000
+    },
+    {
+      "ts": 1788768000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788768000000,
+          "type": "NACHKAUF",
+          "price": 79420.16,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 79369 — aufstocken (NEUTRAL)",
+          "stop_ref": 76264.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 80200.0,
+      "final_start": 1788724800000
+    },
+    {
+      "ts": 1788840000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1788840000000,
+          "type": "NACHKAUF",
+          "price": 78482.0,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 76264.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 80200.0,
+      "final_start": 1788724800000
+    },
+    {
+      "ts": 1789041600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1789041600000,
+          "type": "NACHKAUF",
+          "price": 77555.704,
+          "tranche_pct": 25,
+          "reason": "0.786-Zone erreicht, Struktur intakt",
+          "stop_ref": 76264.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 80200.0,
+      "final_start": 1788724800000
+    },
+    {
+      "ts": 1789070400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1789070400000,
+          "type": "NACHKAUF",
+          "price": 76568.72,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 76264.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 80200.0,
+      "final_start": 1788724800000
+    },
+    {
+      "ts": 1789502400000,
+      "calls": [
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1789502400000,
+          "type": "STOPLOSS",
+          "price": 75644.48,
+          "tranche_pct": 100,
+          "reason": "Kerzenschluss unter Invalidierung 76264 - nach 1 Kerze(n) nicht zurueckerobert",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOPLOSS"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1789718400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1789718400000,
+          "type": "KAUF_2",
+          "price": 78062.0,
+          "tranche_pct": 75,
+          "reason": "Capitulation: GP durchschlagen (Tief 77660), Schluss ueber Invalidierung (GESUNDER_TREND)",
+          "stop_ref": 76264.0,
+          "tag": "FLUSH",
+          "label": "KAUF 2 (Kernposition im Golden Pocket)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1789732800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1789732800000,
+          "type": "NACHKAUF",
+          "price": 80725.6,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 77851 — aufstocken (SHORT_COVERING)",
+          "stop_ref": 76264.0,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1789747200000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 81272.62,
+          "start": 1789747200000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1789747200000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 81204.76,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 81273 - beobachte Ausbruch ueber 81273 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 81272.62,
+      "final_start": 1789747200000
+    },
+    {
+      "ts": 1789761600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 81272.62,
+          "start": 1789761600000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1789761600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 80883.87,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 81273 - beobachte Ausbruch ueber 81273 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 81272.62,
+      "final_start": 1789761600000
+    },
+    {
+      "ts": 1789790400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1789790400000,
+          "type": "WARNUNG",
+          "price": 81100.16,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 81272.62,
+      "final_start": 1789761600000
+    },
+    {
+      "ts": 1789804800000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ausbruch",
+          "mark": 81272.62,
+          "start": 1789761600000
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1789804800000,
+          "type": "WARNUNG",
+          "price": 81302.63,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "ausbruch",
+          "ts": 1789804800000,
+          "kurs": 81302.63,
+          "marke": 81272.62,
+          "lang": true,
+          "fenster": 12,
+          "zone": 81678.98309999998,
+          "tranche": 25
+        }
+      ],
+      "final_mark": 81272.62,
+      "final_start": 1789761600000
+    },
+    {
+      "ts": 1789819200000,
+      "calls": [
+        {
+          "kind": "step",
+          "result": "ruecktest",
+          "mark": 81272.62,
+          "start": 1789761600000
+        },
+        {
+          "kind": "end"
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1789819200000,
+          "type": "RUECKKAUF",
+          "price": 81636.01,
+          "tranche_pct": 25,
+          "reason": "Ausbruch ueber 81273, Ruecktest gehalten (Tief 81183, Schluss 81636) - Stop fuer diesen Teil bei Schluss unter 81273",
+          "stop_ref": 81272.62,
+          "tag": "",
+          "label": "RUECKKAUF (Ausbruch mit Ruecktest)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1789848000000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1789848000000,
+          "type": "WARNUNG",
+          "price": 81249.99,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [
+        {
+          "art": "teil_wartet",
+          "ts": 1789848000000,
+          "kurs": 81249.99,
+          "marke": 81272.62,
+          "lang": true,
+          "kerze_nr": 1,
+          "von": 1,
+          "noch": 1,
+          "boden": 77208.98899999999,
+          "nur_rueckkauf": false
+        }
+      ],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1789862400000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1789862400000,
+          "type": "RUECKKAUF_STOP",
+          "price": 80486.38,
+          "tranche_pct": 25,
+          "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 81273 - nach 1 Kerze(n) nicht zurueckerobert - der Rest der Position behaelt seinen Stop",
+          "stop_ref": null,
+          "tag": "",
+          "label": "STOP Rueckkauf-Teil (Schluss unter der Ausbruchsmarke)"
+        },
+        {
+          "ts": 1789862400000,
+          "type": "WARNUNG",
+          "price": 80486.38,
+          "tranche_pct": 0,
+          "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+          "stop_ref": null,
+          "tag": "",
+          "label": "WARNUNG (Derivate-Pump aktiv)"
+        }
+      ],
+      "messages": [],
+      "final_mark": null,
+      "final_start": -1
+    },
+    {
+      "ts": 1789977600000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 89228.0,
+          "start": 1789977600000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1789977600000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 82488.8,
+          "tranche_pct": 15,
+          "reason": "Leiter-Teilgewinn an Extension 0.8 (82489)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        {
+          "ts": 1789977600000,
+          "type": "TEILVERKAUF_1",
+          "price": 83696.0,
+          "tranche_pct": 40,
+          "reason": "Extension 1.0 erreicht (83696)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF 1 (Extension 1.0)"
+        },
+        {
+          "ts": 1789977600000,
+          "type": "VERKAUF_REST",
+          "price": 84887.19,
+          "tranche_pct": 20,
+          "reason": "Gegen-Muster am Ziel: SHORT_COVERING - beobachte Ausbruch ueber 89228 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 89228.0,
+      "final_start": 1789977600000
+    },
+    {
+      "ts": 1790179200000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1790179200000,
+          "type": "KAUF_1",
+          "price": 83760.855,
+          "tranche_pct": 25,
+          "reason": "0.5-Retracement des Impulses 80126->87396",
+          "stop_ref": 80126.04,
+          "tag": "",
+          "label": "KAUF 1 (Teilposition am 0.5-Level)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 89228.0,
+      "final_start": 1789977600000
+    },
+    {
+      "ts": 1790308800000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1790308800000,
+          "type": "NACHKAUF",
+          "price": 84043.96,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 83864 — aufstocken (NEUTRAL)",
+          "stop_ref": 80126.04,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 89228.0,
+      "final_start": 1789977600000
+    },
+    {
+      "ts": 1790337600000,
+      "calls": [],
+      "signals": [
+        {
+          "ts": 1790337600000,
+          "type": "NACHKAUF",
+          "price": 83796.01,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 82875 — aufstocken (NEUTRAL)",
+          "stop_ref": 80126.04,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 89228.0,
+      "final_start": 1789977600000
+    },
+    {
+      "ts": 1790496000000,
+      "calls": [
+        {
+          "kind": "begin",
+          "mark": 85255.0,
+          "start": 1790496000000,
+          "breakout": -1
+        }
+      ],
+      "signals": [
+        {
+          "ts": 1790496000000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 84810.02,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 85255 - beobachte Ausbruch ueber 85255 (Rueckkauf nach Ruecktest)",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      ],
+      "messages": [],
+      "final_mark": 85255.0,
+      "final_start": 1790496000000
+    }
+  ]
+}

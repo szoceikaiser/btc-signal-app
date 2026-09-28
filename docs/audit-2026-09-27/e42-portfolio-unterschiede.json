@@ -1,0 +1,5877 @@
+{
+  "description": "Original inputs; F09 independent ledger. Accounting difference, not isolated causal attribution. Non-rebuy means standard signal TYPE only; a standard STOPLOSS can still close only rebuy units.",
+  "added_non_rebuy": [
+    {
+      "signal": {
+        "ts": 1775764800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71787.97,
+        "tranche_pct": 15,
+        "reason": "Teilgewinn am letzten Hoch 72271 - beobachte Ausbruch ueber 72271 (Rueckkauf nach Ruecktest)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+      },
+      "fill": {
+        "signal": 101,
+        "ts": 1775764800000,
+        "execution_ts": 1775764800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71787.97,
+        "units": 0.006009471164118928,
+        "cash_before": 8673.88901059241,
+        "cash_after": 9104.865338502399,
+        "fee": 0.4314077356456347,
+        "nominal": 431.4077356456347
+      }
+    },
+    {
+      "signal": {
+        "ts": 1775779200000,
+        "type": "STOPLOSS",
+        "price": 71868.67,
+        "tranche_pct": 100,
+        "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 72026 - nach 1 Kerze(n) nicht zurueckerobert",
+        "stop_ref": null,
+        "tag": "",
+        "label": "STOPLOSS"
+      },
+      "fill": {
+        "signal": 102,
+        "ts": 1775779200000,
+        "execution_ts": 1775779200000,
+        "type": "STOPLOSS",
+        "price": 71868.67,
+        "units": 0.03405366993000726,
+        "cash_before": 9104.865338502399,
+        "cash_after": 11549.809913024525,
+        "fee": 2.447391966488615,
+        "nominal": 2447.391966488615
+      }
+    },
+    {
+      "signal": {
+        "ts": 1784131200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64977.34,
+        "tranche_pct": 15,
+        "reason": "Teilgewinn am letzten Hoch 65623 - beobachte Ausbruch ueber 65623 (Rueckkauf nach Ruecktest)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+      },
+      "fill": {
+        "signal": 185,
+        "ts": 1784131200000,
+        "execution_ts": 1784131200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64977.34,
+        "units": 0.0074337682152167016,
+        "cash_before": 9737.210963275165,
+        "cash_after": 10219.754421591693,
+        "fee": 0.48302648480132876,
+        "nominal": 483.02648480132876
+      }
+    },
+    {
+      "signal": {
+        "ts": 1784160000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64619.95,
+        "tranche_pct": 15,
+        "reason": "Teilgewinn am letzten Hoch 64763 - beobachte Ausbruch ueber 64763 (Rueckkauf nach Ruecktest)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+      },
+      "fill": {
+        "signal": 186,
+        "ts": 1784160000000,
+        "execution_ts": 1784160000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64619.95,
+        "units": 0.0074337682152167016,
+        "cash_before": 10219.754421591693,
+        "cash_after": 10699.643782240208,
+        "fee": 0.48036973037889247,
+        "nominal": 480.3697303788925
+      }
+    },
+    {
+      "signal": {
+        "ts": 1784174400000,
+        "type": "STOPLOSS",
+        "price": 64238.0,
+        "tranche_pct": 100,
+        "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 64693 - nach 1 Kerze(n) nicht zurueckerobert",
+        "stop_ref": null,
+        "tag": "",
+        "label": "STOPLOSS"
+      },
+      "fill": {
+        "signal": 187,
+        "ts": 1784174400000,
+        "execution_ts": 1784174400000,
+        "type": "STOPLOSS",
+        "price": 64238.0,
+        "units": 0.03469091833767795,
+        "cash_before": 10699.643782240208,
+        "cash_after": 12925.890519203787,
+        "fee": 2.228475212175756,
+        "nominal": 2228.475212175756
+      }
+    },
+    {
+      "signal": {
+        "ts": 1786392000000,
+        "type": "NACHKAUF",
+        "price": 63925.2161,
+        "tranche_pct": 25,
+        "reason": "0.786-Zone erreicht, Struktur intakt",
+        "stop_ref": 63100.0,
+        "tag": "",
+        "label": "NACHKAUF (0.786-Zone)"
+      },
+      "fill": {
+        "signal": 215,
+        "ts": 1786392000000,
+        "execution_ts": 1786392000000,
+        "type": "NACHKAUF",
+        "price": 63925.2161,
+        "units": 0.02666699621844779,
+        "cash_before": 1706.3998958980558,
+        "cash_after": 0.0,
+        "fee": 1.7063998958980557,
+        "nominal": 1706.3998958980558
+      }
+    },
+    {
+      "signal": {
+        "ts": 1787198400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69816.45,
+        "tranche_pct": 15,
+        "reason": "Teilgewinn am letzten Hoch 69310 - beobachte Ausbruch ueber 69310 (Rueckkauf nach Ruecktest)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+      },
+      "fill": {
+        "signal": 230,
+        "ts": 1787198400000,
+        "execution_ts": 1787198400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69816.45,
+        "units": 0.007083417796834973,
+        "cash_before": 9812.645201989708,
+        "cash_after": 10306.689747347105,
+        "fee": 0.494539084441839,
+        "nominal": 494.539084441839
+      }
+    },
+    {
+      "signal": {
+        "ts": 1787212800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71927.07,
+        "tranche_pct": 15,
+        "reason": "Teilgewinn am letzten Hoch 69989 - beobachte Ausbruch ueber 69989 (Rueckkauf nach Ruecktest)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+      },
+      "fill": {
+        "signal": 232,
+        "ts": 1787212800000,
+        "execution_ts": 1787212800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71927.07,
+        "units": 0.007083417796834973,
+        "cash_before": 10306.689747347105,
+        "cash_after": 10815.669745571588,
+        "fee": 0.5094894877121949,
+        "nominal": 509.48948771219494
+      }
+    },
+    {
+      "signal": {
+        "ts": 1787212800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71987.14,
+        "tranche_pct": 15,
+        "reason": "Leiter-Teilgewinn an Extension 0.8 (71987)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+      },
+      "fill": {
+        "signal": 233,
+        "ts": 1787212800000,
+        "execution_ts": 1787212800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71987.14,
+        "units": 0.007083417796834973,
+        "cash_before": 10815.669745571588,
+        "cash_after": 11325.074819202218,
+        "fee": 0.5099149886192508,
+        "nominal": 509.9149886192507
+      }
+    },
+    {
+      "signal": {
+        "ts": 1787227200000,
+        "type": "TEILVERKAUF_1",
+        "price": 72758.37,
+        "tranche_pct": 40,
+        "reason": "Extension 1.0 erreicht (72758)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF 1 (Extension 1.0)"
+      },
+      "fill": {
+        "signal": 235,
+        "ts": 1787227200000,
+        "execution_ts": 1787227200000,
+        "type": "TEILVERKAUF_1",
+        "price": 72758.37,
+        "units": 0.018889114124893257,
+        "cash_before": 11837.208633514423,
+        "cash_after": 13210.175446831161,
+        "fee": 1.3743411544712099,
+        "nominal": 1374.3411544712098
+      }
+    },
+    {
+      "signal": {
+        "ts": 1787227200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 72372.75499999999,
+        "tranche_pct": 15,
+        "reason": "Leiter-Teilgewinn an Extension 0.9 (72373)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+      },
+      "fill": {
+        "signal": 234,
+        "ts": 1787227200000,
+        "execution_ts": 1787227200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 72372.75499999999,
+        "units": 0.007083417796834973,
+        "cash_before": 11325.074819202218,
+        "cash_after": 11837.208633514423,
+        "fee": 0.5126464607729773,
+        "nominal": 512.6464607729772
+      }
+    },
+    {
+      "signal": {
+        "ts": 1787270400000,
+        "type": "TEILVERKAUF_2",
+        "price": 75141.47069999999,
+        "tranche_pct": 40,
+        "reason": "Extension 1.618 erreicht (75141)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF 2 (Extension 1.618)"
+      },
+      "fill": {
+        "signal": 236,
+        "ts": 1787270400000,
+        "execution_ts": 1787270400000,
+        "type": "TEILVERKAUF_2",
+        "price": 75141.47069999999,
+        "units": 0,
+        "cash_before": 13210.175446831161,
+        "cash_after": 13210.175446831161,
+        "fee": 0.0,
+        "nominal": 0.0
+      }
+    },
+    {
+      "signal": {
+        "ts": 1787284800000,
+        "type": "VERKAUF_REST",
+        "price": 76308.65,
+        "tranche_pct": 20,
+        "reason": "Gegen-Muster am Ziel: DERIVATE_PUMP - beobachte Ausbruch ueber 77905 (Rueckkauf nach Ruecktest)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "VERKAUF Rest (Muster/Divergenz am Ziel)"
+      },
+      "fill": {
+        "signal": 237,
+        "ts": 1787284800000,
+        "execution_ts": 1787284800000,
+        "type": "VERKAUF_REST",
+        "price": 76308.65,
+        "units": 0,
+        "cash_before": 13210.175446831161,
+        "cash_after": 13210.175446831161,
+        "fee": 0.0,
+        "nominal": 0.0
+      }
+    },
+    {
+      "signal": {
+        "ts": 1787371200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 77289.18,
+        "tranche_pct": 15,
+        "reason": "Teilgewinn am letzten Hoch 78600 - beobachte Ausbruch ueber 78600 (Rueckkauf nach Ruecktest)",
+        "stop_ref": null,
+        "tag": "",
+        "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+      },
+      "fill": {
+        "signal": 239,
+        "ts": 1787371200000,
+        "execution_ts": 1787371200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 77289.18,
+        "units": 0.006311440026344682,
+        "cash_before": 9907.63158512337,
+        "cash_after": 10394.949803354473,
+        "fee": 0.48780602425535885,
+        "nominal": 487.80602425535886
+      }
+    },
+    {
+      "signal": {
+        "ts": 1787385600000,
+        "type": "STOPLOSS",
+        "price": 77130.02,
+        "tranche_pct": 100,
+        "reason": "Rueckkauf-Teil: Kerzenschluss unter Ausbruchsmarke 77905 - nach 1 Kerze(n) nicht zurueckerobert",
+        "stop_ref": null,
+        "tag": "",
+        "label": "STOPLOSS"
+      },
+      "fill": {
+        "signal": 241,
+        "ts": 1787385600000,
+        "execution_ts": 1787385600000,
+        "type": "STOPLOSS",
+        "price": 77130.02,
+        "units": 0.0357648268159532,
+        "cash_before": 10394.949803354473,
+        "cash_after": 13150.733069157868,
+        "fee": 2.7585418076110066,
+        "nominal": 2758.541807611007
+      }
+    }
+  ],
+  "removed_non_rebuy": [
+    {
+      "signal": {
+        "ts": 1786377600000,
+        "type": "NACHKAUF",
+        "price": 63925.2161,
+        "tranche_pct": 25,
+        "reason": "0.786-Zone erreicht, Struktur intakt",
+        "stop_ref": 63100.0,
+        "tag": "",
+        "label": "NACHKAUF (0.786-Zone)"
+      },
+      "fill": {
+        "signal": 195,
+        "ts": 1786377600000,
+        "execution_ts": 1786377600000,
+        "type": "NACHKAUF",
+        "price": 63925.2161,
+        "units": 0.0,
+        "cash_before": 0.0,
+        "cash_after": 0.0,
+        "fee": 0.0,
+        "nominal": 0.0
+      }
+    },
+    {
+      "signal": {
+        "ts": 1786377600000,
+        "type": "NACHKAUF",
+        "price": 64045.7,
+        "tranche_pct": 15,
+        "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+        "stop_ref": 63100.0,
+        "tag": "",
+        "label": "NACHKAUF (0.786-Zone)"
+      },
+      "fill": {
+        "signal": 194,
+        "ts": 1786377600000,
+        "execution_ts": 1786377600000,
+        "type": "NACHKAUF",
+        "price": 64045.7,
+        "units": 0.026898538019642634,
+        "cash_before": 1724.4601566012275,
+        "cash_after": 0.0,
+        "fee": 1.7244601566012274,
+        "nominal": 1724.4601566012275
+      }
+    }
+  ],
+  "matched_orders_different_size": [
+    {
+      "ts": 1771185600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 68832.58,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 8,
+        "ts": 1771185600000,
+        "execution_ts": 1771185600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 68832.58,
+        "units": 0.005482297894925523,
+        "cash_before": 7634.985571724921,
+        "cash_after": 8011.968919452777,
+        "fee": 0.37736070843629266,
+        "nominal": 377.36070843629267
+      },
+      "e42": {
+        "signal": 9,
+        "ts": 1771185600000,
+        "execution_ts": 1771185600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 68832.58,
+        "units": 0.009919329030538144,
+        "cash_before": 5215.395072552979,
+        "cash_after": 5897.485308584778,
+        "fee": 0.6827730090408393,
+        "nominal": 682.7730090408393
+      }
+    },
+    {
+      "ts": 1771934400000,
+      "type": "NACHKAUF",
+      "price": 63973.97,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 12,
+        "ts": 1771934400000,
+        "execution_ts": 1771934400000,
+        "type": "NACHKAUF",
+        "price": 63973.97,
+        "units": 0.004204992167602902,
+        "cash_before": 269.27932210256563,
+        "cash_after": 0.0,
+        "fee": 0.2692793221025656,
+        "nominal": 269.27932210256563
+      },
+      "e42": {
+        "signal": 14,
+        "ts": 1771934400000,
+        "execution_ts": 1771934400000,
+        "type": "NACHKAUF",
+        "price": 63973.97,
+        "units": 0.0025870869206277578,
+        "cash_before": 165.67189294057312,
+        "cash_after": 0.0,
+        "fee": 0.1656718929405731,
+        "nominal": 165.67189294057312
+      }
+    },
+    {
+      "ts": 1772625600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 72327.408,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 23,
+        "ts": 1772625600000,
+        "execution_ts": 1772625600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 72327.408,
+        "units": 0.02247119666941821,
+        "cash_before": 0.0,
+        "cash_after": 1623.6581263474948,
+        "fee": 1.625283409757252,
+        "nominal": 1625.283409757252
+      },
+      "e42": {
+        "signal": 25,
+        "ts": 1772625600000,
+        "execution_ts": 1772625600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 72327.408,
+        "units": 0.02235186258500776,
+        "cash_before": 0.0,
+        "cash_after": 1615.035632461045,
+        "fee": 1.616652284745791,
+        "nominal": 1616.652284745791
+      }
+    },
+    {
+      "ts": 1772640000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 73554.549,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 24,
+        "ts": 1772640000000,
+        "execution_ts": 1772640000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 73554.549,
+        "units": 0.02247119666941821,
+        "cash_before": 1623.6581263474948,
+        "cash_after": 3274.864004120344,
+        "fee": 1.6528587365093586,
+        "nominal": 1652.8587365093586
+      },
+      "e42": {
+        "signal": 26,
+        "ts": 1772640000000,
+        "execution_ts": 1772640000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 73554.549,
+        "units": 0.02235186258500776,
+        "cash_before": 1615.035632461045,
+        "cash_after": 3257.4727230395147,
+        "fee": 1.64408117175022,
+        "nominal": 1644.08117175022
+      }
+    },
+    {
+      "ts": 1772712000000,
+      "type": "TEILVERKAUF_1",
+      "price": 70402.28,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 26,
+        "ts": 1772712000000,
+        "execution_ts": 1772712000000,
+        "type": "TEILVERKAUF_1",
+        "price": 70402.28,
+        "units": 0.059923191118448564,
+        "cash_before": 3274.864004120344,
+        "cash_after": 7489.3745544552585,
+        "fee": 4.2187292796145295,
+        "nominal": 4218.729279614529
+      },
+      "e42": {
+        "signal": 28,
+        "ts": 1772712000000,
+        "execution_ts": 1772712000000,
+        "type": "TEILVERKAUF_1",
+        "price": 70402.28,
+        "units": 0.05960496689335403,
+        "cash_before": 3257.4727230395147,
+        "cash_after": 7449.601966087538,
+        "fee": 4.196325568616641,
+        "nominal": 4196.32556861664
+      }
+    },
+    {
+      "ts": 1772712000000,
+      "type": "VERKAUF_REST",
+      "price": 71652.77,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 27,
+        "ts": 1772712000000,
+        "execution_ts": 1772712000000,
+        "type": "VERKAUF_REST",
+        "price": 71652.77,
+        "units": 0.04494239333883641,
+        "cash_before": 7489.3745544552585,
+        "cash_after": 10706.401280639278,
+        "fee": 3.2202469731571775,
+        "nominal": 3220.2469731571773
+      },
+      "e42": {
+        "signal": 29,
+        "ts": 1772712000000,
+        "execution_ts": 1772712000000,
+        "type": "VERKAUF_REST",
+        "price": 71652.77,
+        "units": 0.04470372517001553,
+        "cash_before": 7449.601966087538,
+        "cash_after": 10649.544558100122,
+        "fee": 3.203145737750334,
+        "nominal": 3203.145737750334
+      }
+    },
+    {
+      "ts": 1772798400000,
+      "type": "KAUF_2",
+      "price": 68504.71,
+      "tranche_pct": 75,
+      "baseline": {
+        "signal": 28,
+        "ts": 1772798400000,
+        "execution_ts": 1772798400000,
+        "type": "KAUF_2",
+        "price": 68504.71,
+        "units": 0.11709809675158071,
+        "cash_before": 10706.401280639278,
+        "cash_after": 2676.6003201598196,
+        "fee": 8.02980096047946,
+        "nominal": 8029.800960479459
+      },
+      "e42": {
+        "signal": 30,
+        "ts": 1772798400000,
+        "execution_ts": 1772798400000,
+        "type": "KAUF_2",
+        "price": 68504.71,
+        "units": 0.11647624316863055,
+        "cash_before": 10649.544558100122,
+        "cash_after": 2662.3861395250296,
+        "fee": 7.987158418575093,
+        "nominal": 7987.158418575093
+      }
+    },
+    {
+      "ts": 1772812800000,
+      "type": "NACHKAUF",
+      "price": 67846.888,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 30,
+        "ts": 1772812800000,
+        "execution_ts": 1772812800000,
+        "type": "NACHKAUF",
+        "price": 67846.888,
+        "units": 0.01576445905574717,
+        "cash_before": 1070.640128063928,
+        "cash_after": 0.0,
+        "fee": 1.070640128063928,
+        "nominal": 1070.640128063928
+      },
+      "e42": {
+        "signal": 32,
+        "ts": 1772812800000,
+        "execution_ts": 1772812800000,
+        "type": "NACHKAUF",
+        "price": 67846.888,
+        "units": 0.015680741338559272,
+        "cash_before": 1064.9544558100113,
+        "cash_after": 0.0,
+        "fee": 1.0649544558100112,
+        "nominal": 1064.9544558100113
+      }
+    },
+    {
+      "ts": 1772812800000,
+      "type": "NACHKAUF",
+      "price": 68131.79,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 29,
+        "ts": 1772812800000,
+        "execution_ts": 1772812800000,
+        "type": "NACHKAUF",
+        "price": 68131.79,
+        "units": 0.023547806859379388,
+        "cash_before": 2676.6003201598196,
+        "cash_after": 1070.640128063928,
+        "fee": 1.6059601920958917,
+        "nominal": 1605.9601920958917
+      },
+      "e42": {
+        "signal": 31,
+        "ts": 1772812800000,
+        "execution_ts": 1772812800000,
+        "type": "NACHKAUF",
+        "price": 68131.79,
+        "units": 0.02342275539849024,
+        "cash_before": 2662.3861395250296,
+        "cash_after": 1064.9544558100113,
+        "fee": 1.5974316837150184,
+        "nominal": 1597.4316837150184
+      }
+    },
+    {
+      "ts": 1772827200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 68114.02,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 31,
+        "ts": 1772827200000,
+        "execution_ts": 1772827200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 68114.02,
+        "units": 0.02346155440000609,
+        "cash_before": 0.0,
+        "cash_after": 1596.4627248474696,
+        "fee": 1.5980607856331028,
+        "nominal": 1598.0607856331028
+      },
+      "e42": {
+        "signal": 33,
+        "ts": 1772827200000,
+        "execution_ts": 1772827200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 68114.02,
+        "units": 0.023336960985852008,
+        "cash_before": 0.0,
+        "cash_after": 1587.9846531022138,
+        "fee": 1.5895742273295435,
+        "nominal": 1589.5742273295434
+      }
+    },
+    {
+      "ts": 1772841600000,
+      "type": "NACHKAUF",
+      "price": 68095.5,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 32,
+        "ts": 1772841600000,
+        "execution_ts": 1772841600000,
+        "type": "NACHKAUF",
+        "price": 68095.5,
+        "units": 0.023421022859405134,
+        "cash_before": 1596.4627248474696,
+        "cash_after": 0.0,
+        "fee": 1.5964627248474696,
+        "nominal": 1596.4627248474696
+      },
+      "e42": {
+        "signal": 34,
+        "ts": 1772841600000,
+        "execution_ts": 1772841600000,
+        "type": "NACHKAUF",
+        "price": 68095.5,
+        "units": 0.023296644689430455,
+        "cash_before": 1587.9846531022138,
+        "cash_after": 0.0,
+        "fee": 1.5879846531022137,
+        "nominal": 1587.9846531022138
+      }
+    },
+    {
+      "ts": 1772856000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 67842.67,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 33,
+        "ts": 1772856000000,
+        "execution_ts": 1772856000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 67842.67,
+        "units": 0.02346155440000609,
+        "cash_before": 0.0,
+        "cash_after": 1590.1027983538145,
+        "fee": 1.5916944928466612,
+        "nominal": 1591.6944928466612
+      },
+      "e42": {
+        "signal": 35,
+        "ts": 1772856000000,
+        "execution_ts": 1772856000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 67842.67,
+        "units": 0.023336960985852008,
+        "cash_before": 0.0,
+        "cash_after": 1581.6585012230664,
+        "fee": 1.5832417429660326,
+        "nominal": 1583.2417429660325
+      }
+    },
+    {
+      "ts": 1772884800000,
+      "type": "NACHKAUF",
+      "price": 67877.45,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 34,
+        "ts": 1772884800000,
+        "execution_ts": 1772884800000,
+        "type": "NACHKAUF",
+        "price": 67877.45,
+        "units": 0.023402657223502956,
+        "cash_before": 1590.1027983538145,
+        "cash_after": 0.0,
+        "fee": 1.5901027983538145,
+        "nominal": 1590.1027983538145
+      },
+      "e42": {
+        "signal": 36,
+        "ts": 1772884800000,
+        "execution_ts": 1772884800000,
+        "type": "NACHKAUF",
+        "price": 67877.45,
+        "units": 0.02327837658488708,
+        "cash_before": 1581.6585012230664,
+        "cash_after": 0.0,
+        "fee": 1.5816585012230664,
+        "nominal": 1581.6585012230664
+      }
+    },
+    {
+      "ts": 1773360000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 71932.09000000001,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 40,
+        "ts": 1773360000000,
+        "execution_ts": 1773360000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71932.09000000001,
+        "units": 0.02346155440000609,
+        "cash_before": 0.0,
+        "cash_after": 1685.9510039984932,
+        "fee": 1.6876386426411343,
+        "nominal": 1687.6386426411343
+      },
+      "e42": {
+        "signal": 42,
+        "ts": 1773360000000,
+        "execution_ts": 1773360000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71932.09000000001,
+        "units": 0.023336960985852008,
+        "cash_before": 0.0,
+        "cash_after": 1676.997701582835,
+        "fee": 1.6786763779607956,
+        "nominal": 1678.6763779607957
+      }
+    },
+    {
+      "ts": 1773403200000,
+      "type": "TEILVERKAUF_1",
+      "price": 73510.49,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 44,
+        "ts": 1773403200000,
+        "execution_ts": 1773403200000,
+        "type": "TEILVERKAUF_1",
+        "price": 73510.49,
+        "units": 0.06256414506668291,
+        "cash_before": 3390.3993508707385,
+        "cash_after": 7984.9211901933995,
+        "fee": 4.599120960282944,
+        "nominal": 4599.120960282944
+      },
+      "e42": {
+        "signal": 46,
+        "ts": 1773403200000,
+        "execution_ts": 1773403200000,
+        "type": "TEILVERKAUF_1",
+        "price": 73510.49,
+        "units": 0.06223189596227202,
+        "cash_before": 3372.3945152460938,
+        "cash_after": 7942.516983895916,
+        "fee": 4.574697165815638,
+        "nominal": 4574.697165815638
+      }
+    },
+    {
+      "ts": 1773403200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 72721.29000000001,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 43,
+        "ts": 1773403200000,
+        "execution_ts": 1773403200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 72721.29000000001,
+        "units": 0.02346155440000609,
+        "cash_before": 1685.9510039984932,
+        "cash_after": 3390.3993508707385,
+        "fee": 1.706154501373619,
+        "nominal": 1706.154501373619
+      },
+      "e42": {
+        "signal": 45,
+        "ts": 1773403200000,
+        "execution_ts": 1773403200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 72721.29000000001,
+        "units": 0.023336960985852008,
+        "cash_before": 1676.997701582835,
+        "cash_after": 3372.3945152460938,
+        "fee": 1.69709390757083,
+        "nominal": 1697.09390757083
+      }
+    },
+    {
+      "ts": 1773403200000,
+      "type": "VERKAUF_REST",
+      "price": 71831.46,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 45,
+        "ts": 1773403200000,
+        "execution_ts": 1773403200000,
+        "type": "VERKAUF_REST",
+        "price": 71831.46,
+        "units": 0.04682368008290808,
+        "cash_before": 7984.9211901933995,
+        "cash_after": 11344.97107981868,
+        "fee": 3.3634133029282087,
+        "nominal": 3363.413302928209
+      },
+      "e42": {
+        "signal": 47,
+        "ts": 1773403200000,
+        "execution_ts": 1773403200000,
+        "type": "VERKAUF_REST",
+        "price": 71831.46,
+        "units": 0.04657502127431753,
+        "cash_before": 7942.516983895916,
+        "cash_after": 11284.72320978354,
+        "fee": 3.3455517776652886,
+        "nominal": 3345.5517776652887
+      }
+    },
+    {
+      "ts": 1773475200000,
+      "type": "KAUF_2",
+      "price": 70751.42,
+      "tranche_pct": 75,
+      "baseline": {
+        "signal": 46,
+        "ts": 1773475200000,
+        "execution_ts": 1773475200000,
+        "type": "KAUF_2",
+        "price": 70751.42,
+        "units": 0.12014203505108657,
+        "cash_before": 11344.97107981868,
+        "cash_after": 2836.2427699546697,
+        "fee": 8.508728309864011,
+        "nominal": 8508.728309864011
+      },
+      "e42": {
+        "signal": 48,
+        "ts": 1773475200000,
+        "execution_ts": 1773475200000,
+        "type": "KAUF_2",
+        "price": 70751.42,
+        "units": 0.11950401652617457,
+        "cash_before": 11284.72320978354,
+        "cash_after": 2821.180802445884,
+        "fee": 8.463542407337656,
+        "nominal": 8463.542407337656
+      }
+    },
+    {
+      "ts": 1773489600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 70580.09,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 47,
+        "ts": 1773489600000,
+        "execution_ts": 1773489600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 70580.09,
+        "units": 0.018021305257662986,
+        "cash_before": 2836.2427699546697,
+        "cash_after": 4106.916171610993,
+        "fee": 1.2719453470033268,
+        "nominal": 1271.9453470033268
+      },
+      "e42": {
+        "signal": 49,
+        "ts": 1773489600000,
+        "execution_ts": 1773489600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 70580.09,
+        "units": 0.017925602478926186,
+        "cash_before": 2821.180802445884,
+        "cash_after": 4085.1062480764504,
+        "fee": 1.2651906362668333,
+        "nominal": 1265.1906362668333
+      }
+    },
+    {
+      "ts": 1773504000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 70700.0,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 48,
+        "ts": 1773504000000,
+        "execution_ts": 1773504000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 70700.0,
+        "units": 0.018021305257662986,
+        "cash_before": 4106.916171610993,
+        "cash_after": 5379.748347046049,
+        "fee": 1.2741062817167732,
+        "nominal": 1274.106281716773
+      },
+      "e42": {
+        "signal": 50,
+        "ts": 1773504000000,
+        "execution_ts": 1773504000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 70700.0,
+        "units": 0.017925602478926186,
+        "cash_before": 4085.1062480764504,
+        "cash_after": 5351.179003241272,
+        "fee": 1.2673400952600815,
+        "nominal": 1267.3400952600814
+      }
+    },
+    {
+      "ts": 1773604800000,
+      "type": "NACHKAUF",
+      "price": 72815.24,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 49,
+        "ts": 1773604800000,
+        "execution_ts": 1773604800000,
+        "type": "NACHKAUF",
+        "price": 72815.24,
+        "units": 0.03112981872679088,
+        "cash_before": 5379.748347046049,
+        "cash_after": 3110.754131082313,
+        "fee": 2.2689942159637364,
+        "nominal": 2268.994215963736
+      },
+      "e42": {
+        "signal": 52,
+        "ts": 1773604800000,
+        "execution_ts": 1773604800000,
+        "type": "NACHKAUF",
+        "price": 72815.24,
+        "units": 0.030964502723808247,
+        "cash_before": 2529.9982007953868,
+        "cash_after": 273.0535588386788,
+        "fee": 2.256944641956708,
+        "nominal": 2256.944641956708
+      }
+    },
+    {
+      "ts": 1773633600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 74337.744,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 50,
+        "ts": 1773633600000,
+        "execution_ts": 1773633600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 74337.744,
+        "units": 0.018021305257662986,
+        "cash_before": 3110.754131082313,
+        "cash_after": 4449.077644695528,
+        "fee": 1.3396631767900054,
+        "nominal": 1339.6631767900053
+      },
+      "e42": {
+        "signal": 53,
+        "ts": 1773633600000,
+        "execution_ts": 1773633600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 74337.744,
+        "units": 0.02311657895356779,
+        "cash_before": 273.0535588386788,
+        "cash_after": 1989.769452916383,
+        "fee": 1.7184343284061103,
+        "nominal": 1718.4343284061104
+      }
+    },
+    {
+      "ts": 1773691200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 74831.327,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 55,
+        "ts": 1773691200000,
+        "execution_ts": 1773691200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 74831.327,
+        "units": 0.018021305257662986,
+        "cash_before": 4449.077644695528,
+        "cash_after": 5796.287273211823,
+        "fee": 1.3485581867029983,
+        "nominal": 1348.5581867029982
+      },
+      "e42": {
+        "signal": 58,
+        "ts": 1773691200000,
+        "execution_ts": 1773691200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 74831.327,
+        "units": 0.02311657895356779,
+        "cash_before": 1989.769452916383,
+        "cash_after": 3717.8838874333364,
+        "fee": 1.7298442787957493,
+        "nominal": 1729.8442787957492
+      }
+    },
+    {
+      "ts": 1773705600000,
+      "type": "TEILVERKAUF_1",
+      "price": 75324.91,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 57,
+        "ts": 1773705600000,
+        "execution_ts": 1773705600000,
+        "type": "TEILVERKAUF_1",
+        "price": 75324.91,
+        "units": 0.04805681402043463,
+        "cash_before": 5796.287273211823,
+        "cash_after": 9412.542588996825,
+        "fee": 3.6198751909759768,
+        "nominal": 3619.8751909759767
+      },
+      "e42": {
+        "signal": 60,
+        "ts": 1773705600000,
+        "execution_ts": 1773705600000,
+        "type": "TEILVERKAUF_1",
+        "price": 75324.91,
+        "units": 0.06164421054284743,
+        "cash_before": 3717.8838874333364,
+        "cash_after": 8356.58515398321,
+        "fee": 4.643344611161034,
+        "nominal": 4643.344611161034
+      }
+    },
+    {
+      "ts": 1773705600000,
+      "type": "VERKAUF_REST",
+      "price": 74463.98,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 58,
+        "ts": 1773705600000,
+        "execution_ts": 1773705600000,
+        "type": "VERKAUF_REST",
+        "price": 74463.98,
+        "units": 0.031129818726790874,
+        "cash_before": 9412.542588996825,
+        "cash_after": 11728.27473787313,
+        "fee": 2.318050199075381,
+        "nominal": 2318.050199075381
+      },
+      "e42": {
+        "signal": 61,
+        "ts": 1773705600000,
+        "execution_ts": 1773705600000,
+        "type": "VERKAUF_REST",
+        "price": 74463.98,
+        "units": 0.046233157907135586,
+        "cash_before": 8356.58515398321,
+        "cash_after": 11795.847394771261,
+        "fee": 3.442704945733786,
+        "nominal": 3442.7049457337857
+      }
+    },
+    {
+      "ts": 1773820800000,
+      "type": "KAUF_1",
+      "price": 73158.5,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 59,
+        "ts": 1773820800000,
+        "execution_ts": 1773820800000,
+        "type": "KAUF_1",
+        "price": 73158.5,
+        "units": 0.04003822680595985,
+        "cash_before": 11728.27473787313,
+        "cash_after": 8796.206053404847,
+        "fee": 2.932068684468282,
+        "nominal": 2932.0686844682823
+      },
+      "e42": {
+        "signal": 62,
+        "ts": 1773820800000,
+        "execution_ts": 1773820800000,
+        "type": "KAUF_1",
+        "price": 73158.5,
+        "units": 0.04026890773928009,
+        "cash_before": 11795.847394771261,
+        "cash_after": 8846.885546078445,
+        "fee": 2.9489618486928153,
+        "nominal": 2948.9618486928152
+      }
+    },
+    {
+      "ts": 1773835200000,
+      "type": "NACHKAUF",
+      "price": 71533.162,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 60,
+        "ts": 1773835200000,
+        "execution_ts": 1773835200000,
+        "type": "NACHKAUF",
+        "price": 71533.162,
+        "units": 0.04094795384249635,
+        "cash_before": 8796.206053404847,
+        "cash_after": 5864.137368936565,
+        "fee": 2.932068684468282,
+        "nominal": 2932.0686844682823
+      },
+      "e42": {
+        "signal": 63,
+        "ts": 1773835200000,
+        "execution_ts": 1773835200000,
+        "type": "NACHKAUF",
+        "price": 71533.162,
+        "units": 0.041183876183805805,
+        "cash_before": 8846.885546078445,
+        "cash_after": 5897.92369738563,
+        "fee": 2.9489618486928153,
+        "nominal": 2948.9618486928152
+      }
+    },
+    {
+      "ts": 1773849600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 71072.38,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 61,
+        "ts": 1773849600000,
+        "execution_ts": 1773849600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71072.38,
+        "units": 0.012147927097268429,
+        "cash_before": 5864.137368936565,
+        "cash_after": 6726.656077715054,
+        "fee": 0.8633820908693588,
+        "nominal": 863.3820908693588
+      },
+      "e42": {
+        "signal": 64,
+        "ts": 1773849600000,
+        "execution_ts": 1773849600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71072.38,
+        "units": 0.012217917588462883,
+        "cash_before": 5897.92369738563,
+        "cash_after": 6765.411822559891,
+        "fee": 0.8683564816559177,
+        "nominal": 868.3564816559177
+      }
+    },
+    {
+      "ts": 1773864000000,
+      "type": "NACHKAUF",
+      "price": 71246.54,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 62,
+        "ts": 1773864000000,
+        "execution_ts": 1773864000000,
+        "type": "NACHKAUF",
+        "price": 71246.54,
+        "units": 0.024667611500436212,
+        "cash_before": 6726.656077715054,
+        "cash_after": 4967.414867034085,
+        "fee": 1.7592412106809696,
+        "nominal": 1759.2412106809695
+      },
+      "e42": {
+        "signal": 65,
+        "ts": 1773864000000,
+        "execution_ts": 1773864000000,
+        "type": "NACHKAUF",
+        "price": 71246.54,
+        "units": 0.02480973436894583,
+        "cash_before": 6765.411822559891,
+        "cash_after": 4996.034713344202,
+        "fee": 1.7693771092156891,
+        "nominal": 1769.3771092156892
+      }
+    },
+    {
+      "ts": 1773878400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 71215.39,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 63,
+        "ts": 1773878400000,
+        "execution_ts": 1773878400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71215.39,
+        "units": 0.014025879757743599,
+        "cash_before": 4967.414867034085,
+        "cash_after": 5965.27450557786,
+        "fee": 0.998858497040816,
+        "nominal": 998.8584970408159
+      },
+      "e42": {
+        "signal": 66,
+        "ts": 1773878400000,
+        "execution_ts": 1773878400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71215.39,
+        "units": 0.014106690105535325,
+        "cash_before": 4996.034713344202,
+        "cash_after": 5999.643537381567,
+        "fee": 1.0046134374748394,
+        "nominal": 1004.6134374748393
+      }
+    },
+    {
+      "ts": 1773907200000,
+      "type": "STOPLOSS",
+      "price": 69952.75,
+      "tranche_pct": 100,
+      "baseline": {
+        "signal": 64,
+        "ts": 1773907200000,
+        "execution_ts": 1773907200000,
+        "type": "STOPLOSS",
+        "price": 69952.75,
+        "units": 0.07947998529388038,
+        "cash_before": 5965.27450557786,
+        "cash_after": 11519.558203303084,
+        "fee": 5.559843541266491,
+        "nominal": 5559.843541266491
+      },
+      "e42": {
+        "signal": 67,
+        "ts": 1773907200000,
+        "execution_ts": 1773907200000,
+        "type": "STOPLOSS",
+        "price": 69952.75,
+        "units": 0.07993791059803351,
+        "cash_before": 5999.643537381567,
+        "cash_after": 11585.928336292569,
+        "fee": 5.591876675586589,
+        "nominal": 5591.876675586589
+      }
+    },
+    {
+      "ts": 1774353600000,
+      "type": "KAUF_1",
+      "price": 69588.875,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 65,
+        "ts": 1774353600000,
+        "execution_ts": 1774353600000,
+        "type": "KAUF_1",
+        "price": 69588.875,
+        "units": 0.04134295404653324,
+        "cash_before": 11519.558203303084,
+        "cash_after": 8639.668652477312,
+        "fee": 2.8798895508257716,
+        "nominal": 2879.8895508257715
+      },
+      "e42": {
+        "signal": 68,
+        "ts": 1774353600000,
+        "execution_ts": 1774353600000,
+        "type": "KAUF_1",
+        "price": 69588.875,
+        "units": 0.04158115218832132,
+        "cash_before": 11585.928336292569,
+        "cash_after": 8689.446252219426,
+        "fee": 2.8964820840731424,
+        "nominal": 2896.4820840731422
+      }
+    },
+    {
+      "ts": 1774368000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 69377.33,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 66,
+        "ts": 1774368000000,
+        "execution_ts": 1774368000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69377.33,
+        "units": 0.006201443106979986,
+        "cash_before": 8639.668652477312,
+        "cash_after": 9069.477977821578,
+        "fee": 0.4302395649091758,
+        "nominal": 430.2395649091758
+      },
+      "e42": {
+        "signal": 69,
+        "ts": 1774368000000,
+        "execution_ts": 1774368000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69377.33,
+        "units": 0.0062371728282481975,
+        "cash_before": 8689.446252219426,
+        "cash_after": 9121.731931394263,
+        "fee": 0.43271839757240854,
+        "nominal": 432.71839757240855
+      }
+    },
+    {
+      "ts": 1774382400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 70556.74,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 67,
+        "ts": 1774382400000,
+        "execution_ts": 1774382400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 70556.74,
+        "units": 0.006201443106979986,
+        "cash_before": 9069.477977821578,
+        "cash_after": 9506.594033136633,
+        "fee": 0.4375536089239791,
+        "nominal": 437.5536089239791
+      },
+      "e42": {
+        "signal": 70,
+        "ts": 1774382400000,
+        "execution_ts": 1774382400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 70556.74,
+        "units": 0.0062371728282481975,
+        "cash_before": 9121.731931394263,
+        "cash_after": 9561.366438390458,
+        "fee": 0.44007458157777274,
+        "nominal": 440.07458157777273
+      }
+    },
+    {
+      "ts": 1774540800000,
+      "type": "NACHKAUF",
+      "price": 68314.33602,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 68,
+        "ts": 1774540800000,
+        "execution_ts": 1774540800000,
+        "type": "NACHKAUF",
+        "price": 68314.33602,
+        "units": 0.04211428857967177,
+        "cash_before": 9506.594033136633,
+        "cash_after": 6626.704482310861,
+        "fee": 2.8798895508257716,
+        "nominal": 2879.8895508257715
+      },
+      "e42": {
+        "signal": 73,
+        "ts": 1774540800000,
+        "execution_ts": 1774540800000,
+        "type": "NACHKAUF",
+        "price": 68314.33602,
+        "units": 0.04235693077865721,
+        "cash_before": 9514.134318632501,
+        "cash_after": 6617.6522345593585,
+        "fee": 2.8964820840731424,
+        "nominal": 2896.4820840731422
+      }
+    },
+    {
+      "ts": 1774569600000,
+      "type": "NACHKAUF",
+      "price": 68767.51,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 69,
+        "ts": 1774569600000,
+        "execution_ts": 1774569600000,
+        "type": "NACHKAUF",
+        "price": 68767.51,
+        "units": 0.03346940625042198,
+        "cash_before": 6626.704482310861,
+        "cash_after": 4322.792841650244,
+        "fee": 2.303911640660617,
+        "nominal": 2303.9116406606167
+      },
+      "e42": {
+        "signal": 74,
+        "ts": 1774569600000,
+        "execution_ts": 1774569600000,
+        "type": "NACHKAUF",
+        "price": 68767.51,
+        "units": 0.03366224081097681,
+        "cash_before": 6617.6522345593585,
+        "cash_after": 4300.466567300844,
+        "fee": 2.317185667258514,
+        "nominal": 2317.185667258514
+      }
+    },
+    {
+      "ts": 1774584000000,
+      "type": "NACHKAUF",
+      "price": 68540.48,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 70,
+        "ts": 1774584000000,
+        "execution_ts": 1774584000000,
+        "type": "NACHKAUF",
+        "price": 68540.48,
+        "units": 0.033580268609440085,
+        "cash_before": 4322.792841650244,
+        "cash_after": 2018.881200989627,
+        "fee": 2.303911640660617,
+        "nominal": 2303.9116406606167
+      },
+      "e42": {
+        "signal": 75,
+        "ts": 1774584000000,
+        "execution_ts": 1774584000000,
+        "type": "NACHKAUF",
+        "price": 68540.48,
+        "units": 0.033773741905385776,
+        "cash_before": 4300.466567300844,
+        "cash_after": 1983.28090004233,
+        "fee": 2.317185667258514,
+        "nominal": 2317.185667258514
+      }
+    },
+    {
+      "ts": 1774612800000,
+      "type": "STOPLOSS",
+      "price": 66112.82,
+      "tranche_pct": 100,
+      "baseline": {
+        "signal": 71,
+        "ts": 1774612800000,
+        "execution_ts": 1774612800000,
+        "type": "STOPLOSS",
+        "price": 66112.82,
+        "units": 0.1381040312721071,
+        "cash_before": 2018.881200989627,
+        "cash_after": 11140.197714796048,
+        "fee": 9.13044696076719,
+        "nominal": 9130.446960767189
+      },
+      "e42": {
+        "signal": 76,
+        "ts": 1774612800000,
+        "execution_ts": 1774612800000,
+        "type": "STOPLOSS",
+        "price": 66112.82,
+        "units": 0.13889972002684473,
+        "cash_before": 1983.28090004233,
+        "cash_after": 11157.150036039326,
+        "fee": 9.183052188185181,
+        "nominal": 9183.052188185182
+      }
+    },
+    {
+      "ts": 1775044800000,
+      "type": "KAUF_2",
+      "price": 68918.52,
+      "tranche_pct": 75,
+      "baseline": {
+        "signal": 72,
+        "ts": 1775044800000,
+        "execution_ts": 1775044800000,
+        "type": "KAUF_2",
+        "price": 68918.52,
+        "units": 0.12111103282268595,
+        "cash_before": 11140.197714796048,
+        "cash_after": 2785.0494286990124,
+        "fee": 8.355148286097036,
+        "nominal": 8355.148286097035
+      },
+      "e42": {
+        "signal": 77,
+        "ts": 1775044800000,
+        "execution_ts": 1775044800000,
+        "type": "KAUF_2",
+        "price": 68918.52,
+        "units": 0.12129533055124318,
+        "cash_before": 11157.150036039326,
+        "cash_after": 2789.2875090098314,
+        "fee": 8.367862527029494,
+        "nominal": 8367.862527029494
+      }
+    },
+    {
+      "ts": 1775059200000,
+      "type": "NACHKAUF",
+      "price": 68176.84,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 73,
+        "ts": 1775059200000,
+        "execution_ts": 1775059200000,
+        "type": "NACHKAUF",
+        "price": 68176.84,
+        "units": 0.032647619094933855,
+        "cash_before": 2785.0494286990124,
+        "cash_after": 557.0098857398029,
+        "fee": 2.2280395429592095,
+        "nominal": 2228.0395429592095
+      },
+      "e42": {
+        "signal": 78,
+        "ts": 1775059200000,
+        "execution_ts": 1775059200000,
+        "type": "NACHKAUF",
+        "price": 68176.84,
+        "units": 0.03269729980445936,
+        "cash_before": 2789.2875090098314,
+        "cash_after": 557.8575018019665,
+        "fee": 2.231430007207865,
+        "nominal": 2231.430007207865
+      }
+    },
+    {
+      "ts": 1775059200000,
+      "type": "NACHKAUF",
+      "price": 68314.33602,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 74,
+        "ts": 1775059200000,
+        "execution_ts": 1775059200000,
+        "type": "NACHKAUF",
+        "price": 68314.33602,
+        "units": 0.008145477337160293,
+        "cash_before": 557.0098857398029,
+        "cash_after": 0.0,
+        "fee": 0.5570098857398029,
+        "nominal": 557.0098857398029
+      },
+      "e42": {
+        "signal": 79,
+        "ts": 1775059200000,
+        "execution_ts": 1775059200000,
+        "type": "NACHKAUF",
+        "price": 68314.33602,
+        "units": 0.008157872516495029,
+        "cash_before": 557.8575018019665,
+        "cash_after": 0.0,
+        "fee": 0.5578575018019665,
+        "nominal": 557.8575018019665
+      }
+    },
+    {
+      "ts": 1775088000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 66576.25,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 76,
+        "ts": 1775088000000,
+        "execution_ts": 1775088000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 66576.25,
+        "units": 0.024285619388217015,
+        "cash_before": 0.0,
+        "cash_after": 1615.2286223269882,
+        "fee": 1.616845467794783,
+        "nominal": 1616.845467794783
+      },
+      "e42": {
+        "signal": 81,
+        "ts": 1775088000000,
+        "execution_ts": 1775088000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 66576.25,
+        "units": 0.024322575430829635,
+        "cash_before": 0.0,
+        "cash_after": 1617.6865566642448,
+        "fee": 1.6193058625267716,
+        "nominal": 1619.3058625267715
+      }
+    },
+    {
+      "ts": 1775102400000,
+      "type": "STOPLOSS",
+      "price": 66930.79,
+      "tranche_pct": 100,
+      "baseline": {
+        "signal": 77,
+        "ts": 1775102400000,
+        "execution_ts": 1775102400000,
+        "type": "STOPLOSS",
+        "price": 66930.79,
+        "units": 0.13761850986656307,
+        "cash_before": 1615.2286223269882,
+        "cash_after": 10816.933290734856,
+        "fee": 9.210915583991861,
+        "nominal": 9210.91558399186
+      },
+      "e42": {
+        "signal": 82,
+        "ts": 1775102400000,
+        "execution_ts": 1775102400000,
+        "type": "STOPLOSS",
+        "price": 66930.79,
+        "units": 0.13782792744136793,
+        "cash_before": 1617.6865566642448,
+        "cash_after": 10833.393692309965,
+        "fee": 9.224932067713434,
+        "nominal": 9224.932067713433
+      }
+    },
+    {
+      "ts": 1775131200000,
+      "type": "KAUF_2",
+      "price": 66852.91,
+      "tranche_pct": 75,
+      "baseline": {
+        "signal": 78,
+        "ts": 1775131200000,
+        "execution_ts": 1775131200000,
+        "type": "KAUF_2",
+        "price": 66852.91,
+        "units": 0.121230134456123,
+        "cash_before": 10816.933290734856,
+        "cash_after": 2704.2333226837145,
+        "fee": 8.112699968051142,
+        "nominal": 8112.699968051142
+      },
+      "e42": {
+        "signal": 83,
+        "ts": 1775131200000,
+        "execution_ts": 1775131200000,
+        "type": "KAUF_2",
+        "price": 66852.91,
+        "units": 0.12141461342465483,
+        "cash_before": 10833.393692309965,
+        "cash_after": 2708.348423077491,
+        "fee": 8.125045269232473,
+        "nominal": 8125.045269232473
+      }
+    },
+    {
+      "ts": 1775145600000,
+      "type": "NACHKAUF",
+      "price": 66975.99,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 79,
+        "ts": 1775145600000,
+        "execution_ts": 1775145600000,
+        "type": "NACHKAUF",
+        "price": 66975.99,
+        "units": 0.03226862748111412,
+        "cash_before": 2704.2333226837145,
+        "cash_after": 540.846664536743,
+        "fee": 2.1633866581469716,
+        "nominal": 2163.3866581469715
+      },
+      "e42": {
+        "signal": 84,
+        "ts": 1775145600000,
+        "execution_ts": 1775145600000,
+        "type": "NACHKAUF",
+        "price": 66975.99,
+        "units": 0.03231773146949423,
+        "cash_before": 2708.348423077491,
+        "cash_after": 541.6696846154982,
+        "fee": 2.166678738461993,
+        "nominal": 2166.678738461993
+      }
+    },
+    {
+      "ts": 1775160000000,
+      "type": "NACHKAUF",
+      "price": 66901.99,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 80,
+        "ts": 1775160000000,
+        "execution_ts": 1775160000000,
+        "type": "NACHKAUF",
+        "price": 66901.99,
+        "units": 0.008076079917386706,
+        "cash_before": 540.846664536743,
+        "cash_after": 0.0,
+        "fee": 0.540846664536743,
+        "nominal": 540.846664536743
+      },
+      "e42": {
+        "signal": 85,
+        "ts": 1775160000000,
+        "execution_ts": 1775160000000,
+        "type": "NACHKAUF",
+        "price": 66901.99,
+        "units": 0.008088369492908696,
+        "cash_before": 541.6696846154982,
+        "cash_after": 0.0,
+        "fee": 0.5416696846154982,
+        "nominal": 541.6696846154982
+      }
+    },
+    {
+      "ts": 1775174400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 66579.97,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 81,
+        "ts": 1775174400000,
+        "execution_ts": 1775174400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 66579.97,
+        "units": 0.02423622627819358,
+        "cash_before": 0.0,
+        "cash_after": 1612.033571296825,
+        "fee": 1.6136472185153403,
+        "nominal": 1613.6472185153402
+      },
+      "e42": {
+        "signal": 86,
+        "ts": 1775174400000,
+        "execution_ts": 1775174400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 66579.97,
+        "units": 0.024273107158058665,
+        "cash_before": 0.0,
+        "cash_after": 1614.4866436439409,
+        "fee": 1.6161027463903312,
+        "nominal": 1616.1027463903313
+      }
+    },
+    {
+      "ts": 1775188800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 67042.08,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 82,
+        "ts": 1775188800000,
+        "execution_ts": 1775188800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 67042.08,
+        "units": 0.02423622627819358,
+        "cash_before": 1612.033571296825,
+        "cash_after": 3235.2557453165405,
+        "fee": 1.6248470210407564,
+        "nominal": 1624.8470210407563
+      },
+      "e42": {
+        "signal": 87,
+        "ts": 1775188800000,
+        "execution_ts": 1775188800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 67042.08,
+        "units": 0.024273107158058665,
+        "cash_before": 1614.4866436439409,
+        "cash_after": 3240.178915991143,
+        "fee": 1.6273195919391417,
+        "nominal": 1627.3195919391417
+      }
+    },
+    {
+      "ts": 1775433600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 69160.12,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 83,
+        "ts": 1775433600000,
+        "execution_ts": 1775433600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69160.12,
+        "units": 0.02423622627819358,
+        "cash_before": 3235.2557453165405,
+        "cash_after": 4909.759882745815,
+        "fee": 1.6761803177470214,
+        "nominal": 1676.1803177470213
+      },
+      "e42": {
+        "signal": 89,
+        "ts": 1775433600000,
+        "execution_ts": 1775433600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69160.12,
+        "units": 0.024273107158058665,
+        "cash_before": 531.8304929136525,
+        "cash_after": 2208.8827657340244,
+        "fee": 1.6787310038241963,
+        "nominal": 1678.7310038241963
+      }
+    },
+    {
+      "ts": 1775462400000,
+      "type": "TEILVERKAUF_1",
+      "price": 70022.12,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 86,
+        "ts": 1775462400000,
+        "execution_ts": 1775462400000,
+        "type": "TEILVERKAUF_1",
+        "price": 70022.12,
+        "units": 0.06462993674184951,
+        "cash_before": 6594.699387887465,
+        "cash_after": 11115.69904883153,
+        "fee": 4.525525186130195,
+        "nominal": 4525.525186130195
+      },
+      "e42": {
+        "signal": 92,
+        "ts": 1775462400000,
+        "execution_ts": 1775462400000,
+        "type": "TEILVERKAUF_1",
+        "price": 70022.12,
+        "units": 0.0647282857548231,
+        "cash_before": 3896.3862860303343,
+        "cash_after": 8424.26566675633,
+        "fee": 4.532411792518514,
+        "nominal": 4532.411792518514
+      }
+    },
+    {
+      "ts": 1775462400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 69591.12,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 85,
+        "ts": 1775462400000,
+        "execution_ts": 1775462400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69591.12,
+        "units": 0.02423622627819358,
+        "cash_before": 4909.759882745815,
+        "cash_after": 6594.699387887465,
+        "fee": 1.6866261312729225,
+        "nominal": 1686.6261312729225
+      },
+      "e42": {
+        "signal": 91,
+        "ts": 1775462400000,
+        "execution_ts": 1775462400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69591.12,
+        "units": 0.024273107158058665,
+        "cash_before": 2208.8827657340244,
+        "cash_after": 3896.3862860303343,
+        "fee": 1.6891927130093196,
+        "nominal": 1689.1927130093195
+      }
+    },
+    {
+      "ts": 1775462400000,
+      "type": "VERKAUF_REST",
+      "price": 69614.91,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 87,
+        "ts": 1775462400000,
+        "execution_ts": 1775462400000,
+        "type": "VERKAUF_REST",
+        "price": 69614.91,
+        "units": 0,
+        "cash_before": 11115.69904883153,
+        "cash_after": 11115.69904883153,
+        "fee": 0.0,
+        "nominal": 0.0
+      },
+      "e42": {
+        "signal": 93,
+        "ts": 1775462400000,
+        "execution_ts": 1775462400000,
+        "type": "VERKAUF_REST",
+        "price": 69614.91,
+        "units": 0.040166263460931065,
+        "cash_before": 8424.26566675633,
+        "cash_after": 11217.640311809466,
+        "fee": 2.796170815869005,
+        "nominal": 2796.170815869005
+      }
+    },
+    {
+      "ts": 1775563200000,
+      "type": "KAUF_2",
+      "price": 68168.1,
+      "tranche_pct": 75,
+      "baseline": {
+        "signal": 88,
+        "ts": 1775563200000,
+        "execution_ts": 1775563200000,
+        "type": "KAUF_2",
+        "price": 68168.1,
+        "units": 0.12217499845729929,
+        "cash_before": 11115.69904883153,
+        "cash_after": 2778.924762207882,
+        "fee": 8.336774286623648,
+        "nominal": 8336.774286623648
+      },
+      "e42": {
+        "signal": 94,
+        "ts": 1775563200000,
+        "execution_ts": 1775563200000,
+        "type": "KAUF_2",
+        "price": 68168.1,
+        "units": 0.1232954564323084,
+        "cash_before": 11217.640311809466,
+        "cash_after": 2804.410077952367,
+        "fee": 8.4132302338571,
+        "nominal": 8413.230233857099
+      }
+    },
+    {
+      "ts": 1775577600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 69011.29,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 89,
+        "ts": 1775577600000,
+        "execution_ts": 1775577600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69011.29,
+        "units": 0.018326249768594892,
+        "cash_before": 2778.924762207882,
+        "cash_after": 4042.378181463424,
+        "fee": 1.2647181373929348,
+        "nominal": 1264.7181373929348
+      },
+      "e42": {
+        "signal": 95,
+        "ts": 1775577600000,
+        "execution_ts": 1775577600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 69011.29,
+        "units": 0.01849431846484626,
+        "cash_before": 2804.410077952367,
+        "cash_after": 4079.450536107297,
+        "fee": 1.27631677492986,
+        "nominal": 1276.31677492986
+      }
+    },
+    {
+      "ts": 1775592000000,
+      "type": "TEILVERKAUF_1",
+      "price": 71471.81,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 92,
+        "ts": 1775592000000,
+        "execution_ts": 1775592000000,
+        "type": "TEILVERKAUF_1",
+        "price": 71471.81,
+        "units": 0.048869999382919714,
+        "cash_before": 6653.968137131604,
+        "cash_after": 10143.302620417162,
+        "fee": 3.4928273105961547,
+        "nominal": 3492.827310596155
+      },
+      "e42": {
+        "signal": 98,
+        "ts": 1775592000000,
+        "execution_ts": 1775592000000,
+        "type": "TEILVERKAUF_1",
+        "price": 71471.81,
+        "units": 0.04931818257292336,
+        "cash_before": 6714.991192248003,
+        "cash_after": 10236.326106870896,
+        "fee": 3.524859774397289,
+        "nominal": 3524.859774397289
+      }
+    },
+    {
+      "ts": 1775592000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 70723.84999999999,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 91,
+        "ts": 1775592000000,
+        "execution_ts": 1775592000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 70723.84999999999,
+        "units": 0.018326249768594892,
+        "cash_before": 5359.161300374661,
+        "cash_after": 6653.968137131604,
+        "fee": 1.2961029396966397,
+        "nominal": 1296.1029396966396
+      },
+      "e42": {
+        "signal": 97,
+        "ts": 1775592000000,
+        "execution_ts": 1775592000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 70723.84999999999,
+        "units": 0.01849431846484626,
+        "cash_before": 5408.309776692946,
+        "cash_after": 6714.991192248003,
+        "fee": 1.3079894049600171,
+        "nominal": 1307.989404960017
+      }
+    },
+    {
+      "ts": 1775592000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 71924.22,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 90,
+        "ts": 1775592000000,
+        "execution_ts": 1775592000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71924.22,
+        "units": 0.018326249768594892,
+        "cash_before": 4042.378181463424,
+        "cash_after": 5359.161300374661,
+        "fee": 1.3181012201313682,
+        "nominal": 1318.101220131368
+      },
+      "e42": {
+        "signal": 96,
+        "ts": 1775592000000,
+        "execution_ts": 1775592000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 71924.22,
+        "units": 0.01849431846484626,
+        "cash_before": 4079.450536107297,
+        "cash_after": 5408.309776692946,
+        "fee": 1.330189430015665,
+        "nominal": 1330.1894300156648
+      }
+    },
+    {
+      "ts": 1775592000000,
+      "type": "VERKAUF_REST",
+      "price": 71924.22,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 93,
+        "ts": 1775592000000,
+        "execution_ts": 1775592000000,
+        "type": "VERKAUF_REST",
+        "price": 71924.22,
+        "units": 0.018326249768594878,
+        "cash_before": 10143.302620417162,
+        "cash_after": 11460.085739328399,
+        "fee": 1.3181012201313673,
+        "nominal": 1318.1012201313672
+      },
+      "e42": {
+        "signal": 99,
+        "ts": 1775592000000,
+        "execution_ts": 1775592000000,
+        "type": "VERKAUF_REST",
+        "price": 71924.22,
+        "units": 0.01849431846484626,
+        "cash_before": 10236.326106870896,
+        "cash_after": 11565.185347456545,
+        "fee": 1.330189430015665,
+        "nominal": 1330.1894300156648
+      }
+    },
+    {
+      "ts": 1776513600000,
+      "type": "KAUF_1",
+      "price": 75821.425,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 94,
+        "ts": 1776513600000,
+        "execution_ts": 1776513600000,
+        "type": "KAUF_1",
+        "price": 75821.425,
+        "units": 0.037748649717375626,
+        "cash_before": 11460.085739328399,
+        "cash_after": 8595.0643044963,
+        "fee": 2.8650214348320997,
+        "nominal": 2865.0214348320997
+      },
+      "e42": {
+        "signal": 103,
+        "ts": 1776513600000,
+        "execution_ts": 1776513600000,
+        "type": "KAUF_1",
+        "price": 75821.425,
+        "units": 0.03804419431285913,
+        "cash_before": 11549.809913024525,
+        "cash_after": 8662.357434768393,
+        "fee": 2.8874524782561313,
+        "nominal": 2887.452478256131
+      }
+    },
+    {
+      "ts": 1776528000000,
+      "type": "NACHKAUF",
+      "price": 75649.85,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 95,
+        "ts": 1776528000000,
+        "execution_ts": 1776528000000,
+        "type": "NACHKAUF",
+        "price": 75649.85,
+        "units": 0.022700558534331006,
+        "cash_before": 8595.0643044963,
+        "cash_after": 6876.05144359704,
+        "fee": 1.7190128608992599,
+        "nominal": 1719.0128608992597
+      },
+      "e42": {
+        "signal": 104,
+        "ts": 1776528000000,
+        "execution_ts": 1776528000000,
+        "type": "NACHKAUF",
+        "price": 75649.85,
+        "units": 0.022878287471379318,
+        "cash_before": 8662.357434768393,
+        "cash_after": 6929.885947814715,
+        "fee": 1.7324714869536786,
+        "nominal": 1732.4714869536785
+      }
+    },
+    {
+      "ts": 1776528000000,
+      "type": "NACHKAUF",
+      "price": 75649.85,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 96,
+        "ts": 1776528000000,
+        "execution_ts": 1776528000000,
+        "type": "NACHKAUF",
+        "price": 75649.85,
+        "units": 0.030267411379108,
+        "cash_before": 6876.05144359704,
+        "cash_after": 4584.0342957313605,
+        "fee": 2.2920171478656792,
+        "nominal": 2292.0171478656794
+      },
+      "e42": {
+        "signal": 105,
+        "ts": 1776528000000,
+        "execution_ts": 1776528000000,
+        "type": "NACHKAUF",
+        "price": 75649.85,
+        "units": 0.030504383295172424,
+        "cash_before": 6929.885947814715,
+        "cash_after": 4619.92396520981,
+        "fee": 2.309961982604905,
+        "nominal": 2309.9619826049047
+      }
+    },
+    {
+      "ts": 1776542400000,
+      "type": "NACHKAUF",
+      "price": 75691.76,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 97,
+        "ts": 1776542400000,
+        "execution_ts": 1776542400000,
+        "type": "NACHKAUF",
+        "price": 75691.76,
+        "units": 0.03025065252436743,
+        "cash_before": 4584.0342957313605,
+        "cash_after": 2292.017147865681,
+        "fee": 2.2920171478656792,
+        "nominal": 2292.0171478656794
+      },
+      "e42": {
+        "signal": 106,
+        "ts": 1776542400000,
+        "execution_ts": 1776542400000,
+        "type": "NACHKAUF",
+        "price": 75691.76,
+        "units": 0.03048749323073344,
+        "cash_before": 4619.92396520981,
+        "cash_after": 2309.9619826049056,
+        "fee": 2.309961982604905,
+        "nominal": 2309.9619826049047
+      }
+    },
+    {
+      "ts": 1776556800000,
+      "type": "NACHKAUF",
+      "price": 75515.77,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 98,
+        "ts": 1776556800000,
+        "execution_ts": 1776556800000,
+        "type": "NACHKAUF",
+        "price": 75515.77,
+        "units": 0.022740863902180438,
+        "cash_before": 2292.017147865681,
+        "cash_after": 573.0042869664214,
+        "fee": 1.7190128608992599,
+        "nominal": 1719.0128608992597
+      },
+      "e42": {
+        "signal": 107,
+        "ts": 1776556800000,
+        "execution_ts": 1776556800000,
+        "type": "NACHKAUF",
+        "price": 75515.77,
+        "units": 0.022918908401076025,
+        "cash_before": 2309.9619826049056,
+        "cash_after": 577.4904956512271,
+        "fee": 1.7324714869536786,
+        "nominal": 1732.4714869536785
+      }
+    },
+    {
+      "ts": 1776571200000,
+      "type": "NACHKAUF",
+      "price": 75252.34,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 99,
+        "ts": 1776571200000,
+        "execution_ts": 1776571200000,
+        "type": "NACHKAUF",
+        "price": 75252.34,
+        "units": 0.007606823690525171,
+        "cash_before": 573.0042869664214,
+        "cash_after": 0.0,
+        "fee": 0.5730042869664215,
+        "nominal": 573.0042869664214
+      },
+      "e42": {
+        "signal": 108,
+        "ts": 1776571200000,
+        "execution_ts": 1776571200000,
+        "type": "NACHKAUF",
+        "price": 75252.34,
+        "units": 0.007666379612322699,
+        "cash_before": 577.4904956512271,
+        "cash_after": 0.0,
+        "fee": 0.5774904956512271,
+        "nominal": 577.4904956512271
+      }
+    },
+    {
+      "ts": 1776585600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 75604.11,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 100,
+        "ts": 1776585600000,
+        "execution_ts": 1776585600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 75604.11,
+        "units": 0.02269724396218315,
+        "cash_before": 0.0,
+        "cash_after": 1714.288924284517,
+        "fee": 1.7160049292137307,
+        "nominal": 1716.0049292137307
+      },
+      "e42": {
+        "signal": 109,
+        "ts": 1776585600000,
+        "execution_ts": 1776585600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 75604.11,
+        "units": 0.02287494694853146,
+        "cash_before": 0.0,
+        "cash_after": 1727.710565335596,
+        "fee": 1.729440005340937,
+        "nominal": 1729.4400053409368
+      }
+    },
+    {
+      "ts": 1776600000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 75846.63,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 101,
+        "ts": 1776600000000,
+        "execution_ts": 1776600000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 75846.63,
+        "units": 0.02269724396218315,
+        "cash_before": 1714.288924284517,
+        "cash_after": 3434.076879639137,
+        "fee": 1.7215094648194398,
+        "nominal": 1721.5094648194397
+      },
+      "e42": {
+        "signal": 110,
+        "ts": 1776600000000,
+        "execution_ts": 1776600000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 75846.63,
+        "units": 0.02287494694853146,
+        "cash_before": 1727.710565335596,
+        "cash_after": 3460.9632151730157,
+        "fee": 1.7349876374748947,
+        "nominal": 1734.9876374748947
+      }
+    },
+    {
+      "ts": 1776628800000,
+      "type": "NACHKAUF",
+      "price": 74384.80410000001,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 102,
+        "ts": 1776628800000,
+        "execution_ts": 1776628800000,
+        "type": "NACHKAUF",
+        "price": 74384.80410000001,
+        "units": 0.038477703181815155,
+        "cash_before": 3434.076879639137,
+        "cash_after": 569.0554448070375,
+        "fee": 2.8650214348320997,
+        "nominal": 2865.0214348320997
+      },
+      "e42": {
+        "signal": 111,
+        "ts": 1776628800000,
+        "execution_ts": 1776628800000,
+        "type": "NACHKAUF",
+        "price": 74384.80410000001,
+        "units": 0.03877895573805611,
+        "cash_before": 3460.9632151730157,
+        "cash_after": 573.5107369168845,
+        "fee": 2.8874524782561313,
+        "nominal": 2887.452478256131
+      }
+    },
+    {
+      "ts": 1776830400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 77742.82999999999,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 104,
+        "ts": 1776830400000,
+        "execution_ts": 1776830400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 77742.82999999999,
+        "units": 0.02269724396218315,
+        "cash_before": 569.0554448070375,
+        "cash_after": 2331.838875648748,
+        "fee": 1.764547978820531,
+        "nominal": 1764.547978820531
+      },
+      "e42": {
+        "signal": 115,
+        "ts": 1776830400000,
+        "execution_ts": 1776830400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 77742.82999999999,
+        "units": 0.022953404054364877,
+        "cash_before": 561.6622744242962,
+        "cash_after": 2344.3404011547755,
+        "fee": 1.7844625893197992,
+        "nominal": 1784.4625893197992
+      }
+    },
+    {
+      "ts": 1776844800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 78245.14499999999,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 106,
+        "ts": 1776844800000,
+        "execution_ts": 1776844800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 78245.14499999999,
+        "units": 0.02269724396218315,
+        "cash_before": 2331.838875648748,
+        "cash_after": 4106.012071425222,
+        "fee": 1.7759491449213949,
+        "nominal": 1775.949144921395
+      },
+      "e42": {
+        "signal": 117,
+        "ts": 1776844800000,
+        "execution_ts": 1776844800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 78245.14499999999,
+        "units": 0.022953404054364877,
+        "cash_before": 2344.3404011547755,
+        "cash_after": 4138.5368372036655,
+        "fee": 1.7959924284773674,
+        "nominal": 1795.9924284773674
+      }
+    },
+    {
+      "ts": 1776859200000,
+      "type": "TEILVERKAUF_1",
+      "price": 78747.45999999999,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 108,
+        "ts": 1776859200000,
+        "execution_ts": 1776859200000,
+        "type": "TEILVERKAUF_1",
+        "price": 78747.45999999999,
+        "units": 0.06052598389915507,
+        "cash_before": 4106.012071425222,
+        "cash_after": 8867.51329998852,
+        "fee": 4.766267496059358,
+        "nominal": 4766.267496059358
+      },
+      "e42": {
+        "signal": 119,
+        "ts": 1776859200000,
+        "execution_ts": 1776859200000,
+        "type": "TEILVERKAUF_1",
+        "price": 78747.45999999999,
+        "units": 0.06120907747830634,
+        "cash_before": 4138.5368372036655,
+        "cash_after": 8953.776158183135,
+        "fee": 4.820059380359829,
+        "nominal": 4820.0593803598285
+      }
+    },
+    {
+      "ts": 1776859200000,
+      "type": "VERKAUF_REST",
+      "price": 79272.9,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 109,
+        "ts": 1776859200000,
+        "execution_ts": 1776859200000,
+        "type": "VERKAUF_REST",
+        "price": 79272.9,
+        "units": 0.038477703181815155,
+        "cash_before": 8867.51329998852,
+        "cash_after": 11914.702177433674,
+        "fee": 3.0502391165617144,
+        "nominal": 3050.2391165617146
+      },
+      "e42": {
+        "signal": 120,
+        "ts": 1776859200000,
+        "execution_ts": 1776859200000,
+        "type": "VERKAUF_REST",
+        "price": 79272.9,
+        "units": 0.038412822577500144,
+        "cash_before": 8953.776158183135,
+        "cash_after": 11995.826905244143,
+        "fee": 3.045095842903911,
+        "nominal": 3045.095842903911
+      }
+    },
+    {
+      "ts": 1777291200000,
+      "type": "KAUF_1",
+      "price": 76598.565,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 110,
+        "ts": 1777291200000,
+        "execution_ts": 1777291200000,
+        "type": "KAUF_1",
+        "price": 76598.565,
+        "units": 0.03884794537357273,
+        "cash_before": 11914.702177433674,
+        "cash_after": 8936.026633075255,
+        "fee": 2.9786755443584183,
+        "nominal": 2978.6755443584184
+      },
+      "e42": {
+        "signal": 121,
+        "ts": 1777291200000,
+        "execution_ts": 1777291200000,
+        "type": "KAUF_1",
+        "price": 76598.565,
+        "units": 0.039112452949800355,
+        "cash_before": 11995.826905244143,
+        "cash_after": 8996.870178933108,
+        "fee": 2.9989567263110355,
+        "nominal": 2998.9567263110353
+      }
+    },
+    {
+      "ts": 1777348800000,
+      "type": "NACHKAUF",
+      "price": 76879.28,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 111,
+        "ts": 1777348800000,
+        "execution_ts": 1777348800000,
+        "type": "NACHKAUF",
+        "price": 76879.28,
+        "units": 0.023223658198781725,
+        "cash_before": 8936.026633075255,
+        "cash_after": 7148.821306460204,
+        "fee": 1.7872053266150512,
+        "nominal": 1787.205326615051
+      },
+      "e42": {
+        "signal": 122,
+        "ts": 1777348800000,
+        "execution_ts": 1777348800000,
+        "type": "NACHKAUF",
+        "price": 76879.28,
+        "units": 0.02338178325487485,
+        "cash_before": 8996.870178933108,
+        "cash_after": 7197.496143146487,
+        "fee": 1.7993740357866215,
+        "nominal": 1799.3740357866213
+      }
+    },
+    {
+      "ts": 1777348800000,
+      "type": "NACHKAUF",
+      "price": 76879.28,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 112,
+        "ts": 1777348800000,
+        "execution_ts": 1777348800000,
+        "type": "NACHKAUF",
+        "price": 76879.28,
+        "units": 0.030964877598375632,
+        "cash_before": 7148.821306460204,
+        "cash_after": 4765.880870973469,
+        "fee": 2.3829404354867347,
+        "nominal": 2382.9404354867347
+      },
+      "e42": {
+        "signal": 123,
+        "ts": 1777348800000,
+        "execution_ts": 1777348800000,
+        "type": "NACHKAUF",
+        "price": 76879.28,
+        "units": 0.0311757110064998,
+        "cash_before": 7197.496143146487,
+        "cash_after": 4798.330762097658,
+        "fee": 2.399165381048829,
+        "nominal": 2399.1653810488287
+      }
+    },
+    {
+      "ts": 1777363200000,
+      "type": "NACHKAUF",
+      "price": 76229.0,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 113,
+        "ts": 1777363200000,
+        "execution_ts": 1777363200000,
+        "type": "NACHKAUF",
+        "price": 76229.0,
+        "units": 0.02342177020934862,
+        "cash_before": 4765.880870973469,
+        "cash_after": 2978.6755443584184,
+        "fee": 1.7872053266150512,
+        "nominal": 1787.205326615051
+      },
+      "e42": {
+        "signal": 124,
+        "ts": 1777363200000,
+        "execution_ts": 1777363200000,
+        "type": "NACHKAUF",
+        "price": 76229.0,
+        "units": 0.023581244168896807,
+        "cash_before": 4798.330762097658,
+        "cash_after": 2998.956726311037,
+        "fee": 1.7993740357866215,
+        "nominal": 1799.3740357866213
+      }
+    },
+    {
+      "ts": 1777363200000,
+      "type": "NACHKAUF",
+      "price": 76229.0,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 114,
+        "ts": 1777363200000,
+        "execution_ts": 1777363200000,
+        "type": "NACHKAUF",
+        "price": 76229.0,
+        "units": 0.03122902694579816,
+        "cash_before": 2978.6755443584184,
+        "cash_after": 595.7351088716837,
+        "fee": 2.3829404354867347,
+        "nominal": 2382.9404354867347
+      },
+      "e42": {
+        "signal": 125,
+        "ts": 1777363200000,
+        "execution_ts": 1777363200000,
+        "type": "NACHKAUF",
+        "price": 76229.0,
+        "units": 0.031441658891862415,
+        "cash_before": 2998.956726311037,
+        "cash_after": 599.7913452622083,
+        "fee": 2.399165381048829,
+        "nominal": 2399.1653810488287
+      }
+    },
+    {
+      "ts": 1777377600000,
+      "type": "NACHKAUF",
+      "price": 76066.38,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 115,
+        "ts": 1777377600000,
+        "execution_ts": 1777377600000,
+        "type": "NACHKAUF",
+        "price": 76066.38,
+        "units": 0.007823947633143735,
+        "cash_before": 595.7351088716837,
+        "cash_after": 0.0,
+        "fee": 0.5957351088716837,
+        "nominal": 595.7351088716837
+      },
+      "e42": {
+        "signal": 126,
+        "ts": 1777377600000,
+        "execution_ts": 1777377600000,
+        "type": "NACHKAUF",
+        "price": 76066.38,
+        "units": 0.007877219264502215,
+        "cash_before": 599.7913452622083,
+        "cash_after": 0.0,
+        "fee": 0.5997913452622083,
+        "nominal": 599.7913452622083
+      }
+    },
+    {
+      "ts": 1777478400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 75563.86,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 116,
+        "ts": 1777478400000,
+        "execution_ts": 1777478400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 75563.86,
+        "units": 0.02332668389385309,
+        "cash_before": 0.0,
+        "cash_after": 1760.8916217433502,
+        "fee": 1.7626542760193697,
+        "nominal": 1762.6542760193697
+      },
+      "e42": {
+        "signal": 127,
+        "ts": 1777478400000,
+        "execution_ts": 1777478400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 75563.86,
+        "units": 0.02348551043046547,
+        "cash_before": 0.0,
+        "cash_after": 1772.8811663740362,
+        "fee": 1.7746558221962325,
+        "nominal": 1774.6558221962325
+      }
+    },
+    {
+      "ts": 1777492800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 75780.0,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 117,
+        "ts": 1777492800000,
+        "execution_ts": 1777492800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 75780.0,
+        "units": 0.02332668389385309,
+        "cash_before": 1760.8916217433502,
+        "cash_after": 3526.820031114061,
+        "fee": 1.767696105476187,
+        "nominal": 1767.696105476187
+      },
+      "e42": {
+        "signal": 128,
+        "ts": 1777492800000,
+        "execution_ts": 1777492800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 75780.0,
+        "units": 0.02348551043046547,
+        "cash_before": 1772.8811663740362,
+        "cash_after": 3550.833414814289,
+        "fee": 1.7797319804206735,
+        "nominal": 1779.7319804206734
+      }
+    },
+    {
+      "ts": 1777536000000,
+      "type": "KAUF_2",
+      "price": 75920.24082,
+      "tranche_pct": 50,
+      "baseline": {
+        "signal": 118,
+        "ts": 1777536000000,
+        "execution_ts": 1777536000000,
+        "type": "KAUF_2",
+        "price": 75920.24082,
+        "units": 0.04640782448828574,
+        "cash_before": 3526.820031114061,
+        "cash_after": 0.0,
+        "fee": 3.526820031114061,
+        "nominal": 3526.820031114061
+      },
+      "e42": {
+        "signal": 129,
+        "ts": 1777536000000,
+        "execution_ts": 1777536000000,
+        "type": "KAUF_2",
+        "price": 75920.24082,
+        "units": 0.04672380570827955,
+        "cash_before": 3550.833414814289,
+        "cash_after": 0.0,
+        "fee": 3.550833414814289,
+        "nominal": 3550.833414814289
+      }
+    },
+    {
+      "ts": 1777852800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 79536.32800000001,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 123,
+        "ts": 1777852800000,
+        "execution_ts": 1777852800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 79536.32800000001,
+        "units": 0.02332668389385309,
+        "cash_before": 0.0,
+        "cash_after": 1853.463462552483,
+        "fee": 1.8553187813338168,
+        "nominal": 1855.3187813338168
+      },
+      "e42": {
+        "signal": 134,
+        "ts": 1777852800000,
+        "execution_ts": 1777852800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 79536.32800000001,
+        "units": 0.02348551043046547,
+        "cash_before": 0.0,
+        "cash_after": 1866.083309584078,
+        "fee": 1.867951260844923,
+        "nominal": 1867.951260844923
+      }
+    },
+    {
+      "ts": 1777867200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 80111.17900000002,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 124,
+        "ts": 1777867200000,
+        "execution_ts": 1777867200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 80111.17900000002,
+        "units": 0.02332668389385309,
+        "cash_before": 1853.463462552483,
+        "cash_after": 3720.322883300468,
+        "fee": 1.8687281488968823,
+        "nominal": 1868.7281488968822
+      },
+      "e42": {
+        "signal": 135,
+        "ts": 1777867200000,
+        "execution_ts": 1777867200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 80111.17900000002,
+        "units": 0.02348551043046547,
+        "cash_before": 1866.083309584078,
+        "cash_after": 3745.6537876554635,
+        "fee": 1.8814519300013868,
+        "nominal": 1881.4519300013867
+      }
+    },
+    {
+      "ts": 1777910400000,
+      "type": "TEILVERKAUF_1",
+      "price": 80686.03000000001,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 125,
+        "ts": 1777910400000,
+        "execution_ts": 1777910400000,
+        "type": "TEILVERKAUF_1",
+        "price": 80686.03000000001,
+        "units": 0.06220449038360823,
+        "cash_before": 3720.322883300468,
+        "cash_after": 8734.337227149768,
+        "fee": 5.019033377226526,
+        "nominal": 5019.033377226526
+      },
+      "e42": {
+        "signal": 136,
+        "ts": 1777910400000,
+        "execution_ts": 1777910400000,
+        "type": "TEILVERKAUF_1",
+        "price": 80686.03000000001,
+        "units": 0.06262802781457459,
+        "cash_before": 3745.6537876554635,
+        "cash_after": 8793.807511811976,
+        "fee": 5.0532069310876,
+        "nominal": 5053.2069310876
+      }
+    },
+    {
+      "ts": 1778054400000,
+      "type": "VERKAUF_REST",
+      "price": 82522.89,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 126,
+        "ts": 1778054400000,
+        "execution_ts": 1778054400000,
+        "type": "VERKAUF_REST",
+        "price": 82522.89,
+        "units": 0.046407824488285745,
+        "cash_before": 8734.337227149768,
+        "cash_after": 12560.215314740493,
+        "fee": 3.8297077953861107,
+        "nominal": 3829.707795386111
+      },
+      "e42": {
+        "signal": 138,
+        "ts": 1778054400000,
+        "execution_ts": 1778054400000,
+        "type": "VERKAUF_REST",
+        "price": 82522.89,
+        "units": 0.08423845484162663,
+        "cash_before": 5794.850785500941,
+        "cash_after": 12739.499927423798,
+        "fee": 6.951600742665523,
+        "nominal": 6951.600742665522
+      }
+    },
+    {
+      "ts": 1778155200000,
+      "type": "KAUF_2",
+      "price": 79890.63,
+      "tranche_pct": 75,
+      "baseline": {
+        "signal": 127,
+        "ts": 1778155200000,
+        "execution_ts": 1778155200000,
+        "type": "KAUF_2",
+        "price": 79890.63,
+        "units": 0.11779530746683703,
+        "cash_before": 12560.215314740493,
+        "cash_after": 3140.0538286851224,
+        "fee": 9.42016148605537,
+        "nominal": 9420.161486055371
+      },
+      "e42": {
+        "signal": 139,
+        "ts": 1778155200000,
+        "execution_ts": 1778155200000,
+        "type": "KAUF_2",
+        "price": 79890.63,
+        "units": 0.11947671861671738,
+        "cash_before": 12739.499927423798,
+        "cash_after": 3184.87498185595,
+        "fee": 9.554624945567848,
+        "nominal": 9554.624945567848
+      }
+    },
+    {
+      "ts": 1778227200000,
+      "type": "NACHKAUF",
+      "price": 80231.22,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 128,
+        "ts": 1778227200000,
+        "execution_ts": 1778227200000,
+        "type": "NACHKAUF",
+        "price": 80231.22,
+        "units": 0.03127873438650378,
+        "cash_before": 3140.0538286851224,
+        "cash_after": 628.010765737024,
+        "fee": 2.5120430629480985,
+        "nominal": 2512.0430629480984
+      },
+      "e42": {
+        "signal": 140,
+        "ts": 1778227200000,
+        "execution_ts": 1778227200000,
+        "type": "NACHKAUF",
+        "price": 80231.22,
+        "units": 0.03172520728837571,
+        "cash_before": 3184.87498185595,
+        "cash_after": 636.9749963711902,
+        "fee": 2.5478999854847597,
+        "nominal": 2547.89998548476
+      }
+    },
+    {
+      "ts": 1778241600000,
+      "type": "NACHKAUF",
+      "price": 80142.14,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 129,
+        "ts": 1778241600000,
+        "execution_ts": 1778241600000,
+        "type": "NACHKAUF",
+        "price": 80142.14,
+        "units": 0.007828375371200307,
+        "cash_before": 628.010765737024,
+        "cash_after": 0.0,
+        "fee": 0.6280107657370241,
+        "nominal": 628.010765737024
+      },
+      "e42": {
+        "signal": 141,
+        "ts": 1778241600000,
+        "execution_ts": 1778241600000,
+        "type": "NACHKAUF",
+        "price": 80142.14,
+        "units": 0.007940117663127275,
+        "cash_before": 636.9749963711902,
+        "cash_after": 0.0,
+        "fee": 0.6369749963711901,
+        "nominal": 636.9749963711902
+      }
+    },
+    {
+      "ts": 1778443200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 82210.07,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 130,
+        "ts": 1778443200000,
+        "execution_ts": 1778443200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 82210.07,
+        "units": 0.023535362583681167,
+        "cash_before": 0.0,
+        "cash_after": 1932.90896167433,
+        "fee": 1.9348438054798098,
+        "nominal": 1934.8438054798098
+      },
+      "e42": {
+        "signal": 142,
+        "ts": 1778443200000,
+        "execution_ts": 1778443200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 82210.07,
+        "units": 0.023871306535233058,
+        "cash_before": 0.0,
+        "cash_after": 1960.4993194717142,
+        "fee": 1.9624617812529672,
+        "nominal": 1962.4617812529673
+      }
+    },
+    {
+      "ts": 1778515200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 81961.99,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 131,
+        "ts": 1778515200000,
+        "execution_ts": 1778515200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 81961.99,
+        "units": 0.023535362583681167,
+        "cash_before": 1932.90896167433,
+        "cash_after": 3859.98510925165,
+        "fee": 1.92900515273005,
+        "nominal": 1929.00515273005
+      },
+      "e42": {
+        "signal": 143,
+        "ts": 1778515200000,
+        "execution_ts": 1778515200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 81961.99,
+        "units": 0.023871306535233058,
+        "cash_before": 1960.4993194717142,
+        "cash_after": 3915.0825672118935,
+        "fee": 1.9565397875277069,
+        "nominal": 1956.5397875277067
+      }
+    },
+    {
+      "ts": 1778673600000,
+      "type": "NACHKAUF",
+      "price": 79103.98688,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 132,
+        "ts": 1778673600000,
+        "execution_ts": 1778673600000,
+        "type": "NACHKAUF",
+        "price": 79103.98688,
+        "units": 0.039655571085375346,
+        "cash_before": 3859.98510925165,
+        "cash_after": 719.9312805665263,
+        "fee": 3.140053828685124,
+        "nominal": 3140.053828685124
+      },
+      "e42": {
+        "signal": 144,
+        "ts": 1778673600000,
+        "execution_ts": 1778673600000,
+        "type": "NACHKAUF",
+        "price": 79103.98688,
+        "units": 0.040221615020500645,
+        "cash_before": 3915.0825672118935,
+        "cash_after": 730.2075853559436,
+        "fee": 3.18487498185595,
+        "nominal": 3184.87498185595
+      }
+    },
+    {
+      "ts": 1778846400000,
+      "type": "NACHKAUF",
+      "price": 79150.27,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 133,
+        "ts": 1778846400000,
+        "execution_ts": 1778846400000,
+        "type": "NACHKAUF",
+        "price": 79150.27,
+        "units": 0.009086656928472383,
+        "cash_before": 719.9312805665263,
+        "cash_after": 0.0,
+        "fee": 0.7199312805665263,
+        "nominal": 719.9312805665263
+      },
+      "e42": {
+        "signal": 145,
+        "ts": 1778846400000,
+        "execution_ts": 1778846400000,
+        "type": "NACHKAUF",
+        "price": 79150.27,
+        "units": 0.00921635994129379,
+        "cash_before": 730.2075853559436,
+        "cash_after": 0.0,
+        "fee": 0.7302075853559437,
+        "nominal": 730.2075853559436
+      }
+    },
+    {
+      "ts": 1778976000000,
+      "type": "STOPLOSS",
+      "price": 78028.88,
+      "tranche_pct": 100,
+      "baseline": {
+        "signal": 134,
+        "ts": 1778976000000,
+        "execution_ts": 1778976000000,
+        "type": "STOPLOSS",
+        "price": 78028.88,
+        "units": 0.15857392007102653,
+        "cash_before": 0.0,
+        "cash_after": 12360.972034971368,
+        "fee": 12.37334538035172,
+        "nominal": 12373.34538035172
+      },
+      "e42": {
+        "signal": 146,
+        "ts": 1778976000000,
+        "execution_ts": 1778976000000,
+        "type": "STOPLOSS",
+        "price": 78028.88,
+        "units": 0.1608374054595487,
+        "cash_before": 0.0,
+        "cash_after": 12537.412647504358,
+        "fee": 12.549962610114472,
+        "nominal": 12549.962610114471
+      }
+    },
+    {
+      "ts": 1781035200000,
+      "type": "KAUF_1",
+      "price": 61682.795,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 135,
+        "ts": 1781035200000,
+        "execution_ts": 1781035200000,
+        "type": "KAUF_1",
+        "price": 61682.795,
+        "units": 0.050048846939152146,
+        "cash_before": 12360.972034971368,
+        "cash_after": 9270.729026228526,
+        "fee": 3.090243008742842,
+        "nominal": 3090.243008742842
+      },
+      "e42": {
+        "signal": 147,
+        "ts": 1781035200000,
+        "execution_ts": 1781035200000,
+        "type": "KAUF_1",
+        "price": 61682.795,
+        "units": 0.05076324457596666,
+        "cash_before": 12537.412647504358,
+        "cash_after": 9403.059485628268,
+        "fee": 3.1343531618760894,
+        "nominal": 3134.3531618760894
+      }
+    },
+    {
+      "ts": 1781049600000,
+      "type": "NACHKAUF",
+      "price": 61549.64,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 136,
+        "ts": 1781049600000,
+        "execution_ts": 1781049600000,
+        "type": "NACHKAUF",
+        "price": 61549.64,
+        "units": 0.030094272841245853,
+        "cash_before": 9270.729026228526,
+        "cash_after": 7416.58322098282,
+        "fee": 1.8541458052457052,
+        "nominal": 1854.145805245705
+      },
+      "e42": {
+        "signal": 148,
+        "ts": 1781049600000,
+        "execution_ts": 1781049600000,
+        "type": "NACHKAUF",
+        "price": 61549.64,
+        "units": 0.03052383872965834,
+        "cash_before": 9403.059485628268,
+        "cash_after": 7522.447588502614,
+        "fee": 1.8806118971256538,
+        "nominal": 1880.6118971256537
+      }
+    },
+    {
+      "ts": 1781049600000,
+      "type": "NACHKAUF",
+      "price": 61549.64,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 137,
+        "ts": 1781049600000,
+        "execution_ts": 1781049600000,
+        "type": "NACHKAUF",
+        "price": 61549.64,
+        "units": 0.04012569712166114,
+        "cash_before": 7416.58322098282,
+        "cash_after": 4944.388813988547,
+        "fee": 2.472194406994274,
+        "nominal": 2472.194406994274
+      },
+      "e42": {
+        "signal": 149,
+        "ts": 1781049600000,
+        "execution_ts": 1781049600000,
+        "type": "NACHKAUF",
+        "price": 61549.64,
+        "units": 0.040698451639544456,
+        "cash_before": 7522.447588502614,
+        "cash_after": 5014.965059001743,
+        "fee": 2.507482529500872,
+        "nominal": 2507.482529500872
+      }
+    },
+    {
+      "ts": 1781107200000,
+      "type": "NACHKAUF",
+      "price": 61942.44,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 138,
+        "ts": 1781107200000,
+        "execution_ts": 1781107200000,
+        "type": "NACHKAUF",
+        "price": 61942.44,
+        "units": 0.03987124518484063,
+        "cash_before": 4944.388813988547,
+        "cash_after": 2472.194406994273,
+        "fee": 2.472194406994274,
+        "nominal": 2472.194406994274
+      },
+      "e42": {
+        "signal": 150,
+        "ts": 1781107200000,
+        "execution_ts": 1781107200000,
+        "type": "NACHKAUF",
+        "price": 61942.44,
+        "units": 0.040440367653766476,
+        "cash_before": 5014.965059001743,
+        "cash_after": 2507.482529500871,
+        "fee": 2.507482529500872,
+        "nominal": 2507.482529500872
+      }
+    },
+    {
+      "ts": 1781193600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63605.68,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 139,
+        "ts": 1781193600000,
+        "execution_ts": 1781193600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63605.68,
+        "units": 0.024021009313034965,
+        "cash_before": 2472.194406994273,
+        "cash_after": 3998.5391660045525,
+        "fee": 1.5278726316419218,
+        "nominal": 1527.8726316419218
+      },
+      "e42": {
+        "signal": 151,
+        "ts": 1781193600000,
+        "execution_ts": 1781193600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63605.68,
+        "units": 0.024363885389840387,
+        "cash_before": 2507.482529500871,
+        "cash_after": 4055.614345666071,
+        "fee": 1.549681497662863,
+        "nominal": 1549.681497662863
+      }
+    },
+    {
+      "ts": 1781251200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63766.01,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 140,
+        "ts": 1781251200000,
+        "execution_ts": 1781251200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63766.01,
+        "units": 0.024021009313034965,
+        "cash_before": 3998.5391660045525,
+        "cash_after": 5528.731362149569,
+        "fee": 1.531723920065081,
+        "nominal": 1531.7239200650808
+      },
+      "e42": {
+        "signal": 152,
+        "ts": 1781251200000,
+        "execution_ts": 1781251200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63766.01,
+        "units": 0.024363885389840387,
+        "cash_before": 4055.614345666071,
+        "cash_after": 5607.64851731408,
+        "fee": 1.5535877594074161,
+        "nominal": 1553.5877594074161
+      }
+    },
+    {
+      "ts": 1781337600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63666.552,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 141,
+        "ts": 1781337600000,
+        "execution_ts": 1781337600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63666.552,
+        "units": 0.024021009313034965,
+        "cash_before": 5528.731362149569,
+        "cash_after": 7056.536865831873,
+        "fee": 1.5293348385208252,
+        "nominal": 1529.334838520825
+      },
+      "e42": {
+        "signal": 153,
+        "ts": 1781337600000,
+        "execution_ts": 1781337600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63666.552,
+        "units": 0.024363885389840387,
+        "cash_before": 5607.64851731408,
+        "cash_after": 7157.2619288322985,
+        "fee": 1.5511645760943134,
+        "nominal": 1551.1645760943134
+      }
+    },
+    {
+      "ts": 1781352000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64030.496,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 142,
+        "ts": 1781352000000,
+        "execution_ts": 1781352000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64030.496,
+        "units": 0.024021009313034965,
+        "cash_before": 7056.536865831873,
+        "cash_after": 8593.075929425388,
+        "fee": 1.5380771407342482,
+        "nominal": 1538.0771407342481
+      },
+      "e42": {
+        "signal": 154,
+        "ts": 1781352000000,
+        "execution_ts": 1781352000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64030.496,
+        "units": 0.024363885389840387,
+        "cash_before": 7157.2619288322985,
+        "cash_after": 8715.733563164933,
+        "fee": 1.5600316659986333,
+        "nominal": 1560.0316659986333
+      }
+    },
+    {
+      "ts": 1781380800000,
+      "type": "TEILVERKAUF_1",
+      "price": 64394.44,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 143,
+        "ts": 1781380800000,
+        "execution_ts": 1781380800000,
+        "type": "TEILVERKAUF_1",
+        "price": 64394.44,
+        "units": 0.0640560248347599,
+        "cash_before": 8593.075929425388,
+        "cash_after": 12713.802925437984,
+        "fee": 4.124851847860457,
+        "nominal": 4124.8518478604565
+      },
+      "e42": {
+        "signal": 156,
+        "ts": 1781380800000,
+        "execution_ts": 1781380800000,
+        "type": "TEILVERKAUF_1",
+        "price": 64394.44,
+        "units": 0.06497036103957436,
+        "cash_before": 5581.380401288843,
+        "cash_after": 9760.926687014311,
+        "fee": 4.183730015741209,
+        "nominal": 4183.730015741209
+      }
+    },
+    {
+      "ts": 1781395200000,
+      "type": "VERKAUF_REST",
+      "price": 64545.3,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 144,
+        "ts": 1781395200000,
+        "execution_ts": 1781395200000,
+        "type": "VERKAUF_REST",
+        "price": 64545.3,
+        "units": 0,
+        "cash_before": 12713.802925437984,
+        "cash_after": 12713.802925437984,
+        "fee": 0.0,
+        "nominal": 0.0
+      },
+      "e42": {
+        "signal": 157,
+        "ts": 1781395200000,
+        "execution_ts": 1781395200000,
+        "type": "VERKAUF_REST",
+        "price": 64545.3,
+        "units": 0.04869960924388394,
+        "cash_before": 9760.926687014311,
+        "cash_after": 12901.114244655044,
+        "fee": 3.1433308885292623,
+        "nominal": 3143.330888529262
+      }
+    },
+    {
+      "ts": 1781611200000,
+      "type": "KAUF_1",
+      "price": 65485.49,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 145,
+        "ts": 1781611200000,
+        "execution_ts": 1781611200000,
+        "type": "KAUF_1",
+        "price": 65485.49,
+        "units": 0.04848818082644166,
+        "cash_before": 12713.802925437984,
+        "cash_after": 9535.352194078487,
+        "fee": 3.1784507313594963,
+        "nominal": 3178.4507313594963
+      },
+      "e42": {
+        "signal": 158,
+        "ts": 1781611200000,
+        "execution_ts": 1781611200000,
+        "type": "KAUF_1",
+        "price": 65485.49,
+        "units": 0.0492025528495335,
+        "cash_before": 12901.114244655044,
+        "cash_after": 9675.835683491283,
+        "fee": 3.225278561163761,
+        "nominal": 3225.278561163761
+      }
+    },
+    {
+      "ts": 1781654400000,
+      "type": "NACHKAUF",
+      "price": 65851.99,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 146,
+        "ts": 1781654400000,
+        "execution_ts": 1781654400000,
+        "type": "NACHKAUF",
+        "price": 65851.99,
+        "units": 0.03857465544325249,
+        "cash_before": 9535.352194078487,
+        "cash_after": 6992.59160899089,
+        "fee": 2.5427605850875965,
+        "nominal": 2542.7605850875966
+      },
+      "e42": {
+        "signal": 159,
+        "ts": 1781654400000,
+        "execution_ts": 1781654400000,
+        "type": "NACHKAUF",
+        "price": 65851.99,
+        "units": 0.03914297238522446,
+        "cash_before": 9675.835683491283,
+        "cash_after": 7095.612834560274,
+        "fee": 2.5802228489310086,
+        "nominal": 2580.2228489310087
+      }
+    },
+    {
+      "ts": 1781683200000,
+      "type": "NACHKAUF",
+      "price": 64810.01,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 147,
+        "ts": 1781683200000,
+        "execution_ts": 1781683200000,
+        "type": "NACHKAUF",
+        "price": 64810.01,
+        "units": 0.029396128289085,
+        "cash_before": 6992.59160899089,
+        "cash_after": 5085.521170175192,
+        "fee": 1.9070704388156976,
+        "nominal": 1907.0704388156976
+      },
+      "e42": {
+        "signal": 160,
+        "ts": 1781683200000,
+        "execution_ts": 1781683200000,
+        "type": "NACHKAUF",
+        "price": 64810.01,
+        "units": 0.029829218812982103,
+        "cash_before": 7095.612834560274,
+        "cash_after": 5160.445697862017,
+        "fee": 1.9351671366982566,
+        "nominal": 1935.1671366982566
+      }
+    },
+    {
+      "ts": 1781712000000,
+      "type": "NACHKAUF",
+      "price": 64301.85,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 148,
+        "ts": 1781712000000,
+        "execution_ts": 1781712000000,
+        "type": "NACHKAUF",
+        "price": 64301.85,
+        "units": 0.029628437881287738,
+        "cash_before": 5085.521170175192,
+        "cash_after": 3178.450731359495,
+        "fee": 1.9070704388156976,
+        "nominal": 1907.0704388156976
+      },
+      "e42": {
+        "signal": 161,
+        "ts": 1781712000000,
+        "execution_ts": 1781712000000,
+        "type": "NACHKAUF",
+        "price": 64301.85,
+        "units": 0.03006495100158951,
+        "cash_before": 5160.445697862017,
+        "cash_after": 3225.278561163761,
+        "fee": 1.9351671366982566,
+        "nominal": 1935.1671366982566
+      }
+    },
+    {
+      "ts": 1781712000000,
+      "type": "NACHKAUF",
+      "price": 64301.85,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 149,
+        "ts": 1781712000000,
+        "execution_ts": 1781712000000,
+        "type": "NACHKAUF",
+        "price": 64301.85,
+        "units": 0.03950458384171698,
+        "cash_before": 3178.450731359495,
+        "cash_after": 635.6901462718984,
+        "fee": 2.5427605850875965,
+        "nominal": 2542.7605850875966
+      },
+      "e42": {
+        "signal": 162,
+        "ts": 1781712000000,
+        "execution_ts": 1781712000000,
+        "type": "NACHKAUF",
+        "price": 64301.85,
+        "units": 0.04008660133545268,
+        "cash_before": 3225.278561163761,
+        "cash_after": 645.0557122327523,
+        "fee": 2.5802228489310086,
+        "nominal": 2580.2228489310087
+      }
+    },
+    {
+      "ts": 1781712000000,
+      "type": "NACHKAUF",
+      "price": 64452.08048,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 150,
+        "ts": 1781712000000,
+        "execution_ts": 1781712000000,
+        "type": "NACHKAUF",
+        "price": 64452.08048,
+        "units": 0.00985312578579506,
+        "cash_before": 635.6901462718984,
+        "cash_after": 0.0,
+        "fee": 0.6356901462718983,
+        "nominal": 635.6901462718984
+      },
+      "e42": {
+        "signal": 163,
+        "ts": 1781712000000,
+        "execution_ts": 1781712000000,
+        "type": "NACHKAUF",
+        "price": 64452.08048,
+        "units": 0.009998291005058951,
+        "cash_before": 645.0557122327523,
+        "cash_after": 0.0,
+        "fee": 0.6450557122327523,
+        "nominal": 645.0557122327523
+      }
+    },
+    {
+      "ts": 1781726400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64509.4,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 151,
+        "ts": 1781726400000,
+        "execution_ts": 1781726400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64509.4,
+        "units": 0.029316766810136837,
+        "cash_before": 0.0,
+        "cash_after": 1889.3158298249793,
+        "fee": 1.8912070368618412,
+        "nominal": 1891.2070368618413
+      },
+      "e42": {
+        "signal": 164,
+        "ts": 1781726400000,
+        "execution_ts": 1781726400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64509.4,
+        "units": 0.02974868810847618,
+        "cash_before": 0.0,
+        "cash_after": 1917.1509506442685,
+        "fee": 1.9190700206649336,
+        "nominal": 1919.0700206649335
+      }
+    },
+    {
+      "ts": 1781740800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64282.82,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 152,
+        "ts": 1781740800000,
+        "execution_ts": 1781740800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64282.82,
+        "units": 0.029316766810136837,
+        "cash_before": 1889.3158298249793,
+        "cash_after": 3771.9957092191416,
+        "fee": 1.8845644438380005,
+        "nominal": 1884.5644438380004
+      },
+      "e42": {
+        "signal": 165,
+        "ts": 1781740800000,
+        "execution_ts": 1781740800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64282.82,
+        "units": 0.02974868810847618,
+        "cash_before": 1917.1509506442685,
+        "cash_after": 3827.56818399467,
+        "fee": 1.912329562913315,
+        "nominal": 1912.329562913315
+      }
+    },
+    {
+      "ts": 1781798400000,
+      "type": "STOPLOSS",
+      "price": 62950.79,
+      "tranche_pct": 100,
+      "baseline": {
+        "signal": 153,
+        "ts": 1781798400000,
+        "execution_ts": 1781798400000,
+        "type": "STOPLOSS",
+        "price": 62950.79,
+        "units": 0.13681157844730524,
+        "cash_before": 3771.9957092191416,
+        "cash_after": 12375.780256679574,
+        "fee": 8.612396944404837,
+        "nominal": 8612.396944404838
+      },
+      "e42": {
+        "signal": 166,
+        "ts": 1781798400000,
+        "execution_ts": 1781798400000,
+        "type": "STOPLOSS",
+        "price": 62950.79,
+        "units": 0.13882721117288885,
+        "cash_before": 3827.56818399467,
+        "cash_after": 12558.11151820802,
+        "fee": 8.739282616830181,
+        "nominal": 8739.28261683018
+      }
+    },
+    {
+      "ts": 1783584000000,
+      "type": "KAUF_1",
+      "price": 63003.42,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 154,
+        "ts": 1783584000000,
+        "execution_ts": 1783584000000,
+        "type": "KAUF_1",
+        "price": 63003.42,
+        "units": 0.0490584657008417,
+        "cash_before": 12375.780256679574,
+        "cash_after": 9281.835192509681,
+        "fee": 3.0939450641698936,
+        "nominal": 3093.9450641698936
+      },
+      "e42": {
+        "signal": 167,
+        "ts": 1783584000000,
+        "execution_ts": 1783584000000,
+        "type": "KAUF_1",
+        "price": 63003.42,
+        "units": 0.04978123967988488,
+        "cash_before": 12558.11151820802,
+        "cash_after": 9418.583638656015,
+        "fee": 3.1395278795520047,
+        "nominal": 3139.527879552005
+      }
+    },
+    {
+      "ts": 1783598400000,
+      "type": "NACHKAUF",
+      "price": 62868.05,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 155,
+        "ts": 1783598400000,
+        "execution_ts": 1783598400000,
+        "type": "NACHKAUF",
+        "price": 62868.05,
+        "units": 0.02949846021092485,
+        "cash_before": 9281.835192509681,
+        "cash_after": 7425.468154007745,
+        "fee": 1.8563670385019362,
+        "nominal": 1856.3670385019361
+      },
+      "e42": {
+        "signal": 168,
+        "ts": 1783598400000,
+        "execution_ts": 1783598400000,
+        "type": "NACHKAUF",
+        "price": 62868.05,
+        "units": 0.02993305838185647,
+        "cash_before": 9418.583638656015,
+        "cash_after": 7534.866910924812,
+        "fee": 1.8837167277312028,
+        "nominal": 1883.7167277312028
+      }
+    },
+    {
+      "ts": 1783598400000,
+      "type": "NACHKAUF",
+      "price": 62868.05,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 156,
+        "ts": 1783598400000,
+        "execution_ts": 1783598400000,
+        "type": "NACHKAUF",
+        "price": 62868.05,
+        "units": 0.03933128028123314,
+        "cash_before": 7425.468154007745,
+        "cash_after": 4950.312102671831,
+        "fee": 2.475156051335915,
+        "nominal": 2475.156051335915
+      },
+      "e42": {
+        "signal": 169,
+        "ts": 1783598400000,
+        "execution_ts": 1783598400000,
+        "type": "NACHKAUF",
+        "price": 62868.05,
+        "units": 0.039910744509141956,
+        "cash_before": 7534.866910924812,
+        "cash_after": 5023.244607283208,
+        "fee": 2.5116223036416034,
+        "nominal": 2511.6223036416036
+      }
+    },
+    {
+      "ts": 1783612800000,
+      "type": "KAUF_2",
+      "price": 62603.02712,
+      "tranche_pct": 50,
+      "baseline": {
+        "signal": 158,
+        "ts": 1783612800000,
+        "execution_ts": 1783612800000,
+        "type": "KAUF_2",
+        "price": 62603.02712,
+        "units": 0.03949778483626432,
+        "cash_before": 2475.156051335916,
+        "cash_after": 0.0,
+        "fee": 2.475156051335916,
+        "nominal": 2475.156051335916
+      },
+      "e42": {
+        "signal": 171,
+        "ts": 1783612800000,
+        "execution_ts": 1783612800000,
+        "type": "KAUF_2",
+        "price": 62603.02712,
+        "units": 0.040079702160861944,
+        "cash_before": 2511.6223036416045,
+        "cash_after": 0.0,
+        "fee": 2.5116223036416048,
+        "nominal": 2511.6223036416045
+      }
+    },
+    {
+      "ts": 1783612800000,
+      "type": "NACHKAUF",
+      "price": 63248.1,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 157,
+        "ts": 1783612800000,
+        "execution_ts": 1783612800000,
+        "type": "NACHKAUF",
+        "price": 63248.1,
+        "units": 0.03909494348896772,
+        "cash_before": 4950.312102671831,
+        "cash_after": 2475.156051335916,
+        "fee": 2.475156051335915,
+        "nominal": 2475.156051335915
+      },
+      "e42": {
+        "signal": 170,
+        "ts": 1783612800000,
+        "execution_ts": 1783612800000,
+        "type": "NACHKAUF",
+        "price": 63248.1,
+        "units": 0.03967092578809422,
+        "cash_before": 5023.244607283208,
+        "cash_after": 2511.6223036416045,
+        "fee": 2.5116223036416034,
+        "nominal": 2511.6223036416036
+      }
+    },
+    {
+      "ts": 1783627200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63230.0,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 159,
+        "ts": 1783627200000,
+        "execution_ts": 1783627200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63230.0,
+        "units": 0.02947214017773476,
+        "cash_before": 0.0,
+        "cash_after": 1861.6599000147305,
+        "fee": 1.8635234234381688,
+        "nominal": 1863.5234234381687
+      },
+      "e42": {
+        "signal": 172,
+        "ts": 1783627200000,
+        "execution_ts": 1783627200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63230.0,
+        "units": 0.02990635057797592,
+        "cash_before": 0.0,
+        "cash_after": 1889.0875684983719,
+        "fee": 1.8909785470454175,
+        "nominal": 1890.9785470454174
+      }
+    },
+    {
+      "ts": 1783641600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63947.2,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 160,
+        "ts": 1783641600000,
+        "execution_ts": 1783641600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63947.2,
+        "units": 0.02947214017773476,
+        "cash_before": 1861.6599000147305,
+        "cash_after": 3744.436081545997,
+        "fee": 1.88466084237364,
+        "nominal": 1884.66084237364
+      },
+      "e42": {
+        "signal": 173,
+        "ts": 1783641600000,
+        "execution_ts": 1783641600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63947.2,
+        "units": 0.02990635057797592,
+        "cash_before": 1889.0875684983719,
+        "cash_after": 3799.602522796634,
+        "fee": 1.9124273816799418,
+        "nominal": 1912.4273816799416
+      }
+    },
+    {
+      "ts": 1783958400000,
+      "type": "NACHKAUF",
+      "price": 62032.976239999996,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 164,
+        "ts": 1783958400000,
+        "execution_ts": 1783958400000,
+        "type": "NACHKAUF",
+        "price": 62032.976239999996,
+        "units": 0.04982593624312816,
+        "cash_before": 3744.436081545997,
+        "cash_after": 650.4910173761032,
+        "fee": 3.0939450641698936,
+        "nominal": 3093.9450641698936
+      },
+      "e42": {
+        "signal": 177,
+        "ts": 1783958400000,
+        "execution_ts": 1783958400000,
+        "type": "NACHKAUF",
+        "price": 62032.976239999996,
+        "units": 0.050560017296897845,
+        "cash_before": 3799.602522796634,
+        "cash_after": 660.074643244629,
+        "fee": 3.1395278795520047,
+        "nominal": 3139.527879552005
+      }
+    },
+    {
+      "ts": 1784030400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64539.49800000001,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 165,
+        "ts": 1784030400000,
+        "execution_ts": 1784030400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64539.49800000001,
+        "units": 0.02947214017773476,
+        "cash_before": 650.4910173761032,
+        "cash_after": 2550.706032300679,
+        "fee": 1.9021171320566324,
+        "nominal": 1902.1171320566323
+      },
+      "e42": {
+        "signal": 178,
+        "ts": 1784030400000,
+        "execution_ts": 1784030400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64539.49800000001,
+        "units": 0.02990635057797592,
+        "cash_before": 660.074643244629,
+        "cash_after": 2588.2853557058907,
+        "fee": 1.9301408533145759,
+        "nominal": 1930.140853314576
+      }
+    },
+    {
+      "ts": 1784044800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64878.814000000006,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 166,
+        "ts": 1784044800000,
+        "execution_ts": 1784044800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64878.814000000006,
+        "units": 0.02947214017773476,
+        "cash_before": 2550.706032300679,
+        "cash_after": 4460.911415573086,
+        "fee": 1.9121175007731803,
+        "nominal": 1912.1175007731804
+      },
+      "e42": {
+        "signal": 179,
+        "ts": 1784044800000,
+        "execution_ts": 1784044800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64878.814000000006,
+        "units": 0.02990635057797592,
+        "cash_before": 2588.2853557058907,
+        "cash_after": 4526.633623716616,
+        "fee": 1.9402885565672923,
+        "nominal": 1940.2885565672923
+      }
+    },
+    {
+      "ts": 1784088000000,
+      "type": "TEILVERKAUF_1",
+      "price": 65218.130000000005,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 169,
+        "ts": 1784088000000,
+        "execution_ts": 1784088000000,
+        "type": "TEILVERKAUF_1",
+        "price": 65218.130000000005,
+        "units": 0.07859237380729268,
+        "cash_before": 4460.911415573086,
+        "cash_after": 9581.433419893721,
+        "fee": 5.125647651972609,
+        "nominal": 5125.647651972609
+      },
+      "e42": {
+        "signal": 182,
+        "ts": 1784088000000,
+        "execution_ts": 1784088000000,
+        "type": "TEILVERKAUF_1",
+        "price": 65218.130000000005,
+        "units": 0.07975026820793579,
+        "cash_before": 4526.633623716616,
+        "cash_after": 9722.595819877119,
+        "fee": 5.201163359520024,
+        "nominal": 5201.163359520024
+      }
+    },
+    {
+      "ts": 1784088000000,
+      "type": "VERKAUF_REST",
+      "price": 64549.34,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 170,
+        "ts": 1784088000000,
+        "execution_ts": 1784088000000,
+        "type": "VERKAUF_REST",
+        "price": 64549.34,
+        "units": 0.04982593624312816,
+        "cash_before": 9581.433419893721,
+        "cash_after": 12794.448487970347,
+        "fee": 3.216231299376002,
+        "nominal": 3216.231299376002
+      },
+      "e42": {
+        "signal": 183,
+        "ts": 1784088000000,
+        "execution_ts": 1784088000000,
+        "type": "VERKAUF_REST",
+        "price": 64549.34,
+        "units": 0.050560017296897825,
+        "cash_before": 9722.595819877119,
+        "cash_after": 12982.947951033553,
+        "fee": 3.2636157469033384,
+        "nominal": 3263.6157469033383
+      }
+    },
+    {
+      "ts": 1784246400000,
+      "type": "KAUF_1",
+      "price": 63712.485,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 171,
+        "ts": 1784246400000,
+        "execution_ts": 1784246400000,
+        "type": "KAUF_1",
+        "price": 63712.485,
+        "units": 0.05015364743457415,
+        "cash_before": 12794.448487970347,
+        "cash_after": 9595.83636597776,
+        "fee": 3.198612121992587,
+        "nominal": 3198.6121219925867
+      },
+      "e42": {
+        "signal": 188,
+        "ts": 1784246400000,
+        "execution_ts": 1784246400000,
+        "type": "KAUF_1",
+        "price": 63712.485,
+        "units": 0.050668894129167086,
+        "cash_before": 12925.890519203787,
+        "cash_after": 9694.417889402841,
+        "fee": 3.231472629800947,
+        "nominal": 3231.472629800947
+      }
+    },
+    {
+      "ts": 1784275200000,
+      "type": "NACHKAUF",
+      "price": 63298.01,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 172,
+        "ts": 1784275200000,
+        "execution_ts": 1784275200000,
+        "type": "NACHKAUF",
+        "price": 63298.01,
+        "units": 0.030289231935132818,
+        "cash_before": 9595.83636597776,
+        "cash_after": 7676.669092782208,
+        "fee": 1.919167273195552,
+        "nominal": 1919.167273195552
+      },
+      "e42": {
+        "signal": 189,
+        "ts": 1784275200000,
+        "execution_ts": 1784275200000,
+        "type": "NACHKAUF",
+        "price": 63298.01,
+        "units": 0.03060040425129775,
+        "cash_before": 9694.417889402841,
+        "cash_after": 7755.534311522273,
+        "fee": 1.9388835778805682,
+        "nominal": 1938.883577880568
+      }
+    },
+    {
+      "ts": 1784275200000,
+      "type": "NACHKAUF",
+      "price": 63298.01,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 173,
+        "ts": 1784275200000,
+        "execution_ts": 1784275200000,
+        "type": "NACHKAUF",
+        "price": 63298.01,
+        "units": 0.040385642580177086,
+        "cash_before": 7676.669092782208,
+        "cash_after": 5117.7793951881395,
+        "fee": 2.5588896975940694,
+        "nominal": 2558.8896975940693
+      },
+      "e42": {
+        "signal": 190,
+        "ts": 1784275200000,
+        "execution_ts": 1784275200000,
+        "type": "NACHKAUF",
+        "price": 63298.01,
+        "units": 0.040800539001730335,
+        "cash_before": 7755.534311522273,
+        "cash_after": 5170.356207681516,
+        "fee": 2.5851781038407577,
+        "nominal": 2585.1781038407576
+      }
+    },
+    {
+      "ts": 1784289600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 63452.0,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 174,
+        "ts": 1784289600000,
+        "execution_ts": 1784289600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63452.0,
+        "units": 0.018124278292482608,
+        "cash_before": 5117.7793951881395,
+        "cash_after": 6266.651079696531,
+        "fee": 1.1500217062146065,
+        "nominal": 1150.0217062146064
+      },
+      "e42": {
+        "signal": 191,
+        "ts": 1784289600000,
+        "execution_ts": 1784289600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 63452.0,
+        "units": 0.018310475607329277,
+        "cash_before": 5170.356207681516,
+        "cash_after": 6331.030669619537,
+        "fee": 1.1618362982362573,
+        "nominal": 1161.8362982362573
+      }
+    },
+    {
+      "ts": 1784304000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64160.8,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 175,
+        "ts": 1784304000000,
+        "execution_ts": 1784304000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64160.8,
+        "units": 0.018124278292482608,
+        "cash_before": 6266.651079696531,
+        "cash_after": 7428.356406170181,
+        "fee": 1.1628681946683181,
+        "nominal": 1162.8681946683182
+      },
+      "e42": {
+        "signal": 192,
+        "ts": 1784304000000,
+        "execution_ts": 1784304000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64160.8,
+        "units": 0.018310475607329277,
+        "cash_before": 6331.030669619537,
+        "cash_after": 7504.670618202922,
+        "fee": 1.1748147633467323,
+        "nominal": 1174.8147633467322
+      }
+    },
+    {
+      "ts": 1784548800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 65557.584,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 177,
+        "ts": 1784548800000,
+        "execution_ts": 1784548800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 65557.584,
+        "units": 0.018124278292482608,
+        "cash_before": 7428.356406170181,
+        "cash_after": 8615.352118872388,
+        "fee": 1.1881838965988052,
+        "nominal": 1188.1838965988052
+      },
+      "e42": {
+        "signal": 194,
+        "ts": 1784548800000,
+        "execution_ts": 1784548800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 65557.584,
+        "units": 0.018310475607329277,
+        "cash_before": 7504.670618202922,
+        "cash_after": 8703.860770367655,
+        "fee": 1.2003905427074402,
+        "nominal": 1200.39054270744
+      }
+    },
+    {
+      "ts": 1784606400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 65935.087,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 179,
+        "ts": 1784606400000,
+        "execution_ts": 1784606400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 65935.087,
+        "units": 0.018124278292482608,
+        "cash_before": 8615.352118872388,
+        "cash_after": 9809.182959033413,
+        "fee": 1.1950258660270523,
+        "nominal": 1195.0258660270522
+      },
+      "e42": {
+        "signal": 196,
+        "ts": 1784606400000,
+        "execution_ts": 1784606400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 65935.087,
+        "units": 0.018310475607329277,
+        "cash_before": 8703.860770367655,
+        "cash_after": 9909.956269746108,
+        "fee": 1.2073028021806338,
+        "nominal": 1207.3028021806338
+      }
+    },
+    {
+      "ts": 1784620800000,
+      "type": "TEILVERKAUF_1",
+      "price": 66312.59,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 180,
+        "ts": 1784620800000,
+        "execution_ts": 1784620800000,
+        "type": "TEILVERKAUF_1",
+        "price": 66312.59,
+        "units": 0.04833140877995362,
+        "cash_before": 9809.182959033413,
+        "cash_after": 13010.95887268633,
+        "fee": 3.204980894547465,
+        "nominal": 3204.9808945474647
+      },
+      "e42": {
+        "signal": 197,
+        "ts": 1784620800000,
+        "execution_ts": 1784620800000,
+        "type": "TEILVERKAUF_1",
+        "price": 66312.59,
+        "units": 0.048827934952878065,
+        "cash_before": 9909.956269746108,
+        "cash_after": 13144.625193991902,
+        "fee": 3.2379068310768724,
+        "nominal": 3237.906831076872
+      }
+    },
+    {
+      "ts": 1784808000000,
+      "type": "KAUF_1",
+      "price": 65028.075,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 181,
+        "ts": 1784808000000,
+        "execution_ts": 1784808000000,
+        "type": "KAUF_1",
+        "price": 65028.075,
+        "units": 0.04997052393836679,
+        "cash_before": 13010.95887268633,
+        "cash_after": 9758.219154514747,
+        "fee": 3.2527397181715823,
+        "nominal": 3252.7397181715824
+      },
+      "e42": {
+        "signal": 198,
+        "ts": 1784808000000,
+        "execution_ts": 1784808000000,
+        "type": "KAUF_1",
+        "price": 65028.075,
+        "units": 0.05048388933855843,
+        "cash_before": 13144.625193991902,
+        "cash_after": 9858.468895493927,
+        "fee": 3.286156298497976,
+        "nominal": 3286.156298497976
+      }
+    },
+    {
+      "ts": 1784822400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64846.94,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 182,
+        "ts": 1784822400000,
+        "execution_ts": 1784822400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64846.94,
+        "units": 0.0074955785907550206,
+        "cash_before": 9758.219154514747,
+        "cash_after": 10243.798424319582,
+        "fee": 0.4860653351399754,
+        "nominal": 486.0653351399754
+      },
+      "e42": {
+        "signal": 199,
+        "ts": 1784822400000,
+        "execution_ts": 1784822400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64846.94,
+        "units": 0.007572583400783765,
+        "cash_before": 9858.468895493927,
+        "cash_after": 10349.036698068112,
+        "fee": 0.4910588614356208,
+        "nominal": 491.05886143562077
+      }
+    },
+    {
+      "ts": 1784836800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 65098.97,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 183,
+        "ts": 1784836800000,
+        "execution_ts": 1784836800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 65098.97,
+        "units": 0.0074955785907550206,
+        "cash_before": 10243.798424319582,
+        "cash_after": 10731.264915685973,
+        "fee": 0.4879544458122034,
+        "nominal": 487.95444581220335
+      },
+      "e42": {
+        "signal": 200,
+        "ts": 1784836800000,
+        "execution_ts": 1784836800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 65098.97,
+        "units": 0.007572583400783765,
+        "cash_before": 10349.036698068112,
+        "cash_after": 10841.511110318603,
+        "fee": 0.4929673796301203,
+        "nominal": 492.96737963012026
+      }
+    },
+    {
+      "ts": 1784894400000,
+      "type": "NACHKAUF",
+      "price": 63925.2161,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 184,
+        "ts": 1784894400000,
+        "execution_ts": 1784894400000,
+        "type": "NACHKAUF",
+        "price": 63925.2161,
+        "units": 0.050832631889271174,
+        "cash_before": 10731.264915685973,
+        "cash_after": 7478.525197514391,
+        "fee": 3.2527397181715823,
+        "nominal": 3252.7397181715824
+      },
+      "e42": {
+        "signal": 202,
+        "ts": 1784894400000,
+        "execution_ts": 1784894400000,
+        "type": "NACHKAUF",
+        "price": 63925.2161,
+        "units": 0.05135485403856895,
+        "cash_before": 7555.354811820627,
+        "cash_after": 4269.198513322652,
+        "fee": 3.286156298497976,
+        "nominal": 3286.156298497976
+      }
+    },
+    {
+      "ts": 1784937600000,
+      "type": "NACHKAUF",
+      "price": 64085.36,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 185,
+        "ts": 1784937600000,
+        "execution_ts": 1784937600000,
+        "type": "NACHKAUF",
+        "price": 64085.36,
+        "units": 0.04056448434966626,
+        "cash_before": 7478.525197514391,
+        "cash_after": 4876.333422977125,
+        "fee": 2.602191774537266,
+        "nominal": 2602.1917745372657
+      },
+      "e42": {
+        "signal": 204,
+        "ts": 1784937600000,
+        "execution_ts": 1784937600000,
+        "type": "NACHKAUF",
+        "price": 64085.36,
+        "units": 0.04098121807788209,
+        "cash_before": 7487.089760755012,
+        "cash_after": 4858.164721956632,
+        "fee": 2.6289250387983802,
+        "nominal": 2628.9250387983802
+      }
+    },
+    {
+      "ts": 1784952000000,
+      "type": "NACHKAUF",
+      "price": 64003.2,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 186,
+        "ts": 1784952000000,
+        "execution_ts": 1784952000000,
+        "type": "NACHKAUF",
+        "price": 64003.2,
+        "units": 0.04061655640284749,
+        "cash_before": 4876.333422977125,
+        "cash_after": 2274.1416484398596,
+        "fee": 2.602191774537266,
+        "nominal": 2602.1917745372657
+      },
+      "e42": {
+        "signal": 205,
+        "ts": 1784952000000,
+        "execution_ts": 1784952000000,
+        "type": "NACHKAUF",
+        "price": 64003.2,
+        "units": 0.04103382508623915,
+        "cash_before": 4858.164721956632,
+        "cash_after": 2229.239683158252,
+        "fee": 2.6289250387983802,
+        "nominal": 2628.9250387983802
+      }
+    },
+    {
+      "ts": 1785513600000,
+      "type": "STOPLOSS",
+      "price": 62972.0,
+      "tranche_pct": 100,
+      "baseline": {
+        "signal": 188,
+        "ts": 1785513600000,
+        "execution_ts": 1785513600000,
+        "type": "STOPLOSS",
+        "price": 62972.0,
+        "units": 0.16699303939864169,
+        "cash_before": 2274.1416484398596,
+        "cash_after": 12779.511439774113,
+        "fee": 10.515885677011264,
+        "nominal": 10515.885677011263
+      },
+      "e42": {
+        "signal": 207,
+        "ts": 1785513600000,
+        "execution_ts": 1785513600000,
+        "type": "STOPLOSS",
+        "price": 62972.0,
+        "units": 0.1687086197396811,
+        "cash_before": 2229.239683158252,
+        "cash_after": 12842.534966203202,
+        "fee": 10.623919202247198,
+        "nominal": 10623.919202247198
+      }
+    },
+    {
+      "ts": 1785931200000,
+      "type": "KAUF_2",
+      "price": 64388.01,
+      "tranche_pct": 75,
+      "baseline": {
+        "signal": 189,
+        "ts": 1785931200000,
+        "execution_ts": 1785931200000,
+        "type": "KAUF_2",
+        "price": 64388.01,
+        "units": 0.14870857083874395,
+        "cash_before": 12779.511439774113,
+        "cash_after": 3194.877859943528,
+        "fee": 9.584633579830586,
+        "nominal": 9584.633579830584
+      },
+      "e42": {
+        "signal": 208,
+        "ts": 1785931200000,
+        "execution_ts": 1785931200000,
+        "type": "KAUF_2",
+        "price": 64388.01,
+        "units": 0.1494419430485233,
+        "cash_before": 12842.534966203202,
+        "cash_after": 3210.6337415508006,
+        "fee": 9.631901224652403,
+        "nominal": 9631.901224652402
+      }
+    },
+    {
+      "ts": 1785945600000,
+      "type": "NACHKAUF",
+      "price": 64840.28,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 190,
+        "ts": 1785945600000,
+        "execution_ts": 1785945600000,
+        "type": "NACHKAUF",
+        "price": 64840.28,
+        "units": 0.03937901541552362,
+        "cash_before": 3194.877859943528,
+        "cash_after": 638.9755719887057,
+        "fee": 2.5559022879548223,
+        "nominal": 2555.9022879548224
+      },
+      "e42": {
+        "signal": 209,
+        "ts": 1785945600000,
+        "execution_ts": 1785945600000,
+        "type": "NACHKAUF",
+        "price": 64840.28,
+        "units": 0.03957321723853444,
+        "cash_before": 3210.6337415508006,
+        "cash_after": 642.1267483101601,
+        "fee": 2.5685069932406406,
+        "nominal": 2568.5069932406404
+      }
+    },
+    {
+      "ts": 1785960000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64665.23,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 191,
+        "ts": 1785960000000,
+        "execution_ts": 1785960000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64665.23,
+        "units": 0.028213137938140134,
+        "cash_before": 638.9755719887057,
+        "cash_after": 2461.5602167264715,
+        "fee": 1.8244090537915576,
+        "nominal": 1824.4090537915577
+      },
+      "e42": {
+        "signal": 210,
+        "ts": 1785960000000,
+        "execution_ts": 1785960000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64665.23,
+        "units": 0.028352274043058658,
+        "cash_before": 642.1267483101601,
+        "cash_after": 2473.6996640055604,
+        "fee": 1.833406322017418,
+        "nominal": 1833.406322017418
+      }
+    },
+    {
+      "ts": 1785974400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64531.03,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 192,
+        "ts": 1785974400000,
+        "execution_ts": 1785974400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64531.03,
+        "units": 0.028213137938140134,
+        "cash_before": 2461.5602167264715,
+        "cash_after": 4280.36244455605,
+        "fee": 1.820622850680259,
+        "nominal": 1820.622850680259
+      },
+      "e42": {
+        "signal": 211,
+        "ts": 1785974400000,
+        "execution_ts": 1785974400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64531.03,
+        "units": 0.028352274043058658,
+        "cash_before": 2473.6996640055604,
+        "cash_after": 4301.471509399559,
+        "fee": 1.8296014468408397,
+        "nominal": 1829.6014468408396
+      }
+    },
+    {
+      "ts": 1786017600000,
+      "type": "NACHKAUF",
+      "price": 64631.87,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 193,
+        "ts": 1786017600000,
+        "execution_ts": 1786017600000,
+        "type": "NACHKAUF",
+        "price": 64631.87,
+        "units": 0.039505995813936184,
+        "cash_before": 4280.36244455605,
+        "cash_after": 1724.4601566012275,
+        "fee": 2.5559022879548223,
+        "nominal": 2555.9022879548224
+      },
+      "e42": {
+        "signal": 212,
+        "ts": 1786017600000,
+        "execution_ts": 1786017600000,
+        "type": "NACHKAUF",
+        "price": 64631.87,
+        "units": 0.03970082385435235,
+        "cash_before": 4301.471509399559,
+        "cash_after": 1732.9645161589187,
+        "fee": 2.5685069932406406,
+        "nominal": 2568.5069932406404
+      }
+    },
+    {
+      "ts": 1786694400000,
+      "type": "STOPLOSS",
+      "price": 62868.83,
+      "tranche_pct": 100,
+      "baseline": {
+        "signal": 198,
+        "ts": 1786694400000,
+        "execution_ts": 1786694400000,
+        "type": "STOPLOSS",
+        "price": 62868.83,
+        "units": 0.1980658442115661,
+        "cash_before": 0.0,
+        "cash_after": 12439.715720654889,
+        "fee": 12.452167888543432,
+        "nominal": 12452.167888543432
+      },
+      "e42": {
+        "signal": 218,
+        "ts": 1786694400000,
+        "execution_ts": 1786694400000,
+        "type": "STOPLOSS",
+        "price": 62868.83,
+        "units": 0.19867843227374055,
+        "cash_before": 0.0,
+        "cash_after": 12478.189902701022,
+        "fee": 12.490680583284307,
+        "nominal": 12490.680583284307
+      }
+    },
+    {
+      "ts": 1786996800000,
+      "type": "KAUF_2",
+      "price": 64532.1,
+      "tranche_pct": 75,
+      "baseline": {
+        "signal": 199,
+        "ts": 1786996800000,
+        "execution_ts": 1786996800000,
+        "type": "KAUF_2",
+        "price": 64532.1,
+        "units": 0.14443132958172253,
+        "cash_before": 12439.715720654889,
+        "cash_after": 3109.928930163722,
+        "fee": 9.329786790491168,
+        "nominal": 9329.786790491167
+      },
+      "e42": {
+        "signal": 219,
+        "ts": 1786996800000,
+        "execution_ts": 1786996800000,
+        "type": "KAUF_2",
+        "price": 64532.1,
+        "units": 0.14487803410393807,
+        "cash_before": 12478.189902701022,
+        "cash_after": 3119.5474756752556,
+        "fee": 9.358642427025767,
+        "nominal": 9358.642427025767
+      }
+    },
+    {
+      "ts": 1787011200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64185.01,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 200,
+        "ts": 1787011200000,
+        "execution_ts": 1787011200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64185.01,
+        "units": 0.02166469943725838,
+        "cash_before": 3109.928930163722,
+        "cash_after": 4499.087331241119,
+        "fee": 1.3905489500274237,
+        "nominal": 1390.5489500274236
+      },
+      "e42": {
+        "signal": 220,
+        "ts": 1787011200000,
+        "execution_ts": 1787011200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64185.01,
+        "units": 0.021731705115590708,
+        "cash_before": 3119.5474756752556,
+        "cash_after": 4513.002336126336,
+        "fee": 1.394849710161241,
+        "nominal": 1394.8497101612409
+      }
+    },
+    {
+      "ts": 1787025600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 64198.97,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 201,
+        "ts": 1787025600000,
+        "execution_ts": 1787025600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64198.97,
+        "units": 0.02166469943725838,
+        "cash_before": 4499.087331241119,
+        "cash_after": 5888.547869083455,
+        "fee": 1.3908513892315677,
+        "nominal": 1390.8513892315677
+      },
+      "e42": {
+        "signal": 221,
+        "ts": 1787025600000,
+        "execution_ts": 1787025600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 64198.97,
+        "units": 0.021731705115590708,
+        "cash_before": 4513.002336126336,
+        "cash_after": 5906.760267806225,
+        "fee": 1.3951530847646543,
+        "nominal": 1395.1530847646543
+      }
+    },
+    {
+      "ts": 1787054400000,
+      "type": "NACHKAUF",
+      "price": 64855.06,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 202,
+        "ts": 1787054400000,
+        "execution_ts": 1787054400000,
+        "type": "NACHKAUF",
+        "price": 64855.06,
+        "units": 0.02874242041777673,
+        "cash_before": 5888.547869083455,
+        "cash_after": 4022.590510985222,
+        "fee": 1.8659573580982334,
+        "nominal": 1865.9573580982333
+      },
+      "e42": {
+        "signal": 222,
+        "ts": 1787054400000,
+        "execution_ts": 1787054400000,
+        "type": "NACHKAUF",
+        "price": 64855.06,
+        "units": 0.028831316429585422,
+        "cash_before": 5906.760267806225,
+        "cash_after": 4035.0317824010717,
+        "fee": 1.8717284854051535,
+        "nominal": 1871.7284854051534
+      }
+    },
+    {
+      "ts": 1787054400000,
+      "type": "NACHKAUF",
+      "price": 64855.06,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 203,
+        "ts": 1787054400000,
+        "execution_ts": 1787054400000,
+        "type": "NACHKAUF",
+        "price": 64855.06,
+        "units": 0.03832322722370231,
+        "cash_before": 4022.590510985222,
+        "cash_after": 1534.6473668542444,
+        "fee": 2.4879431441309774,
+        "nominal": 2487.9431441309775
+      },
+      "e42": {
+        "signal": 223,
+        "ts": 1787054400000,
+        "execution_ts": 1787054400000,
+        "type": "NACHKAUF",
+        "price": 64855.06,
+        "units": 0.03844175523944723,
+        "cash_before": 4035.0317824010717,
+        "cash_after": 1539.3938018608674,
+        "fee": 2.4956379805402045,
+        "nominal": 2495.6379805402044
+      }
+    },
+    {
+      "ts": 1787068800000,
+      "type": "NACHKAUF",
+      "price": 64643.26,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 204,
+        "ts": 1787068800000,
+        "execution_ts": 1787068800000,
+        "type": "NACHKAUF",
+        "price": 64643.26,
+        "units": 0.023716513051590997,
+        "cash_before": 1534.6473668542444,
+        "cash_after": 0.0,
+        "fee": 1.5346473668542444,
+        "nominal": 1534.6473668542444
+      },
+      "e42": {
+        "signal": 225,
+        "ts": 1787068800000,
+        "execution_ts": 1787068800000,
+        "type": "NACHKAUF",
+        "price": 64643.26,
+        "units": 0.0,
+        "cash_before": 0.0,
+        "cash_after": 0.0,
+        "fee": 0.0,
+        "nominal": 0.0
+      }
+    },
+    {
+      "ts": 1787140800000,
+      "type": "TEILVERKAUF_1",
+      "price": 67884.0,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 206,
+        "ts": 1787140800000,
+        "execution_ts": 1787140800000,
+        "type": "TEILVERKAUF_1",
+        "price": 67884.0,
+        "units": 0.07675363656011033,
+        "cash_before": 1929.7492529869323,
+        "cash_after": 7134.882773369216,
+        "fee": 5.21034386424653,
+        "nominal": 5210.34386424653
+      },
+      "e42": {
+        "signal": 227,
+        "ts": 1787140800000,
+        "execution_ts": 1787140800000,
+        "type": "TEILVERKAUF_1",
+        "price": 67884.0,
+        "units": 0.0769599474501048,
+        "cash_before": 1934.9363464419519,
+        "cash_after": 7154.061070072164,
+        "fee": 5.224349072702915,
+        "nominal": 5224.349072702915
+      }
+    },
+    {
+      "ts": 1787140800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 67112.76999999999,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 205,
+        "ts": 1787140800000,
+        "execution_ts": 1787140800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 67112.76999999999,
+        "units": 0.028782613710041375,
+        "cash_before": 0.0,
+        "cash_after": 1929.7492529869323,
+        "fee": 1.9316809339208534,
+        "nominal": 1931.6809339208532
+      },
+      "e42": {
+        "signal": 226,
+        "ts": 1787140800000,
+        "execution_ts": 1787140800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 67112.76999999999,
+        "units": 0.028859980293789302,
+        "cash_before": 0.0,
+        "cash_after": 1934.9363464419519,
+        "fee": 1.9368732196616136,
+        "nominal": 1936.8732196616136
+      }
+    },
+    {
+      "ts": 1787140800000,
+      "type": "VERKAUF_REST",
+      "price": 68554.0,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 207,
+        "ts": 1787140800000,
+        "execution_ts": 1787140800000,
+        "type": "VERKAUF_REST",
+        "price": 68554.0,
+        "units": 0.08634784113012411,
+        "cash_before": 7134.882773369216,
+        "cash_after": 13048.45318430291,
+        "fee": 5.919489900834528,
+        "nominal": 5919.489900834528
+      },
+      "e42": {
+        "signal": 228,
+        "ts": 1787140800000,
+        "execution_ts": 1787140800000,
+        "type": "VERKAUF_REST",
+        "price": 68554.0,
+        "units": 0.0865799408813679,
+        "cash_before": 7154.061070072164,
+        "cash_after": 13083.526935986278,
+        "fee": 5.9354012671812955,
+        "nominal": 5935.401267181295
+      }
+    },
+    {
+      "ts": 1787688000000,
+      "type": "KAUF_1",
+      "price": 78409.14499999999,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 208,
+        "ts": 1787688000000,
+        "execution_ts": 1787688000000,
+        "type": "KAUF_1",
+        "price": 78409.14499999999,
+        "units": 0.04156213134041511,
+        "cash_before": 13048.45318430291,
+        "cash_after": 9786.339888227183,
+        "fee": 3.2621132960757278,
+        "nominal": 3262.1132960757277
+      },
+      "e42": {
+        "signal": 242,
+        "ts": 1787688000000,
+        "execution_ts": 1787688000000,
+        "type": "KAUF_1",
+        "price": 78409.14499999999,
+        "units": 0.04188791478369236,
+        "cash_before": 13150.733069157868,
+        "cash_after": 9863.049801868401,
+        "fee": 3.287683267289467,
+        "nominal": 3287.683267289467
+      }
+    },
+    {
+      "ts": 1787702400000,
+      "type": "NACHKAUF",
+      "price": 79088.62,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 209,
+        "ts": 1787702400000,
+        "execution_ts": 1787702400000,
+        "type": "NACHKAUF",
+        "price": 79088.62,
+        "units": 0.032964046486380995,
+        "cash_before": 9786.339888227183,
+        "cash_after": 7176.649251366601,
+        "fee": 2.6096906368605826,
+        "nominal": 2609.6906368605823
+      },
+      "e42": {
+        "signal": 243,
+        "ts": 1787702400000,
+        "execution_ts": 1787702400000,
+        "type": "NACHKAUF",
+        "price": 79088.62,
+        "units": 0.03322243411527148,
+        "cash_before": 9863.049801868401,
+        "cash_after": 7232.9031880368275,
+        "fee": 2.630146613831574,
+        "nominal": 2630.1466138315736
+      }
+    },
+    {
+      "ts": 1787716800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 78925.56,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 210,
+        "ts": 1787716800000,
+        "execution_ts": 1787716800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 78925.56,
+        "units": 0.011178926674019419,
+        "cash_before": 7176.649251366601,
+        "cash_after": 8058.069996264575,
+        "fee": 0.8823030479459201,
+        "nominal": 882.3030479459201
+      },
+      "e42": {
+        "signal": 244,
+        "ts": 1787716800000,
+        "execution_ts": 1787716800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 78925.56,
+        "units": 0.011266552334844575,
+        "cash_before": 7232.9031880368275,
+        "cash_after": 8121.232921381446,
+        "fee": 0.8892189522969155,
+        "nominal": 889.2189522969155
+      }
+    },
+    {
+      "ts": 1787731200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 78487.26,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 211,
+        "ts": 1787731200000,
+        "execution_ts": 1787731200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 78487.26,
+        "units": 0.011178926674019419,
+        "cash_before": 8058.069996264575,
+        "cash_after": 8934.595917324888,
+        "fee": 0.8774033243846973,
+        "nominal": 877.4033243846973
+      },
+      "e42": {
+        "signal": 245,
+        "ts": 1787731200000,
+        "execution_ts": 1787731200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 78487.26,
+        "units": 0.011266552334844575,
+        "cash_before": 8121.232921381446,
+        "cash_after": 9004.62946296759,
+        "fee": 0.8842808224085532,
+        "nominal": 884.2808224085531
+      }
+    },
+    {
+      "ts": 1787774400000,
+      "type": "NACHKAUF",
+      "price": 79023.75,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 212,
+        "ts": 1787774400000,
+        "execution_ts": 1787774400000,
+        "type": "NACHKAUF",
+        "price": 79023.75,
+        "units": 0.0329911064233692,
+        "cash_before": 8934.595917324888,
+        "cash_after": 6324.905280464306,
+        "fee": 2.6096906368605826,
+        "nominal": 2609.6906368605823
+      },
+      "e42": {
+        "signal": 246,
+        "ts": 1787774400000,
+        "execution_ts": 1787774400000,
+        "type": "NACHKAUF",
+        "price": 79023.75,
+        "units": 0.033249706160714244,
+        "cash_before": 9004.62946296759,
+        "cash_after": 6374.482849136017,
+        "fee": 2.630146613831574,
+        "nominal": 2630.1466138315736
+      }
+    },
+    {
+      "ts": 1788177600000,
+      "type": "KAUF_2",
+      "price": 77733.3649,
+      "tranche_pct": 50,
+      "baseline": {
+        "signal": 214,
+        "ts": 1788177600000,
+        "execution_ts": 1788177600000,
+        "type": "KAUF_2",
+        "price": 77733.3649,
+        "units": 0.08128530629430969,
+        "cash_before": 6324.905280464306,
+        "cash_after": 0.0,
+        "fee": 6.324905280464306,
+        "nominal": 6324.905280464306
+      },
+      "e42": {
+        "signal": 250,
+        "ts": 1788177600000,
+        "execution_ts": 1788177600000,
+        "type": "KAUF_2",
+        "price": 77733.3649,
+        "units": 0.08040849305835185,
+        "cash_before": 6256.679411375357,
+        "cash_after": 0.0,
+        "fee": 6.256679411375357,
+        "nominal": 6256.679411375357
+      }
+    },
+    {
+      "ts": 1788436800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 80845.56,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 217,
+        "ts": 1788436800000,
+        "execution_ts": 1788436800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 80845.56,
+        "units": 0.024966710579465427,
+        "cash_before": 0.0,
+        "cash_after": 2016.429250456652,
+        "fee": 2.018447698154807,
+        "nominal": 2018.4476981548069
+      },
+      "e42": {
+        "signal": 253,
+        "ts": 1788436800000,
+        "execution_ts": 1788436800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 80845.56,
+        "units": 0.02493531651725112,
+        "cash_before": 0.0,
+        "cash_after": 2013.893717986802,
+        "fee": 2.0159096276144166,
+        "nominal": 2015.9096276144164
+      }
+    },
+    {
+      "ts": 1788451200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 81418.255,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 218,
+        "ts": 1788451200000,
+        "execution_ts": 1788451200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 81418.255,
+        "units": 0.024966710579465427,
+        "cash_before": 2016.429250456652,
+        "cash_after": 4047.142512918296,
+        "fee": 2.032746008470114,
+        "nominal": 2032.746008470114
+      },
+      "e42": {
+        "signal": 254,
+        "ts": 1788451200000,
+        "execution_ts": 1788451200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 81418.255,
+        "units": 0.02493531651725112,
+        "cash_before": 2013.893717986802,
+        "cash_after": 4042.053486735358,
+        "fee": 2.030189958707264,
+        "nominal": 2030.1899587072637
+      }
+    },
+    {
+      "ts": 1788465600000,
+      "type": "TEILVERKAUF_1",
+      "price": 81990.95,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 219,
+        "ts": 1788465600000,
+        "execution_ts": 1788465600000,
+        "type": "TEILVERKAUF_1",
+        "price": 81990.95,
+        "units": 0.06657789487857448,
+        "cash_before": 4047.142512918296,
+        "cash_after": 9500.468578162658,
+        "fee": 5.458784850094456,
+        "nominal": 5458.784850094456
+      },
+      "e42": {
+        "signal": 255,
+        "ts": 1788465600000,
+        "execution_ts": 1788465600000,
+        "type": "TEILVERKAUF_1",
+        "price": 81990.95,
+        "units": 0.06649417737933633,
+        "cash_before": 4042.053486735358,
+        "cash_after": 9488.522338762854,
+        "fee": 5.451920772800296,
+        "nominal": 5451.920772800296
+      }
+    },
+    {
+      "ts": 1788696000000,
+      "type": "KAUF_1",
+      "price": 79282.0,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 220,
+        "ts": 1788696000000,
+        "execution_ts": 1788696000000,
+        "type": "KAUF_1",
+        "price": 79282.0,
+        "units": 0.04110455314926026,
+        "cash_before": 9500.468578162658,
+        "cash_after": 6238.35528208693,
+        "fee": 3.2621132960757278,
+        "nominal": 3262.1132960757277
+      },
+      "e42": {
+        "signal": 256,
+        "ts": 1788696000000,
+        "execution_ts": 1788696000000,
+        "type": "KAUF_1",
+        "price": 79282.0,
+        "units": 0.0414267498804543,
+        "cash_before": 9488.522338762854,
+        "cash_after": 6200.839071473387,
+        "fee": 3.287683267289467,
+        "nominal": 3287.683267289467
+      }
+    },
+    {
+      "ts": 1788710400000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 79829.99,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 221,
+        "ts": 1788710400000,
+        "execution_ts": 1788710400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 79829.99,
+        "units": 0.024966710579465427,
+        "cash_before": 6238.35528208693,
+        "cash_after": 8229.454445722658,
+        "fee": 1.9930922558916193,
+        "nominal": 1993.0922558916193
+      },
+      "e42": {
+        "signal": 257,
+        "ts": 1788710400000,
+        "execution_ts": 1788710400000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 79829.99,
+        "units": 0.02493531651725112,
+        "cash_before": 6200.839071473387,
+        "cash_after": 8189.43455362416,
+        "fee": 1.990586068218992,
+        "nominal": 1990.5860682189918
+      }
+    },
+    {
+      "ts": 1788724800000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 80341.83,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 222,
+        "ts": 1788724800000,
+        "execution_ts": 1788724800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 80341.83,
+        "units": 0.024966710579465427,
+        "cash_before": 8229.454445722658,
+        "cash_after": 10233.319791540236,
+        "fee": 2.005871217034613,
+        "nominal": 2005.8712170346128
+      },
+      "e42": {
+        "signal": 258,
+        "ts": 1788724800000,
+        "execution_ts": 1788724800000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 80341.83,
+        "units": 0.02493531651725112,
+        "cash_before": 8189.43455362416,
+        "cash_after": 10190.780165288716,
+        "fee": 2.0033489606251815,
+        "nominal": 2003.3489606251815
+      }
+    },
+    {
+      "ts": 1788753600000,
+      "type": "NACHKAUF",
+      "price": 79397.83,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 223,
+        "ts": 1788753600000,
+        "execution_ts": 1788753600000,
+        "type": "NACHKAUF",
+        "price": 79397.83,
+        "units": 0.024626752515374682,
+        "cash_before": 10233.319791540236,
+        "cash_after": 8276.0518138948,
+        "fee": 1.9572679776454367,
+        "nominal": 1957.2679776454368
+      },
+      "e42": {
+        "signal": 259,
+        "ts": 1788753600000,
+        "execution_ts": 1788753600000,
+        "type": "NACHKAUF",
+        "price": 79397.83,
+        "units": 0.024819788530912074,
+        "cash_before": 10190.780165288716,
+        "cash_after": 8218.170204915035,
+        "fee": 1.9726099603736802,
+        "nominal": 1972.6099603736802
+      }
+    },
+    {
+      "ts": 1788753600000,
+      "type": "NACHKAUF",
+      "price": 79397.83,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 224,
+        "ts": 1788753600000,
+        "execution_ts": 1788753600000,
+        "type": "NACHKAUF",
+        "price": 79397.83,
+        "units": 0.03283567002049957,
+        "cash_before": 8276.0518138948,
+        "cash_after": 5666.361177034217,
+        "fee": 2.6096906368605826,
+        "nominal": 2609.6906368605823
+      },
+      "e42": {
+        "signal": 260,
+        "ts": 1788753600000,
+        "execution_ts": 1788753600000,
+        "type": "NACHKAUF",
+        "price": 79397.83,
+        "units": 0.03309305137454943,
+        "cash_before": 8218.170204915035,
+        "cash_after": 5588.023591083462,
+        "fee": 2.630146613831574,
+        "nominal": 2630.1466138315736
+      }
+    },
+    {
+      "ts": 1788768000000,
+      "type": "NACHKAUF",
+      "price": 79420.16,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 225,
+        "ts": 1788768000000,
+        "execution_ts": 1788768000000,
+        "type": "NACHKAUF",
+        "price": 79420.16,
+        "units": 0.032826437849328455,
+        "cash_before": 5666.361177034217,
+        "cash_after": 3056.6705401736344,
+        "fee": 2.6096906368605826,
+        "nominal": 2609.6906368605823
+      },
+      "e42": {
+        "signal": 261,
+        "ts": 1788768000000,
+        "execution_ts": 1788768000000,
+        "type": "NACHKAUF",
+        "price": 79420.16,
+        "units": 0.03308374683729851,
+        "cash_before": 5588.023591083462,
+        "cash_after": 2957.876977251888,
+        "fee": 2.630146613831574,
+        "nominal": 2630.1466138315736
+      }
+    },
+    {
+      "ts": 1788840000000,
+      "type": "NACHKAUF",
+      "price": 78482.0,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 226,
+        "ts": 1788840000000,
+        "execution_ts": 1788840000000,
+        "type": "NACHKAUF",
+        "price": 78482.0,
+        "units": 0.024914129477686495,
+        "cash_before": 3056.6705401736344,
+        "cash_after": 1099.4025625281977,
+        "fee": 1.9572679776454367,
+        "nominal": 1957.2679776454368
+      },
+      "e42": {
+        "signal": 262,
+        "ts": 1788840000000,
+        "execution_ts": 1788840000000,
+        "type": "NACHKAUF",
+        "price": 78482.0,
+        "units": 0.025109418088393603,
+        "cash_before": 2957.876977251888,
+        "cash_after": 985.2670168782079,
+        "fee": 1.9726099603736802,
+        "nominal": 1972.6099603736802
+      }
+    },
+    {
+      "ts": 1789041600000,
+      "type": "NACHKAUF",
+      "price": 77555.704,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 227,
+        "ts": 1789041600000,
+        "execution_ts": 1789041600000,
+        "type": "NACHKAUF",
+        "price": 77555.704,
+        "units": 0.014161474956963443,
+        "cash_before": 1099.4025625281977,
+        "cash_after": 0.0,
+        "fee": 1.0994025625281978,
+        "nominal": 1099.4025625281977
+      },
+      "e42": {
+        "signal": 263,
+        "ts": 1789041600000,
+        "execution_ts": 1789041600000,
+        "type": "NACHKAUF",
+        "price": 77555.704,
+        "units": 0.012691287669329,
+        "cash_before": 985.2670168782079,
+        "cash_after": 0.0,
+        "fee": 0.9852670168782078,
+        "nominal": 985.2670168782079
+      }
+    },
+    {
+      "ts": 1789502400000,
+      "type": "STOPLOSS",
+      "price": 75644.48,
+      "tranche_pct": 100,
+      "baseline": {
+        "signal": 229,
+        "ts": 1789502400000,
+        "execution_ts": 1789502400000,
+        "type": "STOPLOSS",
+        "price": 75644.48,
+        "units": 0.17046901796911287,
+        "cash_before": 0.0,
+        "cash_after": 12882.145180163814,
+        "fee": 12.8950402203842,
+        "nominal": 12895.040220384199
+      },
+      "e42": {
+        "signal": 265,
+        "ts": 1789502400000,
+        "execution_ts": 1789502400000,
+        "type": "STOPLOSS",
+        "price": 75644.48,
+        "units": 0.17022404238093689,
+        "cash_before": 0.0,
+        "cash_after": 12863.632660234527,
+        "fee": 12.876509169403931,
+        "nominal": 12876.509169403931
+      }
+    },
+    {
+      "ts": 1789718400000,
+      "type": "KAUF_2",
+      "price": 78062.0,
+      "tranche_pct": 75,
+      "baseline": {
+        "signal": 230,
+        "ts": 1789718400000,
+        "execution_ts": 1789718400000,
+        "type": "KAUF_2",
+        "price": 78062.0,
+        "units": 0.12364463216722268,
+        "cash_before": 12882.145180163814,
+        "cash_after": 3220.5362950409544,
+        "fee": 9.66160888512286,
+        "nominal": 9661.60888512286
+      },
+      "e42": {
+        "signal": 266,
+        "ts": 1789718400000,
+        "execution_ts": 1789718400000,
+        "type": "KAUF_2",
+        "price": 78062.0,
+        "units": 0.12346694641029846,
+        "cash_before": 12863.632660234527,
+        "cash_after": 3215.908165058632,
+        "fee": 9.647724495175895,
+        "nominal": 9647.724495175895
+      }
+    },
+    {
+      "ts": 1789732800000,
+      "type": "NACHKAUF",
+      "price": 80725.6,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 231,
+        "ts": 1789732800000,
+        "execution_ts": 1789732800000,
+        "type": "NACHKAUF",
+        "price": 80725.6,
+        "units": 0.03188396997974286,
+        "cash_before": 3220.5362950409544,
+        "cash_after": 644.1072590081912,
+        "fee": 2.576429036032763,
+        "nominal": 2576.429036032763
+      },
+      "e42": {
+        "signal": 267,
+        "ts": 1789732800000,
+        "execution_ts": 1789732800000,
+        "type": "NACHKAUF",
+        "price": 80725.6,
+        "units": 0.03183815054350613,
+        "cash_before": 3215.908165058632,
+        "cash_after": 643.1816330117267,
+        "fee": 2.5727265320469055,
+        "nominal": 2572.7265320469055
+      }
+    },
+    {
+      "ts": 1789747200000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 81204.76,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 232,
+        "ts": 1789747200000,
+        "execution_ts": 1789747200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 81204.76,
+        "units": 0.023329290322044834,
+        "cash_before": 644.1072590081912,
+        "cash_after": 2536.6622311585925,
+        "fee": 1.8944494215719734,
+        "nominal": 1894.4494215719733
+      },
+      "e42": {
+        "signal": 268,
+        "ts": 1789747200000,
+        "execution_ts": 1789747200000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 81204.76,
+        "units": 0.023295764543070686,
+        "cash_before": 643.1816330117267,
+        "cash_after": 2533.016874779555,
+        "fee": 1.8917269687365648,
+        "nominal": 1891.7269687365647
+      }
+    },
+    {
+      "ts": 1789761600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 80883.87,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 233,
+        "ts": 1789761600000,
+        "execution_ts": 1789761600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 80883.87,
+        "units": 0.023329290322044834,
+        "cash_before": 2536.6622311585925,
+        "cash_after": 4421.738553473524,
+        "fee": 1.8869632856005323,
+        "nominal": 1886.9632856005323
+      },
+      "e42": {
+        "signal": 269,
+        "ts": 1789761600000,
+        "execution_ts": 1789761600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 80883.87,
+        "units": 0.023295764543070686,
+        "cash_before": 2533.016874779555,
+        "cash_after": 4415.384214041042,
+        "fee": 1.8842515908523387,
+        "nominal": 1884.2515908523387
+      }
+    },
+    {
+      "ts": 1789977600000,
+      "type": "TEILVERKAUF_1",
+      "price": 83696.0,
+      "tranche_pct": 40,
+      "baseline": {
+        "signal": 239,
+        "ts": 1789977600000,
+        "execution_ts": 1789977600000,
+        "type": "TEILVERKAUF_1",
+        "price": 83696.0,
+        "units": 0.06221144085878622,
+        "cash_before": 6344.219311827099,
+        "cash_after": 11545.861217189953,
+        "fee": 5.2068487541169715,
+        "nominal": 5206.848754116972
+      },
+      "e42": {
+        "signal": 277,
+        "ts": 1789977600000,
+        "execution_ts": 1789977600000,
+        "type": "TEILVERKAUF_1",
+        "price": 83696.0,
+        "units": 0.06212203878152184,
+        "cash_before": 6283.476498415905,
+        "cash_after": 11477.643290116299,
+        "fee": 5.199366157858251,
+        "nominal": 5199.366157858251
+      }
+    },
+    {
+      "ts": 1789977600000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 82488.8,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 238,
+        "ts": 1789977600000,
+        "execution_ts": 1789977600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 82488.8,
+        "units": 0.023329290322044834,
+        "cash_before": 4421.738553473524,
+        "cash_after": 6344.219311827099,
+        "fee": 1.924405163517092,
+        "nominal": 1924.405163517092
+      },
+      "e42": {
+        "signal": 276,
+        "ts": 1789977600000,
+        "execution_ts": 1789977600000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 82488.8,
+        "units": 0.023295764543070686,
+        "cash_before": 4363.758475837696,
+        "cash_after": 6283.476498415905,
+        "fee": 1.9216396622404492,
+        "nominal": 1921.6396622404493
+      }
+    },
+    {
+      "ts": 1789977600000,
+      "type": "VERKAUF_REST",
+      "price": 84887.19,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 240,
+        "ts": 1789977600000,
+        "execution_ts": 1789977600000,
+        "type": "VERKAUF_REST",
+        "price": 84887.19,
+        "units": 0.02332929032204481,
+        "cash_before": 11545.861217189953,
+        "cash_after": 13524.2387594224,
+        "fee": 1.980357900132579,
+        "nominal": 1980.357900132579
+      },
+      "e42": {
+        "signal": 278,
+        "ts": 1789977600000,
+        "execution_ts": 1789977600000,
+        "type": "VERKAUF_REST",
+        "price": 84887.19,
+        "units": 0.02329576454307071,
+        "cash_before": 11477.643290116299,
+        "cash_after": 13453.177769088243,
+        "fee": 1.9775119909629066,
+        "nominal": 1977.5119909629066
+      }
+    },
+    {
+      "ts": 1790179200000,
+      "type": "KAUF_1",
+      "price": 83760.855,
+      "tranche_pct": 25,
+      "baseline": {
+        "signal": 241,
+        "ts": 1790179200000,
+        "execution_ts": 1790179200000,
+        "type": "KAUF_1",
+        "price": 83760.855,
+        "units": 0.04032526447068555,
+        "cash_before": 13524.2387594224,
+        "cash_after": 10143.1790695668,
+        "fee": 3.3810596898556002,
+        "nominal": 3381.0596898556
+      },
+      "e42": {
+        "signal": 279,
+        "ts": 1790179200000,
+        "execution_ts": 1790179200000,
+        "type": "KAUF_1",
+        "price": 83760.855,
+        "units": 0.040113381696375815,
+        "cash_before": 13453.177769088243,
+        "cash_after": 10089.883326816182,
+        "fee": 3.3632944422720605,
+        "nominal": 3363.2944422720607
+      }
+    },
+    {
+      "ts": 1790308800000,
+      "type": "NACHKAUF",
+      "price": 84043.96,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 242,
+        "ts": 1790308800000,
+        "execution_ts": 1790308800000,
+        "type": "NACHKAUF",
+        "price": 84043.96,
+        "units": 0.032151541932728955,
+        "cash_before": 10143.1790695668,
+        "cash_after": 7438.33131768232,
+        "fee": 2.7048477518844805,
+        "nominal": 2704.84775188448
+      },
+      "e42": {
+        "signal": 280,
+        "ts": 1790308800000,
+        "execution_ts": 1790308800000,
+        "type": "NACHKAUF",
+        "price": 84043.96,
+        "units": 0.03198260670087215,
+        "cash_before": 10089.883326816182,
+        "cash_after": 7399.247772998533,
+        "fee": 2.6906355538176485,
+        "nominal": 2690.6355538176485
+      }
+    },
+    {
+      "ts": 1790337600000,
+      "type": "NACHKAUF",
+      "price": 83796.01,
+      "tranche_pct": 20,
+      "baseline": {
+        "signal": 243,
+        "ts": 1790337600000,
+        "execution_ts": 1790337600000,
+        "type": "NACHKAUF",
+        "price": 83796.01,
+        "units": 0.03224667742691562,
+        "cash_before": 7438.33131768232,
+        "cash_after": 4733.48356579784,
+        "fee": 2.7048477518844805,
+        "nominal": 2704.84775188448
+      },
+      "e42": {
+        "signal": 281,
+        "ts": 1790337600000,
+        "execution_ts": 1790337600000,
+        "type": "NACHKAUF",
+        "price": 83796.01,
+        "units": 0.03207724232053329,
+        "cash_before": 7399.247772998533,
+        "cash_after": 4708.6122191808845,
+        "fee": 2.6906355538176485,
+        "nominal": 2690.6355538176485
+      }
+    },
+    {
+      "ts": 1790496000000,
+      "type": "TEILVERKAUF_LADDER",
+      "price": 84810.02,
+      "tranche_pct": 15,
+      "baseline": {
+        "signal": 244,
+        "ts": 1790496000000,
+        "execution_ts": 1790496000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 84810.02,
+        "units": 0.01570852257454952,
+        "cash_before": 4733.48356579784,
+        "cash_after": 6064.3914394021185,
+        "fee": 1.3322401137179967,
+        "nominal": 1332.2401137179966
+      },
+      "e42": {
+        "signal": 282,
+        "ts": 1790496000000,
+        "execution_ts": 1790496000000,
+        "type": "TEILVERKAUF_LADDER",
+        "price": 84810.02,
+        "units": 0.01562598460766719,
+        "cash_before": 4708.6122191808845,
+        "cash_after": 6032.527046209735,
+        "fee": 1.3252400670959468,
+        "nominal": 1325.2400670959466
+      }
+    }
+  ]
+}

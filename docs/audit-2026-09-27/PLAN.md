@@ -96,10 +96,20 @@ begrenzen Aussagen. Bei zu kurzer Historie bleibt ein echter Vorwärtstest offen
 | Lauf-ID | Zweck | Status |
 |---|---|---|
 | audit-20260927-00 | Zugang, Remote-Stand, Workflows, Plan | erledigt |
-| audit-20260927-01 | Basissuite, Inventar, Datenvalidierung | vorbereitet |
-| audit-20260927-02 | E44.5-Reproduktion | vorbereitet |
-| audit-20260927-03 | unabhängige Gegenproben und E42-Lose | vorbereitet |
-| audit-20260927-04 | vorab festgelegte gemeinsame Gitter | vorbereitet |
+| audit-20260927-01 | Basissuite, Inventar, Datenvalidierung | erledigt, 607 Tests bestanden |
+| audit-20260927-02 | E44.5-Reproduktion | erledigt, inhaltlich exakt |
+| audit-20260927-03 | unabhängige Gegenproben und E42-Lose | erledigt, Befunde und Grenzen dokumentiert |
+| audit-20260927-04 | vorab festgelegte gemeinsame Gitter | erledigt, 79 Konfigurationen |
+| audit-20260928-05 | separat vorher festgelegte Kapitalquoten | erledigt, siehe ERGAENZUNGSPLAN.md |
 
 Zwischenstände werden regelmäßig auf diesem Zweig gesichert. Kein alter Befund
 wird durch Überschreiben seiner Ursprungsdatei scheinbar korrigiert.
+
+## Abschlussvermerk 28.09.2026
+
+Die obigen Hypothesen und Kriterien wurden nach Kenntnis der Ergebnisse nicht
+gelockert. G1 übernimmt die ursprünglichen Rollen (+1 Hauptzeile, +2 erklärende
+Kombinationen); neue G2–G5-Kombinationen werden nach der vorab strengeren +2-Regel
+eingeordnet. Alle 79 Parameterzeilen waren vor dem Lauf in e7e92d3 festgeschrieben.
+Die ergänzende Kapitalquotenrechnung wurde separat in 9b916f0 vor ihrer Berechnung
+begründet. Detailergebnisse: BERICHT.md, ABDECKUNG.md und REPRODUKTION.md.

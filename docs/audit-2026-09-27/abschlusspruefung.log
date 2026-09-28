@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-09-28T05:49:50.906390+00:00",
+  "head_before_snapshot_commit": "9b916f0fcc764c1165a8f79634c05a4781aac433",
+  "production_base": "e2b0051199c2e0c38723cc3a23c00ea3bd320601",
+  "production_unchanged": true,
+  "input_sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+  "preregistration_unchanged": true,
+  "configurations": 79,
+  "long_ledgers_reconciled": 78,
+  "complete_factorial_grids": 5,
+  "json_files_parsed": 105,
+  "markdown_links_valid": true,
+  "original_tests": "607 passed, 0 failed",
+  "e42_observations": 57,
+  "e42_breakouts": 33,
+  "same_bar_replaced": 1,
+  "e42_lots": 16,
+  "independent_profile_matches": true,
+  "private_full_transcripts_added": false,
+  "credential_scan": "No matching tokens"
+}
+Manifest: 188 files

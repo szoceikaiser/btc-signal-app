@@ -418,7 +418,8 @@
           "close": 71924.22
         }
       ],
-      "end_reason": "am_datenende_offen"
+      "end_reason": "neue_beobachtung",
+      "end": 1775592000000
     },
     {
       "id": "O022",
@@ -1186,7 +1187,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "gescheitert",
-      "end": 1768824000000
+      "end": 1768824000000,
+      "replaced_same_bar": false
     },
     {
       "id": "B002",
@@ -1196,7 +1198,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "gescheitert",
-      "end": 1768852800000
+      "end": 1768852800000,
+      "replaced_same_bar": false
     },
     {
       "id": "B003",
@@ -1209,7 +1212,8 @@
       ],
       "terminal": "gekauft",
       "end": 1770998400000,
-      "signal_index": 8
+      "signal_index": 8,
+      "replaced_same_bar": false
     },
     {
       "id": "B004",
@@ -1222,7 +1226,8 @@
       ],
       "terminal": "ohne_kauf",
       "end": 1773072000000,
-      "block_reason": "die Engine ist schon voll investiert"
+      "block_reason": "die Engine ist schon voll investiert",
+      "replaced_same_bar": false
     },
     {
       "id": "B005",
@@ -1235,7 +1240,8 @@
       ],
       "terminal": "gekauft",
       "end": 1773532800000,
-      "signal_index": 51
+      "signal_index": 51,
+      "replaced_same_bar": false
     },
     {
       "id": "B006",
@@ -1248,7 +1254,8 @@
       ],
       "terminal": "gekauft",
       "end": 1774497600000,
-      "signal_index": 71
+      "signal_index": 71,
+      "replaced_same_bar": false
     },
     {
       "id": "B007",
@@ -1258,7 +1265,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "gescheitert",
-      "end": 1775318400000
+      "end": 1775318400000,
+      "replaced_same_bar": false
     },
     {
       "id": "B008",
@@ -1268,7 +1276,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "gescheitert",
-      "end": 1775347200000
+      "end": 1775347200000,
+      "replaced_same_bar": false
     },
     {
       "id": "B009",
@@ -1281,7 +1290,8 @@
       ],
       "terminal": "gekauft",
       "end": 1775404800000,
-      "signal_index": 88
+      "signal_index": 88,
+      "replaced_same_bar": false
     },
     {
       "id": "B010",
@@ -1291,7 +1301,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "ersetzt",
-      "end": 1775592000000
+      "end": 1775592000000,
+      "replaced_same_bar": false
     },
     {
       "id": "B011",
@@ -1301,7 +1312,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "ersetzt",
-      "end": 1775736000000
+      "end": 1775592000000,
+      "replaced_same_bar": true
     },
     {
       "id": "B012",
@@ -1314,7 +1326,8 @@
       ],
       "terminal": "gekauft",
       "end": 1775750400000,
-      "signal_index": 100
+      "signal_index": 100,
+      "replaced_same_bar": false
     },
     {
       "id": "B013",
@@ -1324,7 +1337,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "ersetzt",
-      "end": 1776600000000
+      "end": 1776600000000,
+      "replaced_same_bar": false
     },
     {
       "id": "B014",
@@ -1334,7 +1348,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "gescheitert",
-      "end": 1776715200000
+      "end": 1776715200000,
+      "replaced_same_bar": false
     },
     {
       "id": "B015",
@@ -1347,7 +1362,8 @@
       ],
       "terminal": "gekauft",
       "end": 1776758400000,
-      "signal_index": 112
+      "signal_index": 112,
+      "replaced_same_bar": false
     },
     {
       "id": "B016",
@@ -1359,7 +1375,8 @@
         1777867200000
       ],
       "terminal": "gescheitert",
-      "end": 1777881600000
+      "end": 1777881600000,
+      "replaced_same_bar": false
     },
     {
       "id": "B017",
@@ -1373,7 +1390,8 @@
       ],
       "terminal": "gekauft",
       "end": 1777924800000,
-      "signal_index": 137
+      "signal_index": 137,
+      "replaced_same_bar": false
     },
     {
       "id": "B018",
@@ -1386,7 +1404,8 @@
       ],
       "terminal": "gekauft",
       "end": 1781366400000,
-      "signal_index": 155
+      "signal_index": 155,
+      "replaced_same_bar": false
     },
     {
       "id": "B019",
@@ -1396,7 +1415,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "gescheitert",
-      "end": 1781539200000
+      "end": 1781539200000,
+      "replaced_same_bar": false
     },
     {
       "id": "B020",
@@ -1407,7 +1427,8 @@
       "retest_bars": [],
       "terminal": "verfallen",
       "end": 1783814400000,
-      "block_reason": null
+      "block_reason": null,
+      "replaced_same_bar": false
     },
     {
       "id": "B021",
@@ -1420,7 +1441,8 @@
       ],
       "terminal": "gekauft",
       "end": 1784116800000,
-      "signal_index": 184
+      "signal_index": 184,
+      "replaced_same_bar": false
     },
     {
       "id": "B022",
@@ -1431,7 +1453,8 @@
       "retest_bars": [],
       "terminal": "verfallen",
       "end": 1784476800000,
-      "block_reason": null
+      "block_reason": null,
+      "replaced_same_bar": false
     },
     {
       "id": "B023",
@@ -1444,7 +1467,8 @@
       ],
       "terminal": "gekauft",
       "end": 1784851200000,
-      "signal_index": 201
+      "signal_index": 201,
+      "replaced_same_bar": false
     },
     {
       "id": "B024",
@@ -1454,7 +1478,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "gescheitert",
-      "end": 1786003200000
+      "end": 1786003200000,
+      "replaced_same_bar": false
     },
     {
       "id": "B025",
@@ -1467,7 +1492,8 @@
       ],
       "terminal": "gekauft",
       "end": 1786104000000,
-      "signal_index": 213
+      "signal_index": 213,
+      "replaced_same_bar": false
     },
     {
       "id": "B026",
@@ -1480,7 +1506,8 @@
       ],
       "terminal": "gekauft",
       "end": 1787054400000,
-      "signal_index": 224
+      "signal_index": 224,
+      "replaced_same_bar": false
     },
     {
       "id": "B027",
@@ -1493,7 +1520,8 @@
       ],
       "terminal": "gekauft",
       "end": 1787184000000,
-      "signal_index": 229
+      "signal_index": 229,
+      "replaced_same_bar": false
     },
     {
       "id": "B028",
@@ -1503,7 +1531,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "ersetzt",
-      "end": 1787212800000
+      "end": 1787212800000,
+      "replaced_same_bar": false
     },
     {
       "id": "B029",
@@ -1513,7 +1542,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "ersetzt",
-      "end": 1787284800000
+      "end": 1787284800000,
+      "replaced_same_bar": false
     },
     {
       "id": "B030",
@@ -1526,7 +1556,8 @@
       ],
       "terminal": "gekauft",
       "end": 1787356800000,
-      "signal_index": 238
+      "signal_index": 238,
+      "replaced_same_bar": false
     },
     {
       "id": "B031",
@@ -1539,7 +1570,8 @@
       ],
       "terminal": "gekauft",
       "end": 1787832000000,
-      "signal_index": 247
+      "signal_index": 247,
+      "replaced_same_bar": false
     },
     {
       "id": "B032",
@@ -1549,7 +1581,8 @@
       "first_retest": null,
       "retest_bars": [],
       "terminal": "gescheitert",
-      "end": 1788739200000
+      "end": 1788739200000,
+      "replaced_same_bar": false
     },
     {
       "id": "B033",
@@ -1562,7 +1595,8 @@
       ],
       "terminal": "gekauft",
       "end": 1789819200000,
-      "signal_index": 272
+      "signal_index": 272,
+      "replaced_same_bar": false
     }
   ],
   "journal": [
@@ -12257,6 +12291,15 @@
       "old_rk_still_open": []
     }
   ],
+  "audit_lifetime_corrections": [
+    {
+      "observation": "O021",
+      "previous_end": null,
+      "previous_reason": "am_datenende_offen",
+      "end": 1775592000000,
+      "reason": "neue_beobachtung"
+    }
+  ],
   "counts": {
     "observations": 57,
     "breakouts": 33,
@@ -12270,6 +12313,7 @@
     "episodes_with_retest": 18,
     "retest_bars": 19,
     "buys": 16,
+    "breakouts_replaced_same_bar": 1,
     "positive_lots": 6,
     "negative_lots": 10
   },
