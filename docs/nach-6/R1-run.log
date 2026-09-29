@@ -25,3 +25,7 @@ start 2 S1 row 1: 10494.35; independent checks PASS
 start 2 S2 row 0: 9980.51; independent checks PASS
 start 2 S2 row 1: 9773.36; independent checks PASS
 start 2 S3 row 0: 10367.64; independent checks PASS
+start 2 S3 row 1: 10495.25; independent checks PASS
+start 2 S4 row 0: 9759.20; independent checks PASS
+start 2 S4 row 1: 9796.79; independent checks PASS
+All 30 causal runs and independent accounts PASS

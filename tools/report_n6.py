@@ -27,6 +27,8 @@ def cycles(result):
 def main():
     report=['# Historische Auswertung nach Etappe 6','',
         'Basis `05208cecce8d5a0e856a1ea56984b209f403ccd6`. Nur das festgelegte Paar Basis/E42-12; keine Optimierung. Live unverändert.','',
+        '**Ergebnis bis 29.09., 12:00 UTC:** Im Hauptfall S1 endet die Basis mit 12.813,81 USD, E42 mit 12.639,84 USD: E42 liegt 173,96 USD beziehungsweise 1,3576 % darunter und hat höheren Schluss-DD sowie eine höhere obere Intrabar-Grenze. Das bedingte 95-%-Intervall des relativen Tagesbereichsvorteils reicht von −4,1660 bis +1,4369 % (p_cond 0,839658). Keine belegte Überlegenheit.','',
+        'Die Basis dominiert historisch S0/S1/S2/S4. S3 (zusätzliche Wartekerze, 0,1 % Slippage) zeigt +117,27 USD für E42, aber höheren Schluss-DD: ein Zielkonflikt. Alle drei S3-Unsicherheitsintervalle umfassen null. Sein positiver Unterschied konzentriert sich auf August (+204,21 USD), mehr als der gesamte Vorteil. S1 bleibt auch bei beiden festgelegten Frischstarts negativ. Keine Auswahl des günstigsten Szenarios als neues Hauptresultat.','',
         'R0 endet am 27.09.2026 um 08:29:08.840 UTC (letzter Close 08:00). R1 endet fest am 29.09.2026 um 12:00 UTC. ',
         'R1 ergänzt 13 abgeschlossene Kerzen; die 2.480 abgeschlossenen R0-Kerzen einschließlich Warmup sind feldgenau gleich. Die damalige laufende R0-Kerze bleibt im Original erhalten, war dort ausgeschlossen und wird nur in R1 als später abgeschlossene neue Kerze verwendet.','',
         'Daten, Parameter, Statistik und Ausführung wurden vor der Auswertung fixiert (erster Plan Commit `6462e08`, erhalten als `plan-v1.json`). Ein i+2-Frischstart traf einen numerischen Überverkauf um 1,7347e-18 BTC. Planversion 2 dokumentiert die isolierte Rundungskorrektur (höchstens 8 ULP des Spitzenbestands); materielle Überverkäufe bleiben gesperrt. Alle 60 Fälle wurden danach neu gerechnet. Analyse nach Datenkenntnis, keine historische Präregistrierung. ',
@@ -88,6 +90,17 @@ def main():
             b,k=x['rows'];c=x['comparison']
             report.append(f"| {utc(b['start_ms'])} | {x['scenario']} | {b['ende']:.2f} | {k['ende']:.2f} | {c['delta_usd']:+.2f} | {c['dominance']} | {b['dd_close_pct']:.3f} / {b['dd_intrabar_upper_pct']:.3f} | {k['dd_close_pct']:.3f} / {k['dd_intrabar_upper_pct']:.3f} |")
         report+=['','Vollständige Cash/BTC/Restkosten/Gebühren/Exposition, Monats-/Drittelstände und größte Risikoepisoden auch für jeden Frischstart: Paket-`results.json` und `periods.csv`.','']
+        report += [f'### {package}: größte Rückgangsphasen des vollständigen Pfads','',
+            'High/Low-Zeiten bezeichnen die Kerze mit diesem Schlusszeitpunkt, keinen beobachteten Intrabar-Zeitpunkt. Zusätzlich sind die drei größten Peak-bis-Erholung-Episoden je Maß im Ergebnis-JSON gespeichert.','',
+            '| Fall / Zeile | Maß | DD % | Peak UTC / Bewertung | Tief UTC / Bewertung |',
+            '|---|---|---:|---|---|']
+        for x in full:
+            for name,r in zip(['Basis','E42'],x['rows']):
+                for metric,phase in zip(['Schluss','untere Grenze','obere Grenze'],r['risk_phases']):
+                    p=phase['maximum']
+                    if p:
+                        report.append(f"| {x['scenario']} {name} | {metric} | {phase['dd_pct']:.4f} | {utc(p['peak_at'])} / {p['peak_event']} | {utc(p['trough_at'])} / {p['trough_event']} |")
+        report+=['']
         ledgers=json.loads(gzip.decompress((DOC/package/'ledgers.json.gz').read_bytes()))
         for row in ledgers:
             allcycles.append(dict(package=package,start_index=row['start_index'],scenario=row['scenario'],row=row['row'],cycles=cycles(row['result'])))
@@ -111,7 +124,7 @@ def main():
         '741 reguläre Tests (728 alte unverändert +13 neu), sechs synthetische Statistik-Testgruppen und 15 neue gezielte Schutzproben. Erhalten: F17 16, F13 16, Etappe 4 23, 3b 19, D01 6, F09 3. Protokolle in `checks/`. Unabhängige Rechnung übernimmt ausgewählte Kandidaten bzw. ausgeführte Mengen; sie bestätigt Buchführung, nicht Strategieauswahl oder historische Verfügbarkeit.','',
         'Live-Engine, Konfiguration, site, Versandliste, alte Ausführungs-/Positions-/Checkpointformate und Verträge unverändert. Nur eigener Zweig; kein main-Merge/Push, keine Orders oder Nachrichten. V1-Fills simuliert, historische Signalbänder Diagnostik, manueller Bestand unbekannt. F13-ID bleibt lokale Identität; uncertain blockiert, kein Reset/erneuter Versand bestätigter oder unklarer Nachrichten, keine Exactly-once-Zusage. Ephemerer Runnerverlust vor Git-Persistenz bleibt offen. V2/Shorts/E41.6 getrennt. **Kein Live-Go.**','',
         'Exakter Remote-HEAD, CI, Bundle/ZIP-Hashes, vollständiger Restore, Test-/Schutzproben und identische unabhängige Neuberechnung stehen nach Abschluss in `audit-backups/nach-6-abschluss-<SHA>/ABSCHLUSS.json`. Weitere Arbeit nur separat.','']
-    (DOC/'BERICHT.md').write_text('\n'.join(report),encoding='utf-8')
+    (DOC/'BERICHT.md').write_text('\n'.join(report).replace('tradeoff_or_tie','Zielkonflikt / Gleichstand').replace('| basis |','| Basis |'),encoding='utf-8')
     print(json.dumps(brief,indent=2))
 
 

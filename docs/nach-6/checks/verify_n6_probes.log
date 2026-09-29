@@ -34,6 +34,14 @@
       "caught": true
     },
     {
+      "name": "micro_short",
+      "caught": true
+    },
+    {
+      "name": "material_oversale",
+      "caught": true
+    },
+    {
       "name": "iid_instead_of_blocks",
       "caught": true
     },
