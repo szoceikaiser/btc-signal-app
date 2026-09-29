@@ -1,5 +1,26 @@
 # 00 STAND — Kurzstand in einer halben Minute
 
+## Aktueller Arbeitsstand 29.09.2026: Etappe 4 abgeschlossen
+
+- F03/F04/F05/F10: V1-Restlose und gebührenhaltige Kosten, proportionaler Verkauf,
+  gezielter E42-Teilstop, monoton gespeicherter Long-Stop und gemeinsamer Positionsplan.
+- Signalreferenz, simulierte Fills und unbekannter manueller Live-Bestand bleiben
+  ausdrücklich getrennt. Kein erfundener Live-Einstand, kein Altpositionsreset.
+- Positionsschema 2; vollständige V1-Checkpoints Version 1 einschließlich Absichten,
+  Reservierungen, Kosten, E41/E42 und Risiko. `widerstand_exits` bleibt erhalten.
+- **676 Tests**, **23/23 neue Sabotagen**, 3b 19/19, D01 6/6, F09 3/3.
+  Vier Auditfehler auf 3b reproduziert. Sechs festgelegte lokale Vergleiche:
+  1.101 Fills / 9.054 Closes unabhängig geprüft, sechs Prozessneustarts exakt gleich.
+- Ohne Slippage: Live-Basis 13.418,88 USD (−12,57 gegenüber 3b), E42 13.299,89 USD
+  (+49,02); obere Intrabar-DD-Grenze jeweils **9,9428 %**. Keine Strategieauswahl.
+- Zweig `codex/etappe-4-bestand-stop`, Arbeitsbaum `etappe-4-work`, Basis `9606a6f`.
+  Bericht `docs/nacharbeit-2026-09-28/ETAPPE-4-ABSCHLUSS.md` nennt jede Testanpassung
+  und die Grenzen. Exakte Abschluss-SHA/CI/Restore lokal in
+  `audit-backups/4-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+- Kein main-/Live-Go; Originale/Tag/Workflows unverändert. Nächster **getrennter**
+  Auftrag: Etappe 5a (F13), **GPT-6 Sol / hoch**, siehe `START-5A.md` im Berichtsordner.
+  F17 bleibt 5b; keine Folgeetappe automatisch starten.
+
 ## Aktueller Arbeitsstand 28.09.2026: Etappe 3b abgeschlossen
 
 - F01/F12-Vertrag V1 umgesetzt im neuen Offline-Pfad `backtest.run_execution`:

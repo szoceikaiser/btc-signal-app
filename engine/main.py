@@ -34,7 +34,7 @@ from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCH
                            ampel, ampel_richtung, classify_pattern, lage_bericht,
                            orderflow_detail, OF_FENSTER, DIP_FLOOR_PCT, SignalType,
                            last_significant_impulse, liq_levels, next_pivot_beyond,
-                           oi_in_btc, RUECKKAUF_TRANCHE)
+                           oi_in_btc, RUECKKAUF_TRANCHE, resolve_stop)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
                              format_ruecktest, format_stop_rueckeroberung,
                              send_lage, send_plan,
@@ -392,95 +392,8 @@ def eval_params(cfg: dict) -> dict:
 
 # --------------------------------------------------------- State-Persistenz
 
-def pos_to_state(pos: Position) -> dict:
-    d = {"direction": pos.direction, "pos_state": pos.state.value,
-         "last_signal_ts": pos.last_signal_ts, "retrace_extreme": pos.retrace_extreme,
-         "tp_rungs": pos.tp_rungs, "dip_buys": pos.dip_buys,
-         "buy_rungs": pos.buy_rungs, "entry_ref": pos.entry_ref,
-         "entry_pct": pos.entry_pct, "liq_exits": pos.liq_exits,
-         "high_exits": pos.high_exits, "liq_entries": pos.liq_entries,
-         "last_stop_ts": pos.last_stop_ts, "ziel_extrem": pos.ziel_extrem,
-         "be_aktiv": pos.be_aktiv,
-         # E41: Die Live-Engine ist bei jedem Lauf ein neuer Prozess. Ohne diese drei
-         # Felder finge das Warten auf die Rueckeroberung bei JEDEM Lauf neu an - der
-         # Stop kaeme nie, und im Backtest fiele es nicht auf (der rechnet am Stueck).
-         "stop_wartet": pos.stop_wartet, "stop_wartet_inv": pos.stop_wartet_inv,
-         "stop_geprueft": pos.stop_geprueft,
-         # E44.3 (E42): Beobachtung, Ausbruch, Rueckkauf-Teil und sein Stop gelten ueber
-         # viele Kerzen. Ohne diese Felder finge jeder Lauf (alle 4 Stunden ein neuer
-         # Prozess) von vorn an: kein Ausbruch wuerde je erinnert, das Ruecktest-Fenster
-         # liefe nie ab, der Teil verloere seinen Stop - und der Backtest (am Stueck)
-         # zeigte davon nichts.
-         "e42_marke": pos.e42_marke, "e42_richtung": pos.e42_richtung,
-         "e42_start_ts": pos.e42_start_ts, "e42_ausbruch_ts": pos.e42_ausbruch_ts,
-         "e42_gekauft": pos.e42_gekauft, "e42_teil_marke": pos.e42_teil_marke,
-         "e42_teil_wartet": pos.e42_teil_wartet,
-         "e42_teil_wartet_inv": pos.e42_teil_wartet_inv,
-         "e42_teil_geprueft": pos.e42_teil_geprueft,
-         "bestand_pct": pos.bestand_pct,
-         "zones": None}
-    if pos.zones:
-        z = pos.zones
-        d["zones"] = {
-            "impuls_start": z.impulse.start.price, "impuls_start_ts": z.impulse.start.ts,
-            "impuls_start_kind": z.impulse.start.kind,
-            "impuls_ende": z.impulse.end.price, "impuls_ende_ts": z.impulse.end.ts,
-            "impuls_ende_kind": z.impulse.end.kind,
-            "level_05": z.level_05, "gp_upper": z.gp_upper, "gp_lower": z.gp_lower,
-            "level_0786": z.level_0786, "invalidation": z.invalidation,
-        }
-        # E18.3: Steht eine eingefrorene Zielreferenz, zeigt der Chart deren Ziele —
-        # sonst zeichnete er andere Linien, als die Engine handelt.
-        ref = pos.ziel_extrem if pos.ziel_extrem is not None else pos.retrace_extreme
-        if ref is not None:
-            d["zones"]["ext1"] = z.ext_target(ref, 1.0)
-            d["zones"]["ext2"] = z.ext_target(ref, 1.618)
-    return d
-
-
-def pos_from_state(d: dict) -> Position:
-    pos = Position()
-    if not d:
-        return pos
-    pos.direction = d.get("direction", "NONE")
-    pos.state = PosState(d.get("pos_state", "FLAT"))
-    pos.last_signal_ts = d.get("last_signal_ts", -1)
-    pos.retrace_extreme = d.get("retrace_extreme")
-    pos.tp_rungs = d.get("tp_rungs", 0)
-    pos.dip_buys = d.get("dip_buys", 0)
-    pos.buy_rungs = d.get("buy_rungs", 0)
-    pos.entry_ref = d.get("entry_ref")
-    pos.entry_pct = d.get("entry_pct", 0)
-    pos.liq_exits = d.get("liq_exits", 0)
-    pos.high_exits = d.get("high_exits", 0)
-    pos.liq_entries = d.get("liq_entries", 0)
-    pos.last_stop_ts = d.get("last_stop_ts", -1)
-    pos.ziel_extrem = d.get("ziel_extrem")
-    pos.be_aktiv = bool(d.get("be_aktiv", False))
-    pos.stop_wartet = int(d.get("stop_wartet", 0) or 0)
-    pos.stop_wartet_inv = d.get("stop_wartet_inv")
-    pos.stop_geprueft = d.get("stop_geprueft")
-    pos.e42_marke = d.get("e42_marke")
-    pos.e42_richtung = d.get("e42_richtung", "NONE") or "NONE"
-    pos.e42_start_ts = int(d.get("e42_start_ts", -1))
-    pos.e42_ausbruch_ts = int(d.get("e42_ausbruch_ts", -1))
-    pos.e42_gekauft = d.get("e42_gekauft")
-    pos.e42_teil_marke = d.get("e42_teil_marke")
-    pos.e42_teil_wartet = int(d.get("e42_teil_wartet", 0) or 0)
-    pos.e42_teil_wartet_inv = d.get("e42_teil_wartet_inv")
-    pos.e42_teil_geprueft = d.get("e42_teil_geprueft")
-    # Altbestand ohne das Feld: aus den Kaeufen schaetzen, hoechstens 100. Die Schaetzung
-    # kennt keine Teilverkaeufe und liegt damit eher zu HOCH - im Zweifel also "voll",
-    # also eher kein Rueckkauf als einer zu viel.
-    pos.bestand_pct = int(d.get("bestand_pct", min(100, pos.entry_pct or 0)) or 0)
-    z = d.get("zones")
-    if z and "impuls_start" in z:
-        imp = Impulse(
-            Pivot(0, z.get("impuls_start_ts", 0), z["impuls_start"], z.get("impuls_start_kind", "L")),
-            Pivot(0, z.get("impuls_ende_ts", 0), z["impuls_ende"], z.get("impuls_ende_kind", "H")))
-        pos.zones = FibZones(imp, z["level_05"], z["gp_upper"], z["gp_lower"],
-                             z["level_0786"], z["invalidation"])
-    return pos
+# Shared complete, versioned codec (stage 4).
+from position_state import pos_to_state, pos_from_state
 
 
 def zonen_vorschau(candles: list[Candle], cfg: dict | None = None,
@@ -608,7 +521,20 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
     piv = find_pivots(candles, n=par["pivot_n"])
 
     plan: dict = {"richtung": pos.direction, "anteil_pct": pos.entry_pct,
-                  "einstand": pos.entry_ref, "kurs": cur.close}
+                  "anteil_art": "Signaltranchen kumuliert",
+                  "einstand": pos.entry_ref, "kurs": cur.close,
+                  "bestand_quelle": pos.inventory_source,
+                  "live_bestand_belegt": False,
+                  "einstand_art": "Signalreferenz (kein belegter Live-Einstand)",
+                  "basis_einstand": pos.entry_ref,
+                  "migration": list(pos.migration_notes)}
+    if pos.inventory_source == "simulated_fills":
+        from inventory import summary
+        total = summary(pos.lots)
+        plan.update(einstand=total["entry"], btc=total["units"],
+                    anteil_pct=pos.bestand_pct, anteil_art="finanzierter Restanteil (Simulation)",
+                    anschaffungskosten=total["cost"], kosten_vollstaendig=total["complete"],
+                    einstand_art="Simulierter Kosteneinstand inkl. Kaufgebuehr")
     # E32: Die Lage dazu - Struktur (Preis) und Spot-Nachfrage (Order-Flow). Reine
     # Information; sie aendert keine einzige Marke des Plans. Kaiser am 12.09.2026:
     # "ich bekomme die info zur struktur nur, wenn ich eine nachricht fuer ein nachkauf
@@ -684,13 +610,8 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
                          "tranche": TRANCHEN["TP2"]})
 
     # --- Stop ---
-    stop, grund = z.invalidation, "Invalidierung"
-    if par["trail_stop"] and (pos.state in (PosState.TP1, PosState.TP2)
-                              or pos.tp_rungs > 0 or (par["be_im_plus"] and pos.be_aktiv)):
-        if pos.entry_ref is not None:
-            besser = pos.entry_ref > stop if lang else pos.entry_ref < stop
-            if besser:
-                stop, grund = pos.entry_ref, "Einstand (nachgezogen)"
+    stop, grund = resolve_stop(pos, cur, piv, trail_stop=par["trail_stop"],
+                               be_im_plus=par["be_im_plus"], stored_only=True)
 
     plan["nachkauf"] = sorted(nach, key=lambda x: -(x.get("preis") or x["zone"][1]) if lang
                               else (x.get("preis") or x["zone"][0]))

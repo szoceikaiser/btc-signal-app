@@ -803,7 +803,8 @@ def run_backtest(candles, flow, cfg: dict, start_ms: int = START_MS) -> list[dic
 
 
 def run_execution(candles, flow, cfg: dict, *, start_ms: int, end_ms: int,
-                  fee: float = .001, slippage: float = 0., start_capital: float = 10000.):
+                  fee: float = .001, slippage: float = 0., start_capital: float = 10000.,
+                  checkpoint_at: int | None = None):
     """V1 closed-loop Long/Spot, using the frozen input's explicit D01 cutoff.
 
     Return signal candidates AND execution ledger together. Recompute this path
@@ -812,7 +813,8 @@ def run_execution(candles, flow, cfg: dict, *, start_ms: int, end_ms: int,
     """
     from execution_v1 import run_v1
     return run_v1(candles, flow, cfg, start_ms=start_ms, end_ms=end_ms,
-                  fee=fee, slippage=slippage, start_capital=start_capital)
+                  fee=fee, slippage=slippage, start_capital=start_capital,
+                  checkpoint_at=checkpoint_at)
 
 
 def run_execution_half(candles, flow, cfg: dict, *, start_ms: int, end_ms: int,

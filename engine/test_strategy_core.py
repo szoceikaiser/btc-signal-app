@@ -1313,9 +1313,10 @@ def test_be_im_plus_zieht_den_stop_auf_den_einstand():
     # erst eine Kerze im Plus (schaltet den Break-even scharf), dann der Rueckfall
     evaluate(cs[:-1], flow, p2, trail_stop=True, be_im_plus=True)
     assert p2.be_aktiv is True
+    assert p2.valid_stop == 145  # Confirmed structure already tighter than entry140.
     s2 = evaluate(cs, flow, p2, trail_stop=True, be_im_plus=True)
     stops = [x for x in s2 if x.type == SignalType.STOPLOSS]
-    assert len(stops) == 1 and "Einstand" in stops[0].reason
+    assert len(stops) == 1 and "Struktur-Tief" in stops[0].reason and "145" in stops[0].reason
     assert p2.state == PosState.FLAT
 
 
@@ -2211,10 +2212,10 @@ def test_e433_mehr_historie_aendert_muster2_nicht_bei_usd():
     """Der Kern von E43.3: Mit "usd" erkennt die Engine bei 400 und bei 1200 geladenen
     Kerzen DIESELBEN Muster - live und Backtest sehen dieselbe Lage gleich.
 
-    Und durch evaluate() hindurch: Die Signale sind gleich - mit einer benannten
-    Ausnahme, Nebenbefund A5 (Teilgewinn am letzten Hoch haengt von der Laenge der
-    Historie ab, docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md, Abschnitt E43.5). Jede ANDERE
-    Abweichung macht den Test rot. Wird A5 behoben, faellt die Ausnahme weg.
+    Und durch evaluate() hindurch, isoliert vom Struktur-Nachzug: trail_stop=False.
+    F03 speichert nun den bei Aktivierung gueltigen Strukturstop; zusaetzlich geladene
+    alte Pivots koennen ihn berechtigt veraendern. Muster 2 bleibt identisch, gesamte
+    Stop-Pfade muessen es nicht. A5 (high_exit) bleibt wie zuvor separat ausgefiltert.
 
     Vorprobe: Bei "alt" unterscheiden sich die Derivate-Pump-Warnungen zwischen den
     Fenstern - der Vergleich erreicht Muster 2 also auch auf Signal-Ebene.
@@ -2228,7 +2229,7 @@ def test_e433_mehr_historie_aendert_muster2_nicht_bei_usd():
     n = len(kerzen)
 
     def lauf(fenster, muster_cvd, n_letzte=60):
-        live = dict(_live_einstellung(), muster_cvd=muster_cvd)
+        live = dict(_live_einstellung(), muster_cvd=muster_cvd, trail_stop=False)
         pos, sigs = Position(), []
         for i in range(n - n_letzte, n + 1):
             aus = max(0, i - fenster)

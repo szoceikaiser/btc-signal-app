@@ -1,6 +1,6 @@
 # Nacharbeit nach dem unabhaengigen Audit
 
-Stand 28.09.2026. Kleine, einzeln pruefbare Etappen; nach jeder Etappe Ergebnis,
+Stand 29.09.2026. Kleine, einzeln pruefbare Etappen; nach jeder Etappe Ergebnis,
 offene Grenzen und Empfehlung fuer Modell/Aufwand neu bewerten. Keine automatische
 Live-Uebernahme. Ein Go zur Bearbeitung ist kein Go fuer main.
 
@@ -40,6 +40,18 @@ den individuellen Codex-Tarif.
 [GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol).
 
 ## Aktueller Stand
+
+**Etappe 4 abgeschlossen** auf `codex/etappe-4-bestand-stop`, direkt aus gesichertem
+3b `9606a6f`. Restlose/Kosten in V1, monotone Long-Stop-Grenze, gemeinsamer Plan,
+vollständiges Positionsschema 2 und V1-Checkpoint 1. **676 Tests**, **23/23 neue
+Sabotagen**; 3b/D01/F09 erhalten. Sechs eng festgelegte lokale Vergleiche mit
+unabhängiger Losrechnung und identischen Fortsetzungen in neuen Prozessen.
+[Abschlussbericht und Grenzen](ETAPPE-4-ABSCHLUSS.md). Signalreferenz ist kein
+belegter Live-Bestand; unbekannte Altgeschichte bleibt gekennzeichnet.
+Kein main-/Live-Go. Nächster eigener Auftrag **Etappe 5a (F13), GPT-6 Sol / hoch**,
+vollständiger [Startprompt](START-5A.md). F17 bleibt 5b. Etappe 4 hier beenden.
+
+### Historischer Abschluss 3b
 
 **Etappe 3b abgeschlossen** auf `codex/etappe-3b-f01-f12`, direkt aus gesichertem
 3a `67c8e62`. Neuer kausaler V1-Pfad `backtest.run_execution` mit Ereignis-Ledger,

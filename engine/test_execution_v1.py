@@ -31,6 +31,12 @@ def order(action,t,price=100.,pct=100):
     return dict(action=action,type=t,price=price,tranche_pct=pct,reason='hand case')
 
 
+def mixed_initial_lots():
+    # Stage 4: explicit cohort evidence replaces mutating the aggregate rk_units.
+    return [dict(id=k, at=0, fill_price=100., units=q, cost=q*100,
+                 buy_fee=0., kind=k) for k, q in [('base', 75.), ('e42', 25.)]]
+
+
 class ScriptDecision:
     def __init__(self,cs,fs,p,params,by_bar):
         self.candidates=[dict(o,ts=cs[-1].ts) for o in by_bar.get(cs[-1].ts//v.STEP,[])]
@@ -377,7 +383,7 @@ def test_real_e42_partial_stop_precedes_tp_and_preserves_other_lots():
     with patch.object(sc,'find_pivots',return_value=[]):
         d=v.decide(cs,fs,p,dict(tp_ladder=False,buy_ladder=False,rest_halten=True))
     assert [o['action'] for o in d.candidates]==['part_stop','tp1','tp2']
-    b=v.Book(0,0,0,1,100); b.rk_units=25
+    b=v.Book(0,0,0,1,100,initial_lots=mixed_initial_lots())
     pending=b.schedule(d.candidates,105)
     assert pending[0]['action']=='part_stop' and pending[0]['amount']==25
     done=[b.fill(o,sc.Candle(v.STEP,100,100,100,100)) for o in pending]
@@ -397,7 +403,7 @@ def test_real_e42_only_part_stop_preserves_base_holdings():
     p=position(e42_teil_marke=110.)
     d=real_decision([(140,140,100,105)],p)
     assert [o['action'] for o in d.candidates]==['part_stop']
-    b=v.Book(0,0,0,1,100);b.rk_units=25
+    b=v.Book(0,0,0,1,100,initial_lots=mixed_initial_lots())
     pending=b.schedule(d.candidates,105)
     with patch.object(sc,'find_pivots',return_value=[]):
         d.confirm(p,[b.fill(o,sc.Candle(v.STEP,90,90,90,90)) for o in pending],b)

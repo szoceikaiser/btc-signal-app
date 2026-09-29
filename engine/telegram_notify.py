@@ -163,11 +163,19 @@ def format_plan(p: dict) -> str:
     emoji, _ = STYLE["PLAN"]
     lang = p.get("richtung") == "LONG"
     zeilen = [f"{emoji} PLAN — {'Long' if lang else 'Short'}-Position, "
-              f"{p.get('anteil_pct', 0)} % investiert"]
+              f"{p.get('anteil_pct', 0)} % {p.get('anteil_art', 'investiert')}"]
     if p.get("einstand"):
-        zeilen.append(f"Einstand {_fmt_usd(p['einstand'])} · Kurs {_fmt_usd(p['kurs'])}")
+        zeilen.append(f"{p.get('einstand_art', 'Einstand')} {_fmt_usd(p['einstand'])} · Kurs {_fmt_usd(p['kurs'])}")
     else:
         zeilen.append(f"Kurs {_fmt_usd(p['kurs'])}")
+    if p.get("bestand_quelle") == "signal_reference":
+        zeilen.append("Manueller Live-Bestand und Ausfuehrungen sind nicht belegt.")
+    elif p.get("kosten_vollstaendig") is False:
+        zeilen.append("Anschaffungskosten des simulierten Altbestands sind unbekannt.")
+    elif p.get("bestand_quelle") == "simulated_fills" and p.get("basis_einstand"):
+        zeilen.append(f"Basis-Einstand fuer Hauptstop {_fmt_usd(p['basis_einstand'])}; E42-Teil separat.")
+    if "prior_stop_maximum_unknown" in p.get("migration", []):
+        zeilen.append("Altzustand: frueherer Stop-Hoechststand ist nicht rekonstruierbar.")
 
     def _block(titel, eintraege):
         if not eintraege:

@@ -1237,7 +1237,8 @@ def test_plan_nachgezogener_stop_bleibt_ohne_rueckeroberung():
     pos.state, pos.tp_rungs = PosState.TP1, 1
     p = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0, "trail_stop": True,
                                      "stop_rueckeroberung": 1}, pos)
-    assert p["stop"]["grund"] == "Einstand (nachgezogen)"        # Vorprobe
+    # F10: the shared resolver includes the confirmed structure120 above entry115.
+    assert p["stop"] == {"preis": 120, "grund": "Struktur-Tief"}
     assert "rueckeroberung" not in p["stop"]
 
 

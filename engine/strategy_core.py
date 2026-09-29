@@ -1158,7 +1158,15 @@ class Position:
     tp_rungs: int = 0                        # Anzahl gefeuerter Leiter-Zwischenverkaeufe
     dip_buys: int = 0                        # Anzahl bedingter Nachkaeufe unter Invalidierung (E9.3)
     buy_rungs: int = 0                       # Anzahl Mehrtages-Kaufleiter-Tranchen (E9.5)
-    entry_ref: Optional[float] = None        # tranchengewichteter Durchschnitts-Einstand (E9.10)
+    entry_ref: Optional[float] = None        # Signalanker; V1: Restkosten/BTC des Basisteils
+    # Stage 4: only V1 fill feedback supplies cost-bearing inventory. The live
+    # observer remains an explicitly labelled signal reference, never broker BTC.
+    inventory_source: str = "signal_reference"
+    lots: list = field(default_factory=list)
+    cost_basis_complete: bool = True
+    migration_notes: list = field(default_factory=list)
+    valid_stop: Optional[float] = None
+    valid_stop_reason: str = ""
     entry_pct: int = 0                       # Summe der eingestiegenen Tranchen-Prozente
     liq_exits: int = 0                       # Anzahl Teilverkaeufe an Liquidationen (E9.11)
     high_exits: int = 0                      # Anzahl Teilverkaeufe am letzten Hoch (E10.2)
@@ -1211,6 +1219,11 @@ def _reset_position(pos: "Position") -> None:
     pos.dip_buys = 0
     pos.buy_rungs = 0
     pos.entry_ref = None
+    pos.lots = []
+    pos.cost_basis_complete = True
+    pos.valid_stop = None
+    pos.valid_stop_reason = ""
+    pos.migration_notes = [n for n in pos.migration_notes if n != 'prior_stop_maximum_unknown']
     pos.entry_pct = 0
     pos.liq_exits = 0
     pos.high_exits = 0
@@ -1228,6 +1241,43 @@ def _reset_position(pos: "Position") -> None:
     pos.e42_teil_wartet_inv = None
     pos.e42_teil_geprueft = None
     pos.bestand_pct = 0
+
+
+def resolve_stop(pos, cur, pivots, *, trail_stop=False, be_im_plus=False,
+                 commit=False, stored_only=False):
+    """Single stop source for engine and plan. Long boundaries survive breaches.
+
+    A NEW structure candidate must be below the close; an existing boundary has
+    no such filter. Reading a plan cannot move the stop or activate break-even.
+    Short behavior is retained as historical diagnostics, outside V1.
+    """
+    if pos.state == PosState.FLAT or pos.zones is None:
+        return None, ""
+    long_side = pos.direction == "LONG"
+    if stored_only and long_side and pos.valid_stop is not None:
+        return pos.valid_stop, pos.valid_stop_reason
+    level, reason = pos.zones.invalidation, "Invalidierung"
+    active = be_im_plus and pos.be_aktiv and pos.entry_ref is not None
+    if trail_stop and (pos.state in (PosState.TP1, PosState.TP2)
+                       or pos.tp_rungs > 0 or active):
+        candidates = [(level, reason)]
+        if pos.entry_ref is not None:
+            candidates.append((pos.entry_ref, "Einstand (nachgezogen)"))
+        if long_side:
+            lows = [p.price for p in pivots if p.kind == "L" and p.price < cur.close]
+            if lows:
+                candidates.append((max(lows), "Struktur-Tief"))
+            level, reason = max(candidates, key=lambda x: x[0])
+        else:
+            highs = [p.price for p in pivots if p.kind == "H" and p.price > cur.close]
+            if highs:
+                candidates.append((min(highs), "Struktur-Hoch"))
+            level, reason = min(candidates, key=lambda x: x[0])
+    if long_side and pos.valid_stop is not None and pos.valid_stop >= level:
+        level, reason = pos.valid_stop, pos.valid_stop_reason
+    if commit and long_side:
+        pos.valid_stop, pos.valid_stop_reason = level, reason
+    return level, reason
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
@@ -2206,8 +2256,6 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         # der Stop auf den hoechsten der drei Bezugspunkte: urspruengliche Invalidierung,
         # Durchschnitts-Einstand (Break-even) und letztes bestaetigtes Pivot-Tief unter
         # dem Kurs (Struktur). Er kann dadurch NUR steigen, nie lockerer werden.
-        stop_level = z.invalidation
-        trail_note = ""
         # E19.3: Break-even schon, sobald die Position EINMAL im Plus stand (nicht erst nach
         # einem Teilgewinn). Der Merker ist noetig, weil die Bedingung genau in der Kerze,
         # in der der Stop greifen soll, nicht mehr erfuellt waere — der Kurs ist dann ja
@@ -2215,22 +2263,8 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         if be_im_plus and pos.entry_ref is not None and not pos.be_aktiv:
             if (cur.close > pos.entry_ref) if long_side else (cur.close < pos.entry_ref):
                 pos.be_aktiv = True
-        _im_plus = be_im_plus and pos.be_aktiv and pos.entry_ref is not None
-        if trail_stop and (pos.state in (PosState.TP1, PosState.TP2)
-                           or pos.tp_rungs > 0 or _im_plus):
-            cands = [(z.invalidation, "Invalidierung")]
-            if pos.entry_ref is not None:
-                cands.append((pos.entry_ref, "Einstand"))
-            if long_side:
-                lows = [p.price for p in pivots if p.kind == "L" and p.price < cur.close]
-                if lows:
-                    cands.append((max(lows), "Struktur-Tief"))
-                stop_level, trail_note = max(cands, key=lambda x: x[0])
-            else:
-                highs = [p.price for p in pivots if p.kind == "H" and p.price > cur.close]
-                if highs:
-                    cands.append((min(highs), "Struktur-Hoch"))
-                stop_level, trail_note = min(cands, key=lambda x: x[0])
+        stop_level, trail_note = resolve_stop(pos, cur, pivots, trail_stop=trail_stop,
+                                             be_im_plus=be_im_plus, commit=True)
         stop_hit = (cur.close < stop_level) if long_side else (cur.close > stop_level)
         stop_preis, stop_grund = cur.close, None
         # E41: nur der URSPRUENGLICHE Stop - ein nachgezogener sichert Gewinn und bleibt.
@@ -2238,7 +2272,7 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 stop_puffer_pct > 0 or stop_rueckeroberung > 0 or stop_auf_docht):
             _wartete = pos.stop_wartet > 0
             stop_hit, stop_preis, stop_grund = stop_entscheidung(
-                pos, cur, z.invalidation, long_side, puffer_pct=stop_puffer_pct,
+                pos, cur, stop_level, long_side, puffer_pct=stop_puffer_pct,
                 rueckeroberung=stop_rueckeroberung, auf_docht=stop_auf_docht)
             # Gesperrt in der Wartekerze UND in der Kerze der Rueckeroberung: Die
             # Bestaetigung steht erst mit deren Schluss fest.
@@ -2250,10 +2284,10 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         # darf der bedingte Nachkauf nicht aushebeln.
         if stop_hit and conditional_stop and trail_note in ("", "Invalidierung"):
             if long_side:
-                hard_break = cur.close < z.invalidation * (1 - DIP_FLOOR_PCT)
+                hard_break = cur.close < stop_level * (1 - DIP_FLOOR_PCT)
                 flow_ok = _confirm_long()
             else:
-                hard_break = cur.close > z.invalidation * (1 + DIP_FLOOR_PCT)
+                hard_break = cur.close > stop_level * (1 + DIP_FLOOR_PCT)
                 flow_ok = _confirm_short()
             if flow_ok and not hard_break and pos.dip_buys < MAX_DIP_BUYS:
                 # The strategy replaces the main stop even if this buy is rejected.
@@ -2296,7 +2330,7 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     reason = stop_grund                          # E41: warum genau jetzt
                 else:
                     reason = ("Kerzenschluss {} Invalidierung {:.0f}".format(
-                        'unter' if long_side else 'ueber', z.invalidation)
+                        'unter' if long_side else 'ueber', stop_level)
                         + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
                 signals.append(Signal(cur.ts, st, stop_preis, 100, reason))
                 # BUGFIX 2026-07-27: hier stand eine handgeschriebene Teil-Ruecksetzung, die
@@ -2670,9 +2704,9 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if _execution_sizes is not None and action in _execution_sizes:
                 sig.tranche_pct = _execution_sizes[action]
 
-    # Durchschnitts-Einstand fortschreiben (E9.10): tranchengewichtet ueber alle
-    # Einstiegs-Signale dieser Kerze. Zentral hier, damit kein Einstiegspfad vergessen
-    # wird (0.5-Level, Golden Pocket, Flush, 0.786, Kauf-/Dip-Leiter).
+    # Historical signal reference, NOT remaining-inventory cost. V1 replaces this
+    # anchor from filled base lots in Decision.confirm before the next decision.
+    # The live observer has no manual fill evidence and must not invent any.
     for s in signals:
         if s.type in _ENTRY_TYPES and s.tranche_pct > 0:
             tot = pos.entry_pct + s.tranche_pct
@@ -2688,6 +2722,13 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # E44.3: investierter Anteil nach dieser Kerze (immer gefuehrt, damit er stimmt,
     # wenn ausbruch_ruecktest spaeter eingeschaltet wird; aendert kein Signal).
     pos.bestand_pct = bestand_nach(_bestand_start, signals)
+
+    if pos.direction == "LONG" and pos.zones is not None and pos.valid_stop is None:
+        pos.valid_stop, pos.valid_stop_reason = pos.zones.invalidation, "Invalidierung"
+    if _execution_gate is None and pos.direction == "LONG" and pos.zones is not None:
+        # A signal-state TP transition arms the prospective plan now. In V1 this
+        # must instead wait for the fill AND its cost feedback (Decision.confirm).
+        resolve_stop(pos, cur, pivots, trail_stop=trail_stop, be_im_plus=be_im_plus, commit=True)
 
     pos.last_signal_ts = cur.ts
     return signals

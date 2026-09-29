@@ -1,5 +1,55 @@
 # Laufende Übergabe
 
+## 29.09.2026 — Etappe 4 F03/F04/F05/F10 abgeschlossen auf eigenem Zweig
+
+Arbeitsbaum `etappe-4-work`, Zweig `codex/etappe-4-bestand-stop`, direkt aus dem
+gesicherten 3b-Abschluss `9606a6f555f9cdaee86f9c33a5175c5c5306b365`.
+Remotes, Zweige, Arbeitsbäume und Änderungen geprüft; private/fremde Änderungen
+erhalten. Keine neueren main-/E44.4-/E44.5-Commits übernommen. Privates Repo nicht
+committet; Sicherungstag unverändert, main nur lesend beobachtet.
+
+Vertrag: `docs/nacharbeit-2026-09-28/F03-F04-F05-F10-VERTRAG.md`.
+Bericht: `docs/nacharbeit-2026-09-28/ETAPPE-4-ABSCHLUSS.md`.
+V1 führt gebührenhaltige Restkosten je tatsächlich gefülltem Los, proportionalen
+gewöhnlichen Verkauf und gezielten E42-Losverkauf. Gesamteinstand enthält E42;
+Basis-Einstand für den Hauptstop bleibt davon getrennt. Ein Long-Stop bleibt nach
+Aktivierung monoton bis FLAT, auch nach Kursbruch, Nachkauf, Zonen-/Fensterwechsel
+und Neustart. Beim bestätigten TP-Fill wird er aus dem bekannten Präfix aktiviert,
+erst nach Kostenrückkopplung; abgelehnte/verfallene TP-Absichten aktivieren ihn nicht.
+Engine und Plan verwenden denselben gespeicherten Stop samt Grund und E41-Regel.
+
+Positionsschema 2 speichert sämtliche entscheidungsrelevanten Felder einschließlich
+widerstand_exits und Pivot-Indizes. V1-Checkpoint 1 umfasst zusätzlich Reservierungen,
+Absichten, bekannte Entscheidungsbasis, Cash/Restlose, Risiko und bisherige Ergebnisse.
+JSON-Weg plus neue Prozesse liefern identische Fortsetzung. Altzustände behalten
+Position/Dedupe/Signalanker; unbekannte frühere Stopmaxima und fehlende Zähler sind
+markiert. Keine manuelle Live-Ausführung wird aus Telegram-Signalen rekonstruiert.
+Der Live-Observer bleibt Signalreferenz, kein Kostennachweis. Anzeige kennzeichnet
+diese Grenze ausdrücklich. Versandmechanik/F13 und Chart/F17 bleiben unberührt.
+
+**676/676 Tests**, 38 neue; **23/23 neue Sabotagen** nach erreichtem Ausgangsfall.
+Bestehende 3b 19/19, D01 6/6, F09 3/3 erneut bestanden. Zwei alte Erwartungen zu
+Strukturstop/Plan korrigiert, zwei E42-Fixtures um echte Testlose ergänzt. Ein
+Muster-2-Test isoliert nun den Struktur-Nachzug; seine bisherigen Muster-/Signal-
+Assertions bleiben, die zusätzliche Strukturhistorie hat einen eigenen Gegenfall.
+Alle Anpassungen mit konkreten Werten im Bericht. Kein Test gestrichen.
+
+Vorab genau dieselben zwei Zeilen und drei Slippages wie 3b festgelegt. Ausschließlich
+lokales `backtest.run_execution`, Inputs unverändert. 1.101 Fills und 9.054 Closes
+gegen unabhängiges Audit-Buch und Decimal-Kostenrechnung geprüft; sechs echte
+Prozessneustarts mit identischem Gesamtergebnis. Ohne Slippage Endwerte
+13.418,88 / 13.299,89 USD; gegenüber 3b −12,57 / +49,02. Schluss-DD 7,9166 / 8,4177 %,
+**obere Intrabar-Grenze jeweils 9,9428 %**. Kein Gitter, keine Renditezielsetzung,
+keine neuen DD-Schwellen. Originale und frühere Ergebnisdateien unverändert.
+
+Eigener GitHub-Zweig, exakte Abschluss-SHA/CI, Bundle/ZIP und geprüfter frischer
+Restore unter `audit-backups/4-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+Keine privaten Volltranskripte, main-Push/Merge, Live-Schalter, Nachrichten, Orders,
+Deployments oder Dispatches. Nächster getrennter Auftrag **Etappe 5a, GPT-6 Sol / hoch**:
+`docs/nacharbeit-2026-09-28/START-5A.md`. Etappe 4 beenden, nichts automatisch starten.
+
+---
+
 ## 28.09.2026 — Etappe 3b F01/F12 abgeschlossen auf eigenem Zweig
 
 Arbeitsbaum `etappe-3b-work`, Zweig `codex/etappe-3b-f01-f12`, direkt vom exakten

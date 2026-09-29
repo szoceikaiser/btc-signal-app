@@ -5,11 +5,13 @@ conditional orders, funding or persisted broker position. Legacy backtest.py
 signal-band accounting remains only a named historical diagnostic.
 """
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 import math
 
 import strategy_core as sc
+import inventory
+from position_state import pos_to_state, pos_from_state
 
 STEP = 14_400_000
 BUY_ACTIONS = {'entry_t1', 'entry_gp', 'entry_flush', 'dip', 'buy_ladder',
@@ -32,12 +34,26 @@ class Decision:
     flow: list
     params: dict
 
+    def to_state(self):
+        return dict(candidates=deepcopy(self.candidates), params=deepcopy(self.params),
+                    observed=pos_to_state(self.observed), sell_state=pos_to_state(self.sell_state),
+                    before=pos_to_state(self.before), candles=[asdict(c) for c in self.candles],
+                    flow=[asdict(f) for f in self.flow])
+
+    @classmethod
+    def from_state(cls, d):
+        if set(d) != {'candidates', 'params', 'observed', 'sell_state', 'before', 'candles', 'flow'}:
+            raise ValueError('Incomplete pending decision')
+        return cls(deepcopy(d['candidates']), pos_from_state(d['observed']),
+                   pos_from_state(d['sell_state']), pos_from_state(d['before']),
+                   [sc.Candle(**c) for c in d['candles']],
+                   [sc.FlowPoint(**f) for f in d['flow']], deepcopy(d['params']))
+
     def confirm(self, position, executed, book):
         """Re-evaluate the SAME known prefix, allowing only executed blocks.
 
-        The reference-price entry formula is intentionally unchanged (F04).
-        Partial cash funding scales its existing tranche weighting. Actual BTC
-        and available cash are carried separately by Book, never by that formula.
+        Stage 4: after replaying accepted strategy blocks, replace the signal
+        anchor with remaining base-lot cost. E42 keeps its separate stop cohort.
         """
         accepted = {o['action']: o for o in executed}
         full = any(o['type'] in FULL for o in executed)
@@ -58,6 +74,14 @@ class Decision:
                 result.e42_teil_marke = None
                 result.e42_teil_wartet = 0
                 result.e42_teil_wartet_inv = result.e42_teil_geprueft = None
+        book.sync_position(result)
+        if executed and result.direction == 'LONG' and result.zones is not None:
+            # Accepted TP can activate trailing before the next close. Use only
+            # the decision's already-known prefix, and AFTER actual cost feedback.
+            sc.resolve_stop(result, self.candles[-1],
+                sc.find_pivots(self.candles, n=self.params.get('pivot_n', 5)),
+                trail_stop=self.params.get('trail_stop', False),
+                be_im_plus=self.params.get('be_im_plus', False), commit=True)
         position.__dict__.update(deepcopy(result.__dict__))
 
 
@@ -90,7 +114,7 @@ def decide(candles, flow, position, params):
 
 
 class Book:
-    def __init__(self, capital, fee, slip, deploy, initial_units=0.):
+    def __init__(self, capital, fee, slip, deploy, initial_units=0., initial_lots=None):
         self.cash = float(capital)
         self.units = float(initial_units)
         self.peak_units = self.units
@@ -100,6 +124,52 @@ class Book:
         self.fee, self.slip, self.deploy = fee, slip, deploy
         self.reserved_cash = self.reserved_units = 0.
         self.ledger = []
+        self.lots = inventory.validate(initial_lots or [])
+        if initial_units and initial_lots is None:
+            # Explicit numerical hand-case holdings, acquisition cost unknown.
+            # Never fabricate that cost from a strategy signal anchor.
+            inventory.buy(self.lots, lot_id='initial_unknown', at=None, price=None,
+                          units=initial_units, cost=None, fee=None, kind='base')
+        if not math.isclose(inventory.summary(self.lots)['units'], self.units,
+                            rel_tol=1e-12, abs_tol=0.):
+            raise ValueError('Initial lots and BTC disagree')
+        self.rk_units = inventory.summary(self.lots, 'e42')['units']
+
+    def sync_position(self, pos):
+        pos.inventory_source = 'simulated_fills'
+        pos.lots = deepcopy(self.lots)
+        pos.cost_basis_complete = inventory.summary(self.lots)['complete']
+        base = inventory.summary(self.lots, 'base')
+        if base['complete']:
+            pos.entry_ref = base['entry']
+        if not base['units']:
+            pos.entry_pct = 0
+
+    def to_state(self):
+        return dict(version=1, **deepcopy(self.__dict__))
+
+    @classmethod
+    def from_state(cls, state):
+        fields = set(cls(0., 0., 0., 1.).__dict__)
+        if state.get('version') != 1 or set(state) != fields | {'version'}:
+            raise ValueError('Unsupported/incomplete V1 book state')
+        obj = cls(0., 0., 0., 1.)
+        obj.__dict__.update(deepcopy({k: state[k] for k in fields}))
+        inventory.validate(obj.lots)
+        numeric = ('cash', 'units', 'rk_units', 'peak_units', 'alloc', 'invested_pct',
+                   'fee', 'slip', 'deploy', 'reserved_cash', 'reserved_units')
+        if not all(math.isfinite(getattr(obj, k)) and getattr(obj, k) >= 0 for k in numeric):
+            raise ValueError('Invalid stored book number')
+        if not (obj.fee < 1 and obj.slip < 1 and obj.deploy <= 1 and obj.invested_pct <= 100
+                and obj.peak_units >= obj.units):
+            raise ValueError('Invalid stored book limits')
+        total = inventory.summary(obj.lots)['units']
+        rk = inventory.summary(obj.lots, 'e42')['units']
+        if not math.isclose(total, obj.units, rel_tol=1e-12, abs_tol=0.) or not math.isclose(rk, obj.rk_units, rel_tol=1e-12, abs_tol=0.):
+            raise ValueError('Stored lots disagree with BTC')
+        if not (0 <= obj.reserved_cash <= obj.cash and 0 <= obj.reserved_units <= obj.units):
+            raise ValueError('Invalid stored reservations')
+        return obj
 
     def value(self, price):
         return self.cash + self.units * price
@@ -108,7 +178,11 @@ class Book:
         return dict(cash=self.cash, btc=self.units, reserved_cash=self.reserved_cash,
                     reserved_btc=self.reserved_units, available_cash=self.cash-self.reserved_cash,
                     available_btc=self.units-self.reserved_units, rk_btc=self.rk_units,
-                    market_value=self.units*price, equity=self.value(price))
+                    market_value=self.units*price, equity=self.value(price),
+                    cost_basis=inventory.summary(self.lots)['cost'],
+                    cost_entry=inventory.summary(self.lots)['entry'],
+                    base_entry=inventory.summary(self.lots, 'base')['entry'],
+                    lots=deepcopy(self.lots))
 
     def event(self, order, status, reason, at, price, before, **details):
         self.ledger.append(dict(id=f"{order['id']}:{len(self.ledger)}", order_id=order['id'],
@@ -181,6 +255,9 @@ class Book:
             charge=amount*self.fee
             self.cash -= amount
             self.units += quantity
+            inventory.buy(self.lots, lot_id=o['id'], at=candle.ts, price=price,
+                          units=quantity, cost=amount, fee=charge,
+                          kind='e42' if o['type']=='RUECKKAUF' else 'base')
             self.invested_pct = min(100., self.invested_pct + amount/self.alloc*100)
             if o['type']=='RUECKKAUF': self.rk_units += quantity
             self.peak_units=max(self.peak_units,self.units)
@@ -191,6 +268,9 @@ class Book:
             quantity=amount
             charge=quantity*price*self.fee
             old=self.units
+            disposed_cost, disposed_buy_fee = inventory.sell(
+                self.lots, quantity, e42_only=o['type']=='RUECKKAUF_STOP',
+                close_cohort=quantity == (self.rk_units if o['type']=='RUECKKAUF_STOP' else old))
             self.cash += quantity*price-charge
             self.units -= quantity
             self.invested_pct *= self.units/old
@@ -211,6 +291,9 @@ class Book:
             fee=charge,quantity=quantity,gross_budget=amount if buy else None,
             before=before,after=self.snapshot(candle.open))
         self.ledger.append(event)
+        if not buy:
+            event.update(disposed_cost=disposed_cost, disposed_buy_fee=disposed_buy_fee,
+                         realized_pnl=quantity*price-charge-disposed_cost if disposed_cost is not None else None)
         if fraction<1:
             self.event(o,'rejected','cash_shortfall',candle.ts,candle.open,self.snapshot(candle.open),
                        rejected_budget=o['requested']-amount)
@@ -255,7 +338,7 @@ def validate(candles, flow, end_ms):
 
 def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
            start_capital=10000., initial_units=0., initial_position=None,
-           decision_fn=decide):
+           initial_lots=None, decision_fn=decide, checkpoint_at=None, resume_state=None):
     """Closed-loop simulation. Every cost scenario regenerates its own decisions.
 
     end_ms MUST be the frozen input's historical cutoff, not the current clock.
@@ -268,18 +351,60 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
     cs,fs=validate(candles,flow,end_ms)
     active=[c for c in cs if c.ts>=start_ms]
     if not active: raise ValueError('No eligible closed trading candles')
-    if bool(initial_units) != bool(initial_position and initial_position.state!=sc.PosState.FLAT):
+    if resume_state is None and bool(initial_units) != bool(initial_position and initial_position.state!=sc.PosState.FLAT):
         raise ValueError('Initial holdings and strategy position disagree')
     if initial_position and initial_units and initial_position.direction!='LONG':
         raise ValueError('V1 initial position must be LONG')
     import backtest as bt
     params={k:cfg[k] for k in bt.EVAL_KEYS if k in cfg}
     pos=deepcopy(initial_position) if initial_position else sc.Position()
-    book=Book(start_capital,fee,slippage,deploy,initial_units)
+    book=Book(start_capital,fee,slippage,deploy,initial_units,initial_lots)
     if initial_position: book.invested_pct=initial_position.bestand_pct
+    book.sync_position(pos)
     risk=Risk(book.value(active[0].open))
     equity=[]; signals=[]; feedback=[]; pending=[]; decision=None; months={}
+    context = dict(cfg=deepcopy(cfg), start_ms=start_ms, end_ms=end_ms, fee=fee,
+                   slippage=slippage, start_capital=start_capital, initial_units=initial_units)
+    checkpoint = None
+    last_done = None
+    if resume_state is not None:
+        if decision_fn is not decide:
+            raise ValueError('Only production V1 decisions can resume')
+        required = {'version', 'context', 'last_done', 'position', 'book', 'risk',
+                    'pending', 'decision', 'equity', 'signals', 'feedback', 'months'}
+        if resume_state.get('version') != 1 or set(resume_state) != required:
+            raise ValueError('Unsupported/incomplete V1 checkpoint')
+        if resume_state['context'] != context:
+            raise ValueError('V1 checkpoint context changed')
+        last_done = resume_state['last_done']
+        decision = Decision.from_state(resume_state['decision'])
+        prefix = [c for c in cs if c.ts <= last_done]
+        prefix_flow = fs[:len(prefix)]
+        if not prefix or prefix[-1].ts != last_done or prefix != decision.candles or prefix_flow != decision.flow:
+            raise ValueError('V1 checkpoint input prefix changed')
+        pos = pos_from_state(resume_state['position'])
+        book = Book.from_state(resume_state['book'])
+        pending = deepcopy(resume_state['pending'])
+        if book.fee != fee or book.slip != slippage or book.deploy != deploy:
+            raise ValueError('Stored book costs changed')
+        if decision.params != dict(params, bias_short=False, no_flip=False):
+            raise ValueError('Stored strategy parameters changed')
+        for buy, reserved in ((True, book.reserved_cash), (False, book.reserved_units)):
+            amount = math.fsum(o['amount'] for o in pending if (o['action'] in BUY_ACTIONS) == buy)
+            if not math.isclose(amount, reserved, rel_tol=1e-12, abs_tol=0.):
+                raise ValueError('Pending orders and reservations disagree')
+        if pos.lots != book.lots:
+            raise ValueError('Strategy lots and book disagree')
+        risk.peaks, risk.dd = deepcopy(resume_state['risk']['peaks']), deepcopy(resume_state['risk']['dd'])
+        if len(risk.peaks) != 3 or len(risk.dd) != 3 or not all(
+                math.isfinite(p) and p > 0 and math.isfinite(d) and 0 <= d <= 1
+                for p, d in zip(risk.peaks, risk.dd)):
+            raise ValueError('Invalid stored risk state')
+        equity, signals, feedback, months = [deepcopy(resume_state[k]) for k in
+                                            ('equity', 'signals', 'feedback', 'months')]
     for i,c in enumerate(cs):
+        if last_done is not None and c.ts <= last_done:
+            continue
         if c.ts<start_ms:
             pos.last_signal_ts=c.ts
             continue
@@ -294,11 +419,15 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
             feedback.append(dict(at=c.ts,cash=book.cash,btc=book.units,
                 actions=[o['action'] for o in executed],state=pos.state.name,
                 buy_rungs=pos.buy_rungs,tp_rungs=pos.tp_rungs,bestand_pct=pos.bestand_pct,
-                entry_ref=pos.entry_ref,entry_pct=pos.entry_pct,e42_teil_marke=pos.e42_teil_marke))
+                entry_ref=pos.entry_ref,entry_pct=pos.entry_pct,e42_teil_marke=pos.e42_teil_marke,
+                cost_entry=inventory.summary(book.lots)['entry'],
+                cost_basis=inventory.summary(book.lots)['cost'], lots=deepcopy(book.lots)))
         pending=[]
         risk.bar(book,c)
         value=book.value(c.close)
-        equity.append(dict(candle_id=c.ts,at=c.ts+STEP,cash=book.cash,btc=book.units,equity=value))
+        equity.append(dict(candle_id=c.ts,at=c.ts+STEP,cash=book.cash,btc=book.units,equity=value,
+                           cost_basis=inventory.summary(book.lots)['cost'],
+                           cost_entry=inventory.summary(book.lots)['entry']))
         month=datetime.fromtimestamp((c.ts+STEP-1)/1000,timezone.utc).strftime('%Y-%m')
         months[month]=dict(at=c.ts+STEP,equity=value,close=c.close)
         decision=decision_fn(cs[:i+1],fs[:i+1],pos,params)
@@ -306,10 +435,19 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
             signals.append(dict(o,sequence=seq,candle_id=c.ts,knowledge_assumed_at=c.ts+STEP,
                                 decision_at=c.ts+STEP,reference_price=o['price']))
         pending=book.schedule(decision.candidates,c.close)
+        if checkpoint_at == c.ts:
+            if not isinstance(decision, Decision):
+                raise ValueError('Only production V1 decisions can be checkpointed')
+            checkpoint = dict(version=1, context=context, last_done=c.ts,
+                position=pos_to_state(pos), book=book.to_state(),
+                risk=dict(peaks=list(risk.peaks), dd=list(risk.dd)),
+                pending=deepcopy(pending), decision=decision.to_state(),
+                equity=deepcopy(equity), signals=deepcopy(signals),
+                feedback=deepcopy(feedback), months=deepcopy(months))
     for o in pending: book.expire(o,cs[-1].close)
     # Rejections/expiry leave only observation state, already applied by decide.
     final=book.value(active[-1].close)
-    return dict(model='V1_close_to_next_open_zero_latency',risk_unit='positive_loss_percent',
+    result = dict(model='V1_close_to_next_open_zero_latency',risk_unit='positive_loss_percent',
         start=start_capital,ende=final,rendite_pct=(final/(start_capital+initial_units*active[0].open)-1)*100,
         dd_close_pct=risk.dd[0]*100,dd_intrabar_lower_pct=risk.dd[1]*100,
         dd_intrabar_upper_pct=risk.dd[2]*100,cash=book.cash,btc=book.units,
@@ -318,4 +456,18 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
         unfilled_end_of_data=sum(e['status']=='unfilled_end_of_data' for e in book.ledger),
         signals=signals,ledger=book.ledger,equity=equity,month_ends=months,feedback=feedback,
         final_strategy=dict(state=pos.state.name,buy_rungs=pos.buy_rungs,tp_rungs=pos.tp_rungs,
-                            entry_ref=pos.entry_ref,entry_pct=pos.entry_pct,bestand_pct=pos.bestand_pct))
+                            entry_ref=pos.entry_ref,entry_pct=pos.entry_pct,bestand_pct=pos.bestand_pct),
+        lots=deepcopy(book.lots), cost_basis=inventory.summary(book.lots)['cost'],
+        cost_entry=inventory.summary(book.lots)['entry'], position_state=pos_to_state(pos))
+    if checkpoint_at is not None:
+        if checkpoint is None:
+            raise ValueError('Checkpoint candle not reached')
+        result['checkpoint'] = checkpoint
+    return result
+
+
+def resume_v1(candles, flow, checkpoint):
+    """Restore only explicit complete offline state, never a live signal state."""
+    context = deepcopy(checkpoint['context'])
+    cfg = context.pop('cfg')
+    return run_v1(candles, flow, cfg, **context, resume_state=checkpoint)
