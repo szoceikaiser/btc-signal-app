@@ -20,7 +20,9 @@ def main():
         ('wait_risk_omitted', '        risk.bar(book, c)', '        if not pending: risk.bar(book, c)', 'test_i2_sell_keeps_waiting_risk_and_gap'),
         ('fill_future_close', 'book.fill(order, c)', 'book.fill(order, sc.Candle(c.ts,c.close,c.high,c.low,c.close))', 'test_i2_buy_waits_and_does_not_own_waiting_low'),
         ('ignore_cutoff', 'v.validate(candles, flow, end_ms)', 'v.validate(candles, flow, end_ms+v.STEP)', 'test_i2_cutoff_rejects_running_fill_bar'),
-        ('fee_doubled', 'v.Book(10000., fee, slippage, deploy)', 'v.Book(10000., 2*fee, slippage, deploy)', 'test_i2_roundtrip_costs'),
+        ('fee_doubled', 'DelayedBook(10000., fee, slippage, deploy)', 'DelayedBook(10000., 2*fee, slippage, deploy)', 'test_i2_roundtrip_costs'),
+        ('micro_short', "adjusted['amount'] = self.units", 'pass', 'test_i2_last_reserved_sale_rounding_does_not_create_micro_short'),
+        ('material_oversale', 'excess > 8*math.ulp(self.peak_units)', 'False', 'test_i2_real_oversale_is_rejected_not_clipped'),
     ]
     results=[]
     original=(ROOT/'engine/execution_delayed.py').read_text(encoding='utf-8')
@@ -30,7 +32,7 @@ def main():
         ns=dict(d.__dict__)
         exec(compile(original.replace(old,new,1),'<mutation '+name+'>','exec'),ns)
         try:
-            with patch.object(d,'run_delayed',ns['run_delayed']):fn()
+            with patch.multiple(d,run_delayed=ns['run_delayed'],DelayedBook=ns['DelayedBook']):fn()
         except (AssertionError,ValueError,StopIteration,IndexError):results.append(dict(name=name,caught=True))
         else:raise AssertionError('Survived: '+name)
     source=(ROOT/'tools/historical_stats.py').read_text(encoding='utf-8')

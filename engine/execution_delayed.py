@@ -12,6 +12,22 @@ import inventory
 from position_state import pos_to_state
 
 
+class DelayedBook(v.Book):
+    def fill(self, order, candle):
+        # Multi-sale subtraction can leave aggregate BTC one ulp below the
+        # last reserved amount. Preserve intent; cap only numerical overshoot.
+        adjusted = dict(order)
+        excess = order['amount']-self.units if order['action'] not in v.BUY_ACTIONS else 0.
+        if excess > 0:
+            if excess > 8*math.ulp(self.peak_units):
+                raise ValueError('Sale exceeds actual inventory')
+            adjusted['amount'] = self.units
+        accepted = super().fill(adjusted, candle)
+        if excess > 0:
+            self.ledger[-1]['numerical_btc_cap'] = excess
+        return accepted
+
+
 def run_delayed(candles, flow, cfg, *, start_ms, end_ms, fee=.001,
                 slippage=.001, decision_fn=v.decide):
     if cfg.get('bias_short', False):
@@ -26,7 +42,7 @@ def run_delayed(candles, flow, cfg, *, start_ms, end_ms, fee=.001,
         raise ValueError('No eligible closed trading candles')
     import backtest as bt
     params = {k: cfg[k] for k in bt.EVAL_KEYS if k in cfg}
-    pos, book, risk = sc.Position(), v.Book(10000., fee, slippage, deploy), v.Risk(10000.)
+    pos, book, risk = sc.Position(), DelayedBook(10000., fee, slippage, deploy), v.Risk(10000.)
     book.sync_position(pos)
     pending, decision = [], None
     equity, signals, feedback, waiting, months = [], [], [], [], {}

@@ -1,0 +1,167 @@
+{
+  "result": "PASS",
+  "mutations": 23,
+  "cases": [
+    {
+      "name": "reference_instead_of_filled_entry",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "execution_v1.Book",
+      "test": "test_audit_cost_25_at220_50_at17280_real_gp_feedback"
+    },
+    {
+      "name": "omit_buy_fee_from_cost",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "execution_v1.Book",
+      "test": "test_fee_slippage_and_reference_price_are_separate"
+    },
+    {
+      "name": "requested_instead_of_funded_cost",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "execution_v1.Book",
+      "test": "test_partial_funding_records_only_paid_cost_and_units"
+    },
+    {
+      "name": "arithmetic_mean_instead_of_cost_per_btc",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "inventory.summary",
+      "test": "test_audit_cost_25_at220_50_at17280_real_gp_feedback"
+    },
+    {
+      "name": "keep_sold_cost",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "inventory.sell",
+      "test": "test_proportional_sale_preserves_each_lot_cost_per_coin"
+    },
+    {
+      "name": "partstop_sells_base_lots",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "inventory.sell",
+      "test": "test_targeted_e42_sale_preserves_base_lot_after_proportional_sale"
+    },
+    {
+      "name": "e42_changes_main_entry",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "execution_v1.Book",
+      "test": "test_e42_does_not_replace_main_stop_basis_with_total_entry"
+    },
+    {
+      "name": "full_exit_keeps_lot",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "inventory.sell",
+      "test": "test_flat_clears_lots_cost_and_next_cycle_uses_new_cash"
+    },
+    {
+      "name": "drop_tiny_real_lot",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "inventory.sell",
+      "test": "test_tiny_partial_sale_retains_nonzero_cost"
+    },
+    {
+      "name": "stop_maximum_forgotten",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "strategy_core.resolve_stop",
+      "test": "test_audit_stop115_survives_close110_and_json_restart"
+    },
+    {
+      "name": "do_not_store_stop",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "strategy_core.resolve_stop",
+      "test": "test_audit_stop115_survives_close110_and_json_restart"
+    },
+    {
+      "name": "new_structure_above_close_allowed",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "strategy_core.resolve_stop",
+      "test": "test_new_structure_must_be_under_close_but_old_boundary_needs_not"
+    },
+    {
+      "name": "plan_uses_entry_instead_of_stop",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "main.positions_plan",
+      "test": "test_plan_uses_stored_engine_stop_and_is_read_only"
+    },
+    {
+      "name": "e41_uses_old_zone_not_valid_stop",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "strategy_core._evaluate",
+      "test": "test_original_stop_e41_counter_survives_restart_and_uses_stored_boundary"
+    },
+    {
+      "name": "forget_widerstand_exits",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "position_state.pos_to_state",
+      "test": "test_resistance_limit_reached_then_identical_after_restart"
+    },
+    {
+      "name": "truncate_remaining_fraction",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "position_state.pos_from_state",
+      "test": "test_all_position_fields_roundtrip_including_fraction_and_pivot_indices"
+    },
+    {
+      "name": "forget_pivot_index",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "position_state.pos_to_state",
+      "test": "test_all_position_fields_roundtrip_including_fraction_and_pivot_indices"
+    },
+    {
+      "name": "reset_legacy_position",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "position_state.pos_from_state",
+      "test": "test_legacy_active_state_preserves_reference_history_and_dedupe"
+    },
+    {
+      "name": "restore_without_pending_orders",
+      "reached_baseline": "PASS",
+      "detected": "ValueError",
+      "production": "execution_v1.run_v1",
+      "test": "test_pending_buy_checkpoint_json_restart_exact_parity"
+    },
+    {
+      "name": "forget_prior_risk_peak",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "execution_v1.run_v1",
+      "test": "test_checkpoint_preserves_earlier_peak_and_drawdown"
+    },
+    {
+      "name": "forge_live_inventory_label",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "main.positions_plan",
+      "test": "test_live_reference_plan_cannot_claim_manual_fills"
+    },
+    {
+      "name": "do_not_arm_after_confirmed_tp",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "execution_v1.Decision",
+      "test": "test_confirmed_tp_arms_stop_before_next_close_using_only_known_prefix"
+    },
+    {
+      "name": "do_not_arm_signal_tp_plan",
+      "reached_baseline": "PASS",
+      "detected": "AssertionError",
+      "production": "strategy_core._evaluate",
+      "test": "test_signal_tp_plan_arms_same_stop_for_next_observation"
+    }
+  ]
+}

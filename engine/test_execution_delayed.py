@@ -129,3 +129,27 @@ def test_i2_warmup_does_not_trade():
     start=cs[-2].ts
     r=d.run_delayed(cs,fs,dict(pivot_n=2,bias_short=False),start_ms=start,end_ms=cs[-1].ts+v.STEP)
     assert all(s['ts']>=start for s in r['signals']) and not fills(r)
+
+
+def test_i2_last_reserved_sale_rounding_does_not_create_micro_short():
+    units=.014829911889147264
+    amount=.014829911889147266
+    lot=dict(id='e42',at=0,fill_price=69886.26645,units=amount,
+        cost=1037.4446183333018,buy_fee=1.0374446183333017,kind='e42')
+    b=d.DelayedBook(9395.890008018921,.001,.001,1.,units,[lot])
+    b.peak_units=.03707477972286816;b.reserved_units=units
+    o=dict(order('tp1','TEILVERKAUF_1',pct=40),ts=0,sequence=0,id='rounding',amount=amount,requested=amount)
+    saved=deepcopy(o)
+    b.fill(o,sc.Candle(2*v.STEP,73027.02,75785.82,73027.02,74510.77))
+    assert o==saved and b.units==b.rk_units==b.reserved_units==0 and b.lots==[]
+    near(b.cash,9395.890008018921+units*73027.02*.999*.999)
+    assert b.ledger[-1]['numerical_btc_cap']==amount-units
+
+
+def test_i2_real_oversale_is_rejected_not_clipped():
+    b=d.DelayedBook(0,0,0,1.,1.)
+    o=dict(order('tp1','TEILVERKAUF_1'),ts=0,sequence=0,id='oversale',amount=1.01,requested=1.01)
+    try:b.fill(o,sc.Candle(2*v.STEP,100,100,100,100))
+    except ValueError:pass
+    else:raise AssertionError('Material oversale accepted')
+    assert b.units==1 and b.cash==0 and not b.ledger

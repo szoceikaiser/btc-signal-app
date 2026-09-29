@@ -9,13 +9,18 @@ from historical_analysis import digest,canonical,dump,ROOT,DOC
 
 
 def main():
-    assert not (DOC/'plan.json').exists(), 'Never overwrite a frozen plan'
+    prior=None
+    if (DOC/'plan.json').exists():
+        assert '--numerical-revision' in sys.argv
+        assert not (DOC/'plan-v1.json').exists(), 'Preserve all plan revisions'
+        prior=(DOC/'plan.json').read_bytes()
+        (DOC/'plan-v1.json').write_bytes(prior)
     for script,out in [('tools/test_historical_stats.py','synthetic-tests.log'),
                        ('tools/verify_n6_probes.py','new-probes.json')]:
         p=subprocess.run([sys.executable,str(ROOT/script)],cwd=ROOT,capture_output=True)
         (DOC/out).write_bytes(p.stdout)
         assert p.returncode==0,p.stderr.decode(errors='replace')
-    assert '739 passed, 0 failed' in (DOC/'tests.log').read_text(encoding='utf-8-sig')
+    assert '741 passed, 0 failed' in (DOC/'tests.log').read_text(encoding='utf-8-sig')
     reg=json.loads((ROOT/'docs/nacharbeit-2026-09-28/6-design-register.json').read_text(encoding='utf-8'))
     for row in reg['rows']:assert digest(canonical(row['params']))==row['params_sha256']
     names=[p.relative_to(ROOT).as_posix() for p in (ROOT/'engine').glob('*.py')]
@@ -38,6 +43,10 @@ def main():
         hash_convention='SHA256 UTF8 bytes with CRLF normalized to LF',
         files={n:digest((ROOT/n).read_bytes().replace(b'\r\n',b'\n')) for n in sorted(names)})
     plan['bootstrap']['numpy_version']=np.__version__
+    if prior:
+        plan.update(version=2,previous_plan_sha256=digest(prior),
+            correction='i+2 fresh-start S3 E42 hit numerical BTC oversale 1.7347e-18; cap only <=8 ulp of peak BTC, preserve intent and reject material oversales; unchanged legacy V1 and all parameters',
+            prior_result_status='R0/R1 first 27 completed cases logged; both stopped before writing final aggregates; all 60 rerun')
     dump(DOC/'plan.json',plan)
     print('Analysis plan frozen; no historical results calculated')
 

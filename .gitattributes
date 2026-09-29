@@ -16,3 +16,6 @@
 *.gif binary
 *.mp4 binary
 *.ico binary
+
+# Historical evidence retains original byte hashes on all platforms.
+docs/nach-6/** -text

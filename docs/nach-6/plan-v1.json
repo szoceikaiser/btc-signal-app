@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "frozen_at": "2026-09-29T15:58:59.804763+00:00",
+  "version": 1,
+  "frozen_at": "2026-09-29T15:50:02.753875+00:00",
   "base": "05208cecce8d5a0e856a1ea56984b209f403ccd6",
   "declaration": "Analysis after data knowledge, not historical preregistration",
   "input_sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
@@ -187,14 +187,14 @@
   "hash_convention": "SHA256 UTF8 bytes with CRLF normalized to LF",
   "files": {
     "docs/nach-6/data-manifest.json": "7d9487e2a93096fff734e07a8710e5cf38ac7734086600f6f54d4e23eab3d99c",
-    "docs/nach-6/new-probes.json": "36edbafe777ac4c832fd058a9706c3c6682ac4811b7c79c333545d3b864107f5",
+    "docs/nach-6/new-probes.json": "0522f8aabb00f9a0e7eb7ce9c8430de7ce2e3638ec2815c6a5ff66a931f04a50",
     "docs/nach-6/r1-manifest.json": "904e92c15ea3b88b39948089bb4835ae29505510e9032d0993677ec643c9209b",
     "docs/nach-6/synthetic-tests.log": "1d6004d058347d0ca1a4a63c08d012d406a739bd0434a92287b97a1116b6ec27",
     "docs/nacharbeit-2026-09-28/6-design-register.json": "269441dea779e9887fd493893587178e02a907f84521c9ddeeb649cd09c9a5b3",
     "engine/archiv.py": "9d0f5942cf1600d6c8cf7fcca26f9f3f15bcec13a1a84843cbbde7408b169a55",
     "engine/backtest.py": "1e9a8a00820967d7041acce7027ab4c3b2c1cc7032f35fc9a86793dd61e856f9",
     "engine/coinalyze.py": "09b8d8ca8d9057086c08b2a8aeb392063ab8d4fb251f8ccf1db5f5d8ef18037e",
-    "engine/execution_delayed.py": "3e8267a9c3c5f3831cd32f1bbe1093a4bdbe3c7c880f27a7bf3291b453408578",
+    "engine/execution_delayed.py": "8bee1928e3327aaf038a6ca0106d298132213cc5947d357118d3c4dbb6fd8e7b",
     "engine/execution_v1.py": "4cd179dbc706b5bd0d322572ec2b720b278640e747d72ebacc735d109e59febc",
     "engine/inventory.py": "610d211e172113f3fc770eb374dca9327fb5908d96d6d3d267fa809e2536c8c8",
     "engine/main.py": "785e31f1b9cb566fa1b5dfe95fb207e5552774b81d56d7d477250a34144006d5",
@@ -226,7 +226,7 @@
     "engine/test_d01_kerzenschluss.py": "acb730303f0bb02979f89ba43f919a3ee17782052a927af53c4015ac0ffb02c1",
     "engine/test_e442.py": "323f73af3d2320f3f165c7f4845e2047a93023ec38881f20847ee7198eeadec0",
     "engine/test_e443.py": "5e1a729399886893dd3539b775cd2fd1e15aa562d4a5db109984b6384337e573",
-    "engine/test_execution_delayed.py": "f0e525c29009278f75683529719053bb4d45f0645ef2b1c0e0a6a01da7fad5f0",
+    "engine/test_execution_delayed.py": "d3dab6bf71e2e2305773be1ccadd1a8aad4194838eb0d1a266ba3ab58d6827b5",
     "engine/test_execution_v1.py": "bd26ffe66f55502c195f02a9f625bdceb53cd283a03c21b47defc5350ea11dc1",
     "engine/test_f09_wiederanlage.py": "8bba4392ac4e761d3b6e2a69294ccd323ae3c5cbb9c8a44fcd612ee54b4b2ae4",
     "engine/test_main.py": "36efca97193f92091259ea4c368acdaa7102b72f9bded4d9ae772823f98cf289",
@@ -239,9 +239,6 @@
     "tools/historical_stats.py": "8536a16739118d25e82c53f89aec78023c58582dc492d89ab759f15ba02fac6a",
     "tools/test_historical_stats.py": "6611c16077ccfc3618990f928f745cb8c0384b5f03b0a3bfb9304ce01a160e0d",
     "tools/verify_4.py": "aa173aca5877a1b8361c075eeec4fc0899349464e5de33ff3d129519190b7076",
-    "tools/verify_n6_probes.py": "3398724b03f0de7393c397eeba1a378d9b51b33abb4bd2012f2cf7e8ffcd92a1"
-  },
-  "previous_plan_sha256": "d66cf82ecee0199de7f935d067ce57aa3696a647c84c4e4a4e6b98e6cf553e51",
-  "correction": "i+2 fresh-start S3 E42 hit numerical BTC oversale 1.7347e-18; cap only <=8 ulp of peak BTC, preserve intent and reject material oversales; unchanged legacy V1 and all parameters",
-  "prior_result_status": "R0/R1 first 27 completed cases logged; both stopped before writing final aggregates; all 60 rerun"
+    "tools/verify_n6_probes.py": "7efe9d5fd65100fe315cbed85d51cd17c6bda8857d7c84970e731f7041d64378"
+  }
 }
