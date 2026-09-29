@@ -41,6 +41,22 @@ den individuellen Codex-Tarif.
 
 ## Aktueller Stand
 
+**Etappe 5a abgeschlossen** auf `codex/etappe-5a-telegram-outbox`, direkt aus
+gesichertem 4-Abschluss `ebc01a48057994629c021bd84ab7f9a236678b70`.
+F13 im Hauptlauf: stabile Identität, atomare dauerhafte Versandabsicht mit
+Position/Dedupe, geordnete Wiederholung sicherer Ablehnungen, bestätigte Quittungen
+und konservativer Halt bei unklarer Zustellung. **712 Tests**, alle 676 alten
+unverändert, 36 neue, **16/16 F13-Sabotagen**; 4/3b/D01/F09 erhalten.
+[Vertrag](F13-VERTRAG.md), [Abschlussbericht](ETAPPE-5A-ABSCHLUSS.md).
+Keine Exactly-once-Zusage; Verlust eines ephemeren GitHub-Runners vor dessen
+Git-Commit bleibt Betriebsgrenze. Keine Workflow-/Strategie-/site-Änderung,
+kein Live-Go. Geprüfter Remote-/CI-/Bundle-/ZIP-/Restore-Abschluss lokal in
+`audit-backups/5a-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+Nächster **separater** Auftrag **5b/F17**, **GPT-6 Sol / mittel**, bei unklaren
+Herkunftskollisionen hoch; [Startprompt](START-5B.md). 5a beenden, nichts starten.
+
+### Historischer Abschluss 4
+
 **Etappe 4 abgeschlossen** auf `codex/etappe-4-bestand-stop`, direkt aus gesichertem
 3b `9606a6f`. Restlose/Kosten in V1, monotone Long-Stop-Grenze, gemeinsamer Plan,
 vollständiges Positionsschema 2 und V1-Checkpoint 1. **676 Tests**, **23/23 neue

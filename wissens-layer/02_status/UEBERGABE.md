@@ -1,5 +1,55 @@
 # Laufende Übergabe
 
+## 29.09.2026 — Etappe 5a F13 abgeschlossen auf eigenem Zweig
+
+Direkt aus gesichertem Etappe-4-Abschluss ebc01a48057994629c021bd84ab7f9a236678b70,
+Zweig `codex/etappe-5a-telegram-outbox`, Arbeitsbaum `etappe-5a-work`.
+ABSCHLUSS.json von Etappe 4, Remotes/Zweige/Änderungen und Arbeitsbäume geprüft;
+fremde ungetrackte E44-Dateien und private Änderungen erhalten. Keine neueren
+main-/E44.4-/E44.5-Commits übernommen, privates Backup-Repo nicht committet.
+
+Vor Umsetzung Vertrag F13-VERTRAG.md festgelegt. Hauptlauf speichert atomar
+Position, Dedupe, unveränderliche Nachrichtenabsichten und reparierbare Historien-
+Projektionen in state.json. Nachrichten-ID aus Art/Zeit/Sequenz/Inhalt; Text-SHA,
+Versandstatus, Versuche, Zielhash und message_id dauerhaft gespeichert.
+Sending vor API-Aufruf, confirmed nur nach positivem Telegram-Beleg.
+Ablehnung/pending wird beim Neustart in Reihenfolge erneut versucht, auch ohne
+neue Kerzen/bei Fetchfehler. Confirmed nie erneut. Timeout/unterbrochenes sending
+wird uncertain und stoppt Folgeeinträge. Ein OS-Dateilock schützt den lokalen Pfad.
+
+712/712 Tests: sämtliche 676 bisherigen unverändert, 36 neue F13-Fälle.
+Original-F13 mit echter KAUF_1-Auswertung auf ebc01a4 reproduziert. Echte E41-
+Wartemeldung vor zwei Teilverkäufen, Hauptlauf plus echter Fake-HTTP-Parser,
+Schreibfehler/Projektreparatur, Altbestand/kein Historienreplay, Zielwechsel,
+fehlende Zugangsdaten, Dry-run und Schema-/Textfehler geprüft. Fünf separate
+Python-Prozesse abrupt beendet: vor/nach Commit, vor API, nach simulierter
+Annahme und nach Quittung. Konkurrenzprozess/Sperrfreigabe geprüft.
+16/16 F13-Sabotagen erst nach grüner erreichter Vorprobe erkannt;
+4 23/23, 3b 19/19, D01 6/6 und F09 3/3 erhalten.
+
+Keine Änderung an Strategie, site, Workflows, V1/Positionscodec oder alten Tests.
+F09/D01, Restlose/Kosten, monotoner Stop, Next-Open, Exitpriorität, Reservierungen,
+Gebühren/Slippage, Schluss-DD/obere Intrabar-Grenze und bestätigte Verträge bleiben.
+GitHub-Zweig/Remote-HEAD/Tests zur exakten SHA lesend geprüft. Bundle/ZIP,
+vollständiger Baumvergleich, frischer Restore, 712 Tests/Schutzproben und sechs
+identische gespeicherte V1-Prozessfortsetzungen lokal gesichert unter
+`audit-backups/5a-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+Bericht: `docs/nacharbeit-2026-09-28/ETAPPE-5A-ABSCHLUSS.md`.
+
+Grenzen: API-Annahme ist kein Lesebeleg/manueller Fill. Keine Exactly-once-Zusage;
+unklare Fälle benötigen separate manuelle Klärung. Lokale Transaktion überlebt
+Prozessende, nicht verlorene Datenträger/getrennte Hostkopien. Der unveränderte
+GitHub-Workflow persistiert erst nach dem Lauf: Verlust des ephemeren Runners
+davor bleibt offen und muss vor Live-Go separat gelöst werden. Eigenständige
+watch/lage/test/resend-Befehle bleiben Einmalbefehle. Keine echten Nachrichten,
+Orders, Deployments, Live-Schalter, Dispatches oder main-Push/Merges.
+Sicherungstag/Originale/private Volltranskripte unverändert. F17 bleibt 5b;
+V2/Shorts/E41.6/andere Befunde nicht bearbeitet. Nächster separater Auftrag:
+`START-5B.md`, GPT-6 Sol / Aufwand mittel, bei Herkunftsmehrdeutigkeit hoch.
+5a beenden; keine Folgeetappe automatisch starten.
+
+---
+
 ## 29.09.2026 — Etappe 4 F03/F04/F05/F10 abgeschlossen auf eigenem Zweig
 
 Arbeitsbaum `etappe-4-work`, Zweig `codex/etappe-4-bestand-stop`, direkt aus dem

@@ -1,5 +1,29 @@
 # 00 STAND — Kurzstand in einer halben Minute
 
+## Aktueller Arbeitsstand 29.09.2026: Etappe 5a abgeschlossen
+
+- F13 im Hauptlauf: atomare Position/Dedupe/Versandabsicht in state.json,
+  stabile lokale Nachrichten-ID und Text, dauerhafte Versandliste Version 1.
+  Signal-/OI-/Flush-Projektionen werden beim Neustart repariert.
+- Sicher abgelehnte/pending Sendungen werden geordnet wieder versucht,
+  bestätigte nie wiederholt. Timeout/unterbrochener Versuch ist uncertain und
+  blockiert Nachfolger. Keine Exactly-once-Zusage oder erfundene manuelle Fills.
+- **712 Tests**, alle **676 alten unverändert**, 36 neue; **16/16 F13-Sabotagen**.
+  4 23/23, 3b 19/19, D01 6/6, F09 3/3 erhalten. Fünf reale Prozessabbrüche
+  netzfrei geprüft; kompletter Restore mit sechs identischen V1-Fortsetzungen.
+- Strategie, site, Workflows, Live-Konfiguration und bestätigte Verträge identisch
+  zu ebc01a4. Keine Nachrichten/Orders/Deployments/main-Push/Merges oder Dispatches.
+- Lokale Dauerhaftigkeit gilt bei überlebendem Datenpfad. Der bestehende ephemere
+  GitHub-Runner committet erst nach dem Lauf; Verlust davor bleibt Betriebsgrenze.
+  Unklarheit benötigt separate Klärung. Eigenständige watch/lage/test/resend-
+  Befehle bleiben Einmalbefehle. Kein Live-Go.
+- Zweig `codex/etappe-5a-telegram-outbox`, Arbeitsbaum `etappe-5a-work`, Basis
+  `ebc01a48057994629c021bd84ab7f9a236678b70`. Bericht
+  `docs/nacharbeit-2026-09-28/ETAPPE-5A-ABSCHLUSS.md`; exakte SHA/CI/Restore in
+  `audit-backups/5a-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+- Nächster **separater** Auftrag: 5b/F17, **GPT-6 Sol / mittel**, bei unklaren
+  Herkunftskollisionen hoch. `START-5B.md`. 5a beenden, nichts automatisch starten.
+
 ## Aktueller Arbeitsstand 29.09.2026: Etappe 4 abgeschlossen
 
 - F03/F04/F05/F10: V1-Restlose und gebührenhaltige Kosten, proportionaler Verkauf,

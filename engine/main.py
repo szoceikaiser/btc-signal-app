@@ -28,6 +28,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import coinalyze
+import telegram_outbox as outbox
+from functools import wraps
 from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
                            Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots, gegen_zonen,
@@ -37,6 +39,7 @@ from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCH
                            oi_in_btc, RUECKKAUF_TRANCHE, resolve_stop)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
                              format_ruecktest, format_stop_rueckeroberung,
+                             format_plan, format_vorschau, format_signal, deliver_telegram,
                              send_lage, send_plan,
                              send_signals, send_text, send_vorschau)
 
@@ -895,6 +898,15 @@ def e41_meldung(pos: Position, wartete_vorher: int, sigs: list, kerze: Candle,
     return None
 
 
+def _serialized_engine(fn):
+    @wraps(fn)
+    def locked(fetch=fetch_market_data, data_dir=DATA, dry_run=False):
+        with outbox.engine_lock(data_dir):
+            return fn(fetch=fetch, data_dir=data_dir, dry_run=dry_run)
+    return locked
+
+
+@_serialized_engine
 def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
                dry_run: bool = False) -> list[dict]:
     """Ein Engine-Lauf: nachholen aller neuen abgeschlossenen Kerzen, Signale senden."""
@@ -908,6 +920,16 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         old_state = json.loads(state_path.read_text(encoding="utf-8"))
         if old_state.get("demo"):
             old_state = {}                                  # Demo-Daten verwerfen
+    delivery = outbox.recover(old_state, state_path)
+    outbox.project(old_state, data_dir)
+    # Resume pending dispatch before market access, even if fetching fails or
+    # there are no new candles. Confirmed/uncertain entries are never resent.
+    dispatch_open = True
+    if '_delivery' in old_state:
+        dispatch_open = outbox.drain(old_state, state_path, deliver_telegram,
+                     os.environ.get('TELEGRAM_BOT_TOKEN', ''),
+                     os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run)
+        delivery = outbox.load_delivery(old_state)
     pos = pos_from_state(old_state)
 
     oi_history = []
@@ -930,6 +952,10 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         except Exception as exc:  # noqa: BLE001
             print(f"config.json nicht lesbar ({exc}) -> alte Einstellungen.")
     new_signals: list[dict] = []
+    previews = []
+    def stage(kind, event, sequence, payload, text, preview):
+        outbox.enqueue(delivery, kind, event, sequence, payload, text, preview=dry_run)
+        previews.append(preview)
     params = eval_params(cfg)
     # Nachholen: alle Kerzen, die neuer sind als der letzte verarbeitete Stand.
     # E44.3: Die Meldungen werden JE KERZE gesammelt (E41-Meldung, E42-Meldungen, Signale)
@@ -965,8 +991,9 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     plan = positions_plan(candles, flow, cfg, pos)
     state["plan"] = plan
     if cfg.get("plan_telegram", True) and plan_geaendert((old_state or {}).get("plan"), plan):
-        send_plan(plan, dry_run=dry_run)
-        print(f"Plan gesendet: {len(plan.get('nachkauf', []))} Nachkauf-, "
+        stage('plan', candles[-1].ts, 0, plan, format_plan(plan),
+              lambda: send_plan(plan, dry_run=True))
+        print(f"Plan vorgemerkt: {len(plan.get('nachkauf', []))} Nachkauf-, "
               f"{len(plan.get('teilgewinn', []))} Teilgewinn-Marken.")
     state["config"] = cfg
     state["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -984,14 +1011,11 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         alt.get("impuls_start_ts"), alt.get("impuls_ende_ts")
     ) != (vorschau["impuls_start_ts"], vorschau["impuls_ende_ts"])
     if neue_struktur and cfg.get("vorschau_telegram", True):
-        send_vorschau(vorschau, candles[-1].ts, dry_run=dry_run)
-        print(f"Vorschau gesendet: {vorschau['richtung']}, GP "
+        stage('vorschau', candles[-1].ts, 0, vorschau, format_vorschau(vorschau, candles[-1].ts),
+              lambda: send_vorschau(vorschau, candles[-1].ts, dry_run=True))
+        print(f"Vorschau vorgemerkt: {vorschau['richtung']}, GP "
               f"{vorschau['gp_lower']:.0f}-{vorschau['gp_upper']:.0f}, "
               f"Stop-Abstand {vorschau['abstand_pct']} %")
-
-    state_path.write_text(json.dumps(state, indent=1), encoding="utf-8")
-    signals_path.write_text(json.dumps(hist, indent=1), encoding="utf-8")
-    oi_path.write_text(json.dumps(oi_history), encoding="utf-8")
 
     # --- Aufloesung einer offenen Flush-Warnung (Kaiser 2026-07-29) ------------------
     # Ohne diese Rueckmeldung bliebe jede Warnung in der Luft haengen: Man wuesste nie,
@@ -1008,20 +1032,41 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
             # Die gewarnte Kerze ist jetzt abgeschlossen -> Ergebnis feststellen.
             bestaetigt = any(s["ts"] == w["gewarnt_ts"] and s.get("tag") == "FLUSH"
                              for s in new_signals)
-            send_text(format_flush_aufloesung(w, bestaetigt), dry_run=dry_run)
+            text = format_flush_aufloesung(w, bestaetigt)
+            stage('flush_aufloesung', w['gewarnt_ts'], 0, [w, bestaetigt], text,
+                  lambda text=text: send_text(text, dry_run=True))
             w["aufgeloest"] = True
             w["bestaetigt"] = bestaetigt
-            watch_path.write_text(json.dumps(w, indent=1), encoding="utf-8")
+            delivery['watch_resolution'] = w
             print(f"Flush-Warnung aufgeloest: {'bestaetigt' if bestaetigt else 'nicht bestaetigt'}")
 
     # E41/E44.3: je Kerze erst die Meldungen, dann die Signale dieser Kerze.
     for m41, m42, sigs in pakete:
         if m41:
-            send_text(format_stop_rueckeroberung(m41), dry_run=dry_run)
-        for m in m42:
-            send_text(format_ruecktest(m), dry_run=dry_run)
+            text = format_stop_rueckeroberung(m41)
+            stage('e41', m41['ts'], 0, m41, text,
+                  lambda text=text: send_text(text, dry_run=True))
+        for j, m in enumerate(m42):
+            text = format_ruecktest(m)
+            stage('e42', m['ts'], j, m, text,
+                  lambda text=text: send_text(text, dry_run=True))
         if sigs:
-            send_signals(sigs, dry_run=dry_run)
+            for j, sig in enumerate(sigs):
+                stage('signal', sig['ts'], j, sig, format_signal(sig),
+                      lambda sig=sig: send_signals([sig], dry_run=True))
+    delivery['signals'], delivery['oi_history'] = hist, oi_history
+    state['_delivery'] = delivery
+    # This is the sole authoritative commit: position/dedupe and intentions
+    # become durable together. Projection failures cannot lose intentions.
+    outbox.atomic_json(state_path, state)
+    outbox.project(state, data_dir)
+    if dry_run or not os.environ.get('TELEGRAM_BOT_TOKEN') or not os.environ.get('TELEGRAM_CHAT_ID'):
+        for preview in previews:
+            preview()
+    if dispatch_open:
+        outbox.drain(state, state_path, deliver_telegram,
+                     os.environ.get('TELEGRAM_BOT_TOKEN', ''),
+                     os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run)
     print(f"Lauf ok: {len(candles)} Kerzen, {len(new_signals)} neue Signale, "
           f"OI-Punkte: {len(oi_history)}, Position: {pos.direction}/{pos.state.value}")
     return new_signals
