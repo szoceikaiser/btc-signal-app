@@ -61,6 +61,20 @@ def main():
     for path in files:
         assert hashlib.sha256(restored_zip.read(path)).hexdigest() == tree[path]
     assert not git(restored, 'status', '--porcelain').strip()
+    def verify_working_files():
+        entries = git(restored, 'ls-tree', '-r', 'HEAD').decode().splitlines()
+        paths, expected = [], []
+        for line in entries:
+            meta, path = line.split('\t', 1)
+            mode, kind, oid = meta.split()
+            assert kind == 'blob'
+            paths.append(path); expected.append(oid)
+        actual = subprocess.run(['git', '-c', f'safe.directory={restored.as_posix()}',
+            'hash-object', '--stdin-paths'], input='\n'.join(paths)+'\n', cwd=restored,
+            text=True, capture_output=True, check=True).stdout.splitlines()
+        assert actual == expected
+        return dict(result='PASS', restored_working_files=len(paths), all_normalized_blob_ids_identical=True)
+    working_files = verify_working_files()
     print('Bundle/ZIP/full restored Git tree PASS', flush=True)
     def proof(script, name, *args):
         proc = subprocess.run([sys.executable, str(restored/script), *map(str, args)], cwd=restored,
@@ -102,11 +116,14 @@ def main():
         print(f'Restored checkpoint {i+1}/6 identical', flush=True)
     assert not git(ROOT, 'status', '--porcelain').strip()
     assert not git(restored, 'status', '--porcelain').strip()
+    assert verify_working_files() == working_files
+    (backup/'wiederherstellung-arbeitsdateien.json').write_text(json.dumps(working_files, indent=2), encoding='utf-8')
     changed = git(ROOT, 'diff', '--name-only', BASE, commit).decode().splitlines()
     registry = json.loads((DOC/'6-design-register.json').read_text())
     result = dict(stage='6 Reproduktion und Bestätigungsdesign gesichert', commit=commit, branch=BRANCH, base=BASE,
         local_tests=728, baseline_tests=728, new_tests=0, old_test_changes='none', github=ci,
         bundle_restore_verified=True, full_tree_verified=True, zip_verified=True, restored_tests=728,
+        restored_worktree_blobs_verified=working_files,
         restored_full_comparisons=6, restored_independent_comparisons=6, restored_fills=1101, restored_closes=9054,
         restored_protection_probes=dict(f17=16, f13=16, stage4=23, stage3b=19, d01=6, f09=3),
         process_replays=replays, design_status=registry['status'], decisions=registry['decisions'],
@@ -114,10 +131,11 @@ def main():
         frozen_hashes=previous['frozen_hashes'], changed_files_sha256={p:tree[p] for p in changed},
         backup_sha256={'abschluss.bundle':sha(bundle), 'abschluss.zip':sha(archive)},
         report='docs/nacharbeit-2026-09-28/ETAPPE-6-ABSCHLUSS.md',
-        boundaries=['Only model reproduction; no economic confirmation', 'Future design needs prior registration and as-of data',
+        boundaries=['Only frozen model reproduction; no new candidate measurement',
+            'Retrospective design; prior selection adjustment not established; input availability assumptions explicit',
             'No live-go; manual live holdings unknown', 'No exactly-once guarantee; uncertain delivery blocks',
             'Ephemeral runner loss before Git persistence remains open', 'V2/Shorts/E41.6/other findings separate'],
-        next_assignment='Separate design registration/technical feasibility only; START-NACH-6.md; do not auto-start')
+        next_assignment='Separate retrospective implementation/assessment to fixed historical cutoff; START-NACH-6.md; do not auto-start')
     (backup/'ABSCHLUSS.json').write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding='utf-8')
     (backup/'START-NACH-6.md').write_text(f'Gesicherter Etappe-6-Commit: `{commit}`\n\n'+(DOC/'START-NACH-6.md').read_text(encoding='utf-8'), encoding='utf-8')
     (backup/'README.md').write_text(f'# Etappe 6 gesichert\n\nCommit `{commit}`, Zweig `{BRANCH}`.\n\nDesign: {registry["status"]}.\nABSCHLUSS.json: exakte Remote-/CI-/Restore-Belege. Bundle und ZIP geprüft.\nKeine Bestätigungsmessung und kein Live-Go. Folgeauftrag nur separat.\n', encoding='utf-8')

@@ -1,24 +1,23 @@
 # 00 STAND — Kurzstand in einer halben Minute
 
-## Aktueller Arbeitsstand 29.09.2026: Etappe 6 Reproduktion und Design
+## Aktueller Arbeitsstand 29.09.2026: Etappe 6, retrospektives Design v2
 
-- Direkt aus gesichertem 5b `bb862204c97c6bb4c0da49cb6f1de90dd58af663`.
-  Nur eingefrorene Live-Basis/E42-12 × Slippage 0/0,1/0,5 %, Gebühr 0,1 %.
-  Sechs komplette V1-Läufe exakt identisch zu gesicherten Ledgers/5b-Replay-Hashes;
-  1.101 Fills / 9.054 Closes unabhängig auf Bestand, Kosten und Risiko geprüft.
-- **728 Tests**, alle unverändert. Engine/site/Daten/Versand/Verträge/Workflows
-  identisch zur 5b-Basis. Keine neue Kandidatenmessung und kein Live-Go.
-- Konkretes Bestätigungsdesign: nur E42/12 gegen Basis, künftiges Jahresfenster,
-  gepaarter Blockbootstrap, Mindestvorsprung und neue DD-Budgets. **D6-A/B/C offen**
-  bis ausdrückliche Nutzerantwort. Quellen-/Vintage-Manifest, Latenz-/Statistikcode
-  und rechtzeitiger Registrierungscommit bleiben technische Voraussetzungen.
-- Zweig `codex/etappe-6-reproduktion-design`, Arbeitsbaum `etappe-6-work`;
-  Bericht `docs/nacharbeit-2026-09-28/ETAPPE-6-ABSCHLUSS.md`, Design/Register dort.
-  Exakte SHA/Remote-CI/Bundle/ZIP/vollständiger Restore lokal
-  `audit-backups/6-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
-- Nächster **separater** Auftrag: `START-NACH-6.md`, Designfestlegung und
-  Registrierungsfähigkeit, noch keine neue Messung. Nichts automatisch starten.
-  F13-Unsicherheit/Runnerverlust, unbekannter Live-Bestand, V2/Shorts/E41.6 bleiben.
+- Sechs eingefrorene V1-Läufe exakt reproduziert: 1.101 Fills / 9.054 Closes
+  unabhängig geprüft, 728 Tests unverändert. Basis exakt bb862204c97c6bb4c0da49cb6f1de90dd58af663.
+- Nutzer verlangt historische Prüfung bis jetzt ohne Jahreswartezeit. Zukunfts-
+  fenster aufgehoben; unbestätigte 2-%-Nutzen-/15/20/+2-DD-Budgets zurückgezogen.
+  Feste Wirkung/Risiko/Dominanz, Zeitabschnitte, Kosten/Latenz und Unsicherheit;
+  frühere Auswahl gesondert berücksichtigen, kein erfundenes unabhängiges Fenster.
+- R0-Befund endet 27.09.; R1 bis 29.09.2026 12:00 UTC geplant, noch keine neuen
+  Inputs beschafft/Messungen. Statistik/i+2/Quellenmanifest/Suchinventar offen.
+  Keine erneute Zustimmung zu den alten Vorschlägen nötig. Kein Live-Go.
+- Zweig codex/etappe-6-reproduktion-design, Arbeitsbaum etappe-6-work;
+  Bericht/Design/Register in docs/nacharbeit-2026-09-28. Exakte SHA/CI/Bundle/ZIP/
+  vollständiger Restore in audit-backups/6-abschluss-<Kurz-SHA>/ABSCHLUSS.json.
+  Alte v1-Sicherung efc3b1a bleibt erhalten.
+- Nächster separater Auftrag: START-NACH-6.md, retrospektive Umsetzung/Auswertung;
+  keine automatische Folgearbeit. Engine/site/Workflows/Daten/Verträge unverändert.
+  F13-Betriebsgrenzen, unbekannter Live-Bestand, V2/Shorts/E41.6 bleiben offen.
 
 ## Aktueller Arbeitsstand 29.09.2026: Etappe 5b F17 abgeschlossen
 

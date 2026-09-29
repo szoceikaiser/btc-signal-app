@@ -41,19 +41,17 @@ den individuellen Codex-Tarif.
 
 ## Aktueller Stand
 
-**Etappe 6: Reproduktion und Bestätigungsdesign**, direkt aus gesichertem 5b
-`bb862204c97c6bb4c0da49cb6f1de90dd58af663`, Zweig
-`codex/etappe-6-reproduktion-design`. Sechs vollständige eingefrorene V1-Läufe
-exakt gleich, 1.101 Fills / 9.054 Closes unabhängig geprüft; **728 Tests**, alle
-unverändert. Engine/site/Versand/Daten/Verträge/Workflows identisch zu 5b.
-[Bericht](ETAPPE-6-ABSCHLUSS.md), [Bestätigungsentwurf](6-BESTAETIGUNGSDESIGN.md),
-[Entwurfsregister](6-design-register.json). **D6-A/B/C fachlich noch offen**;
-technische Daten-/Latenz-/Statistik-/Vorregistrierungsvoraussetzungen dokumentiert.
-Keine neuen Kandidaten gemessen, keine alte DD-Schwelle übernommen, kein Live-Go.
-Exakte SHA/CI/Bundle/ZIP/vollständiger Restore lokal
-`audit-backups/6-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
-Nächster separater Auftrag: [Designfestlegung/Registrierungsfähigkeit](START-NACH-6.md).
-Keine automatische Folgearbeit oder Bestätigungsmessung.
+**Etappe 6: Reproduktion und retrospektives Prüfdesign v2.** Sechs V1-Läufe
+exakt identisch, 1.101 Fills / 9.054 Closes unabhängig geprüft; 728 Tests erhalten.
+Nutzer verlangt Vergangenheit bis aktuellen Stichtag ohne Jahreswartezeit.
+Zukunftsfenster und unbestätigte Nutzen-/DD-Budgets aufgehoben. Feste historische
+Wirkung/Risiko/Stabilität, bedingte Unsicherheit und Status der Auswahlbereinigung
+statt vermeintlich unabhängigem bekanntem Fenster. [Bericht](ETAPPE-6-ABSCHLUSS.md),
+[Design v2](6-BESTAETIGUNGSDESIGN.md), [Register](6-design-register.json).
+R0 bis 27.09. unverändert; R1 bis 29.09.2026 12:00 UTC geplant, noch nicht gemessen.
+Neue SHA/CI/Bundle/ZIP/Restore in 6-abschluss-<Kurz-SHA>/ABSCHLUSS.json,
+v1-Sicherung efc3b1a erhalten. [Getrennter Folgeauftrag](START-NACH-6.md):
+retrospektive Umsetzung/Auswertung. Keine automatische Folgearbeit/Live-Go.
 
 ### Historischer Abschluss 5b
 

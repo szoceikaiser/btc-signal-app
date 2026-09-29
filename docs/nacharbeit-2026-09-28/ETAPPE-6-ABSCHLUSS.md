@@ -65,31 +65,43 @@ Restlose/Kosten, monotone Long-Stops, Positionsschema 2 und Checkpoint 1 erhalte
 Workflow-Auslöser; nur automatische Unit-Tests reagieren auf diesen Zweig.
 Pages bleibt main/site bzw. Signal-Engine/Backtest vorbehalten, nicht Tests.
 
-## Bestätigungsdesign und offene Entscheidungen
+## Retrospektives Prüfdesign, Version 2
 
-Konkreter prüfbarer [Entwurf](6-BESTAETIGUNGSDESIGN.md) und
-[maschinenlesbares Entwurfsregister](6-design-register.json). Einziger Kandidat
-E42/12 gegen dieselbe Basis; vorgeschlagenes unabhängiges künftiges Jahresfenster
-01.10.2026–01.10.2027 UTC. Primär 0,1 % Slippage, relativer Mindestvorsprung von
-2 % Jahres-Endvermögen samt einseitiger 95-%-Untergrenze. Gepaarter stationärer
-14-Tage-Blockbootstrap mit festen 7-/28-Tage-Sensitivitäten, Familie m=1, keine
-Szenario-/Fenster-/Kennzahlenwahl. Neue vorgeschlagene Risiken: 15 % Schluss-DD,
-20 % obere Intrabar-Grenze, jeweils höchstens +2 Prozentpunkte gegenüber Basis
-in allen fünf Kosten-/Latenzfällen. Keine Übertragung der alten DD-Schwellen.
+Der Nutzer verlangt ausdrücklich eine Prüfung von der Vergangenheit bis zum
+aktuellen Stichtag ohne Jahreswartezeit. Das vorgeschlagene Zukunftsfenster ist
+aufgehoben. [Prüfdesign](6-BESTAETIGUNGSDESIGN.md) und
+[Register](6-design-register.json) trennen historischen Modellbefund,
+Stabilitätsprüfung, bedingte Unsicherheit und auswahlbereinigte Evidenz.
+Die unbestätigten 2-%-Nutzenhürde und 15/20/+2-DD-Budgets sind zurückgezogen:
+Effektgrößen und Risiken offen ausweisen, Dominanz oder Zielkonflikt nennen,
+keine persönliche Nutzen-/Risikotoleranz als wissenschaftlichen Wert erfinden.
 
-**D6-A/B/C sind zur fachlichen Entscheidung vorgelegt und bis zur ausdrücklichen
-Antwort offen.** Status/Antworten werden im Entwurfsregister erfasst. Kein
-Schweigen als Zustimmung. Das Design dokumentiert unbekannte Power, Abhängigkeits-
-und Regimeannahmen, Unsicherheits-/Ungültigkeitsausgänge und Umgang mit Vorwissen.
-Ein Jahr garantiert keine Signifikanz. Keine neuen Kandidatenfälle gemessen.
+Bestehendes R0 bleibt bis 27.09.2026 08:29:08.840 UTC vollständig reproduziert.
+R1 plant denselben Handelsstart/Warmup bis festem Stichtag
+29.09.2026 12:00 UTC; neue historische Inputs bislang nicht beschafft und keine
+neuen Kandidatenfälle gemessen. Paket/Code/Methoden vor der nächsten Auswertung
+fixieren; keine rückwirkende Präregistrierung oder unabhängiges Fenster behaupten.
+Kalendermonate und mechanische Drittel einschließlich aller schlechten Abschnitte,
+Kosten-/Latenzszenarien und bedingte Bootstrap-Unsicherheit festgelegt.
 
-Technische Voraussetzungen bleiben offen: Quellen-/Vintage-Manifest mit belegter
-erster Verfügbarkeit, vollständiger Warmup, separat geprüfte Open-i+2-Umsetzung,
-Statistikcode mit synthetischen Prüfungen und unveränderlicher Registrierungscommit
-vor dem Fenster. Späte Daten machen Null-Latenz zum idealisierten Benchmark,
-nicht zu einem zeitlich erreichbaren Fill. Fehlt rechtzeitige Registrierung,
-kein heimliches Verschieben oder nachträgliches historisches Bestätigungsfenster.
-Diese Etappe baut keine Datensammlung oder Latenzimplementierung.
+Frühere E43/E44-/Audit-/Korrektur-Auswahl lesend inventarisieren. Reality-Check/
+SPA und E42-spezifische simultane Aussagen benötigen eine vollständige relevante
+Familie und geprüfte Implementierung. Diese Familie ist noch nicht nachgewiesen;
+fehlende Auswahlbereinigung verhindert keine korrekte beschreibende Auswertung,
+aber eine unqualifizierte Überlegenheitsbehauptung. Historische Vorkenntnis wird
+auch bei sachlicher KI-Auswertung nicht als beseitigt dargestellt.
+
+Schon bekannte R0-Zahlen: E42-Endwert minus Basis -118,99 / -174,48 / -348,03 USD
+bei Slippage 0/0,1/0,5 %. Schluss-DD jeweils höher, obere Intrabar-Grenze gleich
+oder höher. Historische Dominanz der Basis in diesen drei Kennzahlen, kein
+Zukunftsbeweis und kein Ergebnis bis zum 29.09. Kein neues Ergebnis errechnet.
+
+D6-A durch Nutzer auf retrospektives Design festgelegt; D6-B/C-Vorschläge
+zurückgezogen. Keine erneute Freigabefrage zu diesen alten Vorschlägen.
+Technisch offen: separates R1-Daten-/Quellen-/Vintage-Paket, Statistikcode samt
+synthetischen Prüfungen, separate i+2-Umsetzung und Suchhistorieninventar.
+Keine laufende Datensammlung, neue Marktabfrage oder neue Strategieauswahl.
+Version 1 und Sicherung efc3b1a bleiben unverändert nachvollziehbar.
 
 ## Exakte Remote-/Sicherungsabnahme
 
@@ -129,5 +141,5 @@ Commits übernommen. V2/Shorts/E41.6/weitere Befunde bleiben getrennt.
 Kein Strategiegütebeweis und **kein Live-Go**.
 
 Nächster ausschließlich getrennter Auftrag: [START-NACH-6.md](START-NACH-6.md),
-fachliche Festlegung/technische Registrierungsfähigkeit. Keine automatische
+rückblickende Umsetzung/Auswertung zum festen Stichtag. Keine automatische
 Folgeetappe und keine Bestätigungsmessung im Anschluss an diesen Auftrag.

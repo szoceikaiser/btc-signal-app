@@ -18,8 +18,15 @@ def verify():
     assert registry['document_sha256'] == hashlib.sha256((DOC/'6-BESTAETIGUNGSDESIGN.md').read_text(encoding='utf-8').encode('utf-8')).hexdigest()
     assert set(registry['decisions']) == {'D6-A', 'D6-B', 'D6-C'}
     states = [d['status'] for d in registry['decisions'].values()]
-    assert all(s in {'open', 'confirmed'} for s in states)
-    assert registry['status'] == ('fachlich bestätigt; technische Registrierung offen' if all(s == 'confirmed' for s in states) else 'Entwurf; fachliche Entscheidungen offen')
+    assert states == ['confirmed', 'withdrawn', 'withdrawn']
+    assert registry['version'] == 2
+    assert registry['status'] == 'Retrospektives Prüfdesign; keine Jahreswartezeit; Umsetzung offen'
+    assert registry['historical_selection_family_size'] is None
+    assert registry['inference_scope'] == 'Conditional fixed pair; historical selection adjustment not established'
+    assert registry['minimum_wealth_advantage'] is None
+    assert registry['absolute_dd_budgets'] is None
+    assert registry['window']['r1_cutoff_utc'] == '2026-09-29T12:00:00Z'
+    assert registry['window']['r1_measured'] is False
     assert registry['implementation_registration_complete'] is False
     assert registry['scenarios'] == [
         dict(id='S0', next_open_offset=1, fee_pct=.1, slippage_pct=0.),
@@ -29,6 +36,7 @@ def verify():
         dict(id='S4', next_open_offset=2, fee_pct=.1, slippage_pct=.5)]
     return dict(result='PASS', status=registry['status'], frozen_parameter_hashes_verified=True,
         document_sha256=registry['document_sha256'], decisions=registry['decisions'],
-        no_confirmation_measurement=True, live_go=False)
+        no_confirmation_measurement=True, no_waiting_year=True,
+        historical_selection_adjustment_established=False, live_go=False)
 
 if __name__ == '__main__': print(json.dumps(verify(), ensure_ascii=False, indent=2))

@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "base": "bb862204c97c6bb4c0da49cb6f1de90dd58af663",
-  "status": "Entwurf; fachliche Entscheidungen offen",
+  "status": "Retrospektives Prüfdesign; keine Jahreswartezeit; Umsetzung offen",
   "measured": false,
   "live_go": false,
   "implementation_registration_complete": false,
@@ -110,19 +110,25 @@
       "params_sha256": "2d95bc8a6999368024f38d947eaa76f284d2c0a31101c8734a5943995adeaa68"
     }
   ],
-  "document_sha256": "45dfe6696ac5833453960e57721a04cac228c0b08ba0876b7b5b6f37c9d5bf9b",
+  "document_sha256": "e6733a2c4ca2c0e900ea2cea864b1897d6b475dc6ff4200868b3e3cc16991b41",
   "decisions": {
     "D6-A": {
-      "status": "open",
-      "proposal": "E42/12 vs frozen basis; 2026-10-01T00:00:00Z to 2027-10-01T00:00:00Z; registration before start and as-of evidence required"
+      "status": "confirmed",
+      "resolution": "Retrospective historical assessment to current fixed cutoff; future-year proposal superseded",
+      "source": "Current user instruction: historical assessment from the past to the current cutoff without waiting one year",
+      "previous_proposal": "E42/12 vs frozen basis; 2026-10-01T00:00:00Z to 2027-10-01T00:00:00Z; registration before start and as-of evidence required"
     },
     "D6-B": {
-      "status": "open",
-      "proposal": "2% relative annual terminal wealth advantage; one-sided 95% lower bound exceeds 2%"
+      "status": "withdrawn",
+      "resolution": "Unconfirmed 2% personal benefit threshold withdrawn; report actual effect and uncertainty",
+      "source": "Design revision: no personal benefit/risk preference inferred from user instruction",
+      "previous_proposal": "2% relative annual terminal wealth advantage; one-sided 95% lower bound exceeds 2%"
     },
     "D6-C": {
-      "status": "open",
-      "proposal": "Close DD <=15%; upper intrabar DD <=20%; each <= basis +2 percentage points in all scenarios"
+      "status": "withdrawn",
+      "resolution": "Unconfirmed 15%/20%/+2pp risk budgets withdrawn; report risk and dominance/trade-off",
+      "source": "Design revision: no personal benefit/risk preference inferred from user instruction",
+      "previous_proposal": "Close DD <=15%; upper intrabar DD <=20%; each <= basis +2 percentage points in all scenarios"
     }
   },
   "scenarios": [
@@ -168,14 +174,28 @@
     "seed": 20260929,
     "rng": "PCG64",
     "quantile": "linear",
-    "numpy_version": "to freeze before registration"
+    "numpy_version": "to freeze before registration",
+    "purpose": "Conditional descriptive uncertainty; no unqualified post-selection confirmation"
   },
   "unresolved_technical_prerequisites": [
-    "source/vintage manifest",
-    "complete 365-day warmup",
-    "verified offline i+2 implementation",
+    "R1 historical data package and field/source/revision manifest",
     "statistical implementation and synthetic validation",
-    "immutable pre-window registration"
+    "verified offline i+2 implementation",
+    "inventory of historical selection; U2 only if complete"
   ],
-  "document_hash_convention": "UTF-8 text, newlines normalized to LF"
+  "document_hash_convention": "UTF-8 text, newlines normalized to LF",
+  "inference_scope": "Conditional fixed pair; historical selection adjustment not established",
+  "historical_selection_family_size": null,
+  "family_size_meaning": "Current fixed-pair candidate count only; not the historical search family",
+  "minimum_wealth_advantage": null,
+  "absolute_dd_budgets": null,
+  "window": {
+    "mode": "retrospective",
+    "r0_start_ms": 1768766400000,
+    "r0_cutoff_ms": 1790497748840,
+    "r1_cutoff_utc": "2026-09-29T12:00:00Z",
+    "r1_measured": false,
+    "r1_inputs_acquired": false,
+    "no_waiting_year": true
+  }
 }

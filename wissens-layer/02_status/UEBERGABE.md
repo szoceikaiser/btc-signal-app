@@ -1,47 +1,40 @@
 # Laufende Übergabe
 
-## Übergabe 29.09.2026: Etappe 6 Reproduktion und Bestätigungsdesign
+## Übergabe 29.09.2026: Etappe 6, retrospektives Design v2
 
-Eigener Zweig `codex/etappe-6-reproduktion-design`, Arbeitsbaum `etappe-6-work`,
-direkt aus lokal gesichertem 5b `bb862204c97c6bb4c0da49cb6f1de90dd58af663`.
-ABSCHLUSS.json, Bundle/ZIP, vollständige 215-Datei-Basis und eingefrorene Inputs
-geprüft. Nur sechs vorab bekannte Fälle vollständig neu über kausales V1 gerechnet;
-alle Ergebnisfelder und 5b-Replay-SHA256 exakt identisch. 1.101 Fills und 9.054
-Closes unabhängig gegen Audit-Buch und Decimal-Restkosten geprüft.
+Eigener Zweig codex/etappe-6-reproduktion-design direkt aus gesichertem 5b
+bb862204c97c6bb4c0da49cb6f1de90dd58af663. R0-Reproduktion unverändert:
+sechs vollständige V1-Läufe exakt identisch, 1.101 Fills / 9.054 Closes unabhängig
+geprüft, 728 Tests unverändert. Engine/site/Daten/Versand/Verträge/Workflows erhalten.
 
-728/728 Tests, alle bisherigen unverändert, Engine/site/Workflows/Verträge/Daten
-identisch. Keine neue Konfiguration/Messung/Schwelle aktiviert. Bericht
-`docs/nacharbeit-2026-09-28/ETAPPE-6-ABSCHLUSS.md`, Ergebnisse `6-ergebnis.json`
-und `6-ledger.json.gz`. Exakte Remote-/CI-/Bundle-/ZIP-/Restore-Belege lokal
-`audit-backups/6-abschluss-<Kurz-SHA>/ABSCHLUSS.json`; Restore umfasst 728 Tests,
-alle bisherigen Schutzproben, sechs komplette identische Reproduktionen plus
-sechs Checkpoint-Fortsetzungen in neuen Prozessen.
+Nutzer lehnt Jahreswartezeit ab und verlangt sachliche historische Prüfung bis
+jetzt. Design v2 in 6-BESTAETIGUNGSDESIGN.md / 6-design-register.json:
+R0 bis 27.09. bleibt erhalten; R1 mit gleicher Basis/Warmup bis festem Stichtag
+29.09.2026 12:00 UTC geplant. R1 noch nicht beschafft/gemessen. Keine neuen
+Kandidaten oder Auswertungen durch diese Designänderung. Unbestätigte Nutzen-
+und DD-Budgets zurückgezogen, keine persönliche Risikotoleranz unterstellt.
+Wirkung/Risiko/Dominanz und Zielkonflikte berichten statt willkürlicher Hürden.
 
-Bestätigungsdesign `6-BESTAETIGUNGSDESIGN.md`, Parameteridentitäten/Status in
-`6-design-register.json`. Vorschlag: E42/12 gegen eingefrorene Basis, Fenster
-01.10.2026–01.10.2027 UTC, primär 0,1 % Slippage, mindestens 2 % relatives
-Jahres-Endvermögen einschließlich 95-%-Untergrenze. Stationärer gepaarter
-14-Tage-Blockbootstrap, feste 7-/28-Tage-Sensitivitäten, Familie m=1.
-Neue vorgeschlagene Risiken: Schluss-DD <=15 %, obere Intrabar-Grenze <=20 %,
-jeweils höchstens +2 Prozentpunkte gegenüber Basis in allen fünf Kosten-/
-Latenzfällen. **Fachentscheidungen D6-A/B/C vorgelegt, noch offen**;
-keine stillschweigende Zustimmung. Keine alten DD-Schwellen übernommen.
+Historische Kalendermonate/mechanische Drittel/Startzustandssensitivität und alle
+Kosten-/Latenzfälle festgelegt. Paar-Bootstrap nur bedingte Unsicherheit,
+keine Bereinigung der früheren Auswahl. Suchhistorie E43/E44/Audit/Korrekturen
+lesend inventarisieren. Reality-Check/SPA und E42-spezifische simultane Aussagen
+nur bei vollständiger relevanter Familie/geprüfter Implementierung. Familie noch
+nicht nachgewiesen; trotzdem beschreibende historische Evidenz möglich.
+Keine KI-Objektivität als Ersatz für statistische Auswahlkontrolle behaupten.
 
-Keine neue Kandidatenmessung. Technische Registrierung noch nicht erfolgt:
-Quellen-/Vintage-/Verfügbarkeitsmanifest, vollständiger Warmup, geprüfte i+2-
-Latenzumsetzung, Statistikcode/synthetische Prüfungen und unveränderlicher
-Registrierungscommit vor Fensterbeginn erforderlich. Verspätung verliert das
-Fenster; keine heimliche Verschiebung. Unbekannte Power, Regime-/Abhängigkeits-
-annahmen, Datenmangel und Vorwissen ausdrücklich dokumentiert.
+D6-A retrospektiv durch Nutzer festgelegt, D6-B/C zurückgezogen; alte Fragen
+nicht erneut stellen. Offene Technik: R1-Paket/Quellen-/Verfügbarkeitsmanifest,
+Statistik/synthetische Tests, separate i+2-Umsetzung und Suchinventar. Bekannte
+R0-Dominanz der Basis nur historischer Modellbefund, kein Zukunfts-/Live-Go.
+Version-1-Sicherung efc3b1a unverändert. Bericht ETAPPE-6-ABSCHLUSS.md;
+neue exakte SHA/CI/Bundle/ZIP/Restore lokal 6-abschluss-<Kurz-SHA>/ABSCHLUSS.json.
 
-Keine echten Nachrichten/Orders/Deployments/Live-Schalter/Dispatches/main-Push/
-Merges; privates Repo, fremde Arbeitsbäume/Originale/Transkripte/Tag unverändert.
-Historische Signalbänder Diagnostik, V1-Fills simuliert, Live-Bestand unbekannt.
-F13-ID lokale Versandidentität; unklare Zustellung blockiert, bestätigte/unklare
-Sendungen nicht wiederholt, kein Reset/Exactly-once. Ephemerer Runnerverlust
-vor Git-Persistenz offen. V2/Shorts/E41.6/weitere Befunde getrennt. Kein Live-Go.
-Nächster ausschließlich separater Auftrag: `START-NACH-6.md`, fachliche Festlegung
-und technische Registrierungsfähigkeit; keine automatische Folgearbeit.
+Keine Nachrichten/Orders/Deployments/Live-Schalter/Dispatches/main-Push/Merges.
+F13-ID lokale Versandidentität; uncertain blockiert, kein Reset/Exactly-once.
+Ephemerer Runnerverlust vor Git-Persistenz offen, manuelle Fills unbekannt.
+V2/Shorts/E41.6/weitere Befunde getrennt. Nächster separater Auftrag
+START-NACH-6.md: retrospektive Umsetzung/Auswertung; nichts automatisch starten.
 
 ---
 
