@@ -1,5 +1,50 @@
 # Laufende Übergabe
 
+## Übergabe 29.09.2026: Etappe 6 Reproduktion und Bestätigungsdesign
+
+Eigener Zweig `codex/etappe-6-reproduktion-design`, Arbeitsbaum `etappe-6-work`,
+direkt aus lokal gesichertem 5b `bb862204c97c6bb4c0da49cb6f1de90dd58af663`.
+ABSCHLUSS.json, Bundle/ZIP, vollständige 215-Datei-Basis und eingefrorene Inputs
+geprüft. Nur sechs vorab bekannte Fälle vollständig neu über kausales V1 gerechnet;
+alle Ergebnisfelder und 5b-Replay-SHA256 exakt identisch. 1.101 Fills und 9.054
+Closes unabhängig gegen Audit-Buch und Decimal-Restkosten geprüft.
+
+728/728 Tests, alle bisherigen unverändert, Engine/site/Workflows/Verträge/Daten
+identisch. Keine neue Konfiguration/Messung/Schwelle aktiviert. Bericht
+`docs/nacharbeit-2026-09-28/ETAPPE-6-ABSCHLUSS.md`, Ergebnisse `6-ergebnis.json`
+und `6-ledger.json.gz`. Exakte Remote-/CI-/Bundle-/ZIP-/Restore-Belege lokal
+`audit-backups/6-abschluss-<Kurz-SHA>/ABSCHLUSS.json`; Restore umfasst 728 Tests,
+alle bisherigen Schutzproben, sechs komplette identische Reproduktionen plus
+sechs Checkpoint-Fortsetzungen in neuen Prozessen.
+
+Bestätigungsdesign `6-BESTAETIGUNGSDESIGN.md`, Parameteridentitäten/Status in
+`6-design-register.json`. Vorschlag: E42/12 gegen eingefrorene Basis, Fenster
+01.10.2026–01.10.2027 UTC, primär 0,1 % Slippage, mindestens 2 % relatives
+Jahres-Endvermögen einschließlich 95-%-Untergrenze. Stationärer gepaarter
+14-Tage-Blockbootstrap, feste 7-/28-Tage-Sensitivitäten, Familie m=1.
+Neue vorgeschlagene Risiken: Schluss-DD <=15 %, obere Intrabar-Grenze <=20 %,
+jeweils höchstens +2 Prozentpunkte gegenüber Basis in allen fünf Kosten-/
+Latenzfällen. **Fachentscheidungen D6-A/B/C vorgelegt, noch offen**;
+keine stillschweigende Zustimmung. Keine alten DD-Schwellen übernommen.
+
+Keine neue Kandidatenmessung. Technische Registrierung noch nicht erfolgt:
+Quellen-/Vintage-/Verfügbarkeitsmanifest, vollständiger Warmup, geprüfte i+2-
+Latenzumsetzung, Statistikcode/synthetische Prüfungen und unveränderlicher
+Registrierungscommit vor Fensterbeginn erforderlich. Verspätung verliert das
+Fenster; keine heimliche Verschiebung. Unbekannte Power, Regime-/Abhängigkeits-
+annahmen, Datenmangel und Vorwissen ausdrücklich dokumentiert.
+
+Keine echten Nachrichten/Orders/Deployments/Live-Schalter/Dispatches/main-Push/
+Merges; privates Repo, fremde Arbeitsbäume/Originale/Transkripte/Tag unverändert.
+Historische Signalbänder Diagnostik, V1-Fills simuliert, Live-Bestand unbekannt.
+F13-ID lokale Versandidentität; unklare Zustellung blockiert, bestätigte/unklare
+Sendungen nicht wiederholt, kein Reset/Exactly-once. Ephemerer Runnerverlust
+vor Git-Persistenz offen. V2/Shorts/E41.6/weitere Befunde getrennt. Kein Live-Go.
+Nächster ausschließlich separater Auftrag: `START-NACH-6.md`, fachliche Festlegung
+und technische Registrierungsfähigkeit; keine automatische Folgearbeit.
+
+---
+
 ## Übergabe 29.09.2026: Etappe 5b F17 abgeschlossen
 
 - Chart erhält alle Quellen/Kollisionen: L Live-Referenz, H historische Diagnostik,

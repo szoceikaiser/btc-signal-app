@@ -1,0 +1,22 @@
+{
+  "result": "PASS",
+  "status": "Entwurf; fachliche Entscheidungen offen",
+  "frozen_parameter_hashes_verified": true,
+  "document_sha256": "45dfe6696ac5833453960e57721a04cac228c0b08ba0876b7b5b6f37c9d5bf9b",
+  "decisions": {
+    "D6-A": {
+      "status": "open",
+      "proposal": "E42/12 vs frozen basis; 2026-10-01T00:00:00Z to 2027-10-01T00:00:00Z; registration before start and as-of evidence required"
+    },
+    "D6-B": {
+      "status": "open",
+      "proposal": "2% relative annual terminal wealth advantage; one-sided 95% lower bound exceeds 2%"
+    },
+    "D6-C": {
+      "status": "open",
+      "proposal": "Close DD <=15%; upper intrabar DD <=20%; each <= basis +2 percentage points in all scenarios"
+    }
+  },
+  "no_confirmation_measurement": true,
+  "live_go": false
+}

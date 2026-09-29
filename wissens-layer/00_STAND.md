@@ -1,5 +1,25 @@
 # 00 STAND — Kurzstand in einer halben Minute
 
+## Aktueller Arbeitsstand 29.09.2026: Etappe 6 Reproduktion und Design
+
+- Direkt aus gesichertem 5b `bb862204c97c6bb4c0da49cb6f1de90dd58af663`.
+  Nur eingefrorene Live-Basis/E42-12 × Slippage 0/0,1/0,5 %, Gebühr 0,1 %.
+  Sechs komplette V1-Läufe exakt identisch zu gesicherten Ledgers/5b-Replay-Hashes;
+  1.101 Fills / 9.054 Closes unabhängig auf Bestand, Kosten und Risiko geprüft.
+- **728 Tests**, alle unverändert. Engine/site/Daten/Versand/Verträge/Workflows
+  identisch zur 5b-Basis. Keine neue Kandidatenmessung und kein Live-Go.
+- Konkretes Bestätigungsdesign: nur E42/12 gegen Basis, künftiges Jahresfenster,
+  gepaarter Blockbootstrap, Mindestvorsprung und neue DD-Budgets. **D6-A/B/C offen**
+  bis ausdrückliche Nutzerantwort. Quellen-/Vintage-Manifest, Latenz-/Statistikcode
+  und rechtzeitiger Registrierungscommit bleiben technische Voraussetzungen.
+- Zweig `codex/etappe-6-reproduktion-design`, Arbeitsbaum `etappe-6-work`;
+  Bericht `docs/nacharbeit-2026-09-28/ETAPPE-6-ABSCHLUSS.md`, Design/Register dort.
+  Exakte SHA/Remote-CI/Bundle/ZIP/vollständiger Restore lokal
+  `audit-backups/6-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+- Nächster **separater** Auftrag: `START-NACH-6.md`, Designfestlegung und
+  Registrierungsfähigkeit, noch keine neue Messung. Nichts automatisch starten.
+  F13-Unsicherheit/Runnerverlust, unbekannter Live-Bestand, V2/Shorts/E41.6 bleiben.
+
 ## Aktueller Arbeitsstand 29.09.2026: Etappe 5b F17 abgeschlossen
 
 - Chart erhält alle Quellen/Kollisionen: L Live-Referenz, H historische Diagnostik,

@@ -41,6 +41,22 @@ den individuellen Codex-Tarif.
 
 ## Aktueller Stand
 
+**Etappe 6: Reproduktion und Bestätigungsdesign**, direkt aus gesichertem 5b
+`bb862204c97c6bb4c0da49cb6f1de90dd58af663`, Zweig
+`codex/etappe-6-reproduktion-design`. Sechs vollständige eingefrorene V1-Läufe
+exakt gleich, 1.101 Fills / 9.054 Closes unabhängig geprüft; **728 Tests**, alle
+unverändert. Engine/site/Versand/Daten/Verträge/Workflows identisch zu 5b.
+[Bericht](ETAPPE-6-ABSCHLUSS.md), [Bestätigungsentwurf](6-BESTAETIGUNGSDESIGN.md),
+[Entwurfsregister](6-design-register.json). **D6-A/B/C fachlich noch offen**;
+technische Daten-/Latenz-/Statistik-/Vorregistrierungsvoraussetzungen dokumentiert.
+Keine neuen Kandidaten gemessen, keine alte DD-Schwelle übernommen, kein Live-Go.
+Exakte SHA/CI/Bundle/ZIP/vollständiger Restore lokal
+`audit-backups/6-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+Nächster separater Auftrag: [Designfestlegung/Registrierungsfähigkeit](START-NACH-6.md).
+Keine automatische Folgearbeit oder Bestätigungsmessung.
+
+### Historischer Abschluss 5b
+
 **Etappe 5b/F17 abgeschlossen** direkt aus gesichertem 5a `6c0c6fd…`, eigener
 Zweig `codex/etappe-5b-chart-identitaet`. Quellengetrennte Chartidentitäten,
 Kollisionen erhalten, lesbare Herkunftsliste; keine Engine-/Versandänderung.
