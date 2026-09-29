@@ -1,5 +1,37 @@
 # Laufende Übergabe
 
+## Übergabe 29.09.2026: Etappe 5b F17 abgeschlossen
+
+- Chart erhält alle Quellen/Kollisionen: L Live-Referenz, H historische Diagnostik,
+  optional V1 Modell-Fills. Deterministische Chartidentitäten, vollständige
+  Ereignisliste, reine Altbestandsprojektion ohne Versand-/Zustandsänderung.
+- **728 Tests**, alle **712 alten unverändert**, 16 neue; **16/16 F17-Sabotagen**.
+  5a 16/16, 4 23/23, 3b 19/19, D01 6/6, F09 3/3 erhalten. 1.101 gespeicherte
+  V1-Fills auf Zeit/Preis/Identität projiziert, keine historische Neuberechnung.
+- Engine, Versandliste, Strategie, Konfiguration, historische Daten und Workflows
+  identisch zur gesicherten Basis 6c0c6fdd56db9bb27febaf42c56f6e33bcab0685.
+  Keine echte Zustellung/Orders/Deployments/main-Push/Merges/Dispatches, kein Live-Go.
+- Grenzen aus 5a bleiben: uncertain sperrt Folge, keine Exactly-once-Garantie,
+  ephemerer Runnerverlust vor Git-Persistenz offen. Chart-ID ist kein Zustellbeleg;
+  identische Altduplikate erlauben keine nachträgliche Einzelzuordnung.
+- Zweig `codex/etappe-5b-chart-identitaet`, Arbeitsbaum `etappe-5b-work`, Bericht
+  `docs/nacharbeit-2026-09-28/ETAPPE-5B-ABSCHLUSS.md`. Exakte SHA/CI/Restore lokal
+  `audit-backups/5b-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+- Nächster **separater** Auftrag: Etappe 6, `START-6.md`; Sol/mittel für begrenzte
+  Reproduktion, Astra/hoch für Bestätigungsdesign. Nichts automatisch starten.
+
+F17-Vertrag vor Umsetzung festgelegt. Originalmerge auf exakter 5a-Basis und
+zwei unabhängige Audit-Snapshot-Konflikte reproduziert. Tatsächliches JavaScript
+inklusive HTML-load/Marker-/Listenpfad netzfrei geprüft; kein Screenshot-/Live-
+Seitenbeleg behauptet. Explizite IDs nur quellenintern bei identischem Inhalt
+zusammengefasst; widersprüchliche Inhalte markiert, Altduplikate erhalten.
+Optionale V1-Ergebnisdatei wird nicht erzeugt oder automatisch ausgewählt.
+728 Restore-Tests, alle Schutzproben, sechs identische bereits festgelegte V1-
+Prozessfortsetzungen und unabhängiger Kostenabgleich gehören zur lokalen Abnahme.
+V2/Shorts/E41.6/weitere Befunde getrennt. Privates Repo/Originale/Tag unverändert.
+
+---
+
 ## 29.09.2026 — Etappe 5a F13 abgeschlossen auf eigenem Zweig
 
 Direkt aus gesichertem Etappe-4-Abschluss ebc01a48057994629c021bd84ab7f9a236678b70,

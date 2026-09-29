@@ -1,5 +1,25 @@
 # 00 STAND — Kurzstand in einer halben Minute
 
+## Aktueller Arbeitsstand 29.09.2026: Etappe 5b F17 abgeschlossen
+
+- Chart erhält alle Quellen/Kollisionen: L Live-Referenz, H historische Diagnostik,
+  optional V1 Modell-Fills. Deterministische Chartidentitäten, vollständige
+  Ereignisliste, reine Altbestandsprojektion ohne Versand-/Zustandsänderung.
+- **728 Tests**, alle **712 alten unverändert**, 16 neue; **16/16 F17-Sabotagen**.
+  5a 16/16, 4 23/23, 3b 19/19, D01 6/6, F09 3/3 erhalten. 1.101 gespeicherte
+  V1-Fills auf Zeit/Preis/Identität projiziert, keine historische Neuberechnung.
+- Engine, Versandliste, Strategie, Konfiguration, historische Daten und Workflows
+  identisch zur gesicherten Basis 6c0c6fdd56db9bb27febaf42c56f6e33bcab0685.
+  Keine echte Zustellung/Orders/Deployments/main-Push/Merges/Dispatches, kein Live-Go.
+- Grenzen aus 5a bleiben: uncertain sperrt Folge, keine Exactly-once-Garantie,
+  ephemerer Runnerverlust vor Git-Persistenz offen. Chart-ID ist kein Zustellbeleg;
+  identische Altduplikate erlauben keine nachträgliche Einzelzuordnung.
+- Zweig `codex/etappe-5b-chart-identitaet`, Arbeitsbaum `etappe-5b-work`, Bericht
+  `docs/nacharbeit-2026-09-28/ETAPPE-5B-ABSCHLUSS.md`. Exakte SHA/CI/Restore lokal
+  `audit-backups/5b-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+- Nächster **separater** Auftrag: Etappe 6, `START-6.md`; Sol/mittel für begrenzte
+  Reproduktion, Astra/hoch für Bestätigungsdesign. Nichts automatisch starten.
+
 ## Aktueller Arbeitsstand 29.09.2026: Etappe 5a abgeschlossen
 
 - F13 im Hauptlauf: atomare Position/Dedupe/Versandabsicht in state.json,

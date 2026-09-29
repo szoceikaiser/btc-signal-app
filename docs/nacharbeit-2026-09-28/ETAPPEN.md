@@ -41,6 +41,20 @@ den individuellen Codex-Tarif.
 
 ## Aktueller Stand
 
+**Etappe 5b/F17 abgeschlossen** direkt aus gesichertem 5a `6c0c6fd…`, eigener
+Zweig `codex/etappe-5b-chart-identitaet`. Quellengetrennte Chartidentitäten,
+Kollisionen erhalten, lesbare Herkunftsliste; keine Engine-/Versandänderung.
+**728 Tests**, alle 712 alten unverändert, 16 neue; **16/16 F17-Sabotagen**,
+alle bisherigen Schutzproben erhalten. 1.101 vorhandene V1-Fills projiziert,
+keine neue historische Rechnung. [Vertrag](F17-VERTRAG.md),
+[Abschlussbericht](ETAPPE-5B-ABSCHLUSS.md). Exakte SHA/CI/Bundle/ZIP/Restore lokal
+`audit-backups/5b-abschluss-<Kurz-SHA>/ABSCHLUSS.json`. 5a-Betriebsgrenzen bleiben,
+kein Live-Go. Nächster **separater** Auftrag: [Etappe 6](START-6.md),
+Sol/mittel für begrenzte Wiederholung, Astra/hoch für Bestätigungsdesign.
+5b beenden, nichts automatisch starten.
+
+### Historischer Abschluss 5a
+
 **Etappe 5a abgeschlossen** auf `codex/etappe-5a-telegram-outbox`, direkt aus
 gesichertem 4-Abschluss `ebc01a48057994629c021bd84ab7f9a236678b70`.
 F13 im Hauptlauf: stabile Identität, atomare dauerhafte Versandabsicht mit
