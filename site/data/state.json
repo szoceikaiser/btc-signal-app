@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1790740800000,
+ "last_signal_ts": 1790755200000,
  "retrace_extreme": 82563.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -56,10 +56,10 @@
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 83858.78115384615,
-  "kurs": 83304.92,
+  "kurs": 83915.16,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 83.305 $ ueber EMA200 (71.757 $)",
+   "trend_text": "Uebergeordnet: Kurs 83.915 $ ueber EMA200 (71.706 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
    "spot": "schwach",
@@ -80,6 +80,11 @@
   },
   "nachkauf": [
    {
+    "preis": 83864.07,
+    "was": "Liquidationszone",
+    "tranche": 20
+   },
+   {
     "zone": [
      80126.04,
      83760.855
@@ -93,11 +98,6 @@
     "tranche": 20
    },
    {
-    "preis": 83183.0,
-    "was": "Liquidationszone",
-    "tranche": 20
-   },
-   {
     "preis": 81681.74081999999,
     "was": "0.786-Zone",
     "tranche": 25
@@ -105,17 +105,17 @@
   ],
   "teilgewinn": [
    {
+    "preis": 84141.17005,
+    "was": "kurz unter dem letzten Hoch 84.564",
+    "tranche": 15
+   },
+   {
     "zone": [
      84167.34654,
      84250.4195
     ],
     "was": "Widerstand der Gegenbewegung \u2014 nur Hinweis, die Engine verkauft dort nicht",
     "tranche": 0
-   },
-   {
-    "preis": 84733.23485,
-    "was": "kurz unter dem letzten Hoch 85.159",
-    "tranche": 15
    },
    {
     "preis": 88378.704,
@@ -189,13 +189,13 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-09-30T10:14:48Z",
- "last_close": 83304.92,
+ "updated_at": "2026-09-30T12:02:24Z",
+ "last_close": 83915.16,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 83.305 $ ueber EMA200 (71.757 $)",
+   "trend_text": "Uebergeordnet: Kurs 83.915 $ ueber EMA200 (71.706 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
    "spot": "schwach",
