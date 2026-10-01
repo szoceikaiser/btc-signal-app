@@ -6,12 +6,16 @@ No Telegram token is persisted. Uncertain delivery requires separate review.
 from __future__ import annotations
 
 from contextlib import contextmanager
+from contextvars import ContextVar
 from copy import deepcopy
 import hashlib
 import json
 import os
 from pathlib import Path
 import tempfile
+
+# A4: a durable session commits authoritative state BEFORE the local mirror.
+durable_writer = ContextVar('durable_writer', default=None)
 
 
 def canonical(value):
@@ -27,6 +31,9 @@ def atomic_json(path, value):
     """Replace one file after syncing it; old or new complete JSON survives a crash."""
     path = Path(path)
     data = canonical(value)
+    writer = durable_writer.get()
+    if writer is not None:
+        writer(path, value)
     fd, temp = tempfile.mkstemp(prefix='.'+path.name+'-', dir=path.parent)
     try:
         with os.fdopen(fd, 'w', encoding='utf-8', newline='\n') as stream:

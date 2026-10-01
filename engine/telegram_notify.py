@@ -517,8 +517,9 @@ def deliver_telegram(text: str, token: str, chat_id: str, timeout: int = 15) -> 
 
 
 def send_telegram(text: str, token: str, chat_id: str, timeout: int = 15) -> bool:
-    """Legacy one-shot commands; durable main-loop dispatch uses deliver_telegram."""
-    return deliver_telegram(text, token, chat_id, timeout)['status'] == 'confirmed'
+    """Stage a one-shot text; the command commits its batch before dispatch."""
+    from durable_delivery import stage_text
+    return stage_text(text)
 
 
 def send_signals(signals: list[dict], dry_run: bool = False) -> list[str]:

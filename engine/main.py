@@ -31,6 +31,7 @@ import coinalyze
 from flow_contract import (AsOfSeries, asof, direct, FOUR_HOURS_MS, MAX_OI_AGE_MS,
                            MAX_FUNDING_AGE_MS)
 import telegram_outbox as outbox
+import durable_delivery as durable
 from functools import wraps
 from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
                            Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
@@ -715,6 +716,7 @@ def plan_geaendert(alt: dict | None, neu: dict | None, toleranz: float = 0.0025)
     return False
 
 
+@durable.durable_command('watch')
 def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
                 now_ms: int | None = None, kerzen_roh=None) -> dict | None:
     """Leichter Zwischenlauf: Entwickelt sich in der LAUFENDEN Kerze gerade ein Flush?
@@ -808,13 +810,14 @@ def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
     }
     send_text(format_flush_warnung(w), dry_run=dry_run)
     watch_path.write_text(json.dumps(w, indent=1), encoding="utf-8")
-    print(f"Flush-Warnung gesendet: Kurs {laufend.close:.0f}, GP {z['gp_lower']:.0f}, "
+    print(f"Flush-Warnung vorgemerkt: Kurs {laufend.close:.0f}, GP {z['gp_lower']:.0f}, "
           f"Puffer {w['puffer_pct']} %")
     return w
 
 
 # ------------------------------------------------------------ Orchestrierung
 
+@durable.durable_command('lage')
 def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
                dry_run: bool = False, sth=sth_kostenbasis) -> dict | None:
     """Die Lage auf Knopfdruck — unter der Annahme einer LONG-Position (E35).
@@ -832,8 +835,8 @@ def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
         bein_richtung sagt. Ein Abwaerts-Bein bedeutet fuer einen Long nichts; findet
         sich kein Aufwaerts-Bein, sagt die Nachricht genau das.
       - Er fasst state.json NICHT an und erzeugt KEIN Signal — wie `--watch`.
-      - Er sendet IMMER, ohne Dedupe. Der Abruf ist ja gerade der Wunsch, jetzt zu
-        sehen, wie es steht.
+      - Jeder neue dauerhafte Auftrag erzeugt einen Abruf. Eine Wiederholung
+        derselben Auftrags-ID verwendet den gespeicherten Nachrichtenbatch.
     """
     cfg = {}
     cfg_path = data_dir / "config.json"
@@ -923,7 +926,7 @@ def e41_meldung(pos: Position, wartete_vorher: int, sigs: list, kerze: Candle,
 def _serialized_engine(fn):
     @wraps(fn)
     def locked(fetch=fetch_market_data, data_dir=DATA, dry_run=False):
-        with outbox.engine_lock(data_dir):
+        with outbox.engine_lock(data_dir), durable.engine_session(Path(data_dir), dry_run):
             return fn(fetch=fetch, data_dir=data_dir, dry_run=dry_run)
     return locked
 
@@ -947,7 +950,7 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     # Resume pending dispatch before market access, even if fetching fails or
     # there are no new candles. Confirmed/uncertain entries are never resent.
     dispatch_open = True
-    if '_delivery' in old_state:
+    if '_delivery' in old_state and durable.can_dispatch():
         dispatch_open = outbox.drain(old_state, state_path, deliver_telegram,
                      os.environ.get('TELEGRAM_BOT_TOKEN', ''),
                      os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run)
@@ -1078,14 +1081,14 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
                       lambda sig=sig: send_signals([sig], dry_run=True))
     delivery['signals'], delivery['oi_history'] = hist, oi_history
     state['_delivery'] = delivery
-    # This is the sole authoritative commit: position/dedupe and intentions
-    # become durable together. Projection failures cannot lose intentions.
+    # Position/dedupe and intentions commit together. In an A4 session the
+    # external snapshot commits first; state.json is then only its local mirror.
     outbox.atomic_json(state_path, state)
     outbox.project(state, data_dir)
     if dry_run or not os.environ.get('TELEGRAM_BOT_TOKEN') or not os.environ.get('TELEGRAM_CHAT_ID'):
         for preview in previews:
             preview()
-    if dispatch_open:
+    if dispatch_open and durable.can_dispatch():
         outbox.drain(state, state_path, deliver_telegram,
                      os.environ.get('TELEGRAM_BOT_TOKEN', ''),
                      os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run)
@@ -1094,14 +1097,16 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     return new_signals
 
 
-def send_testnachricht():
+@durable.durable_command('test')
+def send_testnachricht(data_dir: Path = DATA, dry_run: bool = False):
     ts = int(time.time() * 1000)
     send_signals([{"ts": ts, "type": "WARNUNG", "label": "TESTNACHRICHT — Einrichtung ok",
                    "price": 0.0, "tranche_pct": 0,
-                   "reason": "Telegram-Verbindung funktioniert. Ab jetzt kommen echte Trigger."}])
+                   "reason": "Telegram-Verbindung funktioniert. Ab jetzt kommen echte Trigger."}], dry_run=dry_run)
 
 
-def resend_all_signals(data_dir: Path = DATA):
+@durable.durable_command('resend')
+def resend_all_signals(data_dir: Path = DATA, dry_run: bool = False):
     """Sendet ALLE gespeicherten Kauf-/Verkaufstrigger erneut an Telegram (auf Knopfdruck)."""
     signals_path = data_dir / "signals.json"
     if not signals_path.exists():
@@ -1109,20 +1114,20 @@ def resend_all_signals(data_dir: Path = DATA):
         return []
     hist = json.loads(signals_path.read_text(encoding="utf-8"))
     sigs = sorted(hist.get("signals", []), key=lambda s: s["ts"])
-    dry = not (os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"))
+    dry = dry_run or not (os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"))
     send_signals([{"ts": int(time.time() * 1000), "type": "WARNUNG",
                    "label": f"NEUSENDUNG: {len(sigs)} Trigger (Historie, keine neuen Signale)",
                    "price": 0.0, "tranche_pct": 0,
                    "reason": "Ab hier folgen alle bisherigen Kauf-/Verkaufstrigger noch einmal."}],
                   dry_run=dry)
     send_signals(sigs, dry_run=dry)
-    print(f"{len(sigs)} Trigger erneut gesendet (dry_run={dry}).")
+    print(f"{len(sigs)} Trigger fuer Neusendung vorgemerkt (dry_run={dry}).")
     return sigs
 
 
 if __name__ == "__main__":
     if "--test-telegram" in sys.argv:
-        send_testnachricht()
+        send_testnachricht(dry_run="--dry-run" in sys.argv)
     elif "--watch" in sys.argv:
         # Leichter Zwischenlauf (alle 15 Min): nur nach sich entwickelnden Flushs
         # schauen. Fasst state.json nicht an, erzeugt keine Signale.
@@ -1132,6 +1137,6 @@ if __name__ == "__main__":
         # Signal, fasst state.json nicht an.
         lage_abruf(dry_run="--dry-run" in sys.argv or not os.environ.get("TELEGRAM_BOT_TOKEN"))
     elif "--resend-all" in sys.argv:
-        resend_all_signals()
+        resend_all_signals(dry_run="--dry-run" in sys.argv)
     else:
         run_engine(dry_run="--dry-run" in sys.argv or not os.environ.get("TELEGRAM_BOT_TOKEN"))

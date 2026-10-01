@@ -1,5 +1,5 @@
 """F13 reached production/transport/crash cases. All sends and fetches are offline."""
-from contextlib import contextmanager, redirect_stdout
+from contextlib import contextmanager, redirect_stdout, nullcontext
 from copy import deepcopy
 import io
 import json
@@ -22,7 +22,10 @@ CREDS = dict(TELEGRAM_BOT_TOKEN='F13_FAKE_TOKEN', TELEGRAM_CHAT_ID='F13_FAKE_CHA
 
 @contextmanager
 def offline(credentials=True):
+    # These historical probes intentionally cover the LOCAL 5a contract.
+    # A4's separate probes exercise the real durable session without this patch.
     with patch.dict(os.environ, CREDS if credentials else dict(TELEGRAM_BOT_TOKEN='', TELEGRAM_CHAT_ID='')), \
+         patch.object(main.durable, 'engine_session', side_effect=lambda *a: nullcontext()), \
          patch.object(tg.urllib.request, 'urlopen', side_effect=AssertionError('network forbidden')), \
          redirect_stdout(io.StringIO()) as output:
         yield output
