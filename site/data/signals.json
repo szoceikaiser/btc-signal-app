@@ -424,6 +424,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1790798400000,
+   "type": "WARNUNG",
+   "price": 83623.6,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
   }
  ]
 }
