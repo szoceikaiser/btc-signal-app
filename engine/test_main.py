@@ -1266,7 +1266,8 @@ def test_e433_anzeige_rechnet_muster2_wie_der_handel():
     assert aufrufe >= 3, "Vorprobe: die Anzeige-Aufrufe sind nicht mehr da"
     assert len(re.findall(r'classify_pattern\(candles, flow, muster_cvd=par\["muster_cvd"\][,)]',
                           q)) == aufrufe
-    assert main.EVAL_DEFAULTS["muster_cvd"] == "alt"
+    # A2 makes the already specified offset-invariant dollar comparison active.
+    assert main.EVAL_DEFAULTS["muster_cvd"] == "usd"
 
 
 def test_e434_anzeige_rechnet_das_oi_wie_der_handel():
@@ -1342,7 +1343,7 @@ def test_e434_live_und_backtest_rechnen_dieselben_kontrakte():
     oi_map = _e434_oi_mit_luecken(raw)
     live = _e434_live_flow(raw, oi_map)
     _cs, bt = backtest.build_series(raw, [], oi_map)
-    assert [f.oi_btc for f in live] == [f.oi_btc for f in bt] == [10.0, 10.0, 10.0,
+    assert [f.oi_btc for f in live] == [f.oi_btc for f in bt] == [0.0, 10.0, 10.0,
                                                                   12.0, 12.0]
     assert [f.oi for f in live] == [f.oi for f in bt]
 

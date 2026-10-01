@@ -33,6 +33,8 @@ from pathlib import Path
 
 import archiv
 import coinalyze
+from flow_contract import (AsOfSeries, asof, direct, FOUR_HOURS_MS, MAX_OI_AGE_MS,
+                           MAX_FUNDING_AGE_MS)
 from main import _get_json, fetch_funding_8h
 from strategy_core import Candle, FlowPoint, LADDER_TRANCHE, Position, evaluate, oi_in_btc
 
@@ -728,7 +730,7 @@ def build_series(raw: list, funding: list[tuple[int, float]],
                  oi_map: dict | None = None, liq_map: dict | None = None,
                  fut_map: dict | None = None, ls_map: dict | None = None,
                  spot_map: dict | None = None, *, end_ms: int | None = None):
-    """OI aus oi_map (Coinalyze, E9.1) je Kerze; ohne oi_map bleibt OI konstant (neutral).
+    """OI aus oi_map (Coinalyze, E9.1) je Kerze; ohne oi_map fehlt OI.
     liq_map liefert (long_liq, short_liq) je Kerzen-Open-ts.
     fut_map (E16) liefert das Futures-Taker-Delta je Kerze -> wird hier zum Futures-CVD
     aufsummiert; ohne fut_map bleibt es 0 und classify_pattern nutzt den Ersatzweg.
@@ -746,18 +748,19 @@ def build_series(raw: list, funding: list[tuple[int, float]],
 
     E43.4: Neben dem Dollar-OI entsteht die Reihe in Kontrakten (FlowPoint.oi_btc) -
     jeder OI-Punkt mit dem Schlusskurs SEINER Kerze umgerechnet (oi_in_btc), erst dann
-    aufgefuellt, genau wie live in main.fetch_market_data. Ohne oi_map bleibt sie 0.0
-    (keine Daten), waehrend das Dollar-OI konstant 1.0 steht - beides neutral."""
+    aufgefuellt, genau wie live in main.fetch_market_data. Ohne oi_map zeigen
+    beide Zahlen 0.0 mit provenance.coverage="missing" statt neutraler Messung."""
     # Ein Messlauf hat einen festen Stichtag (END_MS); Replays geben ihren
     # gespeicherten Stichtag explizit an, niemals die heutige Uhrzeit.
     cutoff = END_MS if end_ms is None else end_ms
     raw = [k for k in raw if int(k[0]) + CANDLE_MS <= cutoff]
     candles, flow, spot_cvd, fut_cvd = [], [], 0.0, 0.0
     oi_pairs = sorted(oi_map.items()) if oi_map else []
-    first_oi = oi_pairs[0][1] if oi_pairs else 1.0
     btc_pairs = sorted(oi_in_btc(oi_map, {int(k[0]): float(k[4]) for k in raw}).items()) \
         if oi_map else []
-    first_btc = btc_pairs[0][1] if btc_pairs else 0.0
+    oi_series = AsOfSeries(oi_pairs, FOUR_HOURS_MS)
+    btc_series = AsOfSeries(btc_pairs, FOUR_HOURS_MS)
+    funding_series = AsOfSeries(funding)
 
     def latest_leq(pairs, ts, default=0.0):
         val = default
@@ -775,13 +778,33 @@ def build_series(raw: list, funding: list[tuple[int, float]],
         # nie beides, sonst zaehlt Binance doppelt und in zwei Einheiten.
         spot_cvd += (spot_map.get(ts, 0.0) if spot_map is not None
                      else 2.0 * float(k[10]) - float(k[7]))
-        oi_val = latest_leq(oi_pairs, ts, first_oi) if oi_pairs else 1.0
+        close_ts = ts + CANDLE_MS
+        oi_val, oi_meta = asof(oi_series, close_ts, "coinalyze_4h_oi_usd",
+                               MAX_OI_AGE_MS)
         long_liq, short_liq = (liq_map.get(ts, (0.0, 0.0)) if liq_map else (0.0, 0.0))
         fut_cvd += (fut_map.get(ts, 0.0) if fut_map else 0.0)
+        funding_val, funding_meta = asof(funding_series, close_ts, "kraken_funding_8h",
+                                           MAX_FUNDING_AGE_MS)
+        btc_val, btc_meta = asof(btc_series, close_ts, "coinalyze_4h_oi_btc",
+                                 MAX_OI_AGE_MS)
+        provenance = {
+            "spot_cvd": direct(ts, close_ts, "aggregate_spot_delta_btc" if spot_map is not None
+                               else "binance_spot_taker_usd",
+                               spot_map is None or ts in spot_map),
+            "fut_cvd": direct(ts, close_ts, "coinalyze_fut_delta_btc",
+                              fut_map is not None and ts in fut_map),
+            "oi": oi_meta, "oi_btc": btc_meta, "funding": funding_meta,
+            "long_liq": direct(ts, close_ts, "coinalyze_long_liq_usd",
+                               liq_map is not None and ts in liq_map),
+            "short_liq": direct(ts, close_ts, "coinalyze_short_liq_usd",
+                                liq_map is not None and ts in liq_map),
+            "long_pct": direct(ts, close_ts, "coinalyze_long_pct",
+                               ls_map is not None and ts in ls_map),
+        }
         flow.append(FlowPoint(ts, spot_cvd, fut_cvd, oi_val,
-                              latest_leq(funding, ts + CANDLE_MS), long_liq, short_liq,
+                              funding_val, long_liq, short_liq,
                               (ls_map.get(ts, 0.0) if ls_map else 0.0),
-                              latest_leq(btc_pairs, ts, first_btc)))
+                              btc_val, provenance))
     return candles, flow
 
 

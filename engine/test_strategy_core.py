@@ -1079,14 +1079,14 @@ def test_muster2_nutzt_echtes_futures_cvd_wenn_vorhanden():
     # (a) Futures-CVD stark hoch, Spot flach -> echter Derivate-Pump
     mit_fut = flow_series(spot=[100] * n, fut=[100 + i * 10 for i in range(n)],
                           oi=stark_oi, funding=funding)
-    assert classify_pattern(candles, mit_fut) == Pattern.DERIVATE_PUMP
+    assert classify_pattern(candles, mit_fut, muster_cvd="alt") == Pattern.DERIVATE_PUMP
 
     # (b) Gleiche Lage, aber Spot traegt die Bewegung MIT (Spot steigt so stark wie
     #     Futures) -> mit echten Daten ist das KEIN Derivate-Pump mehr.
     spot_traegt = flow_series(spot=[100 + i * 10 for i in range(n)],
                               fut=[100 + i * 10 for i in range(n)],
                               oi=stark_oi, funding=funding)
-    assert classify_pattern(candles, spot_traegt) != Pattern.DERIVATE_PUMP
+    assert classify_pattern(candles, spot_traegt, muster_cvd="alt") != Pattern.DERIVATE_PUMP
 
     # (c) Ohne Futures-Daten (fut=0) sieht die Engine denselben Fall (b) FALSCH:
     #     Der Ersatzweg prueft nur, ob Spot flach ist — die Information, dass Spot
@@ -1096,10 +1096,10 @@ def test_muster2_nutzt_echtes_futures_cvd_wenn_vorhanden():
     ohne_fut = flow_series(spot=[100 + i for i in range(n)],    # Spot steigt leicht
                            fut=[0] * n,
                            oi=stark_oi, funding=funding)
-    ersatz = classify_pattern(candles, ohne_fut)
+    ersatz = classify_pattern(candles, ohne_fut, muster_cvd="alt")
     mit = classify_pattern(candles, flow_series(
         spot=[100 + i for i in range(n)], fut=[100 + i * 10 for i in range(n)],
-        oi=stark_oi, funding=funding))
+        oi=stark_oi, funding=funding), muster_cvd="alt")
     assert mit == Pattern.DERIVATE_PUMP
     assert ersatz != mit, "Ersatzweg und echter Zweig muessen sich unterscheiden koennen"
 

@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 import math
 
 import strategy_core as sc
+from flow_contract import legacy_unknown, FOUR_HOURS_MS
 import inventory
 from position_state import pos_to_state, pos_from_state
 
@@ -47,7 +48,10 @@ class Decision:
         return cls(deepcopy(d['candidates']), pos_from_state(d['observed']),
                    pos_from_state(d['sell_state']), pos_from_state(d['before']),
                    [sc.Candle(**c) for c in d['candles']],
-                   [sc.FlowPoint(**f) for f in d['flow']], deepcopy(d['params']))
+                   [sc.FlowPoint(**(f if 'provenance' in f else
+                                    dict(f, provenance=legacy_unknown(f['ts'],
+                                                                      f['ts'] + FOUR_HOURS_MS))))
+                    for f in d['flow']], deepcopy(d['params']))
 
     def confirm(self, position, executed, book):
         """Re-evaluate the SAME known prefix, allowing only executed blocks.

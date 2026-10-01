@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 from typing import Optional
+from flow_contract import usable
 
 # ---------------------------------------------------------------- Datentypen
 
@@ -29,14 +30,15 @@ class FlowPoint:
     ts: int
     spot_cvd: float      # kumuliertes Spot-Delta (USD)
     fut_cvd: float       # kumuliertes Futures-Delta (USD)
-    oi: float            # Open Interest (USD)
-    funding: float       # 8h-Funding-Rate, Durchschnitt (z. B. 0.0001 = 0.01 %)
+    oi: float            # Open Interest (USD); missing/stale status is in provenance
+    funding: float       # 8h-Funding-Rate; zero needs observed coverage to confirm
     long_liq: float = 0.0   # Long-Liquidationen dieser Kerze (USD), E9.1 (Coinalyze)
     short_liq: float = 0.0  # Short-Liquidationen dieser Kerze (USD)
     long_pct: float = 0.0   # Anteil der Long-Positionierung in % (E16, Coinalyze);
                             # 0.0 = keine Daten. >50 = mehrheitlich long.
     oi_btc: float = 0.0     # Open Interest in BTC = Kontrakte (E43.4, oi_in_btc);
                             # 0.0 = keine Kontrakt-Reihe. `oi` bleibt in USD.
+    provenance: dict = field(default_factory=dict)  # A2: per-field source/time/coverage/age
 
 
 class Pattern(Enum):
@@ -538,8 +540,12 @@ def oi_aenderung(f: list[FlowPoint], muster_oi: str = "usd") -> float:
     "usd" rechnet Zeichen fuer Zeichen wie vor E43.4 (auch im Randfall OI am Ende 0).
     """
     if muster_oi == "btc":
+        if not (usable(f[0], "oi_btc") and usable(f[-1], "oi_btc")):
+            return 0.0
         a, b = f[0].oi_btc, f[-1].oi_btc
         return (b - a) / a if a and b else 0.0
+    if not (usable(f[0], "oi") and usable(f[-1], "oi")):
+        return 0.0
     return (f[-1].oi - f[0].oi) / f[0].oi if f[0].oi else 0.0
 
 
@@ -646,7 +652,8 @@ def spot_nachfrage(flow: list[FlowPoint], fenster: int = SPOT_FENSTER) -> Option
     Gibt None zurueck, wenn zu wenige Punkte vorliegen - dann steht in der Nachricht
     nichts, statt etwas Erfundenes.
     """
-    if len(flow) < 2 * fenster + 1:
+    if len(flow) < 2 * fenster + 1 or not all(
+            usable(p, "spot_cvd") for p in flow[-2 * fenster - 1:]):
         return None
     werte = [p.spot_cvd for p in flow]
     jetzt = werte[-1] - werte[-1 - fenster]
@@ -742,7 +749,8 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
     })
 
     # --- Spot-CVD: die echte Nachfrage
-    sp = _of_reihe([p.spot_cvd for p in flow], fenster)
+    sp = (_of_reihe([p.spot_cvd for p in flow], fenster)
+          if all(usable(p, "spot_cvd") for p in flow[-fenster-1:]) else None)
     if sp:
         zeilen.append({"name": "Spot-CVD", "wert": _usd_kurz(sp["aenderung"]),
                        "richtung": sp["richtung"],
@@ -775,7 +783,8 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
     # spot_cvd in Dollar. Bis dahin stand der BTC-Wert hier mit "$" - um den Faktor
     # Kurs zu klein -, und der Anteil am Spot-Flow teilte BTC durch Dollar. Deshalb
     # jetzt erst in Dollar umrechnen (_fut_cvd_usd), dann vergleichen.
-    fu = _of_reihe(_fut_cvd_usd(candles, flow), fenster)
+    fu = (_of_reihe(_fut_cvd_usd(candles, flow), fenster)
+          if all(usable(p, "fut_cvd") for p in flow[-fenster-1:]) else None)
     if fu:
         # E36.2: Die Groessenordnung ist die eigentliche Aussage - das Verhaeltnis zum
         # Spot sagt, ob der Hebel die Bewegung traegt (Transkript 9:00-9:31).
@@ -803,14 +812,16 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
     # den KONTRAKTEN (oi_btc, dieselbe Reihe wie muster_oi in E43.4). Der Dollar-Wert
     # bleibt stehen; zeigen beide in verschiedene Richtungen, sagt der Hinweis das dazu.
     # Ohne Kontrakt-Reihe (Kraken-Rueckfall) bleibt alles wie vorher.
-    oi = _of_reihe([p.oi for p in flow], fenster)
+    oi = (_of_reihe([p.oi for p in flow], fenster)
+          if all(usable(p, "oi") for p in flow[-fenster-1:]) else None)
     if oi:
         oi_davor = flow[-1 - fenster].oi
         pct = (oi["aenderung"] / oi_davor * 100) if oi_davor else 0.0
         pct_txt = f"{pct:+.1f}".replace(".", ",")
         wert = f"{_usd_kurz(oi['aenderung'])} ({pct_txt} %)"
         richtung = oi["richtung"]
-        kt = _of_reihe([p.oi_btc for p in flow], fenster)
+        kt = (_of_reihe([p.oi_btc for p in flow], fenster)
+              if all(usable(p, "oi_btc") for p in flow[-fenster-1:]) else None)
         kt_davor = flow[-1 - fenster].oi_btc
         if kt and kt_davor:
             kt_pct = kt["aenderung"] / kt_davor * 100
@@ -830,8 +841,8 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
                        "richtung": richtung, "hinweis": hin})
 
     # --- Funding: Ueberhebelung. Kein kumulierter Wert - der Stand zaehlt.
-    fund = [p.funding for p in flow[-fenster:]]
-    if any(f != 0 for f in fund):
+    fund = [p.funding for p in flow[-fenster:] if usable(p, "funding")]
+    if usable(flow[-1], "funding") and fund:
         jetzt = fund[-1]
         mittel = sum(fund) / len(fund)
         zeilen.append({
@@ -845,7 +856,8 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
     # --- Liquidationen: Summe im Fenster, je Seite
     ll = sum(p.long_liq for p in flow[-fenster:])
     sl = sum(p.short_liq for p in flow[-fenster:])
-    if ll or sl:
+    if (ll or sl) and all(usable(p, "long_liq") and usable(p, "short_liq")
+                          for p in flow[-fenster:]):
         zeilen.append({"name": "Long-Liquidationen",
                        "wert": _usd_kurz(ll, vorzeichen=False),
                        "richtung": "", "hinweis": ""})
@@ -855,7 +867,7 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
 
     # --- Positionierung: 0.0 heisst laut FlowPoint ausdruecklich "keine Daten"
     lp = flow[-1].long_pct
-    if lp:
+    if lp and usable(flow[-1], "long_pct"):
         zeilen.append({
             "name": "Positionierung", "wert": f"{lp:.0f} % long",
             "richtung": "",
@@ -1056,11 +1068,11 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
                      sharp_move_pct: float = 0.04,
                      funding_hot: float = 0.0001,
                      liq_spike_mult: float = 3.0,
-                     muster_cvd: str = "alt",
+                     muster_cvd: str = "usd",
                      muster_oi: str = "usd") -> Pattern:
     """Ordnet die juengste Marktphase einem der 4 Kompass-Muster zu.
 
-    muster_cvd (E43.3, Default "alt" = bisheriges Verhalten): "usd" ersetzt in Muster 2
+    muster_cvd (A2-Default "usd"): "usd" ersetzt in Muster 2
     den Vergleich zweier relativer Slopes durch einen Vergleich zweier Dollar-Betraege
     im Fenster (_muster2_dollar). Nur Muster 2 aendert sich - die Vorzeichen-Pruefungen
     der anderen Muster haengen nicht vom Startwert der Summe ab.
@@ -1080,26 +1092,37 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
         return Pattern.NEUTRAL
     c, f = candles[-window:], flow[-window:]
     price_chg = (c[-1].close - c[0].close) / c[0].close
-    spot = _slope([p.spot_cvd for p in f])
+    spot_valid = all(usable(p, "spot_cvd") for p in f)
+    spot = ((f[-1].spot_cvd - f[0].spot_cvd) if muster_cvd == "usd" else
+            _slope([p.spot_cvd for p in f])) if spot_valid else 0.0
     fut = _slope([p.fut_cvd for p in f])
     # E43.4 (Befund A3): In Dollar steckt die Kursbewegung im OI - bei +3 % Kurs erfuellt
     # schon ein unveraendertes OI die Pump-Schwelle. "btc" zaehlt Kontrakte.
     oi_chg = oi_aenderung(f, muster_oi)
-    funding_now = f[-1].funding
-    funding_rising = f[-1].funding > f[0].funding
+    oi_valid = usable(f[0], "oi_btc" if muster_oi == "btc" else "oi") and usable(
+        f[-1], "oi_btc" if muster_oi == "btc" else "oi") and (
+            f[0].oi_btc > 0 and f[-1].oi_btc > 0 if muster_oi == "btc" else
+            f[0].oi > 0 and f[-1].oi > 0)
+    funding_valid = usable(f[-1], "funding")
+    funding_now = f[-1].funding if funding_valid else 0.0
+    funding_rising = (funding_valid and usable(f[0], "funding")
+                      and f[-1].funding > f[0].funding)
 
-    def _liq_spike(get) -> bool:
+    def _liq_spike(get, field_name) -> bool:
+        if not all(usable(p, field_name) for p in f):
+            return False
         vals = [get(p) for p in f]
         base = sum(vals[:-1]) / (len(vals) - 1) if len(vals) > 1 else 0.0
         return base > 0 and vals[-1] >= liq_spike_mult * base
-    long_liq_spike = _liq_spike(lambda p: p.long_liq)
-    short_liq_spike = _liq_spike(lambda p: p.short_liq)
+    long_liq_spike = _liq_spike(lambda p: p.long_liq, "long_liq")
+    short_liq_spike = _liq_spike(lambda p: p.short_liq, "short_liq")
 
     # 4: Capitulation/Flush + Reset — Preis scharf runter, Spot-CVD dreht,
     #    dazu OI-Wipeout ODER echte Long-Liquidations-Kaskade
     if price_chg <= -sharp_move_pct:
-        spot_turning = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
-        if spot_turning and (oi_chg <= -oi_wipeout_pct or long_liq_spike):
+        spot_turning = (spot_valid and len(flow) >= 3
+                        and flow[-1].spot_cvd > flow[-3].spot_cvd)
+        if spot_turning and ((oi_valid and oi_chg <= -oi_wipeout_pct) or long_liq_spike):
             return Pattern.CAPITULATION_RESET
     # 5: Ungesunder Abverkauf (E13) — das Spiegelbild von Muster 4. Der Kurs faellt, aber
     #    der Markt ist NICHT ausgeraeumt: Spot-CVD faellt mit (der Dip wird nicht gekauft),
@@ -1109,35 +1132,40 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
     #    Konfluenz-Prinzip, nur negativ: genau die Lage, in der er NICHT kauft.
     #    Halbe Schwelle beim Preis, weil dieser Zustand typischerweise VOR dem scharfen
     #    Einbruch vorliegt — er soll warnen, bevor der Flush kommt, nicht danach.
-    if (price_chg <= -sharp_move_pct / 2 and spot < 0 and oi_chg >= -0.01
+    if (price_chg <= -sharp_move_pct / 2 and spot_valid and spot < 0
+            and oi_valid and oi_chg >= -0.01 and funding_valid
             and funding_now > 0 and not long_liq_spike):
         return Pattern.UNGESUNDER_ABVERKAUF
     # 3: Short-Covering — Preis hoch, OI runter ODER echte Short-Liquidations-Kaskade
-    if price_chg >= sharp_move_pct / 2 and (oi_chg <= -0.02 or short_liq_spike):
+    if price_chg >= sharp_move_pct / 2 and ((oi_valid and oi_chg <= -0.02)
+                                            or short_liq_spike):
         return Pattern.SHORT_COVERING
     # 2: Derivate-Pump — Futures-CVD stark hoch, Spot flach/runter, OI deutlich hoch, Funding zieht an
-    has_fut = any(p.fut_cvd for p in f)
+    has_fut = all(usable(p, "fut_cvd") for p in f) and (
+        any(b.fut_cvd != a.fut_cvd for a, b in zip(f, f[1:]))
+        if muster_cvd == "usd" else any(p.fut_cvd for p in f))
     if has_fut:
         if muster_cvd == "usd":
             # E43.3: zwei Dollar-Betraege im Fenster statt zweier Anteile an einer
             # willkuerlich begonnenen Summe. "Futures steigt" ebenfalls in Dollar,
             # damit beide Seiten des Vergleichs dieselbe Einheit haben.
             d = _muster2_dollar(c, f)
-            cvd_pump = d is not None and d[1] > 0 and d[0] <= d[1] / 3
+            cvd_pump = spot_valid and d is not None and d[1] > 0 and d[0] <= d[1] / 3
         else:
             cvd_pump = fut > 0 and spot <= fut / 3
-        if (price_chg > 0 and cvd_pump and oi_chg >= 0.03
-                and (funding_rising or funding_now >= funding_hot)):
+        if (price_chg > 0 and cvd_pump and oi_valid and oi_chg >= 0.03
+                and (funding_rising or (funding_valid and funding_now >= funding_hot))):
             return Pattern.DERIVATE_PUMP
     else:
         # Ohne Futures-CVD-Quelle (US-Geo-Block): Pump-Erkennung ueber die uebrigen
         # Merkmale aus Furkans Notizen — OI deutlich hoch, Funding zieht an, Spot flach
-        if (price_chg > 0 and oi_chg >= 0.03 and spot <= 0.01
-                and (funding_rising or funding_now >= funding_hot)):
+        if (price_chg > 0 and oi_valid and oi_chg >= 0.03 and spot_valid
+                and spot <= (0 if muster_cvd == "usd" else 0.01) and (funding_rising or
+                                       (funding_valid and funding_now >= funding_hot))):
             return Pattern.DERIVATE_PUMP
     # 1: Gesunder Trend — Preis hoch, Spot-CVD traegt, Funding unauffaellig
-    if (price_chg > 0 and spot > 0 and abs(funding_now) < funding_hot
-            and 0 <= oi_chg <= 0.10):
+    if (price_chg > 0 and spot_valid and spot > 0 and funding_valid
+            and abs(funding_now) < funding_hot and oi_valid and 0 <= oi_chg <= 0.10):
         return Pattern.GESUNDER_TREND
     return Pattern.NEUTRAL
 
@@ -1419,12 +1447,16 @@ def confirm_ok(pattern: "Pattern", flow: list[FlowPoint], long_side: bool,
     if long_side:
         strong = pattern == Pattern.CAPITULATION_RESET or (
             muster5_entry and pattern == Pattern.UNGESUNDER_ABVERKAUF)
-        cvd_up = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
-        fund_ok = bool(flow) and flow[-1].funding <= 0
+        cvd_up = (len(flow) >= 3 and usable(flow[-1], "spot_cvd")
+                  and usable(flow[-3], "spot_cvd")
+                  and flow[-1].spot_cvd > flow[-3].spot_cvd)
+        fund_ok = bool(flow) and usable(flow[-1], "funding") and flow[-1].funding <= 0
         return strong or (cvd_up and fund_ok) if strict_confirm else strong or fund_ok or cvd_up
     strong = pattern == Pattern.DERIVATE_PUMP
-    cvd_dn = len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd
-    fund_hot = bool(flow) and flow[-1].funding > 0
+    cvd_dn = (len(flow) >= 3 and usable(flow[-1], "spot_cvd")
+              and usable(flow[-3], "spot_cvd")
+              and flow[-1].spot_cvd < flow[-3].spot_cvd)
+    fund_hot = bool(flow) and usable(flow[-1], "funding") and flow[-1].funding > 0
     return strong or (cvd_dn and fund_hot) if strict_confirm else strong or fund_hot or cvd_dn
 
 
@@ -1716,7 +1748,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              zonen_nachziehen: bool = False,
              pivot_n_1d: int = 0,
              ampel_filter: str = "off",
-             muster_cvd: str = "alt",
+             muster_cvd: str = "usd",
              muster_oi: str = "usd",
              high_exit_hist: str = "voll",
              ausbruch_ruecktest: bool = False,
@@ -1754,7 +1786,7 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              zonen_nachziehen: bool = False,
              pivot_n_1d: int = 0,
              ampel_filter: str = "off",
-             muster_cvd: str = "alt",
+             muster_cvd: str = "usd",
              muster_oi: str = "usd",
              high_exit_hist: str = "voll",
              ausbruch_ruecktest: bool = False,

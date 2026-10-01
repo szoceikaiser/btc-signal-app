@@ -28,6 +28,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import coinalyze
+from flow_contract import (AsOfSeries, asof, direct, FOUR_HOURS_MS, MAX_OI_AGE_MS,
+                           MAX_FUNDING_AGE_MS)
 import telegram_outbox as outbox
 from functools import wraps
 from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
@@ -241,8 +243,8 @@ def fetch_market_data(oi_history: list[list] | None = None,
       US-Server blockiert.
     - Futures-CVD nicht verfuegbar -> 0; der Kompass erkennt den Derivate-Pump
       stattdessen ueber OI + Funding + flaches Spot-CVD.
-    - OI von Kraken (kleinere Boerse, aber gleiche Richtung); Historie waechst
-      mit jedem Lauf — die ersten ~2 Tage sind die OI-Muster noch neutral.
+    - OI von Kraken (kleinere Boerse); Historie waechst mit jedem Lauf.
+      Vor der ersten Messung und bei ueberalterten Werten fehlt OI-Bestaetigung.
     """
     now_ms = now_ms or int(time.time() * 1000)
     spot_raw = fetch_spot(LIMIT_HAUPT)
@@ -284,7 +286,6 @@ def fetch_market_data(oi_history: list[list] | None = None,
     use_cz = bool(cz_oi)
     oi_pairs = sorted((int(t), float(v)) for t, v
                       in (cz_oi.items() if use_cz else oi_history))
-    first_oi = oi_pairs[0][1] if oi_pairs else 0.0
     # E43.4: OI in Kontrakten (BTC). Jeder Coinalyze-Punkt mit dem Schlusskurs SEINER
     # Kerze umgerechnet, erst danach aufgefuellt - wie backtest.build_series. Der
     # Kraken-Rueckfall bekommt keine Kontrakt-Reihe (0.0 = keine Daten): seine Historie
@@ -292,7 +293,9 @@ def fetch_market_data(oi_history: list[list] | None = None,
     kurs = {int(k[0]): float(k[4]) for k in spot_raw if int(k[6]) <= now_ms}
     btc_pairs = sorted(oi_in_btc({int(t): float(v) for t, v in cz_oi.items()},
                                  kurs).items()) if use_cz else []
-    first_btc = btc_pairs[0][1] if btc_pairs else 0.0
+    oi_series = AsOfSeries(oi_pairs, FOUR_HOURS_MS if use_cz else 0)
+    btc_series = AsOfSeries(btc_pairs, FOUR_HOURS_MS)
+    funding_series = AsOfSeries(funding)
 
     candles: list[Candle] = []
     flow: list[FlowPoint] = []
@@ -307,13 +310,26 @@ def fetch_market_data(oi_history: list[list] | None = None,
         close_ts = c_ts + CANDLE_MS
         # Coinalyze-OI ist je 4h-Kerze (ts = Open-Time) -> direkt per c_ts; Kraken-
         # Snapshot-Historie wird wie bisher zum Kerzenschluss zugeordnet.
-        oi_val = _latest_leq(oi_pairs, c_ts if use_cz else close_ts, default=first_oi)
+        oi_val, oi_meta = asof(oi_series, close_ts,
+                               "coinalyze_4h_oi_usd" if use_cz else "kraken_oi_snapshot_usd",
+                               MAX_OI_AGE_MS)
         long_liq, short_liq = cz_liq.get(c_ts, (0.0, 0.0))
-        fut_cvd += cz_fut.get(c_ts, 0.0)               # ohne Daten bleibt es 0 = wie bisher
+        fut_cvd += cz_fut.get(c_ts, 0.0)  # Null-Surrogat; Abdeckung steht in provenance
+        funding_val, funding_meta = asof(funding_series, close_ts, "kraken_funding_8h",
+                                           MAX_FUNDING_AGE_MS)
+        btc_val, btc_meta = asof(btc_series, close_ts, "coinalyze_4h_oi_btc",
+                                 MAX_OI_AGE_MS)
+        provenance = {
+            "spot_cvd": direct(c_ts, close_ts, "binance_spot_taker_usd"),
+            "fut_cvd": direct(c_ts, close_ts, "coinalyze_fut_delta_btc", c_ts in cz_fut),
+            "oi": oi_meta, "oi_btc": btc_meta, "funding": funding_meta,
+            "long_liq": direct(c_ts, close_ts, "coinalyze_long_liq_usd", c_ts in cz_liq),
+            "short_liq": direct(c_ts, close_ts, "coinalyze_short_liq_usd", c_ts in cz_liq),
+            "long_pct": direct(c_ts, close_ts, "coinalyze_long_pct", c_ts in cz_ls),
+        }
         flow.append(FlowPoint(c_ts, spot_cvd, fut_cvd, oi_val,
-                              _latest_leq(funding, close_ts), long_liq, short_liq,
-                              cz_ls.get(c_ts, 0.0),
-                              _latest_leq(btc_pairs, c_ts, default=first_btc)))
+                              funding_val, long_liq, short_liq,
+                              cz_ls.get(c_ts, 0.0), btc_val, provenance))
     return candles, flow, oi_history
 
 
@@ -352,9 +368,8 @@ EVAL_DEFAULTS = {
     "zonen_1d": False, "zonen_nachziehen": False, "pivot_n_1d": 0,
     "trend_filter": False, "trend_ema": 200,
     "ampel_filter": "off",
-    # E43.3 (26.09.2026), Default "alt" = bisheriges Verhalten - siehe
-    # strategy_core.classify_pattern.
-    "muster_cvd": "alt",
+    # A2: fachlich versatzinvariante CVD-Definition vor Ergebnismessung festgelegt.
+    "muster_cvd": "usd",
     # E43.4 (26.09.2026), Default "usd" = bisheriges Verhalten - siehe
     # strategy_core.oi_aenderung.
     "muster_oi": "usd",
