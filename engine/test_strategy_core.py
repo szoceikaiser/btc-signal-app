@@ -2376,14 +2376,18 @@ def test_e434_oi_in_btc_rechnet_jeden_punkt_mit_dem_kurs_seiner_kerze():
 
 
 def test_e434_ohne_oi_daten_rechnen_usd_und_btc_gleich():
-    """Ohne OI-Daten steht das Dollar-OI konstant (Backtest: 1.0) und es gibt keine
-    Kontrakt-Reihe (oi_btc = 0). Beide Einstellungen muessen dann dasselbe sagen: keine
-    OI-Bewegung. Sonst erfaende "btc" aus fehlenden Daten ein Signal."""
+    """A2: fehlendes OI bleibt in beiden Einheiten als missing gekennzeichnet.
+
+    Die alte Backtest-Erwartung oi=1.0 als neutrale Ersatzmessung war gerade die
+    D02-Vermischung; beide Einstellungen duerfen daraus kein Signal erfinden.
+    """
     from dataclasses import replace
     from strategy_core import oi_aenderung
     for lage in (_A3_KAPITULATION, _A3_PUMP, (0.03, -0.025, 200e6, 100, 0.00002, False)):
         cs, fl = _oi_lage(*lage)
-        leer = [replace(x, oi=1.0, oi_btc=0.0) for x in fl]
+        missing = {"coverage": "missing"}
+        leer = [replace(x, oi=0.0, oi_btc=0.0,
+                        provenance={"oi": missing, "oi_btc": missing}) for x in fl]
         assert oi_aenderung(leer, "btc") == 0.0 == oi_aenderung(leer, "usd")
         assert classify_pattern(cs, leer, muster_oi="btc") == \
             classify_pattern(cs, leer, muster_oi="usd"), lage

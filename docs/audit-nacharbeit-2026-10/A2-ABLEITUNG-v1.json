@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "version": "a2-flow-v1",
+  "basis": "8ad1139793a2ec5724d418bc2fc3ab88801f8f9c",
+  "implementation_commit": "3d0a3af4c022a91d2ecb5528ac754ea793a5b766",
+  "originals": {
+    "r0_frozen_input_sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+    "r0_reference": "docs/nach-6/data-manifest.json",
+    "r1_input_path": "docs/nach-6/r1-inputs.json",
+    "r1_input_sha256": "701c0eea34098317d0fae2827a16afd4cb73f7e9684c724d70881c2df49e5089",
+    "r1_raw_manifest_path": "docs/nach-6/r1-raw/manifest.json",
+    "r1_raw_manifest_sha256": "2e89bebc453868b65dcde44088d4ff31a58260278bce85533511c8935a6cdfec",
+    "changed": false
+  },
+  "derivation": {
+    "kind": "causal_flow_contract_and_independent_countercases",
+    "contract_path": "docs/audit-nacharbeit-2026-10/A2-VERTRAG.md",
+    "contract_sha256": "c003770458c04297cc95d75cc2af8524c7c9879fe013d012a3d52dcb6ca4fc6a",
+    "tests_path": "docs/audit-nacharbeit-2026-10/A2-tests-local.log",
+    "tests_sha256": "55dc9b73b86586486b058488d243690ea73f768147b697c6d2644c11a0568b99",
+    "tests": "748 passed, 0 failed",
+    "historical_return_calculated": false,
+    "api_as_of_proven": false
+  },
+  "countercases": {
+    "f06": "constant spot and futures cumulative offsets preserve DERIVATE_PUMP",
+    "f07": "first OI at 8h: earlier prefixes missing; subsequent observed/carried/stale",
+    "d02": "measured fresh zero confirms, missing and stale zero do not; checkpoint preserves coverage"
+  }
+}
