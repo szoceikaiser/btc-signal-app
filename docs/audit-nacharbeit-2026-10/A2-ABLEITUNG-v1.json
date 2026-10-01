@@ -15,16 +15,17 @@
   "derivation": {
     "kind": "causal_flow_contract_and_independent_countercases",
     "contract_path": "docs/audit-nacharbeit-2026-10/A2-VERTRAG.md",
-    "contract_sha256": "c003770458c04297cc95d75cc2af8524c7c9879fe013d012a3d52dcb6ca4fc6a",
+    "contract_sha256": "c5117349e8bb5da01696031042d07683ea613ccc97a34f03205ff747b3eddc7a",
     "tests_path": "docs/audit-nacharbeit-2026-10/A2-tests-local.log",
-    "tests_sha256": "55dc9b73b86586486b058488d243690ea73f768147b697c6d2644c11a0568b99",
-    "tests": "748 passed, 0 failed",
+    "tests_sha256": "4076cf32c8ddb2beb4306a89192f1c47d85aab6aac60649ff579a719e229504c",
+    "tests": "749 passed, 0 failed",
     "historical_return_calculated": false,
     "api_as_of_proven": false
   },
   "countercases": {
-    "f06": "constant spot and futures cumulative offsets preserve DERIVATE_PUMP",
+    "f06": "constant spot and futures cumulative offsets preserve DERIVATE_PUMP; aggregated BTC spot deltas converted per candle to USD",
     "f07": "first OI at 8h: earlier prefixes missing; subsequent observed/carried/stale",
     "d02": "measured fresh zero confirms, missing and stale zero do not; checkpoint preserves coverage"
-  }
+  },
+  "unit_normalization_commit": "d8779c38ca6502eae551f3b643251cdf74b8fdb3"
 }

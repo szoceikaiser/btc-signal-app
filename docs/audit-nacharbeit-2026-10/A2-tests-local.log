@@ -1,4 +1,5 @@
 PASS test_a2_flow::test_a2_d02_observed_zero_missing_and_stale_funding
+PASS test_a2_flow::test_a2_f06_aggregated_spot_btc_is_compared_in_usd
 PASS test_a2_flow::test_a2_f06_constant_offsets_do_not_change_default_pattern
 Coinalyze: 1 OI-Punkte, 0 Liq-Punkte.
 Coinalyze: 0 Futures-Delta-Punkte, 0 Long-Short-Punkte.
@@ -1717,4 +1718,4 @@ PASS test_telegram_notify::test_stop_wartet_nachricht_sagt_was_passiert_und_was_
 PASS test_telegram_notify::test_stop_wartet_nennt_den_harten_boden_nur_wenn_er_noch_zaehlt
 PASS test_telegram_notify::test_uebergeordneter_trend_steht_in_den_nachrichten
 PASS test_telegram_notify::test_vorschau_nennt_das_bein_nicht_doppelt
---- 748 passed, 0 failed
+--- 749 passed, 0 failed

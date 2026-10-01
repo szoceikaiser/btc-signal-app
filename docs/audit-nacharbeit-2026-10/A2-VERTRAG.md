@@ -9,8 +9,10 @@ den heutigen Archiven nicht beweisbar.
 ## F06: CVD-Signal
 
 Der aktuelle Muster-2-Vergleich nutzt `muster_cvd="usd"`: Im 12-Kerzen-Fenster
-zählt Spot-CVD als Differenz von letztem und erstem kumulierten USD-Wert. Jedes
-Futures-CVD-Delta in BTC wird mit dem Schlusskurs derselben Kerze in USD
+zählt Binance-Spot-CVD als Differenz von letztem und erstem kumulierten
+USD-Wert. Aggregiertes Spot-CVD in BTC wird wie Futures-CVD Delta für Delta
+mit dem Schlusskurs derselben Kerze in USD umgerechnet. Jedes
+Futures-CVD-Delta in BTC wird ebenfalls mit dem Schlusskurs derselben Kerze in USD
 umgerechnet und summiert. Ein Derivate-Pump verlangt positives Futures-Delta und
 Spot-Delta höchstens ein Drittel davon. Die bestehende Schwelle ist ein fachlicher
 Vergleich, keine nach Rendite gewählte Schwelle. Preis, OI und Funding bleiben
