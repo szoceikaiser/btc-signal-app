@@ -336,10 +336,12 @@ def test_resample_daily_und_ema():
 
 
 def test_daily_trend_richtung():
-    rising = [c(d * DAY_MS, 80 + d, 81 + d, 79 + d, 80 + d) for d in range(12)]
+    rising = [c(d * DAY_MS + h * H4_MS, 80 + d, 81 + d, 79 + d, 80 + d)
+              for d in range(12) for h in range(6)]
     close, e = daily_trend(rising, 50)
     assert close > e                                  # Aufwaerts: Preis ueber EMA
-    falling = [c(d * DAY_MS, 100 - d, 101 - d, 99 - d, 100 - d) for d in range(12)]
+    falling = [c(d * DAY_MS + h * H4_MS, 100 - d, 101 - d, 99 - d, 100 - d)
+               for d in range(12) for h in range(6)]
     close, e = daily_trend(falling, 50)
     assert close < e                                  # Abwaerts: Preis unter EMA
 
@@ -454,7 +456,8 @@ def test_daily_fib_zone_liefert_zone():
     # Genug Tage fuer 1D-Pivots (n=5): klarer Impuls 100->140 mit Ruecklauf
     daily_closes = [100, 100, 100, 100, 100, 100, 120, 140, 140, 140,
                     140, 140, 130, 125, 120]
-    cs = [c(d * DAY_MS, p, p + 1, p - 1, p) for d, p in enumerate(daily_closes)]
+    cs = [c(d * DAY_MS + h * H4_MS, p, p + 1, p - 1, p)
+          for d, p in enumerate(daily_closes) for h in range(6)]
     z = daily_fib_zone(cs, pivot_n=5)
     assert z is not None and z.impulse.up
     assert z.gp_lower < z.level_05                    # Zonen korrekt geordnet
@@ -941,7 +944,8 @@ def e13_szenario(spot_faellt=True, oi_steigt=True, funding_positiv=True):
     Ueber die drei Schalter laesst sich der Order-Flow gesund/ungesund stellen.
     """
     werte = [100, 99, 98, 99, 104, 110, 116, 122, 128, 130] + [130 - i for i in range(1, 17)]
-    cs = [Candle(1_600_000_000_000 + i * H4_MS, v, v * 1.004, v * 0.996, v)
+    cs = [Candle((1_600_000_000_000 // DAY_MS) * DAY_MS + i * H4_MS,
+                 v, v * 1.004, v * 0.996, v)
           for i, v in enumerate(werte)]
     fl = [FlowPoint(c.ts,
                     5000.0 - i * 30 if spot_faellt else 5000.0 + i * 30,
@@ -1964,7 +1968,7 @@ def test_pivot_n_1d_kommt_durch_evaluate_an():
 
 # ------------- E33: uebergeordneter Trend (13.09.2026)
 
-def _lange_serie(n_kerzen=1300, seed=42):
+def _lange_serie(n_kerzen=1302, seed=42):
     """Eine lange, schwankende 4h-Serie - lang genug fuer einen echten EMA200 auf 1D."""
     import random
     r = random.Random(seed)
@@ -2640,7 +2644,7 @@ def e34_signale(cs, fl, **kw):
     auf trend_filter, der hier aus ist); Basis- und Vergleichslauf bekommen denselben
     Wert, der Vergleich bleibt einer mit genau einem Unterschied.
     """
-    kw.setdefault("trend_ema", 5)
+    kw.setdefault("trend_ema", 3)
     pos = Position()
     raus = []
     for i in range(len(cs)):
@@ -2758,7 +2762,7 @@ def test_ampel_filter_gegenprobe_und_nullhypothese():
     # unguenstige Stufe kommt jetzt aus Trend + Spot. (Diese Vorprobe hat die Aenderung
     # als einzige der Ampel-Filter-Tests sofort gemeldet - genau dafuer steht sie da.)
     assert ampel(lage_bericht(cs, fl, pattern=classify_pattern(cs, fl),
-                              trend_period=5))["stufe"] == "unguenstig"
+                              trend_period=3))["stufe"] == "unguenstig"
     voll = [t for _s, t in _tranchen(e34_signale(cs, fl))]
     klein = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="klein"))]
     gross = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="gross"))]

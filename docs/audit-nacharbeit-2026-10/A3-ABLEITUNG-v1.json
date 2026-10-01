@@ -1,0 +1,19 @@
+{
+  "schema": "a3-data-v1",
+  "base_commit": "c90fcd616f684b4b134f423fd86a2eaf6b95467c",
+  "scope": "synthetic offline counterexamples; no historical return measurement",
+  "before": {
+    "F08": {"hours_observed": 8, "daily_bars": 1},
+    "F14": {"requested": ["A", "B"], "returned": ["A"], "values": {"0": 10, "1": 11}},
+    "F15": {"raw_BTC_volume": 1000, "raw_USD_volume": 2000, "selected": ["USD"]}
+  },
+  "contract": "A3-VERTRAG.md",
+  "after": {
+    "F08": {"hours_observed": 8, "daily_bars": 0, "six_aligned_4h_bars": 1, "one_missing_slot": 0},
+    "F14": {"requested": ["A", "B"], "returned": ["A"], "values": {}, "skipped_points": 2, "partial_gap_only_skips_that_point": true},
+    "F15": {"BTC_volume": 1000, "BTC_USD_close": 60000, "normalized_BTC_volume_USD": 60000000, "USD_volume": 2000, "selected_raw_unit_group": ["BTC"], "unknown_conversion_evaluable": false},
+    "D01": {"closed_series_regression": "engine/test_d01_kerzenschluss.py"}
+  },
+  "historical_market_basket": "unverified; historical aggregate variants disabled",
+  "raw_inputs_changed": false
+}

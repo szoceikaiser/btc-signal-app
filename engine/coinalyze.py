@@ -12,6 +12,7 @@ verifiziert werden kann, bevor der Parser gebaut wird. Kein Blind-Parsen.
 from __future__ import annotations
 
 import json
+import math
 import os
 import time
 import urllib.error
@@ -259,7 +260,7 @@ def _abgelehnte_je_boerse(maerkte: list, codes=BOERSEN_CODES) -> dict:
 
 
 def _groesster_je_boerse(kandidaten: dict, reihen: dict, codes=BOERSEN_CODES) -> dict:
-    """Je Boerse das Symbol mit dem groessten Gesamtvolumen im Fenster.
+    """Je Boerse das Symbol mit dem groessten belegten USD-Umsatz im Fenster.
 
     `reihen` kommt aus _pruefe_symbole(); massgeblich ist dort 'summe_v'. Symbole
     ohne brauchbare Reihe (keine Antwort, kein 'v'/'bv') scheiden aus — ein Markt,
@@ -273,12 +274,17 @@ def _groesster_je_boerse(kandidaten: dict, reihen: dict, codes=BOERSEN_CODES) ->
             r = reihen.get(sym) or {}
             if not r.get("hat_v_und_bv"):
                 continue
-            summe = r.get("summe_v") or 0.0
-            if bester is None or summe > bester["summe_v"]:
+            summe = r.get("summe_v_usd")
+            if summe is None or not math.isfinite(summe) or summe <= 0:
+                continue
+            if bester is None or summe > bester["summe_v_usd"]:
                 bester = {"symbol": sym, "quote": e.get("quote_asset"),
                           "an_der_boerse": e.get("symbol_on_exchange"),
                           "boerse": codes.get(code, code),
-                          "summe_v": summe,
+                          "summe_v": r.get("summe_v"),
+                          "summe_v_usd": summe,
+                          "volumen_einheit": r.get("volumen_einheit"),
+                          "umrechnung": r.get("umrechnung"),
                           "punkte": r.get("punkte"),
                           "reichweite_tage": r.get("reichweite_tage")}
         if bester is not None:
@@ -340,8 +346,9 @@ def _mit_wiederholung(hole, was: str):
     raise RuntimeError("unerreichbar")
 
 
-def _reihe_auswerten(eintrag: dict) -> dict:
-    """Eine Symbolreihe beschreiben: Felder, Reichweite, Gesamtvolumen, Einheit."""
+def _reihe_auswerten(eintrag: dict, markt: dict | None = None,
+                     fx_je_quote: dict | None = None) -> dict:
+    """Symbolreihe und nur belegbar nach USD umgerechneten Umsatz beschreiben."""
     punkte = eintrag.get("history") or []
     felder = sorted({k for p in punkte if isinstance(p, dict) for k in p})
     zeiten = [int(p["t"]) for p in punkte if isinstance(p, dict) and "t" in p]
@@ -349,12 +356,55 @@ def _reihe_auswerten(eintrag: dict) -> dict:
     # Boerse der groesste ist, wird gemessen und nicht mehr geraten.
     summe_v = sum(float(p["v"]) for p in punkte
                   if isinstance(p, dict) and isinstance(p.get("v"), (int, float)))
+    markt = markt or {}
+    denom = markt.get(DENOM_FELD)
+    quote = markt.get("quote_asset")
+    basis = markt.get("base_asset")
+    einheit = ("BTC" if denom in ("BASE_ASSET", "BTC") and basis == "BTC"
+               else "USD" if denom in ("QUOTE_ASSET", "USD") and quote == "USD"
+               else quote if denom == "QUOTE_ASSET" else None)
+    usd_werte = []
+    grund = None
+    if not einheit:
+        grund = "Instrument-Denominierung nicht belegt"
+    for p in punkte:
+        if grund:
+            break
+        if not isinstance(p, dict) or not all(k in p for k in ("t", "v", "bv")):
+            grund = "Volumenpunkt ohne t/v/bv"
+            break
+        v = p["v"]
+        if not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
+            grund = "ungueltiges Volumen"
+            break
+        faktor = 1.0
+        if einheit == "BTC":
+            kurs = p.get("c")
+            if not isinstance(kurs, (int, float)) or not math.isfinite(kurs) or kurs <= 0:
+                grund = "BTC/Quote-Schlusskurs fehlt"
+                break
+            faktor = kurs
+        if quote != "USD":
+            kursreihe = (fx_je_quote or {}).get(quote, {})
+            fx = kursreihe.get(int(p["t"]))
+            if not isinstance(fx, (int, float)) or not math.isfinite(fx) or fx <= 0:
+                grund = f"{quote}/USD-Umrechnung fehlt"
+                break
+            faktor *= fx
+        usd_werte.append(v * faktor)
+    if not punkte:
+        grund = "keine Volumenpunkte"
     letzter = punkte[-1] if punkte else None
     return {
         "punkte": len(punkte),
         "felder": felder,
         "hat_v_und_bv": ("v" in felder and "bv" in felder),
         "summe_v": round(summe_v, 2),
+        "summe_v_usd": round(sum(usd_werte), 2) if not grund else None,
+        "volumen_einheit": einheit,
+        "umrechnung": ("v * BTC/Quote-Schlusskurs * Quote/USD je Punkt" if einheit == "BTC"
+                        else "v * Quote/USD je Punkt" if einheit else None),
+        "nicht_auswertbar": grund,
         "reichweite_tage": round((max(zeiten) - min(zeiten)) / 86400.0, 1)
                            if len(zeiten) > 1 else 0.0,
         "von": time.strftime("%Y-%m-%d %H:%M", time.gmtime(min(zeiten))) if zeiten else "",
@@ -455,12 +505,14 @@ def _hole_reihen_roh(api_key: str, symbole: list, endpoint: str = "ohlcv-history
 
 
 def _pruefe_symbole(api_key: str, symbole: list, tage: int = SPOT_REICHWEITE_TAGE,
+                    maerkte: dict | None = None, fx_je_quote: dict | None = None,
                     **kw) -> dict:
     """Beschreibt jede Symbolreihe (Probe-Sicht): Felder, Reichweite, Volumen, Einheit."""
     if not symbole:
         return {"fehler": "keine Symbole zu pruefen"}
     eintraege, bloecke = _hole_reihen_roh(api_key, symbole, tage=tage, **kw)
-    je_symbol = {e.get("symbol", "?"): _reihe_auswerten(e) for e in eintraege}
+    je_symbol = {e.get("symbol", "?"): _reihe_auswerten(
+        e, (maerkte or {}).get(e.get("symbol")), fx_je_quote) for e in eintraege}
     return {"angefragt": len(symbole), "zurueck": len(je_symbol),
             "mehrfachabruf_geht": any(b.get("zurueck", 0) > 1 for b in bloecke),
             "bloecke": bloecke, "je_symbol": je_symbol}
@@ -486,6 +538,7 @@ def spot_auswahl(api_key: str, **kw) -> dict:
     zweimal zu holen waere Verschwendung und koennte zwischen den beiden Laeufen sogar
     unterschiedlich ausfallen.
     """
+    fx_je_quote = kw.pop("fx_je_quote", None)
     maerkte = get_json("spot-markets", {}, api_key, **kw)
     kandidaten = _kandidaten_je_boerse(maerkte if isinstance(maerkte, list) else [])
     alle = [e["symbol"] for liste in kandidaten.values() for e in liste if e.get("symbol")]
@@ -494,12 +547,17 @@ def spot_auswahl(api_key: str, **kw) -> dict:
     # Fuer die RANGFOLGE genuegen 30 Tage: welcher Markt einer Boerse der groesste ist,
     # aendert sich nicht dadurch, dass man ein Jahr statt einen Monat misst — aber ein
     # Jahr mal zehn Symbole ist zehnmal so viel Last auf einer API mit 40 Abrufen/Minute.
-    reihen = _pruefe_symbole(api_key, alle, tage=AUSWAHL_TAGE, **kw).get("je_symbol", {})
+    reihen = _pruefe_symbole(api_key, alle, tage=AUSWAHL_TAGE,
+                             maerkte={e["symbol"]: e for liste in kandidaten.values()
+                                      for e in liste}, fx_je_quote=fx_je_quote,
+                             **kw).get("je_symbol", {})
+    spot_reihen = {s: r for s, r in reihen.items() if r.get("volumen_einheit") == "BTC"}
     return {
         SPOT_WAHL_GROESSTER: {code: [d["symbol"]] for code, d
-                              in _groesster_je_boerse(kandidaten, reihen).items()},
+                              in _groesster_je_boerse(kandidaten, spot_reihen).items()},
         SPOT_WAHL_ALLE: {code: [e["symbol"] for e in liste
-                                if (reihen.get(e.get("symbol")) or {}).get("hat_v_und_bv")]
+                                if (reihen.get(e.get("symbol")) or {}).get("summe_v_usd") is not None
+                                and (reihen.get(e.get("symbol")) or {}).get("volumen_einheit") == "BTC"]
                          for code, liste in kandidaten.items()},
     }
 
@@ -524,12 +582,16 @@ def _summiere_vollstaendig(je_symbol: dict, symbole: list, bloecke: list,
     """
     fehlende = [s for s in symbole if s not in je_symbol]
     vorhanden = [s for s in symbole if s in je_symbol]
+    alle_ts = set().union(*(set(je_symbol[s]) for s in vorhanden)) if vorhanden else set()
     if not vorhanden:
-        return {}, {"fehler": "keine einzige Reihe erhalten", "bloecke": bloecke}
+        return {}, {"fehler": "keine einzige Reihe erhalten", "bloecke": bloecke,
+                    "ohne_antwort": fehlende, "punkte_gesamt": 0,
+                    "punkte_vollstaendig": 0, "punkte_ausgelassen": 0,
+                    "einheit": einheit}
 
-    alle_ts = set().union(*(set(je_symbol[s]) for s in vorhanden))
-    vollstaendig = set.intersection(*(set(je_symbol[s]) for s in vorhanden))
-    summe = {ts: sum(je_symbol[s][ts] for s in vorhanden) for ts in sorted(vollstaendig)}
+    vollstaendig = (set.intersection(*(set(je_symbol[s]) for s in vorhanden))
+                     if not fehlende else set())
+    summe = {ts: sum(je_symbol[s][ts] for s in symbole) for ts in sorted(vollstaendig)}
     bericht = {
         "symbole": vorhanden,
         "ohne_antwort": fehlende,
@@ -540,10 +602,13 @@ def _summiere_vollstaendig(je_symbol: dict, symbole: list, bloecke: list,
         "bloecke": bloecke,
         "einheit": einheit,
     }
+    if fehlende:
+        bericht["fehler"] = "angeforderter Boersenkorb unvollstaendig"
     return summe, bericht
 
 
-def spot_delta_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
+def spot_delta_aggregiert(api_key: str, symbole: list,
+                         einheiten: dict | None = None, **kw) -> tuple:
     """{Open-Time_ms: Summe der Taker-Deltas} ueber mehrere Boersen, plus Bericht.
 
     Delta je Markt = 2*bv - v (Kaeufe minus Verkaeufe), dieselbe Formel wie beim
@@ -562,6 +627,9 @@ def spot_delta_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
     """
     if not symbole:
         return {}, {"fehler": "keine Symbole"}
+    if not einheiten or any(einheiten.get(s) != "BTC" for s in symbole):
+        return {}, {"fehler": "Spot-CVD-Einheiten nicht fuer jeden Markt als BTC belegt",
+                    "symbole": symbole, "einheiten": einheiten or {}}
     eintraege, bloecke = _hole_reihen_roh(api_key, symbole, **kw)
     je_symbol: dict = {}
     for e in eintraege:
@@ -628,12 +696,16 @@ def perp_auswahl(api_key: str, **kw) -> dict:
     abhaengt, welche Maerkte beim Futures-CVD ueberhaupt zusammengerechnet werden
     duerfen.
     """
+    fx_je_quote = kw.pop("fx_je_quote", None)
     maerkte = get_json("future-markets", {}, api_key, **kw)
     kandidaten = _perp_kandidaten_je_boerse(maerkte if isinstance(maerkte, list) else [])
     alle = [e["symbol"] for liste in kandidaten.values() for e in liste if e.get("symbol")]
     if not alle:
         return {"gewaehlt": {}, "kandidaten": {}, "abgelehnt": {}}
-    reihen = _pruefe_symbole(api_key, alle, tage=AUSWAHL_TAGE, **kw).get("je_symbol", {})
+    reihen = _pruefe_symbole(api_key, alle, tage=AUSWAHL_TAGE,
+                             maerkte={e["symbol"]: e for liste in kandidaten.values()
+                                      for e in liste}, fx_je_quote=fx_je_quote,
+                             **kw).get("je_symbol", {})
     gewaehlt = _groesster_je_boerse(kandidaten, reihen, codes=PERP_BOERSEN)
     denom = {e["symbol"]: e.get(DENOM_FELD)
              for liste in kandidaten.values() for e in liste if e.get("symbol")}
@@ -665,13 +737,21 @@ def _nach_denominierung(gewaehlt: dict) -> tuple:
     zwei Zwergboersen duerfen Binance nicht ueberstimmen.
     """
     gruppen: dict = {}
+    raus = []
     for d in gewaehlt.values():
-        gruppen.setdefault(d.get("denominierung"), []).append(d)
+        denom = d.get("denominierung")
+        usd = d.get("summe_v_usd")
+        if denom not in ("BASE_ASSET", "QUOTE_ASSET", "BTC", "USD") \
+                or not isinstance(usd, (int, float)) or not math.isfinite(usd) or usd <= 0:
+            raus.append({"symbol": d.get("symbol"), "boerse": d.get("boerse"),
+                         "denominierung": denom, "grund": "Einheit oder USD-Umrechnung nicht belegt"})
+            continue
+        gruppen.setdefault(denom, []).append(d)
     if not gruppen:
-        return [], []
-    beste = max(gruppen, key=lambda k: sum(d.get("summe_v", 0.0) for d in gruppen[k]))
+        return [], raus
+    beste = max(gruppen, key=lambda k: sum(d["summe_v_usd"] for d in gruppen[k]))
     drin = [d["symbol"] for d in gruppen[beste]]
-    raus = [{"symbol": d["symbol"], "boerse": d.get("boerse"),
+    raus += [{"symbol": d["symbol"], "boerse": d.get("boerse"),
              "denominierung": d.get("denominierung"),
              "grund": f"rechnet in {d.get('denominierung')!r}, die Mehrheit in {beste!r} "
                       "— summieren wuerde zwei Einheiten mischen"}
@@ -679,10 +759,15 @@ def _nach_denominierung(gewaehlt: dict) -> tuple:
     return drin, raus
 
 
-def fut_delta_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
+def fut_delta_aggregiert(api_key: str, symbole: list,
+                        einheiten: dict | None = None, **kw) -> tuple:
     """Futures-CVD ueber mehrere Perp-Maerkte. NUR gleiche Denominierung (siehe oben)."""
     if not symbole:
         return {}, {"fehler": "keine Symbole"}
+    denom = {einheiten.get(s) for s in symbole} if einheiten else set()
+    if len(denom) != 1 or next(iter(denom), None) not in ("BASE_ASSET", "QUOTE_ASSET", "BTC", "USD"):
+        return {}, {"fehler": "Futures-CVD-Denominierung fehlt oder ist gemischt",
+                    "symbole": symbole, "einheiten": einheiten or {}}
     eintraege, bloecke = _hole_reihen_roh(api_key, symbole, **kw)
     je_symbol: dict = {}
     for e in eintraege:
@@ -754,8 +839,9 @@ def gewichtetes_mittel(werte: dict, gewichte: dict, symbole: list, bloecke: list
                     "bloecke": bloecke, "ohne_antwort": fehlende}
 
     alle_ts = set().union(*(set(werte[s]) for s in vorhanden))
-    vollstaendig = set.intersection(
+    vollstaendig = (set.intersection(
         *(set(werte[s]) & set(gewichte[s]) for s in vorhanden))
+        if not fehlende else set())
     out = {}
     ohne_gewicht = 0
     for ts in sorted(vollstaendig):
@@ -776,6 +862,8 @@ def gewichtetes_mittel(werte: dict, gewichte: dict, symbole: list, bloecke: list
         "einheit": einheit,
         "gewichtung": "nach Open Interest je Zeitpunkt, normiert",
     }
+    if fehlende:
+        bericht["fehler"] = "angeforderter Boersenkorb unvollstaendig"
     return out, bericht
 
 
@@ -853,12 +941,13 @@ def liq_aggregiert(api_key: str, symbole: list, **kw) -> tuple:
     lang, kurz = {}, {}
     for e in eintraege:
         sym = e.get("symbol", "?")
-        pkte = [p for p in e.get("history") or [] if isinstance(p, dict) and "t" in p]
-        lang[sym] = {int(p["t"]) * 1000: float(p.get("l", 0.0)) for p in pkte}
-        kurz[sym] = {int(p["t"]) * 1000: float(p.get("s", 0.0)) for p in pkte}
+        pkte = [p for p in e.get("history") or [] if isinstance(p, dict)
+                and all(k in p for k in ("t", "l", "s"))]
+        lang[sym] = {int(p["t"]) * 1000: float(p["l"]) for p in pkte}
+        kurz[sym] = {int(p["t"]) * 1000: float(p["s"]) for p in pkte}
     s_lang, bericht = _summiere_vollstaendig(lang, symbole, bloecke, "USD (convert_to_usd)")
     s_kurz, _ = _summiere_vollstaendig(kurz, symbole, bloecke, "USD (convert_to_usd)")
-    return {ts: (v, s_kurz.get(ts, 0.0)) for ts, v in s_lang.items()}, bericht
+    return {ts: (v, s_kurz[ts]) for ts, v in s_lang.items()}, bericht
 
 
 def spot_probe(api_key: str, **kw) -> dict:
@@ -866,6 +955,7 @@ def spot_probe(api_key: str, **kw) -> dict:
 
     Es wird nichts gebaut und nichts entschieden — nur gefragt und berichtet.
     """
+    fx_je_quote = kw.pop("fx_je_quote", None)
     out: dict = {"_frage": ("Gibt es BTC-Dollar-Spotmaerkte auf Binance, Coinbase, Bybit "
                             "und OKX mit Kauf-/Verkaufsdaten, laesst sich alles in EINEM "
                             "Abruf holen, und wie weit reicht die Historie?")}
@@ -897,9 +987,12 @@ def spot_probe(api_key: str, **kw) -> dict:
     # ALLE Kandidaten holen, nicht nur einen je Boerse — erst daraus entscheidet das
     # gemessene Volumen, welcher Markt der groesste ist (E37.1).
     symbole = [e["symbol"] for e in alle if e.get("symbol")]
-    out["mehrfachabruf"] = _pruefe_symbole(api_key, symbole, **kw)
+    out["mehrfachabruf"] = _pruefe_symbole(
+        api_key, symbole, maerkte={e["symbol"]: e for e in alle},
+        fx_je_quote=fx_je_quote, **kw)
     reihen = out["mehrfachabruf"].get("je_symbol", {})
-    gewaehlt = _groesster_je_boerse(kandidaten, reihen)
+    gewaehlt = _groesster_je_boerse(
+        kandidaten, {s: r for s, r in reihen.items() if r.get("volumen_einheit") == "BTC"})
     out["gewaehlt_je_boerse"] = gewaehlt
 
     # Wie deutlich gewinnt der groesste Markt? Das macht sichtbar, ob die alte Regel
@@ -908,12 +1001,14 @@ def spot_probe(api_key: str, **kw) -> dict:
     for code, liste in kandidaten.items():
         zeilen = sorted(
             ({"symbol": e.get("symbol"), "quote": e.get("quote_asset"),
-              "summe_v": (reihen.get(e.get("symbol")) or {}).get("summe_v", 0.0)}
+              "summe_v": (reihen.get(e.get("symbol")) or {}).get("summe_v", 0.0),
+              "summe_v_usd": (reihen.get(e.get("symbol")) or {}).get("summe_v_usd")}
              for e in liste),
-            key=lambda z: z["summe_v"], reverse=True)
-        gesamt = sum(z["summe_v"] for z in zeilen) or 1.0
+            key=lambda z: z["summe_v_usd"] or 0.0, reverse=True)
+        gesamt = sum(z["summe_v_usd"] or 0.0 for z in zeilen) or 1.0
         for z in zeilen:
-            z["anteil_prozent"] = round(100.0 * z["summe_v"] / gesamt, 2)
+            z["anteil_prozent"] = (round(100.0 * z["summe_v_usd"] / gesamt, 2)
+                                     if z["summe_v_usd"] is not None else None)
         vergleich[BOERSEN_CODES.get(code, code)] = zeilen
     out["volumenvergleich_je_boerse"] = vergleich
 

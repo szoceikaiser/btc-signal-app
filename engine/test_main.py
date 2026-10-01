@@ -700,7 +700,8 @@ def _lage_kerzen(auf: bool = True):
     else:
         werte = [130, 131, 132, 131, 126, 120, 114, 108, 102, 100] \
             + [100 + i * 0.8 for i in range(1, 17)]
-    cs = [Candle(1_700_000_000_000 + i * ms, v, v * 1.004, v * 0.996, v)
+    cs = [Candle((1_700_000_000_000 // (6 * ms)) * (6 * ms) + i * ms,
+                 v, v * 1.004, v * 0.996, v)
           for i, v in enumerate(werte)]
     fl = [FlowPoint(c.ts, 5000.0 + i * 30, 0.0, 1e9 + i * 1e6, 0.0001)
           for i, c in enumerate(cs)]

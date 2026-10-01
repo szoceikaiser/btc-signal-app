@@ -308,20 +308,34 @@ def ema(values: list[float], period: int) -> Optional[float]:
 
 
 def resample_daily(candles: list[Candle]) -> list[Candle]:
-    """Fasst 4h-Kerzen zu Tageskerzen zusammen (UTC-Tag: Open zuerst, High/Low, Close zuletzt)."""
-    days: dict[int, list[float]] = {}
-    order: list[int] = []
+    """Nur vollstaendige UTC-Tage aus bereits abgeschlossenen 4h-Kerzen.
+
+    Der letzte 20-Uhr-Slot schliesst erst an der naechsten UTC-Mitternacht.
+    Die Eingangsadapter muessen nach D01 laufende 4h-Kerzen entfernen.
+    """
+    step = 14_400_000
+    day_ms = 86_400_000
+    days: dict[int, dict[int, Candle]] = {}
     for c in candles:
-        day = (c.ts // 86_400_000) * 86_400_000        # Mitternacht UTC in ms
-        if day not in days:
-            days[day] = [c.open, c.high, c.low, c.close]
-            order.append(day)
+        day = (c.ts // day_ms) * day_ms
+        slot = c.ts - day
+        if slot % step:
+            continue
+        bucket = days.setdefault(day, {})
+        # Doppelte Eingaben belegen keine zweite abgeschlossene Kerze.
+        if slot in bucket:
+            bucket[slot] = None
         else:
-            d = days[day]
-            d[1] = max(d[1], c.high)
-            d[2] = min(d[2], c.low)
-            d[3] = c.close
-    return [Candle(day, days[day][0], days[day][1], days[day][2], days[day][3]) for day in order]
+            bucket[slot] = c
+    out = []
+    for day in sorted(days):
+        slots = days[day]
+        if set(slots) != {i * step for i in range(6)} or any(c is None for c in slots.values()):
+            continue
+        ordered = [slots[i * step] for i in range(6)]
+        out.append(Candle(day, ordered[0].open, max(c.high for c in ordered),
+                          min(c.low for c in ordered), ordered[-1].close))
+    return out
 
 
 def daily_trend(candles: list[Candle], period: int = 50, streng: bool = False):

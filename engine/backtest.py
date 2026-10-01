@@ -2862,9 +2862,14 @@ def main():
     # Coinalyze keinen Spot). Nur fuer den VERGLEICH geholt — die Hauptreihe `flow`
     # bleibt auf dem bisherigen Binance-Vision-Weg, damit alle Zahlen des Berichts
     # weiter mit frueheren Laeufen vergleichbar sind.
-    spot_agg, spot_bericht = {}, {}
-    spot_alle, spot_alle_bericht = {}, {}
-    if api_key:
+    # A3: Die heutige Markt-API ist kein Point-in-time-Marktmanifest fuer den
+    # historischen Messzeitraum. Bis ein solches Manifest vorliegt, sind die
+    # historischen Aggregationsvarianten ausdruecklich nicht auswertbar.
+    historischer_korb = None
+    korb_grenze = "Historische Marktauswahl nicht belegt; heutiger Boersenkorb gilt nicht rueckwirkend"
+    spot_agg, spot_bericht = {}, {"fehler": korb_grenze}
+    spot_alle, spot_alle_bericht = {}, {"fehler": korb_grenze}
+    if api_key and historischer_korb:
         try:
             auswahl = coinalyze.spot_auswahl(api_key)       # beide Wahlen, ein Durchgang
         except Exception as exc:  # noqa: BLE001
@@ -2876,7 +2881,8 @@ def main():
                 continue
             try:
                 karte, bericht = coinalyze.spot_delta_aggregiert(
-                    api_key, syms, frm=WARMUP_MS // 1000, to=END_MS // 1000)
+                    api_key, syms, einheiten={s: "BTC" for s in syms},
+                    frm=WARMUP_MS // 1000, to=END_MS // 1000)
                 if wahl == coinalyze.SPOT_WAHL_GROESSTER:
                     spot_agg, spot_bericht = karte, bericht
                 else:
@@ -2891,8 +2897,8 @@ def main():
     # Wieder nur fuer den Vergleich — die Hauptreihe bleibt auf Binance.
     oi_agg, liq_agg, fut_agg, derivate_bericht = {}, {}, {}, {}
     fund_agg, ls_agg = {}, {}
-    derivate_fehler = "kein COINALYZE_API_KEY gesetzt"
-    if api_key:
+    derivate_fehler = korb_grenze
+    if api_key and historischer_korb:
         derivate_fehler = ""
         try:
             pa = coinalyze.perp_auswahl(api_key)
@@ -2910,7 +2916,10 @@ def main():
             oi_agg, b_oi = coinalyze._summiere_vollstaendig(
                 oi_einzeln, alle_syms, b_oi_roh, "USD (convert_to_usd)")
             liq_agg, b_liq = coinalyze.liq_aggregiert(api_key, alle_syms, **zeitraum)
-            fut_agg, b_fut = coinalyze.fut_delta_aggregiert(api_key, cvd_syms, **zeitraum)
+            fut_agg, b_fut = coinalyze.fut_delta_aggregiert(
+                api_key, cvd_syms,
+                einheiten={d["symbol"]: d["denominierung"] for d in gewaehlt.values()},
+                **zeitraum)
             derivate_bericht = {
                 "maerkte": {d["boerse"]: d["symbol"] for d in gewaehlt.values()},
                 "cvd_maerkte": cvd_syms, "cvd_ausgeschlossen": ausgeschlossen,
