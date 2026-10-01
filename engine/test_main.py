@@ -354,6 +354,19 @@ def test_eval_params_faengt_unbrauchbare_werte_ab():
     assert p["k_atr"] == 2.0 and p["cooldown_h"] == 0.0
 
 
+def test_eval_params_verlangt_json_booleans_statt_truthy_text():
+    """Bool-Schalter akzeptieren nur JSON-Bools; Text darf keine Richtung umkehren."""
+    assert main.eval_params({"bias_short": False})["bias_short"] is False
+    assert main.eval_params({"bias_short": True})["bias_short"] is True
+    for value in ("false", "true", 0, 1, None):
+        try:
+            main.eval_params({"bias_short": value})
+        except TypeError as exc:
+            assert "muss true oder false" in str(exc)
+        else:
+            raise AssertionError(f"ungueltiger Booleanwert akzeptiert: {value!r}")
+
+
 def test_leere_config_ergibt_bisheriges_verhalten():
     """Ohne config.json muss exakt das herauskommen, was evaluate ohnehin tut."""
     import inspect

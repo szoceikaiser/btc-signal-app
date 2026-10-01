@@ -25,6 +25,28 @@ def c(ts, o, h, l, cl):
     return Candle(ts, o, h, l, cl)
 
 
+def test_atr_kurzer_vorlauf_und_volles_fenster_gegen_unabhaengige_true_ranges():
+    from strategy_core import atr
+    candles = [c(0, 100, 101, 99, 100), c(1, 120, 121, 119, 120),
+               c(2, 90, 91, 89, 90)]
+    assert atr([], 14) == 0.0
+    assert atr(candles[:1], 14) == 0.0
+
+    def independent(values):
+        ranges = [max(cur.high-cur.low, abs(cur.high-prev.close),
+                      abs(cur.low-prev.close))
+                  for prev, cur in zip(values, values[1:])]
+        return sum(ranges) / len(ranges) if ranges else 0.0
+
+    # Original F16 vector: independently calculated TRs are 21 and 31.
+    assert independent(candles) == 26.0
+    assert atr(candles, 14) == independent(candles)
+    assert atr(candles, 2) == independent(candles)
+    long = candles + [c(3, 91, 130, 90, 125), c(4, 125, 126, 115, 118),
+                      c(5, 118, 124, 117, 121)]
+    assert atr(long, 3) == independent(long[-4:])
+
+
 # ------------------------------------------------- Fib: Zahlen aus dem Video
 
 def video_impulse():

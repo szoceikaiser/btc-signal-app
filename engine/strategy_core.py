@@ -147,10 +147,16 @@ class FibZones:
 
 def atr(candles: list[Candle], period: int = 14) -> float:
     """Average True Range der letzten `period` Kerzen (einfacher Durchschnitt)."""
+    if period < 1:
+        raise ValueError("period muss mindestens 1 sein")
     if len(candles) < 2:
         return 0.0
     trs = []
-    for prev, cur in zip(candles[-period - 1:-1], candles[-period:]):
+    # Fuer n beobachtbare True Ranges braucht es n+1 Kerzen. Bei kurzem
+    # Vorlauf wurden die zwei Slices bisher unterschiedlich abgeschnitten und
+    # falsche Paare (oder nur Kerzenranges) gemittelt.
+    window = candles[-(period + 1):]
+    for prev, cur in zip(window, window[1:]):
         trs.append(max(cur.high - cur.low,
                        abs(cur.high - prev.close),
                        abs(cur.low - prev.close)))

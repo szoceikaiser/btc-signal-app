@@ -378,10 +378,17 @@ def eval_params(cfg: dict) -> dict:
     out = {}
     for name, default in EVAL_DEFAULTS.items():
         wert = cfg.get(name, default)
+        if isinstance(default, bool):
+            # JSON-Konfigurationsschalter haben einen echten bool-Vertrag. Strings
+            # sind kein bool (bool("false") waere True); bei Typfehler abbrechen,
+            # damit ein Tippfehler nie unbemerkt den gegenteiligen Modus aktiviert.
+            if type(wert) is not bool:
+                raise TypeError(f"config.json: '{name}' muss true oder false (JSON-Bool) sein; "
+                                f"erhalten: {wert!r}")
+            out[name] = wert
+            continue
         try:
-            if isinstance(default, bool):
-                wert = bool(wert)
-            elif isinstance(default, int):
+            if isinstance(default, int):
                 wert = int(wert)
             elif isinstance(default, float):
                 wert = float(wert)
