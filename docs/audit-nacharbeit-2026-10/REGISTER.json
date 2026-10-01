@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "stage": "A3",
+  "stage": "A4",
   "as_of": "2026-10-01",
-  "base_commit": "c90fcd616f684b4b134f423fd86a2eaf6b95467c",
+  "base_commit": "aaadbf6606ae1082e2eb59fd0ef1e1d4e1f23c1b",
   "original_audit": {
     "commit": "ccf2b01c0578346f325261e72445b7375a9ac706",
     "branch": "codex/audit-2026-09-27",
@@ -18,7 +18,8 @@
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6 Regression, A7 Ergebnisfolgen, A8 Abschluss",
-      "remaining_limit": "Intrabar-Reihenfolge bleibt ohne feinere Daten begrenzt; kein Live-Go."
+      "remaining_limit": "Intrabar-Reihenfolge bleibt ohne feinere Daten begrenzt; kein Live-Go.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F02",
@@ -28,7 +29,8 @@
       "status": "offen",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A5",
-      "remaining_limit": "Derivatefälle, Kapitalbindung und Funding nicht nachgewiesen."
+      "remaining_limit": "Derivatefälle, Kapitalbindung und Funding nicht nachgewiesen.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F03",
@@ -38,7 +40,8 @@
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A8",
-      "remaining_limit": "Keine pauschale Aussage jenseits des geprüften Vertrags."
+      "remaining_limit": "Keine pauschale Aussage jenseits des geprüften Vertrags.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F04",
@@ -48,7 +51,8 @@
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A7/A8",
-      "remaining_limit": "Manueller Live-Einstand unbekannt."
+      "remaining_limit": "Manueller Live-Einstand unbekannt.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F05",
@@ -58,7 +62,8 @@
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A8",
-      "remaining_limit": "Widerstandsverkauf derzeit aus; Aktivierung nicht belegt."
+      "remaining_limit": "Widerstandsverkauf derzeit aus; Aktivierung nicht belegt.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F06",
@@ -74,7 +79,8 @@
       "evidence": "engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md",
       "scope": "usd-Fensterdeltas als aktueller Default; konstante CVD-Summenversätze invariant; aggregierte BTC-Spot-Deltas vor Vergleich in USD.",
       "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
-      "remaining_limit": "Historische alt-Zeilen eingefroren; keine neue Renditemessung in A2."
+      "remaining_limit": "Historische alt-Zeilen eingefroren; keine neue Renditemessung in A2.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F07",
@@ -86,7 +92,8 @@
       "evidence": "engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md",
       "scope": "Vor Verfügbarkeit missing, kausale Fortschreibung mit Alter/Quelle/Abdeckung.",
       "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
-      "remaining_limit": "Historische API-Verfügbarkeit nicht bewiesen; R0/R1-Originale unverändert."
+      "remaining_limit": "Historische API-Verfügbarkeit nicht bewiesen; R0/R1-Originale unverändert.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F08",
@@ -98,7 +105,8 @@
       "next_stage": "A8 Abschluss",
       "remaining_limit": "D01-Adapter muss Eingänge vor Resampling schließen; historische API-Verfügbarkeit unbewiesen.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
-      "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff"
+      "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F09",
@@ -108,7 +116,8 @@
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6 Regression, A7 Ergebnisfolgen, A8 Abschluss",
-      "remaining_limit": "A1 ändert keine Buchführung; alte Gegenfälle/Artefakte erhalten."
+      "remaining_limit": "A1 ändert keine Buchführung; alte Gegenfälle/Artefakte erhalten.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F10",
@@ -118,7 +127,8 @@
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A8",
-      "remaining_limit": "A1 erweitert den Nachweis nicht."
+      "remaining_limit": "A1 erweitert den Nachweis nicht.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F11",
@@ -128,7 +138,8 @@
       "status": "A1 korrigiert und gezielt geprüft",
       "scope": "eval_params verlangt JSON-Bool; falsche Typen lösen TypeError aus. Echte Boolwerte und gespeicherte config.json bleiben gültig.",
       "next_stage": "A6 Regression, A8 Abschluss",
-      "remaining_limit": "Keine Live-Aktivierung; sonstige Konfigurationsfragen außer Umfang."
+      "remaining_limit": "Keine Live-Aktivierung; sonstige Konfigurationsfragen außer Umfang.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F12",
@@ -138,17 +149,21 @@
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A5 V2-Abgrenzung, A7 Ergebnissemantik, A8",
-      "remaining_limit": "Vorab liegende bedingte Orders bleiben eigener Vertrag."
+      "remaining_limit": "Vorab liegende bedingte Orders bleiben eigener Vertrag.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F13",
       "origin": "BERICHT.md P1: Telegram-Zustellung (ca. Zeile 138)",
       "finding": "Fehlgeschlagene Nachricht kann beim Wiederanlauf verschwinden; Schreibgrenzen können Duplikate erzeugen.",
       "prior_evidence": "Etappe 5a lokaler Hauptlauf/Outbox und Teilfälle.",
-      "status": "teilweise erledigt; Rest offen",
-      "scope": "A3 ändert Versandpfade nicht.",
-      "next_stage": "A4 Restfälle, A6/A8",
-      "remaining_limit": "Vollständiger Runnerverlust und ausgeschlossene Einmalbefehle offen."
+      "status": "A4 implementiert und simuliert geprüft; reale Betriebsbereitstellung offen",
+      "scope": "Hauptlauf und test/resend/lage/watch: persistentes separates Volume, Intent/sending/Quittung vor lokalem Spiegel; Runnerwiederherstellung; uncertain ohne Reset.",
+      "next_stage": "A6 Regression, A8 Abschluss; Betriebsbereitstellung separat",
+      "remaining_limit": "Geeigneter persistenter Speicher, geprüfte Migration und Runner-Anbindung nicht bereitgestellt. Keine Garantie bei Volume-Verlust, NFS, getrennten Kopien oder altem Backup; keine Exactly-once-Zusage.",
+      "a4_review": "14 neue Testfunktionen mit 18 harten Abbrüchen; voller temporärer Runner entfernt; nur simulierter Transport. A4-Umfang abgeschlossen, Betrieb offen.",
+      "evidence": "A4-VERTRAG.md; A4-BERICHT.md; A4-BETRIEB.md; A4-vorher.log; A4-tests-local.log; A4-5a-sabotage.json; engine/test_a4_delivery.py",
+      "change_commit": "0cd06d2a81114966e34238d9bcf1074fc25461bc"
     },
     {
       "id": "F14",
@@ -160,7 +175,8 @@
       "next_stage": "A8 Abschluss",
       "remaining_limit": "Heute beobachtete Marktantworten belegen keinen damaligen Börsenkorb.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
-      "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff"
+      "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F15",
@@ -172,7 +188,8 @@
       "next_stage": "A8 Abschluss",
       "remaining_limit": "Historische Point-in-time-Marktliste und zeitgleiche USD-Quote-Konversion fehlen; solche Reihen nicht auswertbar.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
-      "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff"
+      "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F16",
@@ -182,7 +199,8 @@
       "status": "A1 korrigiert und gezielt geprüft",
       "scope": "Letzte bis period True Ranges; leer/eine Kerze, kurzer Vorlauf, Fensterlänge und langer Vorlauf geprüft.",
       "next_stage": "A6 Regression, A8 Abschluss",
-      "remaining_limit": "Keine Rendite- oder Gesamtstrategieauswertung in A1."
+      "remaining_limit": "Keine Rendite- oder Gesamtstrategieauswertung in A1.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "F17",
@@ -192,7 +210,8 @@
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A8",
-      "remaining_limit": "Keine neue Chart-Abnahme in A1."
+      "remaining_limit": "Keine neue Chart-Abnahme in A1.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "D01",
@@ -203,7 +222,8 @@
       "scope": "Geschlossene 4h-Reihen und Cutoff unverändert; Tagesresampling setzt diese Voraussetzung voraus.",
       "next_stage": "A8 Abschluss",
       "remaining_limit": "Historischer Beschaffungszeitpunkt nicht bewiesen.",
-      "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md"
+      "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "D02",
@@ -215,7 +235,8 @@
       "evidence": "engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md",
       "scope": "Feldmetadaten trennen missing/stale/observed; nur frisches gemessenes Funding bestätigt.",
       "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
-      "remaining_limit": "Alte Flow-Dateien ohne Metadaten beweisen Messherkunft nicht; keine R0/R1-Umdeutung."
+      "remaining_limit": "Alte Flow-Dateien ohne Metadaten beweisen Messherkunft nicht; keine R0/R1-Umdeutung.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "M01",
@@ -225,7 +246,8 @@
       "status": "beibehalten; historische Aussage begrenzt",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A7/A8",
-      "remaining_limit": "Alte Entscheidungen nicht pauschal auf heutige Basis übertragbar."
+      "remaining_limit": "Alte Entscheidungen nicht pauschal auf heutige Basis übertragbar.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "M02",
@@ -235,7 +257,8 @@
       "status": "beibehalten; offene Inferenzgrenze",
       "scope": "Keine Änderung in A3.",
       "next_stage": "A7/A8",
-      "remaining_limit": "Vollständige Suchfamilie unbekannt; keine Auswahlkorrektur behauptet."
+      "remaining_limit": "Vollständige Suchfamilie unbekannt; keine Auswahlkorrektur behauptet.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     },
     {
       "id": "T01",
@@ -245,7 +268,8 @@
       "status": "teilweise erledigt; übrige Vorlagen nicht pauschal geschlossen",
       "scope": "A3 ändert Schutzproben nicht.",
       "next_stage": "A6",
-      "remaining_limit": "Keine pauschale Schließung der übrigen alten Vorlagenlücken."
+      "remaining_limit": "Keine pauschale Schließung der übrigen alten Vorlagenlücken.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
     }
   ]
 }
