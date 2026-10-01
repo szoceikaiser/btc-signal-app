@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "stage": "A2",
+  "stage": "A3",
   "as_of": "2026-10-01",
-  "base_commit": "8ad1139793a2ec5724d418bc2fc3ab88801f8f9c",
+  "base_commit": "c90fcd616f684b4b134f423fd86a2eaf6b95467c",
   "original_audit": {
     "commit": "ccf2b01c0578346f325261e72445b7375a9ac706",
     "branch": "codex/audit-2026-09-27",
@@ -10,27 +10,242 @@
     "report": "docs/audit-2026-09-27/BERICHT.md"
   },
   "findings": [
-    {"id":"F01","origin":"BERICHT.md P1: Drawdown-Rechnung (ca. Zeile 79)","finding":"Falscher Intrabar-Bestand kann Rückgang übersehen.","prior_evidence":"Offline-V1-Korrektur und Prüfung im Erhaltregister; Nach-6-Abnahme.","status":"beibehalten; A1 nicht betroffen","scope":"Keine Änderung in A1.","next_stage":"A6 Regression, A7 Ergebnisfolgen, A8 Abschluss","remaining_limit":"Intrabar-Reihenfolge bleibt ohne feinere Daten begrenzt; kein Live-Go."},
-    {"id":"F02","origin":"BERICHT.md P2-Tabelle (ca. Zeile 170)","finding":"Shorts binden kein Kapital/Margin; Funding fehlt.","prior_evidence":"Kein Erledigungsbeleg; offen laut Erhaltregister.","status":"offen","scope":"Keine Änderung in A1.","next_stage":"A5","remaining_limit":"Derivatefälle, Kapitalbindung und Funding nicht nachgewiesen."},
-    {"id":"F03","origin":"BERICHT.md P1: Struktur-Stop (ca. Zeile 112)","finding":"Nachgezogener Long-Stop kann sinken.","prior_evidence":"Etappe 4: monotone Grenze geprüft.","status":"beibehalten; A1 nicht betroffen","scope":"Keine Änderung in A1.","next_stage":"A6/A8","remaining_limit":"Keine pauschale Aussage jenseits des geprüften Vertrags."},
-    {"id":"F04","origin":"BERICHT.md P1: Engine-Einstand (ca. Zeile 125)","finding":"Einstand wird nach Kapitalprozenten statt BTC-Losen gewichtet.","prior_evidence":"Etappe 4: Lose und Kosten geprüft.","status":"beibehalten; A1 nicht betroffen","scope":"Keine Änderung in A1.","next_stage":"A6/A7/A8","remaining_limit":"Manueller Live-Einstand unbekannt."},
-    {"id":"F05","origin":"BERICHT.md P3-Tabelle (ca. Zeile 177)","finding":"widerstand_exits geht bei State-Rundlauf verloren.","prior_evidence":"Etappe 4: Positionsschema/Fortsetzung geprüft.","status":"beibehalten; A1 nicht betroffen","scope":"Keine Änderung in A1.","next_stage":"A6/A8","remaining_limit":"Widerstandsverkauf derzeit aus; Aktivierung nicht belegt."},
-    {"id":"F06","origin":"BERICHT.md P2-Tabelle (ca. Zeile 167)","finding":"CVD-Muster hängt vom willkürlichen Summenstart ab.","prior_evidence":"Originalprobe: DERIVATE_PUMP wird mit Summenversatz GESUNDER_TREND.","status":"A2 korrigiert und gezielt geprüft","change_commit":"d8779c38ca6502eae551f3b643251cdf74b8fdb3","change_commits":["3d0a3af4c022a91d2ecb5528ac754ea793a5b766","d8779c38ca6502eae551f3b643251cdf74b8fdb3"],"evidence":"engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md","scope":"usd-Fensterdeltas als aktueller Default; konstante CVD-Summenversätze invariant; aggregierte BTC-Spot-Deltas vor Vergleich in USD.","next_stage":"A7 Ergebnisfolgen, A8 Abschluss","remaining_limit":"Historische alt-Zeilen eingefroren; keine neue Renditemessung in A2."},
-    {"id":"F07","origin":"BERICHT.md P2-Tabelle (ca. Zeile 168)","finding":"Erster später vorhandener OI-Wert wird rückwärts gefüllt.","prior_evidence":"Originalprobe: 12345 vor erster OI-Zeit; R0-Warmup heilt dies nicht.","status":"A2 korrigiert und gezielt geprüft","change_commit":"3d0a3af4c022a91d2ecb5528ac754ea793a5b766","evidence":"engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md","scope":"Vor Verfügbarkeit missing, kausale Fortschreibung mit Alter/Quelle/Abdeckung.","next_stage":"A7 Ergebnisfolgen, A8 Abschluss","remaining_limit":"Historische API-Verfügbarkeit nicht bewiesen; R0/R1-Originale unverändert."},
-    {"id":"F08","origin":"BERICHT.md P2-Tabelle (ca. Zeile 171)","finding":"Tagesresampling kann unvollständige Tageskerzen verwenden.","prior_evidence":"Kein Erledigungsbeleg.","status":"offen","scope":"Keine Änderung in A1.","next_stage":"A3","remaining_limit":"UTC-Abschluss- und Lückensemantik ausstehend."},
-    {"id":"F09","origin":"BERICHT.md P1: Rest verhindert Kapitalzyklus (ca. Zeile 93)","finding":"Numerischer BTC-Rest kann Wiederanlage verhindern.","prior_evidence":"Etappe 1/Folgeprüfungen; zusätzlicher i+2-Fall separat dokumentiert.","status":"beibehalten; A1 nicht betroffen","scope":"Keine Änderung in A1.","next_stage":"A6 Regression, A7 Ergebnisfolgen, A8 Abschluss","remaining_limit":"A1 ändert keine Buchführung; alte Gegenfälle/Artefakte erhalten."},
-    {"id":"F10","origin":"BERICHT.md P1: Engine-Einstand/Planstop (ca. Zeile 125)","finding":"Positionsplan kann einen anderen Stop als die Engine zeigen.","prior_evidence":"Etappe 4: gemeinsamer Stop-Resolver geprüft.","status":"beibehalten; A1 nicht betroffen","scope":"Keine Änderung in A1.","next_stage":"A6/A8","remaining_limit":"A1 erweitert den Nachweis nicht."},
-    {"id":"F11","origin":"BERICHT.md P3-Tabelle (ca. Zeile 181); audit/probes.py:94","finding":"eval_params macht den Text false mit bool(text) zu True.","prior_evidence":"Originalgegenfall am Basiscommit: True.","status":"A1 korrigiert und gezielt geprüft","scope":"eval_params verlangt JSON-Bool; falsche Typen lösen TypeError aus. Echte Boolwerte und gespeicherte config.json bleiben gültig.","next_stage":"A6 Regression, A8 Abschluss","remaining_limit":"Keine Live-Aktivierung; sonstige Konfigurationsfragen außer Umfang."},
-    {"id":"F12","origin":"BERICHT.md P1: Kerzenschluss/Levelpreis (ca. Zeile 61)","finding":"Schlussentscheidung kann rückwirkend einen früheren Kerzenpreis erhalten.","prior_evidence":"Offline-V1/i+2-Pfad geprüft; V2 separat begrenzt.","status":"beibehalten; A1 nicht betroffen","scope":"Keine Änderung in A1.","next_stage":"A5 V2-Abgrenzung, A7 Ergebnissemantik, A8","remaining_limit":"Vorab liegende bedingte Orders bleiben eigener Vertrag."},
-    {"id":"F13","origin":"BERICHT.md P1: Telegram-Zustellung (ca. Zeile 138)","finding":"Fehlgeschlagene Nachricht kann beim Wiederanlauf verschwinden; Schreibgrenzen können Duplikate erzeugen.","prior_evidence":"Etappe 5a lokaler Hauptlauf/Outbox und Teilfälle.","status":"teilweise erledigt; Rest offen","scope":"A1 ändert Versandpfade nicht.","next_stage":"A4 Restfälle, A6/A8","remaining_limit":"Vollständiger Runnerverlust und ausgeschlossene Einmalbefehle offen."},
-    {"id":"F14","origin":"BERICHT.md P3-Tabelle (ca. Zeile 182)","finding":"Fehlender Markt kann als vollständiger Korb summiert werden.","prior_evidence":"Kein Erledigungsbeleg; Aggregation außerhalb Einzelmarktpaket offen.","status":"offen","scope":"Keine Änderung in A1.","next_stage":"A3","remaining_limit":"Vollständigkeit des gesamten angeforderten Korbs offen."},
-    {"id":"F15","origin":"BERICHT.md P3-Tabelle (ca. Zeile 183)","finding":"Volumina unterschiedlicher Denominierung werden direkt verglichen.","prior_evidence":"Kein Erledigungsbeleg.","status":"offen","scope":"Keine Änderung in A1.","next_stage":"A3","remaining_limit":"Einheiten-/Denominierungsnachweis ausstehend."},
-    {"id":"F16","origin":"BERICHT.md P3-Tabelle (ca. Zeile 184); audit/additional_probes.py:25-32","finding":"ATR richtet Vorgängerschlüsse bei kurzem Vorlauf falsch aus.","prior_evidence":"Originalvektor am Basiscommit: ATR 2.0 statt unabhängig berechneter True-Range-Mittel 26.0.","status":"A1 korrigiert und gezielt geprüft","scope":"Letzte bis period True Ranges; leer/eine Kerze, kurzer Vorlauf, Fensterlänge und langer Vorlauf geprüft.","next_stage":"A6 Regression, A8 Abschluss","remaining_limit":"Keine Rendite- oder Gesamtstrategieauswertung in A1."},
-    {"id":"F17","origin":"BERICHT.md P1: Chart-Kollision (ca. Zeile 152)","finding":"Chart behält bei Schlüsselkonflikt den Backtest-Eintrag.","prior_evidence":"Etappe 5b: Herkunft und Ereignisidentitäten geprüft.","status":"beibehalten; A1 nicht betroffen","scope":"Keine Änderung in A1.","next_stage":"A6/A8","remaining_limit":"Keine neue Chart-Abnahme in A1."},
-    {"id":"D01","origin":"BERICHT.md P2-Tabelle (ca. Zeile 166)","finding":"Eine laufende Schlusskerze wurde historisch mitgeführt.","prior_evidence":"Etappe 2: geschlossene Zeitreihen/Cutoff geprüft; Nach-6 erhält D01.","status":"beibehalten; A1 nicht betroffen","scope":"Keine Änderung in A1.","next_stage":"A3 Regression, A8","remaining_limit":"Historischer Beschaffungszeitpunkt nicht bewiesen."},
-    {"id":"D02","origin":"BERICHT.md P2-Tabelle (ca. Zeile 169)","finding":"Fehlende und echte neutrale Flow-Werte teilen Nullrepräsentation.","prior_evidence":"Originalprobe: fehlende Funding-Null bestätigt Long.","status":"A2 korrigiert und gezielt geprüft","change_commit":"3d0a3af4c022a91d2ecb5528ac754ea793a5b766","evidence":"engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md","scope":"Feldmetadaten trennen missing/stale/observed; nur frisches gemessenes Funding bestätigt.","next_stage":"A7 Ergebnisfolgen, A8 Abschluss","remaining_limit":"Alte Flow-Dateien ohne Metadaten beweisen Messherkunft nicht; keine R0/R1-Umdeutung."},
-    {"id":"M01","origin":"BERICHT.md P2-Tabelle (ca. Zeile 172)","finding":"Alte LIVE-Zeilen verwenden abweichende Basisparameter.","prior_evidence":"Historische Einordnung erhalten; aktuelle feste Paarparameter registriert.","status":"beibehalten; historische Aussage begrenzt","scope":"Keine Änderung in A1.","next_stage":"A7/A8","remaining_limit":"Alte Entscheidungen nicht pauschal auf heutige Basis übertragbar."},
-    {"id":"M02","origin":"BERICHT.md P2-Tabelle (ca. Zeile 173)","finding":"Wiederverwendete Daten und Mehrfachauswahl begrenzen Inferenz.","prior_evidence":"Nach-6-Prüfbericht legt Auswahlgrenze offen.","status":"beibehalten; offene Inferenzgrenze","scope":"Keine Änderung in A1.","next_stage":"A7/A8","remaining_limit":"Vollständige Suchfamilie unbekannt; keine Auswahlkorrektur behauptet."},
-    {"id":"T01","origin":"BERICHT.md P3-Tabelle (ca. Zeile 185)","finding":"Veraltete Sabotagevorlagen und fehlende E41-Warte-Reihenfolgeprobe.","prior_evidence":"Etappe 5a erreichte E41-Wartekerze mit Teilverkäufen.","status":"teilweise erledigt; übrige Vorlagen nicht pauschal geschlossen","scope":"A1 ändert Schutzproben nicht.","next_stage":"A6","remaining_limit":"Keine pauschale Schließung der übrigen alten Vorlagenlücken."}
+    {
+      "id": "F01",
+      "origin": "BERICHT.md P1: Drawdown-Rechnung (ca. Zeile 79)",
+      "finding": "Falscher Intrabar-Bestand kann Rückgang übersehen.",
+      "prior_evidence": "Offline-V1-Korrektur und Prüfung im Erhaltregister; Nach-6-Abnahme.",
+      "status": "beibehalten; A3 nicht betroffen",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A6 Regression, A7 Ergebnisfolgen, A8 Abschluss",
+      "remaining_limit": "Intrabar-Reihenfolge bleibt ohne feinere Daten begrenzt; kein Live-Go."
+    },
+    {
+      "id": "F02",
+      "origin": "BERICHT.md P2-Tabelle (ca. Zeile 170)",
+      "finding": "Shorts binden kein Kapital/Margin; Funding fehlt.",
+      "prior_evidence": "Kein Erledigungsbeleg; offen laut Erhaltregister.",
+      "status": "offen",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A5",
+      "remaining_limit": "Derivatefälle, Kapitalbindung und Funding nicht nachgewiesen."
+    },
+    {
+      "id": "F03",
+      "origin": "BERICHT.md P1: Struktur-Stop (ca. Zeile 112)",
+      "finding": "Nachgezogener Long-Stop kann sinken.",
+      "prior_evidence": "Etappe 4: monotone Grenze geprüft.",
+      "status": "beibehalten; A3 nicht betroffen",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A6/A8",
+      "remaining_limit": "Keine pauschale Aussage jenseits des geprüften Vertrags."
+    },
+    {
+      "id": "F04",
+      "origin": "BERICHT.md P1: Engine-Einstand (ca. Zeile 125)",
+      "finding": "Einstand wird nach Kapitalprozenten statt BTC-Losen gewichtet.",
+      "prior_evidence": "Etappe 4: Lose und Kosten geprüft.",
+      "status": "beibehalten; A3 nicht betroffen",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A6/A7/A8",
+      "remaining_limit": "Manueller Live-Einstand unbekannt."
+    },
+    {
+      "id": "F05",
+      "origin": "BERICHT.md P3-Tabelle (ca. Zeile 177)",
+      "finding": "widerstand_exits geht bei State-Rundlauf verloren.",
+      "prior_evidence": "Etappe 4: Positionsschema/Fortsetzung geprüft.",
+      "status": "beibehalten; A3 nicht betroffen",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A6/A8",
+      "remaining_limit": "Widerstandsverkauf derzeit aus; Aktivierung nicht belegt."
+    },
+    {
+      "id": "F06",
+      "origin": "BERICHT.md P2-Tabelle (ca. Zeile 167)",
+      "finding": "CVD-Muster hängt vom willkürlichen Summenstart ab.",
+      "prior_evidence": "Originalprobe: DERIVATE_PUMP wird mit Summenversatz GESUNDER_TREND.",
+      "status": "A2 korrigiert und gezielt geprüft",
+      "change_commit": "d8779c38ca6502eae551f3b643251cdf74b8fdb3",
+      "change_commits": [
+        "3d0a3af4c022a91d2ecb5528ac754ea793a5b766",
+        "d8779c38ca6502eae551f3b643251cdf74b8fdb3"
+      ],
+      "evidence": "engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md",
+      "scope": "usd-Fensterdeltas als aktueller Default; konstante CVD-Summenversätze invariant; aggregierte BTC-Spot-Deltas vor Vergleich in USD.",
+      "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
+      "remaining_limit": "Historische alt-Zeilen eingefroren; keine neue Renditemessung in A2."
+    },
+    {
+      "id": "F07",
+      "origin": "BERICHT.md P2-Tabelle (ca. Zeile 168)",
+      "finding": "Erster später vorhandener OI-Wert wird rückwärts gefüllt.",
+      "prior_evidence": "Originalprobe: 12345 vor erster OI-Zeit; R0-Warmup heilt dies nicht.",
+      "status": "A2 korrigiert und gezielt geprüft",
+      "change_commit": "3d0a3af4c022a91d2ecb5528ac754ea793a5b766",
+      "evidence": "engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md",
+      "scope": "Vor Verfügbarkeit missing, kausale Fortschreibung mit Alter/Quelle/Abdeckung.",
+      "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
+      "remaining_limit": "Historische API-Verfügbarkeit nicht bewiesen; R0/R1-Originale unverändert."
+    },
+    {
+      "id": "F08",
+      "origin": "BERICHT.md P2-Tabelle (ca. Zeile 171)",
+      "finding": "Tagesresampling kann unvollständige Tageskerzen verwenden.",
+      "prior_evidence": "Kein Erledigungsbeleg.",
+      "status": "A3 korrigiert und gezielt geprüft",
+      "scope": "Nur sechs ausgerichtete und geschlossene UTC-4h-Slots ergeben eine Tageskerze; Teil-/Lückentage entfallen.",
+      "next_stage": "A8 Abschluss",
+      "remaining_limit": "D01-Adapter muss Eingänge vor Resampling schließen; historische API-Verfügbarkeit unbewiesen.",
+      "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
+      "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff"
+    },
+    {
+      "id": "F09",
+      "origin": "BERICHT.md P1: Rest verhindert Kapitalzyklus (ca. Zeile 93)",
+      "finding": "Numerischer BTC-Rest kann Wiederanlage verhindern.",
+      "prior_evidence": "Etappe 1/Folgeprüfungen; zusätzlicher i+2-Fall separat dokumentiert.",
+      "status": "beibehalten; A3 nicht betroffen",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A6 Regression, A7 Ergebnisfolgen, A8 Abschluss",
+      "remaining_limit": "A1 ändert keine Buchführung; alte Gegenfälle/Artefakte erhalten."
+    },
+    {
+      "id": "F10",
+      "origin": "BERICHT.md P1: Engine-Einstand/Planstop (ca. Zeile 125)",
+      "finding": "Positionsplan kann einen anderen Stop als die Engine zeigen.",
+      "prior_evidence": "Etappe 4: gemeinsamer Stop-Resolver geprüft.",
+      "status": "beibehalten; A3 nicht betroffen",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A6/A8",
+      "remaining_limit": "A1 erweitert den Nachweis nicht."
+    },
+    {
+      "id": "F11",
+      "origin": "BERICHT.md P3-Tabelle (ca. Zeile 181); audit/probes.py:94",
+      "finding": "eval_params macht den Text false mit bool(text) zu True.",
+      "prior_evidence": "Originalgegenfall am Basiscommit: True.",
+      "status": "A1 korrigiert und gezielt geprüft",
+      "scope": "eval_params verlangt JSON-Bool; falsche Typen lösen TypeError aus. Echte Boolwerte und gespeicherte config.json bleiben gültig.",
+      "next_stage": "A6 Regression, A8 Abschluss",
+      "remaining_limit": "Keine Live-Aktivierung; sonstige Konfigurationsfragen außer Umfang."
+    },
+    {
+      "id": "F12",
+      "origin": "BERICHT.md P1: Kerzenschluss/Levelpreis (ca. Zeile 61)",
+      "finding": "Schlussentscheidung kann rückwirkend einen früheren Kerzenpreis erhalten.",
+      "prior_evidence": "Offline-V1/i+2-Pfad geprüft; V2 separat begrenzt.",
+      "status": "beibehalten; A3 nicht betroffen",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A5 V2-Abgrenzung, A7 Ergebnissemantik, A8",
+      "remaining_limit": "Vorab liegende bedingte Orders bleiben eigener Vertrag."
+    },
+    {
+      "id": "F13",
+      "origin": "BERICHT.md P1: Telegram-Zustellung (ca. Zeile 138)",
+      "finding": "Fehlgeschlagene Nachricht kann beim Wiederanlauf verschwinden; Schreibgrenzen können Duplikate erzeugen.",
+      "prior_evidence": "Etappe 5a lokaler Hauptlauf/Outbox und Teilfälle.",
+      "status": "teilweise erledigt; Rest offen",
+      "scope": "A3 ändert Versandpfade nicht.",
+      "next_stage": "A4 Restfälle, A6/A8",
+      "remaining_limit": "Vollständiger Runnerverlust und ausgeschlossene Einmalbefehle offen."
+    },
+    {
+      "id": "F14",
+      "origin": "BERICHT.md P3-Tabelle (ca. Zeile 182)",
+      "finding": "Fehlender Markt kann als vollständiger Korb summiert werden.",
+      "prior_evidence": "Kein Erledigungsbeleg; Aggregation außerhalb Einzelmarktpaket offen.",
+      "status": "A3 korrigiert und gezielt geprüft",
+      "scope": "Summe und gewichtetes Mittel verlangen alle angeforderten Symbole; ganz fehlender Markt sperrt die Reihe, Teillücke nur den Zeitpunkt.",
+      "next_stage": "A8 Abschluss",
+      "remaining_limit": "Heute beobachtete Marktantworten belegen keinen damaligen Börsenkorb.",
+      "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
+      "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff"
+    },
+    {
+      "id": "F15",
+      "origin": "BERICHT.md P3-Tabelle (ca. Zeile 183)",
+      "finding": "Volumina unterschiedlicher Denominierung werden direkt verglichen.",
+      "prior_evidence": "Kein Erledigungsbeleg.",
+      "status": "A3 korrigiert und gezielt geprüft",
+      "scope": "Rangfolge nur nach belegter BTC/Quote- und Quote/USD-Umrechnung in USD; CVD verlangt belegte gleiche Einheit; historische heutige Auswahl gesperrt.",
+      "next_stage": "A8 Abschluss",
+      "remaining_limit": "Historische Point-in-time-Marktliste und zeitgleiche USD-Quote-Konversion fehlen; solche Reihen nicht auswertbar.",
+      "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
+      "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff"
+    },
+    {
+      "id": "F16",
+      "origin": "BERICHT.md P3-Tabelle (ca. Zeile 184); audit/additional_probes.py:25-32",
+      "finding": "ATR richtet Vorgängerschlüsse bei kurzem Vorlauf falsch aus.",
+      "prior_evidence": "Originalvektor am Basiscommit: ATR 2.0 statt unabhängig berechneter True-Range-Mittel 26.0.",
+      "status": "A1 korrigiert und gezielt geprüft",
+      "scope": "Letzte bis period True Ranges; leer/eine Kerze, kurzer Vorlauf, Fensterlänge und langer Vorlauf geprüft.",
+      "next_stage": "A6 Regression, A8 Abschluss",
+      "remaining_limit": "Keine Rendite- oder Gesamtstrategieauswertung in A1."
+    },
+    {
+      "id": "F17",
+      "origin": "BERICHT.md P1: Chart-Kollision (ca. Zeile 152)",
+      "finding": "Chart behält bei Schlüsselkonflikt den Backtest-Eintrag.",
+      "prior_evidence": "Etappe 5b: Herkunft und Ereignisidentitäten geprüft.",
+      "status": "beibehalten; A3 nicht betroffen",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A6/A8",
+      "remaining_limit": "Keine neue Chart-Abnahme in A1."
+    },
+    {
+      "id": "D01",
+      "origin": "BERICHT.md P2-Tabelle (ca. Zeile 166)",
+      "finding": "Eine laufende Schlusskerze wurde historisch mitgeführt.",
+      "prior_evidence": "Etappe 2: geschlossene Zeitreihen/Cutoff geprüft; Nach-6 erhält D01.",
+      "status": "beibehalten; A3 regressionsgeprüft",
+      "scope": "Geschlossene 4h-Reihen und Cutoff unverändert; Tagesresampling setzt diese Voraussetzung voraus.",
+      "next_stage": "A8 Abschluss",
+      "remaining_limit": "Historischer Beschaffungszeitpunkt nicht bewiesen.",
+      "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md"
+    },
+    {
+      "id": "D02",
+      "origin": "BERICHT.md P2-Tabelle (ca. Zeile 169)",
+      "finding": "Fehlende und echte neutrale Flow-Werte teilen Nullrepräsentation.",
+      "prior_evidence": "Originalprobe: fehlende Funding-Null bestätigt Long.",
+      "status": "A2 korrigiert und gezielt geprüft",
+      "change_commit": "3d0a3af4c022a91d2ecb5528ac754ea793a5b766",
+      "evidence": "engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md",
+      "scope": "Feldmetadaten trennen missing/stale/observed; nur frisches gemessenes Funding bestätigt.",
+      "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
+      "remaining_limit": "Alte Flow-Dateien ohne Metadaten beweisen Messherkunft nicht; keine R0/R1-Umdeutung."
+    },
+    {
+      "id": "M01",
+      "origin": "BERICHT.md P2-Tabelle (ca. Zeile 172)",
+      "finding": "Alte LIVE-Zeilen verwenden abweichende Basisparameter.",
+      "prior_evidence": "Historische Einordnung erhalten; aktuelle feste Paarparameter registriert.",
+      "status": "beibehalten; historische Aussage begrenzt",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A7/A8",
+      "remaining_limit": "Alte Entscheidungen nicht pauschal auf heutige Basis übertragbar."
+    },
+    {
+      "id": "M02",
+      "origin": "BERICHT.md P2-Tabelle (ca. Zeile 173)",
+      "finding": "Wiederverwendete Daten und Mehrfachauswahl begrenzen Inferenz.",
+      "prior_evidence": "Nach-6-Prüfbericht legt Auswahlgrenze offen.",
+      "status": "beibehalten; offene Inferenzgrenze",
+      "scope": "Keine Änderung in A3.",
+      "next_stage": "A7/A8",
+      "remaining_limit": "Vollständige Suchfamilie unbekannt; keine Auswahlkorrektur behauptet."
+    },
+    {
+      "id": "T01",
+      "origin": "BERICHT.md P3-Tabelle (ca. Zeile 185)",
+      "finding": "Veraltete Sabotagevorlagen und fehlende E41-Warte-Reihenfolgeprobe.",
+      "prior_evidence": "Etappe 5a erreichte E41-Wartekerze mit Teilverkäufen.",
+      "status": "teilweise erledigt; übrige Vorlagen nicht pauschal geschlossen",
+      "scope": "A3 ändert Schutzproben nicht.",
+      "next_stage": "A6",
+      "remaining_limit": "Keine pauschale Schließung der übrigen alten Vorlagenlücken."
+    }
   ]
 }
