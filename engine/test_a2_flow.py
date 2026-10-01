@@ -24,6 +24,25 @@ def test_a2_f06_constant_offsets_do_not_change_default_pattern():
         assert sc.classify_pattern(candles, shifted) == baseline
 
 
+def test_a2_f06_aggregated_spot_btc_is_compared_in_usd():
+    candles = [sc.Candle(i * STEP, 100 + .3 * i, 101 + .3 * i,
+                          99 + .3 * i, 100 + .3 * i) for i in range(12)]
+    raw = _rohkerzen_kurs([c.close for c in candles], start=0)
+    spot_map = {i * STEP: 100.0 for i in range(12)}  # BTC per bar
+    fut_map = {i * STEP: 200.0 for i in range(12)}   # BTC per bar
+    oi_map = {i * STEP: 1000.0 + i * 4 for i in range(12)}
+    funding = [(i * STEP + STEP, .00001 + i * .000001) for i in range(12)]
+    cs, flow = backtest.build_series(raw, funding, oi_map, fut_map=fut_map,
+                                      spot_map=spot_map, end_ms=12 * STEP)
+    # Both deltas cover bars 1..11. Spot is 1100 BTC, roughly 111.8k USD;
+    # futures are 2200 BTC, roughly 223.6k USD. Spot exceeds 1/3 futures.
+    spot_usd = sum(100.0 * c.close for c in cs[1:])
+    fut_usd = sum(200.0 * c.close for c in cs[1:])
+    assert spot_usd > fut_usd / 3
+    assert sc._muster2_dollar(cs, flow) == (spot_usd, fut_usd)
+    assert sc.classify_pattern(cs, flow) != sc.Pattern.DERIVATE_PUMP
+
+
 def test_a2_f07_prefix_first_oi_and_stale_age_live_backtest():
     raw = _rohkerzen_kurs([100.0] * 7, start=0)
     oi = {2 * STEP: 500.0}

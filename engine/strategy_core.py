@@ -490,7 +490,8 @@ def _muster2_dollar(c: list[Candle], f: list[FlowPoint]) -> Optional[tuple[float
 
     Hier zaehlen nur Differenzen INNERHALB des Fensters - ein konstanter Startwert
     kuerzt sich heraus:
-      - Spot: f[-1].spot_cvd - f[0].spot_cvd (die Reihe ist schon in Dollar).
+      - Spot: Binance-Reihe als USD-Fensterdifferenz. Bei aggregiertem Spot-CVD
+        (BTC) jedes Kerzen-Delta mit dem Schlusskurs derselben Kerze in USD.
       - Futures: jedes Kerzen-Delta (BTC) mal Schlusskurs DERSELBEN Kerze, dann
         aufsummiert - dieselbe Umrechnung wie _fut_cvd_usd (E43.1), nur fensterlokal.
     Beide decken dieselben Kerzen ab (die Deltas von Kerze 2 bis 12 des Fensters).
@@ -506,7 +507,20 @@ def _muster2_dollar(c: list[Candle], f: list[FlowPoint]) -> Optional[tuple[float
         if k is None:
             return None
         fut += (p.fut_cvd - vorher.fut_cvd) * k
-    return f[-1].spot_cvd - f[0].spot_cvd, fut
+    spot_sources = {p.provenance.get("spot_cvd", {}).get("source", "binance_spot_taker_usd")
+                    for p in f}
+    if len(spot_sources) != 1:
+        return None
+    if spot_sources == {"aggregate_spot_delta_btc"}:
+        spot = 0.0
+        for vorher, p in zip(f, f[1:]):
+            k = kurs.get(p.ts)
+            if k is None:
+                return None
+            spot += (p.spot_cvd - vorher.spot_cvd) * k
+    else:
+        spot = f[-1].spot_cvd - f[0].spot_cvd
+    return spot, fut
 
 
 def oi_in_btc(oi_usd: dict, kurs: dict) -> dict:
