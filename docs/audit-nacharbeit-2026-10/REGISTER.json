@@ -339,13 +339,19 @@
   ],
   "a6_base_commit": "772221ecda67dad50f6190d8e1319476eb7129e3",
   "a7_preflight_v2": {
-    "status": "85 conditional spot model rows eligible; V035 blocked F02; no A7 returns yet",
+    "status": "85 conditional spot model rows eligible; V035 blocked F02; targeted R1/S0 V000/V004 computed and independently book-verified; A7 incomplete",
     "supersedes": "A7-auswertbarkeit-v1.json",
     "evidence": [
       "A7-ABLEITUNGSVERTRAG-v2.md",
       "A7-flow-modeled-manifest-v2.json",
       "A7-auswertbarkeit-v2.json"
     ],
+    "historical_api_as_of_proven": false
+  },
+  "a7_targeted_R1_S0": {
+    "status": "V000/V004 only; independent account checks passed; further runs and A7 acceptance open",
+    "summary": "A7-targeted-R1-S0-summary.json",
+    "results": "A7-targeted-R1-S0-results.json.gz",
     "historical_api_as_of_proven": false
   }
 }
