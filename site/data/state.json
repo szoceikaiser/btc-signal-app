@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1790899200000,
+ "last_signal_ts": 1790913600000,
  "retrace_extreme": 82563.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -44,42 +44,42 @@
  },
  "widerstand": {
   "richtung": "LONG",
-  "bein_start": 85159.03,
-  "bein_ende": 82563.0,
-  "level_05": 83861.015,
-  "gp_von": 84167.34654,
-  "gp_bis": 84250.4195,
-  "level_0786": 84603.47958,
-  "ausbruch": 85159.03
+  "bein_start": 85649.95,
+  "bein_ende": 83186.0,
+  "level_05": 84417.975,
+  "gp_von": 84708.7211,
+  "gp_bis": 84787.5675,
+  "level_0786": 85122.6647,
+  "ausbruch": 85649.95
  },
  "plan": {
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 83858.78115384615,
-  "kurs": 85512.9,
+  "kurs": 86089.65,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 85.513 $ ueber EMA200 (71.788 $)",
+   "trend_text": "Uebergeordnet: Kurs 86.090 $ ueber EMA200 (71.793 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
-   "spot": "stabil",
-   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)",
-   "muster": "DERIVATE_PUMP",
-   "muster_text": "Derivate-Pump (Hebel treibt, Spot fehlt)"
+   "spot": "nachgelassen",
+   "spot_text": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)",
+   "muster": "SHORT_COVERING",
+   "muster_text": "Short-Covering (Shorts decken sich ein)"
   },
   "ampel": {
-   "stufe": "guenstig",
+   "stufe": "gemischt",
    "richtung": "LONG",
    "dafuer": [
     "Trend",
-    "Struktur",
-    "Spot-Nachfrage"
+    "Struktur"
    ],
    "dagegen": [
+    "Spot-Nachfrage",
     "Muster"
    ],
    "gezaehlt": 4,
-   "text": "GUENSTIG \u2014 3 von 4 sprechen dafuer"
+   "text": "GEMISCHT \u2014 2 von 4 sprechen dafuer"
   },
   "nachkauf": [
    {
@@ -109,15 +109,15 @@
   "teilgewinn": [
    {
     "zone": [
-     84167.34654,
-     84250.4195
+     84708.7211,
+     84787.5675
     ],
     "was": "Widerstand der Gegenbewegung \u2014 nur Hinweis, die Engine verkauft dort nicht",
     "tranche": 0
    },
    {
-    "preis": 85221.70025,
-    "was": "kurz unter dem letzten Hoch 85.650",
+    "preis": 86958.69165,
+    "was": "kurz unter dem letzten Hoch 87.396",
     "tranche": 15
    },
    {
@@ -192,32 +192,32 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-02T04:02:25Z",
- "last_close": 85512.9,
+ "updated_at": "2026-10-02T08:02:24Z",
+ "last_close": 86089.65,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 85.513 $ ueber EMA200 (71.788 $)",
+   "trend_text": "Uebergeordnet: Kurs 86.090 $ ueber EMA200 (71.793 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
-   "spot": "stabil",
-   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)",
-   "muster": "DERIVATE_PUMP",
-   "muster_text": "Derivate-Pump (Hebel treibt, Spot fehlt)"
+   "spot": "nachgelassen",
+   "spot_text": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)",
+   "muster": "SHORT_COVERING",
+   "muster_text": "Short-Covering (Shorts decken sich ein)"
   },
   "ampel": {
-   "stufe": "guenstig",
+   "stufe": "unguenstig",
    "richtung": "LONG",
    "dafuer": [
-    "Trend",
-    "Spot-Nachfrage"
+    "Trend"
    ],
    "dagegen": [
+    "Spot-Nachfrage",
     "Muster"
    ],
    "gezaehlt": 3,
-   "text": "GUENSTIG \u2014 2 von 3 sprechen dafuer"
+   "text": "UNGUENSTIG \u2014 1 von 3 spricht dafuer"
   },
   "impuls_start": 80126.04,
   "impuls_ende": 87395.67,
