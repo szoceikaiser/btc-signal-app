@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1790884800000,
+ "last_signal_ts": 1790899200000,
  "retrace_extreme": 82563.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -56,16 +56,16 @@
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 83858.78115384615,
-  "kurs": 84880.05,
+  "kurs": 85512.9,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.880 $ ueber EMA200 (71.650 $)",
+   "trend_text": "Uebergeordnet: Kurs 85.513 $ ueber EMA200 (71.788 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
    "spot": "stabil",
    "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)",
-   "muster": "GESUNDER_TREND",
-   "muster_text": "gesunder Trend (Spot traegt die Bewegung)"
+   "muster": "DERIVATE_PUMP",
+   "muster_text": "Derivate-Pump (Hebel treibt, Spot fehlt)"
   },
   "ampel": {
    "stufe": "guenstig",
@@ -73,14 +73,20 @@
    "dafuer": [
     "Trend",
     "Struktur",
-    "Spot-Nachfrage",
+    "Spot-Nachfrage"
+   ],
+   "dagegen": [
     "Muster"
    ],
-   "dagegen": [],
    "gezaehlt": 4,
-   "text": "GUENSTIG \u2014 4 von 4 sprechen dafuer"
+   "text": "GUENSTIG \u2014 3 von 4 sprechen dafuer"
   },
   "nachkauf": [
+   {
+    "preis": 85300.0,
+    "was": "Liquidationszone",
+    "tranche": 20
+   },
    {
     "preis": 83864.07,
     "was": "Liquidationszone",
@@ -93,11 +99,6 @@
     ],
     "was": "Kaufleiter: neue Tiefkerze in dieser Zone",
     "tranche": 15
-   },
-   {
-    "preis": 83210.0,
-    "was": "Liquidationszone",
-    "tranche": 20
    },
    {
     "preis": 81681.74081999999,
@@ -115,8 +116,8 @@
     "tranche": 0
    },
    {
-    "preis": 84733.23485,
-    "was": "kurz unter dem letzten Hoch 85.159",
+    "preis": 85221.70025,
+    "was": "kurz unter dem letzten Hoch 85.650",
     "tranche": 15
    },
    {
@@ -191,31 +192,32 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-02T03:49:45Z",
- "last_close": 84880.05,
+ "updated_at": "2026-10-02T04:02:25Z",
+ "last_close": 85512.9,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.880 $ ueber EMA200 (71.650 $)",
+   "trend_text": "Uebergeordnet: Kurs 85.513 $ ueber EMA200 (71.788 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
    "spot": "stabil",
    "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)",
-   "muster": "GESUNDER_TREND",
-   "muster_text": "gesunder Trend (Spot traegt die Bewegung)"
+   "muster": "DERIVATE_PUMP",
+   "muster_text": "Derivate-Pump (Hebel treibt, Spot fehlt)"
   },
   "ampel": {
    "stufe": "guenstig",
    "richtung": "LONG",
    "dafuer": [
     "Trend",
-    "Spot-Nachfrage",
+    "Spot-Nachfrage"
+   ],
+   "dagegen": [
     "Muster"
    ],
-   "dagegen": [],
    "gezaehlt": 3,
-   "text": "GUENSTIG \u2014 3 von 3 sprechen dafuer"
+   "text": "GUENSTIG \u2014 2 von 3 sprechen dafuer"
   },
   "impuls_start": 80126.04,
   "impuls_ende": 87395.67,
