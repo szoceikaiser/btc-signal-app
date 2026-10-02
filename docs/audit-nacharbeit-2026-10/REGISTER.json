@@ -337,5 +337,15 @@
     "A7-M01-M02-zuordnung-v1.json",
     "A7-BERICHT.md"
   ],
-  "a6_base_commit": "772221ecda67dad50f6190d8e1319476eb7129e3"
+  "a6_base_commit": "772221ecda67dad50f6190d8e1319476eb7129e3",
+  "a7_preflight_v2": {
+    "status": "85 conditional spot model rows eligible; V035 blocked F02; no A7 returns yet",
+    "supersedes": "A7-auswertbarkeit-v1.json",
+    "evidence": [
+      "A7-ABLEITUNGSVERTRAG-v2.md",
+      "A7-flow-modeled-manifest-v2.json",
+      "A7-auswertbarkeit-v2.json"
+    ],
+    "historical_api_as_of_proven": false
+  }
 }
