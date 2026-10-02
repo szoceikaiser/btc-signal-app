@@ -77,7 +77,8 @@ def test_simulate_short_gewinn():
     ]
     candles = [Candle(backtest.START_MS, 100, 100, 100, 100),
                Candle(backtest.START_MS + 1, 90, 90, 90, 90)]
-    pnl = backtest.simulate(sigs, candles, fee=0.0)
+    # A5: original numerical assertion preserved as invalid legacy reproduction.
+    pnl = backtest.simulate(sigs, candles, fee=0.0, legacy_derivatives=True)
     # 7500 nominal short, 10 % Kursrueckgang -> +750
     assert abs(pnl["ende"] - 10750.0) < 0.01
 
@@ -627,7 +628,8 @@ def test_rueckgang_short_nutzt_das_kerzenhoch():
           Candle(start + H4, 100, 120, 99, 100),          # Docht nach OBEN
           Candle(start + 2 * H4, 100, 100, 100, 100)]
     sigs = [{"ts": cs[0].ts, "type": "SHORT_2", "price": 100.0, "tranche_pct": 100}]
-    p = backtest.simulate(sigs, cs, start_ms=start, fee=0.0)
+    # A5: original assertion retained, no valid derivative performance claim.
+    p = backtest.simulate(sigs, cs, start_ms=start, fee=0.0, legacy_derivatives=True)
     assert p["max_drawdown_pct"] < -15, (
         f"Kerzenhoch bei Short nicht beruecksichtigt: {p['max_drawdown_pct']} %")
 

@@ -911,7 +911,8 @@ def score(signals: list[dict], tol_days: int = 1, start_ms: int = START_MS) -> d
 
 def simulate(signals: list[dict], candles, fee: float = 0.001,
              start_capital: float = 10000.0, start_ms: int | None = None,
-             deploy_pct: float = 1.0, fill: str = "level") -> dict:
+             deploy_pct: float = 1.0, fill: str = "level", *,
+             legacy_derivatives: bool = False) -> dict:
     """LEGACY DIAGNOSTIC: historical signal-band accounting, not contract V1.
 
     Level/close prices are retrospective assumptions, not evidence of prior
@@ -921,7 +922,7 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
 
     Tranchen-genaue P&L-Simulation der Signale.
 
-    Annahmen (dokumentiert): kein Hebel; Kauf-Tranchen als %-Anteil des beim
+    Alte Annahmen (bei Shorts widerlegt, F02): kein Hebel; Kauf-Tranchen als %-Anteil des beim
     Ladder-Start verfuegbaren Kapitals (aus tranche_pct des Signals); Teilverkaeufe
     40 %/40 %/Rest der vollen Position; 0,1 % Gebuehr je Order; Shorts nominal
     ohne Funding-Kosten. Ergebnis inkl. Buy&Hold-Vergleich ueber denselben Zeitraum.
@@ -945,6 +946,12 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     strategy. Legacy max_drawdown_pct uses the old time-inconsistent inventory
     and is kept under its old name solely for historical comparisons.
     """
+    from derivative_accounting import NotEvaluable
+    has_shorts = any(s['type'].startswith('SHORT_') for s in signals)
+    if type(legacy_derivatives) is not bool:
+        raise TypeError('legacy_derivatives must be bool')
+    if has_shorts and not legacy_derivatives:
+        raise NotEvaluable('F02: legacy Short accounting has no margin/funding; not evaluable')
     schluss_je_ts = {c.ts: c.close for c in candles}
 
     def _preis(s: dict) -> float:
@@ -1144,6 +1151,11 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     hold_start = next(c for c in candles if c.ts >= hs).close
     return {
         "start": start_capital,
+        "execution_contract": "legacy_retrospective_diagnostic",
+        "historically_executable": False,
+        "derivative_evaluable": False if has_shorts else None,
+        "limitations": ["F12: no prior orders/fills proven"] + (
+            ["F02: invalid margin/funding; reproduction only"] if has_shorts else []),
         "ende": round(end_equity, 2),
         "rendite_pct": round((end_equity / start_capital - 1) * 100, 2),
         "buyhold_pct": round((last_price / hold_start - 1) * 100, 2),

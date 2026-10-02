@@ -12,6 +12,7 @@ import math
 import strategy_core as sc
 from flow_contract import legacy_unknown, FOUR_HOURS_MS
 import inventory
+from derivative_accounting import require_spot_config
 from position_state import pos_to_state, pos_from_state
 
 STEP = 14_400_000
@@ -348,7 +349,7 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
     end_ms MUST be the frozen input's historical cutoff, not the current clock.
     initial holdings are an explicit hand-case hook, never used in measurements.
     """
-    if cfg.get('bias_short',False): raise ValueError('V1 is Long/Spot only')
+    require_spot_config(cfg)
     deploy=cfg.get('deploy_pct',1.)
     if not (0<=fee<1 and 0<=slippage<1 and 0<=deploy<=1 and start_capital>=0 and initial_units>=0 and start_capital+initial_units>0):
         raise ValueError('Invalid capital/cost parameters')

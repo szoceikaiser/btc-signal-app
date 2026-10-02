@@ -666,14 +666,15 @@ def test_simulate_teilverkauf_nimmt_den_rueckkauf_anteilig_mit():
 
 
 def test_simulate_short_rueckteil():
+    # A5: retain every original assertion only in explicit legacy reproduction mode.
     cs = _cs()[:-1] + [Candle(_cs()[-1].ts, 80.0, 80.0, 80.0, 80.0)]   # Schluss 80
-    s0 = backtest.simulate([_sig(0, "SHORT_1", 100.0, 25)], cs, fee=0.0, start_ms=cs[0].ts)
+    s0 = backtest.simulate([_sig(0, "SHORT_1", 100.0, 25)], cs, fee=0.0, start_ms=cs[0].ts, legacy_derivatives=True)
     s_rt = backtest.simulate([_sig(0, "SHORT_1", 100.0, 25),
                               _sig(1, "SHORT_RUECKTEST", 100.0, 25)], cs, fee=0.0,
-                             start_ms=cs[0].ts)
+                             start_ms=cs[0].ts, legacy_derivatives=True)
     s1 = backtest.simulate([_sig(0, "SHORT_1", 100.0, 25), _sig(1, "SHORT_RUECKTEST", 100.0, 25),
                             _sig(2, "SHORT_RUECKTEST_STOP", 100.0, 25)], cs, fee=0.0,
-                           start_ms=cs[0].ts)
+                           start_ms=cs[0].ts, legacy_derivatives=True)
     assert abs(s_rt["offene_position"] - 2 * s0["offene_position"]) < 1e-6   # Vorprobe
     assert s1["short_trades"] == 1
     # offene Short-Position wieder genau die aus SHORT_1

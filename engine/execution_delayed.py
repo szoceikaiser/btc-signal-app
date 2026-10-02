@@ -30,8 +30,7 @@ class DelayedBook(v.Book):
 
 def run_delayed(candles, flow, cfg, *, start_ms, end_ms, fee=.001,
                 slippage=.001, decision_fn=v.decide):
-    if cfg.get('bias_short', False):
-        raise ValueError('Long/Spot only')
+    v.require_spot_config(cfg)
     deploy = cfg.get('deploy_pct', 1.)
     if not all(math.isfinite(x) for x in (fee, slippage, deploy)) or not (
             0 <= fee < 1 and 0 <= slippage < 1 and 0 <= deploy <= 1):
