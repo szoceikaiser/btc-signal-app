@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "stage": "A4",
-  "as_of": "2026-10-01",
-  "base_commit": "aaadbf6606ae1082e2eb59fd0ef1e1d4e1f23c1b",
+  "stage": "A5",
+  "as_of": "2026-10-02",
+  "base_commit": "291588946206333ca58d771f1cc96f261da1a981",
   "original_audit": {
     "commit": "ccf2b01c0578346f325261e72445b7375a9ac706",
     "branch": "codex/audit-2026-09-27",
@@ -26,11 +26,13 @@
       "origin": "BERICHT.md P2-Tabelle (ca. Zeile 170)",
       "finding": "Shorts binden kein Kapital/Margin; Funding fehlt.",
       "prior_evidence": "Kein Erledigungsbeleg; offen laut Erhaltregister.",
-      "status": "offen",
-      "scope": "Keine Änderung in A3.",
-      "next_stage": "A5",
-      "remaining_limit": "Derivatefälle, Kapitalbindung und Funding nicht nachgewiesen.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "status": "A5 Offline-Buch geprüft; nicht unterstützte Derivatläufe abgewiesen",
+      "scope": "1x-Kapital/Margin, Gebühren, exakte Fundingtermine/Vorzeichen und Markbewertung für synthetische explizite Fills. V1/i+2 strikt Spot; Legacy-Shorts standardmäßig abgewiesen.",
+      "next_stage": "A6 Regression, A7 historische Einordnung, A8 Abschluss",
+      "remaining_limit": "V035 historisch nicht auswertbar: kein kausaler Derivatstrategiepfad und unvollständiger damaliger Instrument-/Funding-/Marknachweis. Kein Börsenvertrag oder Liquidationsmodell; Grenzverletzung sperrt Replay.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "change_commit": "2554a582d4b1c8dd1b3bca73ca3b5ad67c67964a",
+      "evidence": "A5-VERTRAG.md; A5-BERICHT.md; A5-vorher.log; A5-historical-eligibility-v1.json; engine/test_a5_accounting.py; 784/0 Gesamtregression"
     },
     {
       "id": "F03",
@@ -146,11 +148,13 @@
       "origin": "BERICHT.md P1: Kerzenschluss/Levelpreis (ca. Zeile 61)",
       "finding": "Schlussentscheidung kann rückwirkend einen früheren Kerzenpreis erhalten.",
       "prior_evidence": "Offline-V1/i+2-Pfad geprüft; V2 separat begrenzt.",
-      "status": "beibehalten; A3 nicht betroffen",
-      "scope": "Keine Änderung in A3.",
-      "next_stage": "A5 V2-Abgrenzung, A7 Ergebnissemantik, A8",
-      "remaining_limit": "Vorab liegende bedingte Orders bleiben eigener Vertrag.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "status": "V1/i+2 erhalten; A5 V2-Vertragsgrenze ausdrücklich festgelegt",
+      "scope": "Retrospektive Level-/Close-Ergebnisse sind keine damals vorliegenden Orders. V2 ist nicht implementiert/beauftragt. Vorhergegenfall reproduziert, bestehender kausaler H08-Fall regressiv geprüft.",
+      "next_stage": "A6 Regression, A7 Ergebnissemantik, A8 Abschluss",
+      "remaining_limit": "Ohne damalige Order-/Intrabardaten keine echte Ausführbarkeit, Reihenfolge, Liquidität oder Fills bewiesen. E41.6 und unbekannte manuelle Live-Bestände bleiben außerhalb.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "change_commit": "2554a582d4b1c8dd1b3bca73ca3b5ad67c67964a",
+      "evidence": "A5-VERTRAG.md; A5-BERICHT.md; A5-vorher.log; engine/test_execution_v1.py:253; engine/backtest.py:1154"
     },
     {
       "id": "F13",
