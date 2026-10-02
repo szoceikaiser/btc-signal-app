@@ -1,6 +1,6 @@
 # Vollständiges Befundregister – Auditnacharbeit ab 01.10.2026
 
-Stand: A6, Basis `772221ecda67dad50f6190d8e1319476eb7129e3`. Dieses Register ergänzt das Originalaudit vom 27.09.2026; es ersetzt keine Originaldatei und kennzeichnet keinen Befund pauschal als erledigt. Die Fundstellen beziehen sich auf `audit-work/docs/audit-2026-09-27/BERICHT.md` im Originalzweig `codex/audit-2026-09-27` (`ccf2b01c0578346f325261e72445b7375a9ac706`).
+Stand: A7-Zwischenstand auf Basis `8b6af70b1897e8aefff5552f878297cc0090ef26`; A7 ist **nicht abgeschlossen**. Dieses Register ergänzt das Originalaudit vom 27.09.2026; es ersetzt keine Originaldatei und kennzeichnet keinen Befund pauschal als erledigt. Die Fundstellen beziehen sich auf `audit-work/docs/audit-2026-09-27/BERICHT.md` im Originalzweig `codex/audit-2026-09-27` (`ccf2b01c0578346f325261e72445b7375a9ac706`).
 
 | ID | Originalfundstelle und Befund | Vorhandene Erledigungsbelege | A6-Status und Reichweite | Folgeetappe | Verbleibende Grenze |
 |---|---|---|---|---|---|
@@ -30,3 +30,7 @@ Stand: A6, Basis `772221ecda67dad50f6190d8e1319476eb7129e3`. Dieses Register erg
 Maschinenlesbare Statusdaten für alle 22 IDs: [`REGISTER.json`](REGISTER.json). A5 ändert ausschließlich F02/F12; die übrigen 20 Einträge bleiben fachlich unverändert. A1–A4 erhalten. 784 Tests bestanden, 0 fehlgeschlagen. [A5-Bericht](A5-BERICHT.md), [Vertrag](A5-VERTRAG.md) und [historische Einstufung](A5-historical-eligibility-v1.json). Implementierung `2554a582d4b1c8dd1b3bca73ca3b5ad67c67964a`. Die reale [A4-Betriebsbereitstellung](A4-BETRIEB.md) bleibt offen.
 
 A6 führt sämtliche 22 IDs fort; nur T01 erhält einen neuen fachlichen Status. A1–A5-Status und Grenzen bleiben erhalten. Die [A6-Zuordnung](A6-mapping.json) und [Bilanz](A6-summary.json) trennen Treffer, ersetzte Vorlagen und historische Originalfälle. Der [A6-Bericht](A6-BERICHT.md) enthält Prüfungen, Reichweite und offene Betriebs-/Datengrenzen.
+
+## A7-Zwischenstand
+
+Alle 22 IDs bleiben im maschinenlesbaren Register erhalten. Für M01 sind die 76 dokumentierten Entscheidungszeilen mit damaliger Basis/Fenster und 85 alten Codezeilen mit ihrem Abstand zur aktuellen Basis in [A7-M01-M02-zuordnung-v1.json](A7-M01-M02-zuordnung-v1.json) indexiert. M02 bleibt eine offene Inferenzgrenze: unbekannte vollständige Suchfamilie und wiederverwendete Monate; keine Auswahlbereinigung oder unabhängige Stichprobe. Die [A7-Auswertbarkeitsprüfung](A7-auswertbarkeit-v1.json) sperrt die korrigierten historischen R0/R1-Läufe für alle 86 Reihen wegen fehlender A2-Herkunfts-/Verfügbarkeitsmetadaten in den Original-Flowdateien; V035 hat zusätzlich die F02-Sperre. F06/F07/D02-Ergebnisfolgen sind deshalb nicht als Renditen geschlossen. Originale Berichte, Furkan-Quellen und Forschung bleiben unverändert. [A7-BERICHT.md](A7-BERICHT.md) nennt die Belege und offenen Schritte.
