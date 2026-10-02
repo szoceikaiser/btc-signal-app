@@ -1,0 +1,42 @@
+{
+  "original_case_count": 316,
+  "original_adjudication": {
+    "current_mutation_reached_assertion": 243,
+    "current_mutation_reached_expected_failure": 13,
+    "text_template_replaced_current_equivalent_reached": 30,
+    "retired_by_A2_default_contract": 2,
+    "retired_by_A2_asof_contract": 3,
+    "historical_only_absent_at_A5_base": 25
+  },
+  "current_new_cases": 42,
+  "new_cases": {
+    "caught_assertion": 41,
+    "survived_or_error": 1
+  },
+  "seven_original_obsolete_templates": {
+    "sabotage_e41:012": "refresh:E41-buy-wait",
+    "sabotage_e41:043": "refresh:E41-message-missing",
+    "sabotage_e41:044": "contract:T01-E41-order",
+    "sabotage_e433:016": "refresh:E433-cvd-key",
+    "sabotage_e434:020": "refresh:E434-oi-default",
+    "sabotage_e434:024": "refresh:E434-oi-key",
+    "sabotage_e443:032": "refresh:E443-legacy-inventory"
+  },
+  "valid_runtime_reached": {
+    "sabotage_e381:005": "IndexError",
+    "sabotage_e381:006": "IndexError",
+    "sabotage_e381:015": "TypeError",
+    "sabotage_e381:017": "KeyError",
+    "sabotage_e39:018": "IndexError",
+    "sabotage_e40:013": "IndexError",
+    "sabotage_e40:017": "ValueError",
+    "sabotage_e40:020": "RuntimeError",
+    "sabotage_e40:021": "RuntimeError",
+    "sabotage_e40:027": "ZeroDivisionError",
+    "sabotage_e441:005": "JSONDecodeError",
+    "sabotage_e442:002": "StopIteration",
+    "sabotage_e443:035": "KeyError",
+    "current:sabotage_e443:033": "StopIteration"
+  },
+  "unmapped": []
+}

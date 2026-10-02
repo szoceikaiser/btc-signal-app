@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "stage": "A5",
+  "stage": "A6",
   "as_of": "2026-10-02",
-  "base_commit": "291588946206333ca58d771f1cc96f261da1a981",
+  "base_commit": "772221ecda67dad50f6190d8e1319476eb7129e3",
   "original_audit": {
     "commit": "ccf2b01c0578346f325261e72445b7375a9ac706",
     "branch": "codex/audit-2026-09-27",
@@ -19,7 +19,8 @@
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6 Regression, A7 Ergebnisfolgen, A8 Abschluss",
       "remaining_limit": "Intrabar-Reihenfolge bleibt ohne feinere Daten begrenzt; kein Live-Go.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F02",
@@ -32,7 +33,8 @@
       "remaining_limit": "V035 historisch nicht auswertbar: kein kausaler Derivatstrategiepfad und unvollständiger damaliger Instrument-/Funding-/Marknachweis. Kein Börsenvertrag oder Liquidationsmodell; Grenzverletzung sperrt Replay.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "change_commit": "2554a582d4b1c8dd1b3bca73ca3b5ad67c67964a",
-      "evidence": "A5-VERTRAG.md; A5-BERICHT.md; A5-vorher.log; A5-historical-eligibility-v1.json; engine/test_a5_accounting.py; 784/0 Gesamtregression"
+      "evidence": "A5-VERTRAG.md; A5-BERICHT.md; A5-vorher.log; A5-historical-eligibility-v1.json; engine/test_a5_accounting.py; 784/0 Gesamtregression",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F03",
@@ -43,7 +45,8 @@
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A8",
       "remaining_limit": "Keine pauschale Aussage jenseits des geprüften Vertrags.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F04",
@@ -54,7 +57,8 @@
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A7/A8",
       "remaining_limit": "Manueller Live-Einstand unbekannt.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F05",
@@ -65,7 +69,8 @@
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A8",
       "remaining_limit": "Widerstandsverkauf derzeit aus; Aktivierung nicht belegt.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F06",
@@ -82,7 +87,8 @@
       "scope": "usd-Fensterdeltas als aktueller Default; konstante CVD-Summenversätze invariant; aggregierte BTC-Spot-Deltas vor Vergleich in USD.",
       "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
       "remaining_limit": "Historische alt-Zeilen eingefroren; keine neue Renditemessung in A2.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F07",
@@ -95,7 +101,8 @@
       "scope": "Vor Verfügbarkeit missing, kausale Fortschreibung mit Alter/Quelle/Abdeckung.",
       "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
       "remaining_limit": "Historische API-Verfügbarkeit nicht bewiesen; R0/R1-Originale unverändert.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F08",
@@ -108,7 +115,8 @@
       "remaining_limit": "D01-Adapter muss Eingänge vor Resampling schließen; historische API-Verfügbarkeit unbewiesen.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
       "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F09",
@@ -119,7 +127,8 @@
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6 Regression, A7 Ergebnisfolgen, A8 Abschluss",
       "remaining_limit": "A1 ändert keine Buchführung; alte Gegenfälle/Artefakte erhalten.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F10",
@@ -130,7 +139,8 @@
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A8",
       "remaining_limit": "A1 erweitert den Nachweis nicht.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F11",
@@ -141,7 +151,8 @@
       "scope": "eval_params verlangt JSON-Bool; falsche Typen lösen TypeError aus. Echte Boolwerte und gespeicherte config.json bleiben gültig.",
       "next_stage": "A6 Regression, A8 Abschluss",
       "remaining_limit": "Keine Live-Aktivierung; sonstige Konfigurationsfragen außer Umfang.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F12",
@@ -154,7 +165,8 @@
       "remaining_limit": "Ohne damalige Order-/Intrabardaten keine echte Ausführbarkeit, Reihenfolge, Liquidität oder Fills bewiesen. E41.6 und unbekannte manuelle Live-Bestände bleiben außerhalb.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "change_commit": "2554a582d4b1c8dd1b3bca73ca3b5ad67c67964a",
-      "evidence": "A5-VERTRAG.md; A5-BERICHT.md; A5-vorher.log; engine/test_execution_v1.py:253; engine/backtest.py:1154"
+      "evidence": "A5-VERTRAG.md; A5-BERICHT.md; A5-vorher.log; engine/test_execution_v1.py:253; engine/backtest.py:1154",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F13",
@@ -167,7 +179,8 @@
       "remaining_limit": "Geeigneter persistenter Speicher, geprüfte Migration und Runner-Anbindung nicht bereitgestellt. Keine Garantie bei Volume-Verlust, NFS, getrennten Kopien oder altem Backup; keine Exactly-once-Zusage.",
       "a4_review": "14 neue Testfunktionen mit 18 harten Abbrüchen; voller temporärer Runner entfernt; nur simulierter Transport. A4-Umfang abgeschlossen, Betrieb offen.",
       "evidence": "A4-VERTRAG.md; A4-BERICHT.md; A4-BETRIEB.md; A4-vorher.log; A4-tests-local.log; A4-5a-sabotage.json; engine/test_a4_delivery.py",
-      "change_commit": "0cd06d2a81114966e34238d9bcf1074fc25461bc"
+      "change_commit": "0cd06d2a81114966e34238d9bcf1074fc25461bc",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F14",
@@ -180,7 +193,8 @@
       "remaining_limit": "Heute beobachtete Marktantworten belegen keinen damaligen Börsenkorb.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
       "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F15",
@@ -193,7 +207,8 @@
       "remaining_limit": "Historische Point-in-time-Marktliste und zeitgleiche USD-Quote-Konversion fehlen; solche Reihen nicht auswertbar.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
       "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F16",
@@ -204,7 +219,8 @@
       "scope": "Letzte bis period True Ranges; leer/eine Kerze, kurzer Vorlauf, Fensterlänge und langer Vorlauf geprüft.",
       "next_stage": "A6 Regression, A8 Abschluss",
       "remaining_limit": "Keine Rendite- oder Gesamtstrategieauswertung in A1.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "F17",
@@ -215,7 +231,8 @@
       "scope": "Keine Änderung in A3.",
       "next_stage": "A6/A8",
       "remaining_limit": "Keine neue Chart-Abnahme in A1.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "D01",
@@ -227,7 +244,8 @@
       "next_stage": "A8 Abschluss",
       "remaining_limit": "Historischer Beschaffungszeitpunkt nicht bewiesen.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "D02",
@@ -240,7 +258,8 @@
       "scope": "Feldmetadaten trennen missing/stale/observed; nur frisches gemessenes Funding bestätigt.",
       "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
       "remaining_limit": "Alte Flow-Dateien ohne Metadaten beweisen Messherkunft nicht; keine R0/R1-Umdeutung.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "M01",
@@ -251,7 +270,8 @@
       "scope": "Keine Änderung in A3.",
       "next_stage": "A7/A8",
       "remaining_limit": "Alte Entscheidungen nicht pauschal auf heutige Basis übertragbar.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "M02",
@@ -262,18 +282,27 @@
       "scope": "Keine Änderung in A3.",
       "next_stage": "A7/A8",
       "remaining_limit": "Vollständige Suchfamilie unbekannt; keine Auswahlkorrektur behauptet.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved."
     },
     {
       "id": "T01",
       "origin": "BERICHT.md P3-Tabelle (ca. Zeile 185)",
       "finding": "Veraltete Sabotagevorlagen und fehlende E41-Warte-Reihenfolgeprobe.",
       "prior_evidence": "Etappe 5a erreichte E41-Wartekerze mit Teilverkäufen.",
-      "status": "teilweise erledigt; übrige Vorlagen nicht pauschal geschlossen",
-      "scope": "A3 ändert Schutzproben nicht.",
-      "next_stage": "A6",
-      "remaining_limit": "Keine pauschale Schließung der übrigen alten Vorlagenlücken.",
-      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0."
+      "status": "A6 Schutzproben vollständig zugeordnet und erreichte aktuelle Mutationen geprüft",
+      "scope": "316 Originalfälle: 243 Assertion, 13 beabsichtigte Laufzeit-/Testfehler, 30 erreichte aktuelle Entsprechungen; 5 durch A2-Vertrag abgelöst und 25 nur am Original-Auditstand vorhanden. Sieben ursprünglich veraltete Vorlagen aktuell 7/7 erkannt; E41-Wartekerze mit Teilverkauf.",
+      "next_stage": "A7 Ergebnisfolgen, A8 Gesamtabnahme",
+      "remaining_limit": "Historische E44.4/E44.5-Programme bleiben am Originalcommit; keine neue historische Renditemessung oder Live-Abnahme durch A6.",
+      "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
+      "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
+      "evidence": [
+        "A6-BERICHT.md",
+        "A6-mapping.json",
+        "A6-summary.json",
+        "A6-mutations.json",
+        "engine/test_a6_regression.py"
+      ]
     }
   ]
 }
