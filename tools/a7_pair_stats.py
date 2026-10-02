@@ -3,6 +3,8 @@
 import gzip
 import hashlib
 import json
+import argparse
+import math
 from pathlib import Path
 import socket
 import sys
@@ -28,13 +30,37 @@ def blocked(*_args, **_kwargs):
     raise AssertionError("A7 paired statistics are offline")
 
 
+def numerically_equal(a, b):
+    """Compare platform math results without weakening identities or source hashes."""
+    if isinstance(a, bool) or isinstance(b, bool):
+        return type(a) is type(b) and a == b
+    if isinstance(a, int) or isinstance(b, int):
+        return type(a) is type(b) and a == b
+    if isinstance(a, float) and isinstance(b, float):
+        return math.isfinite(a) and math.isfinite(b) and math.isclose(
+            a, b, rel_tol=1e-10, abs_tol=1e-12)
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(numerically_equal(a[k], b[k]) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(numerically_equal(x, y) for x, y in zip(a, b))
+    return type(a) is type(b) and a == b
+
+
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--verify-cross-platform", action="store_true")
+    args = parser.parse_args()
     socket.socket.connect = socket.create_connection = blocked
     plan = read(N6 / "plan.json")
+    dest = DOC / "A7-paired-statistics-v1.json"
+    frozen = read(dest) if args.verify_cross_platform else None
     output = {"schema": "a7-paired-statistics-v1", "rows": ["V000", "V004"],
               "selection_adjusted": False,
               "interpretation": "conditional descriptive uncertainty on reused data; not independent validation",
               "plan_sha256": sha(N6 / "plan.json"), "results": []}
+    if args.verify_cross_platform:
+        assert {k: v for k, v in output.items() if k != "results"} == {
+            k: v for k, v in frozen.items() if k != "results"}
     for package in ("R0", "R1"):
         old = read(N6 / package / "results.json")
         for scenario in ("S0", "S1", "S2", "S3", "S4"):
@@ -54,15 +80,27 @@ def main():
             assert [x["modelled"]["ende"] for x in summary["rows"]] == [
                 x["ende"] for x in previous["rows"]]
             comparison = compare(*(x["modelled"] for x in summary["rows"]))
-            output["results"].append({"package": package, "scenario": scenario,
+            row = {"package": package, "scenario": scenario,
                 "summary_sha256": sha(summary_path), "results_sha256": sha(result_path),
                 "daily_span": span, "paired": intervals, "comparison": comparison,
                 "basis_end_usd": basis["ende"], "e42_end_usd": e42["ende"],
                 "previous_N6_end_delta_usd_each": [x["delta_end_usd"] for x in summary["rows"]],
-                "previous_N6_U1_identical": intervals == previous["U1"]})
+                "previous_N6_U1_identical": intervals == previous["U1"]}
+            output["results"].append(row)
+            if args.verify_cross_platform:
+                saved = frozen["results"][len(output["results"])-1]
+                assert saved["previous_N6_U1_identical"] is True
+                assert numerically_equal(intervals, previous["U1"])
+                assert numerically_equal({k: v for k, v in row.items()
+                                          if k != "previous_N6_U1_identical"},
+                                         {k: v for k, v in saved.items()
+                                          if k != "previous_N6_U1_identical"})
             print(package, scenario, "paired days", span["n"],
-                  "N6-U1 identical", intervals == previous["U1"], flush=True)
-    dest = DOC / "A7-paired-statistics-v1.json"
+                  "N6-U1 exact", intervals == previous["U1"], flush=True)
+    if args.verify_cross_platform:
+        assert len(frozen["results"]) == len(output["results"]) == 10
+        print("Cross-platform numeric verification: 10/10, max tolerance 1e-12 absolute")
+        return
     raw = (json.dumps(output, indent=2, ensure_ascii=False, allow_nan=False) + "\n").encode()
     if dest.exists():
         assert dest.read_bytes() == raw

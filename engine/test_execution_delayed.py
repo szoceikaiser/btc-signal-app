@@ -143,6 +143,7 @@ def test_i2_last_reserved_sale_rounding_does_not_create_micro_short():
     b.fill(o,sc.Candle(2*v.STEP,73027.02,75785.82,73027.02,74510.77))
     assert o==saved and b.units==b.rk_units==b.reserved_units==0 and b.lots==[]
     near(b.cash,9395.890008018921+units*73027.02*.999*.999)
+    assert b.ledger[-1]['quantity']==units
     assert b.ledger[-1]['numerical_btc_cap']==amount-units
 
 

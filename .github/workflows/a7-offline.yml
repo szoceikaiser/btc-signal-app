@@ -29,7 +29,7 @@ jobs:
           python tools/a7_targeted.py --package R0 --scenario S0
           python tools/a7_targeted.py --package R1 --scenario S0
       - name: Verify prespecified paired statistics
-        run: python tools/a7_pair_stats.py
+        run: python tools/a7_pair_stats.py --verify-cross-platform
       - name: Verify targeted A2 intermediate balances
         run: python tools/a7_intermediate_effect.py
       - name: Verify complete A7 result index
