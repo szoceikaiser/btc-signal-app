@@ -1,6 +1,6 @@
 # Vollständiges Befundregister – Auditnacharbeit ab 01.10.2026
 
-Stand: A7-Zwischenstand auf Basis `8b6af70b1897e8aefff5552f878297cc0090ef26`; A7 ist **nicht abgeschlossen**. Dieses Register ergänzt das Originalaudit vom 27.09.2026; es ersetzt keine Originaldatei und kennzeichnet keinen Befund pauschal als erledigt. Die Fundstellen beziehen sich auf `audit-work/docs/audit-2026-09-27/BERICHT.md` im Originalzweig `codex/audit-2026-09-27` (`ccf2b01c0578346f325261e72445b7375a9ac706`).
+Stand: A7-Fachauswertung abgeschlossen auf Basis `8b6af70b1897e8aefff5552f878297cc0090ef26`; A7 ist fachlich abgeschlossen; CI und Sicherung siehe Übergabe. Dieses Register ergänzt das Originalaudit vom 27.09.2026; es ersetzt keine Originaldatei und kennzeichnet keinen Befund pauschal als erledigt. Die Fundstellen beziehen sich auf `audit-work/docs/audit-2026-09-27/BERICHT.md` im Originalzweig `codex/audit-2026-09-27` (`ccf2b01c0578346f325261e72445b7375a9ac706`).
 
 | ID | Originalfundstelle und Befund | Vorhandene Erledigungsbelege | A6-Status und Reichweite | Folgeetappe | Verbleibende Grenze |
 |---|---|---|---|---|---|
@@ -36,3 +36,44 @@ A6 führt sämtliche 22 IDs fort; nur T01 erhält einen neuen fachlichen Status.
 Alle 22 IDs bleiben im maschinenlesbaren Register erhalten. Für M01 sind die 76 dokumentierten Entscheidungszeilen mit damaliger Basis/Fenster und 85 alten Codezeilen mit ihrem Abstand zur aktuellen Basis in [A7-M01-M02-zuordnung-v1.json](A7-M01-M02-zuordnung-v1.json) indexiert. M02 bleibt eine offene Inferenzgrenze: unbekannte vollständige Suchfamilie und wiederverwendete Monate; keine Auswahlbereinigung oder unabhängige Stichprobe. Die [A7-Auswertbarkeitsprüfung](A7-auswertbarkeit-v1.json) sperrt die korrigierten historischen R0/R1-Läufe für alle 86 Reihen wegen fehlender A2-Herkunfts-/Verfügbarkeitsmetadaten in den Original-Flowdateien; V035 hat zusätzlich die F02-Sperre. F06/F07/D02-Ergebnisfolgen sind deshalb nicht als Renditen geschlossen. Originale Berichte, Furkan-Quellen und Forschung bleiben unverändert. [A7-BERICHT.md](A7-BERICHT.md) nennt die Belege und offenen Schritte.
 
 Die erste A7-Sperrmatrix wurde **vor Renditeläufen** durch die [v2-Prüfung](A7-auswertbarkeit-v2.json) revidiert: Aus bereits eingefrorenen Einzelmarkt- und Fundingquellen lässt sich eine eigene [modellierte Flow-Reihe](A7-flow-modeled-manifest-v2.json) mit A2-Zeitvertrag erzeugen. 85 Spotzeilen sind für eine bedingte Offline-Rechnung auswertbar; V035 bleibt gesperrt. Die vier fehlenden Liquidationspunkte bleiben `missing`. Tatsächliche damalige API-Verfügbarkeit wird damit nicht belegt. Die v1-Matrix bleibt als überholter Zwischenbefund erhalten. **Gezielter R1/S0-Paarlauf V000/V004:** Endwerte 13.381,598027877413/13.262,942895190434 USD, jeweils 0,00 USD Differenz zum alten Nach-6-Endwert; beide unabhängigen Kosten-/Bestandsprüfungen bestanden. Beleg: [A7-targeted-R1-S0-summary.json](A7-targeted-R1-S0-summary.json). Weitere Zeilen/Szenarien, systematische Ergebnisfolgen und A7-Abnahme bleiben offen.
+
+## A7-Abschlussfortschreibung
+
+Alle 22 Register-IDs sind in `REGISTER.json` mit `a7_assessment` und
+`a7_evidence` fortgeführt. M01 ist mit 76 damaligen Entscheidungsbasen
+bewertet; M02 hält mindestens 94 dokumentierte Suchen, die unbekannte
+vollständige Suchfamilie und die wiederverwendeten Monate als Grenze fest.
+Die alte v1-Sperrmatrix und der R1/S0-Paarlauf oben sind ausdrücklich
+historische A7-Zwischenstände; die spätere v2-Modellfreigabe und vollständigen
+bedingten Resultate stehen im [A7-Abschlussbericht](A7-ABSCHLUSSBERICHT.md)
+und [Ergebnisindex](A7-resultindex-v1.json). 85 Spotzeilen sind bedingt
+ausgewertet; V035 bleibt nach fachlicher F02-Prüfung ohne historische Rendite.
+Die A7-Buch- und Engineregression bestand lokal mit 792/0; die endgültige
+CI-/Bundle-/Restore-SHA steht nur in der nach Commit erzeugten Übergabe.
+Es gibt keine Live- oder Aktivierungsfreigabe durch A7. Nächster Schritt
+ist ausschließlich A8-Gesamtabnahme.
+
+| ID | A7-Fortschreibung | Verbleibende Grenze |
+|---|---|---|
+| F01 | Schluss- und Intrabar-Risikobänder je Spotlauf ausgewiesen; Intrabar-Reihenfolge bleibt unbekannt. | Intrabar-Reihenfolge bleibt ohne feinere Daten begrenzt; kein Live-Go. |
+| F02 | Synthetische Margin-/Fundingbuchung geprüft; V035 bleibt ohne historischen Derivatvertrag, vollständige Zahlungen, Markpreise und kausale Short-Fills gesperrt. | V035 historisch nicht auswertbar: kein kausaler Derivatstrategiepfad und unvollständiger damaliger Instrument-/Funding-/Marknachweis. Kein Börsenvertrag oder Liquidationsmodell; Grenzverletzung sperrt Replay. |
+| F03 | Monotone Stopkorrektur in der 792er-Regression erhalten; keine allgemeine Aussage zu echten Fills. | Keine pauschale Aussage jenseits des geprüften Vertrags. |
+| F04 | Losgewichteter Einstand erhalten; Kosten, Lose und Monatsbestände jedes kausalen A7-Laufs unabhängig abgeglichen. | Manueller Live-Einstand unbekannt. |
+| F05 | Bisherige Persistenzkorrektur in Regression erhalten; Widerstandsausstieg nicht aktiviert. | Widerstandsverkauf derzeit aus; Aktivierung nicht belegt. |
+| F06 | Korrigiertes CVD entfernt nach Verfügbarkeitsmodellierung nur eine V075-Warnung; S0-Bilanzwirkung R0/R1 je 0 USD. | Historische alt-Zeilen eingefroren; keine neue Renditemessung in A2. |
+| F07 | Modellierte Verfügbarkeit entfernt zwei V050-Nachkäufe; S0-Endwert steigt um 159,461596 USD in R0 und 159,018561 USD in R1. Damalige API-Verfügbarkeit unbewiesen. | Historische API-Verfügbarkeit nicht bewiesen; R0/R1-Originale unverändert. |
+| F08 | Vertrag geschlossener UTC-Tage erhalten; keine unbelegte historische Mehrmarkt-Tagesreihe erzeugt. | D01-Adapter muss Eingänge vor Resampling schließen; historische API-Verfügbarkeit unbewiesen. |
+| F09 | Restbehandlung erhalten; begrenzte Gleitkomma-Losrundung korrigiert, echter Oversell abgewiesen und Gegenbuch abgeglichen. | A1 ändert keine Buchführung; alte Gegenfälle/Artefakte erhalten. |
+| F10 | Gemeinsamer Stop-Resolver in Regression erhalten; keine neue Live-Planbehauptung. | A1 erweitert den Nachweis nicht. |
+| F11 | Typisierte Boolean-Korrektur in Regression erhalten; eingefrorene A7-Parameter bestehen Manifestprüfung. | Keine Live-Aktivierung; sonstige Konfigurationsfragen außer Umfang. |
+| F12 | Alte Level-/Schlussdiagnosen getrennt von kausalen V1/i+2-Spotkonten ausgewiesen; keine Behauptung realer Orders. | Ohne damalige Order-/Intrabardaten keine echte Ausführbarkeit, Reihenfolge, Liquidität oder Fills bewiesen. E41.6 und unbekannte manuelle Live-Bestände bleiben außerhalb. |
+| F13 | Simulierter A4-Outboxstatus erhalten; A7 sendete keine Telegram-Nachricht und änderte keine Bereitstellung. | Geeigneter persistenter Speicher, geprüfte Migration und Runner-Anbindung nicht bereitgestellt. Keine Garantie bei Volume-Verlust, NFS, getrennten Kopien oder altem Backup; keine Exactly-once-Zusage. |
+| F14 | Vollständigkeitsprüfung des Marktkorbs erhalten; keine unbelegte historische Korbreihe eingesetzt. | Heute beobachtete Marktantworten belegen keinen damaligen Börsenkorb. |
+| F15 | USD-Einheitenprüfung erhalten; keine unbelegte historische Mehrmarkt-Volumenrangliste eingesetzt. | Historische Point-in-time-Marktliste und zeitgleiche USD-Quote-Konversion fehlen; solche Reihen nicht auswertbar. |
+| F16 | ATR-Kurzvorlaufkorrektur in Regression erhalten; A7 verwendete eingefrorene Parameter. | Keine Rendite- oder Gesamtstrategieauswertung in A1. |
+| F17 | Bisherige Chart-Ereignisidentität erhalten; A7 änderte keine Chartanzeige. | Keine neue Chart-Abnahme in A1. |
+| D01 | R0/R1 verwenden eingefrorene abgeschlossene 4h-Eingaben und gespeicherte Grenzen; historische API-Zeitpunkte unbewiesen. | Historischer Beschaffungszeitpunkt nicht bewiesen. |
+| D02 | Vier aktive Liquidationspunkte bleiben missing; kein Ersatz durch neutrale Null. V050-Zwischenwirkung gemeinsam mit A2-Verfügbarkeit gemessen. | Alte Flow-Dateien ohne Metadaten beweisen Messherkunft nicht; keine R0/R1-Umdeutung. |
+| M01 | 76 Entscheidungen an damaligen Basen/Fenstern beurteilt, 85 alte Codezeilen inventarisiert; fehlende frühe Basen nicht durch V000 ersetzt. | 76 dokumentierte Entscheidungszeilen und 85 alte Codezeilen zugeordnet; nicht jede alte Rohbasis rekonstruierbar; keine Übertragung auf V000. |
+| M02 | Bedingte Paar-/Stabilitätsdiagnosen abgeschlossen; mindestens 94 dokumentierte Suchen, unbekannte vollständige Familie und wiederverwendete Monate bleiben ohne Auswahlbereinigung. | Frühere Suche unvollständig bekannt, Daten wiederverwendet; keine Auswahlkorrektur, unabhängige Stichprobe oder Signifikanzbehauptung. |
+| T01 | A6-Fallzuordnung erhalten; 792 aktuelle Enginetests bestanden, einschließlich gezielter Rundungsfälle, ohne Live-Aktivierung. | Historische E44.4/E44.5-Programme bleiben am Originalcommit; keine neue historische Renditemessung oder Live-Abnahme durch A6. |

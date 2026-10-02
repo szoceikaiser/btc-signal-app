@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "stage": "A7_in_progress",
+  "stage": "A7_complete",
   "as_of": "2026-10-02",
   "base_commit": "8b6af70b1897e8aefff5552f878297cc0090ef26",
   "original_audit": {
@@ -17,26 +17,36 @@
       "prior_evidence": "Offline-V1-Korrektur und Prüfung im Erhaltregister; Nach-6-Abnahme.",
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
-      "next_stage": "A6 Regression, A7 Ergebnisfolgen, A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Intrabar-Reihenfolge bleibt ohne feinere Daten begrenzt; kein Live-Go.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Schluss- und Intrabar-Risikobänder je Spotlauf ausgewiesen; Intrabar-Reihenfolge bleibt unbekannt.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F02",
       "origin": "BERICHT.md P2-Tabelle (ca. Zeile 170)",
       "finding": "Shorts binden kein Kapital/Margin; Funding fehlt.",
       "prior_evidence": "Kein Erledigungsbeleg; offen laut Erhaltregister.",
-      "status": "A5 Offline-Buch geprüft; nicht unterstützte Derivatläufe abgewiesen",
+      "status": "A5 Offline-Buch geprüft; A7 V035 historisch gesperrt",
       "scope": "1x-Kapital/Margin, Gebühren, exakte Fundingtermine/Vorzeichen und Markbewertung für synthetische explizite Fills. V1/i+2 strikt Spot; Legacy-Shorts standardmäßig abgewiesen.",
-      "next_stage": "A6 Regression, A7 historische Einordnung, A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "V035 historisch nicht auswertbar: kein kausaler Derivatstrategiepfad und unvollständiger damaliger Instrument-/Funding-/Marknachweis. Kein Börsenvertrag oder Liquidationsmodell; Grenzverletzung sperrt Replay.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "change_commit": "2554a582d4b1c8dd1b3bca73ca3b5ad67c67964a",
       "evidence": "A5-VERTRAG.md; A5-BERICHT.md; A5-vorher.log; A5-historical-eligibility-v1.json; engine/test_a5_accounting.py; 784/0 Gesamtregression",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Synthetische Margin-/Fundingbuchung geprüft; V035 bleibt ohne historischen Derivatvertrag, vollständige Zahlungen, Markpreise und kausale Short-Fills gesperrt.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F03",
@@ -45,11 +55,16 @@
       "prior_evidence": "Etappe 4: monotone Grenze geprüft.",
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
-      "next_stage": "A6/A8",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Keine pauschale Aussage jenseits des geprüften Vertrags.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Monotone Stopkorrektur in der 792er-Regression erhalten; keine allgemeine Aussage zu echten Fills.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F04",
@@ -58,11 +73,16 @@
       "prior_evidence": "Etappe 4: Lose und Kosten geprüft.",
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
-      "next_stage": "A6/A7/A8",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Manueller Live-Einstand unbekannt.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Losgewichteter Einstand erhalten; Kosten, Lose und Monatsbestände jedes kausalen A7-Laufs unabhängig abgeglichen.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F05",
@@ -71,11 +91,16 @@
       "prior_evidence": "Etappe 4: Positionsschema/Fortsetzung geprüft.",
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
-      "next_stage": "A6/A8",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Widerstandsverkauf derzeit aus; Aktivierung nicht belegt.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Bisherige Persistenzkorrektur in Regression erhalten; Widerstandsausstieg nicht aktiviert.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F06",
@@ -90,11 +115,16 @@
       ],
       "evidence": "engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md",
       "scope": "usd-Fensterdeltas als aktueller Default; konstante CVD-Summenversätze invariant; aggregierte BTC-Spot-Deltas vor Vergleich in USD.",
-      "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Historische alt-Zeilen eingefroren; keine neue Renditemessung in A2.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Korrigiertes CVD entfernt nach Verfügbarkeitsmodellierung nur eine V075-Warnung; S0-Bilanzwirkung R0/R1 je 0 USD.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F07",
@@ -105,11 +135,16 @@
       "change_commit": "3d0a3af4c022a91d2ecb5528ac754ea793a5b766",
       "evidence": "engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md",
       "scope": "Vor Verfügbarkeit missing, kausale Fortschreibung mit Alter/Quelle/Abdeckung.",
-      "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Historische API-Verfügbarkeit nicht bewiesen; R0/R1-Originale unverändert.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Modellierte Verfügbarkeit entfernt zwei V050-Nachkäufe; S0-Endwert steigt um 159,461596 USD in R0 und 159,018561 USD in R1. Damalige API-Verfügbarkeit unbewiesen.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F08",
@@ -118,13 +153,18 @@
       "prior_evidence": "Kein Erledigungsbeleg.",
       "status": "A3 korrigiert und gezielt geprüft",
       "scope": "Nur sechs ausgerichtete und geschlossene UTC-4h-Slots ergeben eine Tageskerze; Teil-/Lückentage entfallen.",
-      "next_stage": "A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "D01-Adapter muss Eingänge vor Resampling schließen; historische API-Verfügbarkeit unbewiesen.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
       "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Vertrag geschlossener UTC-Tage erhalten; keine unbelegte historische Mehrmarkt-Tagesreihe erzeugt.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F09",
@@ -133,11 +173,16 @@
       "prior_evidence": "Etappe 1/Folgeprüfungen; zusätzlicher i+2-Fall separat dokumentiert.",
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
-      "next_stage": "A6 Regression, A7 Ergebnisfolgen, A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "A1 ändert keine Buchführung; alte Gegenfälle/Artefakte erhalten.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Restbehandlung erhalten; begrenzte Gleitkomma-Losrundung korrigiert, echter Oversell abgewiesen und Gegenbuch abgeglichen.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F10",
@@ -146,11 +191,16 @@
       "prior_evidence": "Etappe 4: gemeinsamer Stop-Resolver geprüft.",
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
-      "next_stage": "A6/A8",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "A1 erweitert den Nachweis nicht.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Gemeinsamer Stop-Resolver in Regression erhalten; keine neue Live-Planbehauptung.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F11",
@@ -159,11 +209,16 @@
       "prior_evidence": "Originalgegenfall am Basiscommit: True.",
       "status": "A1 korrigiert und gezielt geprüft",
       "scope": "eval_params verlangt JSON-Bool; falsche Typen lösen TypeError aus. Echte Boolwerte und gespeicherte config.json bleiben gültig.",
-      "next_stage": "A6 Regression, A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Keine Live-Aktivierung; sonstige Konfigurationsfragen außer Umfang.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Typisierte Boolean-Korrektur in Regression erhalten; eingefrorene A7-Parameter bestehen Manifestprüfung.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F12",
@@ -172,13 +227,18 @@
       "prior_evidence": "Offline-V1/i+2-Pfad geprüft; V2 separat begrenzt.",
       "status": "V1/i+2 erhalten; A5 V2-Vertragsgrenze ausdrücklich festgelegt",
       "scope": "Retrospektive Level-/Close-Ergebnisse sind keine damals vorliegenden Orders. V2 ist nicht implementiert/beauftragt. Vorhergegenfall reproduziert, bestehender kausaler H08-Fall regressiv geprüft.",
-      "next_stage": "A6 Regression, A7 Ergebnissemantik, A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Ohne damalige Order-/Intrabardaten keine echte Ausführbarkeit, Reihenfolge, Liquidität oder Fills bewiesen. E41.6 und unbekannte manuelle Live-Bestände bleiben außerhalb.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "change_commit": "2554a582d4b1c8dd1b3bca73ca3b5ad67c67964a",
       "evidence": "A5-VERTRAG.md; A5-BERICHT.md; A5-vorher.log; engine/test_execution_v1.py:253; engine/backtest.py:1154",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Alte Level-/Schlussdiagnosen getrennt von kausalen V1/i+2-Spotkonten ausgewiesen; keine Behauptung realer Orders.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F13",
@@ -187,13 +247,18 @@
       "prior_evidence": "Etappe 5a lokaler Hauptlauf/Outbox und Teilfälle.",
       "status": "A4 implementiert und simuliert geprüft; reale Betriebsbereitstellung offen",
       "scope": "Hauptlauf und test/resend/lage/watch: persistentes separates Volume, Intent/sending/Quittung vor lokalem Spiegel; Runnerwiederherstellung; uncertain ohne Reset.",
-      "next_stage": "A6 Regression, A8 Abschluss; Betriebsbereitstellung separat",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Geeigneter persistenter Speicher, geprüfte Migration und Runner-Anbindung nicht bereitgestellt. Keine Garantie bei Volume-Verlust, NFS, getrennten Kopien oder altem Backup; keine Exactly-once-Zusage.",
       "a4_review": "14 neue Testfunktionen mit 18 harten Abbrüchen; voller temporärer Runner entfernt; nur simulierter Transport. A4-Umfang abgeschlossen, Betrieb offen.",
       "evidence": "A4-VERTRAG.md; A4-BERICHT.md; A4-BETRIEB.md; A4-vorher.log; A4-tests-local.log; A4-5a-sabotage.json; engine/test_a4_delivery.py",
       "change_commit": "0cd06d2a81114966e34238d9bcf1074fc25461bc",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Simulierter A4-Outboxstatus erhalten; A7 sendete keine Telegram-Nachricht und änderte keine Bereitstellung.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F14",
@@ -202,13 +267,18 @@
       "prior_evidence": "Kein Erledigungsbeleg; Aggregation außerhalb Einzelmarktpaket offen.",
       "status": "A3 korrigiert und gezielt geprüft",
       "scope": "Summe und gewichtetes Mittel verlangen alle angeforderten Symbole; ganz fehlender Markt sperrt die Reihe, Teillücke nur den Zeitpunkt.",
-      "next_stage": "A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Heute beobachtete Marktantworten belegen keinen damaligen Börsenkorb.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
       "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Vollständigkeitsprüfung des Marktkorbs erhalten; keine unbelegte historische Korbreihe eingesetzt.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F15",
@@ -217,13 +287,18 @@
       "prior_evidence": "Kein Erledigungsbeleg.",
       "status": "A3 korrigiert und gezielt geprüft",
       "scope": "Rangfolge nur nach belegter BTC/Quote- und Quote/USD-Umrechnung in USD; CVD verlangt belegte gleiche Einheit; historische heutige Auswahl gesperrt.",
-      "next_stage": "A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Historische Point-in-time-Marktliste und zeitgleiche USD-Quote-Konversion fehlen; solche Reihen nicht auswertbar.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
       "change_commit": "6742df00fea2ef161b13b0998ebfafab2def6eff",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "USD-Einheitenprüfung erhalten; keine unbelegte historische Mehrmarkt-Volumenrangliste eingesetzt.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F16",
@@ -232,11 +307,16 @@
       "prior_evidence": "Originalvektor am Basiscommit: ATR 2.0 statt unabhängig berechneter True-Range-Mittel 26.0.",
       "status": "A1 korrigiert und gezielt geprüft",
       "scope": "Letzte bis period True Ranges; leer/eine Kerze, kurzer Vorlauf, Fensterlänge und langer Vorlauf geprüft.",
-      "next_stage": "A6 Regression, A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Keine Rendite- oder Gesamtstrategieauswertung in A1.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "ATR-Kurzvorlaufkorrektur in Regression erhalten; A7 verwendete eingefrorene Parameter.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "F17",
@@ -245,11 +325,16 @@
       "prior_evidence": "Etappe 5b: Herkunft und Ereignisidentitäten geprüft.",
       "status": "beibehalten; A3 nicht betroffen",
       "scope": "Keine Änderung in A3.",
-      "next_stage": "A6/A8",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Keine neue Chart-Abnahme in A1.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Bisherige Chart-Ereignisidentität erhalten; A7 änderte keine Chartanzeige.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "D01",
@@ -258,12 +343,17 @@
       "prior_evidence": "Etappe 2: geschlossene Zeitreihen/Cutoff geprüft; Nach-6 erhält D01.",
       "status": "beibehalten; A3 regressionsgeprüft",
       "scope": "Geschlossene 4h-Reihen und Cutoff unverändert; Tagesresampling setzt diese Voraussetzung voraus.",
-      "next_stage": "A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Historischer Beschaffungszeitpunkt nicht bewiesen.",
       "evidence": "engine/test_a3_data.py; engine/test_d01_kerzenschluss.py; A3-tests-local.log; A3-VERTRAG.md",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "R0/R1 verwenden eingefrorene abgeschlossene 4h-Eingaben und gespeicherte Grenzen; historische API-Zeitpunkte unbewiesen.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "D02",
@@ -274,39 +364,54 @@
       "change_commit": "3d0a3af4c022a91d2ecb5528ac754ea793a5b766",
       "evidence": "engine/test_a2_flow.py; A2-tests-local.log; A2-VERTRAG.md",
       "scope": "Feldmetadaten trennen missing/stale/observed; nur frisches gemessenes Funding bestätigt.",
-      "next_stage": "A7 Ergebnisfolgen, A8 Abschluss",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Alte Flow-Dateien ohne Metadaten beweisen Messherkunft nicht; keine R0/R1-Umdeutung.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "Vier aktive Liquidationspunkte bleiben missing; kein Ersatz durch neutrale Null. V050-Zwischenwirkung gemeinsam mit A2-Verfügbarkeit gemessen.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "M01",
       "origin": "BERICHT.md P2-Tabelle (ca. Zeile 172)",
       "finding": "Alte LIVE-Zeilen verwenden abweichende Basisparameter.",
       "prior_evidence": "Historische Einordnung erhalten; aktuelle feste Paarparameter registriert.",
-      "status": "A7 alte Entscheidungen und ihre damaligen Basen indexiert; Neuberechnung offen",
+      "status": "A7 historische Basen und bedingte neue Modellvergleiche bewertet",
       "scope": "Keine Änderung in A3.",
-      "next_stage": "A7/A8",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "76 dokumentierte Entscheidungszeilen und 85 alte Codezeilen zugeordnet; nicht jede alte Rohbasis rekonstruierbar; keine Übertragung auf V000.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
       "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
-      "evidence": "A7-M01-M02-zuordnung-v1.json; A7-BERICHT.md"
+      "evidence": "A7-M01-M02-zuordnung-v1.json; A7-BERICHT.md",
+      "a7_assessment": "76 Entscheidungen an damaligen Basen/Fenstern beurteilt, 85 alte Codezeilen inventarisiert; fehlende frühe Basen nicht durch V000 ersetzt.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "M02",
       "origin": "BERICHT.md P2-Tabelle (ca. Zeile 173)",
       "finding": "Wiederverwendete Daten und Mehrfachauswahl begrenzen Inferenz.",
       "prior_evidence": "Nach-6-Prüfbericht legt Auswahlgrenze offen.",
-      "status": "A7 Inferenzgrenze fortgeschrieben; Neuberechnung offen",
+      "status": "A7 Inferenzgrenze und bedingte Statistik vollständig eingeordnet",
       "scope": "Keine Änderung in A3.",
-      "next_stage": "A7/A8",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Frühere Suche unvollständig bekannt, Daten wiederverwendet; keine Auswahlkorrektur, unabhängige Stichprobe oder Signifikanzbehauptung.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
       "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
-      "evidence": "A7-M01-M02-zuordnung-v1.json; A7-BERICHT.md; docs/nach-6/search-inventory.json"
+      "evidence": "A7-M01-M02-zuordnung-v1.json; A7-BERICHT.md; docs/nach-6/search-inventory.json",
+      "a7_assessment": "Bedingte Paar-/Stabilitätsdiagnosen abgeschlossen; mindestens 94 dokumentierte Suchen, unbekannte vollständige Familie und wiederverwendete Monate bleiben ohne Auswahlbereinigung.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     },
     {
       "id": "T01",
@@ -315,7 +420,7 @@
       "prior_evidence": "Etappe 5a erreichte E41-Wartekerze mit Teilverkäufen.",
       "status": "A6 Schutzproben vollständig zugeordnet und erreichte aktuelle Mutationen geprüft",
       "scope": "316 Originalfälle: 243 Assertion, 13 beabsichtigte Laufzeit-/Testfehler, 30 erreichte aktuelle Entsprechungen; 5 durch A2-Vertrag abgelöst und 25 nur am Original-Auditstand vorhanden. Sieben ursprünglich veraltete Vorlagen aktuell 7/7 erkannt; E41-Wartekerze mit Teilverkauf.",
-      "next_stage": "A7 Ergebnisfolgen, A8 Gesamtabnahme",
+      "next_stage": "A8 Gesamtabnahme",
       "remaining_limit": "Historische E44.4/E44.5-Programme bleiben am Originalcommit; keine neue historische Renditemessung oder Live-Abnahme durch A6.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "a6_regression": "A6 final combined test run; T01 mapping and A1-A5 contract mutations in A6-BERICHT.md. Prior scope preserved.",
@@ -326,10 +431,15 @@
         "A6-mutations.json",
         "engine/test_a6_regression.py"
       ],
-      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json."
+      "a7_preflight": "A7 preflight at A6 base: 86 fixed rows inventoried; corrected R0/R1 return runs blocked because numeric flow lacks A2 field provenance. No new historical return or A7 closure claimed. See A7-auswertbarkeit-v1.json.",
+      "a7_assessment": "A6-Fallzuordnung erhalten; 792 aktuelle Enginetests bestanden, einschließlich gezielter Rundungsfälle, ohne Live-Aktivierung.",
+      "a7_evidence": [
+        "A7-ABSCHLUSSBERICHT.md",
+        "A7-resultindex-v1.json"
+      ]
     }
   ],
-  "a7_stage_complete": false,
+  "a7_stage_complete": true,
   "a7_base_commit": "8b6af70b1897e8aefff5552f878297cc0090ef26",
   "a7_preflight_evidence": [
     "A7-analysemanifest-v1.json",
@@ -339,7 +449,7 @@
   ],
   "a6_base_commit": "772221ecda67dad50f6190d8e1319476eb7129e3",
   "a7_preflight_v2": {
-    "status": "85 conditional spot model rows eligible; V035 blocked F02; targeted R1/S0 V000/V004 computed and independently book-verified; A7 incomplete",
+    "status": "Frozen pre-return eligibility: 85 conditional spot model rows; V035 blocked F02",
     "supersedes": "A7-auswertbarkeit-v1.json",
     "evidence": [
       "A7-ABLEITUNGSVERTRAG-v2.md",
@@ -349,9 +459,18 @@
     "historical_api_as_of_proven": false
   },
   "a7_targeted_R1_S0": {
-    "status": "V000/V004 only; independent account checks passed; further runs and A7 acceptance open",
+    "status": "First fixed V000/V004 pair, independently checked; expanded A7 evidence in completion index",
     "summary": "A7-targeted-R1-S0-summary.json",
     "results": "A7-targeted-R1-S0-results.json.gz",
     "historical_api_as_of_proven": false
-  }
+  },
+  "a7_completion_evidence": [
+    "A7-ABSCHLUSSBERICHT.md",
+    "A7-resultindex-v1.json",
+    "A7-ERGEBNISSE-v1.md",
+    "A7-paired-statistics-v1.json",
+    "A7-intermediate-A2-S0-v1.json",
+    "A7-M01-M02-BEWERTUNG.md",
+    "A7-engine-tests.log"
+  ]
 }

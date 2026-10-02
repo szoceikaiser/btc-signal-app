@@ -1,0 +1,78 @@
+{
+  "schema": "a7-buyhold-description-v1",
+  "flow_sha256": "3fdc7d8f2860eb2f8fdf1a93774f46ca60b859b46875633a3ce62753e278e29c",
+  "historical_execution_claim": false,
+  "mean_exposure_benchmark_selected_after_seeing_V000_exposure": true,
+  "results": [
+    {
+      "package": "R0",
+      "start_ms": 1768766400000,
+      "cutoff_ms": 1790497748840,
+      "bars": 1509,
+      "full": {
+        "fraction": 1.0,
+        "entry_close_usd": 93673.14,
+        "final_close_usd": 84791.0,
+        "entry_fee_usd": 10.0,
+        "btc": 0.10664743383215296,
+        "cash_usd": 0.0,
+        "end_marked_usd": 9042.742562062082,
+        "return_marked_pct": -9.572574379379184,
+        "exit_fee_if_sold_usd": 9.042742562062081,
+        "end_if_sold_usd": 9033.69981950002,
+        "return_if_sold_pct": -9.663001804999805,
+        "dd_close_pct": 37.73710584485585
+      },
+      "V000_mean_exposure_fraction": 0.3348670032302592,
+      "exposure_matched_posthoc": {
+        "fraction": 0.3348670032302592,
+        "entry_close_usd": 93673.14,
+        "final_close_usd": 84791.0,
+        "entry_fee_usd": 3.348670032302592,
+        "btc": 0.03571270656957042,
+        "cash_usd": 6651.3299676974075,
+        "end_marked_usd": 9679.446070437853,
+        "return_marked_pct": -3.2055392956214734,
+        "exit_fee_if_sold_usd": 3.0281161027404457,
+        "end_if_sold_usd": 9676.417954335113,
+        "return_if_sold_pct": -3.2358204566488746,
+        "dd_close_pct": 12.636911544849971
+      }
+    },
+    {
+      "package": "R1",
+      "start_ms": 1768766400000,
+      "cutoff_ms": 1790683200000,
+      "bars": 1522,
+      "full": {
+        "fraction": 1.0,
+        "entry_close_usd": 93673.14,
+        "final_close_usd": 84358.01,
+        "entry_fee_usd": 10.0,
+        "btc": 0.10664743383215296,
+        "cash_usd": 0.0,
+        "end_marked_usd": 8996.565289687096,
+        "return_marked_pct": -10.034347103129038,
+        "exit_fee_if_sold_usd": 8.996565289687096,
+        "end_if_sold_usd": 8987.56872439741,
+        "return_if_sold_pct": -10.1243127560259,
+        "dd_close_pct": 37.73710584485585
+      },
+      "V000_mean_exposure_fraction": 0.33607163780644567,
+      "exposure_matched_posthoc": {
+        "fraction": 0.33607163780644567,
+        "entry_close_usd": 93673.14,
+        "final_close_usd": 84358.01,
+        "entry_fee_usd": 3.360716378064457,
+        "btc": 0.03584117775582619,
+        "cash_usd": 6639.283621935543,
+        "end_marked_usd": 9662.774053473306,
+        "return_marked_pct": -3.372259465266947,
+        "exit_fee_if_sold_usd": 3.023490431537763,
+        "end_if_sold_usd": 9659.750563041767,
+        "return_if_sold_pct": -3.4024943695823318,
+        "dd_close_pct": 12.682370967355894
+      }
+    }
+  ]
+}

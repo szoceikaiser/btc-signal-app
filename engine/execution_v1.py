@@ -275,9 +275,14 @@ class Book:
             old=self.units
             disposed_cost, disposed_buy_fee = inventory.sell(
                 self.lots, quantity, e42_only=o['type']=='RUECKKAUF_STOP',
-                close_cohort=quantity == (self.rk_units if o['type']=='RUECKKAUF_STOP' else old))
+                close_cohort=quantity == (self.rk_units if o['type']=='RUECKKAUF_STOP' else old),
+                rounding_scale=self.peak_units)
             self.cash += quantity*price-charge
             self.units -= quantity
+            # A final fill can exceed the aggregate by a few ulps after
+            # independent lot updates. No lots means an exact flat book.
+            if not self.lots:
+                self.units = 0.
             self.invested_pct *= self.units/old
             if o['type']=='RUECKKAUF_STOP' or self.units==0:
                 self.rk_units=0.

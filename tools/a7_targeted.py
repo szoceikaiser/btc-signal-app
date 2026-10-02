@@ -33,7 +33,19 @@ def read(path):
 
 def frozen(path, data):
     if path.exists():
-        assert path.read_bytes() == data, path
+        existing = path.read_bytes()
+        if path.name.endswith("-summary.json"):
+            # Wall-clock duration is observational, not part of the model result.
+            def without_duration(raw):
+                value = json.loads(raw)
+                for row in value["rows"]:
+                    row.pop("elapsed_seconds", None)
+                return value
+            assert without_duration(existing) == without_duration(data), path
+        elif path.name.endswith(".json.gz"):
+            assert json.loads(gzip.decompress(existing)) == json.loads(gzip.decompress(data)), path
+        else:
+            assert existing == data, path
     else:
         path.write_bytes(data)
 
@@ -54,14 +66,14 @@ def main():
     data = json.loads(gzip.decompress(path.read_bytes()))
     n6_plan = read(N6 / "plan.json")
     scenario = next(s for s in n6_plan["scenarios"] if s["id"] == args.scenario)
-    cutoff = data["ende"] if args.package == "R1" else read(ROOT.parent / "audit-backups" /
-        "6-abschluss-05208ce" / "eingefrorene-inputs" / "eingaben.json")["ende"]
+    cutoff = data["ende"] if args.package == "R1" else read(N6 / "R0" / "results.json")["cutoff"]
     cs = [Candle(**c) for c in data["candles"] if c["ts"] + 14_400_000 <= cutoff]
     fs = [FlowPoint(**f) for f in data["flow"][:len(cs)]]
     assert len(cs) == len(fs)
     rows = [next(r for r in design["rows"] if r["id"] == id) for id in ("V000", "V004")]
-    spec = importlib.util.spec_from_file_location("a7_independent_audit_book", ROOT.parent /
-        "audit-work" / "audit" / "book.py")
+    book_path = ROOT / "tools" / "a7_independent_book.py"
+    assert sha(book_path) == n6_plan["book_sha256"]
+    spec = importlib.util.spec_from_file_location("a7_independent_audit_book", book_path)
     book = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(book)
     book.selfcheck()

@@ -30,19 +30,34 @@ def dump(path,obj): path.write_text(json.dumps(obj,indent=2,ensure_ascii=False,a
 def utc(t): return datetime.fromtimestamp(t/1000,timezone.utc).isoformat()
 
 
-def verify_account(result, book, candles, start, offset):
+def verify_account(result, book, candles, start, offset, deploy=1.):
     orders={f"v1:{s['ts']}:{s['sequence']}":s for s in result['signals']}
-    chosen=[orders[e['order_id']] for e in result['ledger'] if e['status']=='scheduled']
+    scheduled=[e for e in result['ledger'] if e['status']=='scheduled']
+    chosen=[orders[e['order_id']] for e in scheduled]
     other=book.account(chosen,candles,start,fee=.001,slip=result['slippage_pct']/100,
-        mode='next_open' if offset==1 else 'delay_4h')
+        mode='next_open' if offset==1 else 'delay_4h',deploy=deploy)
     for a,b in [(result['ende'],other['end']),(result['fees'],other['fees']),
         (result['dd_close_pct'],-other['dd_close_pct']),
         (result['dd_intrabar_upper_pct'],-other['dd_intrabar_range_pct'][0]),
         (result['dd_intrabar_lower_pct'],-other['dd_intrabar_range_pct'][1])]: near(a,b)
     fills=[e for e in result['ledger'] if e['status']=='filled']
-    expected=[f for f in other['fills'] if f['units']>1e-15]
-    assert len(fills)==len(expected)
-    for a,b in zip(fills,expected):
+    by_order={e['order_id']:e for e in fills}
+    assert len(by_order)==len(fills)
+    paired=[];zero_dust=[]
+    for b in other['fills']:
+        a=by_order.get(scheduled[b['signal']]['order_id'])
+        if a is None:
+            assert b['units']==0
+            continue
+        if b['units']==0:
+            # A few true, sub-femtobit V1 buys round to zero when the separate
+            # float book subtracts a budget below one cash ulp. Reconcile the
+            # corresponding order only within a strict materiality bound.
+            assert 0<a['quantity']<=1e-15 and a['quantity']*a['fill_price']<=1e-8
+            zero_dust.append(dict(order_id=a['order_id'],quantity_btc=a['quantity']))
+        paired.append((a,b))
+    assert len(paired)==len(fills)
+    for a,b in paired:
         assert a['fill_at']==b['execution_ts']==a['candle_id']+offset*STEP
         for x,y in [('quantity','units'),('fill_price','price'),('fee','fee')]:near(a[x],b[y])
         near(a['before']['cash'],b['cash_before']);near(a['after']['cash'],b['cash_after'])
@@ -52,9 +67,12 @@ def verify_account(result, book, candles, start, offset):
         for x,y in [('cash','cash'),('btc','units'),('equity','equity')]:near(a[x],b[y])
     for month,p in result['month_ends'].items():near(p['equity'],other['month_ends'][month])
     assert result['unfilled_end_of_data']==len(other['unexecuted'])
-    return dict(costs=independent_costs(result), audit_book=True,
+    answer=dict(costs=independent_costs(result), audit_book=True,
         fills=len(fills), closes=len(other['path']), cycles=other['cycles'],
         avg_exposure_pct=other['avg_exposure_pct'], turnover=other['turnover'])
+    if zero_dust:
+        answer['independent_zero_dust']=zero_dust
+    return answer
 
 
 def risk_paths(result, candles):

@@ -19,7 +19,8 @@ def buy(lots, *, lot_id, at, price, units, cost, fee, kind):
                      cost=cost, buy_fee=fee, kind=kind))
 
 
-def sell(lots, units, *, e42_only=False, close_cohort=False):
+def sell(lots, units, *, e42_only=False, close_cohort=False,
+         rounding_scale=None):
     """Proportional within the selected cohort; return disposed cost/fee.
 
     No absolute dust threshold: tiny real BTC retain their cost. A full sale
@@ -27,7 +28,12 @@ def sell(lots, units, *, e42_only=False, close_cohort=False):
     """
     selected = [l for l in lots if not e42_only or l['kind'] == 'e42']
     total = math.fsum(l['units'] for l in selected)
-    if not total or units > total + 16*math.ulp(total):
+    # Summing many surviving lots and updating aggregate units follow different
+    # floating-point paths. Bound only that accumulation noise, per lot.
+    scale = total if rounding_scale is None else max(total, rounding_scale)
+    rounding = max(max(16, 8*len(selected))*math.ulp(total),
+                   8*math.ulp(scale)) if total else 0.
+    if not total or units > total + rounding:
         raise ValueError('Lot oversell')
     fraction = 1. if close_cohort else min(1., units/total)
     cost = math.fsum(l['cost']*fraction for l in selected) if all(l['cost'] is not None for l in selected) else None

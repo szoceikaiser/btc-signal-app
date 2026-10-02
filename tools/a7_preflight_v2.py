@@ -67,7 +67,7 @@ def main():
         assert path.read_bytes() == encoded
     else:
         path.write_bytes(encoded)
-    print("A7 v2 preflight: 85 conditional spot rows eligible, V035 blocked; no return run yet;",
+    print("A7 v2 preflight: 85 conditional spot rows eligible, V035 blocked; frozen pre-run gate;",
           sha(path))
 
 
