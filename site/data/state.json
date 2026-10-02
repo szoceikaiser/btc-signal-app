@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1790942400000,
+ "last_signal_ts": 1790956800000,
  "retrace_extreme": 82563.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -56,14 +56,14 @@
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 83858.78115384615,
-  "kurs": 85326.0,
+  "kurs": 84315.28,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 85.326 $ ueber EMA200 (71.911 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.315 $ ueber EMA200 (71.901 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
-   "spot": "nachgelassen",
-   "spot_text": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)"
+   "spot": "schwach",
+   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
   "ampel": {
    "stufe": "guenstig",
@@ -80,11 +80,6 @@
   },
   "nachkauf": [
    {
-    "preis": 85300.0,
-    "was": "Liquidationszone",
-    "tranche": 20
-   },
-   {
     "preis": 83864.07,
     "was": "Liquidationszone",
     "tranche": 20
@@ -96,6 +91,11 @@
     ],
     "was": "Kaufleiter: neue Tiefkerze in dieser Zone",
     "tranche": 15
+   },
+   {
+    "preis": 83210.0,
+    "was": "Liquidationszone",
+    "tranche": 20
    },
    {
     "preis": 81681.74081999999,
@@ -113,8 +113,8 @@
     "tranche": 0
    },
    {
-    "preis": 85221.70025,
-    "was": "kurz unter dem letzten Hoch 85.650",
+    "preis": 84733.23485,
+    "was": "kurz unter dem letzten Hoch 85.159",
     "tranche": 15
    },
    {
@@ -189,17 +189,17 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-02T17:21:13Z",
- "last_close": 85326.0,
+ "updated_at": "2026-10-02T20:02:25Z",
+ "last_close": 84315.28,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 85.326 $ ueber EMA200 (71.911 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.315 $ ueber EMA200 (71.901 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
-   "spot": "nachgelassen",
-   "spot_text": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)"
+   "spot": "schwach",
+   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
   "ampel": {
    "stufe": "gemischt",
