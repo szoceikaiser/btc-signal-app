@@ -46,7 +46,8 @@
       "a7_evidence": [
         "A7-ABSCHLUSSBERICHT.md",
         "A7-resultindex-v1.json"
-      ]
+      ],
+      "a7_v035_followup": "Erster historisch bepreister PF_XBTUSD-Short-Einzelfall mit 84 Kraken-Fundingzahlungen und unabhängiger Bilanz bestanden; vollständige V035-Rendite weiterhin gesperrt wegen drei nicht belegten Stundenraten und fehlendem kausalen Long/Short-Strategiepfad. Die öffentliche Kraken-Grafik trägt bei zwei Lücken nur den jeweiligen Vorwert und beweist keine Zahlung; bei der dritten ist sie leer. Siehe A7-V035-NACHPRUEFUNG.md."
     },
     {
       "id": "F03",

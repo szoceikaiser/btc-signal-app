@@ -34,3 +34,7 @@ jobs:
         run: python tools/a7_intermediate_effect.py
       - name: Verify complete A7 result index
         run: python tools/a7_report.py
+      - name: Verify V035 historical short accounting probe and funding gate
+        run: |
+          python tools/a7_v035_probe.py
+          python tools/a7_v035_reconcile.py

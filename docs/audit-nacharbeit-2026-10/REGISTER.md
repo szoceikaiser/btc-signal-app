@@ -53,6 +53,18 @@ CI-/Bundle-/Restore-SHA steht nur in der nach Commit erzeugten Übergabe.
 Es gibt keine Live- oder Aktivierungsfreigabe durch A7. Nächster Schritt
 ist ausschließlich A8-Gesamtabnahme.
 
+Nach A7 auf ausdrücklichen Nutzerwunsch wurde V035 nochmals geprüft. Der
+erste historische Short-Einzelfall besteht die unabhängige Margin-, Kosten-
+und Fundingbilanz mit 84 belegten Stunden. Die vollständige Konfiguration
+bleibt ohne kausalen Derivatstrategiepfad und ohne drei belegte stündliche
+Fundingzahlungen gesperrt. Die öffentliche Kraken-Grafik zeigt bei zwei
+fehlenden Stunden nur den jeweils vorigen Wert; eine tatsächlich gebuchte
+Zahlung folgt daraus nicht. Am dritten Zeitpunkt liefert sie keinen Wert.
+Die [V035-Nachprüfung](A7-V035-NACHPRUEFUNG.md) und die
+[Quellenabstimmung](A7-V035-sources/gap-reconciliation-v1.json) halten
+Umfang und konkrete verbleibende Arbeit fest. Die übrigen 21 Register-IDs
+und die abgeschlossenen Spotresultate ändern sich dadurch nicht.
+
 | ID | A7-Fortschreibung | Verbleibende Grenze |
 |---|---|---|
 | F01 | Schluss- und Intrabar-Risikobänder je Spotlauf ausgewiesen; Intrabar-Reihenfolge bleibt unbekannt. | Intrabar-Reihenfolge bleibt ohne feinere Daten begrenzt; kein Live-Go. |

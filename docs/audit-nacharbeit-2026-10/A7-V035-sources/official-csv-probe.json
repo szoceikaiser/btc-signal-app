@@ -1,0 +1,12 @@
+{
+  "schema": "a7-v035-official-csv-probe-v1",
+  "source_url": "https://assets-cms.kraken.com/files/51n36hrp/facade/4b70936c1227e4ae5514cba8bf41a5561cf13bd7.zip?dl=",
+  "archive_sha256": "65ba6712a6ab657389d2795d3ed77bedb4270841dfe711147ae9df16e366edab",
+  "archive_bytes": 109980750,
+  "symbol": "PF_XBTUSD",
+  "rows": 30431,
+  "first_timestamp": "2022-03-22 16:00:00",
+  "last_timestamp": "2026-02-01 00:00:00",
+  "fills_missing_r1_funding": false,
+  "probe_at_utc": "2026-10-02T22:04:16.732086+00:00"
+}
