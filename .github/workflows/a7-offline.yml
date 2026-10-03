@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   frozen-model-check:
+    if: github.ref == 'refs/heads/codex/a1-audit-nacharbeit'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -41,4 +42,8 @@ jobs:
       - name: Verify isolated causal V035 position and risk diagnostic
         run: |
           python -m unittest discover -s engine -p test_execution_perp_offline.py
-          python tools/a7_v035_causal.py
+          python tools/a8_v035_causal.py
+      - name: A8 independent acceptance and complete artifact integrity
+        run: |
+          python tools/test_a8_reference.py
+          python tools/a8_acceptance.py

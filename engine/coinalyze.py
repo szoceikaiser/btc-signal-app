@@ -591,7 +591,8 @@ def _summiere_vollstaendig(je_symbol: dict, symbole: list, bloecke: list,
 
     vollstaendig = (set.intersection(*(set(je_symbol[s]) for s in vorhanden))
                      if not fehlende else set())
-    summe = {ts: sum(je_symbol[s][ts] for s in symbole) for ts in sorted(vollstaendig)}
+    summe = {ts: sum(je_symbol[s][ts] for s in symbole) for ts in sorted(vollstaendig)
+             if all(_valid_measurement(je_symbol[s][ts]) for s in symbole)}
     bericht = {
         "symbole": vorhanden,
         "ohne_antwort": fehlende,
@@ -605,6 +606,10 @@ def _summiere_vollstaendig(je_symbol: dict, symbole: list, bloecke: list,
     if fehlende:
         bericht["fehler"] = "angeforderter Boersenkorb unvollstaendig"
     return summe, bericht
+
+
+def _valid_measurement(value):
+    return type(value) in (int, float) and math.isfinite(value)
 
 
 def spot_delta_aggregiert(api_key: str, symbole: list,
@@ -845,6 +850,11 @@ def gewichtetes_mittel(werte: dict, gewichte: dict, symbole: list, bloecke: list
     out = {}
     ohne_gewicht = 0
     for ts in sorted(vollstaendig):
+        if not all(_valid_measurement(werte[s][ts]) and
+                   _valid_measurement(gewichte[s][ts]) and gewichte[s][ts] >= 0
+                   for s in vorhanden):
+            ohne_gewicht += 1
+            continue
         summe_g = sum(gewichte[s][ts] for s in vorhanden)
         if summe_g <= 0:           # alle Gewichte null -> kein sinnvolles Mittel
             ohne_gewicht += 1

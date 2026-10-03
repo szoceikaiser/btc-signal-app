@@ -1,0 +1,25 @@
+{
+  "base_sha": "419e3fda6494645b3c227350f1b5145bffd6271a",
+  "manifest_entries_verified": 13,
+  "bundle_sha256": "2d8ac55d7f32350d9fcb0478f5a2ebea6df404e31e6f8e11042dc59c9adf24fc",
+  "bundle_verify": "complete history verified",
+  "existing_restore_sha": "419e3fda6494645b3c227350f1b5145bffd6271a",
+  "existing_restore_tree": "524f849a65fd631bd9b0e14f78dbf06b8b3b4666",
+  "existing_restore_clean": true,
+  "checked_files": [
+    "abschluss.bundle",
+    "restore-verification.json",
+    "UEBERGABE.md",
+    "UEBERGABE.json",
+    "START-A8.md",
+    "restore-check/docs/audit-nacharbeit-2026-10/A7-V035-KAUSALBERICHT.md",
+    "restore-check/docs/audit-nacharbeit-2026-10/A7-V035-causal-resultindex-v1.json",
+    "restore-check/docs/audit-nacharbeit-2026-10/A7-V035-sources/causal-position-discovery-v1.json",
+    "restore-check/docs/audit-nacharbeit-2026-10/REGISTER.json",
+    "restore-check/engine/execution_perp_offline.py",
+    "restore-check/engine/strategy_core.py",
+    "restore-check/tools/a7_v035_causal.py",
+    "restore-check/.github/workflows/a7-offline.yml"
+  ],
+  "old_backup_modified": false
+}

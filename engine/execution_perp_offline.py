@@ -73,7 +73,7 @@ class PerpBook:
                 self.risk_breaches.append(dict(at=at, side=self.side,
                     equity=str(s['equity']), margin=str(s['margin']),
                     available=str(s['available']), gross=str(s['gross'])))
-        # Independent wallet conservation, including closed-lot P&L.
+        # Internal wallet conservation, including closed-lot P&L.
         if self.wallet != self.initial+self.realized-self.fees+self.funding:
             raise AssertionError('Wallet conservation failed')
         return s
@@ -104,6 +104,12 @@ class PerpBook:
         if opening:
             if self.side not in (None, side):
                 raise NotEvaluable('Opposite position cannot be opened before close')
+            if not self.lots:
+                # A new flat-to-open cycle sizes from realized wallet capital.
+                # Neither an old cycle's peak nor its budget may leak forward.
+                self.alloc = self.wallet * self.deploy
+                self.peak_qty = D(0)
+                self.invested_pct = D(0)
             budget = self.alloc*number(order['tranche_pct'])/100
             qty = (budget/(price*(1+self.fee))).quantize(LOT_STEP, rounding=ROUND_DOWN)
             if qty <= 0:

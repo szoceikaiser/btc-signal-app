@@ -316,10 +316,12 @@ def resample_daily(candles: list[Candle]) -> list[Candle]:
     step = 14_400_000
     day_ms = 86_400_000
     days: dict[int, dict[int, Candle]] = {}
+    invalid_days = set()
     for c in candles:
         day = (c.ts // day_ms) * day_ms
         slot = c.ts - day
         if slot % step:
+            invalid_days.add(day)
             continue
         bucket = days.setdefault(day, {})
         # Doppelte Eingaben belegen keine zweite abgeschlossene Kerze.
@@ -329,6 +331,8 @@ def resample_daily(candles: list[Candle]) -> list[Candle]:
             bucket[slot] = c
     out = []
     for day in sorted(days):
+        if day in invalid_days:
+            continue
         slots = days[day]
         if set(slots) != {i * step for i in range(6)} or any(c is None for c in slots.values()):
             continue
