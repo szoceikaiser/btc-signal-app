@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1791014400000,
+ "last_signal_ts": 1791028800000,
  "retrace_extreme": 82563.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -44,22 +44,22 @@
  },
  "widerstand": {
   "richtung": "LONG",
-  "bein_start": 85649.95,
-  "bein_ende": 83186.0,
-  "level_05": 84417.975,
-  "gp_von": 84708.7211,
-  "gp_bis": 84787.5675,
-  "level_0786": 85122.6647,
-  "ausbruch": 85649.95
+  "bein_start": 87220.0,
+  "bein_ende": 83888.0,
+  "level_05": 85554.0,
+  "gp_von": 85947.176,
+  "gp_bis": 86053.8,
+  "level_0786": 86506.952,
+  "ausbruch": 87220.0
  },
  "plan": {
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 83858.78115384615,
-  "kurs": 84672.01,
+  "kurs": 84867.28,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.672 $ ueber EMA200 (71.894 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.867 $ ueber EMA200 (71.896 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
    "spot": "zurueckgekehrt",
@@ -104,17 +104,17 @@
   ],
   "teilgewinn": [
    {
-    "zone": [
-     84708.7211,
-     84787.5675
-    ],
-    "was": "Widerstand der Gegenbewegung \u2014 nur Hinweis, die Engine verkauft dort nicht",
-    "tranche": 0
-   },
-   {
     "preis": 84733.23485,
     "was": "kurz unter dem letzten Hoch 85.159",
     "tranche": 15
+   },
+   {
+    "zone": [
+     85947.176,
+     86053.8
+    ],
+    "was": "Widerstand der Gegenbewegung \u2014 nur Hinweis, die Engine verkauft dort nicht",
+    "tranche": 0
    },
    {
     "preis": 88378.704,
@@ -188,13 +188,13 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-03T15:37:47Z",
- "last_close": 84672.01,
+ "updated_at": "2026-10-03T16:02:26Z",
+ "last_close": 84867.28,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 84.672 $ ueber EMA200 (71.894 $)",
+   "trend_text": "Uebergeordnet: Kurs 84.867 $ ueber EMA200 (71.896 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
    "spot": "zurueckgekehrt",
