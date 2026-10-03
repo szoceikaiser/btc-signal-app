@@ -21,14 +21,20 @@ Short-Ausstieg aus dem erhaltenen Signalband. Hypothetische Orderzeitpunkte
 sind die folgenden 4h-Öffnungen am 27.01.2026 00:00 und 30.01.2026 12:00 UTC.
 Kraken PF_XBTUSD-Handelspreise sind 88.258 und 83.011 USD; die Menge beträgt
 0,0282 BTC, die bestehende S0-Modellgebühr 0,1 % je Fill. Für alle 84
-offenen Fundingstunden liegen eingefrorene Kraken-Zahlungssätze vor. Das
-A5-Derivatbuch endet bei 10.144,83717053630747800577560 USD; Funding
-ist +1,701556336307478005775600000 USD, Gebühren 4,8297858 USD.
+offenen Fundingstunden liegen eingefrorene veröffentlichte Kraken-Sätze vor. Das
+A5-Derivatbuch endet bei 10.144,86631483201195346419060 USD; Funding
+ist +1,730700632011953464190600000 USD, Gebühren 4,8297858 USD.
 Ein unabhängig formulierter geschlossener P&L-/Kosten-/Fundingausdruck liefert
 dasselbe Endkapital (Abweichung 0 USD); die 1x-Risikogrenze wurde nicht
 verletzt. Beleg: `A7-V035-sources/first-short-probe-v1.json`. Dieser einzelne
 historisch bepreiste Fall ist **kein** geschlossener Strategiegesamtlauf:
 das retrospektive Signalband erhält keine Rückmeldung über ausgeführte Fills.
+Laut [Krakens linearem Perpetual-Vertrag](https://support.kraken.com/articles/4844359082772-linear-multi-collateral-derivatives-contract-specifications)
+gilt die am Stundenanfang gesetzte Rate für die folgende Stunde; das
+Funding läuft kontinuierlich auf und wird am Periodenende oder bei einer
+Positionsänderung abgerechnet. Da die beiden hypothetischen Fills exakt auf
+Stundengrenzen liegen, verbucht `tools/a7_v035_probe.py` jede der 84 vollen
+Halteperioden mit dem Satz ihres Anfangs am Periodenende.
 
 **P1 Datenlücke:** Im unveränderten R1-Archiv
 `docs/nach-6/r1-raw/funding.json` fehlen genau drei volle PF_XBTUSD-Stunden
@@ -65,7 +71,8 @@ S0-Modellgebühr ein und behauptet keinen konkreten Kraken-Gebührentarif.
 ## Abschlussentscheidung dieser Nachprüfung
 
 V035 besteht die **gezielte historische Short-Buchprobe** einschließlich
-84 beobachteter Fundingstunden und unabhängigem Endbestandsabgleich.
+84 modellierter Stunden aus veröffentlichten Sätzen und unabhängigem
+Endbestandsabgleich.
 V035 besteht **keinen vollständigen historischen R0/R1-Renditelauf**. Eine
 solche Zahl wäre derzeit erfunden: Es fehlen ein eigener kausaler
 Long/Short-Ausführungspfad und ein prüfbarer Zahlungsnachweis für die drei

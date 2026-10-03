@@ -88,15 +88,19 @@ def main():
     settlements = []
     absolute_sum = D(0)
     for t in range(entry_at+HOUR, exit_at+1, HOUR):
-        rate = rates.get(t)
+        # Kraken sets the rate at the beginning of the next funding period;
+        # that period accrues continuously and settles at its END (t).
+        # Our fills occur at exact hour boundaries, so each full held hour
+        # receives the rate published at its start.
+        rate = rates.get(t-HOUR)
         if rate is None:
-            raise ValueError(f"Missing funding while test short open: {t}")
+            raise ValueError(f"Missing funding for held interval ending {t}")
         absolute = rate["fundingRate"]
         absolute_sum += absolute
         # A5 book multiplies mark*rate. This effective rate encodes the
         # exchange's published absolute USD/BTC payment, not a new estimate.
         settlements.append({"ts": t, "rate": absolute/marks[t],
-                            "source": "Kraken PF_XBTUSD published absolute USD/BTC hourly rate"})
+                            "source": "Kraken PF_XBTUSD published absolute USD/BTC rate set at interval start"})
     fills = [{"id": "v035:first-short:open", "ts": entry_at, "action": "open",
               "lot": "first-short", "side": "short", "qty": qty, "price": entry},
              {"id": "v035:first-short:close", "ts": exit_at, "action": "close",
@@ -126,6 +130,7 @@ def main():
         "open_trade_price": str(entry), "close_trade_price": str(exit_price),
         "quantity_btc": str(qty), "fee_fraction": str(FEE),
         "funding_payments": len(settlements),
+        "funding_rate_alignment": "rate timestamp is interval start; settlement timestamp is next full UTC hour",
         "funding_usd": str(result["funding"]),
         "fees_usd": str(result["fees"]),
         "end_equity_usd": str(result["end"]["equity"]),

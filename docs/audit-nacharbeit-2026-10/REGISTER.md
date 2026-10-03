@@ -55,7 +55,7 @@ ist ausschließlich A8-Gesamtabnahme.
 
 Nach A7 auf ausdrücklichen Nutzerwunsch wurde V035 nochmals geprüft. Der
 erste historische Short-Einzelfall besteht die unabhängige Margin-, Kosten-
-und Fundingbilanz mit 84 belegten Stunden. Die vollständige Konfiguration
+und Fundingbilanz mit 84 modellierten Stunden aus veröffentlichten Sätzen. Die vollständige Konfiguration
 bleibt ohne kausalen Derivatstrategiepfad und ohne drei belegte stündliche
 Fundingzahlungen gesperrt. Die öffentliche Kraken-Grafik zeigt bei zwei
 fehlenden Stunden nur den jeweils vorigen Wert; eine tatsächlich gebuchte
