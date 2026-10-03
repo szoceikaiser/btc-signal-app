@@ -65,10 +65,20 @@ Die [V035-Nachprüfung](A7-V035-NACHPRUEFUNG.md) und die
 Umfang und konkrete verbleibende Arbeit fest. Die übrigen 21 Register-IDs
 und die abgeschlossenen Spotresultate ändern sich dadurch nicht.
 
+Die anschließende [kausale V035-Nachprüfung](A7-V035-KAUSALBERICHT.md) hat
+den separaten 1x-Derivatpfad erstellt. Im strikten Pfad ist die Lücke am
+04.02. bei 0 BTC nicht zahlungsrelevant; am 13.02. fehlen bei 0,0798 BTC
+Short die veröffentlichten Zahlungsdaten. Ein ausdrücklich hypothetischer
+Weiterlauf zeigt für 09.05. 0,0937 BTC Long, ist jedoch seit der Februarlücke
+und einer 1x-Risikoverletzung am 17.04. ungültig. Deshalb bleibt V035 ohne
+historische Gesamtrendite. Unabhängige Wallet-/Equity-Abweichung 0 USD;
+sechs neue Handgegenfälle und 52 bestehende A5-/V1-Gegenfälle bestanden.
+Alle 22 IDs bleiben erhalten; nur F02 ist fachlich weitergeführt.
+
 | ID | A7-Fortschreibung | Verbleibende Grenze |
 |---|---|---|
 | F01 | Schluss- und Intrabar-Risikobänder je Spotlauf ausgewiesen; Intrabar-Reihenfolge bleibt unbekannt. | Intrabar-Reihenfolge bleibt ohne feinere Daten begrenzt; kein Live-Go. |
-| F02 | Synthetische Margin-/Fundingbuchung geprüft; V035 bleibt ohne historischen Derivatvertrag, vollständige Zahlungen, Markpreise und kausale Short-Fills gesperrt. | V035 historisch nicht auswertbar: kein kausaler Derivatstrategiepfad und unvollständiger damaliger Instrument-/Funding-/Marknachweis. Kein Börsenvertrag oder Liquidationsmodell; Grenzverletzung sperrt Replay. |
+| F02 | Kausaler separater V035-Long/Short-Pfad mit nächsten 4h-Open-Fills, Decimal-Gebühren, 1x-Margin und stündlichem Funding geprüft; 04.02. flat, 13.02. Short mit fehlender Rate. | Keine historische V035-Gesamtrendite: Februarrate bei offenem Short unbelegt; unter ausdrücklich hypothetischen Platzhaltern 1x-Risikogrenze am 17.04. verletzt. 09.05. nur im ungültigen Weiterlauf Long. Kein belegtes Börsenliquidationsmodell oder reale Fills. |
 | F03 | Monotone Stopkorrektur in der 792er-Regression erhalten; keine allgemeine Aussage zu echten Fills. | Keine pauschale Aussage jenseits des geprüften Vertrags. |
 | F04 | Losgewichteter Einstand erhalten; Kosten, Lose und Monatsbestände jedes kausalen A7-Laufs unabhängig abgeglichen. | Manueller Live-Einstand unbekannt. |
 | F05 | Bisherige Persistenzkorrektur in Regression erhalten; Widerstandsausstieg nicht aktiviert. | Widerstandsverkauf derzeit aus; Aktivierung nicht belegt. |

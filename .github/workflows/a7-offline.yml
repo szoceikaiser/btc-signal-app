@@ -38,3 +38,7 @@ jobs:
         run: |
           python tools/a7_v035_probe.py
           python tools/a7_v035_reconcile.py
+      - name: Verify isolated causal V035 position and risk diagnostic
+        run: |
+          python -m unittest discover -s engine -p test_execution_perp_offline.py
+          python tools/a7_v035_causal.py

@@ -33,10 +33,10 @@
       "origin": "BERICHT.md P2-Tabelle (ca. Zeile 170)",
       "finding": "Shorts binden kein Kapital/Margin; Funding fehlt.",
       "prior_evidence": "Kein Erledigungsbeleg; offen laut Erhaltregister.",
-      "status": "A5 Offline-Buch geprüft; A7 V035 historisch gesperrt",
-      "scope": "1x-Kapital/Margin, Gebühren, exakte Fundingtermine/Vorzeichen und Markbewertung für synthetische explizite Fills. V1/i+2 strikt Spot; Legacy-Shorts standardmäßig abgewiesen.",
+      "status": "A7 kausaler Offline-Derivatpfad geprüft; V035-Gesamtrendite gesperrt",
+      "scope": "Kausale 4h-Entscheidungen, simulierte nächste-Open-Fills, 1x-Margin, Decimal-Gebühren, stündliche veröffentlichte Fundingzahlungen und Markrisiko im isolierten Pfad; Spot-V1 bleibt gesperrt für Shorts.",
       "next_stage": "A8 Gesamtabnahme",
-      "remaining_limit": "V035 historisch nicht auswertbar: kein kausaler Derivatstrategiepfad und unvollständiger damaliger Instrument-/Funding-/Marknachweis. Kein Börsenvertrag oder Liquidationsmodell; Grenzverletzung sperrt Replay.",
+      "remaining_limit": "13.02.2026: veröffentlichter Satz bei 0,0798 BTC Short fehlt; 17.04.2026: 1x-Grenze unter hypothetischem Null-Platzhalter verletzt; 09.05. nur im ungültigen Weiterlauf Long. Kein originales Liquidationsmodell, damaliger Gebührentarif oder reale Fills. Keine V035-Gesamtrendite.",
       "a4_review": "Vorheriger Befundstatus und Grenze erhalten; A4 nur Rest F13. Gesamtregression 770/0.",
       "change_commit": "2554a582d4b1c8dd1b3bca73ca3b5ad67c67964a",
       "evidence": "A5-VERTRAG.md; A5-BERICHT.md; A5-vorher.log; A5-historical-eligibility-v1.json; engine/test_a5_accounting.py; 784/0 Gesamtregression",
@@ -47,7 +47,8 @@
         "A7-ABSCHLUSSBERICHT.md",
         "A7-resultindex-v1.json"
       ],
-      "a7_v035_followup": "Erster historisch bepreister PF_XBTUSD-Short-Einzelfall mit 84 modellierten Fundingstunden aus veröffentlichten Kraken-Sätzen und unabhängiger Bilanz bestanden; vollständige V035-Rendite weiterhin gesperrt wegen drei nicht belegten Stundenraten und fehlendem kausalen Long/Short-Strategiepfad. Die öffentliche Kraken-Grafik trägt bei zwei Lücken nur den jeweiligen Vorwert und beweist keine Zahlung; bei der dritten ist sie leer. Siehe A7-V035-NACHPRUEFUNG.md."
+      "a7_v035_followup": "Erster historisch bepreister PF_XBTUSD-Short-Einzelfall mit 84 modellierten Fundingstunden aus veröffentlichten Kraken-Sätzen und unabhängiger Bilanz bestanden; vollständige V035-Rendite weiterhin gesperrt wegen drei nicht belegten Stundenraten und fehlendem kausalen Long/Short-Strategiepfad. Die öffentliche Kraken-Grafik trägt bei zwei Lücken nur den jeweiligen Vorwert und beweist keine Zahlung; bei der dritten ist sie leer. Siehe A7-V035-NACHPRUEFUNG.md.",
+      "a7_v035_causal": "A7-V035-KAUSALBERICHT.md; A7-V035-sources/causal-position-discovery-v1.json; engine/execution_perp_offline.py; engine/test_execution_perp_offline.py; 0 USD unabhängige Bilanzabweichung; 6 neue und 52 vorhandene Gegenfälle."
     },
     {
       "id": "F03",
@@ -473,5 +474,16 @@
     "A7-intermediate-A2-S0-v1.json",
     "A7-M01-M02-BEWERTUNG.md",
     "A7-engine-tests.log"
-  ]
+  ],
+  "a7_v035_causal_followup": {
+    "base_sha": "969e69467149b2d8ab8c11cb5a7cb8aa47151343",
+    "status": "causal offline derivative path checked; historical V035 return not evaluable",
+    "evidence": [
+      "A7-V035-KAUSALBERICHT.md",
+      "A7-V035-causal-resultindex-v1.json",
+      "A7-V035-sources/causal-position-discovery-v1.json"
+    ],
+    "spot_rows_modified": 0,
+    "a8_started": false
+  }
 }

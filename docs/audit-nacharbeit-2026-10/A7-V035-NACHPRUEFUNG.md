@@ -88,3 +88,10 @@ Backtest-Dispatch oder Pages-Trigger.
 Alle 22 Register-IDs bleiben erhalten; allein F02 erhält diese zusätzliche
 Nachprüfung. Es gibt keine neue Rangfolge, keine Nachoptimierung und keine
 Live-Freigabe.
+
+## Additive Fortsetzung
+
+Der spätere [kausale V035-Bericht](A7-V035-KAUSALBERICHT.md) ergänzt diese
+erste Buchprobe. Die hier genannte fehlende Ausführungskomponente wurde dort
+als isolierter Offline-Pfad umgesetzt; die historische Gesamtrendite bleibt
+wegen einer zahlungsrelevanten Fundinglücke und der 1x-Risikogrenze gesperrt.

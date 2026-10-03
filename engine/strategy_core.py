@@ -2239,7 +2239,8 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if (cur.high >= z.level_05 and cur.high < z.gp_upper
                     and _trend_ok(False) and _confluence_ok(cur.high)
                     and _liq_entry_ok(cur.high, False)
-                    and _t1_ok(False) and _stop_weit_genug(z.level_05, z)):
+                    and _t1_ok(False) and _stop_weit_genug(z.level_05, z)
+                    and _allow("entry_t1")):
                 pos.direction, pos.state, pos.zones = "SHORT", PosState.T1, z
                 pos.retrace_extreme = cur.high
                 signals.append(Signal(cur.ts, SignalType.SHORT_1, z.level_05, TRANCHEN["T1"],
@@ -2248,7 +2249,7 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             elif z.gp_upper <= cur.high <= z.gp_lower:  # Short: 0.65 liegt OBEN
                 if (_confirm_short() and _trend_ok(False) and _confluence_ok(cur.high)
                         and _liq_entry_ok(cur.high, False)
-                        and _stop_weit_genug(z.gp_upper, z)):
+                        and _stop_weit_genug(z.gp_upper, z) and _allow("entry_gp")):
                     pos.direction, pos.state, pos.zones = "SHORT", PosState.CORE, z
                     pos.retrace_extreme = cur.high
                     signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
@@ -2260,7 +2261,7 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 # Squeeze-Einstieg (E8.1, Spiegelbild): Kerze durchschlaegt das GP nach
                 # oben, schliesst aber unter der Invalidierung
                 if (_confirm_short() and _trend_ok(False) and _liq_entry_ok(cur.high, False)
-                        and _stop_weit_genug(cur.close, z)):
+                        and _stop_weit_genug(cur.close, z) and _allow("entry_flush")):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.SHORT_1 if small else SignalType.SHORT_2
@@ -2561,7 +2562,7 @@ def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                                                   stop_ref=z.invalidation))
                             pos.state = PosState.CORE
                     else:
-                        if _confirm_short():
+                        if _confirm_short() and _allow("upgrade_gp"):
                             signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
                                                   TRANCHEN["CORE"],
                                                   f"Golden Pocket {z.gp_upper:.0f}-{z.gp_lower:.0f} + Bestaetigung ({pattern.name})",
