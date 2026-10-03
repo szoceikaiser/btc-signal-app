@@ -1,0 +1,98 @@
+{
+  "result": "PASS",
+  "cases": [
+    {
+      "case": "H01",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h01_sale_after_low_has_old_inventory_risk"
+    },
+    {
+      "case": "H02",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h02_buy_after_low_does_not_own_old_low"
+    },
+    {
+      "case": "H03",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h03_extremes_and_close_bounds"
+    },
+    {
+      "case": "H04",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h04_causal_buy_gap_and_separate_reference"
+    },
+    {
+      "case": "H05",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h05_stop_gap_old_holdings_before_sale"
+    },
+    {
+      "case": "H06",
+      "kind": "V2 excluded; independent prior-limit arithmetic only",
+      "result": "PASS"
+    },
+    {
+      "case": "H07",
+      "kind": "V2 excluded; independent OCO ambiguity only",
+      "result": "PASS"
+    },
+    {
+      "case": "H08",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h08_real_new_target_reference_never_same_bar_fill"
+    },
+    {
+      "case": "H09",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h09_full_exit_suppresses_buy_and_partial_sale"
+    },
+    {
+      "case": "H10",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h10_fee_once_each_fill"
+    },
+    {
+      "case": "H11",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h11_last_signal_expires_no_phantom_fill"
+    },
+    {
+      "case": "H12",
+      "kind": "V2 excluded; independent cancellation boundary only",
+      "result": "PASS"
+    },
+    {
+      "case": "H13",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h13_open_partial_sale_inventory_during_low"
+    },
+    {
+      "case": "H14",
+      "kind": "E41.6 excluded; independent frozen cohort arithmetic only",
+      "result": "PASS"
+    },
+    {
+      "case": "H15",
+      "kind": "Repeated-extreme path independently reaches V1 upper bound, not lower prediction",
+      "result": "PASS",
+      "actual_path_dd": "3/4"
+    },
+    {
+      "case": "H16",
+      "kind": "V1 production assertion",
+      "result": "PASS",
+      "test": "test_h16_sequential_cash_reservations_partial_funding"
+    }
+  ],
+  "scope": "16 checked; 12 V1 cases, 3 V2 exclusions, 1 E41.6 exclusion"
+}

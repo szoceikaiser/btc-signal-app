@@ -1,0 +1,32 @@
+{
+  "base_sha": "419e3fda6494645b3c227350f1b5145bffd6271a",
+  "original_git_blob_sha256": {
+    "engine/strategy_core.py": "3e2eb1ac57d2c3b277cdcd973cf10341ea5e4f4645a43909039ad8b5abe1cc29",
+    "engine/execution_perp_offline.py": "e4d1c49e6dd066573e324b311eacc6fff4a4cbad91a068c16e5b2961dac9bac3",
+    "engine/coinalyze.py": "713098c442172109390ac74d10c88964b5c272ee0f3c4a67b45e30af0e233ac7"
+  },
+  "cases": [
+    {
+      "test": "test_f08_off_grid_extra_invalidates_only_its_day",
+      "before": "reached AssertionError",
+      "after": "passed"
+    },
+    {
+      "test": "test_f02_partial_exit_uses_current_cycle_peak_for_long_and_short",
+      "before": "reached AssertionError",
+      "after": "passed"
+    },
+    {
+      "test": "test_f02_new_cycle_budget_uses_realized_wallet",
+      "before": "reached AssertionError",
+      "after": "passed"
+    },
+    {
+      "test": "test_f14_invalid_values_are_not_complete_measurements",
+      "before": "reached AssertionError",
+      "after": "passed"
+    }
+  ],
+  "old_files_modified": false,
+  "network_used": false
+}

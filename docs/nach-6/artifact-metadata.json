@@ -1,0 +1,20 @@
+{
+  "id": 11044662222,
+  "node_id": "MDg6QXJ0aWZhY3QxMTA0NDY2MjIyMg==",
+  "name": "nach-6-historical-raw",
+  "size_in_bytes": 181130,
+  "url": "https://api.github.com/repos/szoceikaiser/btc-signal-app/actions/artifacts/11044662222",
+  "archive_download_url": "https://api.github.com/repos/szoceikaiser/btc-signal-app/actions/artifacts/11044662222/zip",
+  "expired": false,
+  "digest": "sha256:437811d73da6837b13794827bc189cc918ad1371a83d9309cd06a1b29fe8ef83",
+  "created_at": "2026-09-29T15:46:06Z",
+  "updated_at": "2026-09-29T15:46:06Z",
+  "expires_at": "2026-10-29T15:46:06Z",
+  "workflow_run": {
+    "id": 36592684701,
+    "repository_id": 1309164619,
+    "head_repository_id": 1309164619,
+    "head_branch": "codex/nach-6-historische-auswertung",
+    "head_sha": "4315e4a5a2654b161e05f79c5f74b3b31d4c32e1"
+  }
+}

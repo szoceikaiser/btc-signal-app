@@ -1,0 +1,66 @@
+{
+  "order": {
+    "ts": 1787241600000,
+    "type": "TEILVERKAUF_1",
+    "price": 72758.37,
+    "tranche_pct": 40,
+    "reason": "Extension 1.0 erreicht (72758)",
+    "stop_ref": null,
+    "tag": "",
+    "label": "TEILVERKAUF 1 (Extension 1.0)",
+    "action": "tp1",
+    "sequence": 2,
+    "id": "v1:1787241600000:2",
+    "amount": 0.014829911889147266,
+    "requested": 0.014829911889147266
+  },
+  "candle": {
+    "ts": 1787270400000,
+    "open": 73027.02,
+    "high": 75785.82,
+    "low": 73027.02,
+    "close": 74510.77
+  },
+  "before": {
+    "cash": 9395.890008018921,
+    "btc": 0.014829911889147264,
+    "reserved_cash": 0.0,
+    "reserved_btc": 0.014829911889147264,
+    "available_cash": 9395.890008018921,
+    "available_btc": 0.0,
+    "rk_btc": 0.014829911889147266,
+    "market_value": 1082.9842721269952,
+    "equity": 10478.874280145916,
+    "cost_basis": 1037.4446183333018,
+    "cost_entry": 69956.22267267267,
+    "base_entry": null,
+    "lots": [
+      {
+        "id": "v1:1787184000000:0",
+        "at": 1787212800000,
+        "fill_price": 69886.26645,
+        "units": 0.014829911889147266,
+        "cost": 1037.4446183333018,
+        "buy_fee": 1.0374446183333017,
+        "kind": "e42"
+      }
+    ]
+  },
+  "after": {
+    "cash": 10476.709394585934,
+    "btc": -1.734723475976807e-18,
+    "reserved_cash": 0.0,
+    "reserved_btc": 0.0,
+    "available_cash": 10476.709394585934,
+    "available_btc": -1.734723475976807e-18,
+    "rk_btc": -1.7347234759768075e-18,
+    "market_value": -1.2668168597462782e-13,
+    "equity": 10476.709394585934,
+    "cost_basis": 0.0,
+    "cost_entry": null,
+    "base_entry": null,
+    "lots": []
+  },
+  "peak_units": 0.03707477972286816,
+  "alloc": 10374.446183333019
+}

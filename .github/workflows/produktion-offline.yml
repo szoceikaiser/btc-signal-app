@@ -1,0 +1,27 @@
+name: Produktionsuebernahme Offline
+
+on:
+  push:
+    branches: [codex/produktion-audit-uebernahme]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    if: github.ref == 'refs/heads/codex/produktion-audit-uebernahme'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify integration and preserved production snapshot
+        run: python tools/produktion_p1.py
+      - name: Verify historical return tables from frozen evidence
+        run: python tools/produktion_renditen.py --verify

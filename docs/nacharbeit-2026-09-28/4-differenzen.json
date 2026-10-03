@@ -1,0 +1,290 @@
+[
+  {
+    "name": "LIVE-heute +Bein in Handelsrichtung",
+    "slippage_pct": 0.0,
+    "first_candidate_difference": {
+      "before": {
+        "ts": 1773705600000,
+        "type": "TEILVERKAUF_1",
+        "price": 75324.91,
+        "reason": "Extension 1.0 erreicht (75325)"
+      },
+      "after": {
+        "ts": 1773705600000,
+        "type": "STOPLOSS",
+        "price": 74463.98,
+        "reason": "Nachgezogener Stop (Struktur-Tief) 74604 — Kerzenschluss darunter, Gewinn gesichert"
+      }
+    },
+    "first_fill_difference": {
+      "before": {
+        "fill_at": 1773720000000,
+        "type": "VERKAUF_REST",
+        "quantity": 0.0783638658572795,
+        "fill_price": 74463.98,
+        "fee": 5.835285339919143
+      },
+      "after": {
+        "fill_at": 1773720000000,
+        "type": "STOPLOSS",
+        "quantity": 0.0783638658572795,
+        "fill_price": 74463.98,
+        "fee": 5.835285339919143
+      }
+    },
+    "first_entry_difference": {
+      "before": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 94026.465,
+        "entry_pct": 25.0
+      },
+      "after": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 93766.90690690691,
+        "entry_pct": 25.0
+      }
+    }
+  },
+  {
+    "name": "LIVE-heute +Bein in Handelsrichtung",
+    "slippage_pct": 0.1,
+    "first_candidate_difference": {
+      "before": {
+        "ts": 1773705600000,
+        "type": "TEILVERKAUF_1",
+        "price": 75324.91,
+        "reason": "Extension 1.0 erreicht (75325)"
+      },
+      "after": {
+        "ts": 1773705600000,
+        "type": "STOPLOSS",
+        "price": 74463.98,
+        "reason": "Nachgezogener Stop (Struktur-Tief) 74604 — Kerzenschluss darunter, Gewinn gesichert"
+      }
+    },
+    "first_fill_difference": {
+      "before": {
+        "fill_at": 1773720000000,
+        "type": "VERKAUF_REST",
+        "quantity": 0.0778181777819395,
+        "fill_price": 74389.51602,
+        "fee": 5.788856582756797
+      },
+      "after": {
+        "fill_at": 1773720000000,
+        "type": "STOPLOSS",
+        "quantity": 0.0778181777819395,
+        "fill_price": 74389.51602,
+        "fee": 5.788856582756797
+      }
+    },
+    "first_entry_difference": {
+      "before": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 94026.465,
+        "entry_pct": 25.0
+      },
+      "after": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 93860.67381381379,
+        "entry_pct": 25.0
+      }
+    }
+  },
+  {
+    "name": "LIVE-heute +Bein in Handelsrichtung",
+    "slippage_pct": 0.5,
+    "first_candidate_difference": {
+      "before": {
+        "ts": 1773705600000,
+        "type": "TEILVERKAUF_1",
+        "price": 75324.91,
+        "reason": "Extension 1.0 erreicht (75325)"
+      },
+      "after": {
+        "ts": 1773705600000,
+        "type": "STOPLOSS",
+        "price": 74463.98,
+        "reason": "Nachgezogener Stop (Struktur-Tief) 74604 — Kerzenschluss darunter, Gewinn gesichert"
+      }
+    },
+    "first_fill_difference": {
+      "before": {
+        "fill_at": 1773720000000,
+        "type": "VERKAUF_REST",
+        "quantity": 0.07567528977254882,
+        "fill_price": 74091.6601,
+        "fee": 5.606907847796693
+      },
+      "after": {
+        "fill_at": 1773720000000,
+        "type": "STOPLOSS",
+        "quantity": 0.07567528977254882,
+        "fill_price": 74091.6601,
+        "fee": 5.606907847796693
+      }
+    },
+    "first_entry_difference": {
+      "before": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 94026.465,
+        "entry_pct": 25.0
+      },
+      "after": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 94235.74144144144,
+        "entry_pct": 25.0
+      }
+    }
+  },
+  {
+    "name": "LIVE-heute +E42",
+    "slippage_pct": 0.0,
+    "first_candidate_difference": {
+      "before": {
+        "ts": 1773705600000,
+        "type": "TEILVERKAUF_1",
+        "price": 75324.91,
+        "reason": "Extension 1.0 erreicht (75325)"
+      },
+      "after": {
+        "ts": 1773705600000,
+        "type": "STOPLOSS",
+        "price": 74463.98,
+        "reason": "Nachgezogener Stop (Struktur-Tief) 74604 — Kerzenschluss darunter, Gewinn gesichert"
+      }
+    },
+    "first_fill_difference": {
+      "before": {
+        "fill_at": 1773720000000,
+        "type": "VERKAUF_REST",
+        "quantity": 0.10675039234036772,
+        "fill_price": 74463.98,
+        "fee": 7.949059080225295
+      },
+      "after": {
+        "fill_at": 1773720000000,
+        "type": "STOPLOSS",
+        "quantity": 0.10675039234036772,
+        "fill_price": 74463.98,
+        "fee": 7.949059080225295
+      }
+    },
+    "first_entry_difference": {
+      "before": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 94026.465,
+        "entry_pct": 25.0
+      },
+      "after": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 93766.90690690691,
+        "entry_pct": 25.0
+      }
+    }
+  },
+  {
+    "name": "LIVE-heute +E42",
+    "slippage_pct": 0.1,
+    "first_candidate_difference": {
+      "before": {
+        "ts": 1773705600000,
+        "type": "TEILVERKAUF_1",
+        "price": 75324.91,
+        "reason": "Extension 1.0 erreicht (75325)"
+      },
+      "after": {
+        "ts": 1773705600000,
+        "type": "STOPLOSS",
+        "price": 74463.98,
+        "reason": "Nachgezogener Stop (Struktur-Tief) 74604 — Kerzenschluss darunter, Gewinn gesichert"
+      }
+    },
+    "first_fill_difference": {
+      "before": {
+        "fill_at": 1773720000000,
+        "type": "VERKAUF_REST",
+        "quantity": 0.10595494588171805,
+        "fill_price": 74389.51602,
+        "fee": 7.881937144066298
+      },
+      "after": {
+        "fill_at": 1773720000000,
+        "type": "STOPLOSS",
+        "quantity": 0.10595494588171805,
+        "fill_price": 74389.51602,
+        "fee": 7.881937144066298
+      }
+    },
+    "first_entry_difference": {
+      "before": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 94026.465,
+        "entry_pct": 25.0
+      },
+      "after": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 93860.67381381379,
+        "entry_pct": 25.0
+      }
+    }
+  },
+  {
+    "name": "LIVE-heute +E42",
+    "slippage_pct": 0.5,
+    "first_candidate_difference": {
+      "before": {
+        "ts": 1773705600000,
+        "type": "TEILVERKAUF_1",
+        "price": 75324.91,
+        "reason": "Extension 1.0 erreicht (75325)"
+      },
+      "after": {
+        "ts": 1773705600000,
+        "type": "STOPLOSS",
+        "price": 74463.98,
+        "reason": "Nachgezogener Stop (Struktur-Tief) 74604 — Kerzenschluss darunter, Gewinn gesichert"
+      }
+    },
+    "first_fill_difference": {
+      "before": {
+        "fill_at": 1773720000000,
+        "type": "VERKAUF_REST",
+        "quantity": 0.10283548616732288,
+        "fill_price": 74091.6601,
+        "fee": 7.619251887327538
+      },
+      "after": {
+        "fill_at": 1773720000000,
+        "type": "STOPLOSS",
+        "quantity": 0.10283548616732288,
+        "fill_price": 74091.6601,
+        "fee": 7.619251887327538
+      }
+    },
+    "first_entry_difference": {
+      "before": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 94026.465,
+        "entry_pct": 25.0
+      },
+      "after": {
+        "at": 1768780800000,
+        "state": "T1",
+        "entry_ref": 94235.74144144144,
+        "entry_pct": 25.0
+      }
+    }
+  }
+]

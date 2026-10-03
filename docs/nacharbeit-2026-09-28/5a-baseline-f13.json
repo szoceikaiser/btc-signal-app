@@ -1,0 +1,10 @@
+{
+  "base": "ebc01a48057994629c021bd84ab7f9a236678b70",
+  "reached": "real evaluate KAUF_1",
+  "first_signals": 1,
+  "first_attempts": 1,
+  "restart_signals": 0,
+  "restart_attempts": 0,
+  "last_signal_ts": 1700259200000,
+  "result": "F13 reproduced offline; rejection lost on original"
+}

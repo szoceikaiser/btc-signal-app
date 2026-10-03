@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 from typing import Optional
+from flow_contract import usable
 
 # ---------------------------------------------------------------- Datentypen
 
@@ -29,14 +30,15 @@ class FlowPoint:
     ts: int
     spot_cvd: float      # kumuliertes Spot-Delta (USD)
     fut_cvd: float       # kumuliertes Futures-Delta (USD)
-    oi: float            # Open Interest (USD)
-    funding: float       # 8h-Funding-Rate, Durchschnitt (z. B. 0.0001 = 0.01 %)
+    oi: float            # Open Interest (USD); missing/stale status is in provenance
+    funding: float       # 8h-Funding-Rate; zero needs observed coverage to confirm
     long_liq: float = 0.0   # Long-Liquidationen dieser Kerze (USD), E9.1 (Coinalyze)
     short_liq: float = 0.0  # Short-Liquidationen dieser Kerze (USD)
     long_pct: float = 0.0   # Anteil der Long-Positionierung in % (E16, Coinalyze);
                             # 0.0 = keine Daten. >50 = mehrheitlich long.
     oi_btc: float = 0.0     # Open Interest in BTC = Kontrakte (E43.4, oi_in_btc);
                             # 0.0 = keine Kontrakt-Reihe. `oi` bleibt in USD.
+    provenance: dict = field(default_factory=dict)  # A2: per-field source/time/coverage/age
 
 
 class Pattern(Enum):
@@ -147,10 +149,16 @@ class FibZones:
 
 def atr(candles: list[Candle], period: int = 14) -> float:
     """Average True Range der letzten `period` Kerzen (einfacher Durchschnitt)."""
+    if period < 1:
+        raise ValueError("period muss mindestens 1 sein")
     if len(candles) < 2:
         return 0.0
     trs = []
-    for prev, cur in zip(candles[-period - 1:-1], candles[-period:]):
+    # Fuer n beobachtbare True Ranges braucht es n+1 Kerzen. Bei kurzem
+    # Vorlauf wurden die zwei Slices bisher unterschiedlich abgeschnitten und
+    # falsche Paare (oder nur Kerzenranges) gemittelt.
+    window = candles[-(period + 1):]
+    for prev, cur in zip(window, window[1:]):
         trs.append(max(cur.high - cur.low,
                        abs(cur.high - prev.close),
                        abs(cur.low - prev.close)))
@@ -300,20 +308,38 @@ def ema(values: list[float], period: int) -> Optional[float]:
 
 
 def resample_daily(candles: list[Candle]) -> list[Candle]:
-    """Fasst 4h-Kerzen zu Tageskerzen zusammen (UTC-Tag: Open zuerst, High/Low, Close zuletzt)."""
-    days: dict[int, list[float]] = {}
-    order: list[int] = []
+    """Nur vollstaendige UTC-Tage aus bereits abgeschlossenen 4h-Kerzen.
+
+    Der letzte 20-Uhr-Slot schliesst erst an der naechsten UTC-Mitternacht.
+    Die Eingangsadapter muessen nach D01 laufende 4h-Kerzen entfernen.
+    """
+    step = 14_400_000
+    day_ms = 86_400_000
+    days: dict[int, dict[int, Candle]] = {}
+    invalid_days = set()
     for c in candles:
-        day = (c.ts // 86_400_000) * 86_400_000        # Mitternacht UTC in ms
-        if day not in days:
-            days[day] = [c.open, c.high, c.low, c.close]
-            order.append(day)
+        day = (c.ts // day_ms) * day_ms
+        slot = c.ts - day
+        if slot % step:
+            invalid_days.add(day)
+            continue
+        bucket = days.setdefault(day, {})
+        # Doppelte Eingaben belegen keine zweite abgeschlossene Kerze.
+        if slot in bucket:
+            bucket[slot] = None
         else:
-            d = days[day]
-            d[1] = max(d[1], c.high)
-            d[2] = min(d[2], c.low)
-            d[3] = c.close
-    return [Candle(day, days[day][0], days[day][1], days[day][2], days[day][3]) for day in order]
+            bucket[slot] = c
+    out = []
+    for day in sorted(days):
+        if day in invalid_days:
+            continue
+        slots = days[day]
+        if set(slots) != {i * step for i in range(6)} or any(c is None for c in slots.values()):
+            continue
+        ordered = [slots[i * step] for i in range(6)]
+        out.append(Candle(day, ordered[0].open, max(c.high for c in ordered),
+                          min(c.low for c in ordered), ordered[-1].close))
+    return out
 
 
 def daily_trend(candles: list[Candle], period: int = 50, streng: bool = False):
@@ -482,7 +508,8 @@ def _muster2_dollar(c: list[Candle], f: list[FlowPoint]) -> Optional[tuple[float
 
     Hier zaehlen nur Differenzen INNERHALB des Fensters - ein konstanter Startwert
     kuerzt sich heraus:
-      - Spot: f[-1].spot_cvd - f[0].spot_cvd (die Reihe ist schon in Dollar).
+      - Spot: Binance-Reihe als USD-Fensterdifferenz. Bei aggregiertem Spot-CVD
+        (BTC) jedes Kerzen-Delta mit dem Schlusskurs derselben Kerze in USD.
       - Futures: jedes Kerzen-Delta (BTC) mal Schlusskurs DERSELBEN Kerze, dann
         aufsummiert - dieselbe Umrechnung wie _fut_cvd_usd (E43.1), nur fensterlokal.
     Beide decken dieselben Kerzen ab (die Deltas von Kerze 2 bis 12 des Fensters).
@@ -498,7 +525,20 @@ def _muster2_dollar(c: list[Candle], f: list[FlowPoint]) -> Optional[tuple[float
         if k is None:
             return None
         fut += (p.fut_cvd - vorher.fut_cvd) * k
-    return f[-1].spot_cvd - f[0].spot_cvd, fut
+    spot_sources = {p.provenance.get("spot_cvd", {}).get("source", "binance_spot_taker_usd")
+                    for p in f}
+    if len(spot_sources) != 1:
+        return None
+    if spot_sources == {"aggregate_spot_delta_btc"}:
+        spot = 0.0
+        for vorher, p in zip(f, f[1:]):
+            k = kurs.get(p.ts)
+            if k is None:
+                return None
+            spot += (p.spot_cvd - vorher.spot_cvd) * k
+    else:
+        spot = f[-1].spot_cvd - f[0].spot_cvd
+    return spot, fut
 
 
 def oi_in_btc(oi_usd: dict, kurs: dict) -> dict:
@@ -532,8 +572,12 @@ def oi_aenderung(f: list[FlowPoint], muster_oi: str = "usd") -> float:
     "usd" rechnet Zeichen fuer Zeichen wie vor E43.4 (auch im Randfall OI am Ende 0).
     """
     if muster_oi == "btc":
+        if not (usable(f[0], "oi_btc") and usable(f[-1], "oi_btc")):
+            return 0.0
         a, b = f[0].oi_btc, f[-1].oi_btc
         return (b - a) / a if a and b else 0.0
+    if not (usable(f[0], "oi") and usable(f[-1], "oi")):
+        return 0.0
     return (f[-1].oi - f[0].oi) / f[0].oi if f[0].oi else 0.0
 
 
@@ -640,7 +684,8 @@ def spot_nachfrage(flow: list[FlowPoint], fenster: int = SPOT_FENSTER) -> Option
     Gibt None zurueck, wenn zu wenige Punkte vorliegen - dann steht in der Nachricht
     nichts, statt etwas Erfundenes.
     """
-    if len(flow) < 2 * fenster + 1:
+    if len(flow) < 2 * fenster + 1 or not all(
+            usable(p, "spot_cvd") for p in flow[-2 * fenster - 1:]):
         return None
     werte = [p.spot_cvd for p in flow]
     jetzt = werte[-1] - werte[-1 - fenster]
@@ -736,7 +781,8 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
     })
 
     # --- Spot-CVD: die echte Nachfrage
-    sp = _of_reihe([p.spot_cvd for p in flow], fenster)
+    sp = (_of_reihe([p.spot_cvd for p in flow], fenster)
+          if all(usable(p, "spot_cvd") for p in flow[-fenster-1:]) else None)
     if sp:
         zeilen.append({"name": "Spot-CVD", "wert": _usd_kurz(sp["aenderung"]),
                        "richtung": sp["richtung"],
@@ -769,7 +815,8 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
     # spot_cvd in Dollar. Bis dahin stand der BTC-Wert hier mit "$" - um den Faktor
     # Kurs zu klein -, und der Anteil am Spot-Flow teilte BTC durch Dollar. Deshalb
     # jetzt erst in Dollar umrechnen (_fut_cvd_usd), dann vergleichen.
-    fu = _of_reihe(_fut_cvd_usd(candles, flow), fenster)
+    fu = (_of_reihe(_fut_cvd_usd(candles, flow), fenster)
+          if all(usable(p, "fut_cvd") for p in flow[-fenster-1:]) else None)
     if fu:
         # E36.2: Die Groessenordnung ist die eigentliche Aussage - das Verhaeltnis zum
         # Spot sagt, ob der Hebel die Bewegung traegt (Transkript 9:00-9:31).
@@ -797,14 +844,16 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
     # den KONTRAKTEN (oi_btc, dieselbe Reihe wie muster_oi in E43.4). Der Dollar-Wert
     # bleibt stehen; zeigen beide in verschiedene Richtungen, sagt der Hinweis das dazu.
     # Ohne Kontrakt-Reihe (Kraken-Rueckfall) bleibt alles wie vorher.
-    oi = _of_reihe([p.oi for p in flow], fenster)
+    oi = (_of_reihe([p.oi for p in flow], fenster)
+          if all(usable(p, "oi") for p in flow[-fenster-1:]) else None)
     if oi:
         oi_davor = flow[-1 - fenster].oi
         pct = (oi["aenderung"] / oi_davor * 100) if oi_davor else 0.0
         pct_txt = f"{pct:+.1f}".replace(".", ",")
         wert = f"{_usd_kurz(oi['aenderung'])} ({pct_txt} %)"
         richtung = oi["richtung"]
-        kt = _of_reihe([p.oi_btc for p in flow], fenster)
+        kt = (_of_reihe([p.oi_btc for p in flow], fenster)
+              if all(usable(p, "oi_btc") for p in flow[-fenster-1:]) else None)
         kt_davor = flow[-1 - fenster].oi_btc
         if kt and kt_davor:
             kt_pct = kt["aenderung"] / kt_davor * 100
@@ -824,8 +873,8 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
                        "richtung": richtung, "hinweis": hin})
 
     # --- Funding: Ueberhebelung. Kein kumulierter Wert - der Stand zaehlt.
-    fund = [p.funding for p in flow[-fenster:]]
-    if any(f != 0 for f in fund):
+    fund = [p.funding for p in flow[-fenster:] if usable(p, "funding")]
+    if usable(flow[-1], "funding") and fund:
         jetzt = fund[-1]
         mittel = sum(fund) / len(fund)
         zeilen.append({
@@ -839,7 +888,8 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
     # --- Liquidationen: Summe im Fenster, je Seite
     ll = sum(p.long_liq for p in flow[-fenster:])
     sl = sum(p.short_liq for p in flow[-fenster:])
-    if ll or sl:
+    if (ll or sl) and all(usable(p, "long_liq") and usable(p, "short_liq")
+                          for p in flow[-fenster:]):
         zeilen.append({"name": "Long-Liquidationen",
                        "wert": _usd_kurz(ll, vorzeichen=False),
                        "richtung": "", "hinweis": ""})
@@ -849,7 +899,7 @@ def orderflow_detail(candles: list[Candle], flow: list[FlowPoint],
 
     # --- Positionierung: 0.0 heisst laut FlowPoint ausdruecklich "keine Daten"
     lp = flow[-1].long_pct
-    if lp:
+    if lp and usable(flow[-1], "long_pct"):
         zeilen.append({
             "name": "Positionierung", "wert": f"{lp:.0f} % long",
             "richtung": "",
@@ -1050,11 +1100,11 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
                      sharp_move_pct: float = 0.04,
                      funding_hot: float = 0.0001,
                      liq_spike_mult: float = 3.0,
-                     muster_cvd: str = "alt",
+                     muster_cvd: str = "usd",
                      muster_oi: str = "usd") -> Pattern:
     """Ordnet die juengste Marktphase einem der 4 Kompass-Muster zu.
 
-    muster_cvd (E43.3, Default "alt" = bisheriges Verhalten): "usd" ersetzt in Muster 2
+    muster_cvd (A2-Default "usd"): "usd" ersetzt in Muster 2
     den Vergleich zweier relativer Slopes durch einen Vergleich zweier Dollar-Betraege
     im Fenster (_muster2_dollar). Nur Muster 2 aendert sich - die Vorzeichen-Pruefungen
     der anderen Muster haengen nicht vom Startwert der Summe ab.
@@ -1074,26 +1124,37 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
         return Pattern.NEUTRAL
     c, f = candles[-window:], flow[-window:]
     price_chg = (c[-1].close - c[0].close) / c[0].close
-    spot = _slope([p.spot_cvd for p in f])
+    spot_valid = all(usable(p, "spot_cvd") for p in f)
+    spot = ((f[-1].spot_cvd - f[0].spot_cvd) if muster_cvd == "usd" else
+            _slope([p.spot_cvd for p in f])) if spot_valid else 0.0
     fut = _slope([p.fut_cvd for p in f])
     # E43.4 (Befund A3): In Dollar steckt die Kursbewegung im OI - bei +3 % Kurs erfuellt
     # schon ein unveraendertes OI die Pump-Schwelle. "btc" zaehlt Kontrakte.
     oi_chg = oi_aenderung(f, muster_oi)
-    funding_now = f[-1].funding
-    funding_rising = f[-1].funding > f[0].funding
+    oi_valid = usable(f[0], "oi_btc" if muster_oi == "btc" else "oi") and usable(
+        f[-1], "oi_btc" if muster_oi == "btc" else "oi") and (
+            f[0].oi_btc > 0 and f[-1].oi_btc > 0 if muster_oi == "btc" else
+            f[0].oi > 0 and f[-1].oi > 0)
+    funding_valid = usable(f[-1], "funding")
+    funding_now = f[-1].funding if funding_valid else 0.0
+    funding_rising = (funding_valid and usable(f[0], "funding")
+                      and f[-1].funding > f[0].funding)
 
-    def _liq_spike(get) -> bool:
+    def _liq_spike(get, field_name) -> bool:
+        if not all(usable(p, field_name) for p in f):
+            return False
         vals = [get(p) for p in f]
         base = sum(vals[:-1]) / (len(vals) - 1) if len(vals) > 1 else 0.0
         return base > 0 and vals[-1] >= liq_spike_mult * base
-    long_liq_spike = _liq_spike(lambda p: p.long_liq)
-    short_liq_spike = _liq_spike(lambda p: p.short_liq)
+    long_liq_spike = _liq_spike(lambda p: p.long_liq, "long_liq")
+    short_liq_spike = _liq_spike(lambda p: p.short_liq, "short_liq")
 
     # 4: Capitulation/Flush + Reset — Preis scharf runter, Spot-CVD dreht,
     #    dazu OI-Wipeout ODER echte Long-Liquidations-Kaskade
     if price_chg <= -sharp_move_pct:
-        spot_turning = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
-        if spot_turning and (oi_chg <= -oi_wipeout_pct or long_liq_spike):
+        spot_turning = (spot_valid and len(flow) >= 3
+                        and flow[-1].spot_cvd > flow[-3].spot_cvd)
+        if spot_turning and ((oi_valid and oi_chg <= -oi_wipeout_pct) or long_liq_spike):
             return Pattern.CAPITULATION_RESET
     # 5: Ungesunder Abverkauf (E13) — das Spiegelbild von Muster 4. Der Kurs faellt, aber
     #    der Markt ist NICHT ausgeraeumt: Spot-CVD faellt mit (der Dip wird nicht gekauft),
@@ -1103,35 +1164,40 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
     #    Konfluenz-Prinzip, nur negativ: genau die Lage, in der er NICHT kauft.
     #    Halbe Schwelle beim Preis, weil dieser Zustand typischerweise VOR dem scharfen
     #    Einbruch vorliegt — er soll warnen, bevor der Flush kommt, nicht danach.
-    if (price_chg <= -sharp_move_pct / 2 and spot < 0 and oi_chg >= -0.01
+    if (price_chg <= -sharp_move_pct / 2 and spot_valid and spot < 0
+            and oi_valid and oi_chg >= -0.01 and funding_valid
             and funding_now > 0 and not long_liq_spike):
         return Pattern.UNGESUNDER_ABVERKAUF
     # 3: Short-Covering — Preis hoch, OI runter ODER echte Short-Liquidations-Kaskade
-    if price_chg >= sharp_move_pct / 2 and (oi_chg <= -0.02 or short_liq_spike):
+    if price_chg >= sharp_move_pct / 2 and ((oi_valid and oi_chg <= -0.02)
+                                            or short_liq_spike):
         return Pattern.SHORT_COVERING
     # 2: Derivate-Pump — Futures-CVD stark hoch, Spot flach/runter, OI deutlich hoch, Funding zieht an
-    has_fut = any(p.fut_cvd for p in f)
+    has_fut = all(usable(p, "fut_cvd") for p in f) and (
+        any(b.fut_cvd != a.fut_cvd for a, b in zip(f, f[1:]))
+        if muster_cvd == "usd" else any(p.fut_cvd for p in f))
     if has_fut:
         if muster_cvd == "usd":
             # E43.3: zwei Dollar-Betraege im Fenster statt zweier Anteile an einer
             # willkuerlich begonnenen Summe. "Futures steigt" ebenfalls in Dollar,
             # damit beide Seiten des Vergleichs dieselbe Einheit haben.
             d = _muster2_dollar(c, f)
-            cvd_pump = d is not None and d[1] > 0 and d[0] <= d[1] / 3
+            cvd_pump = spot_valid and d is not None and d[1] > 0 and d[0] <= d[1] / 3
         else:
             cvd_pump = fut > 0 and spot <= fut / 3
-        if (price_chg > 0 and cvd_pump and oi_chg >= 0.03
-                and (funding_rising or funding_now >= funding_hot)):
+        if (price_chg > 0 and cvd_pump and oi_valid and oi_chg >= 0.03
+                and (funding_rising or (funding_valid and funding_now >= funding_hot))):
             return Pattern.DERIVATE_PUMP
     else:
         # Ohne Futures-CVD-Quelle (US-Geo-Block): Pump-Erkennung ueber die uebrigen
         # Merkmale aus Furkans Notizen — OI deutlich hoch, Funding zieht an, Spot flach
-        if (price_chg > 0 and oi_chg >= 0.03 and spot <= 0.01
-                and (funding_rising or funding_now >= funding_hot)):
+        if (price_chg > 0 and oi_valid and oi_chg >= 0.03 and spot_valid
+                and spot <= (0 if muster_cvd == "usd" else 0.01) and (funding_rising or
+                                       (funding_valid and funding_now >= funding_hot))):
             return Pattern.DERIVATE_PUMP
     # 1: Gesunder Trend — Preis hoch, Spot-CVD traegt, Funding unauffaellig
-    if (price_chg > 0 and spot > 0 and abs(funding_now) < funding_hot
-            and 0 <= oi_chg <= 0.10):
+    if (price_chg > 0 and spot_valid and spot > 0 and funding_valid
+            and abs(funding_now) < funding_hot and oi_valid and 0 <= oi_chg <= 0.10):
         return Pattern.GESUNDER_TREND
     return Pattern.NEUTRAL
 
@@ -1158,7 +1224,15 @@ class Position:
     tp_rungs: int = 0                        # Anzahl gefeuerter Leiter-Zwischenverkaeufe
     dip_buys: int = 0                        # Anzahl bedingter Nachkaeufe unter Invalidierung (E9.3)
     buy_rungs: int = 0                       # Anzahl Mehrtages-Kaufleiter-Tranchen (E9.5)
-    entry_ref: Optional[float] = None        # tranchengewichteter Durchschnitts-Einstand (E9.10)
+    entry_ref: Optional[float] = None        # Signalanker; V1: Restkosten/BTC des Basisteils
+    # Stage 4: only V1 fill feedback supplies cost-bearing inventory. The live
+    # observer remains an explicitly labelled signal reference, never broker BTC.
+    inventory_source: str = "signal_reference"
+    lots: list = field(default_factory=list)
+    cost_basis_complete: bool = True
+    migration_notes: list = field(default_factory=list)
+    valid_stop: Optional[float] = None
+    valid_stop_reason: str = ""
     entry_pct: int = 0                       # Summe der eingestiegenen Tranchen-Prozente
     liq_exits: int = 0                       # Anzahl Teilverkaeufe an Liquidationen (E9.11)
     high_exits: int = 0                      # Anzahl Teilverkaeufe am letzten Hoch (E10.2)
@@ -1211,6 +1285,11 @@ def _reset_position(pos: "Position") -> None:
     pos.dip_buys = 0
     pos.buy_rungs = 0
     pos.entry_ref = None
+    pos.lots = []
+    pos.cost_basis_complete = True
+    pos.valid_stop = None
+    pos.valid_stop_reason = ""
+    pos.migration_notes = [n for n in pos.migration_notes if n != 'prior_stop_maximum_unknown']
     pos.entry_pct = 0
     pos.liq_exits = 0
     pos.high_exits = 0
@@ -1228,6 +1307,43 @@ def _reset_position(pos: "Position") -> None:
     pos.e42_teil_wartet_inv = None
     pos.e42_teil_geprueft = None
     pos.bestand_pct = 0
+
+
+def resolve_stop(pos, cur, pivots, *, trail_stop=False, be_im_plus=False,
+                 commit=False, stored_only=False):
+    """Single stop source for engine and plan. Long boundaries survive breaches.
+
+    A NEW structure candidate must be below the close; an existing boundary has
+    no such filter. Reading a plan cannot move the stop or activate break-even.
+    Short behavior is retained as historical diagnostics, outside V1.
+    """
+    if pos.state == PosState.FLAT or pos.zones is None:
+        return None, ""
+    long_side = pos.direction == "LONG"
+    if stored_only and long_side and pos.valid_stop is not None:
+        return pos.valid_stop, pos.valid_stop_reason
+    level, reason = pos.zones.invalidation, "Invalidierung"
+    active = be_im_plus and pos.be_aktiv and pos.entry_ref is not None
+    if trail_stop and (pos.state in (PosState.TP1, PosState.TP2)
+                       or pos.tp_rungs > 0 or active):
+        candidates = [(level, reason)]
+        if pos.entry_ref is not None:
+            candidates.append((pos.entry_ref, "Einstand (nachgezogen)"))
+        if long_side:
+            lows = [p.price for p in pivots if p.kind == "L" and p.price < cur.close]
+            if lows:
+                candidates.append((max(lows), "Struktur-Tief"))
+            level, reason = max(candidates, key=lambda x: x[0])
+        else:
+            highs = [p.price for p in pivots if p.kind == "H" and p.price > cur.close]
+            if highs:
+                candidates.append((min(highs), "Struktur-Hoch"))
+            level, reason = min(candidates, key=lambda x: x[0])
+    if long_side and pos.valid_stop is not None and pos.valid_stop >= level:
+        level, reason = pos.valid_stop, pos.valid_stop_reason
+    if commit and long_side:
+        pos.valid_stop, pos.valid_stop_reason = level, reason
+    return level, reason
 
 
 # Einstiegs-Signaltypen je Richtung — daraus wird der Durchschnitts-Einstand gebildet
@@ -1363,12 +1479,16 @@ def confirm_ok(pattern: "Pattern", flow: list[FlowPoint], long_side: bool,
     if long_side:
         strong = pattern == Pattern.CAPITULATION_RESET or (
             muster5_entry and pattern == Pattern.UNGESUNDER_ABVERKAUF)
-        cvd_up = len(flow) >= 3 and flow[-1].spot_cvd > flow[-3].spot_cvd
-        fund_ok = bool(flow) and flow[-1].funding <= 0
+        cvd_up = (len(flow) >= 3 and usable(flow[-1], "spot_cvd")
+                  and usable(flow[-3], "spot_cvd")
+                  and flow[-1].spot_cvd > flow[-3].spot_cvd)
+        fund_ok = bool(flow) and usable(flow[-1], "funding") and flow[-1].funding <= 0
         return strong or (cvd_up and fund_ok) if strict_confirm else strong or fund_ok or cvd_up
     strong = pattern == Pattern.DERIVATE_PUMP
-    cvd_dn = len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd
-    fund_hot = bool(flow) and flow[-1].funding > 0
+    cvd_dn = (len(flow) >= 3 and usable(flow[-1], "spot_cvd")
+              and usable(flow[-3], "spot_cvd")
+              and flow[-1].spot_cvd < flow[-3].spot_cvd)
+    fund_hot = bool(flow) and usable(flow[-1], "funding") and flow[-1].funding > 0
     return strong or (cvd_dn and fund_hot) if strict_confirm else strong or fund_hot or cvd_dn
 
 
@@ -1660,11 +1780,50 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
              zonen_nachziehen: bool = False,
              pivot_n_1d: int = 0,
              ampel_filter: str = "off",
-             muster_cvd: str = "alt",
+             muster_cvd: str = "usd",
              muster_oi: str = "usd",
              high_exit_hist: str = "voll",
              ausbruch_ruecktest: bool = False,
              ruecktest_fenster: int = RUECKTEST_FENSTER) -> list[Signal]:
+    """Live signal observer / historical diagnostic, without broker fills.
+
+    Offline V1 uses execution_v1.run_v1 and confirms each trading block only
+    after a booked fill. This wrapper deliberately preserves the live API.
+    """
+    return _evaluate(**locals())
+
+
+def _evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
+             bias_long: bool = True, bias_short: bool = True,
+             pivot_n: int = 5, k_atr: float = 2.0,
+             flush_entry: str = "core", tp_ladder: bool = True,
+             trend_filter: bool = False, trend_ema: int = 200,
+             strict_confirm: bool = False, confluence: bool = False,
+             conditional_stop: bool = False, buy_ladder: bool = True,
+             release_stale_rest: bool = False, trail_stop: bool = False,
+             liq_exit: str = "off", high_exit: str = "off",
+             liq_entry: str = "off", block_unhealthy: bool = False,
+             muster5_entry: bool = False, muster5_halten: str = "off",
+             stop_puffer_pct: float = 0.0, stop_rueckeroberung: int = 0,
+             stop_auf_docht: bool = False,
+             confirm_t1: bool = False, cooldown_h: float = 0.0,
+             min_stop_pct: float = 0.0,
+             no_flip: bool = False, freeze_targets: bool = False,
+             min_bein_pct: float = 0.0, bein_wahl: str = "juengstes",
+             be_im_plus: bool = False, bein_richtung: str = "auto",
+             widerstand_exit: str = "off",
+             rest_halten: bool = False,
+             neustart_mit_rest: bool = False,
+             zonen_1d: bool = False,
+             zonen_nachziehen: bool = False,
+             pivot_n_1d: int = 0,
+             ampel_filter: str = "off",
+             muster_cvd: str = "usd",
+             muster_oi: str = "usd",
+             high_exit_hist: str = "voll",
+             ausbruch_ruecktest: bool = False,
+             ruecktest_fenster: int = RUECKTEST_FENSTER,
+             _execution_gate=None, _execution_sizes=None) -> list[Signal]:
     # AKTUELLE DEFAULTS (Stand 2026-07-24, gemessen im Voll-Daten-Fenster mit echtem
     # Coinalyze-OI, BACKTEST.md): n=5, k_atr=2.0, tp_ladder=True, buy_ladder=True,
     # flush_entry='core'. Beste gemessene Kombination war "nur Long + Flush core +
@@ -1854,6 +2013,17 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     _bestand_start = pos.bestand_pct
 
     signals: list[Signal] = []
+    # V1/offline: gate each complete trading block BEFORE its state writes.
+    # Default None preserves the live observer and historical diagnostic API.
+    # A declined block leaves its trading markers untouched. Time observations
+    # (E41, extremes, dedupe) still advance. No broker confirmation is implied.
+    _actions = []
+
+    def _allow(action: str) -> bool:
+        if _execution_gate is None or _execution_gate(action):
+            _actions.append(action)
+            return True
+        return False
     # E41: in dieser Kerze kein Aufstocken, weil auf eine Rueckeroberung gewartet wird
     # oder gerade zurueckerobert wurde. Wird im Stop-Block gesetzt.
     _e41_sperre = False
@@ -2036,7 +2206,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if (cur.low <= z.level_05 and cur.low > z.gp_upper
                     and _trend_ok(True) and _confluence_ok(cur.low)
                     and _liq_entry_ok(cur.low, True)
-                    and _t1_ok(True) and _stop_weit_genug(z.level_05, z)):
+                    and _t1_ok(True) and _stop_weit_genug(z.level_05, z)
+                    and _allow("entry_t1")):
                 pos.direction, pos.state, pos.zones = "LONG", PosState.T1, z
                 pos.retrace_extreme = cur.low
                 signals.append(Signal(cur.ts, SignalType.KAUF_1, z.level_05, TRANCHEN["T1"],
@@ -2045,7 +2216,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             elif z.gp_lower <= cur.low <= z.gp_upper:
                 if (_confirm_long() and _trend_ok(True) and _confluence_ok(cur.low)
                         and _liq_entry_ok(cur.low, True)
-                        and _stop_weit_genug(z.gp_upper, z)):
+                        and _stop_weit_genug(z.gp_upper, z) and _allow("entry_gp")):
                     pos.direction, pos.state, pos.zones = "LONG", PosState.CORE, z
                     pos.retrace_extreme = cur.low
                     signals.append(Signal(cur.ts, SignalType.KAUF_2, z.gp_upper,
@@ -2057,7 +2228,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 # Capitulation-Einstieg (E8.1): Kerze durchschlaegt das GP nach unten
                 # (Flush-Tage wie 10.10./04.11.), schliesst aber ueber der Invalidierung
                 if (_confirm_long() and _trend_ok(True) and _liq_entry_ok(cur.low, True)
-                        and _stop_weit_genug(cur.close, z)):
+                        and _stop_weit_genug(cur.close, z) and _allow("entry_flush")):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.KAUF_1 if small else SignalType.KAUF_2
@@ -2072,7 +2243,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if (cur.high >= z.level_05 and cur.high < z.gp_upper
                     and _trend_ok(False) and _confluence_ok(cur.high)
                     and _liq_entry_ok(cur.high, False)
-                    and _t1_ok(False) and _stop_weit_genug(z.level_05, z)):
+                    and _t1_ok(False) and _stop_weit_genug(z.level_05, z)
+                    and _allow("entry_t1")):
                 pos.direction, pos.state, pos.zones = "SHORT", PosState.T1, z
                 pos.retrace_extreme = cur.high
                 signals.append(Signal(cur.ts, SignalType.SHORT_1, z.level_05, TRANCHEN["T1"],
@@ -2081,7 +2253,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             elif z.gp_upper <= cur.high <= z.gp_lower:  # Short: 0.65 liegt OBEN
                 if (_confirm_short() and _trend_ok(False) and _confluence_ok(cur.high)
                         and _liq_entry_ok(cur.high, False)
-                        and _stop_weit_genug(z.gp_upper, z)):
+                        and _stop_weit_genug(z.gp_upper, z) and _allow("entry_gp")):
                     pos.direction, pos.state, pos.zones = "SHORT", PosState.CORE, z
                     pos.retrace_extreme = cur.high
                     signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
@@ -2093,7 +2265,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 # Squeeze-Einstieg (E8.1, Spiegelbild): Kerze durchschlaegt das GP nach
                 # oben, schliesst aber unter der Invalidierung
                 if (_confirm_short() and _trend_ok(False) and _liq_entry_ok(cur.high, False)
-                        and _stop_weit_genug(cur.close, z)):
+                        and _stop_weit_genug(cur.close, z) and _allow("entry_flush")):
                     small = flush_entry == "t1"
                     st = PosState.T1 if small else PosState.CORE
                     sig_t = SignalType.SHORT_1 if small else SignalType.SHORT_2
@@ -2155,8 +2327,6 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         # der Stop auf den hoechsten der drei Bezugspunkte: urspruengliche Invalidierung,
         # Durchschnitts-Einstand (Break-even) und letztes bestaetigtes Pivot-Tief unter
         # dem Kurs (Struktur). Er kann dadurch NUR steigen, nie lockerer werden.
-        stop_level = z.invalidation
-        trail_note = ""
         # E19.3: Break-even schon, sobald die Position EINMAL im Plus stand (nicht erst nach
         # einem Teilgewinn). Der Merker ist noetig, weil die Bedingung genau in der Kerze,
         # in der der Stop greifen soll, nicht mehr erfuellt waere — der Kurs ist dann ja
@@ -2164,22 +2334,8 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         if be_im_plus and pos.entry_ref is not None and not pos.be_aktiv:
             if (cur.close > pos.entry_ref) if long_side else (cur.close < pos.entry_ref):
                 pos.be_aktiv = True
-        _im_plus = be_im_plus and pos.be_aktiv and pos.entry_ref is not None
-        if trail_stop and (pos.state in (PosState.TP1, PosState.TP2)
-                           or pos.tp_rungs > 0 or _im_plus):
-            cands = [(z.invalidation, "Invalidierung")]
-            if pos.entry_ref is not None:
-                cands.append((pos.entry_ref, "Einstand"))
-            if long_side:
-                lows = [p.price for p in pivots if p.kind == "L" and p.price < cur.close]
-                if lows:
-                    cands.append((max(lows), "Struktur-Tief"))
-                stop_level, trail_note = max(cands, key=lambda x: x[0])
-            else:
-                highs = [p.price for p in pivots if p.kind == "H" and p.price > cur.close]
-                if highs:
-                    cands.append((min(highs), "Struktur-Hoch"))
-                stop_level, trail_note = min(cands, key=lambda x: x[0])
+        stop_level, trail_note = resolve_stop(pos, cur, pivots, trail_stop=trail_stop,
+                                             be_im_plus=be_im_plus, commit=True)
         stop_hit = (cur.close < stop_level) if long_side else (cur.close > stop_level)
         stop_preis, stop_grund = cur.close, None
         # E41: nur der URSPRUENGLICHE Stop - ein nachgezogener sichert Gewinn und bleibt.
@@ -2187,7 +2343,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 stop_puffer_pct > 0 or stop_rueckeroberung > 0 or stop_auf_docht):
             _wartete = pos.stop_wartet > 0
             stop_hit, stop_preis, stop_grund = stop_entscheidung(
-                pos, cur, z.invalidation, long_side, puffer_pct=stop_puffer_pct,
+                pos, cur, stop_level, long_side, puffer_pct=stop_puffer_pct,
                 rueckeroberung=stop_rueckeroberung, auf_docht=stop_auf_docht)
             # Gesperrt in der Wartekerze UND in der Kerze der Rueckeroberung: Die
             # Bestaetigung steht erst mit deren Schluss fest.
@@ -2199,12 +2355,15 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
         # darf der bedingte Nachkauf nicht aushebeln.
         if stop_hit and conditional_stop and trail_note in ("", "Invalidierung"):
             if long_side:
-                hard_break = cur.close < z.invalidation * (1 - DIP_FLOOR_PCT)
+                hard_break = cur.close < stop_level * (1 - DIP_FLOOR_PCT)
                 flow_ok = _confirm_long()
             else:
-                hard_break = cur.close > z.invalidation * (1 + DIP_FLOOR_PCT)
+                hard_break = cur.close > stop_level * (1 + DIP_FLOOR_PCT)
                 flow_ok = _confirm_short()
             if flow_ok and not hard_break and pos.dip_buys < MAX_DIP_BUYS:
+                # The strategy replaces the main stop even if this buy is rejected.
+                stop_hit = False
+            if flow_ok and not hard_break and pos.dip_buys < MAX_DIP_BUYS and _allow("dip"):
                 nk = SignalType.NACHKAUF if long_side else SignalType.SHORT_NACHLEGEN
                 signals.append(Signal(cur.ts, nk, cur.close, DIP_TRANCHE,
                                       f"Bedingter Nachkauf: Dip haelt, Order-Flow bestaetigt Trend ({pattern.name})",
@@ -2232,51 +2391,54 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 _e42_melden("teil_zurueck", _teil_marke, long_side,
                             nur_rueckkauf=pos.entry_pct == 0)
         if stop_hit:
-            st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
-            if trail_note and trail_note != "Invalidierung":
-                reason = ("Nachgezogener Stop ({}) {:.0f} — Kerzenschluss {}, "
-                          "Gewinn gesichert".format(trail_note, stop_level,
-                                                    'darunter' if long_side else 'darueber'))
-            elif stop_grund:
-                reason = stop_grund                          # E41: warum genau jetzt
-            else:
-                reason = ("Kerzenschluss {} Invalidierung {:.0f}".format(
-                    'unter' if long_side else 'ueber', z.invalidation)
-                    + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
-            signals.append(Signal(cur.ts, st, stop_preis, 100, reason))
-            # BUGFIX 2026-07-27: hier stand eine handgeschriebene Teil-Ruecksetzung, die
-            # entry_ref/entry_pct/liq_exits/high_exits/liq_entries VERGESSEN hat. Folge:
-            # (1) entry_pct wuchs ueber alle gestoppten Positionen hinweg immer weiter, der
-            # Durchschnitts-Einstand blieb am Preis einer laengst geschlossenen Position
-            # haengen -> der nachgezogene Stop (trail_stop) rechnete mit einem falschen
-            # Break-even. (2) Die Zaehler liq_exits/high_exits/liq_entries liefen gegen ihr
-            # Maximum und schalteten die zugehoerigen Mechanismen still ab, bis zufaellig
-            # einmal ueber VERKAUF_REST geschlossen wurde. Jetzt derselbe Reset wie ueberall.
-            _reset_position(pos)
-            pos.last_stop_ts = cur.ts        # E13: Merker fuer die Sperrfrist (cooldown_h)
-            _e42_ende()                      # E44.3: nach einem Stop wird nicht beobachtet
+            if _allow("stop"):
+                st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
+                if trail_note and trail_note != "Invalidierung":
+                    reason = ("Nachgezogener Stop ({}) {:.0f} — Kerzenschluss {}, "
+                              "Gewinn gesichert".format(trail_note, stop_level,
+                                                        'darunter' if long_side else 'darueber'))
+                elif stop_grund:
+                    reason = stop_grund                          # E41: warum genau jetzt
+                else:
+                    reason = ("Kerzenschluss {} Invalidierung {:.0f}".format(
+                        'unter' if long_side else 'ueber', stop_level)
+                        + (" — harter Boden/Flow gekippt" if conditional_stop else ""))
+                signals.append(Signal(cur.ts, st, stop_preis, 100, reason))
+                # BUGFIX 2026-07-27: hier stand eine handgeschriebene Teil-Ruecksetzung, die
+                # entry_ref/entry_pct/liq_exits/high_exits/liq_entries VERGESSEN hat. Folge:
+                # (1) entry_pct wuchs ueber alle gestoppten Positionen hinweg immer weiter, der
+                # Durchschnitts-Einstand blieb am Preis einer laengst geschlossenen Position
+                # haengen -> der nachgezogene Stop (trail_stop) rechnete mit einem falschen
+                # Break-even. (2) Die Zaehler liq_exits/high_exits/liq_entries liefen gegen ihr
+                # Maximum und schalteten die zugehoerigen Mechanismen still ab, bis zufaellig
+                # einmal ueber VERKAUF_REST geschlossen wurde. Jetzt derselbe Reset wie ueberall.
+                _reset_position(pos)
+                pos.last_stop_ts = cur.ts        # E13: Merker fuer die Sperrfrist (cooldown_h)
+                _e42_ende()                      # E44.3: nach einem Stop wird nicht beobachtet
         elif _teil_stop and pos.entry_pct == 0:
-            # E44.3: Die Position besteht NUR aus dem Rueckkauf (aus FLAT eroeffnet, seither
-            # kein anderer Kauf) - dann ist der Stop des Teils ein vollstaendiger Ausstieg.
-            # Sonst bliebe eine leere Position mit Zonen stehen, die spaeter "aufstockt".
-            st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
-            signals.append(Signal(cur.ts, st, cur.close, 100,
-                                  ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
-                                  + _teil_grund))
-            _reset_position(pos)
-            pos.last_stop_ts = cur.ts
-            _e42_ende()
+            if _allow("part_full"):
+                # E44.3: Die Position besteht NUR aus dem Rueckkauf (aus FLAT eroeffnet, seither
+                # kein anderer Kauf) - dann ist der Stop des Teils ein vollstaendiger Ausstieg.
+                # Sonst bliebe eine leere Position mit Zonen stehen, die spaeter "aufstockt".
+                st = SignalType.STOPLOSS if long_side else SignalType.SHORT_STOPLOSS
+                signals.append(Signal(cur.ts, st, cur.close, 100,
+                                      ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
+                                      + _teil_grund))
+                _reset_position(pos)
+                pos.last_stop_ts = cur.ts
+                _e42_ende()
         else:
             if _teil_stop:
-                # E44.3: nur der Rueckkauf-Teil geht, der Rest behaelt seinen Stop.
-                ts_ = SignalType.RUECKKAUF_STOP if long_side else SignalType.SHORT_RUECKTEST_STOP
-                signals.append(Signal(cur.ts, ts_, cur.close, RUECKKAUF_TRANCHE,
-                                      ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
-                                      + _teil_grund
-                                      + " - der Rest der Position behaelt seinen Stop"))
-                pos.e42_teil_marke = None
-                pos.e42_teil_wartet, pos.e42_teil_wartet_inv = 0, None
-                pos.e42_teil_geprueft = None
+                if _allow("part_stop"):
+                    # E44.3: nur der Rueckkauf-Teil geht, der Rest behaelt seinen Stop.
+                    ts_ = SignalType.RUECKKAUF_STOP if long_side else SignalType.SHORT_RUECKTEST_STOP
+                    signals.append(Signal(cur.ts, ts_, cur.close, RUECKKAUF_TRANCHE,
+                                          ("Rueckkauf-Teil: " if long_side else "Short-Rueckteil: ")
+                                          + _teil_grund
+                                          + " - der Rest der Position behaelt seinen Stop"))
+                    pos.e42_teil_marke = None
+                    pos.e42_teil_wartet, pos.e42_teil_wartet_inv = 0, None
+                    pos.e42_teil_geprueft = None
             # Mehrtages-Kaufleiter (E9.5): neue Tiefkerze IN der Retracement-Zone (ueber
             # Invalidierung, unter 0.5) mit Flow-Bestaetigung -> kleine Tranche nachlegen.
             if buy_ladder and made_new_extreme and pos.buy_rungs < MAX_BUY_RUNGS \
@@ -2293,7 +2455,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 # E13: In einen ungesunden Abverkauf wird auch nicht NACHgekauft. Genau
                 # das war Kaisers Beispiel 16.06.: Ersteinstieg, dann drei Nachkaeufe in
                 # einen weiter fallenden Markt, dann Stop.
-                if in_zone and ladder_ok and _healthy(long_side):
+                if in_zone and ladder_ok and _healthy(long_side) and _allow("buy_ladder"):
                     signals.append(Signal(cur.ts, nk, cur.close, BUY_LADDER_TRANCHE,
                                           f"Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt ({pattern.name})",
                                           stop_ref=z.invalidation))
@@ -2315,7 +2477,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     in_struct = z.level_05 <= cur.high < z.invalidation
                     flow_ok = _confirm_short()
                     nk = SignalType.SHORT_NACHLEGEN
-                if treffer is not None and in_struct and flow_ok:
+                if treffer is not None and in_struct and flow_ok and _allow("liq_buy"):
                     signals.append(Signal(cur.ts, nk, cur.close, LIQ_ENTRY_TRANCHE,
                                           f"Konfluenz: Fib-Zone + Liquidationszone {treffer:.0f} "
                                           f"— aufstocken ({pattern.name})",
@@ -2338,7 +2500,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     treffer = in_liq_zone(cur.high if long_side else cur.low, lv)
                     if treffer is not None:
                         grund = f"Liquidationszone {treffer:.0f} erreicht (historische Kaskade)"
-                if grund is not None:
+                if grund is not None and _allow("liq_sell"):
                     lt = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
                     signals.append(Signal(cur.ts, lt, cur.close, LADDER_TRANCHE,
                                           f"Teilgewinn an Liquidationen: {grund}"))
@@ -2357,7 +2519,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     erreicht = (cur.high >= lo) if long_side else (cur.low <= hi)
                     # nur sinnvoll, wenn die Zone ueberhaupt vor uns liegt
                     davor = (lo > cur.open) if long_side else (hi < cur.open)
-                    if erreicht and davor:
+                    if erreicht and davor and _allow("resistance"):
                         wt = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
                         signals.append(Signal(cur.ts, wt, lo if long_side else hi,
                                               LADDER_TRANCHE,
@@ -2382,7 +2544,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     else:
                         spot_traegt = len(flow) >= 3 and flow[-1].spot_cvd < flow[-3].spot_cvd
                     ok = nah and (high_exit == "on" or not spot_traegt)
-                    if ok:
+                    if ok and _allow("high"):
                         ht = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
                         zusatz = "" if high_exit == "on" else ", Anlauf ohne Spot-Nachfrage"
                         signals.append(Signal(cur.ts, ht, cur.close, LADDER_TRANCHE,
@@ -2397,14 +2559,14 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     else (z.gp_upper <= cur.high <= z.gp_lower)
                 if in_gp:
                     if long_side:
-                        if _confirm_long():
+                        if _confirm_long() and _allow("upgrade_gp"):
                             signals.append(Signal(cur.ts, SignalType.KAUF_2, z.gp_upper,
                                                   TRANCHEN["CORE"],
                                                   f"Golden Pocket {z.gp_lower:.0f}-{z.gp_upper:.0f} + Bestaetigung ({pattern.name})",
                                                   stop_ref=z.invalidation))
                             pos.state = PosState.CORE
                     else:
-                        if _confirm_short():
+                        if _confirm_short() and _allow("upgrade_gp"):
                             signals.append(Signal(cur.ts, SignalType.SHORT_2, z.gp_upper,
                                                   TRANCHEN["CORE"],
                                                   f"Golden Pocket {z.gp_upper:.0f}-{z.gp_lower:.0f} + Bestaetigung ({pattern.name})",
@@ -2413,7 +2575,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             # Nachkauf am 0.786
             if pos.state in (PosState.T1, PosState.CORE) and _darf_aufstocken():
                 touch = (cur.low <= z.level_0786) if long_side else (cur.high >= z.level_0786)
-                if touch:
+                if touch and _allow("upgrade_full"):
                     nk = SignalType.NACHKAUF if long_side else SignalType.SHORT_NACHLEGEN
                     # E41: Nach einer Rueckeroberung kommt der Kurs von UNTEN an die
                     # 0.786-Zone. Eine Limit-Order dort waere zum Eroeffnungskurs gefuellt
@@ -2435,7 +2597,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                     and pos.tp_rungs < len(LADDER_FACTORS) and _darf_teilverkaufen():
                 rung_ext = z.ext_target(pos.retrace_extreme, LADDER_FACTORS[pos.tp_rungs])
                 rung_hit = (cur.high >= rung_ext) if long_side else (cur.low <= rung_ext)
-                if rung_hit:
+                if rung_hit and _allow("tp_ladder"):
                     lt = SignalType.TEILVERKAUF_LADDER if long_side else SignalType.SHORT_TP_LADDER
                     signals.append(Signal(cur.ts, lt, rung_ext, LADDER_TRANCHE,
                                           f"Leiter-Teilgewinn an Extension {LADDER_FACTORS[pos.tp_rungs]:.1f} ({rung_ext:.0f})"))
@@ -2445,14 +2607,14 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if pos.state in (PosState.T1, PosState.CORE, PosState.FULL) \
                     and _darf_teilverkaufen(ziel=True):
                 hit1 = (cur.high >= ext1) if long_side else (cur.low <= ext1)
-                if hit1:
+                if hit1 and _allow("tp1"):
                     tp = SignalType.TEILVERKAUF_1 if long_side else SignalType.SHORT_TP_1
                     signals.append(Signal(cur.ts, tp, ext1, TRANCHEN["TP1"],
                                           f"Extension 1.0 erreicht ({ext1:.0f})"))
                     pos.state = PosState.TP1
             if pos.state == PosState.TP1 and _darf_teilverkaufen(ziel=True):
                 hit2 = (cur.high >= ext2) if long_side else (cur.low <= ext2)
-                if hit2:
+                if hit2 and _allow("tp2"):
                     tp = SignalType.TEILVERKAUF_2 if long_side else SignalType.SHORT_TP_2
                     signals.append(Signal(cur.ts, tp, ext2, TRANCHEN["TP2"],
                                           f"Extension 1.618 erreicht ({ext2:.0f})"))
@@ -2461,7 +2623,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if pos.state in (PosState.TP1, PosState.TP2):
                 exit_pat = (pattern in (Pattern.DERIVATE_PUMP, Pattern.SHORT_COVERING)) if long_side \
                     else (pattern in (Pattern.CAPITULATION_RESET, Pattern.GESUNDER_TREND))
-                if exit_pat and not rest_halten:
+                if exit_pat and not rest_halten and _allow("rest_pattern"):
                     ex = SignalType.VERKAUF_REST if long_side else SignalType.SHORT_COVER_REST
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Gegen-Muster am Ziel: {pattern.name}"))
@@ -2474,7 +2636,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
             if release_stale_rest and pos.state in (PosState.TP1, PosState.TP2) \
                     and imp is not None and pos.zones is not None:
                 alt = (pos.zones.impulse.start.ts, pos.zones.impulse.end.ts)
-                if (imp.start.ts, imp.end.ts) != alt:
+                if (imp.start.ts, imp.end.ts) != alt and _allow("rest_stale"):
                     ex = SignalType.VERKAUF_REST if long_side else SignalType.SHORT_COVER_REST
                     signals.append(Signal(cur.ts, ex, cur.close, 20,
                                           f"Struktur veraltet: neuer Impuls bestaetigt "
@@ -2557,7 +2719,7 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
                 if _seit is not None and _seit >= ruecktest_fenster:
                     _e42_ende()
                     _e42_melden("verfallen", _m, _lang, fenster=ruecktest_fenster)
-            else:
+            elif _allow("e42_buy"):
                 if _flat:
                     # Aus FLAT: neue Position auf dem aktuellen Bein, damit die vorhandene
                     # Extension-Logik die Ziele stellt (vom Ruecktest-Extrem aus).
@@ -2605,9 +2767,17 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
 
         kuerze_einstiege(signals, _halbieren)
 
-    # Durchschnitts-Einstand fortschreiben (E9.10): tranchengewichtet ueber alle
-    # Einstiegs-Signale dieser Kerze. Zentral hier, damit kein Einstiegspfad vergessen
-    # wird (0.5-Level, Golden Pocket, Flush, 0.786, Kauf-/Dip-Leiter).
+    if _execution_gate is not None:
+        trades = [s for s in signals if s.type != SignalType.WARNUNG]
+        assert len(trades) == len(_actions), (trades, _actions)
+        for sig, action in zip(trades, _actions):
+            sig.execution_action = action
+            if _execution_sizes is not None and action in _execution_sizes:
+                sig.tranche_pct = _execution_sizes[action]
+
+    # Historical signal reference, NOT remaining-inventory cost. V1 replaces this
+    # anchor from filled base lots in Decision.confirm before the next decision.
+    # The live observer has no manual fill evidence and must not invent any.
     for s in signals:
         if s.type in _ENTRY_TYPES and s.tranche_pct > 0:
             tot = pos.entry_pct + s.tranche_pct
@@ -2623,6 +2793,13 @@ def evaluate(candles: list[Candle], flow: list[FlowPoint], pos: Position,
     # E44.3: investierter Anteil nach dieser Kerze (immer gefuehrt, damit er stimmt,
     # wenn ausbruch_ruecktest spaeter eingeschaltet wird; aendert kein Signal).
     pos.bestand_pct = bestand_nach(_bestand_start, signals)
+
+    if pos.direction == "LONG" and pos.zones is not None and pos.valid_stop is None:
+        pos.valid_stop, pos.valid_stop_reason = pos.zones.invalidation, "Invalidierung"
+    if _execution_gate is None and pos.direction == "LONG" and pos.zones is not None:
+        # A signal-state TP transition arms the prospective plan now. In V1 this
+        # must instead wait for the fill AND its cost feedback (Decision.confirm).
+        resolve_stop(pos, cur, pivots, trail_stop=trail_stop, be_im_plus=be_im_plus, commit=True)
 
     pos.last_signal_ts = cur.ts
     return signals

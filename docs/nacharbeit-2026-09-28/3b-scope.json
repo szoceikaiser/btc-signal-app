@@ -1,0 +1,18 @@
+{
+  "result": "PASS",
+  "base": "67c8e624de3cc1b854a78dced755a5702b1a9c9a",
+  "head": "67c8e624de3cc1b854a78dced755a5702b1a9c9a",
+  "protected": [
+    "site",
+    ".github",
+    "BACKTEST.md",
+    "docs/e445",
+    "docs/nacharbeit-2026-09-28/F01-F12-VERTRAG.md",
+    "docs/nacharbeit-2026-09-28/D01.md",
+    "docs/nacharbeit-2026-09-28/F09.md",
+    "docs/nacharbeit-2026-09-28/3a-pruefung.json",
+    "docs/nacharbeit-2026-09-28/d01-ergebnis.json"
+  ],
+  "tag": "469be65f65327a3b6abf2794ceba09c1fe0de9e2",
+  "allowed_push_workflow": "Tests"
+}

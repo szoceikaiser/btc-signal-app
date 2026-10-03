@@ -1,0 +1,49 @@
+name: A7 Offline Audit
+
+on:
+  push:
+    branches: [codex/a1-audit-nacharbeit]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-model-check:
+    if: github.ref == 'refs/heads/codex/a1-audit-nacharbeit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fixed numerical dependency
+        run: python -m pip install numpy==2.3.5
+      - name: Frozen source and eligibility
+        run: python tools/a7_preflight_v2.py
+      - name: A7 lot rounding regression
+        run: |
+          PYTHONPATH=engine python -c 'import test_a7_numerical as t; t.test_v015_full_exit_clears_real_lots_and_rejects_true_oversell(); t.test_final_partial_sale_uses_exact_flat_inventory(); t.test_v005_delayed_exit_respects_prior_peak_rounding()'
+      - name: Fixed R0 and R1 pair with independent book
+        run: |
+          python tools/a7_targeted.py --package R0 --scenario S0
+          python tools/a7_targeted.py --package R1 --scenario S0
+      - name: Verify prespecified paired statistics
+        run: python tools/a7_pair_stats.py --verify-cross-platform
+      - name: Verify targeted A2 intermediate balances
+        run: python tools/a7_intermediate_effect.py
+      - name: Verify complete A7 result index
+        run: python tools/a7_report.py
+      - name: Verify V035 historical short accounting probe and funding gate
+        run: |
+          python tools/a7_v035_probe.py
+          python tools/a7_v035_reconcile.py
+      - name: Verify isolated causal V035 position and risk diagnostic
+        run: |
+          python -m unittest discover -s engine -p test_execution_perp_offline.py
+          python tools/a8_v035_causal.py
+      - name: A8 independent acceptance and complete artifact integrity
+        run: |
+          python tools/test_a8_reference.py
+          python tools/a8_acceptance.py

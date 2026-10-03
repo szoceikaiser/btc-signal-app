@@ -23,6 +23,9 @@
     padding:6px 10px; font-size:13px; line-height:1.5; }
   #ohlc b { font-weight:600; }
   .up { color:#16a34a; } .down { color:#dc2626; }
+  #signalDetails { display:block; overflow-wrap:anywhere; }
+  #signalList li { margin:10px 0; }
+  #signalList code { font-size:11px; }
   #status { color:var(--muted); font-size:13px; margin:8px 2px; }
   .legend { display:flex; flex-wrap:wrap; gap:10px 16px; font-size:13px; color:var(--muted);
     background:var(--panel); border-radius:10px; padding:10px 12px; margin-top:10px; }
@@ -69,6 +72,7 @@
 <div id="status">Lade…</div>
 <div class="legend" id="btpanel" hidden></div>
 <div class="legend">
+  <span><b>L</b> Live-Referenz · <b>H</b> historische Diagnostik · <b>V1</b> simulierter Fill; keine Zustell-/Brokerbelege</span>
   <span><b>K1/K2</b> Kauf 0.5 / Golden Pocket</span>
   <span><b>NK</b> Nachkauf 0.786</span>
   <span><b>TVL</b> Leiter-Teilgewinn Ext. 0.8/0.9</span>
@@ -86,7 +90,9 @@
   <span><a href="https://github.com/szoceikaiser/btc-signal-app/blob/main/ANLEITUNG-EINSTELLUNGEN.md"
     style="color:#2962ff" target="_blank">⚙ Einstellungen ändern (Anleitung)</a></span>
 </div>
+<details id="signalDetails" class="legend"><summary>Signalherkunft und Ereignisse im Chart</summary><div id="signalList"></div></details>
 <section id="monate" hidden></section>
+<script src="chart_signals.js"></script>
 <script>
 "use strict";
 const TFS = { "1h":"1h", "4h":"4h", "1D":"1d", "3D":"3d", "1W":"1w", "1M":"1M" };
@@ -372,7 +378,7 @@ function snap(tsSec, candles) {  // Marker auf die passende Kerze legen
 async function load(tf) {
   document.getElementById("status").textContent = "Lade " + tf + "…";
   try {
-    const [candles, sig, state, btsig] = await Promise.all([
+    const [candles, sig, state, btsig, v1] = await Promise.all([
       loadCandles(tf),
       fetchJson(RAW + "signals.json?t=" + Date.now())
         .catch(() => fetchJson("data/signals.json"))
@@ -383,33 +389,22 @@ async function load(tf) {
       fetchJson(RAW + "backtest_signals.json?t=" + Date.now())   // volle Long+Short-Historie
         .catch(() => fetchJson("data/backtest_signals.json"))
         .catch(() => ({ signals:[] })),
+      ChartSignals.loadOptional(fetch, "data/execution_v1.json"), // Optional explicit offline V1 result.
     ]);
     series.setData(candles);
     lastBar = candles[candles.length - 1] || null;
     showBar(lastBar);
     document.getElementById("demoBadge").hidden = !(sig.demo || (state && state.demo));
 
-    // Backtest-Historie (alle Long+Short) + Live-Signale zusammen; Duplikate (ts+type) raus
-    const seen = new Set();
-    const allSig = [...(btsig.signals || []), ...(sig.signals || [])].filter(s => {
-      const k = s.ts + s.type;
-      if (seen.has(k)) return false;
-      seen.add(k); return true;
-    });
-    const markers = allSig.map(s => {
-      const st = MARKER_STYLE[s.type] || { c:"#8b94a7", s:"circle", p:"aboveBar", t:"?" };
-      const time = snap(s.ts / 1000, candles);
-      // Aggressive Kapitulations-Einstiege sichtbar abheben (⚡ + eigene Farbe): In der
-      // Monatsuebersicht laufen sie in einer eigenen Spalte, in Telegram sind sie
-      // markiert — im Chart sahen sie bisher aus wie jeder andere Kauf.
-      const flush = s.tag === "FLUSH";
-      return time === null ? null : {
-        time, position:st.p, shape:st.s, color: flush ? "#a855f7" : st.c,
-        text: (flush ? "⚡" : "") + st.t + " " + Math.round(s.price).toLocaleString("de-DE"),
-      };
-    }).filter(Boolean);
-    markers.sort((a, b) => a.time - b.time);
+    // F17: source-scoped identities, no timestamp/type winner.
+    const projection = ChartSignals.merge(sig, btsig, v1);
+    const allSig = projection.records;
+    const markers = ChartSignals.markers(allSig, candles, MARKER_STYLE, snap);
     series.setMarkers(markers);
+    const visible = new Set(markers.map(m => m.id));
+    ChartSignals.renderList(document.getElementById("signalList"),
+      allSig.filter(s => visible.has(s.chart_id)), projection.issues);
+
 
     priceLines.forEach(l => series.removePriceLine(l));
     priceLines = [];
@@ -505,7 +500,8 @@ async function load(tf) {
     const upd = state && state.updated_at ? new Date(state.updated_at).toLocaleString("de-DE") : "—";
     document.getElementById("status").textContent =
       tf + " · " + candles.length + " Kerzen · " + markers.length +
-      " Trigger im Zeitraum · Engine-Stand: " + upd + zonenHinweis;
+      " Ereignisse im Zeitraum (L/H/V1) · Engine-Stand: " + upd + zonenHinweis +
+      (projection.issues.length ? " · Datenhinweise: " + projection.issues.length : "");
   } catch (e) {
     document.getElementById("status").textContent = "Fehler beim Laden: " + e.message;
   }

@@ -1,26 +1,29 @@
-name: Coinalyze-Test
+name: Nach-6 Historische Rohdaten
 
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  probe:
+  historical-data:
+    if: github.ref == 'refs/heads/codex/nach-6-historische-auswertung'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Coinalyze-Probe holen
+      - name: Fixed-cutoff historical market GETs
         env:
           COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
-        run: cd engine && python3 coinalyze.py
+        run: python3 tools/fetch_n6_data.py
 
-      - name: Probe committen
-        run: |
-          git config user.name "coinalyze-test"
-          git config user.email "actions@users.noreply.github.com"
-          git add site/data/coinalyze_probe.json
-          git diff --cached --quiet || git commit -m "Coinalyze-Test: Probe aktualisiert"
-          git push
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nach-6-historical-raw
+          path: historical-raw/
+          if-no-files-found: error
+          retention-days: 30

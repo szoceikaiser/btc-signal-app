@@ -1,0 +1,55 @@
+stage,row,total_pct,half1_pct,half2_pct,source,family,note
+Originalaudit,Basis,36.130924832553625,23.60972034971367,10.12962770841581,ccf2b01c0578346f325261e72445b7375a9ac706:docs/audit-2026-09-27/grid/V000.json,Level-Diagnose,"Getrennte Frischstarts, damalige Level-Diagnose."
+Originalaudit,E42,35.415646249722755,25.374126475043578,8.009244057766551,ccf2b01c0578346f325261e72445b7375a9ac706:docs/audit-2026-09-27/grid/V004.json,Level-Diagnose,"Getrennte Frischstarts, damalige Level-Diagnose."
+1 / F09,LIVE-heute +Bein in Handelsrichtung,36.1375,,,docs/nacharbeit-2026-09-28/f09-ergebnis.json,alte Level-Simulation; ursprüngliche laufende Schlusskerze enthalten,Keine eigenen Halbzeitläufe belegt.
+1 / F09,LIVE-heute +Rest halten (E43.6),36.71879999999999,,,docs/nacharbeit-2026-09-28/f09-ergebnis.json,alte Level-Simulation; ursprüngliche laufende Schlusskerze enthalten,Keine eigenen Halbzeitläufe belegt.
+1 / F09,LIVE-heute +E42,35.422200000000004,,,docs/nacharbeit-2026-09-28/f09-ergebnis.json,alte Level-Simulation; ursprüngliche laufende Schlusskerze enthalten,Keine eigenen Halbzeitläufe belegt.
+1 / F09,LIVE-heute +E42 +Rest halten,34.57569999999998,,,docs/nacharbeit-2026-09-28/f09-ergebnis.json,alte Level-Simulation; ursprüngliche laufende Schlusskerze enthalten,Keine eigenen Halbzeitläufe belegt.
+1 / F09,"LIVE-heute +E42 (6 Kerzen, Robustheit)",35.9955,,,docs/nacharbeit-2026-09-28/f09-ergebnis.json,alte Level-Simulation; ursprüngliche laufende Schlusskerze enthalten,Keine eigenen Halbzeitläufe belegt.
+2 / D01,LIVE-heute +Bein in Handelsrichtung,36.13,,,docs/nacharbeit-2026-09-28/d01-ergebnis.json,Level-Simulation; nur geschlossene Kerzen,Keine eigenen Halbzeitläufe belegt.
+2 / D01,LIVE-heute +Rest halten (E43.6),36.72,,,docs/nacharbeit-2026-09-28/d01-ergebnis.json,Level-Simulation; nur geschlossene Kerzen,Keine eigenen Halbzeitläufe belegt.
+2 / D01,LIVE-heute +E42,35.42,,,docs/nacharbeit-2026-09-28/d01-ergebnis.json,Level-Simulation; nur geschlossene Kerzen,Keine eigenen Halbzeitläufe belegt.
+2 / D01,LIVE-heute +E42 +Rest halten,34.57,,,docs/nacharbeit-2026-09-28/d01-ergebnis.json,Level-Simulation; nur geschlossene Kerzen,Keine eigenen Halbzeitläufe belegt.
+2 / D01,"LIVE-heute +E42 (6 Kerzen, Robustheit)",35.99,,,docs/nacharbeit-2026-09-28/d01-ergebnis.json,Level-Simulation; nur geschlossene Kerzen,Keine eigenen Halbzeitläufe belegt.
+3b / Ausführung,LIVE-heute +Bein in Handelsrichtung / Slippage 0.0 %,34.31454215601881,,,docs/nacharbeit-2026-09-28/3b-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+3b / Ausführung,LIVE-heute +Bein in Handelsrichtung / Slippage 0.1 %,28.652956094709303,,,docs/nacharbeit-2026-09-28/3b-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+3b / Ausführung,LIVE-heute +Bein in Handelsrichtung / Slippage 0.5 %,8.306332438347308,,,docs/nacharbeit-2026-09-28/3b-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+3b / Ausführung,LIVE-heute +E42 / Slippage 0.0 %,32.50878082995099,,,docs/nacharbeit-2026-09-28/3b-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+3b / Ausführung,LIVE-heute +E42 / Slippage 0.1 %,26.25639077331259,,,docs/nacharbeit-2026-09-28/3b-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+3b / Ausführung,LIVE-heute +E42 / Slippage 0.5 %,4.074209770242421,,,docs/nacharbeit-2026-09-28/3b-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+4,LIVE-heute +Bein in Handelsrichtung / Slippage 0.0 %,34.188799077945205,,,docs/nacharbeit-2026-09-28/4-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+4,LIVE-heute +Bein in Handelsrichtung / Slippage 0.1 %,28.52006290812501,,,docs/nacharbeit-2026-09-28/4-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+4,LIVE-heute +Bein in Handelsrichtung / Slippage 0.5 %,8.152962806734143,,,docs/nacharbeit-2026-09-28/4-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+4,LIVE-heute +E42 / Slippage 0.0 %,32.99894195277007,,,docs/nacharbeit-2026-09-28/4-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+4,LIVE-heute +E42 / Slippage 0.1 %,26.775248768403117,,,docs/nacharbeit-2026-09-28/4-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+4,LIVE-heute +E42 / Slippage 0.5 %,4.672644895468547,,,docs/nacharbeit-2026-09-28/4-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+6,LIVE-heute +Bein in Handelsrichtung / Slippage 0.0 %,34.188799077945205,,,docs/nacharbeit-2026-09-28/6-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+6,LIVE-heute +Bein in Handelsrichtung / Slippage 0.1 %,28.52006290812501,,,docs/nacharbeit-2026-09-28/6-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+6,LIVE-heute +Bein in Handelsrichtung / Slippage 0.5 %,8.152962806734143,,,docs/nacharbeit-2026-09-28/6-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+6,LIVE-heute +E42 / Slippage 0.0 %,32.99894195277007,,,docs/nacharbeit-2026-09-28/6-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+6,LIVE-heute +E42 / Slippage 0.1 %,26.775248768403117,,,docs/nacharbeit-2026-09-28/6-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+6,LIVE-heute +E42 / Slippage 0.5 %,4.672644895468547,,,docs/nacharbeit-2026-09-28/6-ergebnis.json,kausal V1,Keine eigenen Halbzeitläufe belegt.
+Nach-6 R0,LIVE-heute +Bein in Handelsrichtung / S0,34.188799077945205,,,docs/nach-6/R0/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R0,LIVE-heute +E42 / S0,32.99894195277007,,,docs/nach-6/R0/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R0,LIVE-heute +Bein in Handelsrichtung / S1,28.52006290812501,,,docs/nach-6/R0/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R0,LIVE-heute +E42 / S1,26.775248768403117,,,docs/nach-6/R0/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R0,LIVE-heute +Bein in Handelsrichtung / S2,8.152962806734143,,,docs/nach-6/R0/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R0,LIVE-heute +E42 / S2,4.672644895468547,,,docs/nach-6/R0/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R0,LIVE-heute +Bein in Handelsrichtung / S3,27.196895482167594,,,docs/nach-6/R0/results.json,V1_offline_close_to_i_plus_2_open,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R0,LIVE-heute +E42 / S3,28.373626137186214,,,docs/nach-6/R0/results.json,V1_offline_close_to_i_plus_2_open,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R0,LIVE-heute +Bein in Handelsrichtung / S4,8.381438866379076,,,docs/nach-6/R0/results.json,V1_offline_close_to_i_plus_2_open,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R0,LIVE-heute +E42 / S4,7.816726558428155,,,docs/nach-6/R0/results.json,V1_offline_close_to_i_plus_2_open,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +Bein in Handelsrichtung / S0,33.81598027877413,,,docs/nach-6/R1/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +E42 / S0,32.62942895190433,,,docs/nach-6/R1/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +Bein in Handelsrichtung / S1,28.138065278798674,,,docs/nach-6/R1/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +E42 / S1,26.398437215475347,,,docs/nach-6/R1/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +Bein in Handelsrichtung / S2,7.747736399368499,,,docs/nach-6/R1/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +E42 / S2,4.280458507415097,,,docs/nach-6/R1/results.json,V1_close_to_next_open_zero_latency,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +Bein in Handelsrichtung / S3,26.75687170527672,,,docs/nach-6/R1/results.json,V1_offline_close_to_i_plus_2_open,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +E42 / S3,27.929531589029732,,,docs/nach-6/R1/results.json,V1_offline_close_to_i_plus_2_open,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +Bein in Handelsrichtung / S4,7.922915148156395,,,docs/nach-6/R1/results.json,V1_offline_close_to_i_plus_2_open,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+Nach-6 R1,LIVE-heute +E42 / S4,7.360591939204997,,,docs/nach-6/R1/results.json,V1_offline_close_to_i_plus_2_open,"Gesamtfenster, Drittel und Drittel-Frischstarts; keine eigenen Halbzeitläufe."
+A7/A8 R0,Basis,34.188799077945205,23.83526074095279,8.3607352825386,docs/audit-nacharbeit-2026-10/A7-runs/R0-S0-V000.json,kausal S0,A8 bestätigte die unveränderten A7-Spotreihen.
+A7/A8 R1,Basis,33.81598027877413,23.83526074095279,8.059674989258347,docs/audit-nacharbeit-2026-10/A7-runs/R1-S0-V000.json,kausal S0,A8 bestätigte die unveränderten A7-Spotreihen.
+A7/A8 R0,E42,32.99894195277007,23.957367408194607,7.294100168166184,docs/audit-nacharbeit-2026-10/A7-runs/R0-S0-V004.json,kausal S0,A8 bestätigte die unveränderten A7-Spotreihen.
+A7/A8 R1,E42,32.62942895190433,23.957367408194607,6.9960033235882735,docs/audit-nacharbeit-2026-10/A7-runs/R1-S0-V004.json,kausal S0,A8 bestätigte die unveränderten A7-Spotreihen.

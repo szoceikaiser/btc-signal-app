@@ -1,0 +1,106 @@
+{
+  "schema": "a7-flow-modeled-v1",
+  "contract_sha256": "105c9a7244783d0a9ed79636c1227504081ffb1c5ab36d262e0df04273fcc3ca",
+  "code_sha256": "225c043883d15119c5547b206cd4fbcc4ec4361f2915f3b7f715188a2ef2e03e",
+  "base_commit": "8b6af70b1897e8aefff5552f878297cc0090ef26",
+  "R1_input_sha256": "701c0eea34098317d0fae2827a16afd4cb73f7e9684c724d70881c2df49e5089",
+  "archive_sha256": "07e2173f12e4b4fa6c55eb53cd531cf1054471b19421366766bc1cf6367e5f14",
+  "raw_sha256": {
+    "funding.json": "49ca8546d8e7508777e4797b2dd25f697a5ed63c1213e5bf77a160ef31a04035",
+    "liquidation-history.json": "0180cce7e1927fd6cdc83a4e03a6ec834b52cfdc4d3969f6b86bdb397e3de13e",
+    "long-short-ratio-history.json": "9993c283725d0edd9c0413996cd68a257c089b3803c6075079007388e66d920f",
+    "manifest.json": "2e89bebc453868b65dcde44088d4ff31a58260278bce85533511c8935a6cdfec",
+    "ohlcv-history.json": "39abd4e978b8e2c66da677dbe03b0191fb002cbd53ad6fbecf43b66b88d86c4f",
+    "open-interest-history.json": "0f7515f3aad31aa03c8969f273c7dd5fd42eb09eaa5030919e5a2af4af397da2",
+    "spot.json": "6049d0c0087fe8e83d2976d2066f9cc9ab9406a1bc8a3645ef1d951fa427ceee"
+  },
+  "data_sha256": "d4aee4abf66a33a048103661e8fc708c61438dbae5dcf0116ed586670774f4da",
+  "compressed_sha256": "ab7e6cec3bd2c43c762272dc50274a931f8d96faed1ab73dea967f0c77860f66",
+  "first_open_ms": 1754784000000,
+  "end_exclusive_ms": 1790683200000,
+  "all_bars": 2493,
+  "active_bars": 1522,
+  "source_ranges": {
+    "oi": {
+      "first": 1768766400000,
+      "last": 1790683200000,
+      "count": 1523
+    },
+    "liq": {
+      "first": 1768694400000,
+      "last": 1790683200000,
+      "count": 1524
+    },
+    "fut": {
+      "first": 1761580800000,
+      "last": 1790683200000,
+      "count": 2022
+    },
+    "ls": {
+      "first": 1761580800000,
+      "last": 1790683200000,
+      "count": 2022
+    },
+    "funding": {
+      "first": 1758700800000,
+      "last": 1790694000000,
+      "count": 8880
+    }
+  },
+  "active_coverage": {
+    "spot_cvd": {
+      "observed": 1522
+    },
+    "fut_cvd": {
+      "observed": 1522
+    },
+    "oi": {
+      "observed": 1522
+    },
+    "oi_btc": {
+      "observed": 1522
+    },
+    "funding": {
+      "observed": 1521,
+      "carried": 1
+    },
+    "long_liq": {
+      "observed": 1518,
+      "missing": 4
+    },
+    "short_liq": {
+      "observed": 1518,
+      "missing": 4
+    },
+    "long_pct": {
+      "observed": 1522
+    }
+  },
+  "missing_active_times": {
+    "spot_cvd": [],
+    "fut_cvd": [],
+    "oi": [],
+    "oi_btc": [],
+    "funding": [],
+    "long_liq": [
+      1776974400000,
+      1776988800000,
+      1777003200000,
+      1777017600000
+    ],
+    "short_liq": [
+      1776974400000,
+      1776988800000,
+      1777003200000,
+      1777017600000
+    ],
+    "long_pct": []
+  },
+  "numeric_differences_against_R1": {
+    "long_liq": 1
+  },
+  "historical_api_as_of_proven": false,
+  "availability": "A2 modeled bar close for Coinalyze/Binance; source timestamp for Kraken hourly funding",
+  "no_new_market_data": true,
+  "not_a_derivative_payment_book": true
+}

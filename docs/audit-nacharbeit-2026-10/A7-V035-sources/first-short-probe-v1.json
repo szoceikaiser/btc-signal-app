@@ -1,0 +1,40 @@
+{
+  "schema": "a7-v035-first-short-accounting-probe-v1",
+  "scope": "First retrospective V035 SHORT_1 to next full exit; hypothetical next-open PF_XBTUSD fills. No closed-loop V035 strategy or full-window return.",
+  "original_params_sha256": "fc2706be12cfdd014e31e575397f30157dc8c88ca17e81c63726a94943ed868b",
+  "source_manifest_sha256": "147fc0a54e90abb571bd55ca3309e57cca8a6fbd145a11754c2a3028a252f106",
+  "funding_raw_sha256": "49ca8546d8e7508777e4797b2dd25f697a5ed63c1213e5bf77a160ef31a04035",
+  "flow_sha256": "3fdc7d8f2860eb2f8fdf1a93774f46ca60b859b46875633a3ce62753e278e29c",
+  "signal_tape": "legacy_retrospective_no_execution_feedback",
+  "first_signal": {
+    "ts": 1769457600000,
+    "type": "SHORT_1",
+    "tranche_pct": 25
+  },
+  "full_exit_signal": {
+    "ts": 1769760000000,
+    "type": "SHORT_COVER_REST"
+  },
+  "open_at_ms": 1769472000000,
+  "close_at_ms": 1769774400000,
+  "open_trade_price": "88258",
+  "close_trade_price": "83011",
+  "quantity_btc": "0.0282",
+  "fee_fraction": "0.001",
+  "funding_payments": 84,
+  "funding_rate_alignment": "rate timestamp is interval start; settlement timestamp is next full UTC hour",
+  "funding_usd": "1.730700632011953464190600000",
+  "fees_usd": "4.8297858",
+  "end_equity_usd": "10144.86631483201195346419060",
+  "independent_end_equity_usd": "10144.8663148320119534641906",
+  "independent_difference_usd": "0E-23",
+  "max_gross_to_equity": "0.2556904668432674302671002050",
+  "missing_full_window_funding_ms": [
+    1770206400000,
+    1771005600000,
+    1778306400000
+  ],
+  "full_v035_historical_return_valid": false,
+  "historical_api_as_of_proven": false,
+  "real_fills_proven": false
+}

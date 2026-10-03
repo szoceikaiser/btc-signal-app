@@ -1,0 +1,32 @@
+{
+  "result": "PASS",
+  "base": "bb862204c97c6bb4c0da49cb6f1de90dd58af663",
+  "head": "efc3b1a7160801df2642f7f222eebd399face8b8",
+  "branch": "codex/etappe-6-reproduktion-design",
+  "changes": [
+    "docs/nacharbeit-2026-09-28/6-BESTAETIGUNGSDESIGN.md",
+    "docs/nacharbeit-2026-09-28/6-design-pruefung.json",
+    "docs/nacharbeit-2026-09-28/6-design-register.json",
+    "docs/nacharbeit-2026-09-28/6-ergebnis.json",
+    "docs/nacharbeit-2026-09-28/6-ledger.json.gz",
+    "docs/nacharbeit-2026-09-28/6-messung.log",
+    "docs/nacharbeit-2026-09-28/6-scope.json",
+    "docs/nacharbeit-2026-09-28/6-tests.log",
+    "docs/nacharbeit-2026-09-28/ETAPPE-6-ABSCHLUSS.md",
+    "docs/nacharbeit-2026-09-28/ETAPPEN.md",
+    "docs/nacharbeit-2026-09-28/START-NACH-6.md",
+    "tools/verify_6.py",
+    "tools/verify_6_backup.py",
+    "tools/verify_6_ci.py",
+    "tools/verify_6_design.py",
+    "tools/verify_6_scope.py",
+    "wissens-layer/00_STAND.md",
+    "wissens-layer/02_status/UEBERGABE.md"
+  ],
+  "protected_files_identical": 212,
+  "old_test_changes": "none",
+  "engine_site_workflows_contracts_inputs_identical": true,
+  "only_branch_push_workflow": "Tests",
+  "no_new_main_or_e444_e445_commits": true,
+  "private_repo_not_committed": true
+}

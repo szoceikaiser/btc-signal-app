@@ -1,0 +1,33 @@
+{
+  "schema": "a8-result-index-v1",
+  "base_sha": "419e3fda6494645b3c227350f1b5145bffd6271a",
+  "original_configurations": 86,
+  "conditional_spot_rows": 85,
+  "blocked_configuration": "V035",
+  "historical_v035_return": null,
+  "live_approval": false,
+  "a7_v035_v1_superseded_by": "A8-V035-causal-v2.json",
+  "a7_spot_result_bytes_unchanged": true,
+  "results": [
+    {
+      "file": "A7-resultindex-v1.json",
+      "sha256": "dd4662fe69ba24c9b656f4ec85f14ba4d6572fb328b4a06284f9edd710a2fce3"
+    },
+    {
+      "file": "A8-V035-causal-v2.json",
+      "sha256": "a492fbc533eefb549c11f90e914499ced5a2a5e5e1d072a3e27b1fd7ea2633d5"
+    },
+    {
+      "file": "A8-acceptance-v1.json",
+      "sha256": "b15f9c8875f8a78393d7da9ba3785ffa9927001e8ec2ed2f565e68b894b2389d"
+    },
+    {
+      "file": "A8-counterexamples-v1.json",
+      "sha256": "029bab05110f939d4ea84d0f63da5aa8890df385d732780f199724caa14c965a"
+    },
+    {
+      "file": "A8-prior-backup-verification.json",
+      "sha256": "48994a558653413d77d931a83e50a602843bec24d55abd2ee9ca80db3fb57448"
+    }
+  ]
+}

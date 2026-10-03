@@ -1,0 +1,66 @@
+{
+  "audit": "881e36a6271a6e49400d47da59342755e33cf402",
+  "audit_engine_chart_and_config_preserved": true,
+  "audit_register_sha256": "193d0aa8e50895713620740370e59c7861fb7aaa3194042208da6e46583eb468",
+  "config_changes": {
+    "_hinweis_muster_cvd": {
+      "after": "A2: usd ist die vor Ergebnismessung festgelegte versatzinvariante CVD-Definition. alt bleibt nur fuer historische Reproduktion; keine Renditeschwelle bestimmt die Korrektur.",
+      "before": "E43.3 (26.09.2026), Befund A2 der Gesamtpruefung docs/PRUEFUNG-2026-09-26-GESAMT.md. Werte: alt = wie bisher | usd = Muster 2 (Derivate-Pump) vergleicht Spot- und Futures-Delta als Dollar-Betraege im 2-Tage-Fenster. Grund: Der alte Vergleich teilte die Veraenderung durch den Stand der kumulierten Summe am Fensteranfang. Dieser Stand haengt nur davon ab, ab welcher Kerze die Summe zu laufen begann (live ab der ersten geladenen Kerze, im Backtest ab Datenbeginn) - dieselbe Marktlage ergab so je nach Startpunkt gesunder Trend oder Derivate-Pump, und live anders als im Backtest. Muster 2 sperrt Einstiege und loest den Restverkauf aus. Default AUS (alt). Erst nach Backtest-Messung einschalten: live nur, wenn usd gegen die Live-Zeile in BEIDEN Fensterhaelften mindestens 1 Punkt besser ist UND der Rueckgang nicht mehr als 1 Punkt tiefer liegt - der Bericht prueft das selbst (Abschnitt E43.3). GEMESSEN 26.09.2026 (Fenster 18.01.-26.09.2026): nur 2 von 1504 Kerzen anders erkannt, Rendite +35,3 gegen +35,3 Prozent, beide Haelften und Rueckgang identisch, 244 Signale in beiden Zeilen. Regel nicht erfuellt - bleibt alt. Siehe docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md."
+    },
+    "muster_cvd": {
+      "after": "usd",
+      "before": "alt"
+    }
+  },
+  "gates": {
+    "pages_upstream_main_only": true,
+    "production_jobs_main_only": true,
+    "safe_offline_branch": true
+  },
+  "main": "ca8ad2fb730174ca1887791d425ae01aa6a715e6",
+  "old_state": {
+    "has_delivery_journal": false,
+    "last_signal_ts": 1791014400000,
+    "migration_notes": [
+      "legacy_unversioned",
+      "live_fills_unknown",
+      "widerstand_exits_missing_default_0",
+      "prior_stop_maximum_unknown"
+    ],
+    "old_state_direct_provision_refused": true,
+    "pos_state": "T1",
+    "preserved_position_fields": [
+      "pos_state",
+      "direction",
+      "last_signal_ts",
+      "entry_ref",
+      "entry_pct",
+      "bestand_pct",
+      "tp_rungs",
+      "dip_buys",
+      "buy_rungs",
+      "last_stop_ts",
+      "stop_wartet",
+      "stop_wartet_inv"
+    ],
+    "updated_at": "2026-10-03T15:37:47Z",
+    "watch_file_at_main": false
+  },
+  "open": [
+    "host_and_store",
+    "migration_cutover_and_unknown_delivery",
+    "new_main_snapshot_before_activation",
+    "live_operator_approval"
+  ],
+  "production_activated": false,
+  "runtime_data_preserved_git_blob_sha256": {
+    "site/data/archiv/coinalyze_4h.json": "7db128f0901b54351146c32e1c9b4929acfbd94d27f4f99548c17984f2ebc73c",
+    "site/data/backtest.json": "884204a5ef59ac8e5491b565e32b29896b6cf371918c99726fa53c23e14c727b",
+    "site/data/backtest_signals.json": "d81ba2f7177ce9454098e64e37c9072d49ea6e95bc1cf1c7c5be05f7654dbcbd",
+    "site/data/coinalyze_probe.json": "ea81515b4105a70288e6810a39a3fca1e530f3296f28d2c402465e7f5fd8a8fd",
+    "site/data/oi_history.json": "e50f2e8bd85b52b555faa9883850ce131cc36e791c682bef06ca0d1e2f2b0d83",
+    "site/data/signals.json": "25c4e785101f7ed426fd5c67caec5f0bdecd697e12285e767b5ecacb902831ce",
+    "site/data/state.json": "a1662a04bf9a570036ed4c8dc0fd8d8fb949af0bfe44ced28e09344a9d49f9bf"
+  },
+  "schema": "production-p1-integration-v1"
+}

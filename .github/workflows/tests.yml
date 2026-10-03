@@ -11,3 +11,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Unit-Tests ausfuehren
         run: cd engine && python3 run_tests.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fixed scientific test dependency
+        run: python -m pip install numpy==2.3.5
+      - name: Synthetic statistics and offline latency protection tests
+        run: |
+          python tools/test_historical_stats.py
+          python tools/verify_n6_probes.py

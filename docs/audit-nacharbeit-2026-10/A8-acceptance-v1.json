@@ -1,0 +1,41 @@
+{
+  "schema": "a8-independent-acceptance-v1",
+  "register_ids": 22,
+  "original_configurations": 86,
+  "conditional_spot_rows": 85,
+  "blocked_rows": [
+    "V035"
+  ],
+  "indexed_file_hashes_verified": 1681,
+  "causal_files": 1250,
+  "run_modes": {
+    "half1": 170,
+    "half2": 170,
+    "grid": 850,
+    "capital05": 10,
+    "capital06": 10,
+    "fresh1": 20,
+    "fresh2": 20
+  },
+  "frozen_candles_aligned_unique_contiguous": 2493,
+  "f08_change_cannot_change_frozen_spot_results": true,
+  "a6_original_cases_verified": 316,
+  "a6_categories": {
+    "current_mutation_reached_assertion": 243,
+    "current_mutation_reached_expected_failure": 13,
+    "text_template_replaced_current_equivalent_reached": 30,
+    "retired_by_A2_default_contract": 2,
+    "retired_by_A2_asof_contract": 3,
+    "historical_only_absent_at_A5_base": 25
+  },
+  "a6_runtime_failures_checked": 14,
+  "m01_decisions": 76,
+  "m01_code_rows": 85,
+  "paired_statistics": 10,
+  "checkpoint_checks": 3,
+  "checkpoint_exact_parity": true,
+  "a7_index_sha256": "dd4662fe69ba24c9b656f4ec85f14ba4d6572fb328b4a06284f9edd710a2fce3",
+  "a8_v035_sha256": "a492fbc533eefb549c11f90e914499ced5a2a5e5e1d072a3e27b1fd7ea2633d5",
+  "historical_api_as_of_proven": false,
+  "live_approval": false
+}

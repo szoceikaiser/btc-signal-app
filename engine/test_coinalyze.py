@@ -151,7 +151,13 @@ def test_parser_ueberspringen_unvollstaendige_punkte():
 
 def _markt(sym, ex, base="BTC", quote="USDT", buysell=True):
     return {"symbol": sym, "exchange": ex, "symbol_on_exchange": sym.split(".")[0],
-            "base_asset": base, "quote_asset": quote, "has_buy_sell_data": buysell}
+            "base_asset": base, "quote_asset": quote, "has_buy_sell_data": buysell,
+            "oi_lq_vol_denominated_in": "BASE_ASSET"}
+
+
+def _fx(*quotes, start=1000, count=700):
+    """Synthetische, ausdruecklich gelieferte Quote/USD-Kurse."""
+    return {q: {start + i * 14400: 1.0 for i in range(count)} for q in quotes}
 
 
 def test_ablehnungsgrund_nennt_den_grund_statt_nur_nein():
@@ -207,8 +213,8 @@ def test_groesster_je_boerse_schlaegt_die_alte_usdt_rangfolge():
     kandidaten = {"C": [_markt("BTCUSDT.C", "C", quote="USDT"),
                         _markt("BTCUSD.C", "C", quote="USD")]}
     reihen = {
-        "BTCUSDT.C": {"hat_v_und_bv": True, "summe_v": 2.2, "punkte": 2005},
-        "BTCUSD.C":  {"hat_v_und_bv": True, "summe_v": 1800.0, "punkte": 2005},
+        "BTCUSDT.C": {"hat_v_und_bv": True, "summe_v": 2.2, "summe_v_usd": 176000.0, "punkte": 2005},
+        "BTCUSD.C":  {"hat_v_und_bv": True, "summe_v": 1800.0, "summe_v_usd": 144000000.0, "punkte": 2005},
     }
     g = coinalyze._groesster_je_boerse(kandidaten, reihen)
     assert g["C"]["symbol"] == "BTCUSD.C", g
@@ -221,7 +227,7 @@ def test_groesster_je_boerse_nimmt_keinen_markt_den_wir_nicht_lesen_koennen():
                         _markt("BTCUSDT.C", "C", quote="USDT")]}
     reihen = {
         "BTCUSD.C":  {"hat_v_und_bv": False, "summe_v": 9_999_999.0},   # unlesbar
-        "BTCUSDT.C": {"hat_v_und_bv": True, "summe_v": 2.2},
+        "BTCUSDT.C": {"hat_v_und_bv": True, "summe_v": 2.2, "summe_v_usd": 176000.0},
     }
     g = coinalyze._groesster_je_boerse(kandidaten, reihen)
     assert g["C"]["symbol"] == "BTCUSDT.C", g
@@ -238,7 +244,7 @@ def test_reihe_auswerten_summiert_das_volumen_ueber_alle_punkte():
         {"t": 1_700_028_800, "bv": 1.0, "c": 80000},        # ohne v -> zaehlt nicht mit
     ]}
     r = coinalyze._reihe_auswerten(e)
-    assert r["summe_v"] == 15.0, r
+    assert r["summe_v"] == 15.0 and r["summe_v_usd"] is None, r
     assert r["punkte"] == 3 and r["hat_v_und_bv"] is True, r
 
 
@@ -317,7 +323,8 @@ def test_spot_probe_waehlt_nach_volumen_und_nennt_fehlende_boersen():
         "BTCUSDT.C":  _punkte(601, v=2.2),
         "BTCUSD.C":   _punkte(31, v=900.0),                   # gewaehlt, 5 Tage
     }
-    r = coinalyze.spot_probe("KEY", opener=_opener(maerkte, je))
+    r = coinalyze.spot_probe("KEY", opener=_opener(maerkte, je),
+                            fx_je_quote=_fx("USDT", start=1_700_000_000))
     g = r["gewaehlt_je_boerse"]
     assert g["C"]["symbol"] == "BTCUSD.C", g              # Volumen schlaegt USDT-Vorrang
     assert g["A"]["symbol"] == "BTCUSDT.A", g
@@ -390,6 +397,7 @@ def test_spot_delta_summiert_ueber_die_boersen():
         "B.2": [_pkt(1000, 20.0, 5.0)],     # 2*5 - 20 = -10
     }
     summe, b = coinalyze.spot_delta_aggregiert("KEY", ["A.1", "B.2"],
+                                               einheiten={"A.1": "BTC", "B.2": "BTC"},
                                                opener=_ohlcv_opener(je))
     assert summe == {1000 * 1000: -6.0}, summe
     assert b["punkte_vollstaendig"] == 1 and b["punkte_ausgelassen"] == 0, b
@@ -405,6 +413,7 @@ def test_spot_delta_laesst_unvollstaendige_zeitpunkte_aus_und_zaehlt_sie():
         "B.2": [_pkt(1000, 20.0, 5.0),                        _pkt(3000, 20.0, 5.0)],
     }
     summe, b = coinalyze.spot_delta_aggregiert("KEY", ["A.1", "B.2"],
+                                               einheiten={"A.1": "BTC", "B.2": "BTC"},
                                                opener=_ohlcv_opener(je))
     assert set(summe) == {1000 * 1000, 3000 * 1000}, summe
     assert 2000 * 1000 not in summe, "unvollstaendiger Zeitpunkt darf nicht mitzaehlen"
@@ -416,17 +425,21 @@ def test_spot_delta_meldet_symbole_ohne_antwort():
     """Ein Markt, der gar nicht antwortet, darf nicht stillschweigend fehlen."""
     je = {"A.1": [_pkt(1000, 10.0, 7.0)]}
     summe, b = coinalyze.spot_delta_aggregiert("KEY", ["A.1", "FEHLT.9"],
+                                               einheiten={"A.1": "BTC", "FEHLT.9": "BTC"},
                                                opener=_ohlcv_opener(je))
     assert b["ohne_antwort"] == ["FEHLT.9"], b
     assert b["symbole"] == ["A.1"], b
-    assert summe == {1000 * 1000: 4.0}, summe       # laeuft weiter mit dem, was da ist
+    assert summe == {}, summe                        # ganzer Korb nicht auswertbar
+    assert b["punkte_ausgelassen"] == 1 and "fehler" in b, b
 
 
 def test_spot_delta_ueberspringt_punkte_ohne_v_oder_bv():
     je = {"A.1": [{"t": 1000, "v": 10.0},            # bv fehlt
                   {"t": 2000, "bv": 5.0},            # v fehlt
                   _pkt(3000, 10.0, 7.0)]}
-    summe, _ = coinalyze.spot_delta_aggregiert("KEY", ["A.1"], opener=_ohlcv_opener(je))
+    summe, _ = coinalyze.spot_delta_aggregiert("KEY", ["A.1"],
+                                              einheiten={"A.1": "BTC"},
+                                              opener=_ohlcv_opener(je))
     assert summe == {3000 * 1000: 4.0}, summe
 
 
@@ -441,9 +454,12 @@ def test_spot_symbole_groesster_gegen_alle_dollar():
         "BTCUSD.C":   [_pkt(1000, 50.0, 30.0)],
     }
     op = _ohlcv_opener(je, maerkte)
-    g = coinalyze.spot_symbole("KEY", wahl=coinalyze.SPOT_WAHL_GROESSTER, opener=op)
+    fx = _fx("USDT", "FDUSD")
+    g = coinalyze.spot_symbole("KEY", wahl=coinalyze.SPOT_WAHL_GROESSTER,
+                               opener=op, fx_je_quote=fx)
     assert g == {"A": ["BTCUSDT.A"], "C": ["BTCUSD.C"]}, g
-    a = coinalyze.spot_symbole("KEY", wahl=coinalyze.SPOT_WAHL_ALLE, opener=op)
+    a = coinalyze.spot_symbole("KEY", wahl=coinalyze.SPOT_WAHL_ALLE,
+                               opener=op, fx_je_quote=fx)
     assert sorted(a["A"]) == ["BTCFDUSD.A", "BTCUSDT.A"], a
     assert a["C"] == ["BTCUSD.C"], a
 
@@ -457,7 +473,7 @@ def test_spot_symbole_nimmt_bei_alle_dollar_nur_lesbare_reihen():
         "BTCFDUSD.A": [{"t": 1000, "v": 30.0, "c": 80000.0}],     # kein bv
     }
     a = coinalyze.spot_symbole("KEY", wahl=coinalyze.SPOT_WAHL_ALLE,
-                               opener=_ohlcv_opener(je, maerkte))
+                               opener=_ohlcv_opener(je, maerkte), fx_je_quote=_fx("USDT"))
     assert a["A"] == ["BTCUSDT.A"], a
 
 
@@ -475,7 +491,8 @@ def test_spot_auswahl_holt_die_marktliste_nur_EINMAL():
             zaehler["markt"] += 1
         return inner(req, timeout)
 
-    a = coinalyze.spot_auswahl("KEY", opener=zaehlend)
+    a = coinalyze.spot_auswahl("KEY", opener=zaehlend,
+                               fx_je_quote=_fx("USDT", "FDUSD"))
     assert zaehler["markt"] == 1, zaehler
     assert a[coinalyze.SPOT_WAHL_GROESSTER] == {"A": ["BTCUSDT.A"]}, a
     assert sorted(a[coinalyze.SPOT_WAHL_ALLE]["A"]) == ["BTCFDUSD.A", "BTCUSDT.A"], a
@@ -514,11 +531,14 @@ def test_nach_denominierung_trennt_einheiten_und_das_volumen_entscheidet():
     """
     gewaehlt = {
         "A": {"symbol": "BTCUSDT_PERP.A", "boerse": "Binance",
-              "denominierung": "BASE_ASSET", "summe_v": 1_000_000.0},
+              "denominierung": "BASE_ASSET", "summe_v": 1_000_000.0,
+              "summe_v_usd": 80_000_000_000.0},
         "3": {"symbol": "BTCUSD_PERP.3", "boerse": "OKX",
-              "denominierung": "QUOTE_ASSET", "summe_v": 5.0},
+              "denominierung": "QUOTE_ASSET", "summe_v": 5.0,
+              "summe_v_usd": 5.0},
         "6": {"symbol": "BTCUSD_PERP.6", "boerse": "Bybit",
-              "denominierung": "QUOTE_ASSET", "summe_v": 4.0},
+              "denominierung": "QUOTE_ASSET", "summe_v": 4.0,
+              "summe_v_usd": 4.0},
     }
     drin, raus = coinalyze._nach_denominierung(gewaehlt)
     assert drin == ["BTCUSDT_PERP.A"], drin          # Volumen schlaegt Mehrheit (2:1)
@@ -528,7 +548,7 @@ def test_nach_denominierung_trennt_einheiten_und_das_volumen_entscheidet():
 
 def test_nach_denominierung_laesst_alle_drin_wenn_die_einheit_gleich_ist():
     gewaehlt = {c: {"symbol": f"S.{c}", "boerse": c, "denominierung": "BASE_ASSET",
-                    "summe_v": 10.0} for c in ("A", "6", "3")}
+                    "summe_v": 10.0, "summe_v_usd": 800000.0} for c in ("A", "6", "3")}
     drin, raus = coinalyze._nach_denominierung(gewaehlt)
     assert sorted(drin) == ["S.3", "S.6", "S.A"], drin
     assert raus == [], raus
@@ -592,6 +612,7 @@ def test_fut_delta_aggregiert_rechnet_wie_das_spot_delta():
     je = {"A.1": [_pkt(1000, 10.0, 7.0)],       # +4
           "B.2": [_pkt(1000, 20.0, 5.0)]}       # -10
     summe, b = coinalyze.fut_delta_aggregiert("KEY", ["A.1", "B.2"],
+                                              einheiten={"A.1": "BASE_ASSET", "B.2": "BASE_ASSET"},
                                               opener=_hist_opener(je))
     assert summe == {1000 * 1000: -6.0}, summe
     assert "Denominierung" in b["einheit"], b
@@ -607,7 +628,8 @@ def test_perp_auswahl_waehlt_nach_volumen_und_gibt_die_denominierung_mit():
     je = {"BTCUSDT_PERP.A": _punkte(3, v=100.0),
           "BTCUSDC_PERP.A": _punkte(3, v=5.0),
           "BTCUSD_PERP.3":  _punkte(3, v=50.0)}
-    pa = coinalyze.perp_auswahl("KEY", opener=_hist_opener(je, maerkte))
+    pa = coinalyze.perp_auswahl("KEY", opener=_hist_opener(je, maerkte),
+                                fx_je_quote=_fx("USDT", "USDC", start=1_700_000_000))
     g = pa["gewaehlt"]
     assert g["A"]["symbol"] == "BTCUSDT_PERP.A", g               # Volumen entscheidet
     assert g["A"]["denominierung"] == "BASE_ASSET", g
@@ -638,7 +660,8 @@ def test_perp_auswahl_liefert_die_einheiten_trennung_gleich_mit():
                _perp("BTCUSD_PERP.3", "3", quote="USD", denom="QUOTE_ASSET")]
     je = {"BTCUSDT_PERP.A": _punkte(3, v=1000.0),
           "BTCUSD_PERP.3":  _punkte(3, v=5.0)}
-    pa = coinalyze.perp_auswahl("KEY", opener=_hist_opener(je, maerkte))
+    pa = coinalyze.perp_auswahl("KEY", opener=_hist_opener(je, maerkte),
+                                fx_je_quote=_fx("USDT", start=1_700_000_000))
     assert sorted(pa["alle_symbole"]) == ["BTCUSDT_PERP.A", "BTCUSD_PERP.3"], pa
     # Fuers Futures-CVD nur die Mehrheits-Denominierung (nach Volumen: Binance)
     assert pa["cvd_symbole"] == ["BTCUSDT_PERP.A"], pa
@@ -669,7 +692,8 @@ def test_auswahl_misst_nur_30_tage_die_datenabfrage_aber_das_volle_fenster():
     assert all(abs(t - coinalyze.AUSWAHL_TAGE) < 1 for t in spannen), spannen
 
     spannen.clear()
-    coinalyze.spot_delta_aggregiert("KEY", ["BTCUSDT.A"], opener=messend)
+    coinalyze.spot_delta_aggregiert("KEY", ["BTCUSDT.A"],
+                                   einheiten={"BTCUSDT.A": "BTC"}, opener=messend)
     assert all(abs(t - coinalyze.SPOT_REICHWEITE_TAGE) < 1 for t in spannen), spannen
 
 
@@ -971,6 +995,7 @@ def test_gewichtetes_mittel_meldet_symbole_ganz_ohne_gewichtsreihe():
     werte = {"A": {1: 0.01}, "OHNE_OI": {1: 0.99}}
     gewichte = {"A": {1: 10.0}}                      # OHNE_OI fehlt komplett
     m, b = coinalyze.gewichtetes_mittel(werte, gewichte, ["A", "OHNE_OI"], [], "x")
-    assert m == {1: 0.01}, m                         # nur A zaehlt
+    assert m == {}, m                                # ganzer Korb nicht auswertbar
     assert b["symbole"] == ["A"], b
     assert b["ohne_antwort"] == ["OHNE_OI"], b
+    assert "fehler" in b and b["punkte_ausgelassen"] == 1, b

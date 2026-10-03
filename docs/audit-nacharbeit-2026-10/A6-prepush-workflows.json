@@ -1,0 +1,78 @@
+{
+  "default_branch_sha": "55e4d7d598704c23f1aa3184b56b4805dbbaa8eb",
+  "branch": "codex/a1-audit-nacharbeit",
+  "workflow_count": 8,
+  "local_equals_current_default": false,
+  "only_branch_push_workflow": "tests.yml",
+  "tests_has_no_workflow_run_successor": true,
+  "workflows": {
+    "local": {
+      "archiv.yml": {
+        "sha256": "df0641d366a4d1ca1e754595b8e4099ddc77e17d481a66043639591df5de4da5",
+        "triggers": "on:\n  schedule:\n    - cron: \"47 3 * * *\"\n  workflow_dispatch:\n"
+      },
+      "backtest.yml": {
+        "sha256": "db8b7f2f3ea9f6c5012d6ceebe16867356340b41677bcc1a1a126f665e547965",
+        "triggers": "on:\n  workflow_dispatch:\n"
+      },
+      "coinalyze-test.yml": {
+        "sha256": "9b286bed66cd84fe4df663df1f84ab990b383a8b8d5dfead547246e2e4090151",
+        "triggers": "on:\n  workflow_dispatch:\n"
+      },
+      "lage.yml": {
+        "sha256": "00fa0de04d86c1661327b9af1d400556bbfeaef12d97fe1f5c2d6510b3f44c63",
+        "triggers": "on:\n  workflow_dispatch:\n\n# Absichtlich nur Lesen: Der Abruf schreibt nichts, also braucht er auch nichts."
+      },
+      "pages.yml": {
+        "sha256": "8e47d99bd2c59780911a834d5fdff238f66cd1f630a03766804c7cef27fff32b",
+        "triggers": "on:\n  push:\n    branches: [main]\n    paths: [\"site/**\"]\n  # GitHub loest bei einem Push, den ein Workflow mit dem Standard-GITHUB_TOKEN\n  # macht, KEINE weiteren Workflows aus (Schutz vor Endlosschleifen). Die Commits\n  # von \"Signal-Engine\" und \"Backtest\" aendern site/data, konnten die Webseite aber\n  # trotzdem nicht neu bauen: die veroeffentlichte Seite blieb auf dem Stand des\n  # letzten Pushes von Hand stehen (05.09.2026 aufgefallen - Backtest-Zahlen der\n  # Webseite waren 8 Tage alt). workflow_run schliesst diese Luecke.\n  workflow_run:\n    workflows: [\"Signal-Engine\", \"Backtest\"]\n    types: [completed]\n  workflow_dispatch:\n"
+      },
+      "signal.yml": {
+        "sha256": "c74ec04a7513eb6d417e15015d9199ef2e2ea466a906f1567df32505b7cef66c",
+        "triggers": "on:\n  schedule:\n    # Gezielt statt haeufig (Befund 2026-07-27): Der 15-Minuten-Takt wurde von GitHub\n    # massiv verworfen — statt ~96 Laeufen am Tag kamen nur 6-7 an, im Abstand von 1 bis\n    # 3,5 Stunden, alle gruen (kein Fehler, GitHub laesst Schedules bei Last einfach aus).\n    # Die Strategie wertet ABGESCHLOSSENE 4h-Kerzen aus (Schluss 00/04/08/12/16/20 UTC),\n    # dazwischen gibt es nichts zu tun.\n    #\n    # NACHMESSUNG 2026-07-29 (Kaiser): Der Versuch, das ueber die Anzahl zu loesen, ist\n    # GESCHEITERT und die Annahme dahinter war falsch. Von 4 Versuchen kam einer an; auf\n    # 7 Versuche erhoeht — es kam weiterhin GENAU EINER an (Verzug 2:26 h und 2:45 h),\n    # ein Kerzenschluss fiel ganz aus (8 h Luecke). In sechs beobachteten Fenstern gab es\n    # NIE zwei Laeufe. Bei echtem Zufall (p=0,25) haette man bei 7 Versuchen im Schnitt\n    # fast zwei erwartet. Das deutet auf eine Drosselung PRO REPOSITORY hin, nicht auf\n    # zufaelliges Verwerfen — mehr Cron-Eintraege helfen dagegen nicht.\n    #\n    # KONSEQUENZ: Der Zeitplan ist nur noch das NETZ. Puenktlich angestossen wird die\n    # Engine von aussen ueber workflow_dispatch (cron-job.org, Einrichtung siehe\n    # ANLEITUNG-PUENKTLICHER-START.md). Solche Anstoesse laufen nicht ueber die\n    # Schedule-Warteschlange und starten binnen Sekunden.\n    #\n    # Deshalb hier zurueck auf 2 Versuche je Kerzenschluss (12 Laeufe/Tag): Das reicht\n    # als Rueckfall, wenn der externe Dienst ausfaellt, und haelt die Actions-Liste\n    # uebersichtlich. Doppelte Nachrichten kann es nicht geben — die Engine merkt sich\n    # ueber pos.last_signal_ts, welche Kerze sie zuletzt ausgewertet hat.\n    #\n    # Erst ab Minute 2, damit die 4h-Kerze sicher geschlossen ist.\n    - cron: \"2,32 0,4,8,12,16,20 * * *\"\n  workflow_dispatch:\n    inputs:\n      test_telegram:\n        description: \"Nur Telegram-Testnachricht senden\"\n        type: boolean\n        default: false\n      resend_all:\n        description: \"Alle bisherigen Trigger erneut an Telegram senden\"\n        type: boolean\n        default: false\n"
+      },
+      "tests.yml": {
+        "sha256": "41b4dc53048f67d6c750235e3cacb66ac3488a845282001128da1222dcdac969",
+        "triggers": "on:\n  push:\n  workflow_dispatch:\n"
+      },
+      "watch.yml": {
+        "sha256": "69e28686f9323bb1a85923c2490b7852cf6db7928452294dbf00bd8e38a6446b",
+        "triggers": "on:\n  schedule:\n    - cron: \"8,23,38,53 * * * *\"\n  workflow_dispatch:\n"
+      }
+    },
+    "default_branch": {
+      "archiv.yml": {
+        "sha256": "df0641d366a4d1ca1e754595b8e4099ddc77e17d481a66043639591df5de4da5",
+        "triggers": "on:\n  schedule:\n    - cron: \"47 3 * * *\"\n  workflow_dispatch:\n"
+      },
+      "backtest.yml": {
+        "sha256": "db8b7f2f3ea9f6c5012d6ceebe16867356340b41677bcc1a1a126f665e547965",
+        "triggers": "on:\n  workflow_dispatch:\n"
+      },
+      "coinalyze-test.yml": {
+        "sha256": "740338396682de5b0588a3a4bab3a28f7521b900496ab18d7b9fd588793cdaf1",
+        "triggers": "on:\n  workflow_dispatch:\n"
+      },
+      "lage.yml": {
+        "sha256": "00fa0de04d86c1661327b9af1d400556bbfeaef12d97fe1f5c2d6510b3f44c63",
+        "triggers": "on:\n  workflow_dispatch:\n\n# Absichtlich nur Lesen: Der Abruf schreibt nichts, also braucht er auch nichts."
+      },
+      "pages.yml": {
+        "sha256": "8e47d99bd2c59780911a834d5fdff238f66cd1f630a03766804c7cef27fff32b",
+        "triggers": "on:\n  push:\n    branches: [main]\n    paths: [\"site/**\"]\n  # GitHub loest bei einem Push, den ein Workflow mit dem Standard-GITHUB_TOKEN\n  # macht, KEINE weiteren Workflows aus (Schutz vor Endlosschleifen). Die Commits\n  # von \"Signal-Engine\" und \"Backtest\" aendern site/data, konnten die Webseite aber\n  # trotzdem nicht neu bauen: die veroeffentlichte Seite blieb auf dem Stand des\n  # letzten Pushes von Hand stehen (05.09.2026 aufgefallen - Backtest-Zahlen der\n  # Webseite waren 8 Tage alt). workflow_run schliesst diese Luecke.\n  workflow_run:\n    workflows: [\"Signal-Engine\", \"Backtest\"]\n    types: [completed]\n  workflow_dispatch:\n"
+      },
+      "signal.yml": {
+        "sha256": "c74ec04a7513eb6d417e15015d9199ef2e2ea466a906f1567df32505b7cef66c",
+        "triggers": "on:\n  schedule:\n    # Gezielt statt haeufig (Befund 2026-07-27): Der 15-Minuten-Takt wurde von GitHub\n    # massiv verworfen — statt ~96 Laeufen am Tag kamen nur 6-7 an, im Abstand von 1 bis\n    # 3,5 Stunden, alle gruen (kein Fehler, GitHub laesst Schedules bei Last einfach aus).\n    # Die Strategie wertet ABGESCHLOSSENE 4h-Kerzen aus (Schluss 00/04/08/12/16/20 UTC),\n    # dazwischen gibt es nichts zu tun.\n    #\n    # NACHMESSUNG 2026-07-29 (Kaiser): Der Versuch, das ueber die Anzahl zu loesen, ist\n    # GESCHEITERT und die Annahme dahinter war falsch. Von 4 Versuchen kam einer an; auf\n    # 7 Versuche erhoeht — es kam weiterhin GENAU EINER an (Verzug 2:26 h und 2:45 h),\n    # ein Kerzenschluss fiel ganz aus (8 h Luecke). In sechs beobachteten Fenstern gab es\n    # NIE zwei Laeufe. Bei echtem Zufall (p=0,25) haette man bei 7 Versuchen im Schnitt\n    # fast zwei erwartet. Das deutet auf eine Drosselung PRO REPOSITORY hin, nicht auf\n    # zufaelliges Verwerfen — mehr Cron-Eintraege helfen dagegen nicht.\n    #\n    # KONSEQUENZ: Der Zeitplan ist nur noch das NETZ. Puenktlich angestossen wird die\n    # Engine von aussen ueber workflow_dispatch (cron-job.org, Einrichtung siehe\n    # ANLEITUNG-PUENKTLICHER-START.md). Solche Anstoesse laufen nicht ueber die\n    # Schedule-Warteschlange und starten binnen Sekunden.\n    #\n    # Deshalb hier zurueck auf 2 Versuche je Kerzenschluss (12 Laeufe/Tag): Das reicht\n    # als Rueckfall, wenn der externe Dienst ausfaellt, und haelt die Actions-Liste\n    # uebersichtlich. Doppelte Nachrichten kann es nicht geben — die Engine merkt sich\n    # ueber pos.last_signal_ts, welche Kerze sie zuletzt ausgewertet hat.\n    #\n    # Erst ab Minute 2, damit die 4h-Kerze sicher geschlossen ist.\n    - cron: \"2,32 0,4,8,12,16,20 * * *\"\n  workflow_dispatch:\n    inputs:\n      test_telegram:\n        description: \"Nur Telegram-Testnachricht senden\"\n        type: boolean\n        default: false\n      resend_all:\n        description: \"Alle bisherigen Trigger erneut an Telegram senden\"\n        type: boolean\n        default: false\n"
+      },
+      "tests.yml": {
+        "sha256": "63f4117c5871bcf1d9afaa02be5b1953ceca82f8f6890cfe260131d23787caac",
+        "triggers": "on:\n  push:\n  workflow_dispatch:\n"
+      },
+      "watch.yml": {
+        "sha256": "69e28686f9323bb1a85923c2490b7852cf6db7928452294dbf00bd8e38a6446b",
+        "triggers": "on:\n  schedule:\n    - cron: \"8,23,38,53 * * * *\"\n  workflow_dispatch:\n"
+      }
+    }
+  }
+}

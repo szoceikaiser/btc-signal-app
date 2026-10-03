@@ -1,0 +1,102 @@
+{
+  "total": 16,
+  "caught": 16,
+  "cases": [
+    {
+      "name": "intent_not_enqueued",
+      "baseline": "PASS",
+      "reached": "test_rejection_retries_same_intent_without_replaying_real_buy",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "identity_ignores_sequence",
+      "baseline": "PASS",
+      "reached": "test_stable_id_is_independent_of_dict_order_and_text_is_fixed",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "dry_run_pending",
+      "baseline": "PASS",
+      "reached": "test_dry_run_is_terminal_preview_even_when_credentials_appear",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "confirmed_resent",
+      "baseline": "PASS",
+      "reached": "test_confirmed_is_never_resent_on_restart",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "uncertain_retried",
+      "baseline": "PASS",
+      "reached": "test_timeout_after_acceptance_is_uncertain_never_automatically_retried",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "sending_not_saved",
+      "baseline": "PASS",
+      "reached": "test_commit_exists_before_any_transport_attempt",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "rejection_drops_queue",
+      "baseline": "PASS",
+      "reached": "test_rejection_retries_same_intent_without_replaying_real_buy",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "failed_message_overtaken",
+      "baseline": "PASS",
+      "reached": "test_middle_rejection_preserves_order_and_retries_only_remaining_messages",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "receipt_not_saved",
+      "baseline": "PASS",
+      "reached": "test_rejection_retries_same_intent_without_replaying_real_buy",
+      "caught": "ValueError"
+    },
+    {
+      "name": "interrupted_attempt_requeued",
+      "baseline": "PASS",
+      "reached": "test_receipt_write_failure_keeps_sending_then_uncertain_on_restart",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "target_change_ignored",
+      "baseline": "PASS",
+      "reached": "test_goal_change_blocks_rejected_message_and_does_not_persist_chat_or_token",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "true_without_message_id_accepted",
+      "baseline": "PASS",
+      "reached": "test_transport_requires_ok_and_message_id",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "server_failure_retried",
+      "baseline": "PASS",
+      "reached": "test_transport_explicit_rejection_and_server_failure_are_distinguished",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "projection_drops_signal_history",
+      "baseline": "PASS",
+      "reached": "test_state_projection_damage_is_repaired_from_canonical_history_and_oi",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "unknown_schema_accepted",
+      "baseline": "PASS",
+      "reached": "test_invalid_schema_stops_before_transport_or_state_overwrite",
+      "caught": "AssertionError"
+    },
+    {
+      "name": "text_integrity_ignored",
+      "baseline": "PASS",
+      "reached": "test_text_tampering_and_invalid_projection_stop_before_send",
+      "caught": "AssertionError"
+    }
+  ]
+}

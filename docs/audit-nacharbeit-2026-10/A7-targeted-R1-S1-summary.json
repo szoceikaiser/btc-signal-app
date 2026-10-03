@@ -1,0 +1,853 @@
+{
+  "schema": "a7-targeted-v1",
+  "package": "R1",
+  "scenario": "S1",
+  "flow_sha256": "3fdc7d8f2860eb2f8fdf1a93774f46ca60b859b46875633a3ce62753e278e29c",
+  "design_sha256": "a988d3d48a3f08391deb15bc3f983628474ac85b768bcf8d0688409b70fa1625",
+  "source_N6_summary_sha256": "3bfd9e3ea9839be587f53d2a21adcc6d7a9f049dbf09f84d3d0d4c47349d5800",
+  "historical_api_as_of_proven": false,
+  "rows": [
+    {
+      "id": "V000",
+      "modelled": {
+        "model": "V1_close_to_next_open_zero_latency",
+        "ende": 12813.806527879868,
+        "rendite_pct": 28.138065278798674,
+        "fees": 505.13223850963703,
+        "cash": 6984.607983958757,
+        "btc": 0.06910071188167088,
+        "cost_basis": 5826.388178761417,
+        "cost_entry": 84317.339432604,
+        "dd_close_pct": 8.498947944073432,
+        "dd_intrabar_lower_pct": 9.94277229666507,
+        "dd_intrabar_upper_pct": 9.94277229666507,
+        "unfilled_end_of_data": 0,
+        "start_ms": 1768766400000,
+        "end_ms": 1790683200000,
+        "verification": {
+          "costs": {
+            "fills": 173,
+            "closes": 1522,
+            "remaining_cost": 5826.388178761418,
+            "acquired_cost": 253948.22325521192,
+            "disposed_cost": 248121.8350764505,
+            "realized_pnl": 2810.9961627201733
+          },
+          "audit_book": true,
+          "fills": 173,
+          "closes": 1522,
+          "cycles": 23,
+          "avg_exposure_pct": 33.60629193065176,
+          "turnover": 505132.2385096367
+        },
+        "periods": [
+          {
+            "kind": "month",
+            "label": "2026-01",
+            "start_ms": 1768766400000,
+            "end_ms": 1769904000000,
+            "bars": 79,
+            "partial_month": true,
+            "start_equity": 10000.0,
+            "end_equity": 9690.26036039781,
+            "usd_contribution": -309.73963960219044,
+            "return_pct": -3.097396396021901,
+            "section_dd_pct": [
+              3.097396396021901,
+              3.336703553206899,
+              3.336703553206899
+            ],
+            "fees": 13.696957317715526,
+            "cash": 9690.26036039781,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 6.29154144853151
+          },
+          {
+            "kind": "month",
+            "label": "2026-02",
+            "start_ms": 1769904000000,
+            "end_ms": 1772323200000,
+            "bars": 168,
+            "partial_month": false,
+            "start_equity": 9690.26036039781,
+            "end_equity": 9922.935048055851,
+            "usd_contribution": 232.67468765804188,
+            "return_pct": 2.401119051547229,
+            "section_dd_pct": [
+              7.5498136830215445,
+              9.94277229666507,
+              9.94277229666507
+            ],
+            "fees": 11.187553146224367,
+            "cash": 0.0,
+            "btc": 0.1481626405531977,
+            "cost_basis": 9711.762715829569,
+            "avg_exposure_pct": 27.901876255228753
+          },
+          {
+            "kind": "month",
+            "label": "2026-03",
+            "start_ms": 1772323200000,
+            "end_ms": 1775001600000,
+            "bars": 186,
+            "partial_month": false,
+            "start_equity": 9922.935048055851,
+            "end_equity": 10876.80041939536,
+            "usd_contribution": 953.8653713395088,
+            "return_pct": 9.612734203338302,
+            "section_dd_pct": [
+              5.681005401383132,
+              6.658681732454541,
+              6.658681732454541
+            ],
+            "fees": 90.0227567612581,
+            "cash": 10876.80041939536,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 45.004511903698464
+          },
+          {
+            "kind": "month",
+            "label": "2026-04",
+            "start_ms": 1775001600000,
+            "end_ms": 1777593600000,
+            "bars": 180,
+            "partial_month": false,
+            "start_equity": 10876.80041939536,
+            "end_equity": 11653.824140021621,
+            "usd_contribution": 777.0237206262609,
+            "return_pct": 7.143862998908057,
+            "section_dd_pct": [
+              3.1978285140670692,
+              3.8090143974200186,
+              3.8090143974200186
+            ],
+            "fees": 108.63569660094512,
+            "cash": 0.0,
+            "btc": 0.1526437158869301,
+            "cost_basis": 11690.003090422395,
+            "avg_exposure_pct": 33.61729696421428
+          },
+          {
+            "kind": "month",
+            "label": "2026-05",
+            "start_ms": 1777593600000,
+            "end_ms": 1780272000000,
+            "bars": 186,
+            "partial_month": false,
+            "start_equity": 11653.824140021621,
+            "end_equity": 12089.079582389075,
+            "usd_contribution": 435.2554423674537,
+            "return_pct": 3.7348722371113974,
+            "section_dd_pct": [
+              4.241311069548271,
+              5.193216047488757,
+              5.193216047488757
+            ],
+            "fees": 44.27586048375268,
+            "cash": 12089.079582389075,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 40.80355969573636
+          },
+          {
+            "kind": "month",
+            "label": "2026-06",
+            "start_ms": 1780272000000,
+            "end_ms": 1782864000000,
+            "bars": 180,
+            "partial_month": false,
+            "start_equity": 12089.079582389075,
+            "end_equity": 12058.846647725919,
+            "usd_contribution": -30.232934663155902,
+            "return_pct": -0.2500846690363323,
+            "section_dd_pct": [
+              3.5303413002155337,
+              4.204626037311144,
+              4.204626037311144
+            ],
+            "fees": 44.192534087047875,
+            "cash": 12058.846647725919,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 12.30466982253649
+          },
+          {
+            "kind": "month",
+            "label": "2026-07",
+            "start_ms": 1782864000000,
+            "end_ms": 1785542400000,
+            "bars": 186,
+            "partial_month": false,
+            "start_equity": 12058.846647725919,
+            "end_equity": 12156.120547105742,
+            "usd_contribution": 97.27389937982298,
+            "return_pct": 0.8066600581421834,
+            "section_dd_pct": [
+              3.3952626663563024,
+              4.130319416269968,
+              4.130319416269968
+            ],
+            "fees": 50.33550631593813,
+            "cash": 12156.120547105742,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 27.078024259673917
+          },
+          {
+            "kind": "month",
+            "label": "2026-08",
+            "start_ms": 1785542400000,
+            "end_ms": 1788220800000,
+            "bars": 186,
+            "partial_month": false,
+            "start_equity": 12156.120547105742,
+            "end_equity": 12454.776753142622,
+            "usd_contribution": 298.65620603687967,
+            "return_pct": 2.456838140750306,
+            "section_dd_pct": [
+              4.622835486518184,
+              5.146403281365497,
+              7.23041726618705
+            ],
+            "fees": 73.3601127267358,
+            "cash": 0.0,
+            "btc": 0.15849544787496644,
+            "cost_basis": 12457.907543720983,
+            "avg_exposure_pct": 39.44893446671299
+          },
+          {
+            "kind": "month",
+            "label": "2026-09",
+            "start_ms": 1788220800000,
+            "end_ms": 1790683200000,
+            "bars": 171,
+            "partial_month": true,
+            "start_equity": 12454.776753142622,
+            "end_equity": 12813.806527879868,
+            "usd_contribution": 359.02977473724604,
+            "return_pct": 2.8826672838327294,
+            "section_dd_pct": [
+              5.879935442505435,
+              6.941280995138765,
+              6.941280995138765
+            ],
+            "fees": 69.42526107001942,
+            "cash": 6984.607983958757,
+            "btc": 0.06910071188167088,
+            "cost_basis": 5826.388178761417,
+            "avg_exposure_pct": 54.75999807556475
+          },
+          {
+            "kind": "third",
+            "label": "1",
+            "start_ms": 1768766400000,
+            "end_ms": 1776067200000,
+            "bars": 507,
+            "partial_month": false,
+            "start_equity": 10000.0,
+            "end_equity": 11282.416291555943,
+            "usd_contribution": 1282.4162915559427,
+            "return_pct": 12.824162915559434,
+            "section_dd_pct": [
+              8.498947944073432,
+              9.94277229666507,
+              9.94277229666507
+            ],
+            "fees": 177.78411549670625,
+            "cash": 11282.416291555943,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 31.598599786113624
+          },
+          {
+            "kind": "third",
+            "label": "2",
+            "start_ms": 1776067200000,
+            "end_ms": 1783368000000,
+            "bars": 507,
+            "partial_month": false,
+            "start_equity": 11282.416291555943,
+            "end_equity": 12058.846647725919,
+            "usd_contribution": 776.4303561699762,
+            "return_pct": 6.8817736919623895,
+            "section_dd_pct": [
+              4.962264960392437,
+              5.826375977863019,
+              5.826375977863019
+            ],
+            "fees": 134.22724290023743,
+            "cash": 12058.846647725919,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 26.410872254167316
+          },
+          {
+            "kind": "third",
+            "label": "3",
+            "start_ms": 1783368000000,
+            "end_ms": 1790683200000,
+            "bars": 508,
+            "partial_month": false,
+            "start_equity": 12058.846647725919,
+            "end_equity": 12813.806527879868,
+            "usd_contribution": 754.9598801539487,
+            "return_pct": 6.2606309061598475,
+            "section_dd_pct": [
+              6.815915544032869,
+              7.408049502671698,
+              7.408049502671698
+            ],
+            "fees": 193.12088011269336,
+            "cash": 6984.607983958757,
+            "btc": 0.06910071188167088,
+            "cost_basis": 5826.388178761417,
+            "avg_exposure_pct": 42.791287389821925
+          }
+        ],
+        "risk_phases": [
+          {
+            "dd_pct": 8.498947944073432,
+            "maximum": {
+              "peak_at": 1773705600000,
+              "peak_event": "close",
+              "trough_at": 1775188800000,
+              "trough_event": "close",
+              "dd_pct": 8.498947944073432,
+              "recovered_at": null
+            },
+            "largest_episodes": [
+              {
+                "peak_at": 1773705600000,
+                "peak_event": "close",
+                "trough_at": 1775188800000,
+                "trough_event": "close",
+                "dd_pct": 8.498947944073432,
+                "recovered_at": 1776830400000
+              },
+              {
+                "peak_at": 1772049600000,
+                "peak_event": "close",
+                "trough_at": 1772265600000,
+                "trough_event": "close",
+                "dd_pct": 7.5498136830215445,
+                "recovered_at": 1772467200000
+              },
+              {
+                "peak_at": 1778457600000,
+                "peak_event": "close",
+                "trough_at": 1787126400000,
+                "trough_event": "close",
+                "dd_pct": 7.277100736549624,
+                "recovered_at": 1788451200000
+              }
+            ]
+          },
+          {
+            "dd_pct": 9.94277229666507,
+            "maximum": {
+              "peak_at": 1772064000000,
+              "peak_event": "high",
+              "trough_at": 1772265600000,
+              "trough_event": "low",
+              "dd_pct": 9.94277229666507,
+              "recovered_at": null
+            },
+            "largest_episodes": [
+              {
+                "peak_at": 1772064000000,
+                "peak_event": "high",
+                "trough_at": 1772265600000,
+                "trough_event": "low",
+                "dd_pct": 9.94277229666507,
+                "recovered_at": 1772481600000
+              },
+              {
+                "peak_at": 1773720000000,
+                "peak_event": "high",
+                "trough_at": 1775232000000,
+                "trough_event": "low",
+                "dd_pct": 9.452016358670912,
+                "recovered_at": 1776844800000
+              },
+              {
+                "peak_at": 1778788800000,
+                "peak_event": "high",
+                "trough_at": 1787126400000,
+                "trough_event": "low",
+                "dd_pct": 8.109617225401033,
+                "recovered_at": 1788451200000
+              }
+            ]
+          },
+          {
+            "dd_pct": 9.94277229666507,
+            "maximum": {
+              "peak_at": 1772064000000,
+              "peak_event": "high",
+              "trough_at": 1772265600000,
+              "trough_event": "low",
+              "dd_pct": 9.94277229666507,
+              "recovered_at": null
+            },
+            "largest_episodes": [
+              {
+                "peak_at": 1772064000000,
+                "peak_event": "high",
+                "trough_at": 1772265600000,
+                "trough_event": "low",
+                "dd_pct": 9.94277229666507,
+                "recovered_at": 1772481600000
+              },
+              {
+                "peak_at": 1773720000000,
+                "peak_event": "high",
+                "trough_at": 1775232000000,
+                "trough_event": "low",
+                "dd_pct": 9.452016358670912,
+                "recovered_at": 1776844800000
+              },
+              {
+                "peak_at": 1778788800000,
+                "peak_event": "high",
+                "trough_at": 1787126400000,
+                "trough_event": "low",
+                "dd_pct": 8.109617225401033,
+                "recovered_at": 1788451200000
+              }
+            ]
+          }
+        ],
+        "final_exposure_pct": 45.491544852328836,
+        "result_sha256": "eb03899b8e48b57d287dc0567ac60ec4016cfc0ca4e32c0e7dab5be1134c5e83"
+      },
+      "previous_N6_end": 12813.806527879868,
+      "delta_end_usd": 0.0,
+      "elapsed_seconds": 22.92200000002049,
+      "independent_account_verified": true
+    },
+    {
+      "id": "V004",
+      "modelled": {
+        "model": "V1_close_to_next_open_zero_latency",
+        "ende": 12639.843721547535,
+        "rendite_pct": 26.398437215475347,
+        "fees": 558.8088542748991,
+        "cash": 6889.783545695468,
+        "btc": 0.0681625867638659,
+        "cost_basis": 5747.2879647732025,
+        "cost_entry": 84317.339432604,
+        "dd_close_pct": 9.063573064064611,
+        "dd_intrabar_lower_pct": 10.24370044353049,
+        "dd_intrabar_upper_pct": 10.24370044353049,
+        "unfilled_end_of_data": 0,
+        "start_ms": 1768766400000,
+        "end_ms": 1790683200000,
+        "verification": {
+          "costs": {
+            "fills": 198,
+            "closes": 1522,
+            "remaining_cost": 5747.287964773203,
+            "acquired_cost": 280820.5412080684,
+            "disposed_cost": 275073.2532432952,
+            "realized_pnl": 2637.0715104686706
+          },
+          "audit_book": true,
+          "fills": 198,
+          "closes": 1522,
+          "cycles": 25,
+          "avg_exposure_pct": 34.577636245244314,
+          "turnover": 558808.8542748992
+        },
+        "periods": [
+          {
+            "kind": "month",
+            "label": "2026-01",
+            "start_ms": 1768766400000,
+            "end_ms": 1769904000000,
+            "bars": 79,
+            "partial_month": true,
+            "start_equity": 10000.0,
+            "end_equity": 9690.26036039781,
+            "usd_contribution": -309.73963960219044,
+            "return_pct": -3.097396396021901,
+            "section_dd_pct": [
+              3.097396396021901,
+              3.336703553206899,
+              3.336703553206899
+            ],
+            "fees": 13.696957317715526,
+            "cash": 9690.26036039781,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 6.29154144853151
+          },
+          {
+            "kind": "month",
+            "label": "2026-02",
+            "start_ms": 1769904000000,
+            "end_ms": 1772323200000,
+            "bars": 168,
+            "partial_month": false,
+            "start_equity": 9690.26036039781,
+            "end_equity": 9864.82416839501,
+            "usd_contribution": 174.56380799719955,
+            "return_pct": 1.8014356839224588,
+            "section_dd_pct": [
+              7.5498136830215445,
+              9.942772296665048,
+              9.942772296665048
+            ],
+            "fees": 15.818917580313855,
+            "cash": 0.0,
+            "btc": 0.14729496769897432,
+            "cost_basis": 9658.229136983418,
+            "avg_exposure_pct": 30.546627277732206
+          },
+          {
+            "kind": "month",
+            "label": "2026-03",
+            "start_ms": 1772323200000,
+            "end_ms": 1775001600000,
+            "bars": 186,
+            "partial_month": false,
+            "start_equity": 9864.82416839501,
+            "end_equity": 10861.951797199868,
+            "usd_contribution": 997.1276288048593,
+            "return_pct": 10.107910813042809,
+            "section_dd_pct": [
+              6.059517529366476,
+              7.273300253272819,
+              7.273300253272819
+            ],
+            "fees": 101.05452741524165,
+            "cash": 10861.951797199868,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 46.76709637844638
+          },
+          {
+            "kind": "month",
+            "label": "2026-04",
+            "start_ms": 1775001600000,
+            "end_ms": 1777593600000,
+            "bars": 180,
+            "partial_month": false,
+            "start_equity": 10861.951797199868,
+            "end_equity": 11640.287528806013,
+            "usd_contribution": 778.3357316061447,
+            "return_pct": 7.165707840894608,
+            "section_dd_pct": [
+              3.1978285140671026,
+              3.8090143974200297,
+              3.8090143974200297
+            ],
+            "fees": 115.75119441722043,
+            "cash": 0.0,
+            "btc": 0.15246641111455317,
+            "cost_basis": 11676.424455199915,
+            "avg_exposure_pct": 34.02166073736709
+          },
+          {
+            "kind": "month",
+            "label": "2026-05",
+            "start_ms": 1777593600000,
+            "end_ms": 1780272000000,
+            "bars": 186,
+            "partial_month": false,
+            "start_equity": 11640.287528806013,
+            "end_equity": 12075.037396039328,
+            "usd_contribution": 434.74986723331494,
+            "return_pct": 3.7348722371113974,
+            "section_dd_pct": [
+              4.241311069548281,
+              5.193216047488747,
+              5.193216047488747
+            ],
+            "fees": 44.224431433305035,
+            "cash": 12075.037396039328,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 40.80355969573636
+          },
+          {
+            "kind": "month",
+            "label": "2026-06",
+            "start_ms": 1780272000000,
+            "end_ms": 1782864000000,
+            "bars": 180,
+            "partial_month": false,
+            "start_equity": 12075.037396039328,
+            "end_equity": 12044.42870419949,
+            "usd_contribution": -30.608691839837775,
+            "return_pct": -0.2534873461334186,
+            "section_dd_pct": [
+              3.5455280874892026,
+              4.204626037311132,
+              4.204626037311132
+            ],
+            "fees": 50.18048361643707,
+            "cash": 12044.42870419949,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 12.57498146653737
+          },
+          {
+            "kind": "month",
+            "label": "2026-07",
+            "start_ms": 1782864000000,
+            "end_ms": 1785542400000,
+            "bars": 186,
+            "partial_month": false,
+            "start_equity": 12044.42870419949,
+            "end_equity": 12071.188249047153,
+            "usd_contribution": 26.759544847662255,
+            "return_pct": 0.22217363317806882,
+            "section_dd_pct": [
+              3.4144200787166956,
+              4.153522566333878,
+              4.153522566333878
+            ],
+            "fees": 56.402234510018566,
+            "cash": 12071.188249047153,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 27.716527215804643
+          },
+          {
+            "kind": "month",
+            "label": "2026-08",
+            "start_ms": 1785542400000,
+            "end_ms": 1788220800000,
+            "bars": 186,
+            "partial_month": false,
+            "start_equity": 12071.188249047153,
+            "end_equity": 12338.570780642824,
+            "usd_contribution": 267.382531595671,
+            "return_pct": 2.215047318285146,
+            "section_dd_pct": [
+              4.798104950158743,
+              5.347242711349464,
+              7.23041726618705
+            ],
+            "fees": 86.96522404859624,
+            "cash": 0.0,
+            "btc": 0.15701664837320467,
+            "cost_basis": 12341.4681985567,
+            "avg_exposure_pct": 41.55234552198641
+          },
+          {
+            "kind": "month",
+            "label": "2026-09",
+            "start_ms": 1788220800000,
+            "end_ms": 1790683200000,
+            "bars": 171,
+            "partial_month": true,
+            "start_equity": 12338.570780642824,
+            "end_equity": 12639.843721547535,
+            "usd_contribution": 301.2729409047115,
+            "return_pct": 2.441716680649586,
+            "section_dd_pct": [
+              5.879935442505513,
+              6.9412809951388095,
+              6.9412809951388095
+            ],
+            "fees": 74.7148839360507,
+            "cash": 6889.783545695468,
+            "btc": 0.0681625867638659,
+            "cost_basis": 5747.2879647732025,
+            "avg_exposure_pct": 55.1973640493504
+          },
+          {
+            "kind": "third",
+            "label": "1",
+            "start_ms": 1768766400000,
+            "end_ms": 1776067200000,
+            "bars": 507,
+            "partial_month": false,
+            "start_equity": 10000.0,
+            "end_equity": 11269.311092689339,
+            "usd_contribution": 1269.3110926893387,
+            "return_pct": 12.69311092689338,
+            "section_dd_pct": [
+              9.063573064064611,
+              10.24370044353049,
+              10.24370044353049
+            ],
+            "fees": 200.6159000302595,
+            "cash": 11269.311092689339,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 33.26515671560317
+          },
+          {
+            "kind": "third",
+            "label": "2",
+            "start_ms": 1776067200000,
+            "end_ms": 1783368000000,
+            "bars": 507,
+            "partial_month": false,
+            "start_equity": 11269.311092689339,
+            "end_equity": 12044.42870419949,
+            "usd_contribution": 775.1176115101516,
+            "return_pct": 6.878127732341932,
+            "section_dd_pct": [
+              4.965506895218208,
+              5.826375977863019,
+              5.826375977863019
+            ],
+            "fees": 140.11061174997408,
+            "cash": 12044.42870419949,
+            "btc": 0.0,
+            "cost_basis": 0.0,
+            "avg_exposure_pct": 26.50684088517354
+          },
+          {
+            "kind": "third",
+            "label": "3",
+            "start_ms": 1783368000000,
+            "end_ms": 1790683200000,
+            "bars": 508,
+            "partial_month": false,
+            "start_equity": 12044.42870419949,
+            "end_equity": 12639.843721547535,
+            "usd_contribution": 595.4150173480448,
+            "return_pct": 4.943489076741714,
+            "section_dd_pct": [
+              6.984825621285551,
+              7.57815016932204,
+              7.57815016932204
+            ],
+            "fees": 218.08234249466548,
+            "cash": 6889.783545695468,
+            "btc": 0.0681625867638659,
+            "cost_basis": 5747.2879647732025,
+            "avg_exposure_pct": 43.94244012139381
+          }
+        ],
+        "risk_phases": [
+          {
+            "dd_pct": 9.063573064064611,
+            "maximum": {
+              "peak_at": 1773705600000,
+              "peak_event": "close",
+              "trough_at": 1775188800000,
+              "trough_event": "close",
+              "dd_pct": 9.063573064064611,
+              "recovered_at": null
+            },
+            "largest_episodes": [
+              {
+                "peak_at": 1773705600000,
+                "peak_event": "close",
+                "trough_at": 1775188800000,
+                "trough_event": "close",
+                "dd_pct": 9.063573064064611,
+                "recovered_at": 1776844800000
+              },
+              {
+                "peak_at": 1778457600000,
+                "peak_event": "close",
+                "trough_at": 1787126400000,
+                "trough_event": "close",
+                "dd_pct": 7.967615132705941,
+                "recovered_at": 1788451200000
+              },
+              {
+                "peak_at": 1772049600000,
+                "peak_event": "close",
+                "trough_at": 1772265600000,
+                "trough_event": "close",
+                "dd_pct": 7.5498136830215445,
+                "recovered_at": 1772467200000
+              }
+            ]
+          },
+          {
+            "dd_pct": 10.24370044353049,
+            "maximum": {
+              "peak_at": 1773720000000,
+              "peak_event": "high",
+              "trough_at": 1775232000000,
+              "trough_event": "low",
+              "dd_pct": 10.24370044353049,
+              "recovered_at": null
+            },
+            "largest_episodes": [
+              {
+                "peak_at": 1773720000000,
+                "peak_event": "high",
+                "trough_at": 1775232000000,
+                "trough_event": "low",
+                "dd_pct": 10.24370044353049,
+                "recovered_at": 1776844800000
+              },
+              {
+                "peak_at": 1772064000000,
+                "peak_event": "high",
+                "trough_at": 1772265600000,
+                "trough_event": "low",
+                "dd_pct": 9.942772296665048,
+                "recovered_at": 1772481600000
+              },
+              {
+                "peak_at": 1778788800000,
+                "peak_event": "high",
+                "trough_at": 1787126400000,
+                "trough_event": "low",
+                "dd_pct": 8.793931808726253,
+                "recovered_at": 1788451200000
+              }
+            ]
+          },
+          {
+            "dd_pct": 10.24370044353049,
+            "maximum": {
+              "peak_at": 1773720000000,
+              "peak_event": "high",
+              "trough_at": 1775232000000,
+              "trough_event": "low",
+              "dd_pct": 10.24370044353049,
+              "recovered_at": null
+            },
+            "largest_episodes": [
+              {
+                "peak_at": 1773720000000,
+                "peak_event": "high",
+                "trough_at": 1775232000000,
+                "trough_event": "low",
+                "dd_pct": 10.24370044353049,
+                "recovered_at": 1776844800000
+              },
+              {
+                "peak_at": 1772064000000,
+                "peak_event": "high",
+                "trough_at": 1772265600000,
+                "trough_event": "low",
+                "dd_pct": 9.942772296665048,
+                "recovered_at": 1772481600000
+              },
+              {
+                "peak_at": 1778788800000,
+                "peak_event": "high",
+                "trough_at": 1787126400000,
+                "trough_event": "low",
+                "dd_pct": 8.793931808726253,
+                "recovered_at": 1788451200000
+              }
+            ]
+          }
+        ],
+        "final_exposure_pct": 45.491544852328836,
+        "result_sha256": "6ccadf8bfed773b177162079d2c20b0d7d6729ba310c300ff5719034a8c7652a"
+      },
+      "previous_N6_end": 12639.843721547535,
+      "delta_end_usd": 0.0,
+      "elapsed_seconds": 22.5,
+      "independent_account_verified": true
+    }
+  ],
+  "delta_pair_usd": -173.96280633233255,
+  "returns_calculated": true
+}

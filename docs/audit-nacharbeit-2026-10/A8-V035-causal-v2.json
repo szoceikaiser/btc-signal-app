@@ -1,0 +1,153 @@
+{
+  "independent_reference_checks": [
+    {
+      "method": "independent Fraction orders/FIFO/fees/hourly funding/marks",
+      "events_checked": 4557,
+      "all_hourly_marks_checked": true,
+      "first_risk_at": 1776434400000,
+      "max_error_usd": 0.0,
+      "tolerance_usd": 1e-18,
+      "passed": true
+    },
+    {
+      "method": "independent Fraction orders/FIFO/fees/hourly funding/marks",
+      "events_checked": 146,
+      "all_hourly_marks_checked": true,
+      "first_risk_at": null,
+      "max_error_usd": 0.0,
+      "tolerance_usd": 1e-18,
+      "passed": true
+    },
+    {
+      "method": "independent Fraction orders/FIFO/fees/hourly funding/marks",
+      "events_checked": 4557,
+      "all_hourly_marks_checked": true,
+      "first_risk_at": 1776434400000,
+      "max_error_usd": 0.0,
+      "tolerance_usd": 1e-18,
+      "passed": true
+    },
+    {
+      "method": "independent Fraction orders/FIFO/fees/hourly funding/marks",
+      "events_checked": 4557,
+      "all_hourly_marks_checked": true,
+      "first_risk_at": 1776434400000,
+      "max_error_usd": 0.0,
+      "tolerance_usd": 1e-18,
+      "passed": true
+    }
+  ],
+  "schema": "a8-v035-causal-position-discovery-v2",
+  "contract": "closed 4h decision; next contiguous 4h open; 1x PF_XBTUSD linear USD book; current-cycle peak and realized-wallet budget; hourly absolute Kraken funding at period end",
+  "model_fee": "0.001 S0 assumption, not historical Kraken tariff",
+  "parameter_sha256": "fc2706be12cfdd014e31e575397f30157dc8c88ca17e81c63726a94943ed868b",
+  "manifest_sha256": "147fc0a54e90abb571bd55ca3309e57cca8a6fbd145a11754c2a3028a252f106",
+  "flow_sha256": "3fdc7d8f2860eb2f8fdf1a93774f46ca60b859b46875633a3ce62753e278e29c",
+  "funding_sha256": "49ca8546d8e7508777e4797b2dd25f697a5ed63c1213e5bf77a160ef31a04035",
+  "scenario": "zero placeholders ONLY to discover position sensitivity; scenario P&L is not a historical return",
+  "gap_positions": [
+    {
+      "rate_at": 1771005600000,
+      "settle_at": 1771009200000,
+      "side": "short",
+      "qty": "0.0818",
+      "assumed_absolute_rate": "0"
+    },
+    {
+      "rate_at": 1778306400000,
+      "settle_at": 1778310000000,
+      "side": "long",
+      "qty": "0.1088",
+      "assumed_absolute_rate": "0"
+    }
+  ],
+  "illustrative_sensitivity": [
+    {
+      "illustrative_absolute_usd_per_btc": "-1",
+      "open_gaps": [
+        1771005600000,
+        1778306400000
+      ],
+      "first_risk_breach_at": 1776434400000
+    },
+    {
+      "illustrative_absolute_usd_per_btc": "1",
+      "open_gaps": [
+        1771005600000,
+        1778306400000
+      ],
+      "first_risk_breach_at": 1776434400000
+    }
+  ],
+  "gap_relevance": [
+    {
+      "rate_at": 1770206400000,
+      "position_open_in_zero_scenario": false,
+      "observation": {
+        "rate_at": 1770206400000,
+        "settle_at": 1770210000000,
+        "side": null,
+        "qty": "0"
+      }
+    },
+    {
+      "rate_at": 1771005600000,
+      "position_open_in_zero_scenario": true,
+      "observation": {
+        "rate_at": 1771005600000,
+        "settle_at": 1771009200000,
+        "side": "short",
+        "qty": "0.0818"
+      }
+    },
+    {
+      "rate_at": 1778306400000,
+      "position_open_in_zero_scenario": true,
+      "observation": {
+        "rate_at": 1778306400000,
+        "settle_at": 1778310000000,
+        "side": "long",
+        "qty": "0.1088"
+      }
+    }
+  ],
+  "strict": {
+    "blocked": true,
+    "rate_at": 1771005600000,
+    "settle_at": 1771009200000,
+    "side": "short",
+    "quantity": "0.0818"
+  },
+  "strict_risk_with_zero_placeholders": "1x margin/gross risk breached at 1776434400000",
+  "signal_count": 363,
+  "fill_count": 341,
+  "accepted_fill_count": 144,
+  "funding_payment_count": 4216,
+  "prefix_invariance": {
+    "through_ms": 1769904000000,
+    "passed": true
+  },
+  "hypothetical_risk_breach_count": 234,
+  "hypothetical_first_risk_breach": {
+    "at": 1776434400000,
+    "side": "short",
+    "equity": "9483.7993086568568546125155",
+    "margin": "8768.6246",
+    "available": "1490.9177134776826546125155",
+    "gross": "9544.3676048208258"
+  },
+  "end_position": {
+    "side": "long",
+    "qty": "0.0501"
+  },
+  "independent_wallet_difference_usd": "0E-22",
+  "independent_equity_difference_usd": "0E-22",
+  "historical_v035_return_valid": false,
+  "return_blockers": [
+    "missing original funding at held 2026-02-13 hour",
+    "1x risk breach in explicit zero-placeholder diagnostic",
+    "historical fees, fills and liquidation terms not proven"
+  ],
+  "historical_api_as_of_proven": false,
+  "real_fills_proven": false
+}

@@ -12,6 +12,7 @@ import json
 import os
 import urllib.parse
 import urllib.request
+import urllib.error
 from datetime import date, datetime, timezone
 
 # E34: EINE Quelle fuer den Schlusssatz der Ampel. Bewusst importiert statt abgetippt -
@@ -163,11 +164,19 @@ def format_plan(p: dict) -> str:
     emoji, _ = STYLE["PLAN"]
     lang = p.get("richtung") == "LONG"
     zeilen = [f"{emoji} PLAN — {'Long' if lang else 'Short'}-Position, "
-              f"{p.get('anteil_pct', 0)} % investiert"]
+              f"{p.get('anteil_pct', 0)} % {p.get('anteil_art', 'investiert')}"]
     if p.get("einstand"):
-        zeilen.append(f"Einstand {_fmt_usd(p['einstand'])} · Kurs {_fmt_usd(p['kurs'])}")
+        zeilen.append(f"{p.get('einstand_art', 'Einstand')} {_fmt_usd(p['einstand'])} · Kurs {_fmt_usd(p['kurs'])}")
     else:
         zeilen.append(f"Kurs {_fmt_usd(p['kurs'])}")
+    if p.get("bestand_quelle") == "signal_reference":
+        zeilen.append("Manueller Live-Bestand und Ausfuehrungen sind nicht belegt.")
+    elif p.get("kosten_vollstaendig") is False:
+        zeilen.append("Anschaffungskosten des simulierten Altbestands sind unbekannt.")
+    elif p.get("bestand_quelle") == "simulated_fills" and p.get("basis_einstand"):
+        zeilen.append(f"Basis-Einstand fuer Hauptstop {_fmt_usd(p['basis_einstand'])}; E42-Teil separat.")
+    if "prior_stop_maximum_unknown" in p.get("migration", []):
+        zeilen.append("Altzustand: frueherer Stop-Hoechststand ist nicht rekonstruierbar.")
 
     def _block(titel, eintraege):
         if not eintraege:
@@ -473,16 +482,44 @@ def send_text(text: str, dry_run: bool = False) -> str:
     return text
 
 
-def send_telegram(text: str, token: str, chat_id: str, timeout: int = 15) -> bool:
-    """Sendet eine Nachricht ueber die Telegram-Bot-API. True bei Erfolg."""
+def deliver_telegram(text: str, token: str, chat_id: str, timeout: int = 15) -> dict:
+    """Structured receipt for F13. Errors after request may mean acceptance."""
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = urllib.parse.urlencode({"chat_id": chat_id, "text": text}).encode()
+    def classify(body):
+        if not isinstance(body, dict):
+            return dict(status='uncertain', message_id=None)
+        receipt = body.get('result')
+        if body.get('ok') is True and isinstance(receipt, dict):
+            mid = receipt.get('message_id')
+            if type(mid) is int and mid > 0:
+                return dict(status='confirmed', message_id=mid)
+        if body.get('ok') is False and type(body.get('error_code')) is int and 400 <= body['error_code'] < 500:
+            return dict(status='rejected', message_id=None)
+        return dict(status='uncertain', message_id=None)
     try:
         with urllib.request.urlopen(url, data=data, timeout=timeout) as resp:
-            return json.loads(resp.read().decode()).get("ok", False)
-    except Exception as exc:  # noqa: BLE001 — Actions-Log soll den Fehler zeigen
-        print(f"Telegram-Fehler: {exc}")
-        return False
+            return classify(json.loads(resp.read().decode()))
+    except urllib.error.HTTPError as exc:
+        try:
+            body = json.loads(exc.read().decode())
+            # A server-side failure can occur after acceptance. Only explicit
+            # client rejection is safe to retry without assuming idempotency.
+            if 400 <= exc.code < 500:
+                result = classify(body)
+                if result['status'] == 'rejected':
+                    return result
+        except Exception:
+            pass
+        return dict(status='uncertain', message_id=None)
+    except Exception:  # no URL/exception: it may contain the bot token
+        return dict(status='uncertain', message_id=None)
+
+
+def send_telegram(text: str, token: str, chat_id: str, timeout: int = 15) -> bool:
+    """Stage a one-shot text; the command commits its batch before dispatch."""
+    from durable_delivery import stage_text
+    return stage_text(text)
 
 
 def send_signals(signals: list[dict], dry_run: bool = False) -> list[str]:

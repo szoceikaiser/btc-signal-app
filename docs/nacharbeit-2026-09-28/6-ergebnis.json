@@ -1,0 +1,155 @@
+{
+  "result": "PASS",
+  "base": "bb862204c97c6bb4c0da49cb6f1de90dd58af663",
+  "scope": "Only frozen 2 rows x 3 slippages; full causal V1 runs",
+  "secured_5b_tree_files": 215,
+  "backup_hashes_verified": {
+    "abschluss.bundle": "f76985f8094d5b0586e9aeb41e675b634cf04292bf333ccf278f4e5af680f0ee",
+    "abschluss.zip": "697747a978ced82c5fb06d25e60426bf9d825300060aef729c1e348776a7a30f"
+  },
+  "frozen_hashes": {
+    "book.py": "f919af6641400fd91d2f231ed02c5bf68e69242b8267065f8220a6160589f1b8",
+    "eingaben.json": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+    "ergebnis.json": "670463bfb6d82d3d30a8cd6b83981d216102c21401111d4d1f9ff27807b3204d",
+    "signale.json": "7ddfb03c05c12cb65dd869c735d40c42ee801d16359e05258b3a208cd3b797ec"
+  },
+  "start": 1768766400000,
+  "cutoff": 1790497748840,
+  "closed_candles": 2480,
+  "summaries": [
+    {
+      "name": "LIVE-heute +Bein in Handelsrichtung",
+      "slippage_pct": 0.0,
+      "fee_pct": 0.1,
+      "end": 13418.87990779452,
+      "dd_close": 7.9166049347306755,
+      "dd_upper": 9.942772296665048,
+      "delta_vs_secured": 0.0,
+      "fills": 171,
+      "closes": 1509,
+      "costs_verified": {
+        "fills": 171,
+        "closes": 1509,
+        "remaining_cost": 8684.882760393088,
+        "acquired_cost": 259571.15039028446,
+        "disposed_cost": 250886.26762989137,
+        "realized_pnl": 3361.358092912447
+      },
+      "full_result_identical": true,
+      "sha256": "ca99d7258ac668e104c9460d2df8e6303a1eefdea7e868f80eb91f667f6bc792",
+      "independent_book_identical": true
+    },
+    {
+      "name": "LIVE-heute +Bein in Handelsrichtung",
+      "slippage_pct": 0.1,
+      "fee_pct": 0.1,
+      "end": 12852.0062908125,
+      "dd_close": 8.498947944073432,
+      "dd_upper": 9.94277229666507,
+      "delta_vs_secured": 0.0,
+      "fills": 171,
+      "closes": 1509,
+      "costs_verified": {
+        "fills": 171,
+        "closes": 1509,
+        "remaining_cost": 8323.411683944882,
+        "acquired_cost": 253948.22325521192,
+        "disposed_cost": 245624.81157126703,
+        "realized_pnl": 2805.2487445305856
+      },
+      "full_result_identical": true,
+      "sha256": "bf9268e35e3f8d396bbfba2dd57200d377a6b674cad509ca9d9cbb7fb15a1c22",
+      "independent_book_identical": true
+    },
+    {
+      "name": "LIVE-heute +Bein in Handelsrichtung",
+      "slippage_pct": 0.5,
+      "fee_pct": 0.1,
+      "end": 10815.296280673414,
+      "dd_close": 12.053399154911004,
+      "dd_upper": 12.654750671405157,
+      "delta_vs_secured": 0.0,
+      "fills": 171,
+      "closes": 1509,
+      "costs_verified": {
+        "fills": 171,
+        "closes": 1509,
+        "remaining_cost": 7022.570019839428,
+        "acquired_cost": 233027.42692534652,
+        "disposed_cost": 226004.8569055071,
+        "realized_pnl": 803.9538766760481
+      },
+      "full_result_identical": true,
+      "sha256": "6a66f0a068626b360a909e8cea47084d5baa3a382579d8c0fda11b72ec2117b3",
+      "independent_book_identical": true
+    },
+    {
+      "name": "LIVE-heute +E42",
+      "slippage_pct": 0.0,
+      "fee_pct": 0.1,
+      "end": 13299.894195277006,
+      "dd_close": 8.417653100638978,
+      "dd_upper": 9.942772296665048,
+      "delta_vs_secured": 0.0,
+      "fills": 196,
+      "closes": 1509,
+      "costs_verified": {
+        "fills": 196,
+        "closes": 1509,
+        "remaining_cost": 8607.873578518209,
+        "acquired_cost": 287747.16243093344,
+        "disposed_cost": 279139.2888524153,
+        "realized_pnl": 3242.882428489548
+      },
+      "full_result_identical": true,
+      "sha256": "b04605e5e7edbe76a3d9232a67969a5de4b780a139d9f9e2896ef1b6e537b848",
+      "independent_book_identical": true
+    },
+    {
+      "name": "LIVE-heute +E42",
+      "slippage_pct": 0.1,
+      "fee_pct": 0.1,
+      "end": 12677.52487684031,
+      "dd_close": 9.063573064064611,
+      "dd_upper": 10.24370044353049,
+      "delta_vs_secured": 0.0,
+      "fills": 196,
+      "closes": 1509,
+      "costs_verified": {
+        "fills": 196,
+        "closes": 1509,
+        "remaining_cost": 8210.411378247432,
+        "acquired_cost": 280820.5412080684,
+        "disposed_cost": 272610.12982982094,
+        "realized_pnl": 2631.4021203806665
+      },
+      "full_result_identical": true,
+      "sha256": "84ab0cc07df35da0abf77b46365707bc748695cfba898e9e74da26b1f15fa4fe",
+      "independent_book_identical": true
+    },
+    {
+      "name": "LIVE-heute +E42",
+      "slippage_pct": 0.5,
+      "fee_pct": 0.1,
+      "end": 10467.264489546855,
+      "dd_close": 13.105335540282981,
+      "dd_upper": 13.69949424279091,
+      "delta_vs_secured": 0.0,
+      "fills": 196,
+      "closes": 1509,
+      "costs_verified": {
+        "fills": 196,
+        "closes": 1509,
+        "remaining_cost": 6796.586601642749,
+        "acquired_cost": 255249.61300478884,
+        "disposed_cost": 248453.0264031461,
+        "realized_pnl": 456.2870794503795
+      },
+      "full_result_identical": true,
+      "sha256": "50ce4d93e6d90dce23b11eeae814f4f7a018a81a7b7c6d695308ccb3829a6fe8",
+      "independent_book_identical": true
+    }
+  ],
+  "network_blocked": true,
+  "independence_limit": "Audit book checks executed sizing from selected candidates; Decimal checks lots from gross budgets. Neither validates economic merit or historical input availability."
+}

@@ -8,6 +8,7 @@ permissions:
 
 jobs:
   backtest:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # 25 Varianten x 3 Laeufe (Vollfenster + 2 Haelften). Reserve nach oben, weil das
     # Gitter mit E13 gewachsen ist; oeffentliche Repos haben unbegrenzte Actions-Minuten.

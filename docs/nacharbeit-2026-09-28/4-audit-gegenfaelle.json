@@ -1,0 +1,21 @@
+{
+  "result": "Four baseline failures reproduced",
+  "source": "..\\etappe-3b-work",
+  "F03": {
+    "prior_stop": 115,
+    "close": 110,
+    "stopped": false
+  },
+  "F04": {
+    "signal_reference": 188.53333333333333,
+    "independent_cost_entry": 186.10966057441252
+  },
+  "F10": {
+    "engine_stop": 115,
+    "plan_stop": 100
+  },
+  "F05": {
+    "before": 1,
+    "after": 0
+  }
+}

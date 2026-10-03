@@ -1,0 +1,31 @@
+{
+  "aufbau_filter_entfernt": [
+    "test_before_close_excludes_unfinished_and_all_associated_values",
+    "test_exact_close_includes_candle_and_boundary_funding",
+    "test_after_close_still_excludes_next_candle",
+    "test_without_closed_candle_returns_two_empty_series",
+    "test_explicit_saved_raw_cutoff_and_zero"
+  ],
+  "binance_ende_minus_1_als_abgeschlossen": [
+    "test_fetch_filters_api_inclusive_close_timestamp"
+  ],
+  "gespeicherter_stichtag_ignoriert": [
+    "test_saved_cutoff_wins_over_today_and_preserves_inputs",
+    "test_half_uses_close_not_open_and_empty_is_explicit"
+  ],
+  "flow_nicht_mitgeschnitten": [
+    "test_saved_cutoff_wins_over_today_and_preserves_inputs",
+    "test_half_uses_close_not_open_and_empty_is_explicit"
+  ],
+  "schlussgrenze_exklusiv": [
+    "test_exact_close_includes_candle_and_boundary_funding",
+    "test_utc_offset_represents_same_instant",
+    "test_explicit_saved_raw_cutoff_and_zero",
+    "test_coinalyze_seconds_are_converted_to_open_milliseconds"
+  ],
+  "halbfenster_nach_anfang": [
+    "test_saved_cutoff_wins_over_today_and_preserves_inputs",
+    "test_half_uses_close_not_open_and_empty_is_explicit"
+  ]
+}
+6/6 Sabotagen erkannt

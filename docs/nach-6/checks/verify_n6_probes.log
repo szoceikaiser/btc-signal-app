@@ -1,0 +1,65 @@
+{
+  "result": "PASS",
+  "probes": [
+    {
+      "name": "early_fill",
+      "caught": true
+    },
+    {
+      "name": "no_reservation",
+      "caught": true
+    },
+    {
+      "name": "skip_feedback",
+      "caught": true
+    },
+    {
+      "name": "decision_while_waiting",
+      "caught": true
+    },
+    {
+      "name": "wait_risk_omitted",
+      "caught": true
+    },
+    {
+      "name": "fill_future_close",
+      "caught": true
+    },
+    {
+      "name": "ignore_cutoff",
+      "caught": true
+    },
+    {
+      "name": "fee_doubled",
+      "caught": true
+    },
+    {
+      "name": "micro_short",
+      "caught": true
+    },
+    {
+      "name": "material_oversale",
+      "caught": true
+    },
+    {
+      "name": "iid_instead_of_blocks",
+      "caught": true
+    },
+    {
+      "name": "wrong_quantile",
+      "caught": true
+    },
+    {
+      "name": "uncentered_null",
+      "caught": true
+    },
+    {
+      "name": "wrong_tail",
+      "caught": true
+    },
+    {
+      "name": "reversed_pair",
+      "caught": true
+    }
+  ]
+}

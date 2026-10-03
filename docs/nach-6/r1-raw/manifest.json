@@ -1,0 +1,50 @@
+{
+  "start": 1790481600,
+  "end": 1790683200,
+  "run_id": "36592684701",
+  "commit": "4315e4a5a2654b161e05f79c5f74b3b31d4c32e1",
+  "sources": [
+    {
+      "name": "open-interest-history",
+      "url": "https://api.coinalyze.net/v1/open-interest-history?symbols=BTCUSDT_PERP.A&interval=4hour&from=1790481600&to=1790683200&convert_to_usd=true",
+      "retrieved_at": "2026-09-29T15:46:04.058741+00:00",
+      "status": 200,
+      "sha256": "0f7515f3aad31aa03c8969f273c7dd5fd42eb09eaa5030919e5a2af4af397da2"
+    },
+    {
+      "name": "liquidation-history",
+      "url": "https://api.coinalyze.net/v1/liquidation-history?symbols=BTCUSDT_PERP.A&interval=4hour&from=1790481600&to=1790683200&convert_to_usd=true",
+      "retrieved_at": "2026-09-29T15:46:04.368196+00:00",
+      "status": 200,
+      "sha256": "0180cce7e1927fd6cdc83a4e03a6ec834b52cfdc4d3969f6b86bdb397e3de13e"
+    },
+    {
+      "name": "ohlcv-history",
+      "url": "https://api.coinalyze.net/v1/ohlcv-history?symbols=BTCUSDT_PERP.A&interval=4hour&from=1790481600&to=1790683200&convert_to_usd=true",
+      "retrieved_at": "2026-09-29T15:46:04.577239+00:00",
+      "status": 200,
+      "sha256": "39abd4e978b8e2c66da677dbe03b0191fb002cbd53ad6fbecf43b66b88d86c4f"
+    },
+    {
+      "name": "long-short-ratio-history",
+      "url": "https://api.coinalyze.net/v1/long-short-ratio-history?symbols=BTCUSDT_PERP.A&interval=4hour&from=1790481600&to=1790683200&convert_to_usd=true",
+      "retrieved_at": "2026-09-29T15:46:04.763091+00:00",
+      "status": 200,
+      "sha256": "9993c283725d0edd9c0413996cd68a257c089b3803c6075079007388e66d920f"
+    },
+    {
+      "name": "spot",
+      "url": "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&startTime=1790481600000&endTime=1790683199999&limit=1000",
+      "retrieved_at": "2026-09-29T15:46:04.960999+00:00",
+      "status": 200,
+      "sha256": "6049d0c0087fe8e83d2976d2066f9cc9ab9406a1bc8a3645ef1d951fa427ceee"
+    },
+    {
+      "name": "funding",
+      "url": "https://futures.kraken.com/derivatives/api/v4/historicalfundingrates?symbol=PF_XBTUSD",
+      "retrieved_at": "2026-09-29T15:46:05.573425+00:00",
+      "status": 200,
+      "sha256": "49ca8546d8e7508777e4797b2dd25f697a5ed63c1213e5bf77a160ef31a04035"
+    }
+  ]
+}

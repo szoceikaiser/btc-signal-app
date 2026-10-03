@@ -1,0 +1,7 @@
+PASS test_null_and_constant_alternatives
+PASS test_pairing_shared_indices_and_swap
+PASS test_quantile_exact_hand_case_and_tail
+PASS test_geometric_dependence_wrap_and_seed
+PASS test_dependent_vs_iid_and_nonconstant_alternative
+PASS test_day_boundaries_exclude_partial_and_before_fill
+6 synthetic checks passed; numpy 2.3.5

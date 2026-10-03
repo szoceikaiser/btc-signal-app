@@ -1,0 +1,924 @@
+{
+  "schema": "a7-eligibility-v1",
+  "manifest_sha256": "a988d3d48a3f08391deb15bc3f983628474ac85b768bcf8d0688409b70fa1625",
+  "base_commit": "8b6af70b1897e8aefff5552f878297cc0090ef26",
+  "data": {
+    "R0": {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\audit-backups\\6-abschluss-05208ce\\eingefrorene-inputs\\eingaben.json",
+      "sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+      "start_ms": 1768766400000,
+      "end_exclusive_ms": 1790497748840,
+      "bars_total": 2481,
+      "bars_closed": 2480,
+      "trailing_partial_bars": 1,
+      "trade_bars_closed": 1509,
+      "missing_field_provenance_closed_bars": {
+        "spot_cvd": 2480,
+        "fut_cvd": 2480,
+        "oi": 2480,
+        "oi_btc": 2480,
+        "funding": 2480,
+        "long_liq": 2480,
+        "short_liq": 2480,
+        "long_pct": 2480
+      },
+      "earliest_bar_open_ms": 1754784000000,
+      "latest_closed_bar_open_ms": 1790481600000
+    },
+    "R1": {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\a1-work\\docs\\nach-6\\r1-inputs.json",
+      "sha256": "701c0eea34098317d0fae2827a16afd4cb73f7e9684c724d70881c2df49e5089",
+      "start_ms": 1768766400000,
+      "end_exclusive_ms": 1790683200000,
+      "bars_total": 2493,
+      "bars_closed": 2493,
+      "trailing_partial_bars": 0,
+      "trade_bars_closed": 1522,
+      "missing_field_provenance_closed_bars": {
+        "spot_cvd": 2493,
+        "fut_cvd": 2493,
+        "oi": 2493,
+        "oi_btc": 2493,
+        "funding": 2493,
+        "long_liq": 2493,
+        "short_liq": 2493,
+        "long_pct": 2493
+      },
+      "earliest_bar_open_ms": 1754784000000,
+      "latest_closed_bar_open_ms": 1790668800000
+    }
+  },
+  "A2_derivation": "A2-ABLEITUNG-v1.json: contract and synthetic countercases; no historical provenance series",
+  "A3_derivation": "A3-ABLEITUNG-v1.json: synthetic countercases; historical market basket unverified",
+  "corrected_return_run_allowed": false,
+  "blocked_rows": 86,
+  "rows": [
+    {
+      "id": "V000",
+      "legacy_original_params_sha256": "800978d8d55dbd7213bd2739a5ba1db1e899bc5d343425c43c74d26a41d25f5d",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V001",
+      "legacy_original_params_sha256": "784a12d885b60c13cd1482298383915517fe7fd7806dfe555d80e7586b407868",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V002",
+      "legacy_original_params_sha256": "3b52cbc361d657dca278d3442729a8afa465ee62ae98dd5415dfee8c0a3dc032",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V003",
+      "legacy_original_params_sha256": "a9c9a7d418fd932526d93576c845f7207e5f31b10237ce6d35873ae2382f0a0a",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V004",
+      "legacy_original_params_sha256": "32b072e84f446611d4a49447635bda40c2308f47af71607fdfff9543d00c3518",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V005",
+      "legacy_original_params_sha256": "6733d3becaff17494b5541d734d644d29e2164dba1cb9958ea5e066e9db925dd",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V006",
+      "legacy_original_params_sha256": "391c91f640f1e010fbaa1be49c9fdb75e1c20ff8816b41ff1e97bd2f1c9d628c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V007",
+      "legacy_original_params_sha256": "f198a70a387cd820828c98cf526535c7a79cfcd8925ddee4a217df78a4df248e",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V008",
+      "legacy_original_params_sha256": "e5e281736ab92c2ee1e54954681551cd9cf472c06a57064cb21f6dc58b8a4980",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V009",
+      "legacy_original_params_sha256": "a7dc56d056b79a1ff624b8ad422ce423711cbb335c95db9edc632308fd3fb9b4",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V010",
+      "legacy_original_params_sha256": "a664fbeaaac367900dc7d0c58699b76104620bcdbd824f18fd49fd6d73b1c439",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V011",
+      "legacy_original_params_sha256": "f75c6e0cf3836ecf08cd203f85d28b0230c302505c1279838a8e1b78b7d5fa02",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V012",
+      "legacy_original_params_sha256": "939da92594a0dac9a9ac7b8b13cf4cb9f6da43dea21c174b239424b38a811887",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V013",
+      "legacy_original_params_sha256": "9bd2871eafe03db51d3745ee2174643829ee2d7516b4eb575fe29c094e24e678",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V014",
+      "legacy_original_params_sha256": "234d3d8b6af9e3c380884844f0af1326e14bd91a38adcb7ecc5e67b88c013c33",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V015",
+      "legacy_original_params_sha256": "5118050b3da1d9e8daef8a32758d5bcdd284166ecab691dffffa1c35e567764b",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V016",
+      "legacy_original_params_sha256": "31c488617f9aacae3fda76f2c8a304c0ad83a6f2d2d8d627ab359387ac7d4f1c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V017",
+      "legacy_original_params_sha256": "3e3a3c8dc77fc2932e67b1daecae41fa636df211a029c0df2ba52277ba4c5d1d",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V018",
+      "legacy_original_params_sha256": "3b18cf98a3b053ea0f29194513dcdde6756d9fd787e046277e140fe69488aac8",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V019",
+      "legacy_original_params_sha256": "62f23caa5fca985dc51287dc1642df1b3346de5f9ab9e246dadc5c1f31a5222b",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V020",
+      "legacy_original_params_sha256": "1ca9bc9fb3ee763db2e80788d8f6e64fb38e5767a966112bfd50acd53757766c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V021",
+      "legacy_original_params_sha256": "4222a335bb8397e622a7449b947ca6e6bd16fb74230a9979026a5b9f7d6e40ec",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V022",
+      "legacy_original_params_sha256": "3f0fd65ff969ab03c91f63f69bbfa54b5e13ebf02e6dfb6b7425ba7051b604d4",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V023",
+      "legacy_original_params_sha256": "6f1c9069da515ccda50f48988faab6950ebf1fbb1a29a903da780dfeeeda9fe9",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V024",
+      "legacy_original_params_sha256": "6557fc719f212a7cf0496560b55aaf75ad263f909ed9bde0c6c1f2ef98fd877a",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V025",
+      "legacy_original_params_sha256": "bd9f5971feb6ac93558f47cad5b4d68e433c309f20df1ea9a840b73ef59f31e1",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V026",
+      "legacy_original_params_sha256": "8b49f63b9cb0b403699c1dd1538832aed1a46f756253efb4d3fb9d7dc1d3869b",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V027",
+      "legacy_original_params_sha256": "d987914be7484551071f1390fc2190b0b0bbef20552816470fbfe0ddd62af0b8",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V028",
+      "legacy_original_params_sha256": "68d3944df1d9c01128bbd63af7f9061288116b4bc21aac1df985fa03e4b466db",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V029",
+      "legacy_original_params_sha256": "ae408f5e908e26d9138d522a85a231b27028d3d50c13eb460ce4ba4d92b14190",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V030",
+      "legacy_original_params_sha256": "85dd5e75521268fce878a112e54d0e509da3f78e61f01facfc42990bf83f481d",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V031",
+      "legacy_original_params_sha256": "efd04d26f782faf56017c41adfd540e61025bd14bd7ab5374e7788cc3f4e04ff",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V032",
+      "legacy_original_params_sha256": "7a2419c86087b1f42f6554a4283d86ee682163fce9e521e6016c05e3106fd13c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V033",
+      "legacy_original_params_sha256": "984a62f2da1cc80f8bf7455c5d5f4470144bae565dc99c950f1804a5d4fe14fe",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V034",
+      "legacy_original_params_sha256": "550d3f4e26a8a43c1d795ca1e21d2bc6c6dfd3b55fda7e0ce8e23fc62451ec3c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V035",
+      "legacy_original_params_sha256": "fc2706be12cfdd014e31e575397f30157dc8c88ca17e81c63726a94943ed868b",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix",
+        "F02: Short/derivative row has no supported historical instrument, funding payment book or causal strategy fills"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V036",
+      "legacy_original_params_sha256": "bef5fd4c14229e84fd15c54d9f018077382a3da99c0eb6d6f05d82418a05f918",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V037",
+      "legacy_original_params_sha256": "a633086bd591132053455ba63b44152b25ee96fb04392dca3f8070f0267c4f3f",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V038",
+      "legacy_original_params_sha256": "996ca6d2076babfc090fefed42c8e5ca4d2976ed2e9592eed5f89326d5ce548f",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V039",
+      "legacy_original_params_sha256": "265e9c6e1568d1ba4e72cb62b5cd423ff3651ef0c2e1401f44c3a3c0cdc5afdd",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V040",
+      "legacy_original_params_sha256": "07bb14db4cc129d1601d2477840d887ae49ab128ea3114ba71d85d9fea1ac95c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V041",
+      "legacy_original_params_sha256": "45786c5f16b85ff72db7d68ae6b9d4ba3982a1b486f91b650ab1dfdafa464cbb",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V042",
+      "legacy_original_params_sha256": "d78224045cfe3b72a19eff49cb966d4e856213e50c3cafcf8cffbe0884d7a045",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V043",
+      "legacy_original_params_sha256": "a21047c9cb4b6a2bcb3a962e8cec42e3872eedcc97d3c9a0eb1830adef8f090c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V044",
+      "legacy_original_params_sha256": "51f10e5ba74b7acebe83338f443ae66b3d78e0fb30270d323e4c187d23e2223c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V045",
+      "legacy_original_params_sha256": "03d2cc4cf19794776f7a935629d9b26de2a04e012082e768487c5d5c8a175574",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V046",
+      "legacy_original_params_sha256": "ef8cc06731037ce76ccf096ff33f1cea2cb2157dfd2bdae51184c353a68cec31",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V047",
+      "legacy_original_params_sha256": "7f0bb30c25e58b51df333a9e05c14eeaba585f3d82af9f1b5aa3c7df2a30e838",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V048",
+      "legacy_original_params_sha256": "3f7ed2ab4ee3dea246afb4ecafa7eb4da7921d2acc641b84d7db700e83ef2c13",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V049",
+      "legacy_original_params_sha256": "13475844da9bd93700a6b3891a1779e2f01a7cb1b3e577005903227e050a62c0",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V050",
+      "legacy_original_params_sha256": "f5d7a98975ff4619d1d004ef5d5d6053619e213bac345ee24b94445455df051b",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V051",
+      "legacy_original_params_sha256": "476ef442fd5362d1863ef64cf6f66a628fcff96cefef5f1a284f2c3fc1687c45",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V052",
+      "legacy_original_params_sha256": "cd69a9b6c15ba01b799e0b54c37522fa8654e82e9b0ac133a439534ca1544aad",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V053",
+      "legacy_original_params_sha256": "88f379c15a4f5f7611a192281b262bda8ead52d3e2f4677949d36c822a58f1a7",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V054",
+      "legacy_original_params_sha256": "8577ab5a0035bb8e35b4036647837dac99c323b868cf7c14da3fbe078ee96425",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V055",
+      "legacy_original_params_sha256": "20cacd7f26fda175ae76d57623b543613b83d5421405c708cacd55f92baf08aa",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V056",
+      "legacy_original_params_sha256": "f025dc701958d4edc7059419abb3a75beab2ea4c151b7aa05c6c836701f179ee",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V057",
+      "legacy_original_params_sha256": "a549b0d6a594f69ff1b0cf6cae56adde524f55a3e044e603d0b41bca2036d7bb",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V058",
+      "legacy_original_params_sha256": "5c364e2961464ecdd553495dc8e700519467280baa3e721cbbacdf1073b606a0",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V059",
+      "legacy_original_params_sha256": "d4f634832ffb6dcbf1dc917cfa97475d951a9da78951c043bec8c3fd4a800337",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V060",
+      "legacy_original_params_sha256": "5a8f210d79ef5792eb69c994ec9240cceb907eaed68f580c21c074580a8114cc",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V061",
+      "legacy_original_params_sha256": "286cd5147abb9c54dd3fa31147606844e87840df8f5831a66fdd94080db3514c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V062",
+      "legacy_original_params_sha256": "5db15f6ea0e98351d0296ef07eba8cf83429ba6d4bd9dc82134c51321737d41e",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V063",
+      "legacy_original_params_sha256": "02010d0f05a4e63e8f24cb3cf405514b795b45155523343cf2f9b65ed8fe10d5",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V064",
+      "legacy_original_params_sha256": "16d6ba27ea3b0e2c12da0064ca23f64754624e8f4198d0b43b27768ede4b6b84",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V065",
+      "legacy_original_params_sha256": "491d2a940861785e1d86db831aabe67e9bd2abf39559099917771647698ac71d",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V066",
+      "legacy_original_params_sha256": "17d10c012976c88f0c61dd80ea28216734c9f57e00106afe73112109dfbdf95b",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V067",
+      "legacy_original_params_sha256": "003e1af7333d12558c7184ebf3bc9836420e8a607910606f6fe0c7d175e6c2d8",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V068",
+      "legacy_original_params_sha256": "551c315b574482968e9bf6ac758e4adb2eadedad254e13c4d9307579c17731ea",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V069",
+      "legacy_original_params_sha256": "ac5a81fe16ce18d7b4e2f43250113a12cd25ab2d5ff4c27c7ee2a232e9308cf4",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V070",
+      "legacy_original_params_sha256": "d1266a7785a63c9c809335aa95d994a4c4a6923535d4fe4a9eeba82dad606020",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V071",
+      "legacy_original_params_sha256": "ee3624e549754f793041a668b287c4015e2389db2af0d21afcdc8584ffa244a0",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V072",
+      "legacy_original_params_sha256": "db6572a86f70d571871990cfd2bb04a70c692ef9b23023bfd3fc7e69a34e9399",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V073",
+      "legacy_original_params_sha256": "b49c0f10d405414ec04fa379503a2fbd0dd9b651924dce6fb4c8f19c2a54e162",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V074",
+      "legacy_original_params_sha256": "9193b8639d167e62866352afd59c1afc1f2b5daefdf9a758007a4510dc619d91",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V075",
+      "legacy_original_params_sha256": "6e92fde674a4b45cee7f9856ab8038f6d57b348abf671da66fbfece54b7f4d3e",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V076",
+      "legacy_original_params_sha256": "d22c83fcc7e1bbf117dd41cfc1730cc81fed7b99a245fd7cf5dffc9e74507f86",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V077",
+      "legacy_original_params_sha256": "e1e1b86544c27702997eb66c33610b6df4c343309004002baa689d992553a347",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "V078",
+      "legacy_original_params_sha256": "bea7febbbd40f50f7dd7dc749200c49995f8c3ca95357bbeb90d759152103c3f",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "S000",
+      "legacy_original_params_sha256": "254e7dcc504aa592361adc35fb700facb96dc5347ba3484dc626db95f3c8b31a",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "S001",
+      "legacy_original_params_sha256": "132c39eea7e94f8e6523055fb9fee0592b2ff3c1bf95e7a0dc8bd73bf9b31c1c",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "S002",
+      "legacy_original_params_sha256": "e6baf8ad54a0c01c2c8a1bd17b47298d86826b446cc5b52932dceba524c42e49",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "S003",
+      "legacy_original_params_sha256": "ed1c418fe3d6f6083d85821b3e7818fbc36cebc961b2a309281046bcf1414ecb",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "S005",
+      "legacy_original_params_sha256": "02204901db42e1a51054349c3f36f1839fc140d0772e888821f3ea79676b0362",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "S006",
+      "legacy_original_params_sha256": "666ec141f43182aa780b34d59d29e2f11acbb833aa3a82c791ce36a7db8d9503",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    },
+    {
+      "id": "S007",
+      "legacy_original_params_sha256": "d9976fd8354c0bfab0712c597c793f86ab22b757eb142f227a6445472aa77474",
+      "R0_corrected_causal": "blocked",
+      "R1_corrected_causal": "blocked",
+      "reasons": [
+        "F07/D02: R0/R1 numeric flow lacks observed/available-at time and coverage metadata; A2 synthetic derivation does not reconstruct the historic prefix"
+      ],
+      "legacy_diagnostic": "existing original audit results retained; not a corrected A7 return"
+    }
+  ],
+  "scope": "Preflight only. No strategy run, portfolio return, model ranking, paired statistic or inferred zero fills.",
+  "required_to_unblock": [
+    "A separately versioned historical flow derivation with per-field source, observed/available time, age and coverage for every required prefix; no future backfill or assumed observed zeros",
+    "For V035, independently sufficient historical instrument, price, funding-payment and causal fill contract; otherwise retain explicit exclusion",
+    "Recheck A3 daily completeness and any requested multi-market basket/units before the affected run"
+  ]
+}

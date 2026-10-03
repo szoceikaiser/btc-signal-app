@@ -1,0 +1,20 @@
+[
+  {
+    "package": "R0",
+    "previous_logged_cases": 27,
+    "all_logged_cent_values_identical": true,
+    "full_results_before_failure_not_saved": true,
+    "complete_causal_runs": 30,
+    "independent_fills": 3639,
+    "independent_closes": 30180
+  },
+  {
+    "package": "R1",
+    "previous_logged_cases": 27,
+    "all_logged_cent_values_identical": true,
+    "full_results_before_failure_not_saved": true,
+    "complete_causal_runs": 30,
+    "independent_fills": 3699,
+    "independent_closes": 30450
+  }
+]

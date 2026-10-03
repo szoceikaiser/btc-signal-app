@@ -1,5 +1,342 @@
 # Laufende Übergabe
 
+## Historischer Folgeauftrag nach Etappe 6 — 29.09.2026
+
+- Direkt aus 05208cecce8d5a0e856a1ea56984b209f403ccd6, eigener Zweig
+  codex/nach-6-historische-auswertung; kein neuer main-/E44.4-/E44.5-Code.
+- R0 unverändert; R1 bis fest 29.09.2026 12:00 UTC vollständig ergänzt:
+  13 neue abgeschlossene Kerzen, 2.480 alte abgeschlossene Präfixkerzen feldgleich.
+  Nutzer erlaubte im laufenden Auftrag GitHub-Läufe. Isolierter Rohdatenlauf
+  36592684701 nutzte Coinalyze-Secret, ohne Repo-Schreibrechte/Telegram/Pages.
+- 60 feste kausale Läufe: R0/R1 × Basis/E42 × S0–S4 × drei Startpunkte.
+  7.338 Fills / 60.630 Closes unabhängig geprüft; keine neuen Suchalternativen.
+- R1 Hauptfall S1: Basis 12.813,81 USD, E42 12.639,84 USD (−173,96 USD,
+  −1,3576 % relativ), Schluss-DD 8,4989 / 9,0636 %, obere Grenze 9,9428 / 10,2437 %.
+  Basis dominiert S0/S1/S2/S4; S3 +117,27 USD für E42 bei höherem Schluss-DD.
+- 20.000 stationäre gepaarte Tages-Bootstraps, Seed 20260929, Block 14/7/28,
+  alle Ergebnisse/Monate/Drittel/Frischstarts berichtet. S1-Hauptintervall R1
+  −4,1660 bis +1,4369 %, p_cond 0,839658; nur bedingt, Auswahlbereinigung nicht belegt.
+  Historische Vintages/erreichbare Live-Fills bleiben unbelegt, keine Power-Zusage.
+- 741 Tests (728 alte unverändert), 6 synthetische Testgruppen, 15 neue Schutzproben;
+  alle alten F17/F13/4/3b/D01/F09-Proben erhalten. Isolierte i+2-Rundungskorrektur
+  samt Gegenfall/Planrevision dokumentiert; bisheriger V1-/Checkpointcode unverändert.
+- Bericht docs/nach-6/BERICHT.md, vollständige Ergebnisse/CSV/Ledger/Manifeste daneben.
+  Exakte Abschluss-SHA/CI/Bundle/ZIP/Restore: lokale
+  audit-backups/nach-6-abschluss-<Kurz-SHA>/ABSCHLUSS.json.
+- Live-Konfiguration, site, Versandliste und Produktions-Engine unverändert;
+  kein main-Merge, keine Nachrichten/Orders/Deployments, kein Live-Go.
+  F13-uncertain blockiert; kein Reset/Exactly-once, manueller Bestand unbekannt.
+  Runnerverlust vor Git-Persistenz sowie V2/Shorts/E41.6 bleiben separat offen.
+- Auftrag danach beenden. Weitere Kandidaten, Auswahlbereinigung und Live-Entscheidungen
+  ausschließlich separat; kein automatischer Folgeauftrag.
+
+## Übergabe 29.09.2026: Etappe 6, retrospektives Design v2
+
+Eigener Zweig codex/etappe-6-reproduktion-design direkt aus gesichertem 5b
+bb862204c97c6bb4c0da49cb6f1de90dd58af663. R0-Reproduktion unverändert:
+sechs vollständige V1-Läufe exakt identisch, 1.101 Fills / 9.054 Closes unabhängig
+geprüft, 728 Tests unverändert. Engine/site/Daten/Versand/Verträge/Workflows erhalten.
+
+Nutzer lehnt Jahreswartezeit ab und verlangt sachliche historische Prüfung bis
+jetzt. Design v2 in 6-BESTAETIGUNGSDESIGN.md / 6-design-register.json:
+R0 bis 27.09. bleibt erhalten; R1 mit gleicher Basis/Warmup bis festem Stichtag
+29.09.2026 12:00 UTC geplant. R1 noch nicht beschafft/gemessen. Keine neuen
+Kandidaten oder Auswertungen durch diese Designänderung. Unbestätigte Nutzen-
+und DD-Budgets zurückgezogen, keine persönliche Risikotoleranz unterstellt.
+Wirkung/Risiko/Dominanz und Zielkonflikte berichten statt willkürlicher Hürden.
+
+Historische Kalendermonate/mechanische Drittel/Startzustandssensitivität und alle
+Kosten-/Latenzfälle festgelegt. Paar-Bootstrap nur bedingte Unsicherheit,
+keine Bereinigung der früheren Auswahl. Suchhistorie E43/E44/Audit/Korrekturen
+lesend inventarisieren. Reality-Check/SPA und E42-spezifische simultane Aussagen
+nur bei vollständiger relevanter Familie/geprüfter Implementierung. Familie noch
+nicht nachgewiesen; trotzdem beschreibende historische Evidenz möglich.
+Keine KI-Objektivität als Ersatz für statistische Auswahlkontrolle behaupten.
+
+D6-A retrospektiv durch Nutzer festgelegt, D6-B/C zurückgezogen; alte Fragen
+nicht erneut stellen. Offene Technik: R1-Paket/Quellen-/Verfügbarkeitsmanifest,
+Statistik/synthetische Tests, separate i+2-Umsetzung und Suchinventar. Bekannte
+R0-Dominanz der Basis nur historischer Modellbefund, kein Zukunfts-/Live-Go.
+Version-1-Sicherung efc3b1a unverändert. Bericht ETAPPE-6-ABSCHLUSS.md;
+neue exakte SHA/CI/Bundle/ZIP/Restore lokal 6-abschluss-<Kurz-SHA>/ABSCHLUSS.json.
+
+Keine Nachrichten/Orders/Deployments/Live-Schalter/Dispatches/main-Push/Merges.
+F13-ID lokale Versandidentität; uncertain blockiert, kein Reset/Exactly-once.
+Ephemerer Runnerverlust vor Git-Persistenz offen, manuelle Fills unbekannt.
+V2/Shorts/E41.6/weitere Befunde getrennt. Nächster separater Auftrag
+START-NACH-6.md: retrospektive Umsetzung/Auswertung; nichts automatisch starten.
+
+---
+
+## Übergabe 29.09.2026: Etappe 5b F17 abgeschlossen
+
+- Chart erhält alle Quellen/Kollisionen: L Live-Referenz, H historische Diagnostik,
+  optional V1 Modell-Fills. Deterministische Chartidentitäten, vollständige
+  Ereignisliste, reine Altbestandsprojektion ohne Versand-/Zustandsänderung.
+- **728 Tests**, alle **712 alten unverändert**, 16 neue; **16/16 F17-Sabotagen**.
+  5a 16/16, 4 23/23, 3b 19/19, D01 6/6, F09 3/3 erhalten. 1.101 gespeicherte
+  V1-Fills auf Zeit/Preis/Identität projiziert, keine historische Neuberechnung.
+- Engine, Versandliste, Strategie, Konfiguration, historische Daten und Workflows
+  identisch zur gesicherten Basis 6c0c6fdd56db9bb27febaf42c56f6e33bcab0685.
+  Keine echte Zustellung/Orders/Deployments/main-Push/Merges/Dispatches, kein Live-Go.
+- Grenzen aus 5a bleiben: uncertain sperrt Folge, keine Exactly-once-Garantie,
+  ephemerer Runnerverlust vor Git-Persistenz offen. Chart-ID ist kein Zustellbeleg;
+  identische Altduplikate erlauben keine nachträgliche Einzelzuordnung.
+- Zweig `codex/etappe-5b-chart-identitaet`, Arbeitsbaum `etappe-5b-work`, Bericht
+  `docs/nacharbeit-2026-09-28/ETAPPE-5B-ABSCHLUSS.md`. Exakte SHA/CI/Restore lokal
+  `audit-backups/5b-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+- Nächster **separater** Auftrag: Etappe 6, `START-6.md`; Sol/mittel für begrenzte
+  Reproduktion, Astra/hoch für Bestätigungsdesign. Nichts automatisch starten.
+
+F17-Vertrag vor Umsetzung festgelegt. Originalmerge auf exakter 5a-Basis und
+zwei unabhängige Audit-Snapshot-Konflikte reproduziert. Tatsächliches JavaScript
+inklusive HTML-load/Marker-/Listenpfad netzfrei geprüft; kein Screenshot-/Live-
+Seitenbeleg behauptet. Explizite IDs nur quellenintern bei identischem Inhalt
+zusammengefasst; widersprüchliche Inhalte markiert, Altduplikate erhalten.
+Optionale V1-Ergebnisdatei wird nicht erzeugt oder automatisch ausgewählt.
+728 Restore-Tests, alle Schutzproben, sechs identische bereits festgelegte V1-
+Prozessfortsetzungen und unabhängiger Kostenabgleich gehören zur lokalen Abnahme.
+V2/Shorts/E41.6/weitere Befunde getrennt. Privates Repo/Originale/Tag unverändert.
+
+---
+
+## 29.09.2026 — Etappe 5a F13 abgeschlossen auf eigenem Zweig
+
+Direkt aus gesichertem Etappe-4-Abschluss ebc01a48057994629c021bd84ab7f9a236678b70,
+Zweig `codex/etappe-5a-telegram-outbox`, Arbeitsbaum `etappe-5a-work`.
+ABSCHLUSS.json von Etappe 4, Remotes/Zweige/Änderungen und Arbeitsbäume geprüft;
+fremde ungetrackte E44-Dateien und private Änderungen erhalten. Keine neueren
+main-/E44.4-/E44.5-Commits übernommen, privates Backup-Repo nicht committet.
+
+Vor Umsetzung Vertrag F13-VERTRAG.md festgelegt. Hauptlauf speichert atomar
+Position, Dedupe, unveränderliche Nachrichtenabsichten und reparierbare Historien-
+Projektionen in state.json. Nachrichten-ID aus Art/Zeit/Sequenz/Inhalt; Text-SHA,
+Versandstatus, Versuche, Zielhash und message_id dauerhaft gespeichert.
+Sending vor API-Aufruf, confirmed nur nach positivem Telegram-Beleg.
+Ablehnung/pending wird beim Neustart in Reihenfolge erneut versucht, auch ohne
+neue Kerzen/bei Fetchfehler. Confirmed nie erneut. Timeout/unterbrochenes sending
+wird uncertain und stoppt Folgeeinträge. Ein OS-Dateilock schützt den lokalen Pfad.
+
+712/712 Tests: sämtliche 676 bisherigen unverändert, 36 neue F13-Fälle.
+Original-F13 mit echter KAUF_1-Auswertung auf ebc01a4 reproduziert. Echte E41-
+Wartemeldung vor zwei Teilverkäufen, Hauptlauf plus echter Fake-HTTP-Parser,
+Schreibfehler/Projektreparatur, Altbestand/kein Historienreplay, Zielwechsel,
+fehlende Zugangsdaten, Dry-run und Schema-/Textfehler geprüft. Fünf separate
+Python-Prozesse abrupt beendet: vor/nach Commit, vor API, nach simulierter
+Annahme und nach Quittung. Konkurrenzprozess/Sperrfreigabe geprüft.
+16/16 F13-Sabotagen erst nach grüner erreichter Vorprobe erkannt;
+4 23/23, 3b 19/19, D01 6/6 und F09 3/3 erhalten.
+
+Keine Änderung an Strategie, site, Workflows, V1/Positionscodec oder alten Tests.
+F09/D01, Restlose/Kosten, monotoner Stop, Next-Open, Exitpriorität, Reservierungen,
+Gebühren/Slippage, Schluss-DD/obere Intrabar-Grenze und bestätigte Verträge bleiben.
+GitHub-Zweig/Remote-HEAD/Tests zur exakten SHA lesend geprüft. Bundle/ZIP,
+vollständiger Baumvergleich, frischer Restore, 712 Tests/Schutzproben und sechs
+identische gespeicherte V1-Prozessfortsetzungen lokal gesichert unter
+`audit-backups/5a-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+Bericht: `docs/nacharbeit-2026-09-28/ETAPPE-5A-ABSCHLUSS.md`.
+
+Grenzen: API-Annahme ist kein Lesebeleg/manueller Fill. Keine Exactly-once-Zusage;
+unklare Fälle benötigen separate manuelle Klärung. Lokale Transaktion überlebt
+Prozessende, nicht verlorene Datenträger/getrennte Hostkopien. Der unveränderte
+GitHub-Workflow persistiert erst nach dem Lauf: Verlust des ephemeren Runners
+davor bleibt offen und muss vor Live-Go separat gelöst werden. Eigenständige
+watch/lage/test/resend-Befehle bleiben Einmalbefehle. Keine echten Nachrichten,
+Orders, Deployments, Live-Schalter, Dispatches oder main-Push/Merges.
+Sicherungstag/Originale/private Volltranskripte unverändert. F17 bleibt 5b;
+V2/Shorts/E41.6/andere Befunde nicht bearbeitet. Nächster separater Auftrag:
+`START-5B.md`, GPT-6 Sol / Aufwand mittel, bei Herkunftsmehrdeutigkeit hoch.
+5a beenden; keine Folgeetappe automatisch starten.
+
+---
+
+## 29.09.2026 — Etappe 4 F03/F04/F05/F10 abgeschlossen auf eigenem Zweig
+
+Arbeitsbaum `etappe-4-work`, Zweig `codex/etappe-4-bestand-stop`, direkt aus dem
+gesicherten 3b-Abschluss `9606a6f555f9cdaee86f9c33a5175c5c5306b365`.
+Remotes, Zweige, Arbeitsbäume und Änderungen geprüft; private/fremde Änderungen
+erhalten. Keine neueren main-/E44.4-/E44.5-Commits übernommen. Privates Repo nicht
+committet; Sicherungstag unverändert, main nur lesend beobachtet.
+
+Vertrag: `docs/nacharbeit-2026-09-28/F03-F04-F05-F10-VERTRAG.md`.
+Bericht: `docs/nacharbeit-2026-09-28/ETAPPE-4-ABSCHLUSS.md`.
+V1 führt gebührenhaltige Restkosten je tatsächlich gefülltem Los, proportionalen
+gewöhnlichen Verkauf und gezielten E42-Losverkauf. Gesamteinstand enthält E42;
+Basis-Einstand für den Hauptstop bleibt davon getrennt. Ein Long-Stop bleibt nach
+Aktivierung monoton bis FLAT, auch nach Kursbruch, Nachkauf, Zonen-/Fensterwechsel
+und Neustart. Beim bestätigten TP-Fill wird er aus dem bekannten Präfix aktiviert,
+erst nach Kostenrückkopplung; abgelehnte/verfallene TP-Absichten aktivieren ihn nicht.
+Engine und Plan verwenden denselben gespeicherten Stop samt Grund und E41-Regel.
+
+Positionsschema 2 speichert sämtliche entscheidungsrelevanten Felder einschließlich
+widerstand_exits und Pivot-Indizes. V1-Checkpoint 1 umfasst zusätzlich Reservierungen,
+Absichten, bekannte Entscheidungsbasis, Cash/Restlose, Risiko und bisherige Ergebnisse.
+JSON-Weg plus neue Prozesse liefern identische Fortsetzung. Altzustände behalten
+Position/Dedupe/Signalanker; unbekannte frühere Stopmaxima und fehlende Zähler sind
+markiert. Keine manuelle Live-Ausführung wird aus Telegram-Signalen rekonstruiert.
+Der Live-Observer bleibt Signalreferenz, kein Kostennachweis. Anzeige kennzeichnet
+diese Grenze ausdrücklich. Versandmechanik/F13 und Chart/F17 bleiben unberührt.
+
+**676/676 Tests**, 38 neue; **23/23 neue Sabotagen** nach erreichtem Ausgangsfall.
+Bestehende 3b 19/19, D01 6/6, F09 3/3 erneut bestanden. Zwei alte Erwartungen zu
+Strukturstop/Plan korrigiert, zwei E42-Fixtures um echte Testlose ergänzt. Ein
+Muster-2-Test isoliert nun den Struktur-Nachzug; seine bisherigen Muster-/Signal-
+Assertions bleiben, die zusätzliche Strukturhistorie hat einen eigenen Gegenfall.
+Alle Anpassungen mit konkreten Werten im Bericht. Kein Test gestrichen.
+
+Vorab genau dieselben zwei Zeilen und drei Slippages wie 3b festgelegt. Ausschließlich
+lokales `backtest.run_execution`, Inputs unverändert. 1.101 Fills und 9.054 Closes
+gegen unabhängiges Audit-Buch und Decimal-Kostenrechnung geprüft; sechs echte
+Prozessneustarts mit identischem Gesamtergebnis. Ohne Slippage Endwerte
+13.418,88 / 13.299,89 USD; gegenüber 3b −12,57 / +49,02. Schluss-DD 7,9166 / 8,4177 %,
+**obere Intrabar-Grenze jeweils 9,9428 %**. Kein Gitter, keine Renditezielsetzung,
+keine neuen DD-Schwellen. Originale und frühere Ergebnisdateien unverändert.
+
+Eigener GitHub-Zweig, exakte Abschluss-SHA/CI, Bundle/ZIP und geprüfter frischer
+Restore unter `audit-backups/4-abschluss-<Kurz-SHA>/ABSCHLUSS.json`.
+Keine privaten Volltranskripte, main-Push/Merge, Live-Schalter, Nachrichten, Orders,
+Deployments oder Dispatches. Nächster getrennter Auftrag **Etappe 5a, GPT-6 Sol / hoch**:
+`docs/nacharbeit-2026-09-28/START-5A.md`. Etappe 4 beenden, nichts automatisch starten.
+
+---
+
+## 28.09.2026 — Etappe 3b F01/F12 abgeschlossen auf eigenem Zweig
+
+Arbeitsbaum `etappe-3b-work`, Zweig `codex/etappe-3b-f01-f12`, direkt vom exakten
+3a-Abschluss `67c8e624de3cc1b854a78dced755a5702b1a9c9a`. Remotes, Zweige und alle
+Arbeitsbäume geprüft; fremde ungetrackte E44-Artefakte erhalten. Privates Backup-Repo
+nicht committet. Keine neueren main-/E44.4-/E44.5-Commits übernommen.
+
+Neuer V1-Zugang `backtest.run_execution`/`run_execution_half`: getrennte Kauf-/
+Verkaufskandidaten auf gleichem gebuchtem Vorzustand; Reservierung und Fill am nächsten
+zulässigen Open; echte Fills/Ablehnungen vor neuer Entscheidung zurückgekoppelt.
+Teilfinanzierung skaliert nur bestehende Tranche; kein Phantomverbrauch von Leiter-
+stufen. Haupt-/Gesamtausstieg vor Teilstop vor Teilverkauf; Verkauf sperrt Paketkäufe.
+F09-Zyklusreset/Wiederanlage, bestehende Tranchen und D01-Stichtag erhalten.
+
+**638/638 Tests** (600 alt, 38 neu), **19/19 Sabotagen**, 16 unabhängige Handfälle
+(zwölf V1, drei ausgeschlossene V2-Fälle, H14 ausgeschlossene E41.6-Arithmetik).
+Echte Konflikte, Rückkopplung, Cash/Reservierungen, Datenende/Lücken, Präfixe und
+Risikozeitpunkte erreicht. D01 6/6 und F09 3/3 bestehende Mutationen ebenfalls erkannt.
+Zwei Quelltext-Assertions zeigen wegen Auslagerung auf `_evaluate`, sonst alte
+Erwartungen unverändert. Bericht `docs/nacharbeit-2026-09-28/F01-F12-UMSETZUNG.md`.
+
+Genau Live-Basis und bestehendes E42 (zwölf Kerzen), pro Zeile 0/0,1/0,5 % Slippage
+je Seite, nur lokal auf unveränderten Audit-Inputs. Gebühren 0,1 % je Fill.
+Jeder Fill und Cash/BTC-Close-Pfad, Monatsstände, Los-PnL, Kosten und Risikofelder
+gegen unverändertes unabhängiges Losbuch abgeglichen. Endwerte ohne Slippage:
+13.431,45 / 13.250,88 USD gegenüber 3a-Level 13.613,09 / 13.541,56 USD.
+Schluss-DD 7,9166 / 8,4177 %, **obere Intrabar-Grenze jeweils 9,9428 %**.
+Alle neuen Kandidatenbänder unterscheiden sich vom alten Signalband; Buchführung
+ist Erfolg, keine gewünschte Rendite. Ergebnisse ausschließlich separate `3b-*`.
+
+F03/F04-Einstand/Stop-Nachzug und Persistenz bleiben offen; ursprüngliche Referenz-
+Einstandsformel erhalten und kann Strategie weiter beeinflussen. Keine untrennbare
+Etappe-4-Korrektur benötigt. Live-Observer und bisherige Signalband-/Workflow-Zugänge
+bleiben historische Diagnostik ohne V1-Zertifizierung. Neue Messungen ausdrücklich
+mit `run_execution`, keine still umgedeuteten alten Drawdown-Werte/Schwellen.
+
+Originaldaten/Ergebnisse, site/Workflows, Live-Schalter, privates Backup und Sicherungstag
+unverändert; kein Merge/main-Push, Dispatch, Telegram, Order oder Deployment.
+Eigener GitHub-Zweig plus CI zur exakten Abschluss-SHA und frischer Bundle-Clone lokal
+unter `audit-backups/3b-abschluss-<Kurz-SHA>/ABSCHLUSS.json` nachgewiesen.
+
+Nächster separater Auftrag **Etappe 4: GPT-6 Astra / hoch** für Einstands-/Stop-/
+Persistenzvertrag und kritische Prüfung; Sol / hoch für danach klar begrenzte Umsetzung.
+Neue DD-Schwellen vor späterer Strategiebewertung; V2/Short-Margin/Funding/E41.6 getrennt.
+Etappe 3b beenden; keine Folgeetappe automatisch starten.
+
+---
+
+## 28.09.2026 — Etappe 3a F01/F12 abgeschlossen, Umsetzung 3b noch nicht begonnen
+
+Eigener Arbeitsbaum `vertrag-3a-work`, Zweig `codex/etappe-3a-ausfuehrungsvertrag`,
+direkt aus D01 `5fabe2bae1506546fc31708ceecef2034365300f` (enthält F09).
+Remotes, saubere Ausgangsarbeitsbäume und unveränderten Sicherungstag geprüft.
+Privates Backup-Repo nicht committet; main nur lesend aktualisiert/beobachtet.
+
+Vertrag: `docs/nacharbeit-2026-09-28/F01-F12-VERTRAG.md`. Nutzer hat alle drei
+fachlichen Fragen ausdrücklich beantwortet: D1-A nächstes Open, D2-A Ausstiege
+vor Käufen (bei Verkauf kein Kauf im selben Paket), D3 Risikopaket Long/Spot,
+Schluss-DD und Intrabar-Grenzen, 0,1 % Gebühr, 0/0,1/0,5 % Slippage je Seite.
+Next-Open bleibt idealisierte Null-Latenz-Ausführung. Keine Vorab-Limit-Orders
+unterstellen. Signalzeit, Fill und Zustand müssen in 3b kausal getrennt werden.
+Kein bloßes Umrechnen des alten Signalbands als vollständige Korrektur ausgeben.
+
+16 Handfälle mit 27 rationalen Identitäten, acht negative Kontrollwerte erkannt,
+drei erreichte Ist-Proben. F01 Verkauf nach Tief: bisher 0 statt 50 % DD; Kauf nach
+Tief: bisher 50 statt 0 %; F12 neues Ziel derselben Kerze reproduziert. Diese Proben
+bestätigen offene Fehler, sie reparieren nichts. Unveränderte Suite: **600/600**.
+Prüfartefakte `3a-pruefung.json`, `3a-tests.log`, Skript `tools/verify_3a_contract.py`.
+
+Keine Änderungen an Engine, site, Workflows, Live-Schaltern, Originaldaten oder
+früheren Ergebnissen. Kein Gesamtaudit, E44.4/E44.5, Merge, main-Push, Telegram,
+Order, Deployment oder Backtest-Workflow. Eigener Zweig wird gesichert; GitHub-CI
+und Remote-HEAD zur exakten SHA sowie Bundle-Wiederherstellung werden lokal unter
+`audit-backups/3a-abschluss-<Kurz-SHA>` nachgewiesen (ABSCHLUSS.json).
+
+Für V1/3b keine offene fachliche Auswahl mehr. Neue quantitative DD-Schwellen und
+Abschaltregeln vor späterer Strategiebewertung, E41.6-Budget, V2 und Shorts bleiben
+eigene Entscheidungen. F03/F04/Persistenz bleiben Etappe 4; Abhängigkeiten bei
+Fill-Rückkopplung konkret melden, nicht still in 3b mitreparieren.
+
+Neuer Chat sinnvoll: **GPT-6 Sol / hoch**, Aufwand hoch beibehalten, von der
+3a-Empfehlung Astra auf Sol wechseln. Auftrag `docs/nacharbeit-2026-09-28/START-3B.md`.
+Vor neuem Schreibzugriff gesicherten 3a-Commit prüfen, eigenen Folgearbeitsbaum
+anlegen. Etappe 3a danach beendet; dieser Abschluss startet 3b nicht.
+
+---
+
+## 28.09.2026 — Audit-Nacharbeit, Etappe 2 (D01), nur eigener Arbeitszweig
+
+`codex/fix-d01-kerzenschluss` in `fix-d01-work` basiert auf abgeschlossenem F09
+`6edb941b10e4220f4634e4570de8de25261d58b2`. Abruf/Aufbau verwenden Kerzenabschluss
+<= festen Messstichtag. Gespeicherte Reihen werden am damaligen `ende` gemeinsam
+abgegrenzt; Teilfenster haben denselben Vertrag. Keine Signalregel geaendert.
+
+**600 Tests bestanden**, sechs konkrete alte Messpfade durch Gegenfaelle erreicht,
+**6/6 Sabotagen erkannt**. Originalfall selbst bestaetigt: 2.481 Kerzen, letzte
+27.09.2026 08:00 UTC bei Stichtag 08:29:08.840 offen; jetzt 2.480 abgeschlossene,
+1.509 im Handelsfenster. Fuenf eingefrorene Varianten gegen F09 allein neu gerechnet:
+je ein Teilverkauf weniger, Endwerte 0,36 bis 0,66 USD niedriger, mit unabhaengigem
+Losbuch abgeglichen; H1-Endwerte gleich. Keine Mindestrendite als Erfolgskriterium.
+
+Bericht und Wiederholung: `docs/nacharbeit-2026-09-28/D01.md`; Zahlen separat
+`d01-ergebnis.json`. Audit/F09/Originalinputs bleiben unveraendert. Eigener Zweig
+wird auf GitHub gesichert und ausschliesslich `Tests` fuer exakte HEAD-SHA geprueft.
+Lokaler CI-Beleg und Abschlussbundle liegen getrennt unter `audit-backups`.
+
+Keine E44.4/E44.5-Uebernahme, main-/Live-Schalter, Nachrichten, Orders oder Deployments.
+Sicherungstag unveraendert auf `469be65`. F01/F12 und weitere Auditfehler bleiben offen.
+Naechster Auftrag: **3a, GPT-6 Astra / hoch**, Vertrag fuer Ausfuehrung/Risiko und
+Handfaelle; danach **3b, GPT-6 Sol / hoch**, klare Umsetzung. Die Empfehlung ist
+aufgabenbezogen und stellt das Modell nicht automatisch um. D01 danach beenden.
+
+---
+
+## 28.09.2026 — Audit-Nacharbeit, Etappe 1 (F09), nur Arbeitszweig
+
+Aus gesichertem aktuellem main `469be65` wurde `codex/fix-f09-wiederanlage`
+angelegt. Der Long-Abrechner verkauft numerische Rundungsreste bei einem eigentlich
+vollstaendigen Teilverkauf mit. Dadurch verwenden Folgekaeufe neues Cash und neue
+Hoechstbestaende. Keine Strategie-Schalter und keine Signalregeln veraendert.
+
+585 alte plus vier neue Tests bestehen. Drei der neuen Tests scheiterten zuvor;
+alle drei gezielten Sabotagen werden erkannt. Fuenf historische Zeilen stimmen
+nach der Korrektur mit dem unabhaengigen Audit-Losbuch ueberein. F09 kann die
+Rendite je nach Variante erhoehen oder senken. D01/F01/F12 bleiben offen.
+
+Bericht: `docs/nacharbeit-2026-09-28/F09.md`. Etappen, Modellempfehlungen und
+Startauftrag: `docs/nacharbeit-2026-09-28/ETAPPEN.md`.
+Naechste Etappe D01: **GPT-6 Sol, Aufwand mittel**. Die Modelleinstellung wurde
+durch die Arbeit nicht automatisch umgestellt. Jede Etappe getrennt abschliessen.
+
+Kein Merge-Go, kein main-Push, keine Telegram-Nachricht, kein Messworkflow und
+kein Deployment. E44.4/E44.5 sind nicht Teil dieses Korrekturzweigs. Rueckkehrpunkt:
+`sicherung/vor-audit-korrekturen-2026-09-28`, lokal als Bundle/ZIP erfolgreich geprueft.
+
+---
+
 > Was zuletzt passiert ist, was offen liegt, was eine neue Session als Erstes wissen
 > muss. **Jüngster Abschnitt oben.** Nach jeder abgeschlossenen Arbeit einen datierten
 > Abschnitt hier ergänzen — nicht erst am Ende eines Vorhabens.

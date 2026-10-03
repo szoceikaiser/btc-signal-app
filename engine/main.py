@@ -28,15 +28,21 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import coinalyze
+from flow_contract import (AsOfSeries, asof, direct, FOUR_HOURS_MS, MAX_OI_AGE_MS,
+                           MAX_FUNDING_AGE_MS)
+import telegram_outbox as outbox
+import durable_delivery as durable
+from functools import wraps
 from strategy_core import (HIGH_EXIT_TOL, LADDER_FACTORS, LADDER_TRANCHE, TRANCHEN,
                            Candle, FibZones, FlowPoint, Impulse, Pivot, PosState,
                            Position, evaluate, fib_zones, find_pivots, gegen_zonen,
                            ampel, ampel_richtung, classify_pattern, lage_bericht,
                            orderflow_detail, OF_FENSTER, DIP_FLOOR_PCT, SignalType,
                            last_significant_impulse, liq_levels, next_pivot_beyond,
-                           oi_in_btc, RUECKKAUF_TRANCHE)
+                           oi_in_btc, RUECKKAUF_TRANCHE, resolve_stop)
 from telegram_notify import (format_flush_aufloesung, format_flush_warnung,
                              format_ruecktest, format_stop_rueckeroberung,
+                             format_plan, format_vorschau, format_signal, deliver_telegram,
                              send_lage, send_plan,
                              send_signals, send_text, send_vorschau)
 
@@ -238,8 +244,8 @@ def fetch_market_data(oi_history: list[list] | None = None,
       US-Server blockiert.
     - Futures-CVD nicht verfuegbar -> 0; der Kompass erkennt den Derivate-Pump
       stattdessen ueber OI + Funding + flaches Spot-CVD.
-    - OI von Kraken (kleinere Boerse, aber gleiche Richtung); Historie waechst
-      mit jedem Lauf — die ersten ~2 Tage sind die OI-Muster noch neutral.
+    - OI von Kraken (kleinere Boerse); Historie waechst mit jedem Lauf.
+      Vor der ersten Messung und bei ueberalterten Werten fehlt OI-Bestaetigung.
     """
     now_ms = now_ms or int(time.time() * 1000)
     spot_raw = fetch_spot(LIMIT_HAUPT)
@@ -281,7 +287,6 @@ def fetch_market_data(oi_history: list[list] | None = None,
     use_cz = bool(cz_oi)
     oi_pairs = sorted((int(t), float(v)) for t, v
                       in (cz_oi.items() if use_cz else oi_history))
-    first_oi = oi_pairs[0][1] if oi_pairs else 0.0
     # E43.4: OI in Kontrakten (BTC). Jeder Coinalyze-Punkt mit dem Schlusskurs SEINER
     # Kerze umgerechnet, erst danach aufgefuellt - wie backtest.build_series. Der
     # Kraken-Rueckfall bekommt keine Kontrakt-Reihe (0.0 = keine Daten): seine Historie
@@ -289,7 +294,9 @@ def fetch_market_data(oi_history: list[list] | None = None,
     kurs = {int(k[0]): float(k[4]) for k in spot_raw if int(k[6]) <= now_ms}
     btc_pairs = sorted(oi_in_btc({int(t): float(v) for t, v in cz_oi.items()},
                                  kurs).items()) if use_cz else []
-    first_btc = btc_pairs[0][1] if btc_pairs else 0.0
+    oi_series = AsOfSeries(oi_pairs, FOUR_HOURS_MS if use_cz else 0)
+    btc_series = AsOfSeries(btc_pairs, FOUR_HOURS_MS)
+    funding_series = AsOfSeries(funding)
 
     candles: list[Candle] = []
     flow: list[FlowPoint] = []
@@ -304,13 +311,26 @@ def fetch_market_data(oi_history: list[list] | None = None,
         close_ts = c_ts + CANDLE_MS
         # Coinalyze-OI ist je 4h-Kerze (ts = Open-Time) -> direkt per c_ts; Kraken-
         # Snapshot-Historie wird wie bisher zum Kerzenschluss zugeordnet.
-        oi_val = _latest_leq(oi_pairs, c_ts if use_cz else close_ts, default=first_oi)
+        oi_val, oi_meta = asof(oi_series, close_ts,
+                               "coinalyze_4h_oi_usd" if use_cz else "kraken_oi_snapshot_usd",
+                               MAX_OI_AGE_MS)
         long_liq, short_liq = cz_liq.get(c_ts, (0.0, 0.0))
-        fut_cvd += cz_fut.get(c_ts, 0.0)               # ohne Daten bleibt es 0 = wie bisher
+        fut_cvd += cz_fut.get(c_ts, 0.0)  # Null-Surrogat; Abdeckung steht in provenance
+        funding_val, funding_meta = asof(funding_series, close_ts, "kraken_funding_8h",
+                                           MAX_FUNDING_AGE_MS)
+        btc_val, btc_meta = asof(btc_series, close_ts, "coinalyze_4h_oi_btc",
+                                 MAX_OI_AGE_MS)
+        provenance = {
+            "spot_cvd": direct(c_ts, close_ts, "binance_spot_taker_usd"),
+            "fut_cvd": direct(c_ts, close_ts, "coinalyze_fut_delta_btc", c_ts in cz_fut),
+            "oi": oi_meta, "oi_btc": btc_meta, "funding": funding_meta,
+            "long_liq": direct(c_ts, close_ts, "coinalyze_long_liq_usd", c_ts in cz_liq),
+            "short_liq": direct(c_ts, close_ts, "coinalyze_short_liq_usd", c_ts in cz_liq),
+            "long_pct": direct(c_ts, close_ts, "coinalyze_long_pct", c_ts in cz_ls),
+        }
         flow.append(FlowPoint(c_ts, spot_cvd, fut_cvd, oi_val,
-                              _latest_leq(funding, close_ts), long_liq, short_liq,
-                              cz_ls.get(c_ts, 0.0),
-                              _latest_leq(btc_pairs, c_ts, default=first_btc)))
+                              funding_val, long_liq, short_liq,
+                              cz_ls.get(c_ts, 0.0), btc_val, provenance))
     return candles, flow, oi_history
 
 
@@ -349,9 +369,8 @@ EVAL_DEFAULTS = {
     "zonen_1d": False, "zonen_nachziehen": False, "pivot_n_1d": 0,
     "trend_filter": False, "trend_ema": 200,
     "ampel_filter": "off",
-    # E43.3 (26.09.2026), Default "alt" = bisheriges Verhalten - siehe
-    # strategy_core.classify_pattern.
-    "muster_cvd": "alt",
+    # A2: fachlich versatzinvariante CVD-Definition vor Ergebnismessung festgelegt.
+    "muster_cvd": "usd",
     # E43.4 (26.09.2026), Default "usd" = bisheriges Verhalten - siehe
     # strategy_core.oi_aenderung.
     "muster_oi": "usd",
@@ -375,10 +394,17 @@ def eval_params(cfg: dict) -> dict:
     out = {}
     for name, default in EVAL_DEFAULTS.items():
         wert = cfg.get(name, default)
+        if isinstance(default, bool):
+            # JSON-Konfigurationsschalter haben einen echten bool-Vertrag. Strings
+            # sind kein bool (bool("false") waere True); bei Typfehler abbrechen,
+            # damit ein Tippfehler nie unbemerkt den gegenteiligen Modus aktiviert.
+            if type(wert) is not bool:
+                raise TypeError(f"config.json: '{name}' muss true oder false (JSON-Bool) sein; "
+                                f"erhalten: {wert!r}")
+            out[name] = wert
+            continue
         try:
-            if isinstance(default, bool):
-                wert = bool(wert)
-            elif isinstance(default, int):
+            if isinstance(default, int):
                 wert = int(wert)
             elif isinstance(default, float):
                 wert = float(wert)
@@ -392,95 +418,8 @@ def eval_params(cfg: dict) -> dict:
 
 # --------------------------------------------------------- State-Persistenz
 
-def pos_to_state(pos: Position) -> dict:
-    d = {"direction": pos.direction, "pos_state": pos.state.value,
-         "last_signal_ts": pos.last_signal_ts, "retrace_extreme": pos.retrace_extreme,
-         "tp_rungs": pos.tp_rungs, "dip_buys": pos.dip_buys,
-         "buy_rungs": pos.buy_rungs, "entry_ref": pos.entry_ref,
-         "entry_pct": pos.entry_pct, "liq_exits": pos.liq_exits,
-         "high_exits": pos.high_exits, "liq_entries": pos.liq_entries,
-         "last_stop_ts": pos.last_stop_ts, "ziel_extrem": pos.ziel_extrem,
-         "be_aktiv": pos.be_aktiv,
-         # E41: Die Live-Engine ist bei jedem Lauf ein neuer Prozess. Ohne diese drei
-         # Felder finge das Warten auf die Rueckeroberung bei JEDEM Lauf neu an - der
-         # Stop kaeme nie, und im Backtest fiele es nicht auf (der rechnet am Stueck).
-         "stop_wartet": pos.stop_wartet, "stop_wartet_inv": pos.stop_wartet_inv,
-         "stop_geprueft": pos.stop_geprueft,
-         # E44.3 (E42): Beobachtung, Ausbruch, Rueckkauf-Teil und sein Stop gelten ueber
-         # viele Kerzen. Ohne diese Felder finge jeder Lauf (alle 4 Stunden ein neuer
-         # Prozess) von vorn an: kein Ausbruch wuerde je erinnert, das Ruecktest-Fenster
-         # liefe nie ab, der Teil verloere seinen Stop - und der Backtest (am Stueck)
-         # zeigte davon nichts.
-         "e42_marke": pos.e42_marke, "e42_richtung": pos.e42_richtung,
-         "e42_start_ts": pos.e42_start_ts, "e42_ausbruch_ts": pos.e42_ausbruch_ts,
-         "e42_gekauft": pos.e42_gekauft, "e42_teil_marke": pos.e42_teil_marke,
-         "e42_teil_wartet": pos.e42_teil_wartet,
-         "e42_teil_wartet_inv": pos.e42_teil_wartet_inv,
-         "e42_teil_geprueft": pos.e42_teil_geprueft,
-         "bestand_pct": pos.bestand_pct,
-         "zones": None}
-    if pos.zones:
-        z = pos.zones
-        d["zones"] = {
-            "impuls_start": z.impulse.start.price, "impuls_start_ts": z.impulse.start.ts,
-            "impuls_start_kind": z.impulse.start.kind,
-            "impuls_ende": z.impulse.end.price, "impuls_ende_ts": z.impulse.end.ts,
-            "impuls_ende_kind": z.impulse.end.kind,
-            "level_05": z.level_05, "gp_upper": z.gp_upper, "gp_lower": z.gp_lower,
-            "level_0786": z.level_0786, "invalidation": z.invalidation,
-        }
-        # E18.3: Steht eine eingefrorene Zielreferenz, zeigt der Chart deren Ziele —
-        # sonst zeichnete er andere Linien, als die Engine handelt.
-        ref = pos.ziel_extrem if pos.ziel_extrem is not None else pos.retrace_extreme
-        if ref is not None:
-            d["zones"]["ext1"] = z.ext_target(ref, 1.0)
-            d["zones"]["ext2"] = z.ext_target(ref, 1.618)
-    return d
-
-
-def pos_from_state(d: dict) -> Position:
-    pos = Position()
-    if not d:
-        return pos
-    pos.direction = d.get("direction", "NONE")
-    pos.state = PosState(d.get("pos_state", "FLAT"))
-    pos.last_signal_ts = d.get("last_signal_ts", -1)
-    pos.retrace_extreme = d.get("retrace_extreme")
-    pos.tp_rungs = d.get("tp_rungs", 0)
-    pos.dip_buys = d.get("dip_buys", 0)
-    pos.buy_rungs = d.get("buy_rungs", 0)
-    pos.entry_ref = d.get("entry_ref")
-    pos.entry_pct = d.get("entry_pct", 0)
-    pos.liq_exits = d.get("liq_exits", 0)
-    pos.high_exits = d.get("high_exits", 0)
-    pos.liq_entries = d.get("liq_entries", 0)
-    pos.last_stop_ts = d.get("last_stop_ts", -1)
-    pos.ziel_extrem = d.get("ziel_extrem")
-    pos.be_aktiv = bool(d.get("be_aktiv", False))
-    pos.stop_wartet = int(d.get("stop_wartet", 0) or 0)
-    pos.stop_wartet_inv = d.get("stop_wartet_inv")
-    pos.stop_geprueft = d.get("stop_geprueft")
-    pos.e42_marke = d.get("e42_marke")
-    pos.e42_richtung = d.get("e42_richtung", "NONE") or "NONE"
-    pos.e42_start_ts = int(d.get("e42_start_ts", -1))
-    pos.e42_ausbruch_ts = int(d.get("e42_ausbruch_ts", -1))
-    pos.e42_gekauft = d.get("e42_gekauft")
-    pos.e42_teil_marke = d.get("e42_teil_marke")
-    pos.e42_teil_wartet = int(d.get("e42_teil_wartet", 0) or 0)
-    pos.e42_teil_wartet_inv = d.get("e42_teil_wartet_inv")
-    pos.e42_teil_geprueft = d.get("e42_teil_geprueft")
-    # Altbestand ohne das Feld: aus den Kaeufen schaetzen, hoechstens 100. Die Schaetzung
-    # kennt keine Teilverkaeufe und liegt damit eher zu HOCH - im Zweifel also "voll",
-    # also eher kein Rueckkauf als einer zu viel.
-    pos.bestand_pct = int(d.get("bestand_pct", min(100, pos.entry_pct or 0)) or 0)
-    z = d.get("zones")
-    if z and "impuls_start" in z:
-        imp = Impulse(
-            Pivot(0, z.get("impuls_start_ts", 0), z["impuls_start"], z.get("impuls_start_kind", "L")),
-            Pivot(0, z.get("impuls_ende_ts", 0), z["impuls_ende"], z.get("impuls_ende_kind", "H")))
-        pos.zones = FibZones(imp, z["level_05"], z["gp_upper"], z["gp_lower"],
-                             z["level_0786"], z["invalidation"])
-    return pos
+# Shared complete, versioned codec (stage 4).
+from position_state import pos_to_state, pos_from_state
 
 
 def zonen_vorschau(candles: list[Candle], cfg: dict | None = None,
@@ -608,7 +547,20 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
     piv = find_pivots(candles, n=par["pivot_n"])
 
     plan: dict = {"richtung": pos.direction, "anteil_pct": pos.entry_pct,
-                  "einstand": pos.entry_ref, "kurs": cur.close}
+                  "anteil_art": "Signaltranchen kumuliert",
+                  "einstand": pos.entry_ref, "kurs": cur.close,
+                  "bestand_quelle": pos.inventory_source,
+                  "live_bestand_belegt": False,
+                  "einstand_art": "Signalreferenz (kein belegter Live-Einstand)",
+                  "basis_einstand": pos.entry_ref,
+                  "migration": list(pos.migration_notes)}
+    if pos.inventory_source == "simulated_fills":
+        from inventory import summary
+        total = summary(pos.lots)
+        plan.update(einstand=total["entry"], btc=total["units"],
+                    anteil_pct=pos.bestand_pct, anteil_art="finanzierter Restanteil (Simulation)",
+                    anschaffungskosten=total["cost"], kosten_vollstaendig=total["complete"],
+                    einstand_art="Simulierter Kosteneinstand inkl. Kaufgebuehr")
     # E32: Die Lage dazu - Struktur (Preis) und Spot-Nachfrage (Order-Flow). Reine
     # Information; sie aendert keine einzige Marke des Plans. Kaiser am 12.09.2026:
     # "ich bekomme die info zur struktur nur, wenn ich eine nachricht fuer ein nachkauf
@@ -684,13 +636,8 @@ def positions_plan(candles: list[Candle], flow: list[FlowPoint], cfg: dict,
                          "tranche": TRANCHEN["TP2"]})
 
     # --- Stop ---
-    stop, grund = z.invalidation, "Invalidierung"
-    if par["trail_stop"] and (pos.state in (PosState.TP1, PosState.TP2)
-                              or pos.tp_rungs > 0 or (par["be_im_plus"] and pos.be_aktiv)):
-        if pos.entry_ref is not None:
-            besser = pos.entry_ref > stop if lang else pos.entry_ref < stop
-            if besser:
-                stop, grund = pos.entry_ref, "Einstand (nachgezogen)"
+    stop, grund = resolve_stop(pos, cur, piv, trail_stop=par["trail_stop"],
+                               be_im_plus=par["be_im_plus"], stored_only=True)
 
     plan["nachkauf"] = sorted(nach, key=lambda x: -(x.get("preis") or x["zone"][1]) if lang
                               else (x.get("preis") or x["zone"][0]))
@@ -769,6 +716,7 @@ def plan_geaendert(alt: dict | None, neu: dict | None, toleranz: float = 0.0025)
     return False
 
 
+@durable.durable_command('watch')
 def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
                 now_ms: int | None = None, kerzen_roh=None) -> dict | None:
     """Leichter Zwischenlauf: Entwickelt sich in der LAUFENDEN Kerze gerade ein Flush?
@@ -862,13 +810,14 @@ def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
     }
     send_text(format_flush_warnung(w), dry_run=dry_run)
     watch_path.write_text(json.dumps(w, indent=1), encoding="utf-8")
-    print(f"Flush-Warnung gesendet: Kurs {laufend.close:.0f}, GP {z['gp_lower']:.0f}, "
+    print(f"Flush-Warnung vorgemerkt: Kurs {laufend.close:.0f}, GP {z['gp_lower']:.0f}, "
           f"Puffer {w['puffer_pct']} %")
     return w
 
 
 # ------------------------------------------------------------ Orchestrierung
 
+@durable.durable_command('lage')
 def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
                dry_run: bool = False, sth=sth_kostenbasis) -> dict | None:
     """Die Lage auf Knopfdruck — unter der Annahme einer LONG-Position (E35).
@@ -886,8 +835,8 @@ def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
         bein_richtung sagt. Ein Abwaerts-Bein bedeutet fuer einen Long nichts; findet
         sich kein Aufwaerts-Bein, sagt die Nachricht genau das.
       - Er fasst state.json NICHT an und erzeugt KEIN Signal — wie `--watch`.
-      - Er sendet IMMER, ohne Dedupe. Der Abruf ist ja gerade der Wunsch, jetzt zu
-        sehen, wie es steht.
+      - Jeder neue dauerhafte Auftrag erzeugt einen Abruf. Eine Wiederholung
+        derselben Auftrags-ID verwendet den gespeicherten Nachrichtenbatch.
     """
     cfg = {}
     cfg_path = data_dir / "config.json"
@@ -974,6 +923,15 @@ def e41_meldung(pos: Position, wartete_vorher: int, sigs: list, kerze: Candle,
     return None
 
 
+def _serialized_engine(fn):
+    @wraps(fn)
+    def locked(fetch=fetch_market_data, data_dir=DATA, dry_run=False):
+        with outbox.engine_lock(data_dir), durable.engine_session(Path(data_dir), dry_run):
+            return fn(fetch=fetch, data_dir=data_dir, dry_run=dry_run)
+    return locked
+
+
+@_serialized_engine
 def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
                dry_run: bool = False) -> list[dict]:
     """Ein Engine-Lauf: nachholen aller neuen abgeschlossenen Kerzen, Signale senden."""
@@ -987,6 +945,16 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         old_state = json.loads(state_path.read_text(encoding="utf-8"))
         if old_state.get("demo"):
             old_state = {}                                  # Demo-Daten verwerfen
+    delivery = outbox.recover(old_state, state_path)
+    outbox.project(old_state, data_dir)
+    # Resume pending dispatch before market access, even if fetching fails or
+    # there are no new candles. Confirmed/uncertain entries are never resent.
+    dispatch_open = True
+    if '_delivery' in old_state and durable.can_dispatch():
+        dispatch_open = outbox.drain(old_state, state_path, deliver_telegram,
+                     os.environ.get('TELEGRAM_BOT_TOKEN', ''),
+                     os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run)
+        delivery = outbox.load_delivery(old_state)
     pos = pos_from_state(old_state)
 
     oi_history = []
@@ -1009,6 +977,10 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         except Exception as exc:  # noqa: BLE001
             print(f"config.json nicht lesbar ({exc}) -> alte Einstellungen.")
     new_signals: list[dict] = []
+    previews = []
+    def stage(kind, event, sequence, payload, text, preview):
+        outbox.enqueue(delivery, kind, event, sequence, payload, text, preview=dry_run)
+        previews.append(preview)
     params = eval_params(cfg)
     # Nachholen: alle Kerzen, die neuer sind als der letzte verarbeitete Stand.
     # E44.3: Die Meldungen werden JE KERZE gesammelt (E41-Meldung, E42-Meldungen, Signale)
@@ -1044,8 +1016,9 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     plan = positions_plan(candles, flow, cfg, pos)
     state["plan"] = plan
     if cfg.get("plan_telegram", True) and plan_geaendert((old_state or {}).get("plan"), plan):
-        send_plan(plan, dry_run=dry_run)
-        print(f"Plan gesendet: {len(plan.get('nachkauf', []))} Nachkauf-, "
+        stage('plan', candles[-1].ts, 0, plan, format_plan(plan),
+              lambda: send_plan(plan, dry_run=True))
+        print(f"Plan vorgemerkt: {len(plan.get('nachkauf', []))} Nachkauf-, "
               f"{len(plan.get('teilgewinn', []))} Teilgewinn-Marken.")
     state["config"] = cfg
     state["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -1063,14 +1036,11 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         alt.get("impuls_start_ts"), alt.get("impuls_ende_ts")
     ) != (vorschau["impuls_start_ts"], vorschau["impuls_ende_ts"])
     if neue_struktur and cfg.get("vorschau_telegram", True):
-        send_vorschau(vorschau, candles[-1].ts, dry_run=dry_run)
-        print(f"Vorschau gesendet: {vorschau['richtung']}, GP "
+        stage('vorschau', candles[-1].ts, 0, vorschau, format_vorschau(vorschau, candles[-1].ts),
+              lambda: send_vorschau(vorschau, candles[-1].ts, dry_run=True))
+        print(f"Vorschau vorgemerkt: {vorschau['richtung']}, GP "
               f"{vorschau['gp_lower']:.0f}-{vorschau['gp_upper']:.0f}, "
               f"Stop-Abstand {vorschau['abstand_pct']} %")
-
-    state_path.write_text(json.dumps(state, indent=1), encoding="utf-8")
-    signals_path.write_text(json.dumps(hist, indent=1), encoding="utf-8")
-    oi_path.write_text(json.dumps(oi_history), encoding="utf-8")
 
     # --- Aufloesung einer offenen Flush-Warnung (Kaiser 2026-07-29) ------------------
     # Ohne diese Rueckmeldung bliebe jede Warnung in der Luft haengen: Man wuesste nie,
@@ -1087,33 +1057,56 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
             # Die gewarnte Kerze ist jetzt abgeschlossen -> Ergebnis feststellen.
             bestaetigt = any(s["ts"] == w["gewarnt_ts"] and s.get("tag") == "FLUSH"
                              for s in new_signals)
-            send_text(format_flush_aufloesung(w, bestaetigt), dry_run=dry_run)
+            text = format_flush_aufloesung(w, bestaetigt)
+            stage('flush_aufloesung', w['gewarnt_ts'], 0, [w, bestaetigt], text,
+                  lambda text=text: send_text(text, dry_run=True))
             w["aufgeloest"] = True
             w["bestaetigt"] = bestaetigt
-            watch_path.write_text(json.dumps(w, indent=1), encoding="utf-8")
+            delivery['watch_resolution'] = w
             print(f"Flush-Warnung aufgeloest: {'bestaetigt' if bestaetigt else 'nicht bestaetigt'}")
 
     # E41/E44.3: je Kerze erst die Meldungen, dann die Signale dieser Kerze.
     for m41, m42, sigs in pakete:
         if m41:
-            send_text(format_stop_rueckeroberung(m41), dry_run=dry_run)
-        for m in m42:
-            send_text(format_ruecktest(m), dry_run=dry_run)
+            text = format_stop_rueckeroberung(m41)
+            stage('e41', m41['ts'], 0, m41, text,
+                  lambda text=text: send_text(text, dry_run=True))
+        for j, m in enumerate(m42):
+            text = format_ruecktest(m)
+            stage('e42', m['ts'], j, m, text,
+                  lambda text=text: send_text(text, dry_run=True))
         if sigs:
-            send_signals(sigs, dry_run=dry_run)
+            for j, sig in enumerate(sigs):
+                stage('signal', sig['ts'], j, sig, format_signal(sig),
+                      lambda sig=sig: send_signals([sig], dry_run=True))
+    delivery['signals'], delivery['oi_history'] = hist, oi_history
+    state['_delivery'] = delivery
+    # Position/dedupe and intentions commit together. In an A4 session the
+    # external snapshot commits first; state.json is then only its local mirror.
+    outbox.atomic_json(state_path, state)
+    outbox.project(state, data_dir)
+    if dry_run or not os.environ.get('TELEGRAM_BOT_TOKEN') or not os.environ.get('TELEGRAM_CHAT_ID'):
+        for preview in previews:
+            preview()
+    if dispatch_open and durable.can_dispatch():
+        outbox.drain(state, state_path, deliver_telegram,
+                     os.environ.get('TELEGRAM_BOT_TOKEN', ''),
+                     os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run)
     print(f"Lauf ok: {len(candles)} Kerzen, {len(new_signals)} neue Signale, "
           f"OI-Punkte: {len(oi_history)}, Position: {pos.direction}/{pos.state.value}")
     return new_signals
 
 
-def send_testnachricht():
+@durable.durable_command('test')
+def send_testnachricht(data_dir: Path = DATA, dry_run: bool = False):
     ts = int(time.time() * 1000)
     send_signals([{"ts": ts, "type": "WARNUNG", "label": "TESTNACHRICHT — Einrichtung ok",
                    "price": 0.0, "tranche_pct": 0,
-                   "reason": "Telegram-Verbindung funktioniert. Ab jetzt kommen echte Trigger."}])
+                   "reason": "Telegram-Verbindung funktioniert. Ab jetzt kommen echte Trigger."}], dry_run=dry_run)
 
 
-def resend_all_signals(data_dir: Path = DATA):
+@durable.durable_command('resend')
+def resend_all_signals(data_dir: Path = DATA, dry_run: bool = False):
     """Sendet ALLE gespeicherten Kauf-/Verkaufstrigger erneut an Telegram (auf Knopfdruck)."""
     signals_path = data_dir / "signals.json"
     if not signals_path.exists():
@@ -1121,20 +1114,20 @@ def resend_all_signals(data_dir: Path = DATA):
         return []
     hist = json.loads(signals_path.read_text(encoding="utf-8"))
     sigs = sorted(hist.get("signals", []), key=lambda s: s["ts"])
-    dry = not (os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"))
+    dry = dry_run or not (os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"))
     send_signals([{"ts": int(time.time() * 1000), "type": "WARNUNG",
                    "label": f"NEUSENDUNG: {len(sigs)} Trigger (Historie, keine neuen Signale)",
                    "price": 0.0, "tranche_pct": 0,
                    "reason": "Ab hier folgen alle bisherigen Kauf-/Verkaufstrigger noch einmal."}],
                   dry_run=dry)
     send_signals(sigs, dry_run=dry)
-    print(f"{len(sigs)} Trigger erneut gesendet (dry_run={dry}).")
+    print(f"{len(sigs)} Trigger fuer Neusendung vorgemerkt (dry_run={dry}).")
     return sigs
 
 
 if __name__ == "__main__":
     if "--test-telegram" in sys.argv:
-        send_testnachricht()
+        send_testnachricht(dry_run="--dry-run" in sys.argv)
     elif "--watch" in sys.argv:
         # Leichter Zwischenlauf (alle 15 Min): nur nach sich entwickelnden Flushs
         # schauen. Fasst state.json nicht an, erzeugt keine Signale.
@@ -1144,6 +1137,6 @@ if __name__ == "__main__":
         # Signal, fasst state.json nicht an.
         lage_abruf(dry_run="--dry-run" in sys.argv or not os.environ.get("TELEGRAM_BOT_TOKEN"))
     elif "--resend-all" in sys.argv:
-        resend_all_signals()
+        resend_all_signals(dry_run="--dry-run" in sys.argv)
     else:
         run_engine(dry_run="--dry-run" in sys.argv or not os.environ.get("TELEGRAM_BOT_TOKEN"))
