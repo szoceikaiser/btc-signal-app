@@ -23,5 +23,11 @@ jobs:
           python-version: '3.12'
       - name: Verify integration and preserved production snapshot
         run: python tools/produktion_p1.py
-      - name: Verify historical return tables from frozen evidence
-        run: python tools/produktion_renditen.py --verify
+      - name: Preserve P1 return evidence without recalculation
+        run: >-
+          git diff --exit-code 7df2e20e8b68c1c7db8a5b4715fd6c1253e9165b --
+          docs/produktionsuebernahme-2026-10/RENDITEN.md
+          docs/produktionsuebernahme-2026-10/RENDITEN.json
+          docs/produktionsuebernahme-2026-10/RENDITEN-VARIANTEN.csv
+          docs/produktionsuebernahme-2026-10/RENDITEN-ETAPPEN.csv
+          tools/produktion_renditen.py

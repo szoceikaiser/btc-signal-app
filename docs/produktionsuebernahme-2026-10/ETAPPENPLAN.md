@@ -76,6 +76,13 @@ Dateien lesen. Offizielle Modellbeschreibungen:
 
 ## Abschluss jedes Chats
 
+P2a-Vertrag: `P2A-BETRIEBSVERTRAG.md`, `P2A-MIGRATIONSVERTRAG.md` und separat
+`P2A-GITHUB-ADAPTER.md`; begrenzte Umsetzung in `P2B-IMPLEMENTIERUNGSPLAN.md`.
+Hostentscheidung D1, konkrete spätere Migrationsfreigabe D2 und Betriebszuständigkeit
+D3 bleiben ausdrücklich zu belegen. Ohne diese Entscheidungen kein Live-Go.
+P2a ändert weder Engine noch Laufzeitdaten/Renditen. Seine Offline-CI vergleicht die
+vorhandene Renditeaufstellung nur noch mit P1, ohne erneute Berechnung.
+
 Jede Etappe erhält einen belegten Status, Commit, passende sichere CI und eine
 additive Sicherung mit Hashmanifest und geprüfter Wiederherstellung. Vor Push
 alle Workflowtrigger einschließlich `workflow_run` und die aktuellen
