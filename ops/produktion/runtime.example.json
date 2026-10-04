@@ -1,0 +1,17 @@
+{
+  "enabled": false,
+  "mode": "offline_only",
+  "store_adapter": "sqlite_test",
+  "store_path": null,
+  "runner_root": null,
+  "store_id": null,
+  "bot_identity": null,
+  "target_binding": null,
+  "operator": null,
+  "independent_alarm": null,
+  "second_backup_destination": null,
+  "schedule_utc": {
+    "signal": "after each 4h close at minute 02",
+    "watch": "minutes 08, 23, 38, 53"
+  }
+}

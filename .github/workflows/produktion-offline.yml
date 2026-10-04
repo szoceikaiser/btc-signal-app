@@ -3,16 +3,15 @@ name: Produktionsuebernahme Offline
 on:
   push:
     branches: [codex/produktion-audit-uebernahme]
-  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  integration:
+  p2-offline:
     if: github.ref == 'refs/heads/codex/produktion-audit-uebernahme'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,9 +20,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify integration and preserved production snapshot
-        run: python tools/produktion_p1.py
-      - name: Preserve P1 return evidence without recalculation
+      - name: P2 proof on this exact HEAD
+        run: python tools/produktion_p2.py
+      - name: Complete offline engine regression
+        run: cd engine && python run_tests.py
+      - name: Preserve P1 returns without recalculation
         run: >-
           git diff --exit-code 7df2e20e8b68c1c7db8a5b4715fd6c1253e9165b --
           docs/produktionsuebernahme-2026-10/RENDITEN.md

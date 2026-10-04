@@ -751,10 +751,14 @@ def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
     laufend = next((_c(k) for k in raw if int(k[6]) > now_ms), None)
     if laufend is None or len(fertig) < 30:
         return None
+    store = durable.active_store.get()
+    if store is not None and store.snapshot['version'] == 2:
+        if laufend.ts <= store.snapshot['control']['migration']['W']:
+            return None
 
-    cfg = {}
+    cfg = durable.runtime_config(data_dir) or {}
     cfg_path = data_dir / "config.json"
-    if cfg_path.exists():
+    if cfg_path.exists() and durable.runtime_config(data_dir) is None:
         try:
             cfg = {k: v for k, v in json.loads(cfg_path.read_text(encoding="utf-8")).items()
                    if not k.startswith("_")}
@@ -838,9 +842,9 @@ def lage_abruf(fetch=fetch_market_data, data_dir: Path = DATA,
       - Jeder neue dauerhafte Auftrag erzeugt einen Abruf. Eine Wiederholung
         derselben Auftrags-ID verwendet den gespeicherten Nachrichtenbatch.
     """
-    cfg = {}
+    cfg = durable.runtime_config(data_dir) or {}
     cfg_path = data_dir / "config.json"
-    if cfg_path.exists():
+    if cfg_path.exists() and durable.runtime_config(data_dir) is None:
         try:
             cfg = {k: v for k, v in json.loads(cfg_path.read_text(encoding="utf-8")).items()
                    if not k.startswith("_")}
@@ -927,7 +931,14 @@ def _serialized_engine(fn):
     @wraps(fn)
     def locked(fetch=fetch_market_data, data_dir=DATA, dry_run=False):
         with outbox.engine_lock(data_dir), durable.engine_session(Path(data_dir), dry_run):
-            return fn(fetch=fetch, data_dir=data_dir, dry_run=dry_run)
+            durable.health_event('signal','start')
+            try:
+                result=fn(fetch=fetch, data_dir=data_dir, dry_run=dry_run)
+            except Exception:
+                durable.health_event('signal','finish','run_failed')
+                raise
+            durable.health_event('signal','finish',None if durable.can_dispatch() else 'delivery_uncertain')
+            return result
     return locked
 
 
@@ -953,14 +964,19 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     if '_delivery' in old_state and durable.can_dispatch():
         dispatch_open = outbox.drain(old_state, state_path, deliver_telegram,
                      os.environ.get('TELEGRAM_BOT_TOKEN', ''),
-                     os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run)
+                     os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run,
+                     require_target_receipt=durable.active_store.get() is not None and
+                     durable.active_store.get().snapshot['version']==2)
         delivery = outbox.load_delivery(old_state)
+        if durable.active_store.get() is not None and durable.active_store.get().snapshot['version']==2 and not dispatch_open:
+            raise RuntimeError('Open delivery did not complete; production decision blocked')
     pos = pos_from_state(old_state)
 
     oi_history = []
     if oi_path.exists():
         oi_history = json.loads(oi_path.read_text(encoding="utf-8"))
 
+    pinned_cfg = durable.runtime_config(data_dir)
     candles, flow, oi_history = fetch(oi_history)
     if not candles:
         print("Keine Kerzen erhalten — Abbruch.")
@@ -968,9 +984,9 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
 
     # Einstellungen: bevorzugt aus config.json (wird von der Engine NIE ueberschrieben ->
     # konfliktfrei aenderbar), sonst aus dem alten state, sonst Default.
-    cfg = old_state.get("config", {"bias_long": True, "bias_short": True})
+    cfg = pinned_cfg if pinned_cfg is not None else old_state.get("config", {"bias_long": True, "bias_short": True})
     cfg_path = data_dir / "config.json"
-    if cfg_path.exists():
+    if cfg_path.exists() and pinned_cfg is None:
         try:
             loaded = json.loads(cfg_path.read_text(encoding="utf-8"))
             cfg = {**cfg, **{k: v for k, v in loaded.items() if not k.startswith("_")}}
@@ -1007,7 +1023,8 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         h = json.loads(signals_path.read_text(encoding="utf-8"))
         if not h.get("demo"):
             hist = h
-    hist["signals"] = (hist.get("signals", []) + new_signals)[-500:]
+    # A migrated stream must retain the complete imported history indefinitely.
+    hist["signals"] = hist.get("signals", []) + new_signals
 
     state = pos_to_state(pos)
     state["widerstand"] = widerstand_marken(candles, cfg, pos)
@@ -1015,7 +1032,11 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     # sonst kaeme sechsmal taeglich dieselbe Liste.
     plan = positions_plan(candles, flow, cfg, pos)
     state["plan"] = plan
-    if cfg.get("plan_telegram", True) and plan_geaendert((old_state or {}).get("plan"), plan):
+    migration = (durable.active_store.get().snapshot['control']['migration']
+                 if durable.active_store.get() is not None and
+                 durable.active_store.get().snapshot['version'] == 2 else None)
+    new_migration_candle = migration is None or pos.last_signal_ts > migration['B']
+    if new_migration_candle and cfg.get("plan_telegram", True) and plan_geaendert((old_state or {}).get("plan"), plan):
         stage('plan', candles[-1].ts, 0, plan, format_plan(plan),
               lambda: send_plan(plan, dry_run=True))
         print(f"Plan vorgemerkt: {len(plan.get('nachkauf', []))} Nachkauf-, "
@@ -1035,7 +1056,7 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     neue_struktur = vorschau is not None and (
         alt.get("impuls_start_ts"), alt.get("impuls_ende_ts")
     ) != (vorschau["impuls_start_ts"], vorschau["impuls_ende_ts"])
-    if neue_struktur and cfg.get("vorschau_telegram", True):
+    if new_migration_candle and neue_struktur and cfg.get("vorschau_telegram", True):
         stage('vorschau', candles[-1].ts, 0, vorschau, format_vorschau(vorschau, candles[-1].ts),
               lambda: send_vorschau(vorschau, candles[-1].ts, dry_run=True))
         print(f"Vorschau vorgemerkt: {vorschau['richtung']}, GP "
@@ -1053,7 +1074,8 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
         except Exception:  # noqa: BLE001
             w = {}
         offen = w and not w.get("aufgeloest") and w.get("gewarnt_ts") is not None
-        if offen and any(c.ts == w["gewarnt_ts"] for c in candles):
+        if (offen and (migration is None or w['gewarnt_ts'] > migration['W'])
+                and any(c.ts == w["gewarnt_ts"] for c in candles)):
             # Die gewarnte Kerze ist jetzt abgeschlossen -> Ergebnis feststellen.
             bestaetigt = any(s["ts"] == w["gewarnt_ts"] and s.get("tag") == "FLUSH"
                              for s in new_signals)
@@ -1091,7 +1113,9 @@ def run_engine(fetch=fetch_market_data, data_dir: Path = DATA,
     if dispatch_open and durable.can_dispatch():
         outbox.drain(state, state_path, deliver_telegram,
                      os.environ.get('TELEGRAM_BOT_TOKEN', ''),
-                     os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run)
+                     os.environ.get('TELEGRAM_CHAT_ID', ''), dry_run,
+                     require_target_receipt=durable.active_store.get() is not None and
+                     durable.active_store.get().snapshot['version']==2)
     print(f"Lauf ok: {len(candles)} Kerzen, {len(new_signals)} neue Signale, "
           f"OI-Punkte: {len(oi_history)}, Position: {pos.direction}/{pos.state.value}")
     return new_signals

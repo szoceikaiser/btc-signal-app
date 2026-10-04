@@ -9,6 +9,7 @@ Dry-Run (ohne Netz, fuer Tests/lokal): send_signals(..., dry_run=True).
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import urllib.parse
 import urllib.request
@@ -493,7 +494,11 @@ def deliver_telegram(text: str, token: str, chat_id: str, timeout: int = 15) -> 
         if body.get('ok') is True and isinstance(receipt, dict):
             mid = receipt.get('message_id')
             if type(mid) is int and mid > 0:
-                return dict(status='confirmed', message_id=mid)
+                actual = receipt.get('chat', {}).get('id') if isinstance(receipt.get('chat'), dict) else None
+                result = dict(status='confirmed', message_id=mid)
+                if actual is not None and str(actual) == str(chat_id):
+                    result['target_binding'] = hashlib.sha256(str(actual).encode()).hexdigest()
+                return result
         if body.get('ok') is False and type(body.get('error_code')) is int and 400 <= body['error_code'] < 500:
             return dict(status='rejected', message_id=None)
         return dict(status='uncertain', message_id=None)

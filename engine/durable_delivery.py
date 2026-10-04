@@ -13,14 +13,18 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import time
 
 import telegram_outbox as box
+import production_contract as contract
 
 active_store = ContextVar('active_delivery_store', default=None)
 command_texts = ContextVar('delivery_command_texts', default=None)
 
 
 def validate(snapshot):
+    if isinstance(snapshot, dict) and snapshot.get('version') == 2:
+        return contract.validate_v2(snapshot)
     if not isinstance(snapshot, dict) or snapshot.get('version') != 1:
         raise ValueError('Invalid durable snapshot')
     for key in ('engine', 'watch', 'commands'):
@@ -46,6 +50,9 @@ def provision(path, store_id, snapshot):
     validate(snapshot)
     if not isinstance(store_id, str) or not store_id.strip():
         raise ValueError('Store identity required')
+    if snapshot['version'] == 2 and (snapshot['control']['store_id'] != store_id
+                                     or snapshot['control']['mode'] != 'blocked'):
+        raise ValueError('Provision requires matching blocked production store')
     path = Path(path)
     path.mkdir(parents=True, exist_ok=False)
     with closing(sqlite3.connect(path/'mutex.sqlite')) as lock, lock:
@@ -76,6 +83,8 @@ class VolumeStore:
             self.revision = row[1]
             self.snapshot = json.loads(row[2])
             validate(self.snapshot)
+            if self.snapshot['version'] == 2 and self.snapshot['control']['store_id'] != self.store_id:
+                raise ValueError('Control store identity mismatch')
             return self
         except BaseException:
             self.__exit__(None, None, None)
@@ -142,6 +151,20 @@ def session(directory, dry_run=False):
         return
     with configured_store(directory) as store:
         store.recover()
+        if store.snapshot['version'] == 2:
+            control = store.snapshot['control']
+            if control['mode'] != 'active':
+                raise ValueError('Production stream is not active')
+            raw = json.loads((Path(directory)/'config.json').read_text(encoding='utf-8'))
+            target = os.environ.get('TELEGRAM_CHAT_ID', '')
+            if not target or not has_credentials():
+                raise ValueError('Production transport identity missing')
+            contract.verify_runtime_config(store.snapshot, raw,
+                code_sha=os.environ.get('BTC_DELIVERY_CODE_SHA', ''),
+                target_binding=hashlib.sha256(target.encode()).hexdigest(),
+                bot_identity=os.environ.get('BTC_DELIVERY_BOT_IDENTITY', ''))
+            if store.blocked():
+                raise RuntimeError('Uncertain delivery blocks all production work')
         token = active_store.set(store)
         try:
             yield store
@@ -187,6 +210,35 @@ def can_dispatch():
     return store is None or not store.blocked()
 
 
+def runtime_config(directory):
+    """Resolve the single pinned config for v2; legacy callers keep their own path."""
+    store=active_store.get()
+    if store is None or store.snapshot['version']!=2:
+        return None
+    raw=json.loads((Path(directory)/'config.json').read_text(encoding='utf-8'))
+    return contract.verify_runtime_config(store.snapshot,raw)
+
+
+def health_event(kind, event, error_class=None):
+    store=active_store.get()
+    if store is None or store.snapshot['version']!=2:
+        return
+    h=store.snapshot['control']['health']
+    now=int(time.time()*1000)
+    if event=='start':
+        h.update(run_kind=kind,run_started_ms=now,last_error_class=None)
+    elif event=='finish':
+        h['run_finished_ms']=now
+        h['last_error_class']=error_class
+        if kind=='watch' and error_class is None:
+            h['last_watch_check_ms']=now
+        if kind=='signal' and error_class is None:
+            h['last_signal_ts']=store.snapshot['engine']['last_signal_ts']
+    else:
+        raise ValueError('Unknown health event')
+    store.commit()
+
+
 def stage_text(text):
     batch = command_texts.get()
     if batch is None:
@@ -205,7 +257,7 @@ def durable_command(kind):
             bound.apply_defaults()
             directory = Path(bound.arguments['data_dir'])
             dry = bound.arguments.get('dry_run', False)
-            if dry or not has_credentials():
+            if dry or (not has_credentials() and not os.environ.get('BTC_DELIVERY_STORE')):
                 return fn(*args, **kwargs)
             request_id = os.environ.get('BTC_DELIVERY_OPERATION_ID')
             if kind != 'watch' and (not request_id or not request_id.strip()):
@@ -213,6 +265,9 @@ def durable_command(kind):
             with box.engine_lock(directory), session(directory) as store:
                 if store is None:
                     raise RuntimeError('Durable command requires storage')
+                if store.snapshot['version'] == 2 and kind == 'resend':
+                    raise ValueError('Historical resend forbidden for migrated stream')
+                health_event(kind,'start')
                 directory.mkdir(parents=True, exist_ok=True)
                 # Only watch needs an engine projection; lage/test/resend do not
                 # overwrite the local trading state as a side effect.
@@ -231,12 +286,14 @@ def durable_command(kind):
                     try:
                         import telegram_notify as tg
                         return box.drain(entry, directory/'command-delivery.json', tg.deliver_telegram,
-                            os.environ['TELEGRAM_BOT_TOKEN'], os.environ['TELEGRAM_CHAT_ID'])
+                            os.environ['TELEGRAM_BOT_TOKEN'], os.environ['TELEGRAM_CHAT_ID'],
+                            require_target_receipt=store.snapshot['version']==2)
                     finally:
                         box.durable_writer.reset(token)
                 if entry is not None:
                     done = drain(entry)
                     if kind != 'watch' or not done:
+                        health_event(kind,'finish',None if done else 'delivery_incomplete')
                         return deepcopy(entry['result'])
                 if store.blocked():
                     raise RuntimeError('Uncertain delivery requires manual review')
@@ -252,6 +309,7 @@ def durable_command(kind):
                 finally:
                     command_texts.reset(token)
                 if kind == 'watch' and not batch:
+                    health_event(kind,'finish')
                     return result
                 delivery = box.load_delivery(entry or {})
                 delivery.update(signals={'signals': []}, oi_history=[])
@@ -264,6 +322,7 @@ def durable_command(kind):
                     store.snapshot['watch'] = deepcopy(result)
                 store.commit()
                 drain(entry)
+                health_event(kind,'finish',None if not store.blocked() else 'delivery_uncertain')
                 return result
         return wrapped
     return decorate

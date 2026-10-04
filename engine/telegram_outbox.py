@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import time
 
 # A4: a durable session commits authoritative state BEFORE the local mirror.
 durable_writer = ContextVar('durable_writer', default=None)
@@ -158,7 +159,7 @@ def project(state, directory):
             atomic_json(path, {**current, **resolution})
 
 
-def drain(state, state_path, sender, token, target, dry_run=False):
+def drain(state, state_path, sender, token, target, dry_run=False, require_target_receipt=False):
     """Persist sending before call and receipt after. Stop at the first gap."""
     if dry_run or not token or not target:
         return False
@@ -176,6 +177,7 @@ def drain(state, state_path, sender, token, target, dry_run=False):
             return False
         m['target'], m['status'], m['reason'] = target_key, 'sending', None
         m['attempts'] += 1
+        m['attempt_started_ms'] = int(time.time()*1000)
         atomic_json(state_path, state)
         try:
             result = sender(m['text'], token, target)
@@ -186,6 +188,8 @@ def drain(state, state_path, sender, token, target, dry_run=False):
             result = dict(status='uncertain', reason='invalid_result', message_id=None)
         if result['status'] == 'confirmed' and (type(result.get('message_id')) is not int or result['message_id'] <= 0):
             result = dict(status='uncertain', reason='missing_receipt', message_id=None)
+        if result['status'] == 'confirmed' and require_target_receipt and result.get('target_binding') != target_key:
+            result = dict(status='uncertain', reason='receipt_target_mismatch', message_id=None)
         m['status'] = result['status']
         m['receipt'] = result.get('message_id') if m['status'] == 'confirmed' else None
         # Persist only fixed categories, never response text or exception/token.

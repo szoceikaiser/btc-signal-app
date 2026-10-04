@@ -4,11 +4,17 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Unit-Tests ausfuehren
         run: cd engine && python3 run_tests.py
       - uses: actions/setup-python@v5
