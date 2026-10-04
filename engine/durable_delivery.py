@@ -125,18 +125,38 @@ class VolumeStore:
 
 def configured_store(directory):
     raw, sid = os.environ.get('BTC_DELIVERY_STORE'), os.environ.get('BTC_DELIVERY_STORE_ID')
-    if not raw or not sid:
+    adapter = os.environ.get('BTC_DELIVERY_ADAPTER', 'sqlite')
+    if not sid or (adapter == 'sqlite' and not raw):
         raise RuntimeError('Durable delivery store is not provisioned; send refused')
-    path = Path(raw)
     runner_raw = os.environ.get('BTC_DELIVERY_RUNNER_ROOT')
     if not runner_raw or not Path(runner_raw).is_absolute():
         raise ValueError('Absolute BTC_DELIVERY_RUNNER_ROOT required')
     runner = Path(runner_raw).resolve()
     if not Path(directory).resolve().is_relative_to(runner):
         raise ValueError('Data directory outside declared runner')
+    if adapter == 'github':
+        if raw:
+            raise ValueError('GitHub store must not have a local fallback volume')
+        from github_delivery import GitHubContentsClient, GitHubStore
+        keys = ('BTC_DELIVERY_GITHUB_REPO', 'BTC_DELIVERY_GITHUB_BRANCH',
+                'BTC_DELIVERY_GITHUB_TOKEN', 'BTC_DELIVERY_RUN_ID',
+                'BTC_DELIVERY_RUN_ATTEMPT')
+        if any(not os.environ.get(k) for k in keys):
+            raise ValueError('GitHub store identity, run or token missing')
+        return GitHubStore(GitHubContentsClient(os.environ['BTC_DELIVERY_GITHUB_TOKEN']),
+            os.environ['BTC_DELIVERY_GITHUB_REPO'], os.environ['BTC_DELIVERY_GITHUB_BRANCH'],
+            sid, os.environ['BTC_DELIVERY_RUN_ID'], os.environ['BTC_DELIVERY_RUN_ATTEMPT'])
+    if adapter != 'sqlite':
+        raise ValueError('Unknown delivery adapter')
+    path = Path(raw)
     if not path.is_absolute() or path.resolve().is_relative_to(runner):
         raise ValueError('Delivery volume must be absolute and outside entire runner')
     return VolumeStore(path.resolve(), sid)
+
+
+def configured_for_delivery():
+    return bool(os.environ.get('BTC_DELIVERY_STORE') or
+                os.environ.get('BTC_DELIVERY_ADAPTER') == 'github')
 
 
 def has_credentials():
@@ -146,7 +166,7 @@ def has_credentials():
 @contextmanager
 def session(directory, dry_run=False):
     # Unconfigured offline runs preserve the established local preview workflow.
-    if dry_run or (not has_credentials() and not os.environ.get('BTC_DELIVERY_STORE')):
+    if dry_run or (not has_credentials() and not configured_for_delivery()):
         yield None
         return
     with configured_store(directory) as store:
@@ -257,7 +277,7 @@ def durable_command(kind):
             bound.apply_defaults()
             directory = Path(bound.arguments['data_dir'])
             dry = bound.arguments.get('dry_run', False)
-            if dry or (not has_credentials() and not os.environ.get('BTC_DELIVERY_STORE')):
+            if dry or (not has_credentials() and not configured_for_delivery()):
                 return fn(*args, **kwargs)
             request_id = os.environ.get('BTC_DELIVERY_OPERATION_ID')
             if kind != 'watch' and (not request_id or not request_id.strip()):

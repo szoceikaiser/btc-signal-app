@@ -1,0 +1,14 @@
+{
+  "enabled": false,
+  "store_adapter": "github",
+  "code_repository": "szoceikaiser/btc-signal-app",
+  "private_store_repository": null,
+  "store_branch": null,
+  "store_path": "delivery/stream.json",
+  "private_backup_repository": null,
+  "token_scope": "store repository Contents: write only; no PR access",
+  "owner": "user; contact and response windows unverified",
+  "dispatch": "existing cron-job.org configuration unverified",
+  "independent_freshness_monitor": null,
+  "live_activation": "P4 only"
+}

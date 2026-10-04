@@ -1,10 +1,13 @@
-# P2b: deaktivierte Betriebsanbindung
+# P2b/P3: deaktivierte Betriebsanbindung
 
 Die Werkzeuge sind nur für lokale, isolierte Offline-Prüfungen vorbereitet.
 `runtime.example.json` ist absichtlich deaktiviert und enthält keine Pfade,
-Zugänge oder Scheduler-Registrierung. D1 (Host oder separater GitHub-Adapter)
-und D3 (Verantwortlicher, unabhängiger Alarmweg, zweites geschütztes Sicherungsziel)
-sind bis zur konkreten Entscheidung offen.
+Zugänge oder Scheduler-Registrierung. In P3 wurde D1 als GitHub gewählt.
+D3 hat einen benannten Nutzer als Verantwortlichen und ein weiteres privates
+GitHub-Repository als Sicherungsziel; Alarm- und Backupbetrieb sind nicht eingerichtet.
+`github-runtime.disabled.json` und `github-workflow.disabled.yml` bleiben
+ausdrücklich deaktiviert. `P3-GITHUB-BERICHT.md` beschreibt die lokale Fake-API-
+Abnahme und die noch offenen realen Store-/Alarm-/Backup-Gates.
 
 ## Reihenfolge für eine Offline-Probe
 

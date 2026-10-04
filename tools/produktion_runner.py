@@ -27,11 +27,18 @@ from strategy_core import Candle, FlowPoint
 
 def run_checked(kind,data_dir,fetch=None,watch_raw=None,now_ms=None,sth=None):
     """Single fail-closed entry for later H/G wiring; not exposed as a P2 live CLI."""
-    needed=('BTC_DELIVERY_STORE','BTC_DELIVERY_STORE_ID','BTC_DELIVERY_RUNNER_ROOT',
+    needed=('BTC_DELIVERY_STORE_ID','BTC_DELIVERY_RUNNER_ROOT',
             'BTC_DELIVERY_CODE_SHA','BTC_DELIVERY_BOT_IDENTITY',
             'TELEGRAM_BOT_TOKEN','TELEGRAM_CHAT_ID')
     if any(not os.environ.get(k) for k in needed):
         raise ValueError('Production store/config/identity/transport environment incomplete')
+    if os.environ.get('BTC_DELIVERY_ADAPTER') == 'github':
+        needed_github=('BTC_DELIVERY_GITHUB_REPO','BTC_DELIVERY_GITHUB_BRANCH',
+            'BTC_DELIVERY_GITHUB_TOKEN','BTC_DELIVERY_RUN_ID','BTC_DELIVERY_RUN_ATTEMPT')
+        if os.environ.get('BTC_DELIVERY_STORE') or any(not os.environ.get(k) for k in needed_github):
+            raise ValueError('GitHub store identity or permission missing')
+    elif os.environ.get('BTC_DELIVERY_ADAPTER', 'sqlite') != 'sqlite' or not os.environ.get('BTC_DELIVERY_STORE'):
+        raise ValueError('Production store adapter missing or unknown')
     if not Path(data_dir,'config.json').is_file():
         raise FileNotFoundError('Pinned runtime configuration missing')
     durable.configured_store(data_dir)

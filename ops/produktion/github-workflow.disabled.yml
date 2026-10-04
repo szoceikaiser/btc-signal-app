@@ -1,0 +1,19 @@
+# P3 review template outside .github/workflows; never scheduled or installed.
+# P4 must review the complete activation diff and the actual private store.
+name: Production delivery (DISABLED TEMPLATE)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: btc-delivery-single-stream
+  cancel-in-progress: false
+jobs:
+  delivery:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - run: |
+          echo 'This template is intentionally disabled.'
+          exit 1

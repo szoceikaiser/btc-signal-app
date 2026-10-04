@@ -22,6 +22,8 @@ jobs:
           python-version: '3.12'
       - name: P2 proof on this exact HEAD
         run: python tools/produktion_p2.py
+      - name: P3 GitHub offline proof on this exact HEAD
+        run: python tools/produktion_p3.py
       - name: Complete offline engine regression
         run: cd engine && python run_tests.py
       - name: Preserve P1 returns without recalculation
