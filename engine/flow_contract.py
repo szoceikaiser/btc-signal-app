@@ -6,6 +6,7 @@ This is a processing assumption, not proof of historical API publication.
 """
 
 from bisect import bisect_right
+import math
 
 FLOW_VERSION = "a2-flow-v1"
 FOUR_HOURS_MS = 4 * 60 * 60 * 1000
@@ -49,6 +50,31 @@ def usable(point, field):
     """Legacy hand-built points remain measured inputs; producers set evidence."""
     meta = point.provenance.get(field)
     return meta is None or meta["coverage"] in ("observed", "carried")
+
+
+def liquidation_usable(point, field):
+    """UM2-M5-v1 evidence for one liquidation side, including measured zero.
+
+    Unlike legacy optional-flow callers, absence of evidence is unknown. This
+    validates existing observations; it never creates or carries a measurement.
+    The four-hour availability assumption is the frozen A2/UM2 contract.
+    """
+    meta = point.provenance.get(field)
+    if not isinstance(meta, dict) or meta.get('coverage') not in ('observed', 'carried'):
+        return False
+    sample, available, decision, age = [meta.get(k) for k in
+        ('sample_ts', 'available_ts', 'decision_ts', 'age_ms')]
+    if not all(type(x) is int for x in (sample, available, decision, age)):
+        return False
+    if (decision != point.ts + FOUR_HOURS_MS or sample > point.ts
+            or available < sample + FOUR_HOURS_MS or available > decision
+            or age != decision - available or age < 0):
+        return False
+    if ((meta['coverage'] == 'observed' and age != 0)
+            or (meta['coverage'] == 'carried' and age == 0)):
+        return False
+    value = getattr(point, field)
+    return math.isfinite(value) and value >= 0
 
 
 def legacy_unknown(ts, decision_ts):

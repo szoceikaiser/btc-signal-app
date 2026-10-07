@@ -11,6 +11,8 @@ from dataclasses import dataclass, field, asdict
 from enum import Enum
 from typing import Optional
 from flow_contract import usable
+from flow_contract import FOUR_HOURS_MS
+import liquidation_evidence as liq_evidence
 
 # ---------------------------------------------------------------- Datentypen
 
@@ -1166,7 +1168,9 @@ def classify_pattern(candles: list[Candle], flow: list[FlowPoint],
     #    Einbruch vorliegt — er soll warnen, bevor der Flush kommt, nicht danach.
     if (price_chg <= -sharp_move_pct / 2 and spot_valid and spot < 0
             and oi_valid and oi_chg >= -0.01 and funding_valid
-            and funding_now > 0 and not long_liq_spike):
+            and funding_now > 0 and not long_liq_spike
+            and liq_evidence.known(f, ('long_liq',), 'suppressed_missing_m5_no_long_cascade',
+                                   'long', f[-1].ts + FOUR_HOURS_MS)):
         return Pattern.UNGESUNDER_ABVERKAUF
     # 3: Short-Covering — Preis hoch, OI runter ODER echte Short-Liquidations-Kaskade
     if price_chg >= sharp_move_pct / 2 and ((oi_valid and oi_chg <= -0.02)
@@ -1508,9 +1512,12 @@ def liq_cascade(flow: list[FlowPoint], side: str, window: int = 12,
     side="short" = Short-Liquidationen (Squeeze nach oben -> gut fuer Long-Teilgewinne),
     side="long"  = Long-Liquidationen (Flush nach unten -> gut fuer Short-Teilgewinne).
     """
+    f = flow[-window:]
+    if not liq_evidence.known(f, ('long_liq', 'short_liq'), 'suppressed_missing_liq_cascade',
+                            side, f[-1].ts + FOUR_HOURS_MS if f else None):
+        return False
     if len(flow) < 3:
         return False
-    f = flow[-window:]
     vals = [(p.short_liq if side == "short" else p.long_liq) for p in f]
     if len(vals) < 2:
         return False
@@ -1528,9 +1535,19 @@ def liq_levels(candles: list[Candle], flow: list[FlowPoint], side: str,
     Erwartet bereits beschnittene Listen (nur Kerzen VOR der Entscheidung).
     """
     n = min(len(candles), len(flow), lookback)
-    if n < 10:
+    if n == 0:
         return []
     cs, fs = candles[-n:], flow[-n:]
+    decision_at = cs[-1].ts + 2 * FOUR_HOURS_MS
+    if [c.ts for c in cs] != [f.ts for f in fs]:
+        liq_evidence.record('suppressed_missing_liq_levels', side, decision_at,
+                            detail='misaligned_history')
+        return []
+    if not liq_evidence.known(fs, ('long_liq', 'short_liq'), 'suppressed_missing_liq_levels',
+                            side, decision_at):
+        return []
+    if n < 10:
+        return []
     vals = [(p.short_liq if side == "short" else p.long_liq) for p in fs]
     total = sum(vals)
     if total <= 0:

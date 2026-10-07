@@ -17,6 +17,8 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            Signal, _ENTRY_TYPES,
                            resample_daily)
 
+from synthetic_flow_fixture import synthetic_liquidation_point
+
 DAY_MS = 86_400_000
 H4_MS = 4 * 3600 * 1000
 
@@ -107,7 +109,7 @@ def test_find_pivots_und_impuls():
 # ------------------------------------------------------------------ Kompass
 
 def flow_series(spot, fut, oi, funding):
-    return [FlowPoint(i, s, f, o, fu) for i, (s, f, o, fu)
+    return [synthetic_liquidation_point(i, s, f, o, fu) for i, (s, f, o, fu)
             in enumerate(zip(spot, fut, oi, funding))]
 
 
@@ -626,7 +628,7 @@ def test_einstand_ist_tranchengewichtet():
 
 def _liq_flow(n, short_liq_last=0.0, short_liq_base=1000.0):
     """Flow mit ruhigen Short-Liquidationen und optionaler Kaskade in der letzten Kerze."""
-    return [FlowPoint(i, 100 + i, 100, 1000, -0.0001,
+    return [synthetic_liquidation_point(i, 100 + i, 100, 1000, -0.0001,
                       short_liq=(short_liq_last if i == n - 1 else short_liq_base))
             for i in range(n)]
 
@@ -653,7 +655,7 @@ def test_liq_exit_spike_verkauft_in_die_kaskade():
 
 def test_liq_levels_findet_nur_ausreisser():
     cs = [c(i, 100, 100 + i, 99, 100) for i in range(20)]
-    fl = [FlowPoint(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 5 else 1000.0))
+    fl = [synthetic_liquidation_point(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 5 else 1000.0))
           for i in range(20)]
     lv = liq_levels(cs, fl, "short")
     assert len(lv) == 1 and lv[0][0] == cs[5].high          # Kerzen-Hoch als Niveau
@@ -662,9 +664,9 @@ def test_liq_levels_findet_nur_ausreisser():
 
 
 def test_liq_cascade_erkennt_nur_ausschlag():
-    ruhig = [FlowPoint(i, 0, 0, 1000, 0.0, short_liq=1000.0) for i in range(12)]
+    ruhig = [synthetic_liquidation_point(i, 0, 0, 1000, 0.0, short_liq=1000.0) for i in range(12)]
     assert liq_cascade(ruhig, "short") is False
-    kaskade = ruhig[:-1] + [FlowPoint(11, 0, 0, 1000, 0.0, short_liq=50_000.0)]
+    kaskade = ruhig[:-1] + [synthetic_liquidation_point(11, 0, 0, 1000, 0.0, short_liq=50_000.0)]
     assert liq_cascade(kaskade, "short") is True
     assert liq_cascade(kaskade, "long") is False            # falsche Seite
 
@@ -673,7 +675,7 @@ def test_liq_exit_zone_nutzt_keine_zukunft():
     """Kausalitaet: die Kaskade der AKTUELLEN Kerze darf keine Zone fuer sich selbst
     erzeugen — sonst wuesste der Backtest die Zukunft."""
     cs = [c(i, 100, 101, 99, 100) for i in range(20)]
-    fl = [FlowPoint(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 19 else 1000.0))
+    fl = [synthetic_liquidation_point(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 19 else 1000.0))
           for i in range(20)]
     # Aus allen Kerzen ausser der letzten: kein Ausreisser -> keine Zone
     assert liq_levels(cs[:-1], fl[:-1], "short") == []
@@ -709,7 +711,7 @@ def _liq_entry_pfad():
 
 def _liq_flow_long(n, tief_kerze: int, betrag: float = 9_000_000.0):
     """Flow mit einer Long-Liquidations-Kaskade in Kerze `tief_kerze`."""
-    return [FlowPoint(i, 100 + i, 100, 1000, -0.0001,
+    return [synthetic_liquidation_point(i, 100 + i, 100, 1000, -0.0001,
                       long_liq=(betrag if i == tief_kerze else 1000.0))
             for i in range(n)]
 
@@ -947,7 +949,7 @@ def e13_szenario(spot_faellt=True, oi_steigt=True, funding_positiv=True):
     cs = [Candle((1_600_000_000_000 // DAY_MS) * DAY_MS + i * H4_MS,
                  v, v * 1.004, v * 0.996, v)
           for i, v in enumerate(werte)]
-    fl = [FlowPoint(c.ts,
+    fl = [synthetic_liquidation_point(c.ts,
                     5000.0 - i * 30 if spot_faellt else 5000.0 + i * 30,
                     0.0,
                     1e9 + i * 1e6 if oi_steigt else 1e9 - i * 2e7,
@@ -2313,7 +2315,7 @@ def _oi_lage(kurs, kontrakte, spot_d, fut_d, funding, spot_dreht=False):
         sp += d if i else 0
         fu += fut_d / 11 if i else 0
         f = funding[i] if isinstance(funding, list) else funding
-        fl.append(FlowPoint(i, sp, fu, 100_000.0 * (1 + kontrakte * i / 11) * p, f))
+        fl.append(synthetic_liquidation_point(i, sp, fu, 100_000.0 * (1 + kontrakte * i / 11) * p, f))
     btc = oi_in_btc({x.ts: x.oi for x in fl}, {x.ts: x.close for x in cs})
     return cs, [replace(x, oi_btc=btc[x.ts]) for x in fl]
 
@@ -2686,7 +2688,7 @@ def e34_szenario_mit_ausstieg():
     cs, fl = e13_szenario()
     for v in (104, 101, 98, 95, 92):
         cs.append(Candle(cs[-1].ts + H4_MS, v, v * 1.004, v * 0.996, v))
-        fl.append(FlowPoint(cs[-1].ts, fl[-1].spot_cvd - 30, 0.0,
+        fl.append(synthetic_liquidation_point(cs[-1].ts, fl[-1].spot_cvd - 30, 0.0,
                             fl[-1].oi + 1e6, 0.0002))
     return cs, fl
 
@@ -3030,7 +3032,7 @@ def _m5_lage():
         hi = pr * 1.5 if i in (50, 52) else pr * 1.004
         cs.append(Candle(1_600_000_000_000 + i * ms, pr, hi, pr * 0.996, pr))
         cvd = 1000.0 + i * 30.0 if i < 30 else 1000.0 + 900.0 - (i - 30) * 90.0
-        fl.append(FlowPoint(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
+        fl.append(synthetic_liquidation_point(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
     return cs, fl
 
 
@@ -3116,7 +3118,7 @@ def _m5_absturz():
         pr = max(pr, 1.0)
         cs.append(Candle(1_600_000_000_000 + i * ms, pr, pr * 1.004, pr * 0.996, pr))
         cvd = 1000.0 + i * 30.0 if i < 30 else 1000.0 + 900.0 - (i - 30) * 90.0
-        fl.append(FlowPoint(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
+        fl.append(synthetic_liquidation_point(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
     return cs, fl
 
 
