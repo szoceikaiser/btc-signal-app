@@ -27,7 +27,9 @@ S006 bleibt der einfachere Vergleich. Der alte bedingte Minimaxvorsprung von
 55,38 USD gegenüber S006 ist keine unabhängige Zukunftsbestätigung.
 
 Lokale Suite: 834 Testfunktionen, darin ein Wrapper mit 21 portierten Gatefällen;
-zusätzlich sechs synthetische Statistiktests, 15 N6-Mutationsproben und zwei
+Alle 34 neuen einzelnen Gate-/Präfix-/Cashgegenfälle bestehen ihre Vorprobe und
+schlagen bei mindestens einer isolierten Sabotage an. Zusätzlich sechs
+synthetische Statistiktests, 15 N6-Mutationsproben und zwei
 unabhängige Prüfer mit zehn abgewiesenen Manipulationen. Negative Erstläufe und
 Präzisierungen der ausdrücklich synthetischen Fixtures sind erhalten.
 

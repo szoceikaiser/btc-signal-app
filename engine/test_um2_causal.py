@@ -2,6 +2,7 @@
 from copy import deepcopy
 from dataclasses import replace
 import json
+from unittest.mock import patch
 import strategy_core as sc
 import execution_v1 as v
 from position_state import pos_to_state, pos_from_state
@@ -54,7 +55,15 @@ def test_fill_confirmation_keeps_exact_known_prefix_and_serialized_evidence():
     future=unknown(fs,idx)
     future[idx]=replace(future[idx],long_liq=1e99,spot_cvd=1e99,oi=1e99)
     executed2=[book2.fill(o,cs[idx]) for o in saved['pending']]
-    a.confirm(pos1,executed1,book1);b.confirm(pos2,executed2,book2)
+    original=sc._evaluate
+    calls=[]
+    def checked(c,f,*args,**kwargs):
+        assert c==a.candles and f==a.flow, 'Confirmation used a changed knowledge prefix'
+        calls.append((len(c),len(f)))
+        return original(c,f,*args,**kwargs)
+    with patch.object(sc,'_evaluate',side_effect=checked):
+        a.confirm(pos1,executed1,book1);b.confirm(pos2,executed2,book2)
+    assert len(calls)==2
     assert pos_to_state(pos1)==pos_to_state(pos2) and a.to_state()==b.to_state()
     assert a.flow==fs[:len(a.flow)] and future[idx].ts>a.flow[-1].ts
 
@@ -82,6 +91,9 @@ def test_gate_diagnostics_are_context_local_and_restore_on_exception():
             assert len(outer)==len(inner)==1
             raise RuntimeError('synthetic')
     except RuntimeError: pass
+    sizes=(len(outer),len(inner))
+    sc.liq_levels(cs,unknown(fs,-1),'long')
+    assert (len(outer),len(inner))==sizes, 'A finished diagnostic context leaked'
     with collect_events() as fresh:
         assert sc.liq_levels(cs,fs,'long')
     assert fresh==[]

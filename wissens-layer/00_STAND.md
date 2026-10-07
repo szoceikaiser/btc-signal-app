@@ -301,3 +301,29 @@ ein. Kaiser will Shorts im fallenden Markt (E44.6). **E44.3 (E42) ist gebaut** (
 3. **Die Engine ist bei jedem Lauf ein neuer Prozess.** Alles, was über eine Kerze
    hinaus gilt, muss in `state.json` — sonst tut der Backtest etwas, das live nie
    passiert.
+
+
+## 07.10.2026: isolierte lokale UM2-Engineintegration (keine Aktivierung)
+
+Nur Branch `codex/um2-engine-integration` ab P3 `a7cf45d` ist korrigiert.
+Native Liquidations-/M5-Gates: 20/20 eingefrorene Vollfensterläufe exakt zu den
+gespeicherten Tapes. Danach 20 gleiche Läufe mit Ablehnung eines Kaufs ohne
+darstellbaren BTC-Zuwachs; insgesamt 40 historische Strategieläufe. N-UM2-01
+verbraucht dort keine Nachkaufstufe mehr. C05/S006/V000 unverändert, C02 S0/S2/S3
+je ein Kleinstfill weniger; Signalfolgen identisch, größte Endwertabweichung
+3,64e-12 USD. Isoliert 90/125 alte diagnostische Kleinstoperationen abgelehnt;
+35 bleiben darstellbar. Keine allgemeine Mindestorder oder neue Gesamtrangfolge.
+
+C05 und S006 liegen vollständig und inaktiv unter
+`docs/um2-engine-integration/candidates/`. Lokale Tests: 834/0 Testfunktionen,
+34 neue einzelne Gegenfälle mit gefangener Sabotage. Details und Grenzen:
+`docs/um2-engine-integration/ERGEBNIS.md`; additive Nachweise im übergeordneten
+Projekt `audit-backups/um2-engine-integration-20261007/`. Wissenspräfix- und
+Diagnostiktests wurden nach den historischen Läufen verstärkt; Strategie-/
+Ausführungsdateien blieben dabei identisch. Es erfolgte keine weitere Historienrechnung.
+
+Hauptchat-Abnahme, sichere aktuelle Workflowprüfung/separat autorisierter Push
+und Online-CI, echte Fills, P3/D3 und P4 bleiben offen. Keine Umstellung von
+Site, Runtime, Store oder bestehenden Positionen. Hauptplan nicht endgültig
+abgenommen. Vier Aprillücken, unbekannter Warmup, modellierte Verfügbarkeit,
+mindestens 94 frühere Suchen und fehlende Zukunftsprobe bleiben Grenzen.
