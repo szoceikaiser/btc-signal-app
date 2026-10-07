@@ -16,6 +16,7 @@ from derivative_accounting import require_spot_config
 from position_state import pos_to_state, pos_from_state
 
 STEP = 14_400_000
+EXECUTION_SEMANTICS = 'V1-cash-observable-v1'
 BUY_ACTIONS = {'entry_t1', 'entry_gp', 'entry_flush', 'dip', 'buy_ladder',
                'liq_buy', 'upgrade_gp', 'upgrade_full', 'e42_buy'}
 # The documented generator order, not an assumed intrabar price path.
@@ -151,12 +152,13 @@ class Book:
             pos.entry_pct = 0
 
     def to_state(self):
-        return dict(version=1, **deepcopy(self.__dict__))
+        return dict(version=1, execution_semantics=EXECUTION_SEMANTICS, **deepcopy(self.__dict__))
 
     @classmethod
     def from_state(cls, state):
         fields = set(cls(0., 0., 0., 1.).__dict__)
-        if state.get('version') != 1 or set(state) != fields | {'version'}:
+        if (state.get('version') != 1 or state.get('execution_semantics') != EXECUTION_SEMANTICS
+                or set(state) != fields | {'version', 'execution_semantics'}):
             raise ValueError('Unsupported/incomplete V1 book state')
         obj = cls(0., 0., 0., 1.)
         obj.__dict__.update(deepcopy({k: state[k] for k in fields}))
@@ -255,8 +257,19 @@ class Book:
         price=candle.open*(1+self.slip if buy else 1-self.slip)
         amount=o['amount']
         if buy:
-            self.reserved_cash -= amount
             quantity=amount*(1-self.fee)/price
+            # A positive float quantity can round away on addition to inventory.
+            # Such an order cannot be confirmed as an executed strategy action.
+            # Use the actual eligible open, never an assumed future/signal price.
+            # Keep cash and every existing lot exactly unchanged, including real
+            # tiny balances. This is representability, not a broker minimum.
+            if quantity <= 0 or self.units + quantity == self.units:
+                self.reserved_cash = max(0., self.reserved_cash - amount)
+                self.event(o, 'rejected', 'unrepresentable_btc_increment', candle.ts,
+                           candle.open, before, rejected_budget=amount,
+                           computed_quantity=quantity, inventory_ulp=math.ulp(self.units))
+                return None
+            self.reserved_cash -= amount
             charge=amount*self.fee
             self.cash -= amount
             self.units += quantity
@@ -380,9 +393,10 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
     if resume_state is not None:
         if decision_fn is not decide:
             raise ValueError('Only production V1 decisions can resume')
-        required = {'version', 'context', 'last_done', 'position', 'book', 'risk',
+        required = {'version', 'execution_semantics', 'context', 'last_done', 'position', 'book', 'risk',
                     'pending', 'decision', 'equity', 'signals', 'feedback', 'months'}
-        if resume_state.get('version') != 1 or set(resume_state) != required:
+        if (resume_state.get('version') != 1 or resume_state.get('execution_semantics') != EXECUTION_SEMANTICS
+                or set(resume_state) != required):
             raise ValueError('Unsupported/incomplete V1 checkpoint')
         if resume_state['context'] != context:
             raise ValueError('V1 checkpoint context changed')
@@ -422,7 +436,9 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
         executed=[]
         for o in pending:
             risk.observe(book.value(c.open))
-            executed.append(book.fill(o,c))
+            accepted = book.fill(o,c)
+            if accepted is not None:
+                executed.append(accepted)
             risk.observe(book.value(c.open))
         if decision is not None:
             decision.confirm(pos,executed,book)
@@ -448,7 +464,7 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
         if checkpoint_at == c.ts:
             if not isinstance(decision, Decision):
                 raise ValueError('Only production V1 decisions can be checkpointed')
-            checkpoint = dict(version=1, context=context, last_done=c.ts,
+            checkpoint = dict(version=1, execution_semantics=EXECUTION_SEMANTICS, context=context, last_done=c.ts,
                 position=pos_to_state(pos), book=book.to_state(),
                 risk=dict(peaks=list(risk.peaks), dd=list(risk.dd)),
                 pending=deepcopy(pending), decision=decision.to_state(),

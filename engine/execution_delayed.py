@@ -54,7 +54,9 @@ def run_delayed(candles, flow, cfg, *, start_ms, end_ms, fee=.001,
             executed = []
             for order in pending:
                 risk.observe(book.value(c.open))
-                executed.append(book.fill(order, c))
+                accepted = book.fill(order, c)
+                if accepted is not None:
+                    executed.append(accepted)
                 risk.observe(book.value(c.open))
             decision.confirm(pos, executed, book)
             feedback.append(dict(at=c.ts, actions=[o['action'] for o in executed],
