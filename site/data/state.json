@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1791388800000,
+ "last_signal_ts": 1791403200000,
  "retrace_extreme": 82563.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -56,29 +56,27 @@
   "richtung": "LONG",
   "anteil_pct": 65,
   "einstand": 83858.78115384615,
-  "kurs": 83434.68,
+  "kurs": 83321.81,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 83.435 $ ueber EMA200 (72.990 $)",
+   "trend_text": "Uebergeordnet: Kurs 83.322 $ ueber EMA200 (72.989 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
-   "spot": "zurueckgekehrt",
-   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)",
-   "muster": "UNGESUNDER_ABVERKAUF",
-   "muster_text": "Abverkauf mit neuen Short-Wetten - Kurs faellt, Spot wird verkauft, Open Interest haelt oder steigt, noch keine Liquidationswelle",
-   "muster_hinweis": "Jan-Sep 2026 folgte darauf meist eine Gegenbewegung nach oben (1-4 Tage) - nicht immer."
+   "spot": "schwach",
+   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
   "ampel": {
    "stufe": "guenstig",
    "richtung": "LONG",
    "dafuer": [
     "Trend",
-    "Struktur",
+    "Struktur"
+   ],
+   "dagegen": [
     "Spot-Nachfrage"
    ],
-   "dagegen": [],
    "gezaehlt": 3,
-   "text": "GUENSTIG \u2014 3 von 3 sprechen dafuer"
+   "text": "GUENSTIG \u2014 2 von 3 sprechen dafuer"
   },
   "nachkauf": [
    {
@@ -191,31 +189,29 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-07T23:59:24Z",
- "last_close": 83434.68,
+ "updated_at": "2026-10-08T00:02:24Z",
+ "last_close": 83321.81,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 83.435 $ ueber EMA200 (72.990 $)",
+   "trend_text": "Uebergeordnet: Kurs 83.322 $ ueber EMA200 (72.989 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
-   "spot": "zurueckgekehrt",
-   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)",
-   "muster": "UNGESUNDER_ABVERKAUF",
-   "muster_text": "Abverkauf mit neuen Short-Wetten - Kurs faellt, Spot wird verkauft, Open Interest haelt oder steigt, noch keine Liquidationswelle",
-   "muster_hinweis": "Jan-Sep 2026 folgte darauf meist eine Gegenbewegung nach oben (1-4 Tage) - nicht immer."
+   "spot": "schwach",
+   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
   "ampel": {
-   "stufe": "guenstig",
+   "stufe": "gemischt",
    "richtung": "LONG",
    "dafuer": [
-    "Trend",
+    "Trend"
+   ],
+   "dagegen": [
     "Spot-Nachfrage"
    ],
-   "dagegen": [],
    "gezaehlt": 2,
-   "text": "GUENSTIG \u2014 2 von 2 sprechen dafuer"
+   "text": "GEMISCHT \u2014 1 von 2 spricht dafuer"
   },
   "impuls_start": 80126.04,
   "impuls_ende": 87395.67,
