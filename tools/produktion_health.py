@@ -15,7 +15,7 @@ from production_contract import CANDLE_MS, canonical
 
 def evaluate(store_path, store_id, now_ms=None):
     now_ms=int(time.time()*1000) if now_ms is None else now_ms
-    with durable.VolumeStore(store_path,store_id) as store:
+    with durable.read_only_volume(store_path,store_id) as store:
         snapshot=store.snapshot
         if snapshot['version']!=2:
             raise ValueError('Health requires v2 store')
@@ -38,12 +38,24 @@ def evaluate(store_path, store_id, now_ms=None):
         if last_backup is None or now_ms-last_backup>26*60*60*1000: alarms.append('backup_overdue')
         if h.get('consecutive_mutex_conflicts',0)>=2: alarms.append('mutex_conflicts')
         if control['mode']!='active': alarms.append('stream_'+control['mode'])
+        # Legacy local timestamps cannot certify a current external run.
+        alarms.append('external_run_binding_unverified')
         return {'schema':'produktion-health-v1','store_id':store_id,'revision':store.revision,
                 'mode':control['mode'],'code_sha':control['code_sha'],
                 'config_sha256':control['config_sha256'],'last_signal_ts':last_signal,
                 'last_watch_check_ms':last_watch,'last_verified_backup_ms':last_backup,
                 'pending':pending,'uncertain':uncertain,'alarms':alarms,
-                'healthy':not alarms}
+                'healthy':not alarms, 'http_status':503}
+
+
+def evaluate_bound(store_path, store_id, policy, runs, backup, now_ms):
+    from freshness import evaluate as bound, response
+    try:
+        with durable.read_only_volume(store_path,store_id) as store:
+            return bound(store.snapshot, store.revision, store.read_revision,
+                         runs, policy, now_ms, backup)
+    except Exception:
+        return response('api_or_store_unavailable')
 
 
 if __name__=='__main__':

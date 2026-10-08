@@ -32,6 +32,21 @@ def run_checked(kind,data_dir,fetch=None,watch_raw=None,now_ms=None,sth=None):
             'TELEGRAM_BOT_TOKEN','TELEGRAM_CHAT_ID')
     if any(not os.environ.get(k) for k in needed):
         raise ValueError('Production store/config/identity/transport environment incomplete')
+    if kind in ('signal','watch'):
+        metadata=('BTC_DELIVERY_RUN_REPOSITORY','BTC_DELIVERY_WORKFLOW','BTC_DELIVERY_RUN_ID',
+                  'BTC_DELIVERY_RUN_ATTEMPT','BTC_DELIVERY_EXPECTED_START_MS')
+        if any(not os.environ.get(k) for k in metadata):
+            raise ValueError('Explicit run and schedule identity missing')
+        if os.environ.get('BTC_DELIVERY_ADAPTER') == 'github':
+            for actual, pinned in (('GITHUB_REPOSITORY','BTC_DELIVERY_RUN_REPOSITORY'),
+                ('GITHUB_RUN_ID','BTC_DELIVERY_RUN_ID'), ('GITHUB_RUN_ATTEMPT','BTC_DELIVERY_RUN_ATTEMPT'),
+                ('GITHUB_SHA','BTC_DELIVERY_CODE_SHA')):
+                if not os.environ.get(actual) or os.environ[actual] != os.environ[pinned]:
+                    raise ValueError('Actual GitHub run differs from runtime binding')
+            expected_ref=(os.environ['BTC_DELIVERY_RUN_REPOSITORY']+'/'
+                +os.environ['BTC_DELIVERY_WORKFLOW']+'@'+os.environ.get('GITHUB_REF',''))
+            if not os.environ.get('GITHUB_REF') or os.environ.get('GITHUB_WORKFLOW_REF')!=expected_ref:
+                raise ValueError('Actual workflow differs from run binding')
     if os.environ.get('BTC_DELIVERY_ADAPTER') == 'github':
         needed_github=('BTC_DELIVERY_GITHUB_REPO','BTC_DELIVERY_GITHUB_BRANCH',
             'BTC_DELIVERY_GITHUB_TOKEN','BTC_DELIVERY_RUN_ID','BTC_DELIVERY_RUN_ATTEMPT')
@@ -85,6 +100,10 @@ def simulate(store_path,store_id,config_path,fixture_path,kind):
         def network_forbidden(*args,**kwargs):
             raise AssertionError('Network forbidden in P2 offline runner')
         env={'BTC_DELIVERY_STORE':str(root/'store'),'BTC_DELIVERY_STORE_ID':store_id,
+             'BTC_DELIVERY_ADAPTER':'sqlite',
+             'BTC_DELIVERY_RUN_REPOSITORY':'synthetic/code','BTC_DELIVERY_WORKFLOW':'.github/workflows/synthetic.yml',
+             'BTC_DELIVERY_RUN_ID':'synthetic-100','BTC_DELIVERY_RUN_ATTEMPT':'1',
+             'BTC_DELIVERY_EXPECTED_START_MS':str(fixture.get('expected_start_ms',fixture.get('now_ms',0))),
              'BTC_DELIVERY_RUNNER_ROOT':str(root/'runner'),
              'BTC_DELIVERY_CODE_SHA':snapshot['control']['code_sha'],
              'BTC_DELIVERY_BOT_IDENTITY':'synthetic-bot',

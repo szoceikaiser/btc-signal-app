@@ -750,7 +750,14 @@ def watch_flush(data_dir: Path = DATA, dry_run: bool = False,
     fertig = [_c(k) for k in raw if int(k[6]) <= now_ms]
     laufend = next((_c(k) for k in raw if int(k[6]) > now_ms), None)
     if laufend is None or len(fertig) < 30:
+        store = durable.active_store.get()
+        if store is not None and store.snapshot.get('version') == 2:
+            raise ValueError('Incomplete watch data cannot certify production health')
         return None
+    if durable.active_store.get() is not None and durable.active_store.get().snapshot.get('version') == 2:
+        if laufend.ts != now_ms//CANDLE_MS*CANDLE_MS:
+            raise ValueError('Stale watch candle cannot certify production health')
+        durable.watch_observation(laufend.ts, now_ms)
     store = durable.active_store.get()
     if store is not None and store.snapshot['version'] == 2:
         if laufend.ts <= store.snapshot['control']['migration']['W']:

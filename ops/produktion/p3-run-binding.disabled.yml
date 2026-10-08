@@ -1,0 +1,29 @@
+# REVIEW ONLY. Outside .github/workflows. No provisioning, credential or live job.
+name: P3 run binding (DISABLED PROPOSAL)
+run-name: p3:${{ inputs.kind }}:${{ inputs.dispatch_epoch_seconds }}
+on:
+  workflow_dispatch:
+    inputs:
+      kind:
+        type: choice
+        options: [signal, watch]
+        required: true
+      dispatch_epoch_seconds:
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: btc-delivery-single-stream
+  cancel-in-progress: false
+jobs:
+  delivery:
+    if: ${{ false }}
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'DISABLED: actual binding must use p3_run_binding.prepare against a pinned policy.'
+          exit 1
+# Future production wiring remains a separate P4 diff. Never paste dispatch input
+# into shell source. Pass it as an environment variable and validate it in Python.

@@ -105,7 +105,30 @@ class VolumeStore:
                 (body, hashlib.sha256(body.encode()).hexdigest(), self.revision, self.store_id))
             if result.rowcount != 1:
                 raise RuntimeError('Durable revision conflict')
+            completion = self.snapshot.get('control', {}).get('health', {}).get('completion_candidate')
+            if completion and completion['revision'] == self.revision + 1:
+                self.db.execute('CREATE TABLE IF NOT EXISTS health_revisions (revision INTEGER PRIMARY KEY, body TEXT, digest TEXT)')
+                self.db.execute('INSERT INTO health_revisions VALUES (?, ?, ?)',
+                    (self.revision+1, body, hashlib.sha256(body.encode()).hexdigest()))
         self.revision += 1
+        row = self.db.execute('SELECT revision,body,digest FROM snapshot WHERE id=1').fetchone()
+        if row != (self.revision, body, hashlib.sha256(body.encode()).hexdigest()):
+            raise RuntimeError('Durable write readback mismatch')
+
+    def confirmed_record(self):
+        row = self.db.execute('SELECT revision,body,digest FROM snapshot WHERE id=1').fetchone()
+        if row[0] != self.revision or json.loads(row[1]) != self.snapshot or contract.digest(self.snapshot) != row[2]:
+            raise RuntimeError('Durable revision not confirmed')
+        return {'adapter': 'sqlite', 'store_id': self.store_id, 'revision': self.revision,
+                'snapshot_digest': row[2]}
+
+    def read_revision(self, locator):
+        row = self.db.execute('SELECT body,digest FROM health_revisions WHERE revision=?',
+                             (locator['revision'],)).fetchone()
+        if row is None or row[1] != locator['snapshot_digest'] or hashlib.sha256(row[0].encode()).hexdigest() != row[1]:
+            raise RuntimeError('Durable completion revision mismatch')
+        snapshot = json.loads(row[0]); validate(snapshot)
+        return snapshot
 
     def recover(self):
         changed = False
@@ -121,6 +144,23 @@ class VolumeStore:
         return any(m['status'] in {'sending', 'uncertain'}
                    for state in [self.snapshot['engine'], *self.snapshot['commands'].values()]
                    for m in state.get('_delivery', {}).get('messages', []))
+
+
+@contextmanager
+def read_only_volume(path, store_id):
+    """Snapshot transaction only, no owner, mutex write, creation or recovery."""
+    store = VolumeStore(Path(path).resolve(), store_id)
+    with closing(sqlite3.connect((store.path/'snapshot.sqlite').as_uri()+'?mode=ro',
+                                uri=True, timeout=0)) as db:
+        db.execute('BEGIN')
+        row = db.execute('SELECT store_id,revision,body,digest FROM snapshot WHERE id=1').fetchone()
+        if row is None or row[0] != store_id or hashlib.sha256(row[2].encode()).hexdigest() != row[3]:
+            raise ValueError('Read-only durable identity/integrity mismatch')
+        store.db, store.revision, store.snapshot = db, row[1], json.loads(row[2])
+        validate(store.snapshot)
+        if store.snapshot.get('version') == 2 and store.snapshot['control']['store_id'] != store_id:
+            raise ValueError('Read-only control identity mismatch')
+        yield store
 
 
 def configured_store(directory):
@@ -245,6 +285,10 @@ def health_event(kind, event, error_class=None):
         return
     h=store.snapshot['control']['health']
     now=int(time.time()*1000)
+    if kind in ('signal', 'watch'):
+        from run_health import record_event
+        record_event(store, kind, event, now, error_class)
+        return
     if event=='start':
         h.update(run_kind=kind,run_started_ms=now,last_error_class=None)
     elif event=='finish':
@@ -257,6 +301,15 @@ def health_event(kind, event, error_class=None):
     else:
         raise ValueError('Unknown health event')
     store.commit()
+
+
+def watch_observation(candle_open_ms, observed_ms):
+    store = active_store.get()
+    if store is not None and store.snapshot.get('version') == 2:
+        current = store.snapshot['control']['health']['current_run']
+        if current['kind'] != 'watch' or current['status'] != 'running':
+            raise ValueError('Watch observation without current run')
+        current.update(watch_candle_open_ms=candle_open_ms, watch_observed_ms=observed_ms)
 
 
 def stage_text(text):

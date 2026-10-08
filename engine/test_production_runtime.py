@@ -32,6 +32,9 @@ def active(root,store,data):
         volume.snapshot['control']['mode']='active'
         volume.commit()
     env={'BTC_DELIVERY_STORE':str(store),'BTC_DELIVERY_STORE_ID':'synthetic-store',
+         'BTC_DELIVERY_RUN_REPOSITORY':'synthetic/code', 'BTC_DELIVERY_WORKFLOW':'.github/workflows/synthetic.yml',
+         'BTC_DELIVERY_RUN_ID':'synthetic-100', 'BTC_DELIVERY_RUN_ATTEMPT':'1',
+         'BTC_DELIVERY_EXPECTED_START_MS':'1791100800000',
          'BTC_DELIVERY_RUNNER_ROOT':str(data.parent),
          'BTC_DELIVERY_CODE_SHA':'a'*40,'BTC_DELIVERY_BOT_IDENTITY':'synthetic-bot',
          'BTC_DELIVERY_OPERATION_ID':'synthetic-request','TELEGRAM_BOT_TOKEN':'fake',

@@ -143,6 +143,9 @@ def test_more_than_500_legacy_signals_survive_first_continuation():
         runner=root/'runner';local=runner/'data';local.mkdir(parents=True)
         (local/'config.json').write_bytes(config_path.read_bytes())
         env={'BTC_DELIVERY_STORE':str(store),'BTC_DELIVERY_STORE_ID':'synthetic-store',
+             'BTC_DELIVERY_RUN_REPOSITORY':'synthetic/code', 'BTC_DELIVERY_WORKFLOW':'.github/workflows/synthetic.yml',
+             'BTC_DELIVERY_RUN_ID':'synthetic-100', 'BTC_DELIVERY_RUN_ATTEMPT':'1',
+             'BTC_DELIVERY_EXPECTED_START_MS':'1791100800000',
              'BTC_DELIVERY_RUNNER_ROOT':str(runner),'BTC_DELIVERY_CODE_SHA':'a'*40,
              'BTC_DELIVERY_BOT_IDENTITY':'synthetic-bot','TELEGRAM_BOT_TOKEN':'fake',
              'TELEGRAM_CHAT_ID':'synthetic-target'}

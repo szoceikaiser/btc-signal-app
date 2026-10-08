@@ -7,6 +7,7 @@ import base64
 from copy import deepcopy
 import hashlib
 import json
+import re
 import secrets
 import urllib.error
 import urllib.parse
@@ -17,6 +18,7 @@ from production_contract import canonical, validate_v2
 
 MAX_BYTES = 750 * 1024
 MAX_WRITES = 50
+MAX_RESPONSE_BYTES = 2 * 1024 * 1024
 STORE_PATH = 'delivery/stream.json'
 SCHEMA = 'btc-github-store-v1'
 
@@ -75,7 +77,10 @@ class GitHubContentsClient:
             'User-Agent': 'btc-delivery-store'})
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                return json.load(response)
+                raw = response.read(MAX_RESPONSE_BYTES+1)
+                if len(raw) > MAX_RESPONSE_BYTES:
+                    raise StoreUnavailable('GitHub response budget exhausted')
+                return json.loads(raw)
         except urllib.error.HTTPError as exc:
             # Never include a response body, URL with credentials, or token in logs.
             if exc.code == 409:
@@ -97,6 +102,16 @@ class GitHubContentsClient:
             raise ValueError('Explicit store branch and path required')
         ref = self._request('GET', self._route(repo, '/git/ref/heads/' + urllib.parse.quote(branch, safe='')))
         commit_sha = ref['object']['sha']
+        record = self.read_at(repo, commit_sha, path)
+        latest = self._request('GET', self._route(repo, '/git/ref/heads/' + urllib.parse.quote(branch, safe='')))
+        if latest['object']['sha'] != commit_sha:
+            raise StoreConflict('GitHub store branch moved during read')
+        return record
+
+    def read_at(self, repo, commit_sha, path=STORE_PATH):
+        """Immutable commit read; never claims a writer owner."""
+        if not isinstance(commit_sha,str) or not re.fullmatch('[0-9a-f]{40}',commit_sha):
+            raise StoreUnavailable('Invalid pinned commit SHA')
         query = urllib.parse.urlencode({'ref': commit_sha})
         item = self._request('GET', self._route(repo, '/contents/' + urllib.parse.quote(path, safe='/')) + '?' + query)
         if item.get('type') != 'file' or item.get('encoding') != 'base64':
@@ -108,9 +123,6 @@ class GitHubContentsClient:
         actual_blob = hashlib.sha1(b'blob ' + str(len(body)).encode() + b'\0' + body).hexdigest()
         if item['sha'] != actual_blob:
             raise StoreUnavailable('GitHub store blob SHA mismatch')
-        latest = self._request('GET', self._route(repo, '/git/ref/heads/' + urllib.parse.quote(branch, safe='')))
-        if latest['object']['sha'] != commit_sha:
-            raise StoreConflict('GitHub store branch moved during read')
         return {'commit_sha': commit_sha, 'blob_sha': item['sha'], 'body': body}
 
     def update(self, repo, branch, expected_blob_sha, body, write_id, path=STORE_PATH):
@@ -125,6 +137,14 @@ class GitHubContentsClient:
     def parents(self, repo, commit_sha):
         result = self._request('GET', self._route(repo, '/git/commits/' + urllib.parse.quote(commit_sha, safe='')))
         return [p['sha'] for p in result['parents']]
+
+    def is_ancestor(self, repo, base, head):
+        if any(not isinstance(x,str) or not re.fullmatch('[0-9a-f]{40}',x) for x in (base,head)):
+            raise StoreUnavailable('Invalid ancestry SHA')
+        result = self._request('GET', self._route(repo, '/compare/'+base+'...'+head+'?per_page=1'))
+        return (result['base_commit']['sha'] == base
+                and result['merge_base_commit']['sha'] == base
+                and result['status'] in ('ahead', 'identical'))
 
 
 class GitHubStore:
@@ -220,7 +240,7 @@ class GitHubStore:
         body = canonical(next_envelope).encode('utf-8')
         if len(body) > MAX_BYTES:
             raise StoreUnavailable('GitHub store size budget exhausted')
-        self.warning = self.warning or len(body) >= int(MAX_BYTES * .8) or self.writes >= int(MAX_WRITES * .8)
+        self.warning = self.warning or len(body) >= int(MAX_BYTES * .8) or self.writes+1 >= int(MAX_WRITES * .8)
         self.writes += 1
         prior_commit = self._record['commit_sha']
         try:
@@ -247,6 +267,26 @@ class GitHubStore:
             raise StoreConflict('GitHub write without current owner')
         self._write()
 
+    def confirmed_record(self):
+        if self._halted or self._record is None:
+            raise StoreUnavailable('No confirmed revision')
+        return {'adapter': 'github', 'repo': self.repo, 'branch': self.branch,
+            'path': self.path, 'store_id': self.store_id, 'revision': self.revision,
+            'commit_sha': self._record['commit_sha'], 'blob_sha': self._record['blob_sha'],
+            'snapshot_digest': self._envelope['body_digest']}
+
+    def read_revision(self, locator):
+        if not self.client.is_ancestor(self.repo, locator['commit_sha'], self._record['commit_sha']):
+            raise StoreConflict('Completion is not in current store history')
+        record = self.client.read_at(self.repo, locator['commit_sha'], self.path)
+        envelope = self._parse(record)
+        if (record['commit_sha'] != locator['commit_sha'] or record['blob_sha'] != locator['blob_sha']
+                or envelope['revision'] != locator['revision']
+                or envelope['body_digest'] != locator['snapshot_digest']):
+            raise StoreConflict('Completion revision mismatch')
+        return envelope['snapshot']
+
+
     def recover(self):
         changed = False
         for state in [self.snapshot['engine'], *self.snapshot['commands'].values()]:
@@ -261,6 +301,15 @@ class GitHubStore:
         return any(message['status'] in {'sending', 'uncertain'}
             for state in [self.snapshot['engine'], *self.snapshot['commands'].values()]
             for message in state.get('_delivery', {}).get('messages', []))
+
+
+def read_only(client, repo, branch, store_id, path=STORE_PATH):
+    """Consistent authenticated head, without GitHubStore.__enter__ or any PUT."""
+    store = GitHubStore(client, repo, branch, store_id, 'read-only', 'read-only', path)
+    store._record, store._envelope = store._read()
+    store.snapshot = deepcopy(store._envelope['snapshot'])
+    store.revision = store._envelope['revision']
+    return store
 
 
 def review_takeover(client, repo, branch, store_id, expected_owner, expected_revision, evidence, path=STORE_PATH):

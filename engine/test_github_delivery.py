@@ -35,6 +35,7 @@ class FakeAPI:
     def __init__(self, body):
         self.sequence = 0
         self.parents_by_commit = {}
+        self.records = {}
         self.record = None
         self.put_count = 0
         self.fail_next = None
@@ -50,7 +51,13 @@ class FakeAPI:
         blob = hashlib.sha1(b'blob '+str(len(body)).encode()+b'\0'+body).hexdigest()
         self.parents_by_commit[commit] = [] if prior is None else [prior]
         self.record = {'commit_sha': commit, 'blob_sha': blob, 'body': body}
+        self.records[commit] = deepcopy(self.record)
         return commit
+
+    def read_at(self, repo, commit_sha, path):
+        if self.missing:
+            raise github.StoreUnavailable('404')
+        return deepcopy(self.records[commit_sha])
 
     def read(self, repo, branch, path):
         if self.missing:
@@ -77,6 +84,13 @@ class FakeAPI:
 
     def parents(self, repo, commit_sha):
         return self.parents_by_commit[commit_sha]
+
+    def is_ancestor(self, repo, base, head):
+        while head != base:
+            parents = self.parents_by_commit[head]
+            if len(parents) != 1: return False
+            head = parents[0]
+        return True
 
     def rewrite_history(self):
         # Administrator rewrite with identical bytes/blob, but a new parent.

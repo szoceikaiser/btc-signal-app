@@ -21,7 +21,8 @@ Abnahme und die noch offenen realen Store-/Alarm-/Backup-Gates.
 3. `python tools/produktion_store.py provision --package NEUES_PAKET --target NEUER_TESTSTORE`
 4. `python tools/produktion_runner.py --offline --store NEUER_TESTSTORE --store-id ... --config ... --fixture SYNTHETISCHE_EINGABEN.json --kind signal`
 5. `python tools/produktion_health.py --store ... --store-id ...` liest den
-   Status. Exitcode 20 bedeutet gesperrter/unvollständiger Betrieb, 30 unklare
+   lokalen Diagnosestatus; ohne externe Runmetadaten bestätigt er keine gesunde
+   Produktion (`external_run_binding_unverified`). Exitcode 20 bedeutet gesperrter/unvollständiger Betrieb, 30 unklare
    Zustellung, 40 defekter Store. Das Werkzeug versendet keinen Alarm.
 6. `python tools/produktion_backup.py backup --store ... --store-id ... --migration-package ... --out NEUE_SICHERUNG`
    kopiert mit SQLite Backup API unter exklusiver Store-Sperre.
@@ -44,3 +45,17 @@ Zuordnung. Es gibt keinen Reset zu `pending` und keine automatische Freigabe.
 Der Offline-Runner nutzt nur einen temporären kopierten Store und einen
 synthetischen Transport. Ein echter Host, API-Berechtigungen, Alarmweg,
 zweites Sicherungsziel, frischer Migrationssnapshot und D2 gehören zu P3/P4.
+
+## Lokale Betriebsvorstufe vom 08.10.2026
+
+`tools/p3_store_probe.py --offline --out NEUE_DATEI` hat ausschließlich FakeAPI.
+`tools/produktion_freshness.py --offline --fixture SYNTHETISCHE_FIXTURE` bildet
+eine HTTP-Entscheidung ohne Listener. `tools/p3_run_binding.py --offline --fixture ...`
+prüft Dispatchslot und tatsächliche synthetische Runmetadaten. Das lokale Git-
+Backupwerkzeug hat weder fetch noch push und restoret ausschließlich blocked.
+
+Vertrag: `docs/produktionsuebernahme-2026-10/P3-BETRIEBSVORSTUFE.md`.
+Fünf getrennte externe Vorschlagspläne: `P3-EXTERNE-PROBENPLAENE.md` im selben
+Verzeichnis. `p3-acceptance.disabled.json` enthält ausschließlich offene Angaben
+und Vorschläge; `p3-run-binding.disabled.yml` liegt außerhalb aktiver Workflows.
+Keine dieser Dateien gibt Einrichtung, Mailprobe oder P4 frei.
