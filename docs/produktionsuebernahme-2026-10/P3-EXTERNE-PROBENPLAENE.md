@@ -174,43 +174,78 @@ Wochensätze, keine automatische Löschung; Restore vor Updates und monatlich.
 Aus ausdrücklich erlaubtem nur lesendem lokalem Storeclone eine einzelne
 bestätigte Branch-SHA pinnen. Vollständige Historie ab blocked-Seed und aktuelle
 Datei an dieser SHA, Store-/Streamidentität, Revision/Digest, Code-/Configpin,
-Migrationspaket und SHA256SUMS erhalten. `produktion_github_backup.package_local`
-prüft exakte Branch-SHA, sauberen Clone, gesamte lineare Commit-/Digestfolge und
-Migrationsidentität. Es macht **kein fetch/push**. Paketgrenze20 MiB einschließlich
-gehashter Inhalte, höchstens1.000 Commitstände und20 MiB unkodierte historische
-Bodies. Reale Größe/Kompression vor Auftrag messen; Grenze nicht still erweitern.
+Migrationspaket und Datei-SHA256 erhalten. `p3_backup_chain.append_local` prüft
+unabhängig verlangten Pin **und Revision**, Identität und gesamte lineare
+Commit-/Digestfolge. Es macht **kein fetch/push**. Maßgeblich ist jetzt
+[P3-BACKUP-V2-VERTRAG.md](P3-BACKUP-V2-VERTRAG.md): immutable Basis plus verkettete
+Inkremente, je höchstens256 Commits,64 MiB unkomprimierte Storebodies und20 MiB
+Paketdateien. Der Storebranch enthält ausschließlich `delivery/stream.json`;
+README/Workflows/andere Blobs auf dieser Branch werden abgewiesen. Commit-/Tree-
+Metadaten sind zusätzlich begrenzt. Bis512 Pakete/8 GiB, Vorwarnung80%, kein
+unbegrenztes Kapazitätsversprechen. Aktuelle reale Größe und Änderungsrate vor
+Auftrag messen. v1 bleibt Altformat mit seinen alten Grenzen; der Monitor nimmt
+keine v1- oder rein lokale Quittung als aktuellen Betriebsbeleg an.
 
-Ein Paket in ein neues unveränderliches Verzeichnis `sets/<UTC>-<STORE_SHA>/` des
-zweiten Repos übertragen; Vorschlag ein Nicht-Force-Push mit höchstens einem
-Paketcommit, max20 MiB Paketinhalt. Keine DELETE/Historyrewrites. Anschließend
-den neuen Backupcommit separat lesen und alle Dateien/Hashes gegen das lokale
-Paket prüfen; bei unklarer Pushantwort nur Readback, kein automatischer Zweitpush.
+Nur neue Pakete in neue unveränderliche Verzeichnisse `packages/<INDEX>/` des
+zweiten Repos übertragen; ein Paketcommit je Paket. Bereits bestätigte Pakete
+werden weder geändert noch täglich erneut hochgeladen. Keine DELETE/Force-
+Pushes/Historyrewrites. Nach jedem Commit Pin und alle Dateien/Hashes aus dem
+zweiten Repo separat lesen. Bei unklarer Pushantwort nur Readback, kein
+automatischer Zweitpush. Ein identisches bereits bestätigtes Paket darf nach
+Readback wiederverwendet werden. Widerspruch oder fremder Parent: Halt.
+Ausstehende Pakete sind noch kein vollständiger Backupabschluss.
 
 **Aus dieser zweiten Kopie**, nicht aus dem Ursprungsclone, isoliert restoren:
 Git-Bundleclone, `git fsck --full`, vollständige Commitfolge, Commit-/Blob-/Body-
-Identität und Manifest prüfen. `restore_local` verlangt den vorher unabhängig
-festgelegten neuesten Quellpin/-revision, kopiert nie über ein bestehendes Ziel
+Identität und alle Manifest-Vorgänger prüfen. `restore_verified` verlangt den
+vorher unabhängig festgelegten neuesten Quellpin/-revision und die Quellidentität,
+kopiert nie über ein bestehendes Ziel
 und provisioniert ausschließlich `blocked-store` mit offenem Nachfolgeabgleich.
 Sending wird uncertain. Alte Healthbindungen sind geleert; originale Archivbytes
 bleiben im Verification-Clone unverändert. Der Clone hat einen gesperrten Pushweg,
 keine Runtime, Credentials oder aktiven Transport.
 
-Fehlproben: Hashmanipulation, fehlender neuester Commit, ausgelassener Vorfahr,
-falsche Store-/Code-/Configidentität und abweichende Migration müssen vor einer
+Fehlproben: fehlendes/vertauschtes Zwischenpaket, falscher Vorgänger, auch nach
+Neuberechnung äußerer Hashes, Hashmanipulation, fehlender neuester Commit,
+ausgelassener Vorfahr, falsche Identität und abweichende Migration müssen vor einer
 Restorefreigabe scheitern. Lokale Fakehistorie und zusätzlich echter lokaler
 synthetischer Git-Bundle-/fsck-Restore sind getestet; das ist kein privater
 GitHub-Backupnachweis. Source acquisition und Zweitrepo-Write sind noch offen.
 
-Erst nach bestätigtem Zweitrepo-Readback und isoliertem Restore eine getrennte
-kleine Quittung an `backup/latest-receipt.json` schreiben: Schema
-`p3-verified-backup-receipt-v1`, confirmed, erwarteter Termin, Bestätigungszeit,
-vollständiges Manifest plus dessen Digest, history_verified und
-restore_blocked_verified=true. Dieser zweite Commit hat CAS/Parent/Readback;
+Erst nach bestätigtem Zweitrepo-Readback **aller abhängigen Pakete** und isoliertem
+vollständigem Restore ein neues Abschlussmanifest committen und lesen, danach
+die getrennte Quittung an `backup/latest-receipt.json`: Schema
+`p3-verified-backup-receipt-v2`, status confirmed, erwarteter Termin,
+Bestätigungszeit, vollständiges `p3-backup-set-v2`-Manifest plus dessen SHA256,
+`verified_chain_sha256`, `verified_source_pin`, `verified_source_revision`,
+`upload_readback_verified`, `history_verified`, `restore_blocked_verified=true`.
+Diese letzten beiden Commits haben jeweils CAS/Parent/Readback;
 höchstens64 KiB Quittung. Nie eine noch unbekannte eigene Backupcommit-SHA in
 sich einbetten. Monitor bindet die Quittung an den separat gelesenen Backuphead.
-Freigabevorschlag für diesen Probeauftrag: höchstens zwei Nicht-Force-Pushes
-(Paket, danach Quittung), max20 MiB Paket+64 KiB Quittung, keine weiteren Refs,
-max200 lesende REST-Requests, kein laufender Backupdaemon oder Löschplan.
+Freigabevorschlag nur für eine spätere synthetische Erstprobe plus Fortsetzung:
+maximal6 neue Pakete,120 MiB Paketdateien,128 MiB übertragene Git-Packdaten je
+Richtung insgesamt,128 KiB Abschlussmanifest und64 KiB Quittung; maximal8
+Nicht-Force-Pushes (6 Paket-,1 Manifest-,1 Quittungscommit), nur der benannte
+Backupbranch. Max200 lesende REST-Requests insgesamt, höchstens3 lokale
+Git-Übernahmen vom benannten Zweitrepo, keine impliziten Submodule/LFS/anderen
+Remotes. Transferzeit und tatsächliche Bytes müssen der spätere Ausführungsweg
+hart begrenzen; kein realer Adapter ist hier freigeschaltet. Per Git-Schritt120s,
+gesamter Verifikationsaufruf1800s, Python256 MiB RSS und Git-Baum192 MiB.
+Freier Platz: vor Beginn mindestens zweimal gemessene Quell-Gitgröße plus
+Paketverbund plus1 GiB Reserve; danach Abbruch bei gefährdeter Reserve.
+Keine laufende Sammlung oder Löschung. Benötigt die konkrete Probe mehr,
+kein stilles Weiterarbeiten: neue überprüfbare Freigabegrenze vorbereiten.
+
+Unterbrechung nach Paketcommit, vor Abschluss sowie vor Quittung separat proben.
+Keine neue frische Quittung ohne vollständigen Verbund; alte Quittung behält ihre
+alte Terminbindung. Hart beendeter lokaler Writer hinterlässt nicht verfallenden
+Owner-Lock; Prozessende und alle vorhandenen Pakete prüfen, bevor eine ausdrücklich
+kontrollierte Wiederaufnahme erfolgt. Kein zeitgesteuertes Stehlen. Bei täglich
+fortgeführten kleinen Paketen entstehen teilweise gefüllte letzte Pakete;
+512-Paket-Limit kann daher vor der theoretischen Commitobergrenze greifen.
+Tages-/Wochenaufbewahrung bewahrt immer sämtliche Basis-/Inkrementabhängigkeiten.
+Ein v1-Paket wird nur explizit als v1 restored; Überführung benötigt einen neu
+vollständig geprüften v2-Verbund, niemals eine umetikettierte alte Quittung.
 
 Ein altes Restore bleibt trotz intakter Hashes blocked: fehlende Nachfolger und
 Zustellungen erfordern positiven externen Abgleich. Keine automatische Rückkehr,

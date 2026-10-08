@@ -163,5 +163,10 @@ if __name__=='__main__':
     p.add_argument('--synthetic-plan',required=True);a=p.parse_args()
     plan=json.loads(Path(a.synthetic_plan).read_text(encoding='utf-8'))
     if plan.get('synthetic') is not True:raise ValueError('Synthetic source only in this CLI')
-    m=package_local(plan['source'],plan['branch'],plan['pin'],plan['identity'],plan['migration'],plan['out'])
-    print(canonical(restore_local(plan['out'],plan['restore'],plan['pin'],m['revision'])))
+    # v1 functions above are explicit legacy readers/writers for old evidence.
+    # New CLI runs always use v2 and require an independently supplied revision.
+    from p3_backup_chain import append_local, restore_verified
+    result=append_local(plan['source'],plan['branch'],plan['pin'],plan['revision'],
+        plan['identity'],plan['migration'],plan['out'])
+    print(canonical(restore_verified(plan['out'],result['manifest'],plan['restore'],
+        plan['pin'],plan['revision'],plan['identity'])))

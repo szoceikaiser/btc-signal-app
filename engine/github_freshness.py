@@ -121,15 +121,27 @@ def read_backup(client, policy):
     if len(record['body']) > 64*1024:
         raise ValueError('Backup receipt size limit')
     receipt = json.loads(record['body'])
-    if receipt['schema'] != 'p3-verified-backup-receipt-v1' or receipt['status'] != 'confirmed':
+    if receipt['schema'] != 'p3-verified-backup-receipt-v2' or receipt['status'] != 'confirmed':
         raise ValueError('Verified backup receipt missing')
     manifest = receipt['manifest']
     if digest(manifest) != receipt['manifest_sha256']:
         raise ValueError('Backup manifest digest mismatch')
-    if (manifest['schema'] != 'p3-local-github-backup-v1'
+    hashes=manifest.get('package_manifest_sha256',[])
+    import re
+    if (not 1<=len(hashes)<=512 or any(not isinstance(h,str) or not re.fullmatch('[0-9a-f]{64}',h) for h in hashes)
+            or len(set(hashes))!=len(hashes) or manifest.get('package_count')!=len(hashes)
+            or manifest.get('chain_sha256')!=digest(hashes)
+            or receipt.get('verified_chain_sha256')!=manifest.get('chain_sha256')
+            or manifest.get('history_count')!=manifest['revision']+1
+            or receipt.get('verified_source_pin')!=manifest['pin']
+            or receipt.get('verified_source_revision')!=manifest['revision']
+            or receipt.get('upload_readback_verified') is not True):
+        raise ValueError('Complete verified backup chain missing')
+    if (manifest['schema'] != 'p3-backup-set-v2'
             or manifest['identity']['repo'] != policy['store']['repo']
             or manifest['identity']['branch'] != policy['store']['branch']
             or manifest['identity']['store_id'] != policy['identity']['store_id']
+            or manifest['identity']['stream_id'] != policy['identity']['stream_id']
             or manifest['stream_id'] != policy['identity']['stream_id']
             or manifest['store_path'] != policy['store']['path']):
         raise ValueError('Backup source identity mismatch')

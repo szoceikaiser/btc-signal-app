@@ -517,13 +517,17 @@ def test_dispatch_timestamp_pins_slot_before_github_runner_delay():
 def test_backup_receipt_manifest_is_bound_and_reader_clients_share_budget():
     with healthy_fixture() as f:
         source=json.loads(f['api'].records[f['backup']['store_commit_sha']]['body'])
-        manifest={'schema':'p3-local-github-backup-v1',
+        manifest={'schema':'p3-backup-set-v2',
             'stream_id':f['policy']['identity']['stream_id'],'store_path':github.STORE_PATH,
-            'identity':{'repo':REPO,'branch':BRANCH,'store_id':STORE_ID},
+            'identity':{'repo':REPO,'branch':BRANCH,'store_id':STORE_ID,'stream_id':f['policy']['identity']['stream_id']},
             'pin':f['backup']['store_commit_sha'],'snapshot_digest':source['body_digest'],
             'revision':source['revision'],'code_sha':source['snapshot']['control']['code_sha'],
             'config_sha256':source['snapshot']['control']['config_sha256']}
-        receipt={'schema':'p3-verified-backup-receipt-v1','status':'confirmed',
+        manifest.update(package_manifest_sha256=['d'*64],package_count=1,
+            chain_sha256=digest(['d'*64]),history_count=source['revision']+1)
+        receipt={'schema':'p3-verified-backup-receipt-v2','status':'confirmed',
+            'verified_chain_sha256':manifest['chain_sha256'],'verified_source_pin':manifest['pin'],
+            'verified_source_revision':manifest['revision'],'upload_readback_verified':True,
             'manifest':manifest,'manifest_sha256':digest(manifest),
             'expected_start_ms':f['backup']['expected_start_ms'],'verified_ms':f['backup']['verified_ms'],
             'history_verified':True,'restore_blocked_verified':True}

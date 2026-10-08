@@ -131,3 +131,10 @@ Die [cron-job.org-Variablen](https://docs.cron-job.org/creating-cron-jobs.html)
 liefern Ausführungszeit, nicht geplante Zeit. Geplante Zeit und Jitter sind
 deshalb in der späteren cron-Probe getrennt zu prüfen. Keine stillschweigende
 Behauptung über die aktuelle Kontokonfiguration.
+
+Die Sicherungsvorstufe verwendet nach N-P3-01 den gesonderten
+`P3-BACKUP-V2-VERTRAG.md`: vollständige Basis plus unveränderliche Inkremente,
+Abschluss erst nach Prüfung des gesamten Verbunds bis zum unabhängig verlangten
+Quellpin. Der Monitor verlangt eine v2-Upload-/Readbackquittung mit Paketkettenroot;
+alte v1-Belege und rein lokale Prüfquittungen ersetzen sie nicht. Das fügt keine
+GETs hinzu und ändert keine Signal-/Watch-Fristen oder Runbindungen.

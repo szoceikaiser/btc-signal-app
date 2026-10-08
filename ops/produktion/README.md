@@ -59,3 +59,14 @@ Fünf getrennte externe Vorschlagspläne: `P3-EXTERNE-PROBENPLAENE.md` im selben
 Verzeichnis. `p3-acceptance.disabled.json` enthält ausschließlich offene Angaben
 und Vorschläge; `p3-run-binding.disabled.yml` liegt außerhalb aktiver Workflows.
 Keine dieser Dateien gibt Einrichtung, Mailprobe oder P4 frei.
+# Sicherungskapazität N-P3-01: v2
+
+Neue lokale Backupaufrufe verwenden `tools/p3_backup_chain.py` über die
+synthetische CLI `produktion_github_backup.py`; der Plan muss zusätzlich zur SHA
+die unabhängig verlangte `revision` enthalten. Basis und unveränderliche
+Inkremente erhalten die ganze Historie. Vertrag und Grenzen:
+`docs/produktionsuebernahme-2026-10/P3-BACKUP-V2-VERTRAG.md`.
+v1-Funktionen bleiben explizit für alte Belege erhalten. Betriebsquittungen
+müssen v2 sein und den vollständigen privat gelesenen und restored Verbund
+binden. Lokale Verifikationsdateien sind keine privaten Backupquittungen.
+Keine reale Einrichtung, neue externe Berechtigung oder Aktivierung hierdurch.
