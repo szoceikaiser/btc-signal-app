@@ -1,13 +1,13 @@
 {
  "direction": "LONG",
- "pos_state": "T1",
- "last_signal_ts": 1791446400000,
- "retrace_extreme": 82227.56,
+ "pos_state": "FULL",
+ "last_signal_ts": 1791460800000,
+ "retrace_extreme": 80914.23,
  "tp_rungs": 0,
  "dip_buys": 0,
  "buy_rungs": 1,
- "entry_ref": 83697.5253125,
- "entry_pct": 80,
+ "entry_ref": 83217.57662380954,
+ "entry_pct": 105,
  "liq_exits": 0,
  "high_exits": 2,
  "liq_entries": 2,
@@ -26,7 +26,7 @@
  "e42_teil_wartet": 0,
  "e42_teil_wartet_inv": null,
  "e42_teil_geprueft": null,
- "bestand_pct": 50,
+ "bestand_pct": 75,
  "zones": {
   "impuls_start": 80126.04,
   "impuls_start_ts": 1789862400000,
@@ -39,8 +39,8 @@
   "gp_lower": 82670.4105,
   "level_0786": 81681.74081999999,
   "invalidation": 80126.04,
-  "ext1": 89497.19,
-  "ext2": 93989.82134000001
+  "ext1": 88183.86,
+  "ext2": 92676.49134000001
  },
  "widerstand": {
   "richtung": "LONG",
@@ -54,12 +54,12 @@
  },
  "plan": {
   "richtung": "LONG",
-  "anteil_pct": 80,
-  "einstand": 83697.5253125,
-  "kurs": 82506.01,
+  "anteil_pct": 105,
+  "einstand": 83217.57662380954,
+  "kurs": 81037.99,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 82.506 $ ueber EMA200 (72.767 $)",
+   "trend_text": "Uebergeordnet: Kurs 81.038 $ ueber EMA200 (72.752 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
    "spot": "schwach",
@@ -88,25 +88,20 @@
     "tranche": 15
    },
    {
-    "preis": 82227.56,
+    "preis": 80126.04,
     "was": "Liquidationszone",
     "tranche": 20
    },
    {
-    "preis": 81681.74081999999,
-    "was": "0.786-Zone",
-    "tranche": 25
-   },
-   {
-    "preis": 80126.04,
+    "preis": 77620.01,
     "was": "Liquidationszone",
     "tranche": 20
    }
   ],
   "teilgewinn": [
    {
-    "preis": 82435.75,
-    "was": "kurz unter dem letzten Hoch 82.850",
+    "preis": 80866.2569,
+    "was": "kurz unter dem letzten Hoch 81.273",
     "tranche": 15
    },
    {
@@ -118,22 +113,22 @@
     "tranche": 0
    },
    {
-    "preis": 88043.264,
+    "preis": 86729.934,
     "was": "Zwischenziel (Extension 0.8)",
     "tranche": 15
    },
    {
-    "preis": 88770.227,
+    "preis": 87456.897,
     "was": "Zwischenziel (Extension 0.9)",
     "tranche": 15
    },
    {
-    "preis": 89497.19,
+    "preis": 88183.86,
     "was": "Ziel 1.0",
     "tranche": 40
    },
    {
-    "preis": 93989.82134000001,
+    "preis": 92676.49134000001,
     "was": "Ziel 1.618",
     "tranche": 40
    }
@@ -189,13 +184,13 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-08T15:09:36Z",
- "last_close": 82506.01,
+ "updated_at": "2026-10-08T16:02:24Z",
+ "last_close": 81037.99,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 82.506 $ ueber EMA200 (72.767 $)",
+   "trend_text": "Uebergeordnet: Kurs 81.038 $ ueber EMA200 (72.752 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
    "spot": "schwach",
