@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "T1",
- "last_signal_ts": 1791432000000,
+ "last_signal_ts": 1791446400000,
  "retrace_extreme": 82227.56,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -56,14 +56,14 @@
   "richtung": "LONG",
   "anteil_pct": 80,
   "einstand": 83697.5253125,
-  "kurs": 82998.75,
+  "kurs": 82506.01,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 82.999 $ ueber EMA200 (73.089 $)",
+   "trend_text": "Uebergeordnet: Kurs 82.506 $ ueber EMA200 (72.767 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
-   "spot": "nachgelassen",
-   "spot_text": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)"
+   "spot": "schwach",
+   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
   "ampel": {
    "stufe": "guenstig",
@@ -88,12 +88,7 @@
     "tranche": 15
    },
    {
-    "preis": 82874.93,
-    "was": "Liquidationszone",
-    "tranche": 20
-   },
-   {
-    "preis": 82787.25,
+    "preis": 82227.56,
     "was": "Liquidationszone",
     "tranche": 20
    },
@@ -101,12 +96,17 @@
     "preis": 81681.74081999999,
     "was": "0.786-Zone",
     "tranche": 25
+   },
+   {
+    "preis": 80126.04,
+    "was": "Liquidationszone",
+    "tranche": 20
    }
   ],
   "teilgewinn": [
    {
-    "preis": 84733.23485,
-    "was": "kurz unter dem letzten Hoch 85.159",
+    "preis": 82435.75,
+    "was": "kurz unter dem letzten Hoch 82.850",
     "tranche": 15
    },
    {
@@ -189,17 +189,17 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-08T08:02:27Z",
- "last_close": 82998.75,
+ "updated_at": "2026-10-08T12:02:23Z",
+ "last_close": 82506.01,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 82.999 $ ueber EMA200 (73.089 $)",
+   "trend_text": "Uebergeordnet: Kurs 82.506 $ ueber EMA200 (72.767 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
-   "spot": "nachgelassen",
-   "spot_text": "Spot-Nachfrage nachgelassen (die Nachfrage hat gedreht)"
+   "spot": "schwach",
+   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
   },
   "ampel": {
    "stufe": "gemischt",
