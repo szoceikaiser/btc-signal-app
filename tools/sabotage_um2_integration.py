@@ -37,6 +37,8 @@ def main(output):
     assert len(cases)==34
     assert not any(x['caught'] for x in run(ROOT/'engine',cases))
     faults=[
+        ('binary_budget_restored','exact_money.py','value = self.alloc * decimal(pct) / 100',
+         'value = decimal(float(self.alloc) * float(pct) / 100)'),
         ('unknown_accepted','liquidation_evidence.py','    return not unknown','    return True'),
         ('all_liquidation_confirmations_lost','liquidation_evidence.py',
          'def known(points, fields, reason, side, decision_at):','def known(points, fields, reason, side, decision_at):\n    return False'),

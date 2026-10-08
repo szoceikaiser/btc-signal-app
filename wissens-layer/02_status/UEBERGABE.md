@@ -1162,3 +1162,6 @@ und Online-CI, echte Fills, P3/D3 und P4 bleiben offen. Keine Umstellung von
 Site, Runtime, Store oder bestehenden Positionen. Hauptplan nicht endgültig
 abgenommen. Vier Aprillücken, unbekannter Warmup, modellierte Verfügbarkeit,
 mindestens 94 frühere Suchen und fehlende Zukunftsprobe bleiben Grenzen.
+
+## UM2-Budgetnacharbeit 08.10.2026
+Branch codex/um2-engine-integration. Geldvertrag: docs/um2-engine-integration/GELDVERTRAG-v2.md. Additive Belege: audit-backups/um2-budget-korrektur-20261008 im Projektstamm. Synthetische Pruefung bestanden; 0/20 neue Vollfensterstarts vor dem Codepin. Danach ausschliesslich C05/S006/V000/C02 je S0-S4. Kein Push, keine Online-CI, keine Nachrichten oder Aktivierung.

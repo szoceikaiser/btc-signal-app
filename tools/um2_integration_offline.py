@@ -22,7 +22,7 @@ def inspect():
     assert 'if: ${{ false }}' in (ROOT/'ops/produktion/github-workflow.disabled.yml').read_text()
     sys.path.insert(0,str(ROOT/'engine'))
     import execution_v1 as v,liquidation_evidence as evidence
-    assert v.EXECUTION_SEMANTICS=='V1-cash-observable-v1'
+    assert v.EXECUTION_SEMANTICS=='V1-exact-budget-v2'
     assert evidence.SEMANTICS_VERSION=='UM2-M5-v1-native'
     candidates=[]
     for label in ('C05-UM2','S006-UM2'):

@@ -12,11 +12,13 @@ import math
 import strategy_core as sc
 from flow_contract import legacy_unknown, FOUR_HOURS_MS
 import inventory
+from exact_money import Money, decimal
+from fractions import Fraction
 from derivative_accounting import require_spot_config
 from position_state import pos_to_state, pos_from_state
 
 STEP = 14_400_000
-EXECUTION_SEMANTICS = 'V1-cash-observable-v1'
+EXECUTION_SEMANTICS = 'V1-exact-budget-v2'
 BUY_ACTIONS = {'entry_t1', 'entry_gp', 'entry_flush', 'dip', 'buy_ladder',
                'liq_buy', 'upgrade_gp', 'upgrade_full', 'e42_buy'}
 # The documented generator order, not an assumed intrabar price path.
@@ -121,14 +123,14 @@ def decide(candles, flow, position, params):
 
 class Book:
     def __init__(self, capital, fee, slip, deploy, initial_units=0., initial_lots=None):
-        self.cash = float(capital)
+        self.money = Money(capital)
         self.units = float(initial_units)
         self.peak_units = self.units
         self.rk_units = 0.
-        self.alloc = self.cash * deploy if self.units else 0.
+        self.money.alloc = self.money.cash * decimal(deploy) if self.units else Fraction(0)
         self.invested_pct = 100. if self.units else 0.
         self.fee, self.slip, self.deploy = fee, slip, deploy
-        self.reserved_cash = self.reserved_units = 0.
+        self.reserved_units = 0.
         self.ledger = []
         self.lots = inventory.validate(initial_lots or [])
         if initial_units and initial_lots is None:
@@ -141,6 +143,25 @@ class Book:
             raise ValueError('Initial lots and BTC disagree')
         self.rk_units = inventory.summary(self.lots, 'e42')['units']
 
+    @property
+    def cash(self):
+        return float(self.money.cash)
+
+    @property
+    def reserved_cash(self):
+        return float(self.money.reserved)
+
+    @property
+    def alloc(self):
+        return float(self.money.alloc)
+
+    @alloc.setter
+    def alloc(self, value):
+        # Explicit synthetic initial-inventory fixture hook, never a migration.
+        if self.ledger:
+            raise ValueError('Cannot replace an active cycle budget')
+        self.money.alloc = decimal(value)
+
     def sync_position(self, pos):
         pos.inventory_source = 'simulated_fills'
         pos.lots = deepcopy(self.lots)
@@ -152,16 +173,22 @@ class Book:
             pos.entry_pct = 0
 
     def to_state(self):
-        return dict(version=1, execution_semantics=EXECUTION_SEMANTICS, **deepcopy(self.__dict__))
+        fields = deepcopy({k: value for k, value in self.__dict__.items() if k != 'money'})
+        return dict(version=2, execution_semantics=EXECUTION_SEMANTICS,
+                    money=self.money.state(), cash=self.cash, alloc=self.alloc,
+                    reserved_cash=self.reserved_cash, **fields)
 
     @classmethod
     def from_state(cls, state):
-        fields = set(cls(0., 0., 0., 1.).__dict__)
-        if (state.get('version') != 1 or state.get('execution_semantics') != EXECUTION_SEMANTICS
-                or set(state) != fields | {'version', 'execution_semantics'}):
+        fields = set(cls(0., 0., 0., 1.).__dict__) - {'money'}
+        if (state.get('version') != 2 or state.get('execution_semantics') != EXECUTION_SEMANTICS
+                or set(state) != fields | {'version', 'execution_semantics', 'money', 'cash', 'alloc', 'reserved_cash'}):
             raise ValueError('Unsupported/incomplete V1 book state')
         obj = cls(0., 0., 0., 1.)
         obj.__dict__.update(deepcopy({k: state[k] for k in fields}))
+        obj.money = Money.restore(state['money'])
+        if any(state[k] != getattr(obj, k) for k in ('cash','alloc','reserved_cash')):
+            raise ValueError('Rounded view disagrees with exact money')
         inventory.validate(obj.lots)
         numeric = ('cash', 'units', 'rk_units', 'peak_units', 'alloc', 'invested_pct',
                    'fee', 'slip', 'deploy', 'reserved_cash', 'reserved_units')
@@ -183,13 +210,13 @@ class Book:
 
     def snapshot(self, price):
         return dict(cash=self.cash, btc=self.units, reserved_cash=self.reserved_cash,
-                    reserved_btc=self.reserved_units, available_cash=self.cash-self.reserved_cash,
+                    reserved_btc=self.reserved_units, available_cash=float(self.money.available),
                     available_btc=self.units-self.reserved_units, rk_btc=self.rk_units,
                     market_value=self.units*price, equity=self.value(price),
                     cost_basis=inventory.summary(self.lots)['cost'],
                     cost_entry=inventory.summary(self.lots)['entry'],
                     base_entry=inventory.summary(self.lots, 'base')['entry'],
-                    lots=deepcopy(self.lots))
+                    lots=deepcopy(self.lots), money=self.money.state())
 
     def event(self, order, status, reason, at, price, before, **details):
         self.ledger.append(dict(id=f"{order['id']}:{len(self.ledger)}", order_id=order['id'],
@@ -203,7 +230,7 @@ class Book:
 
     def quantities(self, o):
         if o['action'] in BUY_ACTIONS:
-            return min(self.cash-self.reserved_cash, self.alloc * o['tranche_pct']/100)
+            return float(min(self.money.available, self.money.request(o['tranche_pct'])))
         if o['type'] in FULL:
             return self.units-self.reserved_units
         if o['type'] == 'RUECKKAUF_STOP':
@@ -216,8 +243,8 @@ class Book:
         return q
 
     def schedule(self, candidates, close_price):
-        if self.units == 0:
-            self.alloc = self.cash*self.deploy
+        if self.units == 0 and not self.money.pending:
+            self.money.alloc = self.money.cash*decimal(self.deploy)
             self.peak_units = self.rk_units = 0.
             self.invested_pct = 0.
         orders = [dict(o, sequence=i, id=f"v1:{o['ts']}:{i}") for i,o in enumerate(candidates)]
@@ -238,16 +265,21 @@ class Book:
         for o in chosen:
             buy=o['action'] in BUY_ACTIONS
             amount=self.quantities(o)
-            requested=self.alloc*o['tranche_pct']/100 if buy else amount
+            requested_exact=self.money.request(o['tranche_pct']) if buy else None
+            amount_exact=min(self.money.available, requested_exact) if buy else None
+            requested=float(requested_exact) if buy else amount
             before=self.snapshot(close_price)
-            if amount <= 0:
+            if (amount_exact <= 0 if buy else amount <= 0):
                 self.event(o,'rejected','no_cash' if buy else 'no_inventory',o['ts']+STEP,close_price,before)
                 continue
             o.update(amount=amount, requested=requested)
-            if buy: self.reserved_cash += amount
+            if buy:
+                o.update(amount_exact=str(amount_exact), requested_exact=str(requested_exact))
+                self.money.reserve(o['id'], amount_exact)
             else: self.reserved_units += amount
             self.event(o,'scheduled','next_open',o['ts']+STEP,close_price,before,
-                       reserved_amount=amount, requested_amount=requested)
+                       reserved_amount=amount, requested_amount=requested,
+                       **(dict(amount_exact=str(amount_exact), requested_exact=str(requested_exact)) if buy else {}))
             pending.append(o)
         return pending
 
@@ -257,26 +289,26 @@ class Book:
         price=candle.open*(1+self.slip if buy else 1-self.slip)
         amount=o['amount']
         if buy:
-            quantity=amount*(1-self.fee)/price
+            amount_exact=self.money.amount(o)
+            quantity=float(amount_exact*(1-decimal(self.fee))/decimal(price))
             # A positive float quantity can round away on addition to inventory.
             # Such an order cannot be confirmed as an executed strategy action.
             # Use the actual eligible open, never an assumed future/signal price.
             # Keep cash and every existing lot exactly unchanged, including real
             # tiny balances. This is representability, not a broker minimum.
             if quantity <= 0 or self.units + quantity == self.units:
-                self.reserved_cash = max(0., self.reserved_cash - amount)
+                self.money.release(o)
                 self.event(o, 'rejected', 'unrepresentable_btc_increment', candle.ts,
                            candle.open, before, rejected_budget=amount,
                            computed_quantity=quantity, inventory_ulp=math.ulp(self.units))
                 return None
-            self.reserved_cash -= amount
-            charge=amount*self.fee
-            self.cash -= amount
+            charge_exact, quantity_rounding = self.money.buy(o, self.fee, quantity, price)
+            charge=float(charge_exact)
             self.units += quantity
             inventory.buy(self.lots, lot_id=o['id'], at=candle.ts, price=price,
                           units=quantity, cost=amount, fee=charge,
                           kind='e42' if o['type']=='RUECKKAUF' else 'base')
-            self.invested_pct = min(100., self.invested_pct + amount/self.alloc*100)
+            self.invested_pct = min(100., self.invested_pct + float(amount_exact/self.money.alloc*100))
             if o['type']=='RUECKKAUF': self.rk_units += quantity
             self.peak_units=max(self.peak_units,self.units)
         else:
@@ -284,13 +316,13 @@ class Book:
             if 0 < self.units-amount <= 8*math.ulp(self.peak_units) and self.reserved_units <= 8*math.ulp(self.peak_units):
                 amount=self.units  # F09, including the last fill of a multi-sale package.
             quantity=amount
-            charge=quantity*price*self.fee
             old=self.units
             disposed_cost, disposed_buy_fee = inventory.sell(
                 self.lots, quantity, e42_only=o['type']=='RUECKKAUF_STOP',
                 close_cohort=quantity == (self.rk_units if o['type']=='RUECKKAUF_STOP' else old),
                 rounding_scale=self.peak_units)
-            self.cash += quantity*price-charge
+            charge_exact, proceeds_exact = self.money.sell(quantity, price, self.fee)
+            charge=float(charge_exact)
             self.units -= quantity
             # A final fill can exceed the aggregate by a few ulps after
             # independent lot updates. No lots means an exact flat book.
@@ -302,30 +334,35 @@ class Book:
             else:
                 self.rk_units *= self.units/old
         # Round only numerical reservation subtraction noise, never BTC minima.
-        if abs(self.reserved_cash) <= 8*math.ulp(max(1.,self.cash)): self.reserved_cash=0.
         if abs(self.reserved_units) <= 8*math.ulp(max(self.peak_units,1e-300)): self.reserved_units=0.
-        fraction=amount/o['requested'] if buy and o['requested'] else 1.
+        fraction=float(amount_exact/Fraction(o['requested_exact'])) if buy else 1.
+        partial=buy and amount_exact<Fraction(o['requested_exact'])
         event=dict(id=f"{o['id']}:{len(self.ledger)}",order_id=o['id'],candle_id=o['ts'],
             knowledge_assumed_at=o['ts']+STEP,decision_at=o['ts']+STEP,order_at=o['ts']+STEP,
             scheduled_at=o['ts']+STEP,event_at=candle.ts,fill_at=candle.ts,
             sequence=o['sequence'],action=o['action'],type=o['type'],reference_price=o['price'],
             signal_reason=o.get('reason',''),valuation_price=candle.open,fill_price=price,
-            status='filled',reason='partial_cash' if fraction<1 else 'next_open',
+            status='filled',reason='partial_cash' if partial else 'next_open',
             fee=charge,quantity=quantity,gross_budget=amount if buy else None,
             before=before,after=self.snapshot(candle.open))
+        event.update(fee_exact=str(charge_exact))
+        if buy:
+            event.update(amount_exact=str(amount_exact), quantity_rounding_usd=str(quantity_rounding))
+        else:
+            event.update(proceeds_exact=str(proceeds_exact))
         self.ledger.append(event)
         if not buy:
             event.update(disposed_cost=disposed_cost, disposed_buy_fee=disposed_buy_fee,
                          realized_pnl=quantity*price-charge-disposed_cost if disposed_cost is not None else None)
-        if fraction<1:
+        if partial:
             self.event(o,'rejected','cash_shortfall',candle.ts,candle.open,self.snapshot(candle.open),
-                       rejected_budget=o['requested']-amount)
+                       rejected_budget=float(Fraction(o['requested_exact'])-amount_exact))
         assert self.cash >= -1e-8 and self.units >= 0 and self.rk_units <= self.units+1e-10
         return dict(o, fraction=fraction)
 
     def expire(self, o, close):
         before=self.snapshot(close)
-        if o['action'] in BUY_ACTIONS: self.reserved_cash-=o['amount']
+        if o['action'] in BUY_ACTIONS: self.money.release(o)
         else: self.reserved_units-=o['amount']
         self.event(o,'unfilled_end_of_data','no_eligible_next_open',o['ts']+STEP,close,before)
 
@@ -417,6 +454,8 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
             amount = math.fsum(o['amount'] for o in pending if (o['action'] in BUY_ACTIONS) == buy)
             if not math.isclose(amount, reserved, rel_tol=1e-12, abs_tol=0.):
                 raise ValueError('Pending orders and reservations disagree')
+        if {o['id']: book.money.amount(o) for o in pending if o['action'] in BUY_ACTIONS} != book.money.pending:
+            raise ValueError('Exact pending orders and reservations disagree')
         if pos.lots != book.lots:
             raise ValueError('Strategy lots and book disagree')
         risk.peaks, risk.dd = deepcopy(resume_state['risk']['peaks']), deepcopy(resume_state['risk']['dd'])
@@ -478,7 +517,8 @@ def run_v1(candles, flow, cfg, *, start_ms, end_ms, fee=.001, slippage=0.,
         dd_close_pct=risk.dd[0]*100,dd_intrabar_lower_pct=risk.dd[1]*100,
         dd_intrabar_upper_pct=risk.dd[2]*100,cash=book.cash,btc=book.units,
         reserved_cash=book.reserved_cash,reserved_btc=book.reserved_units,
-        fees=sum(e['fee'] for e in book.ledger),fee_pct=fee*100,slippage_pct=slippage*100,
+        fees=float(book.money.fees),money=book.money.state(),execution_semantics=EXECUTION_SEMANTICS,
+        fee_pct=fee*100,slippage_pct=slippage*100,
         unfilled_end_of_data=sum(e['status']=='unfilled_end_of_data' for e in book.ledger),
         signals=signals,ledger=book.ledger,equity=equity,month_ends=months,feedback=feedback,
         final_strategy=dict(state=pos.state.name,buy_rungs=pos.buy_rungs,tp_rungs=pos.tp_rungs,

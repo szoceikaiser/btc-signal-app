@@ -327,3 +327,6 @@ und Online-CI, echte Fills, P3/D3 und P4 bleiben offen. Keine Umstellung von
 Site, Runtime, Store oder bestehenden Positionen. Hauptplan nicht endgültig
 abgenommen. Vier Aprillücken, unbekannter Warmup, modellierte Verfügbarkeit,
 mindestens 94 frühere Suchen und fehlende Zukunftsprobe bleiben Grenzen.
+
+## UM2-Budgetnacharbeit 08.10.2026
+Exakte Geldrechnung V1-exact-budget-v2, vollstaendiger i+2-Neustart und unabhaengige bidirektionale Budgetpruefung lokal umgesetzt. 842 Tests bestanden, 8 neue Budgetfaelle mit gefangenen Sabotagen; bisherige 34 UM2-Faelle erhalten. 125 alte Operationen mit vollstaendiger bedingter Geldvorgeschichte als ausgeschoepftes Budget erklaert. Noch 0/20 neue historische Starts; Wirkungsvergleich und Abschluss offen. Keine Livefreigabe.

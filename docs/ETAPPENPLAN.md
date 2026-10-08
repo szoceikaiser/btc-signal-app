@@ -1999,3 +1999,6 @@ und Online-CI, echte Fills, P3/D3 und P4 bleiben offen. Keine Umstellung von
 Site, Runtime, Store oder bestehenden Positionen. Hauptplan nicht endgültig
 abgenommen. Vier Aprillücken, unbekannter Warmup, modellierte Verfügbarkeit,
 mindestens 94 frühere Suchen und fehlende Zukunftsprobe bleiben Grenzen.
+
+## Lokale UM2-Budgetkorrektur 08.10.2026
+N-UM2-01/P-UM2-02: exakte Geldrechnung und zwei unabhaengige Vertragspruefungen implementiert, 842 Regressionen bestanden. Bauplan PLAN-UM2-BUDGET.md; historischer Wirkungsvergleich 0/20, Abschluss offen.

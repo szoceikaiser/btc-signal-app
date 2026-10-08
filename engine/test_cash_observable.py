@@ -75,11 +75,13 @@ def test_rejection_survives_json_and_does_not_destroy_e42_or_other_reservations(
         assert book.fill(pending[0],sc.Candle(2*v.STEP,100,100,100,100)) is None
         assert book.cash==1e-15 and book.lots==lots and book.rk_units==.25
         assert book.reserved_cash==0
-        # A real later order still executes and only removes its own reservation.
-        book.cash+=100
-        new=book.schedule([dict(o,ts=3*v.STEP)],100)
-        assert book.fill(new[0],sc.Candle(4*v.STEP,100,100,100,100)) is not None
-        assert book.rk_units==.5 and book.units==1.25
+        # No implicit cash mutation/deposit into an established exact history.
+        # A separately declared synthetic wallet can still buy the E42 cohort.
+        funded=v.Book('100.000000000000001',0,0,1,book.units,book.lots)
+        funded.alloc=100
+        new=funded.schedule([dict(o,ts=3*v.STEP)],100)
+        assert funded.fill(new[0],sc.Candle(4*v.STEP,100,100,100,100)) is not None
+        assert funded.rk_units==.5 and funded.units==1.25
     assert b.to_state()==restored.to_state()
     old=b.to_state();del old['execution_semantics']
     try: v.Book.from_state(old)
@@ -107,16 +109,16 @@ def test_v1_and_delayed_callers_exclude_unexecuted_fill_feedback():
         2:[order('buy_ladder','NACHKAUF',pct=15)]}
     r=script(rows,by,capital=capital,fee=.001)
     assert len(fills(r))==2
-    assert any(e['reason']=='unrepresentable_btc_increment' for e in r['ledger'])
+    assert r['cash']==0 and any(e['reason']=='no_cash' for e in r['ledger'])
     assert next(f for f in r['feedback'] if f['at']==3*v.STEP)['actions']==[]
     # Delayed runner has fixed 10,000 cash. Select percentages whose subtraction
     # leaves a residual without injecting any runtime cash or book reset.
-    by={0:[order('entry_t1','KAUF_1',pct=64.4)],2:[order('entry_gp','KAUF_2',pct=100-64.4)],
+    by={0:[order('entry_t1','KAUF_1',pct=64.4)],2:[order('entry_gp','KAUF_2',pct=35.6)],
         4:[order('buy_ladder','NACHKAUF',pct=15)]}
     r=scripted(rows,by,fee=.001,slippage=0)
     assert len(fills(r))==2
-    assert any(e['reason']=='unrepresentable_btc_increment' for e in r['ledger'])
-    assert next(f for f in r['feedback'] if f['at']==6*v.STEP)['actions']==[]
+    assert r['cash']==0 and any(e['reason']=='no_cash' for e in r['ledger'])
+    assert not any(f['actions'] for f in r['feedback'] if f['at']>=5*v.STEP)
 
 
 def test_two_real_reservations_and_full_reinvestment_cycle():
