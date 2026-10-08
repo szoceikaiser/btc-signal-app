@@ -454,6 +454,16 @@
    "stop_ref": null,
    "tag": "",
    "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1791432000000,
+   "type": "NACHKAUF",
+   "price": 82998.75,
+   "tranche_pct": 15,
+   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 80126.04,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
   }
  ]
 }
