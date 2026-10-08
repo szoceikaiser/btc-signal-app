@@ -1165,3 +1165,6 @@ mindestens 94 frühere Suchen und fehlende Zukunftsprobe bleiben Grenzen.
 
 ## UM2-Budgetnacharbeit 08.10.2026
 Branch codex/um2-engine-integration. Geldvertrag: docs/um2-engine-integration/GELDVERTRAG-v2.md. Additive Belege: audit-backups/um2-budget-korrektur-20261008 im Projektstamm. Synthetische Pruefung bestanden; 0/20 neue Vollfensterstarts vor dem Codepin. Danach ausschliesslich C05/S006/V000/C02 je S0-S4. Kein Push, keine Online-CI, keine Nachrichten oder Aktivierung.
+
+
+UM2-Budgetabschluss 08.10.2026: 20/20 neue Vollfensterstarts, insgesamt 60 inklusive früherer 40; alle Signale exakt unverändert, maximale Endwert-/Equitydifferenz 2.1827872842550278e-11 USD. 842 Tests und gezielte Sabotagen bestanden. Bericht docs/um2-engine-integration/BUDGET-v2-ERGEBNIS.md. Lokale Sicherung/Restore wird separat belegt; Hauptchat-Abnahme, Online-CI und Live-Gates offen.

@@ -9,3 +9,6 @@ Ausgang: 4e3652f. Nur codex/um2-engine-integration; keine Livefreigabe.
 5. Regression, lokale Commits, additive Sicherung und frischer Restore. Geschützte Bäume und alte Auditbytes erneut prüfen.
 
 Stand: Gegenbelege werden vor Codeänderung reproduziert. 0/20 neue historische Starts.
+
+
+UM2-Budgetabschluss 08.10.2026: 20/20 neue Vollfensterstarts, insgesamt 60 inklusive früherer 40; alle Signale exakt unverändert, maximale Endwert-/Equitydifferenz 2.1827872842550278e-11 USD. 842 Tests und gezielte Sabotagen bestanden. Bericht docs/um2-engine-integration/BUDGET-v2-ERGEBNIS.md. Lokale Sicherung/Restore wird separat belegt; Hauptchat-Abnahme, Online-CI und Live-Gates offen.

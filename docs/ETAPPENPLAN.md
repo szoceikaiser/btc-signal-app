@@ -2002,3 +2002,6 @@ mindestens 94 frühere Suchen und fehlende Zukunftsprobe bleiben Grenzen.
 
 ## Lokale UM2-Budgetkorrektur 08.10.2026
 N-UM2-01/P-UM2-02: exakte Geldrechnung und zwei unabhaengige Vertragspruefungen implementiert, 842 Regressionen bestanden. Bauplan PLAN-UM2-BUDGET.md; historischer Wirkungsvergleich 0/20, Abschluss offen.
+
+
+UM2-Budgetabschluss 08.10.2026: 20/20 neue Vollfensterstarts, insgesamt 60 inklusive früherer 40; alle Signale exakt unverändert, maximale Endwert-/Equitydifferenz 2.1827872842550278e-11 USD. 842 Tests und gezielte Sabotagen bestanden. Bericht docs/um2-engine-integration/BUDGET-v2-ERGEBNIS.md. Lokale Sicherung/Restore wird separat belegt; Hauptchat-Abnahme, Online-CI und Live-Gates offen.

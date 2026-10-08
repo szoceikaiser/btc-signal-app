@@ -330,3 +330,6 @@ mindestens 94 frühere Suchen und fehlende Zukunftsprobe bleiben Grenzen.
 
 ## UM2-Budgetnacharbeit 08.10.2026
 Exakte Geldrechnung V1-exact-budget-v2, vollstaendiger i+2-Neustart und unabhaengige bidirektionale Budgetpruefung lokal umgesetzt. 842 Tests bestanden, 8 neue Budgetfaelle mit gefangenen Sabotagen; bisherige 34 UM2-Faelle erhalten. 125 alte Operationen mit vollstaendiger bedingter Geldvorgeschichte als ausgeschoepftes Budget erklaert. Noch 0/20 neue historische Starts; Wirkungsvergleich und Abschluss offen. Keine Livefreigabe.
+
+
+UM2-Budgetabschluss 08.10.2026: 20/20 neue Vollfensterstarts, insgesamt 60 inklusive früherer 40; alle Signale exakt unverändert, maximale Endwert-/Equitydifferenz 2.1827872842550278e-11 USD. 842 Tests und gezielte Sabotagen bestanden. Bericht docs/um2-engine-integration/BUDGET-v2-ERGEBNIS.md. Lokale Sicherung/Restore wird separat belegt; Hauptchat-Abnahme, Online-CI und Live-Gates offen.
