@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "FULL",
- "last_signal_ts": 1791532800000,
+ "last_signal_ts": 1791547200000,
  "retrace_extreme": 80393.56,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -44,26 +44,26 @@
  },
  "widerstand": {
   "richtung": "LONG",
-  "bein_start": 86999.11,
-  "bein_ende": 84972.01,
-  "level_05": 85985.56,
-  "gp_von": 86224.75779999999,
-  "gp_bis": 86289.625,
-  "level_0786": 86565.3106,
-  "ausbruch": 86999.11
+  "bein_start": 86698.99,
+  "bein_ende": 80393.56,
+  "level_05": 83546.275,
+  "gp_von": 84290.31574,
+  "gp_bis": 84492.0895,
+  "level_0786": 85349.62798,
+  "ausbruch": 86698.99
  },
  "plan": {
   "richtung": "LONG",
   "anteil_pct": 105,
   "einstand": 83217.57662380954,
-  "kurs": 83246.82,
+  "kurs": 82884.0,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 83.247 $ ueber EMA200 (72.767 $)",
+   "trend_text": "Uebergeordnet: Kurs 82.884 $ ueber EMA200 (72.763 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
-   "spot": "zurueckgekehrt",
-   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)"
+   "spot": "stabil",
+   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)"
   },
   "ampel": {
    "stufe": "guenstig",
@@ -87,17 +87,25 @@
     "tranche": 15
    },
    {
-    "preis": 83183.0,
+    "preis": 82874.93,
     "was": "Liquidationszone",
     "tranche": 20
    },
    {
-    "preis": 82874.93,
+    "preis": 82787.25,
     "was": "Liquidationszone",
     "tranche": 20
    }
   ],
   "teilgewinn": [
+   {
+    "zone": [
+     84290.31574,
+     84492.0895
+    ],
+    "was": "Widerstand der Gegenbewegung \u2014 nur Hinweis, die Engine verkauft dort nicht",
+    "tranche": 0
+   },
    {
     "preis": 84733.23485,
     "was": "kurz unter dem letzten Hoch 85.159",
@@ -107,14 +115,6 @@
     "preis": 86209.264,
     "was": "Zwischenziel (Extension 0.8)",
     "tranche": 15
-   },
-   {
-    "zone": [
-     86224.75779999999,
-     86289.625
-    ],
-    "was": "Widerstand der Gegenbewegung \u2014 nur Hinweis, die Engine verkauft dort nicht",
-    "tranche": 0
    },
    {
     "preis": 86936.227,
@@ -183,17 +183,17 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-09T12:02:23Z",
- "last_close": 83246.82,
+ "updated_at": "2026-10-09T16:02:25Z",
+ "last_close": 82884.0,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 83.247 $ ueber EMA200 (72.767 $)",
+   "trend_text": "Uebergeordnet: Kurs 82.884 $ ueber EMA200 (72.763 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
-   "spot": "zurueckgekehrt",
-   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)"
+   "spot": "stabil",
+   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)"
   },
   "ampel": {
    "stufe": "guenstig",
