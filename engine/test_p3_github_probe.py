@@ -29,7 +29,7 @@ def setup(td, phase='happy'):
     previous = sim.execute(plan, api, td, 'bootstrap')
     previous = sim.execute(plan, api, td, 'activate', previous)
     ledger = p.Ledger(plan, Path(td)/(phase+'.jsonl'), phase, previous)
-    client = p.Client(p.Boundary(plan, ledger, 'reader-secret-fixture', 'writer-secret-fixture', api.open))
+    client = p.Client(sim.boundary(plan, ledger, 'reader-secret-fixture', 'writer-secret-fixture', api.open))
     client.boundary.preflight()
     return plan, api, ledger, client
 
@@ -73,7 +73,7 @@ def test_incomplete_foreign_production_or_unapproved_plans_fail():
         rejects(ValueError, lambda: p.validate_plan(bad))
     rejects(ValueError, lambda: p.authorize(plan, {}, 'activate', 'f'*64))
     rejects(ValueError, lambda: p.authorize(plan, {}, 'activate', p.digest(plan)))
-    grant = {'schema': 'p3-human-grant-v1', 'plan_sha256': p.digest(plan), 'phase': 'activate',
+    grant = {'schema': 'p3-human-grant-v2', 'plan_sha256': p.digest(plan), 'phase': 'activate',
         'approved_by': 'fixture-human', 'human_authorization': False, 'expires_utc': '2099-01-01T00:00:00Z',
         'approval_evidence_sha256': 'a'*64, 'review_sha256': None}
     rejects(ValueError, lambda: p.authorize(plan, grant, 'activate', p.digest(plan)))
@@ -86,7 +86,7 @@ def test_preflight_private_id_actions_pages_rules_and_insufficient_rights_stop_b
         with tempfile.TemporaryDirectory() as td:
             plan = sim.plan(td); api = sim.API(plan); api.override[tail] = value
             ledger = p.Ledger(plan, Path(td)/'bootstrap.jsonl', 'bootstrap')
-            client = p.Client(p.Boundary(plan, ledger, 'fixture', 'fixture', api.open))
+            client = p.Client(sim.boundary(plan, ledger, 'fixture', 'fixture', api.open))
             rejects(ValueError, client.boundary.preflight)
             assert ledger.counts['PUT'] == 0 and not client.boundary.allowed
             ledger.close()
@@ -94,7 +94,7 @@ def test_preflight_private_id_actions_pages_rules_and_insufficient_rights_stop_b
         plan = sim.plan(td); api = sim.API(plan)
         def denied(req, timeout): api.error(req, 403)
         ledger = p.Ledger(plan, Path(td)/'bootstrap.jsonl', 'bootstrap')
-        client = p.Client(p.Boundary(plan, ledger, 'fixture', 'fixture', denied))
+        client = p.Client(sim.boundary(plan, ledger, 'fixture', 'fixture', denied))
         rejects(p.HTTPStatus, client.boundary.preflight)
         assert not client.boundary.allowed; ledger.close()
 
@@ -103,7 +103,7 @@ def test_blocked_claim_denies_and_activation_cannot_accept_production_stream():
     with tempfile.TemporaryDirectory() as td:
         plan = sim.plan(td); api = sim.API(plan)
         ledger = p.Ledger(plan, Path(td)/'bootstrap.jsonl', 'bootstrap')
-        client = p.Client(p.Boundary(plan, ledger, 'fixture', 'fixture', api.open)); client.boundary.preflight()
+        client = p.Client(sim.boundary(plan, ledger, 'fixture', 'fixture', api.open)); client.boundary.preflight()
         s = p.store_for(client, 0)
         rejects(ValueError, s.__enter__); assert ledger.counts['PUT'] == 0
         env = json.loads(p.synthetic_seed(plan)); env['snapshot']['control']['stream_id'] = 'production'
@@ -233,7 +233,7 @@ def test_bootstrap_separate_git_mutation_lost_response_readback_and_no_retry():
             plan.update(seed_commit=pins['seed_commit'], seed_sha256=pins['seed_sha256'])
             api = sim.API(plan); api.head = None
             ledger = p.Ledger(plan, Path(td,'bootstrap.jsonl'), 'bootstrap')
-            client = p.Client(p.Boundary(plan, ledger, 'fixture-reader', 'fixture-bootstrap', api.open))
+            client = p.Client(sim.boundary(plan, ledger, 'fixture-reader', 'fixture-bootstrap', api.open))
             original_run = subprocess.run; pushes = []
             def run(args, **kwargs):
                 if 'push' not in args: return original_run(args, **kwargs)
@@ -250,12 +250,12 @@ def test_bootstrap_separate_git_mutation_lost_response_readback_and_no_retry():
                 else: p.bootstrap(client, Path(td,'execution-root'))
             assert len(pushes) == 1 and ledger.counts['GIT_PUSH'] == 1 and ledger.counts['PUT'] == 0
             ledger.close()
-            rejects(FileExistsError, lambda: p.Ledger(plan, Path(td,'again.jsonl'), 'bootstrap'))
+            rejects((ValueError, FileExistsError), lambda: p.Ledger(plan, Path(td,'again.jsonl'), 'bootstrap'))
 
 
 def test_code_grant_pin_wrong_tree_missing_file_and_no_generated_grant():
     plan = sim.plan()
-    grant = {'schema': 'p3-human-grant-v1', 'plan_sha256': p.digest(plan), 'phase': 'activate',
+    grant = {'schema': 'p3-human-grant-v2', 'plan_sha256': p.digest(plan), 'phase': 'activate',
         'approved_by': 'fixture-human', 'human_authorization': True, 'expires_utc': '2099-01-01T00:00:00Z',
         'approval_evidence_sha256': 'a'*64, 'review_sha256': None}
     with patch.object(p.getpass, 'getpass', side_effect=AssertionError('prompt')):
@@ -299,8 +299,8 @@ def test_hard_process_loss_parent_wait_explicit_takeover_and_uncertain_retention
         saved = json.loads(Path(td,'api.json').read_text()); api = sim.API(plan)
         api.records, api.head = saved['records'], saved['head']
         rows = p.Ledger.verify(journal, p.digest(plan))
-        assert rows[-1]['event'] == 'loss_boundary' and list(Path(td).glob('probe-session-*.lock'))
-        rejects(FileExistsError, lambda: p.Ledger(plan, Path(td,'restart.jsonl'), 'takeover', journal))
+        assert rows[-1]['event'] == 'loss_boundary' and list(Path(td).glob('probe-session.lock'))
+        rejects((ValueError, FileExistsError), lambda: p.Ledger(plan, Path(td,'restart.jsonl'), 'takeover', journal))
         review = {'expected_owner': term['owner'], 'expected_revision': term['revision'],
             'expected_commit': term['commit'], 'termination': term,
             'evidence': {'old_owner': term['owner'], 'reviewer': 'synthetic-human-review', 'evidence_sha256': 'e'*64,
@@ -312,8 +312,8 @@ def test_hard_process_loss_parent_wait_explicit_takeover_and_uncertain_retention
             rejects(ValueError, lambda: p.validate_termination(plan, bad, journal))
         bad = deepcopy(review); bad['termination']['observed_wait'] = False
         rejects(ValueError, lambda: p.validate_termination(plan, bad, journal))
-        ledger = p.Ledger(plan, Path(td,'takeover.jsonl'), 'takeover', journal, reviewed_termination=True)
-        client = p.Client(p.Boundary(plan, ledger, 'fixture', 'fixture', api.open)); client.boundary.preflight()
+        ledger = p.Ledger(plan, Path(td,'takeover.jsonl'), 'takeover', journal, reviewed_termination=review)
+        client = p.Client(sim.boundary(plan, ledger, 'fixture', 'fixture', api.open)); client.boundary.preflight()
         p.verify_history(client); p.takeover(client, review)
         env = json.loads(base64.b64decode(api.records[api.head]['body']))
         assert env['snapshot']['control']['owner'] is None

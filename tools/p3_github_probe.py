@@ -6,7 +6,7 @@ phase-specific human grant. Nothing in this module issues a grant.
 import argparse
 import base64
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import getpass
 import hashlib
 import json
@@ -14,6 +14,8 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sqlite3
+import time
 import sys
 import tempfile
 import urllib.error
@@ -50,7 +52,7 @@ def require(ok, reason):
 
 
 def template():
-    return {'schema': 'p3-synthetic-probe-plan-v1', 'repo': None, 'repository_id': None,
+    return {'schema': 'p3-synthetic-probe-plan-v2', 'repo': None, 'repository_id': None,
         'branch': None, 'path': gh.STORE_PATH, 'store_id': STORE, 'stream_id': STREAM,
         'source_head': SOURCE, 'code_head': None, 'code_tree': None,
         'code_pins': None, 'seed_sha256': None, 'seed_commit': None,
@@ -71,7 +73,8 @@ def template():
         'takeover': None,
         'acknowledge_repo_credential_is_not_path_scope': True,
         'settings_and_other_writers_frozen': None,
-        'journal_directory': None, 'expires_utc': None}
+        'journal_directory': None, 'expires_utc': None,
+        'session_contract': 'sqlite-frontier-v2', 'expiry_policy': 'stop-all-outbound-no-grace'}
 
 
 def validate_plan(p):
@@ -85,7 +88,8 @@ def validate_plan(p):
     require(isinstance(b, str) and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9/_-]*', b)
             and not b.endswith('/') and '//' not in b, 'Explicit valid branch required')
     for k in ('path', 'store_id', 'stream_id', 'limits', 'expected_rules', 'bootstrap',
-              'writer_permissions', 'reader_permissions', 'git_bootstrap_permissions', 'case_runs'):
+              'writer_permissions', 'reader_permissions', 'git_bootstrap_permissions', 'case_runs',
+              'session_contract', 'expiry_policy'):
         require(p[k] == t[k], 'Unsupported '+k)
     require(p['credential_repository_ids'] == [p['repository_id']], 'Credential must bind one repo')
     require(p['takeover'] is None, 'Takeover review is a separate later grant artifact')
@@ -117,7 +121,7 @@ def authorize(p, grant, phase, approved_digest):
     require(phase in p['phases'] and approved_digest == digest(p), 'Phase/independent plan pin mismatch')
     require(set(grant) == {'schema', 'plan_sha256', 'phase', 'approved_by', 'human_authorization',
                           'expires_utc', 'approval_evidence_sha256', 'review_sha256'}, 'Grant incomplete')
-    require(grant['schema'] == 'p3-human-grant-v1' and grant['plan_sha256'] == approved_digest
+    require(grant['schema'] == 'p3-human-grant-v2' and grant['plan_sha256'] == approved_digest
             and grant['phase'] == phase and grant['human_authorization'] is True
             and isinstance(grant['approved_by'], str) and grant['approved_by']
             and re.fullmatch('[0-9a-f]{64}', grant['approval_evidence_sha256'] or '')
@@ -125,7 +129,14 @@ def authorize(p, grant, phase, approved_digest):
             and datetime.fromisoformat(grant['expires_utc'].replace('Z', '+00:00')) > datetime.now(timezone.utc),
             'Explicit human phase grant required')
     require((phase == 'takeover' and re.fullmatch('[0-9a-f]{64}', grant['review_sha256'] or ''))
+            or (phase == 'inspect' and re.fullmatch('[0-9a-f]{64}', grant['review_sha256'] or ''))
             or (phase != 'takeover' and grant['review_sha256'] is None), 'Separate review grant required')
+    guard = GrantGuard(p, grant, phase)
+    verify_code_pin(p)
+    return guard
+
+
+def verify_code_pin(p):
     # Code identity is checked before any credential prompt or network operation.
     def git(*args):
         return subprocess.check_output(['git', '-c', 'safe.directory='+ROOT.as_posix(), '-C', str(ROOT), *args],
@@ -172,58 +183,168 @@ def check_identity(p, body):
     return env
 
 
-class Ledger:
-    """Durable cumulative accounting. Each phase starts once, even after loss.
+class GrantGuard:
+    """Bound approval, strict deadline, no network grace or clock rollback promise."""
+    def __init__(self, p, grant, phase):
+        self.plan_hash, self.grant_hash = digest(p), digest(grant)
+        self.p, self.grant, self.phase = deepcopy(p), deepcopy(grant), phase
+        require(grant['plan_sha256'] == self.plan_hash and grant['phase'] == phase
+                and grant['schema'] == 'p3-human-grant-v2' and grant['human_authorization'] is True,
+                'Grant not bound to actual plan/phase')
+        self.started = self.last_wall = datetime.now(timezone.utc)
+        self.started_mono = time.monotonic()
+        self.expired = False
+        self.check()
 
-    Every new phase copies the exact complete predecessor chain. The session lock
-    survives hard loss; a reviewed takeover alone may pass it with a new lock.
+    def check(self, ledger=None):
+        wall = datetime.now(timezone.utc)
+        effective = max(wall, self.started + timedelta(seconds=time.monotonic()-self.started_mono))
+        deadlines = [datetime.fromisoformat(x['expires_utc'].replace('Z', '+00:00'))
+                     for x in (self.p, self.grant)]
+        valid = (not self.expired and wall >= self.last_wall and all(effective < d for d in deadlines)
+                 and digest(self.p) == self.plan_hash and digest(self.grant) == self.grant_hash)
+        self.expired = not valid
+        require(valid, 'Plan/grant expired, changed or clock moved backwards; no outbound grace')
+        self.last_wall = wall
+        if ledger:
+            require(digest(ledger.p) == self.plan_hash and ledger.phase == self.phase,
+                    'Live plan/phase differs from bound grant')
+            ledger.check_time(wall)
+
+
+class Ledger:
+    """One authoritative SQLite frontier + fsynced JSONL mirror + kernel lock.
+
+    A request is reserved in SQLite FULL, mirrored with fsync, then acknowledged
+    in SQLite FULL before outbound. Any uncertainty poisons this process and
+    blocks every later opener. No automatic repair, resume or lock bypass.
     """
-    def __init__(self, p, path, phase, previous=None, reviewed_termination=False):
-        self.p, self.path, self.phase = p, Path(path), phase
-        require(self.path.parent.resolve() == Path(p['journal_directory']).resolve(), 'Journal directory pin mismatch')
-        if previous:
-            require(Path(previous).parent.resolve() == self.path.parent.resolve(), 'Foreign predecessor directory')
+    def __init__(self, p, path, phase, previous=None, reviewed_termination=None):
+        self.p, self.path, self.phase = deepcopy(p), Path(path), phase
         self.counts = {'GET': 0, 'PUT': 0, 'GIT_PUSH': 0}
-        self.cases, self.runs = {}, {}
+        self.cases, self.runs, self.run = {}, {}, None
         self.previous_hash = '0'*64
-        self.run = None
-        rows = []
-        if previous:
-            rows = self.verify(previous, digest(p))
-            require(not any(r['event'] == 'phase_start' and r['phase'] == phase for r in rows),
-                    'Phase already attempted; no automatic replay')
-            if phase not in ('takeover', 'inspect'):
-                require(rows[-1]['event'] == 'phase_end' and rows[-1].get('result') == 'confirmed',
-                        'Incomplete predecessor; read-only inspection or explicit review required')
-            if phase == 'activate':
-                require(rows[-1]['phase'] == 'bootstrap', 'Activation requires confirmed bootstrap')
-            if phase in ('happy', 'lost-after', 'lost-before', 'stale', 'process-loss'):
-                require(any(r['event'] == 'activation' and r['result'] == 'confirmed-synthetic-only' for r in rows),
-                        'Separately confirmed activation required')
-            for row in rows:
-                if row['event'] == 'request':
-                    self._increment(row['method'], row['phase'], row.get('run'))
-            self.previous_hash = rows[-1]['hash'] if rows else '0'*64
-        self.prior_rows = rows
-        self.lock = self.path.parent / ('probe-session-'+digest(p)+'.lock')
-        if phase == 'inspect':
-            self.lock = self.path.parent / ('probe-inspection-'+digest(p)+'.lock')
-        if reviewed_termination:
-            require(phase == 'takeover', 'Lock exception only for reviewed takeover')
-            self.lock = self.path.parent / ('probe-review-'+digest(p)+'.lock')
-        self.lock_handle = self.lock.open('x', encoding='utf-8')
-        self.lock_handle.write(canonical({'pid': os.getpid(), 'phase': phase, 'utc': utc()}))
-        self.lock_handle.flush(); os.fsync(self.lock_handle.fileno())
+        self.handle = self.db = self.lock_handle = None
+        self.poisoned, self.guard = False, None
+        require(self.path.parent.resolve() == Path(p['journal_directory']).resolve(), 'Journal directory pin mismatch')
+        require(phase in p['phases'], 'Phase outside plan')
+        self.lock = self.path.parent/'probe-session.lock'
+        self.database = self.path.parent/'probe-session.sqlite3'
+        existed = self.lock.exists()
+        self.lock_handle = self.lock.open('a+b')
         try:
-            # One durable phase attempt per approved plan, including lost requests.
-            with (self.path.parent/('attempt-'+digest(p)+'-'+phase)).open('x', encoding='utf-8') as marker:
-                marker.write(canonical({'journal': self.path.name, 'utc': utc()})); marker.flush(); os.fsync(marker.fileno())
+            if self.lock.stat().st_size == 0:
+                self.lock_handle.write(b'0'); self.lock_handle.flush(); os.fsync(self.lock_handle.fileno())
+            self.lock_handle.seek(0)
+            if os.name == 'nt':
+                import msvcrt
+                msvcrt.locking(self.lock_handle.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(self.lock_handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            new = not self.database.exists()
+            if new:
+                require(not existed and phase == 'bootstrap' and previous is None
+                        and not list(self.path.parent.glob('*.jsonl'))
+                        and not list(self.path.parent.glob('attempt-*')),
+                        'Missing frontier/legacy session: no reset or automatic migration')
+            self.db = sqlite3.connect(str(self.database), timeout=0, isolation_level=None)
+            self.db.execute('PRAGMA synchronous=FULL')
+            self.db.execute('PRAGMA journal_mode=DELETE')
+            if new:
+                self.db.executescript('BEGIN IMMEDIATE; CREATE TABLE events (seq INTEGER PRIMARY KEY, body TEXT NOT NULL); '
+                    'CREATE TABLE frontier (id INTEGER PRIMARY KEY CHECK(id=1), plan TEXT NOT NULL, '
+                    'journal TEXT NOT NULL, published TEXT NOT NULL, highwater TEXT NOT NULL); COMMIT;')
+                with self.transaction():
+                    self.db.execute('INSERT INTO frontier VALUES (1,?,?,?,?)', (digest(p), '', '0'*64, utc()))
+            state = self.db.execute('SELECT plan,journal,published,highwater FROM frontier WHERE id=1').fetchone()
+            require(state and state[0] == digest(p), 'Foreign or incomplete session frontier')
+            self.highwater = state[3]
+            self.check_time(datetime.now(timezone.utc))
+            rows = [json.loads(r[0]) for r in self.db.execute('SELECT body FROM events ORDER BY seq')]
+            if rows:
+                require(previous and Path(previous).resolve() == (self.path.parent/state[1]).resolve(),
+                        'Predecessor is not authoritative latest session journal')
+                require(self.verify(previous, digest(p)) == rows and state[2] == rows[-1]['hash'],
+                        'Incomplete publication or journal/frontier mismatch; local review required')
+                require(not any(r['event'] == 'phase_start' and r['phase'] == phase for r in rows),
+                        'Phase already attempted; no replay with another filename')
+                ended = {r['phase'] for r in rows if r['event'] == 'phase_end' and r.get('result') == 'confirmed'}
+                halted = (any(r['event'] == 'phase_halt' for r in rows)
+                          or any(r['event'] == 'phase_start' and r['phase'] not in ended for r in rows))
+                terminal = rows[-1]['event'] in ('phase_end', 'phase_halt')
+                if not terminal:
+                    require(phase in ('takeover', 'inspect') and isinstance(reviewed_termination, dict),
+                            'Interrupted frontier requires positive process-end review')
+                if reviewed_termination is not None:
+                    require(phase in ('takeover', 'inspect') and isinstance(reviewed_termination, dict),
+                            'No boolean lock exception')
+                    validate_termination(p, reviewed_termination, previous)
+                if phase == 'takeover':
+                    require(isinstance(reviewed_termination, dict), 'Separate exact termination review required')
+                if phase not in ('takeover', 'inspect'):
+                    require(not halted and rows[-1]['event'] == 'phase_end' and rows[-1].get('result') == 'confirmed',
+                            'Incomplete predecessor; inspection/review only')
+                if phase == 'activate':
+                    require(rows[-1]['phase'] == 'bootstrap', 'Activation requires confirmed bootstrap')
+                if phase in ('happy', 'lost-after', 'lost-before', 'stale', 'process-loss'):
+                    require(any(r['event'] == 'activation' and r['result'] == 'confirmed-synthetic-only' for r in rows),
+                            'Separately confirmed activation required')
+                for row in rows:
+                    if row['event'] == 'request': self._increment(row['method'], row['phase'], row.get('run'))
+                self.previous_hash = rows[-1]['hash']
+            else:
+                require(new and previous is None, 'Incomplete initial frontier; no automatic retry')
+            starts = [row for row in rows if row['event'] == 'phase_start']
+            markers = list(self.path.parent.glob('attempt-*.json'))
+            require({marker.name for marker in markers} == {'attempt-'+row['phase']+'.json' for row in starts},
+                    'Unpublished phase attempt; no automatic restart')
+            for row in starts:
+                marker = json.loads((self.path.parent/('attempt-'+row['phase']+'.json')).read_text(encoding='utf-8'))
+                require(marker == {key: row[key] for key in ('plan_sha256', 'phase', 'journal', 'pid', 'predecessor')},
+                        'Phase attempt/frontier mismatch')
+            self.prior_rows = rows
+            # An interrupted phase start must not disappear behind a previously
+            # confirmed frontier. A partial/extra intent permanently fails closed.
+            require(not self.path.exists(), 'New journal filename required')
+            with (self.path.parent/('attempt-'+phase+'.json')).open('x', encoding='utf-8') as marker:
+                marker.write(canonical({'plan_sha256': digest(p), 'phase': phase, 'journal': self.path.name,
+                                        'pid': os.getpid(), 'predecessor': self.previous_hash}))
+                marker.flush(); os.fsync(marker.fileno())
+            self.handle = self.path.open('x', encoding='utf-8', newline='\n')
+            for row in rows: self.handle.write(canonical(row)+'\n')
+            self.handle.flush(); os.fsync(self.handle.fileno())
+            self.emit('phase_start', predecessor=self.previous_hash, pid=os.getpid(), journal=self.path.name)
         except BaseException:
-            self.lock_handle.close(); self.lock.unlink(); raise
-        self.handle = self.path.open('x', encoding='utf-8')
-        for row in rows: self.handle.write(canonical(row)+'\n')
-        self.handle.flush(); os.fsync(self.handle.fileno())
-        self.emit('phase_start', predecessor=self.previous_hash)
+            self.close()
+            raise
+
+    def transaction(self):
+        # sqlite connection context manager does not BEGIN in autocommit mode.
+        from contextlib import contextmanager
+        @contextmanager
+        def commit():
+            self.db.execute('BEGIN IMMEDIATE')
+            try: yield
+            except BaseException:
+                self.db.execute('ROLLBACK'); raise
+            else: self.db.execute('COMMIT')
+        return commit()
+
+    def check_time(self, now):
+        require(now >= datetime.fromisoformat(self.highwater.replace('Z', '+00:00')),
+                'Clock behind durable session highwater')
+
+    def checkpoint(self, point, event):
+        """No-op fault seam used only by offline hard-process-loss tests."""
+
+    def assert_published(self):
+        require(not self.poisoned, 'Uncertain durable write; no outbound')
+        state = self.db.execute('SELECT plan,journal,published FROM frontier WHERE id=1').fetchone()
+        row = json.loads(self.db.execute('SELECT body FROM events ORDER BY seq DESC LIMIT 1').fetchone()[0])
+        require(state == (digest(self.p), self.path.name, self.previous_hash)
+                and row['hash'] == self.previous_hash and row['counts'] == self.counts,
+                'Unpublished or changed frontier; no outbound')
 
     @staticmethod
     def verify(path, plan_digest):
@@ -250,6 +371,7 @@ class Ledger:
             key = canonical(run); self.runs[key] = self.runs.get(key, 0)+1
 
     def charge(self, method, **fields):
+        self.assert_published()
         require(method in self.counts and self.counts[method] < LIMITS[method], 'Global request budget exhausted')
         case = self.cases.get(self.phase, {})
         if method in ('GET', 'PUT'):
@@ -262,18 +384,41 @@ class Ledger:
         self.emit('request', method=method, **fields)  # fsync BEFORE outbound request
 
     def emit(self, event, **fields):
+        require(not self.poisoned, 'Uncertain journal/frontier write; local review required')
+        if event == 'phase_end':
+            require(self.guard is not None, 'Completion requires bound phase grant')
+            self.guard.check(self)
         row = {'utc': utc(), 'repository_id': self.p['repository_id'], 'branch': self.p['branch'],
             'path': self.p['path'], 'phase': self.phase, 'run': self.run,
             'plan_sha256': digest(self.p), 'previous_hash': self.previous_hash,
             'counts': deepcopy(self.counts), 'event': event, **fields}
         row['hash'] = digest(row)
-        self.handle.write(canonical(row)+'\n'); self.handle.flush(); os.fsync(self.handle.fileno())
-        self.previous_hash = row['hash']
+        try:
+            self.checkpoint('before_commit', event)
+            with self.transaction():
+                self.db.execute('INSERT INTO events(body) VALUES (?)', (canonical(row),))
+                self.highwater = max((self.highwater, row['utc']),
+                    key=lambda value: datetime.fromisoformat(value.replace('Z', '+00:00')))
+                self.db.execute('UPDATE frontier SET journal=?,highwater=? WHERE id=1', (self.path.name, self.highwater))
+            self.checkpoint('after_commit', event)
+            self.handle.write(canonical(row)+'\n'); self.handle.flush(); os.fsync(self.handle.fileno())
+            self.checkpoint('after_mirror', event)
+            with self.transaction():
+                self.db.execute('UPDATE frontier SET published=? WHERE id=1', (row['hash'],))
+            self.checkpoint('after_publish', event)
+            self.previous_hash = row['hash']
+            self.assert_published()
+        except BaseException:
+            self.poisoned = True
+            raise
 
     def close(self):
-        self.handle.close()
-        self.lock_handle.close()
-        self.lock.unlink()  # normal process end only; a killed process retains lock
+        for name in ('handle', 'db', 'lock_handle'):
+            handle = getattr(self, name, None)
+            if handle is not None:
+                handle.close(); setattr(self, name, None)
+        # Kernel exclusivity ends on close/death; the durable open phase remains
+        # blocked until positive process-end review. Never delete the lock file.
 
 
 class HTTPStatus(gh.StoreUnavailable):
@@ -288,16 +433,23 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 class Boundary:
-    def __init__(self, p, ledger, reader, writer, opener=None):
+    def __init__(self, p, ledger, reader, writer, opener=None, *, guard):
         self.p, self.ledger, self.reader, self.writer = p, ledger, reader, writer
+        require(isinstance(guard, GrantGuard), 'Bound phase authorization required')
+        self.guard = ledger.guard = guard
+        self.guard.check(ledger)
         self.opener = opener or urllib.request.build_opener(NoRedirect()).open
         self.base = gh.GitHubContentsClient._route(p['repo'], '')
         self.allowed = False
         self.fault = None
+        ledger.emit('authorization', grant_sha256=guard.grant_hash,
+                    grant_expires_utc=guard.grant['expires_utc'], review_sha256=guard.grant['review_sha256'],
+                    expiry_policy=p['expiry_policy'])
 
     def request(self, method, route, payload=None):
-        require(datetime.fromisoformat(self.p['expires_utc'].replace('Z', '+00:00')) > datetime.now(timezone.utc),
-                'Plan expired before request')
+        self.guard.check(self.ledger)
+        require(digest(self.p) == self.guard.plan_hash, 'Boundary plan changed')
+        require(method != 'PUT' or self.ledger.phase not in ('inspect', 'bootstrap'), 'Phase cannot PUT')
         require(route.startswith(self.base+'/') or route == self.base, 'Foreign repository route')
         require(method == 'GET' or (method == 'PUT' and self.allowed
                 and route == self.base+'/contents/'+gh.STORE_PATH), 'Unapproved request')
@@ -319,6 +471,7 @@ class Boundary:
                 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'p3-synthetic-probe'})
         fault = self.fault if method == 'PUT' else None
         if method == 'PUT': self.fault = None
+        self.before_outbound(method)
         try:
             if fault == 'before': raise TimeoutError()
             with self.opener(req, timeout=LIMITS['timeout']) as resp:
@@ -330,16 +483,27 @@ class Boundary:
             if fault == 'after': raise TimeoutError()
         except urllib.error.HTTPError as exc:
             self.ledger.emit('response', result='http-'+str(exc.code), **fields)
+            self.guard.check(self.ledger)
             if exc.code == 409: raise gh.StoreConflict('CAS conflict') from None
             raise HTTPStatus(exc.code) from None
         except (TimeoutError, OSError, urllib.error.URLError):
             self.ledger.emit('response', result='unknown', **fields)
+            self.guard.check(self.ledger)
             raise gh.StoreUnavailable('Request outcome unknown') from None
         except Exception:
             self.ledger.emit('response', result='invalid-or-overbudget', **fields)
+            self.guard.check(self.ledger)
             raise gh.StoreUnavailable('Invalid bounded response') from None
         self.ledger.emit('response', result='http-'+str(status), response_bytes=len(raw), **fields)
+        self.guard.check(self.ledger)
         return value
+
+    def before_outbound(self, method):
+        self.ledger.checkpoint('before_outbound', method)
+        self.ledger.assert_published()
+        require(digest(self.p) == self.guard.plan_hash, 'Boundary plan changed')
+        require(method != 'GIT_PUSH' or self.ledger.phase == 'bootstrap', 'Bootstrap phase required')
+        self.guard.check(self.ledger)  # final check, after durable accounting/local prep
 
     def preflight(self, empty=False):
         r = self.request('GET', self.base)
@@ -539,11 +703,17 @@ def validate_termination(p, t, previous):
                                               'evidence', 'termination'}, 'Complete takeover review required')
     rows = Ledger.verify(previous, digest(p))
     term = t['termination']
-    require(term['schema'] == 'p3-parent-wait-exit-v1' and term['plan_sha256'] == digest(p)
+    require(term['schema'] == 'p3-parent-wait-exit-v2' and term['plan_sha256'] == digest(p)
             and term['observed_wait'] is True and type(term['exit_code']) is int
             and type(term['pid']) is int and term['pid'] > 0
-            and term['journal_sha256'] == hashlib.sha256(Path(previous).read_bytes()).hexdigest(),
+            and term['journal_name'] == Path(term['journal_name']).name
+            and term['journal_sha256'] == hashlib.sha256((Path(previous).parent/term['journal_name']).read_bytes()).hexdigest(),
             'Positive parent wait receipt bound to exact journal required')
+    original = Ledger.verify(Path(previous).parent/term['journal_name'], digest(p))
+    require(rows[:len(original)] == original and term['frontier_hash'] == original[-1]['hash']
+            and term['frontier_rows'] == len(original)
+            and [r for r in original if r['event'] == 'phase_start'][-1]['pid'] == term['pid'],
+            'Termination must bind exact phase PID and frontier prefix')
     sending = [r for r in rows if r['event'] == 'sending']
     require(sending and term['owner'] == t['expected_owner'] == sending[-1]['run']
             and term['revision'] == t['expected_revision'] == sending[-1]['revision']
@@ -607,8 +777,6 @@ def bootstrap(client, directory):
     require(result['seed_commit'] == p['seed_commit'] and result['seed_sha256'] == p['seed_sha256'],
             'Prepared root pin mismatch')
     client.boundary.preflight(empty=True)
-    ledger.charge('GIT_PUSH', write_id='synthetic-explicit-blocked-seed-v1', revision=0,
-                  old_blob=None, parents=[], commit=result['seed_commit'], bytes=result['seed_bytes'])
     require(client.boundary.writer, 'Dedicated bootstrap Contents credential required')
     askpass_py = Path(directory)/'synthetic-askpass.py'
     askpass_py.write_text("import os,sys\nprint('x-access-token' if 'username' in sys.argv[1].lower() else os.environ['P3_EXPLICIT_BOOTSTRAP_TOKEN'])\n", encoding='utf-8')
@@ -617,6 +785,10 @@ def bootstrap(client, directory):
     env = git_environment()
     env.update(GIT_TERMINAL_PROMPT='0', GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull,
                GIT_ASKPASS=str(askpass), P3_EXPLICIT_BOOTSTRAP_TOKEN=client.boundary.writer)
+    client.boundary.guard.check(ledger)
+    ledger.charge('GIT_PUSH', write_id='synthetic-explicit-blocked-seed-v1', revision=0,
+                  old_blob=None, parents=[], commit=result['seed_commit'], bytes=result['seed_bytes'])
+    client.boundary.before_outbound('GIT_PUSH')
     try:
         # Exact new branch only; no force, tags, remote config, hooks or implicit credential search.
         subprocess.run(['git', '-c', 'safe.directory='+Path(directory).as_posix(),
@@ -627,7 +799,8 @@ def bootstrap(client, directory):
             p['seed_commit']+':refs/heads/'+p['branch']], env=env,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15, check=True)
     except (subprocess.SubprocessError, OSError):
-        ledger.emit('bootstrap_response', result='unknown-readback-only')
+        ledger.emit('bootstrap_response', result='unknown-readback-only-if-grant-live')
+    client.boundary.guard.check(ledger)
     verify_history(client)
     ledger.emit('bootstrap', result='confirmed-exact-blocked-root', **result)
 
@@ -658,20 +831,21 @@ def main():
             'Default is offline; complete real execution plan and human phase grant required')
     p = json.loads(Path(args.plan).read_text(encoding='utf-8'))
     grant = json.loads(Path(args.grant).read_text(encoding='utf-8'))
-    authorize(p, grant, args.phase, args.approved_plan_sha256)
+    guard = authorize(p, grant, args.phase, args.approved_plan_sha256)
     require(args.phase == 'bootstrap' or args.previous_journal, 'Cumulative predecessor ledger required')
     review = None
-    if args.phase == 'takeover':
+    if args.phase == 'takeover' or grant['review_sha256'] is not None:
         require(args.termination_review, 'Positive process end and exact owner/revision review required')
         review = json.loads(Path(args.termination_review).read_text(encoding='utf-8'))
         require(digest(review) == grant['review_sha256'], 'Unapproved termination review')
         validate_termination(p, review, args.previous_journal)
-    ledger = Ledger(p, args.journal, args.phase, args.previous_journal, reviewed_termination=review is not None)
+    ledger = Ledger(p, args.journal, args.phase, args.previous_journal, reviewed_termination=review)
     try:
+        guard.check(ledger)
         reader = getpass.getpass('Dedicated repo inspection token (hidden): ')
         writer = '' if args.phase == 'inspect' else getpass.getpass('Dedicated repo writer/bootstrap token (hidden): ')
         require(reader and (writer or args.phase == 'inspect'), 'Missing dedicated credentials')
-        client = Client(Boundary(p, ledger, reader, writer))
+        client = Client(Boundary(p, ledger, reader, writer, guard=guard))
         if args.phase == 'bootstrap':
             require(args.bootstrap_dir, 'New bootstrap directory required')
             bootstrap(client, args.bootstrap_dir)
@@ -682,7 +856,7 @@ def main():
             elif args.phase != 'inspect': sequence(client, args.phase)
         ledger.emit('phase_end', result='confirmed')
     except BaseException:
-        ledger.emit('phase_halt', result='incomplete-no-retry-no-release')
+        if not ledger.poisoned: ledger.emit('phase_halt', result='incomplete-no-retry-no-release')
         raise
     finally: ledger.close()
 

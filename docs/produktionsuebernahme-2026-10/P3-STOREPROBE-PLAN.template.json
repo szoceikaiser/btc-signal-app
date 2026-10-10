@@ -1,5 +1,5 @@
 {
-  "schema": "p3-synthetic-probe-plan-v1",
+  "schema": "p3-synthetic-probe-plan-v2",
   "repo": null,
   "repository_id": null,
   "branch": null,
@@ -133,5 +133,7 @@
   "acknowledge_repo_credential_is_not_path_scope": true,
   "settings_and_other_writers_frozen": null,
   "journal_directory": null,
-  "expires_utc": null
+  "expires_utc": null,
+  "session_contract": "sqlite-frontier-v2",
+  "expiry_policy": "stop-all-outbound-no-grace"
 }

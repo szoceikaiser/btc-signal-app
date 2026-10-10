@@ -16,9 +16,12 @@ def observe_exit(process, plan, journal, timeout=300):
     probe.require(boundaries and sending and boundaries[-1]['run'] == sending[-1]['run']
                   and not any(r['event'] == 'phase_end' and r['phase'] == 'process-loss' for r in rows),
                   'No confirmed interrupted sending boundary')
+    probe.require([r for r in rows if r['event'] == 'phase_start'][-1]['pid'] == process.pid,
+                  'Observed process must own interrupted phase')
     row = sending[-1]
-    return {'schema': 'p3-parent-wait-exit-v1', 'plan_sha256': probe.digest(plan),
+    return {'schema': 'p3-parent-wait-exit-v2', 'plan_sha256': probe.digest(plan),
         'pid': process.pid, 'observed_wait': True, 'exit_code': code, 'ended_utc': probe.utc(),
+        'journal_name': Path(journal).name, 'frontier_hash': rows[-1]['hash'], 'frontier_rows': len(rows),
         'journal_sha256': hashlib.sha256(Path(journal).read_bytes()).hexdigest(),
         'owner': row['run'], 'revision': row['revision'], 'commit': row['commit_sha']}
 

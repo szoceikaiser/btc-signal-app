@@ -1,5 +1,5 @@
 {
-  "schema": "p3-human-grant-v1",
+  "schema": "p3-human-grant-v2",
   "plan_sha256": null,
   "phase": null,
   "approved_by": null,

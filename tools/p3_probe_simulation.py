@@ -101,6 +101,7 @@ def plan(journal_directory=None):
         code_head='a'*40, code_tree='b'*40, code_pins={'tools/p3_github_probe.py': 'c'*64},
         seed_commit='d'*40, credential_evidence_sha256='e'*64, credential_repository_ids=[900001],
         settings_and_other_writers_frozen=True, expires_utc='2099-01-01T00:00:00Z')
+    p['phases'] = list(probe.PHASES)
     p['journal_directory'] = str(Path(journal_directory or '.').resolve())
     for i, r in enumerate(p['runs']): r['nonce'] = f'{i+1:032x}'
     p['seed_sha256'] = hashlib.sha256(probe.synthetic_seed(p)).hexdigest()
@@ -108,15 +109,27 @@ def plan(journal_directory=None):
     return p
 
 
+def fixture_grant(p, phase, expires='2099-01-01T00:00:00Z'):
+    """Offline fixture only; never imported or called by the real CLI."""
+    return {'schema': 'p3-human-grant-v2', 'plan_sha256': probe.digest(p), 'phase': phase,
+        'approved_by': 'offline-fixture-no-real-authorization', 'human_authorization': True,
+        'expires_utc': expires, 'approval_evidence_sha256': 'a'*64, 'review_sha256': None}
+
+
+def boundary(p, ledger, reader, writer, opener):
+    return probe.Boundary(p, ledger, reader, writer, opener,
+        guard=probe.GrantGuard(p, fixture_grant(p, ledger.phase), ledger.phase))
+
+
 def execute(p, api, root, phase, previous=None, history=True):
     ledger = probe.Ledger(p, Path(root)/(phase+'.jsonl'), phase, previous)
-    client = probe.Client(probe.Boundary(p, ledger, 'synthetic-reader', 'synthetic-writer', api.open))
+    client = probe.Client(boundary(p, ledger, 'synthetic-reader', 'synthetic-writer', api.open))
     try:
         client.boundary.preflight()
         if history: probe.verify_history(client)
         if phase == 'bootstrap': pass  # root initialized locally by API, no external Git call
         elif phase == 'activate': probe.activation(client)
-        else: probe.sequence(client, phase)
+        elif phase != 'inspect': probe.sequence(client, phase)
         ledger.emit('phase_end', result='confirmed')
     except BaseException:
         ledger.emit('phase_halt', result='incomplete-no-retry-no-release')

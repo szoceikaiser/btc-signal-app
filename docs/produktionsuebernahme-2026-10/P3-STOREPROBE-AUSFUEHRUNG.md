@@ -107,7 +107,7 @@ durch einen **gesondert benannten Git-Initialisierungsschritt** gelöst.
    und ambient Gitüberschreibungen sind deaktiviert. Die Credentialhilfe benutzt
    nur das ausdrücklich verdeckt eingegebene Testcredential über einen privaten
    Askpass-Pipe; kein Token in URL, Kommandoargumenten, Datei oder Output.
-4. Auch bei verlorener Gitantwort nur Readback: Ref → Contents am Commit → Ref,
+4. Auch bei verlorener Gitantwort nur Readback, solange Plan UND Grant noch gelten: Ref → Contents am Commit → Ref,
    vollständiger Tree, Root ohne Parent und exakt freigegebene Bytes. Keine
    unbestätigte Bootstrapfortsetzung und kein zweiter Push. Unbekannter Zustand
    bleibt erhalten. Kein Cleanup/Reset des Ziels.
@@ -188,18 +188,82 @@ Requestzählern und Ergebnis. Keine Credentials, Nachrichtentexte oder API-Bodie
 `observed-only` ist keine Writebestätigung. Erst nach CAS-/Readbackvertrag erscheint
 `confirmed`; bei Fehler niemals phase_end/Runerfolg erfinden.
 
-Jede neue Phasendatei enthält die exakte komplette Vorgängerkette. Hashkette und
-rechnerisch geprüfte Zähler schützen gegen versehentliche Auslassungen. Journalordner
-ist im Plan fest gepinnt. Dauerhafte Versuchmarker verhindern denselben
-Phasenversuch erneut; exklusive Prozesslockdatei bleibt nach hartem Verlust
-erhalten. Bei normal behandeltem Halt bleibt der Versuchmarker. Keine automatische
-Schreibwiederaufnahme. Ein fehlendes/beschädigtes Journal hält an und gibt das
-Writebudget nicht frei. Die neu gespeicherten Zähler sind lokale Belege, kein
-Mechanismus gegen einen absichtlich veränderten Client oder gefälschte Freigabe.
+Seit N-P3-02 gilt ausschließlich `p3-synthetic-probe-plan-v2` mit
+`session_contract=sqlite-frontier-v2` und `expiry_policy=stop-all-outbound-no-grace`.
+Die neue Grantvorlage verlangt `p3-human-grant-v2`. Alte Pläne/Journale werden
+nicht automatisch migriert; alte Belege bleiben unverändert.
+
+Der im Plan festgelegte **eine** Journalordner enthält `probe-session.sqlite3`,
+`probe-session.lock`, feste `attempt-<PHASE>.json`-Startbelege und sämtliche
+kumulativen Phasenjournale. Die Startbelege werden vor dem ersten Phasenjournal
+geflusht und fsync-bestätigt; jeder muss exakt zum zentralen phase_start passen.
+Ein zusätzlicher/partieller Startbeleg sperrt die Fortsetzung auch dann, wenn
+die frühere zentrale Frontier noch confirmed war. SQLite ist die
+maßgebliche unverzweigte Sessionhistorie. Vor Credentials prüft der nächste Start
+den Planhash, den exakten zuletzt gebundenen Dateinamen, alle Journalzeilen gegen
+die zentralen Zeilen, den bestätigten Publikationshash und die daraus vollständig
+rekonstruierten Gesamt-/Phasen-/Runzähler. Ein älterer gültiger Hash, ausgelassene
+Zwischenphasen, eine anders benannte Kopie oder ein fremder Plan reichen nicht.
+Auch eine fehlgeschlagene Phase gehört dauerhaft zur Frontier. `inspect` kann
+vorherigen Verlust/Fehler nicht zu einem gesunden Mutationsvorgänger machen.
+Jede Phase ist im Plan höchstens einmal ausführbar, auch mit anderem Dateinamen.
+
+Eine gemeinsame Betriebssystemsperre gilt für Probe, Inspektion und Übernahme.
+Die Lockdatei wird nie entfernt. Der Kernel gibt die Sperre nach Prozessende
+frei; das ist **keine** Freigabe der offenen dauerhaften Phase. Ohne positiven
+Prozessende-/Owner-/Revisionsbeleg bleiben deren Folgestarts gesperrt. Es gibt
+keinen Review-Nebenlock, Boolean-Bypass, Fristablauf oder automatische Entsperrung.
+
+Jede Reservierung erfolgt in dieser Reihenfolge: SQLite-Transaktion mit
+`synchronous=FULL` committen → Journalzeile schreiben/flush/fsync → Publikationshash
+in zweiter FULL-Transaktion committen → Frontier/Zähler und Freigabe erneut prüfen
+→ Outbound. Dies gilt für sämtliche GETs, PUT-Versuche und den einen Git-Push,
+auch bei HTTP-Fehlern, verlorenen Antworten und Inspektion. Ein Abbruch nach
+Reservierung kann konservativ einen Versuch zählen, obwohl nichts hinausging;
+dieser Versuch wird nicht zurückerstattet. Die Budgets steigen dadurch nicht.
+
+Unklarer Commit/fsync/Publikationsschritt sperrt den laufenden Prozess. Nach
+hartem Verlust mit unvollständiger Publikation bleiben zentrale Historie und
+abweichendes Journal für lokale Prüfung erhalten; das Werkzeug repariert,
+exportiert oder wiederholt sie **nicht automatisch**. Eine solche Session ist
+mit diesem Werkzeug nicht fortsetzbar. Das ist eine bewusste Restgrenze, keine
+Erlaubnis für einen neuen Ordner/Planhash oder einen älteren gesunden Storestand.
+Ein fehlendes zentrales DB-File bei vorhandenen Sessionartefakten hält ebenfalls
+an. Geprüft ist harter Prozessverlust; Stromausfall-/Datenträgergarantien über die
+Zusagen des lokalen Dateisystems und SQLite hinaus werden nicht behauptet.
+
+### Grantgültigkeit unmittelbar an der Grenze (N-P3-03)
+
+Der tatsächlich autorisierte Grant samt Plan-/Phasen-/Reviewhash wird an die
+laufende Boundary gebunden und sein Hash/Ablauf im Journal vermerkt. Vor jedem
+Request und erneut **nach** dauerhafter Zählung, direkt vor HTTP oder Git-Push,
+müssen Plan **und** Grant gelten. Es gilt strikt `jetzt < Deadline`; genau an
+der Deadline ist kein Start erlaubt. Credentialeingabe, Vorprüfung, Seed-/Askpass-
+Vorbereitung oder langsames fsync verlängern die Freigabe nicht. Zusätzlich
+prüft die Abschlussmeldung die noch gültige Freigabe.
+
+**Kein Nachlaufrecht:** Auch neue GETs/Readbacks sind nach Ablauf verboten.
+Ein rechtzeitig gestarteter Request darf seine Antwort liefern; kommt diese
+nach Ablauf, wird nur das beobachtete Ergebnis lokal protokolliert. Danach
+keine neue Mutation, kein Retry, kein Readback und kein pauschales `confirmed`.
+Eine unklare Mutation oder ein überlebendes sending bleibt erhalten und gesperrt.
+Eine eigene spätere `inspect`-Freigabe kann nur bei weiterhin gültigem Gesamtplan,
+maßgeblicher vollständiger Frontier und freier gemeinsamer Sperre lesen; bei
+offener unterbrochener Phase benötigt sie zusätzlich den separat gebundenen
+positiven Prozessende-Review. Nach Ablauf des Gesamtplans endet dieser Ablauf;
+ein neuer Plan ist keine automatische Budgetrücksetzung.
+
+Innerhalb eines Prozesses begrenzt zusätzlich monotone verstrichene Zeit die
+Laufzeit. Rückläufige UTC sperrt den Guard dauerhaft. Die zentral gespeicherte
+höchste beobachtete UTC verhindert bei Neustart eine Fortsetzung hinter dieser
+Zeitmarke, auch bei Übergabe alter Journale. Das ist kein allgemeiner Schutz gegen
+gezielt verstellte Systemuhren, zurückgerollte Datenträger, gefälschte menschliche
+Freigaben oder einen absichtlich veränderten Client. Der lokale Sessionordner
+muss vollständig und unverändert erhalten und gesichert werden.
 
 Die Prozessverlustphase später durch `p3_probe_launcher.py` starten. Der Elternprozess
-beobachtet `wait()` und speichert eine neue `p3-parent-wait-exit-v1`-Quittung mit
-PID/Exitcode/UTC, vollständigem Journalhash und dem zuletzt bestätigten
+beobachtet `wait()` und speichert eine neue `p3-parent-wait-exit-v2`-Quittung mit
+PID/Exitcode/UTC, exakt zur Phase gehörender PID, Journalname, Frontierhash/-zeilenzahl, vollständigem Journalhash und dem zuletzt bestätigten
 sending-Owner/Revision/Commit. Timeout ist kein Runende und erzeugt keine Quittung:
 
 ```powershell
@@ -213,18 +277,26 @@ anderen Worker und pausierte Trigger. Neue Reviewdatei enthält `expected_owner`
 workers_terminated, triggers_paused). Eigene Takeovergrant bindet den canonical
 Reviewhash als `review_sha256`. Aufruf zusätzlich mit
 `--termination-review <REVIEW.json>`. Das Werkzeug prüft positive Waitquittung,
-Journalhash und exakten aktuellen Commit/Owner/Revision, bevor es einen getrennten
-Reviewlock nutzen darf. Alte Locks werden nicht entfernt. Kein Fristablauf.
+Journalhash/Frontierpräfix und exakten aktuellen Commit/Owner/Revision unter der
+gemeinsamen Sessionsperre. Ein inzwischen bestätigtes inspect darf nur das
+unveränderte Originalpräfix ergänzen; als Vorgänger ist weiterhin die neueste
+Frontier nötig. Für inspect nach offenem Prozessverlust bindet dessen Grant
+ebenfalls den Reviewhash und der Aufruf erhält `--termination-review`.
+Alte Locks werden nicht entfernt. Kein Fristablauf.
 Überlebendes sending bleibt uncertain und sperrt neue Claims, auch unter anderen
 vorbenannten Runs. Nur inspect ist danach vorgesehen; keine Zustellklärung,
 Produktionsfreigabe, neue Stream-ID oder automatische Reaktivierung.
 
 ## Konkreter Freigabevorschlag für den Hauptchat
 
-Zunächst Code und lokale Belege abnehmen. Danach tatsächliches Testrepo, ID,
+Zunächst Code und neue lokale Gegenfallbelege für N-P3-02/03 abnehmen. Danach tatsächliches Testrepo, ID,
 Branch, lokale Journalpfade, Zugang und Settings über einen gesonderten Auftrag
 konkret auswählen und bestätigen. Den vollständig ausgefüllten Plan mit Code- und
-Seedpins unabhängig prüfen. Erst dann darf der Nutzer genau diesen Planhash
+Seedpins sowie festen Sessionordner unabhängig prüfen. Der Ablauf darf
+keine alte v1-Session fortsetzen. Vor jeder späteren Phasenfreigabe den neuesten
+Frontierhash, Dateinamen, kumulative Zähler und Restbudget prüfen; genügend
+Zeit für Vorprüfung, Mutation und vollständigen Readback einplanen. Keine
+Verlängerung eines Grants durch das Werkzeug. Erst dann darf der Nutzer genau diesen Planhash
 mit obigen49/48/384-Grenzen und repoweiter Restschreibmacht genehmigen.
 
 Bootstrap und Aktivierung sind ausdrücklich getrennte benannte Freigaben.
