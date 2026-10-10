@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-09-26T15:18:57Z",
+ "generated_at": "2026-10-10T14:09:59Z",
  "variante": "LIVE-heute +Bein in Handelsrichtung",
- "fenster": "18.01.2026-26.09.2026",
+ "fenster": "18.01.2026-10.10.2026",
  "signals": [
   {
    "ts": 1768766400000,
@@ -2439,6 +2439,86 @@
    "price": 83796.01,
    "tranche_pct": 20,
    "reason": "Konfluenz: Fib-Zone + Liquidationszone 82875 \u2014 aufstocken (NEUTRAL)",
+   "stop_ref": 80126.04,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1790496000000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 84898.0,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 85255",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1790510400000,
+   "type": "TEILVERKAUF_LADDER",
+   "price": 84463.37,
+   "tranche_pct": 15,
+   "reason": "Teilgewinn am letzten Hoch 85255",
+   "stop_ref": null,
+   "tag": "",
+   "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+  },
+  {
+   "ts": 1790769600000,
+   "type": "WARNUNG",
+   "price": 84134.43,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1790798400000,
+   "type": "WARNUNG",
+   "price": 83623.6,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1790841600000,
+   "type": "WARNUNG",
+   "price": 83905.76,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1790899200000,
+   "type": "WARNUNG",
+   "price": 85512.9,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
+  },
+  {
+   "ts": 1791432000000,
+   "type": "NACHKAUF",
+   "price": 82998.75,
+   "tranche_pct": 15,
+   "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+   "stop_ref": 80126.04,
+   "tag": "",
+   "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1791460800000,
+   "type": "NACHKAUF",
+   "price": 81681.74081999999,
+   "tranche_pct": 25,
+   "reason": "0.786-Zone erreicht, Struktur intakt",
    "stop_ref": 80126.04,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
