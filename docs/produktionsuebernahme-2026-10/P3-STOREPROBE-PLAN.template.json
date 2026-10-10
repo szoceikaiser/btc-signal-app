@@ -1,0 +1,137 @@
+{
+  "schema": "p3-synthetic-probe-plan-v1",
+  "repo": null,
+  "repository_id": null,
+  "branch": null,
+  "path": "delivery/stream.json",
+  "store_id": "synthetic-p3-storeprobe-v1",
+  "stream_id": "synthetic-p3-stream-v1",
+  "source_head": "0ddd28b4db1679e4e5b89dc255ae500baa4c969c",
+  "code_head": null,
+  "code_tree": null,
+  "code_pins": null,
+  "seed_sha256": null,
+  "seed_commit": null,
+  "credential_evidence_sha256": null,
+  "credential_repository_ids": null,
+  "writer_permissions": {
+    "contents": "write",
+    "metadata": "read"
+  },
+  "reader_permissions": {
+    "contents": "read",
+    "metadata": "read",
+    "administration": "read",
+    "pages": "read"
+  },
+  "git_bootstrap_permissions": {
+    "contents": "write",
+    "metadata": "read"
+  },
+  "limits": {
+    "PUT": 48,
+    "GET": 384,
+    "GIT_PUSH": 1,
+    "mutations": 49,
+    "run_puts": 12,
+    "case_puts": 12,
+    "case_gets": 128,
+    "store_bytes": 768000,
+    "response_bytes": 2097152,
+    "timeout": 15
+  },
+  "expected_rules": [],
+  "bootstrap": "single-root-git-push-blocked-seed",
+  "phases": [
+    "bootstrap",
+    "activate",
+    "happy",
+    "lost-after",
+    "process-loss",
+    "takeover",
+    "inspect"
+  ],
+  "runs": [
+    {
+      "name": "writer-1",
+      "run_id": "synthetic-p3-1",
+      "run_attempt": "1",
+      "nonce": null
+    },
+    {
+      "name": "writer-2",
+      "run_id": "synthetic-p3-2",
+      "run_attempt": "2",
+      "nonce": null
+    },
+    {
+      "name": "writer-3",
+      "run_id": "synthetic-p3-3",
+      "run_attempt": "1",
+      "nonce": null
+    },
+    {
+      "name": "writer-4",
+      "run_id": "synthetic-p3-4",
+      "run_attempt": "2",
+      "nonce": null
+    },
+    {
+      "name": "writer-5",
+      "run_id": "synthetic-p3-5",
+      "run_attempt": "1",
+      "nonce": null
+    },
+    {
+      "name": "writer-6",
+      "run_id": "synthetic-p3-6",
+      "run_attempt": "2",
+      "nonce": null
+    },
+    {
+      "name": "writer-7",
+      "run_id": "synthetic-p3-7",
+      "run_attempt": "1",
+      "nonce": null
+    },
+    {
+      "name": "writer-8",
+      "run_id": "synthetic-p3-8",
+      "run_attempt": "2",
+      "nonce": null
+    }
+  ],
+  "case_runs": {
+    "activate": [
+      0
+    ],
+    "happy": [
+      1,
+      2
+    ],
+    "lost-after": [
+      3,
+      4
+    ],
+    "lost-before": [
+      5,
+      6
+    ],
+    "stale": [
+      5,
+      6
+    ],
+    "process-loss": [
+      5,
+      6
+    ],
+    "takeover": [
+      7
+    ]
+  },
+  "takeover": null,
+  "acknowledge_repo_credential_is_not_path_scope": true,
+  "settings_and_other_writers_frozen": null,
+  "journal_directory": null,
+  "expires_utc": null
+}
