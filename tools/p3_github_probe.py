@@ -39,7 +39,11 @@ LIMITS = {'PUT': 48, 'GET': 384, 'GIT_PUSH': 1, 'mutations': 49,
           'run_puts': 12, 'case_puts': 12, 'case_gets': 128,
           'store_bytes': 768000, 'response_bytes': 2097152, 'timeout': 15}
 READER401_PHASE = 'bootstrap-reader401-once'
-BOOTSTRAP_PHASES = ('bootstrap', READER401_PHASE)
+RULES_DIAG = 'bootstrap-rules403-diagnose-once'
+RULES_UPLOAD = 'bootstrap-rules403-upload-once'
+RULES_PHASES = (RULES_DIAG, RULES_UPLOAD)
+BOOTSTRAP_PHASES = ('bootstrap', READER401_PHASE, *RULES_PHASES)
+GIT_PHASES = ('bootstrap', READER401_PHASE, RULES_UPLOAD)
 PHASES = ('bootstrap', 'activate', 'happy', 'lost-after', 'lost-before',
           'stale', 'process-loss', 'takeover', 'inspect')
 
@@ -221,23 +225,30 @@ class Ledger:
     in SQLite FULL before outbound. Any uncertainty poisons this process and
     blocks every later opener. No automatic repair, resume or lock bypass.
     """
-    def __init__(self, p, path, phase, previous=None, reviewed_termination=None, reader401_amendment=None):
+    def __init__(self, p, path, phase, previous=None, reviewed_termination=None, reader401_amendment=None,
+                 rules403_amendment=None):
         self.p, self.path, self.phase = deepcopy(p), Path(path), phase
         self.counts = {'GET': 0, 'PUT': 0, 'GIT_PUSH': 0}
-        self.cases, self.runs, self.run = {}, {}, None
+        self.cases, self.runs, self.run, self.phase_counts = {}, {}, None, {}
         self.previous_hash = '0'*64
         self.handle = self.db = self.lock_handle = None
         self.poisoned, self.guard = False, None
         require(self.path.parent.resolve() == Path(p['journal_directory']).resolve(), 'Journal directory pin mismatch')
         self.reader401_hash = digest(reader401_amendment) if reader401_amendment is not None else None
-        require((phase in p['phases'] and reader401_amendment is None)
-                or (phase == READER401_PHASE and isinstance(reader401_amendment, dict)), 'Phase outside plan/review')
-        if phase == READER401_PHASE:
+        self.rules403_hash = digest(rules403_amendment) if rules403_amendment is not None else None
+        require((phase in p['phases'] and reader401_amendment is None and rules403_amendment is None)
+                or (phase == READER401_PHASE and isinstance(reader401_amendment, dict) and rules403_amendment is None)
+                or (phase in RULES_PHASES and isinstance(rules403_amendment, dict) and reader401_amendment is None),
+                'Phase outside plan/review')
+        if phase in (READER401_PHASE, *RULES_PHASES):
             require(all((self.path.parent/name).is_file() for name in ('probe-session.sqlite3',
                 'probe-session.lock', 'attempt-bootstrap.json', 'bootstrap.jsonl')), 'Existing session files required')
             require((self.path.parent/'probe-session.lock').stat().st_size > 0, 'Original lock bytes required')
             require(not any((self.path.parent/name).exists() for name in ('probe-session.sqlite3-wal',
                 'probe-session.sqlite3-journal')), 'Unresolved session transaction')
+            if phase in RULES_PHASES:
+                require(all((self.path.parent/name).is_file() for name in
+                    ('attempt-'+READER401_PHASE+'.json', READER401_PHASE+'.jsonl')), 'Original continuation files required')
         self.lock = self.path.parent/'probe-session.lock'
         self.database = self.path.parent/'probe-session.sqlite3'
         existed = self.lock.exists()
@@ -292,7 +303,7 @@ class Ledger:
                     validate_termination(p, reviewed_termination, previous)
                 if phase == 'takeover':
                     require(isinstance(reviewed_termination, dict), 'Separate exact termination review required')
-                if phase not in ('takeover', 'inspect', READER401_PHASE):
+                if phase not in ('takeover', 'inspect', READER401_PHASE, *RULES_PHASES):
                     require(not halted and rows[-1]['event'] == 'phase_end' and rows[-1].get('result') == 'confirmed',
                             'Incomplete predecessor; inspection/review only')
                 if phase == 'activate':
@@ -316,6 +327,9 @@ class Ledger:
             if phase == READER401_PHASE:
                 from p3_reader401_continue import validate_locked
                 validate_locked(self, rows, state, reader401_amendment)
+            if phase in RULES_PHASES:
+                from p3_rules403 import validate_locked
+                validate_locked(self, rows, state, rules403_amendment)
             self.prior_rows = rows
             # An interrupted phase start must not disappear behind a previously
             # confirmed frontier. A partial/extra intent permanently fails closed.
@@ -379,7 +393,9 @@ class Ledger:
 
     def _increment(self, method, phase, run):
         self.counts[method] += 1
-        phase = 'bootstrap' if phase == READER401_PHASE else phase
+        by_phase = self.phase_counts.setdefault(phase, {'GET': 0, 'PUT': 0, 'GIT_PUSH': 0})
+        by_phase[method] += 1
+        phase = 'bootstrap' if phase in BOOTSTRAP_PHASES else phase
         case = self.cases.setdefault(phase, {'GET': 0, 'PUT': 0, 'GIT_PUSH': 0})
         case[method] += 1
         if method == 'PUT' and run:
@@ -389,9 +405,12 @@ class Ledger:
         self.assert_published()
         require(method in self.counts and self.counts[method] < LIMITS[method], 'Global request budget exhausted')
         require(self.phase not in BOOTSTRAP_PHASES or method != 'PUT', 'Bootstrap forbids PUT')
-        budget_phase = 'bootstrap' if self.phase == READER401_PHASE else self.phase
+        if self.phase == RULES_DIAG:
+            require(method == 'GET' and self.phase_counts.get(self.phase, {}).get('GET', 0) < 8,
+                    'Diagnosis GET-only budget exhausted')
+        budget_phase = 'bootstrap' if self.phase in BOOTSTRAP_PHASES else self.phase
         case = self.cases.get(budget_phase, {})
-        if self.phase == READER401_PHASE: fields['budget_phase'] = budget_phase
+        if self.phase in (READER401_PHASE, *RULES_PHASES): fields['budget_phase'] = budget_phase
         if method in ('GET', 'PUT'):
             require(case.get(method, 0) < LIMITS['case_'+method.lower()+'s'], 'Case budget exhausted')
         if method != 'GET':
@@ -440,8 +459,9 @@ class Ledger:
 
 
 class HTTPStatus(gh.StoreUnavailable):
-    def __init__(self, status):
+    def __init__(self, status, diagnostic=None):
         self.status = status
+        self.diagnostic = diagnostic
         super().__init__('GitHub HTTP '+str(status))
 
 
@@ -467,12 +487,17 @@ class Boundary:
     def request(self, method, route, payload=None):
         self.guard.check(self.ledger)
         require(digest(self.p) == self.guard.plan_hash, 'Boundary plan changed')
+        if self.ledger.phase in RULES_PHASES:
+            from p3_rules403 import RulesGuard
+            require(isinstance(self.guard, RulesGuard), 'Bound rules review required')
+            self.guard.validate_route(method, route)
         require(method != 'PUT' or self.ledger.phase not in ('inspect', *BOOTSTRAP_PHASES), 'Phase cannot PUT')
         require(route.startswith(self.base+'/') or route == self.base, 'Foreign repository route')
         require(method == 'GET' or (method == 'PUT' and self.allowed
                 and route == self.base+'/contents/'+gh.STORE_PATH), 'Unapproved request')
         fields = {'bytes': 0, 'write_id': None, 'old_blob': None, 'revision': None,
                   'parent_digest': None}
+        if self.ledger.phase in RULES_PHASES: fields['route'] = route
         if method == 'PUT':
             require(set(payload) == {'message', 'content', 'sha', 'branch'}
                     and payload['branch'] == self.p['branch'] and payload['sha'], 'No runtime bootstrap')
@@ -500,10 +525,15 @@ class Boundary:
                 value = json.loads(raw)
             if fault == 'after': raise TimeoutError()
         except urllib.error.HTTPError as exc:
-            self.ledger.emit('response', result='http-'+str(exc.code), **fields)
+            diagnostic = None
+            if self.ledger.phase in RULES_PHASES:
+                from p3_http_diagnostics import classify
+                diagnostic = classify(exc)
+            self.ledger.emit('response', result='http-'+str(exc.code),
+                             **({'diagnostic': diagnostic} if diagnostic is not None else {}), **fields)
             self.guard.check(self.ledger)
             if exc.code == 409: raise gh.StoreConflict('CAS conflict') from None
-            raise HTTPStatus(exc.code) from None
+            raise HTTPStatus(exc.code, diagnostic) from None
         except (TimeoutError, OSError, urllib.error.URLError):
             self.ledger.emit('response', result='unknown', **fields)
             self.guard.check(self.ledger)
@@ -520,7 +550,7 @@ class Boundary:
         self.ledger.checkpoint('before_outbound', method)
         self.ledger.assert_published()
         require(digest(self.p) == self.guard.plan_hash, 'Boundary plan changed')
-        require(method != 'GIT_PUSH' or self.ledger.phase in BOOTSTRAP_PHASES, 'Bootstrap phase required')
+        require(method != 'GIT_PUSH' or self.ledger.phase in GIT_PHASES, 'Bootstrap phase required')
         self.guard.check(self.ledger)  # final check, after durable accounting/local prep
 
     def preflight(self, empty=False):
@@ -789,10 +819,11 @@ def git_environment():
             if not k.startswith(('GIT_', 'GH_', 'GITHUB_', 'BTC_DELIVERY_', 'TELEGRAM_'))}
 
 
-def bootstrap(client, directory, *, reuse_reviewed_root=False):
+def bootstrap(client, directory, *, reuse_reviewed_root=False, writer_prompt=None):
     p = client.boundary.p; ledger = client.boundary.ledger
     if reuse_reviewed_root:
-        require(ledger.phase == READER401_PHASE and ledger.reader401_hash, 'Reviewed root reuse only')
+        require((ledger.phase == READER401_PHASE and ledger.reader401_hash)
+                or (ledger.phase == RULES_UPLOAD and ledger.rules403_hash), 'Reviewed root reuse only')
         from p3_reader401_continue import verify_root
         result = verify_root(p, directory)
     else:
@@ -800,6 +831,9 @@ def bootstrap(client, directory, *, reuse_reviewed_root=False):
     require(result['seed_commit'] == p['seed_commit'] and result['seed_sha256'] == p['seed_sha256'],
             'Prepared root pin mismatch')
     client.boundary.preflight(empty=True)
+    if writer_prompt is not None:
+        require(ledger.phase == RULES_UPLOAD, 'Deferred Writer entry only for reviewed upload')
+        client.boundary.writer = writer_prompt()
     require(client.boundary.writer, 'Dedicated bootstrap Contents credential required')
     askpass_py = Path(directory)/'synthetic-askpass.py'
     askpass_py.write_text("import os,sys\nprint('x-access-token' if 'username' in sys.argv[1].lower() else os.environ['P3_EXPLICIT_BOOTSTRAP_TOKEN'])\n", encoding='utf-8')
