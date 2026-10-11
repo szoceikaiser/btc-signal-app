@@ -54,7 +54,7 @@ def cli(plan, api, directory, phase, previous, prompt=None, grant=None):
             '--approved-plan-sha256', p.digest(plan), '--phase', phase,
             '--journal', str(root/(phase+'-cli.jsonl'))]
     if previous: argv += ['--previous-journal', str(previous)]
-    with patch.object(sys, 'argv', argv), patch.object(p.getpass, 'getpass', prompt or (lambda *_: 'fixture')), \
+    with patch.object(sys, 'argv', argv), patch.object(p.getpass, 'getpass', prompt or (lambda *_: sim.FIXTURE_TOKEN)), \
          patch.object(p.urllib.request, 'build_opener', return_value=types.SimpleNamespace(open=api.open)):
         p.main()
 
@@ -96,7 +96,7 @@ def test_cli_grant_expires_during_credentials_before_any_outbound():
         boot = sim.execute(plan, api, td, 'bootstrap')
         grant = sim.fixture_grant(plan, 'activate', '2030-01-01T00:01:00Z')
         before = len(api.trace)
-        def prompt(*_): Clock.current += timedelta(minutes=2); return 'fixture'
+        def prompt(*_): Clock.current += timedelta(minutes=2); return sim.FIXTURE_TOKEN
         with patch.object(p, 'verify_code_pin', lambda _: None):
             rejects(ValueError, lambda: cli(plan, api, td, 'activate', boot, prompt, grant))
         rows = p.Ledger.verify(Path(td,'activate-cli.jsonl'), p.digest(plan))

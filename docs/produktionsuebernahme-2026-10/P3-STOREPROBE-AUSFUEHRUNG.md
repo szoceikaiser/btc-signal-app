@@ -1,5 +1,12 @@
 # Lokale Vorbereitung der echten synthetischen Storeprobe
 
+Ergänzung 11.10.2026: Die separat geprüfte einmalige Fortsetzung des vollständig
+publizierten ersten Reader-401 ist im
+[Reader-401-Vertrag](P3-READER401-FORTSETZUNG.md) beschrieben. Originalplan,
+Seedidentität und sämtliche verbrauchten Requests bleiben erhalten. Ein eigener
+Amendierungsreview und menschlicher Phasengrant sind erforderlich; keine
+allgemeine Aufhebung von phase_halt und keine Freigabe durch diese Dokumente.
+
 Stand 10.10.2026. **Keine echte Probe und keine Repositoryanlage genehmigt oder
 ausgeführt.** Hauptchat entscheidet über Ziel, Zugang, Freigaben und Abnahme.
 Quelle: `0ddd28b4db1679e4e5b89dc255ae500baa4c969c`, Baum

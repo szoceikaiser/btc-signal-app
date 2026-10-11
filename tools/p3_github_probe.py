@@ -38,6 +38,8 @@ TARGET = hashlib.sha256(b'synthetic-p3-no-transport').hexdigest()
 LIMITS = {'PUT': 48, 'GET': 384, 'GIT_PUSH': 1, 'mutations': 49,
           'run_puts': 12, 'case_puts': 12, 'case_gets': 128,
           'store_bytes': 768000, 'response_bytes': 2097152, 'timeout': 15}
+READER401_PHASE = 'bootstrap-reader401-once'
+BOOTSTRAP_PHASES = ('bootstrap', READER401_PHASE)
 PHASES = ('bootstrap', 'activate', 'happy', 'lost-after', 'lost-before',
           'stale', 'process-loss', 'takeover', 'inspect')
 
@@ -219,7 +221,7 @@ class Ledger:
     in SQLite FULL before outbound. Any uncertainty poisons this process and
     blocks every later opener. No automatic repair, resume or lock bypass.
     """
-    def __init__(self, p, path, phase, previous=None, reviewed_termination=None):
+    def __init__(self, p, path, phase, previous=None, reviewed_termination=None, reader401_amendment=None):
         self.p, self.path, self.phase = deepcopy(p), Path(path), phase
         self.counts = {'GET': 0, 'PUT': 0, 'GIT_PUSH': 0}
         self.cases, self.runs, self.run = {}, {}, None
@@ -227,7 +229,15 @@ class Ledger:
         self.handle = self.db = self.lock_handle = None
         self.poisoned, self.guard = False, None
         require(self.path.parent.resolve() == Path(p['journal_directory']).resolve(), 'Journal directory pin mismatch')
-        require(phase in p['phases'], 'Phase outside plan')
+        self.reader401_hash = digest(reader401_amendment) if reader401_amendment is not None else None
+        require((phase in p['phases'] and reader401_amendment is None)
+                or (phase == READER401_PHASE and isinstance(reader401_amendment, dict)), 'Phase outside plan/review')
+        if phase == READER401_PHASE:
+            require(all((self.path.parent/name).is_file() for name in ('probe-session.sqlite3',
+                'probe-session.lock', 'attempt-bootstrap.json', 'bootstrap.jsonl')), 'Existing session files required')
+            require((self.path.parent/'probe-session.lock').stat().st_size > 0, 'Original lock bytes required')
+            require(not any((self.path.parent/name).exists() for name in ('probe-session.sqlite3-wal',
+                'probe-session.sqlite3-journal')), 'Unresolved session transaction')
         self.lock = self.path.parent/'probe-session.lock'
         self.database = self.path.parent/'probe-session.sqlite3'
         existed = self.lock.exists()
@@ -282,7 +292,7 @@ class Ledger:
                     validate_termination(p, reviewed_termination, previous)
                 if phase == 'takeover':
                     require(isinstance(reviewed_termination, dict), 'Separate exact termination review required')
-                if phase not in ('takeover', 'inspect'):
+                if phase not in ('takeover', 'inspect', READER401_PHASE):
                     require(not halted and rows[-1]['event'] == 'phase_end' and rows[-1].get('result') == 'confirmed',
                             'Incomplete predecessor; inspection/review only')
                 if phase == 'activate':
@@ -303,6 +313,9 @@ class Ledger:
                 marker = json.loads((self.path.parent/('attempt-'+row['phase']+'.json')).read_text(encoding='utf-8'))
                 require(marker == {key: row[key] for key in ('plan_sha256', 'phase', 'journal', 'pid', 'predecessor')},
                         'Phase attempt/frontier mismatch')
+            if phase == READER401_PHASE:
+                from p3_reader401_continue import validate_locked
+                validate_locked(self, rows, state, reader401_amendment)
             self.prior_rows = rows
             # An interrupted phase start must not disappear behind a previously
             # confirmed frontier. A partial/extra intent permanently fails closed.
@@ -311,6 +324,7 @@ class Ledger:
                 marker.write(canonical({'plan_sha256': digest(p), 'phase': phase, 'journal': self.path.name,
                                         'pid': os.getpid(), 'predecessor': self.previous_hash}))
                 marker.flush(); os.fsync(marker.fileno())
+            self.checkpoint('after_intent', 'phase_start')
             self.handle = self.path.open('x', encoding='utf-8', newline='\n')
             for row in rows: self.handle.write(canonical(row)+'\n')
             self.handle.flush(); os.fsync(self.handle.fileno())
@@ -365,6 +379,7 @@ class Ledger:
 
     def _increment(self, method, phase, run):
         self.counts[method] += 1
+        phase = 'bootstrap' if phase == READER401_PHASE else phase
         case = self.cases.setdefault(phase, {'GET': 0, 'PUT': 0, 'GIT_PUSH': 0})
         case[method] += 1
         if method == 'PUT' and run:
@@ -373,7 +388,10 @@ class Ledger:
     def charge(self, method, **fields):
         self.assert_published()
         require(method in self.counts and self.counts[method] < LIMITS[method], 'Global request budget exhausted')
-        case = self.cases.get(self.phase, {})
+        require(self.phase not in BOOTSTRAP_PHASES or method != 'PUT', 'Bootstrap forbids PUT')
+        budget_phase = 'bootstrap' if self.phase == READER401_PHASE else self.phase
+        case = self.cases.get(budget_phase, {})
+        if self.phase == READER401_PHASE: fields['budget_phase'] = budget_phase
         if method in ('GET', 'PUT'):
             require(case.get(method, 0) < LIMITS['case_'+method.lower()+'s'], 'Case budget exhausted')
         if method != 'GET':
@@ -449,7 +467,7 @@ class Boundary:
     def request(self, method, route, payload=None):
         self.guard.check(self.ledger)
         require(digest(self.p) == self.guard.plan_hash, 'Boundary plan changed')
-        require(method != 'PUT' or self.ledger.phase not in ('inspect', 'bootstrap'), 'Phase cannot PUT')
+        require(method != 'PUT' or self.ledger.phase not in ('inspect', *BOOTSTRAP_PHASES), 'Phase cannot PUT')
         require(route.startswith(self.base+'/') or route == self.base, 'Foreign repository route')
         require(method == 'GET' or (method == 'PUT' and self.allowed
                 and route == self.base+'/contents/'+gh.STORE_PATH), 'Unapproved request')
@@ -502,7 +520,7 @@ class Boundary:
         self.ledger.checkpoint('before_outbound', method)
         self.ledger.assert_published()
         require(digest(self.p) == self.guard.plan_hash, 'Boundary plan changed')
-        require(method != 'GIT_PUSH' or self.ledger.phase == 'bootstrap', 'Bootstrap phase required')
+        require(method != 'GIT_PUSH' or self.ledger.phase in BOOTSTRAP_PHASES, 'Bootstrap phase required')
         self.guard.check(self.ledger)  # final check, after durable accounting/local prep
 
     def preflight(self, empty=False):
@@ -771,9 +789,14 @@ def git_environment():
             if not k.startswith(('GIT_', 'GH_', 'GITHUB_', 'BTC_DELIVERY_', 'TELEGRAM_'))}
 
 
-def bootstrap(client, directory):
+def bootstrap(client, directory, *, reuse_reviewed_root=False):
     p = client.boundary.p; ledger = client.boundary.ledger
-    result = build_bootstrap(p, directory)
+    if reuse_reviewed_root:
+        require(ledger.phase == READER401_PHASE and ledger.reader401_hash, 'Reviewed root reuse only')
+        from p3_reader401_continue import verify_root
+        result = verify_root(p, directory)
+    else:
+        result = build_bootstrap(p, directory)
     require(result['seed_commit'] == p['seed_commit'] and result['seed_sha256'] == p['seed_sha256'],
             'Prepared root pin mismatch')
     client.boundary.preflight(empty=True)
@@ -803,6 +826,20 @@ def bootstrap(client, directory):
     client.boundary.guard.check(ledger)
     verify_history(client)
     ledger.emit('bootstrap', result='confirmed-exact-blocked-root', **result)
+
+
+def validate_token(value):
+    # Shape only, no credential lookup/authentication, logging, trimming or repair.
+    require(isinstance(value, str) and value.count('github_pat_') == 1
+            and re.fullmatch(r'github_pat_[A-Za-z0-9_]{40,255}', value, flags=re.ASCII),
+            'Ungueltiges Eingabeformat oder mehrfach eingefuegt. Kein Request gestartet; Wert nicht ausgeben.')
+    return value
+
+
+def read_token(role):
+    print(role+': Genau EINMAL den vollstaendigen Fine-grained Token einfuegen, dann Enter. '
+          'Keine Zeichen und keine Sternchen erscheinen; das ist normal.')
+    return validate_token(getpass.getpass(role+' (unsichtbare Eingabe): '))
 
 
 def main():
@@ -842,8 +879,8 @@ def main():
     ledger = Ledger(p, args.journal, args.phase, args.previous_journal, reviewed_termination=review)
     try:
         guard.check(ledger)
-        reader = getpass.getpass('Dedicated repo inspection token (hidden): ')
-        writer = '' if args.phase == 'inspect' else getpass.getpass('Dedicated repo writer/bootstrap token (hidden): ')
+        reader = read_token('Reader')
+        writer = '' if args.phase == 'inspect' else read_token('Writer')
         require(reader and (writer or args.phase == 'inspect'), 'Missing dedicated credentials')
         client = Client(Boundary(p, ledger, reader, writer, guard=guard))
         if args.phase == 'bootstrap':

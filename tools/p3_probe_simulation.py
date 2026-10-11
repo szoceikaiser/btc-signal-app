@@ -10,6 +10,8 @@ import urllib.parse
 
 import p3_github_probe as probe
 
+FIXTURE_TOKEN = 'github_pat_'+'FixtureOnly0'*7
+
 
 class Response(io.BytesIO):
     def __init__(self, value, status=200):
