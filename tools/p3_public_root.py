@@ -112,7 +112,9 @@ def history(plan,rows,a):
         p.require(before['route']==route and req['method']=='GET' and req['bytes']==0
             and all(req.get(k) is None for k in ('write_id','old_blob','revision','parent_digest'))
             and req['counts']==resp['counts']=={'GET':count,'PUT':0,'GIT_PUSH':0} and resp['result']==status,'Inspector request/outcome differs')
-    p.require(rest[-2]['route']==r.routes(plan)[3] and rest[-2]['diagnostic']==rest[8]['diagnostic']
+    # The historical inspect boundary saved classification in inspection_error,
+    # not in its generic HTTP response. Do not fabricate an absent envelope.
+    p.require(rest[-2]['route']==r.routes(plan)[3] and 'diagnostic' not in rest[8]
         and rest[-2]['diagnostic']['category']=='feature-unavailable-hint' and rest[-2]['diagnostic']['feature_absence_proved'] is False
         and rest[-1]['category']=='feature-unavailable-hint' and rest[-1]['result']=='incomplete-no-retry-no-release'
         and all(c.parse_utc(i['not_before_utc'])<=c.parse_utc(x['utc'])<min(c.parse_utc(i['expires_utc']),c.parse_utc(g['expires_utc'])) for x in rest), 'Not the exact known feature403 inspector halt')
