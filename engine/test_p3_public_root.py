@@ -31,6 +31,7 @@ def fixture(td):
     parent=i['parent_amendment'];diag=parent['interrupted_diagnosis']['amendment'];reader=parent['reader401_amendment']
     def bind(obj):
         value=transform(obj);mapping[p.digest(obj)]=p.digest(value);return value
+    bind(reader['original_grant'])
     translated=[];rr=dd=pp=ii=None
     for j,row in enumerate(rows):
         if j==5:bind(reader['original_grant']);rr=bind(reader);bind(parent['reader401_grant'])
