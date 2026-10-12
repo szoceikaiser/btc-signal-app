@@ -21,16 +21,25 @@ import p3_rules403 as r
 import p3_reader401_continue as c
 
 PHASE=p.PUBLIC_ROOT
+CONTINUE=p.PUBLIC_CONTINUE
+FAILED_HEAD='6ff40caee285db9251de6b5f465ea3bed708033e'
+FAILED_TREE='d3371864a708769854b180113d632f9bec6d5570'
 REPO='szoceikaiser/btc-p3-store-probe';RID=1414013858
 SEED='c78a4d1283aabdf187a65f628bd2882277b168e7'
 SEED_SHA='0bb72c1a5fb9d6e77cd5579a6083c5cf6033e502c9c2b001cc3719079c56f53a'
 BASE='648e7eda497433c1d1810f98a3de917defb76a07';TREE='5b6db7504f5fef109406955b900a6a4f079f52f3'
 SCOPE='public-synthetic-original-blocked-root-only-no-activation'
 
+class PublicHalt(ValueError):
+    def __init__(self,category):self.category=category;super().__init__(category)
+
+def ensure(ok,category):
+    if not ok:raise PublicHalt(category)
+
 def read(path):return json.loads(Path(path).read_text(encoding='utf-8-sig'))
 
-def template():
-    return {'schema':'p3-public-root-amendment-v1','phase':PHASE,'scope':SCOPE,
+def template(phase=PHASE):
+    value={'schema':'p3-public-root-amendment-v1','phase':phase,'scope':SCOPE,
         'original_plan_sha256':None,'original_expires_utc':None,'root':{'directory':None,'files_sha256':None},
         'history':{'inspection':None,'grant':None,'operator_script':{'path':None,'sha256':None},'code_materialization':None},
         'visibility':{'acceptance_path':None,'files_sha256':None},
@@ -39,6 +48,11 @@ def template():
             'counts':{'GET':7,'PUT':0,'GIT_PUSH':0},'files_sha256':None},
         'review':deepcopy(r.template(r.RESUME)['review']),
         'not_before_utc':None,'expires_utc':None,'time_authorization_sha256':None}
+    if phase==CONTINUE:
+        value['schema']='p3-public-missing-branch-continuation-v1'
+        value['stopped_public']={'amendment':None,'grant':None,'code_materialization':None}
+        value['predecessor'].update(journal=PHASE+'.jsonl',frontier_rows=53,counts={'GET':14,'PUT':0,'GIT_PUSH':0})
+    return value
 
 def window(plan,a,current=True):
     start,end=c.parse_utc(a['not_before_utc']),c.parse_utc(a['expires_utc'])
@@ -49,8 +63,9 @@ def window(plan,a,current=True):
     return start,end
 
 def shape(plan,a):
-    p.validate_plan_structure(plan);t=template()
-    p.require(set(a)==set(t) and a['schema']==t['schema'] and a['phase']==PHASE and a['scope']==SCOPE
+    p.require(a['phase'] in p.PUBLIC_ROOT_PHASES,'Unknown public phase')
+    p.validate_plan_structure(plan);t=template(a['phase'])
+    p.require(set(a)==set(t) and a['schema']==t['schema'] and a['scope']==SCOPE
         and a['original_plan_sha256']==p.digest(plan) and a['original_expires_utc']==plan['expires_utc'], 'Exact public scope required')
     for k in ('root','history','visibility','execution_code','predecessor','review'):
         p.require(isinstance(a[k],dict) and set(a[k])==set(t[k]),'Incomplete public binding')
@@ -80,8 +95,22 @@ def shape(plan,a):
         and isinstance(evidence['human_authorization'],str) and evidence['human_authorization']
         and evidence['general_UI_result']=='This repository is currently public.' and evidence['repository_still_empty'] is True
         and evidence['actual_store_upload'] is False and evidence['other_repository_visibility_changes']==0,'Explicit public visibility approval differs')
+    if a['phase']==CONTINUE:
+        old=a['stopped_public'];p.require(set(old)=={'amendment','grant','code_materialization'},'Exact stopped public review required')
+        prior=old['amendment'];shape(plan,prior)
+        p.require(prior['phase']==PHASE and all(a[k]==prior[k] for k in ('history','root','visibility','original_plan_sha256','original_expires_utc')),
+                  'Original public identities changed')
+        r.validate_grant(plan,old['grant'],PHASE,p.digest(prior))
+        code=prior['execution_code']
+        p.require(code['code_head']==FAILED_HEAD and code['code_tree']==FAILED_TREE
+            and set(code['code_pins'])>=set(plan['code_pins'])|set(c.git(p.ROOT,'diff','--name-only',c.ORIGINAL_HEAD,FAILED_HEAD).decode().splitlines())
+            and old['code_materialization']==r.materialization(code)
+            and c.git(p.ROOT,'rev-parse',FAILED_HEAD+'^{tree}').decode().strip()==FAILED_TREE,'Stopped public code differs')
+        c.git(p.ROOT,'merge-base','--is-ancestor',FAILED_HEAD,a['execution_code']['code_head'])
 
 def history(plan,rows,a):
+    if a['phase']==CONTINUE:
+        history(plan,rows[:35],a['stopped_public']['amendment']);stopped_history(plan,rows,a);return
     i=a['history']['inspection'];parent=i['parent_amendment'];grant=i['parent_grant'];tail=rows[21:24]
     p.require(len(rows)==35 and [x['event'] for x in tail]==['phase_start','reader_validity','phase_halt']
         and all(x['phase']==r.RESUME and x['counts']=={'GET':5,'PUT':0,'GIT_PUSH':0} for x in tail),'Exact24 input cancellation required')
@@ -120,13 +149,38 @@ def history(plan,rows,a):
         and all(c.parse_utc(i['not_before_utc'])<=c.parse_utc(x['utc'])<min(c.parse_utc(i['expires_utc']),c.parse_utc(g['expires_utc'])) for x in rest), 'Not the exact known feature403 inspector halt')
     p.require(all(x['counts']['PUT']==x['counts']['GIT_PUSH']==0 for x in rows),'Earlier mutation or uncertain write forbidden')
 
+def stopped_history(plan,rows,a):
+    old=a['stopped_public'];prior=old['amendment'];grant=old['grant'];tail=rows[35:]
+    expected=['phase_start','authorization','public_root_review']+['request','response']*7+['phase_halt']
+    p.require(len(rows)==53 and [x['event'] for x in tail]==expected and all(x['phase']==PHASE and x['run'] is None for x in tail),
+        'Only exact53 missing-branch pre-Writer halt can continue')
+    p.require(tail[0]['journal']==PHASE+'.jsonl' and tail[0]['predecessor']==rows[34]['hash']
+        and prior['predecessor']['frontier_hash']==rows[34]['hash'] and prior['predecessor']['frontier_rows']==35
+        and tail[1]['grant_sha256']==p.digest(grant) and tail[1]['review_sha256']==p.digest(prior)
+        and tail[1]['grant_expires_utc']==grant['expires_utc'] and tail[1]['expiry_policy']==plan['expiry_policy']
+        and tail[2]['amendment_sha256']==p.digest(prior) and tail[2]['grant_sha256']==p.digest(grant)
+        and tail[2]['execution_code']==prior['execution_code'] and tail[2]['scope']==SCOPE
+        and tail[2]['not_before_utc']==prior['not_before_utc'] and tail[2]['expires_utc']==prior['expires_utc']
+        and tail[2]['original_expires_utc']==plan['expires_utc'] and tail[2]['bootstrap_case_counts']=={'GET':7,'PUT':0,'GIT_PUSH':0},'Stopped grant/code/window differs')
+    for j,(route,status) in enumerate(zip(r.routes(plan),(200,200,404,200,200,200,404))):
+        req,resp=tail[3+2*j:5+2*j]
+        p.require(req['method']=='GET' and req['route']==resp['route']==route and req['bytes']==0 and req['budget_phase']=='bootstrap'
+            and all(req.get(k) is None for k in ('write_id','old_blob','revision','parent_digest'))
+            and req['counts']==resp['counts']=={'GET':8+j,'PUT':0,'GIT_PUSH':0} and resp['result']=='http-'+str(status),'Stopped requests differ')
+    p.require(tail[8]['diagnostic']['category']=='not-found' and tail[16]['diagnostic']['category']=='unknown-404'
+        and tail[16]['diagnostic']['feature_absence_proved'] is False
+        and tail[-1]['result']=='incomplete-no-retry-no-release' and tail[-1]['category']=='public-root-incomplete'
+        and all(c.parse_utc(prior['not_before_utc'])<=c.parse_utc(x['utc'])<min(c.parse_utc(grant['expires_utc']),c.parse_utc(prior['expires_utc'])) for x in tail),
+        'Not the observed timely protection404 halt')
+
 def verify_state(plan,a,*,ledger=None):
     root=Path(plan['journal_directory']);pred=a['predecessor'];rr=p.Ledger.verify(root/pred['journal'],p.digest(plan))
     history(plan,rr,a)
-    p.require(pred['journal']=='inspect.jsonl' and pred['frontier_rows']==len(rr)==35
+    size=53 if a['phase']==CONTINUE else 35;gets=14 if size==53 else 7
+    p.require(pred['journal']==(PHASE+'.jsonl' if size==53 else 'inspect.jsonl') and pred['frontier_rows']==len(rr)==size
         and pred['frontier_hash']==rr[-1]['hash'] and pred['highwater']==rr[-1]['utc']
-        and pred['counts']==rr[-1]['counts']=={'GET':7,'PUT':0,'GIT_PUSH':0}
-        and set(pred['files_sha256'])==r.session_files(rr),'Exact latest35 frontier required')
+        and pred['counts']==rr[-1]['counts']=={'GET':gets,'PUT':0,'GIT_PUSH':0}
+        and set(pred['files_sha256'])==r.session_files(rr),'Exact latest public frontier required')
     for name,sha in pred['files_sha256'].items():
         if ledger and name=='probe-session.lock':
             ledger.lock_handle.seek(0);actual=hashlib.sha256(ledger.lock_handle.read()).hexdigest();ledger.lock_handle.seek(0)
@@ -144,8 +198,9 @@ def verify_state(plan,a,*,ledger=None):
         stop=starts[index+1] if index+1<len(starts) else len(rr)
         p.require((root/rr[j]['journal']).read_bytes()==''.join(p.canonical(x)+'\n' for x in rr[:stop]).encode(),'Historical prefix changed')
         p.require(read(root/('attempt-'+rr[j]['phase']+'.json'))=={k:rr[j][k] for k in ('plan_sha256','phase','journal','pid','predecessor')},'Historical marker differs')
-    p.require(not any((root/n).exists() for n in ('probe-session.sqlite3-wal','probe-session.sqlite3-journal',PHASE+'.jsonl','attempt-'+PHASE+'.json')),'Unpublished attempt/replay forbidden')
-    review=a['review'];latest=rr[24]
+    phase=a['phase']
+    p.require(not any((root/n).exists() for n in ('probe-session.sqlite3-wal','probe-session.sqlite3-journal',phase+'.jsonl','attempt-'+phase+'.json')),'Unpublished attempt/replay forbidden')
+    review=a['review'];latest=rr[35 if size==53 else 24]
     p.require(review['end_basis']==r.END_BASIS and review['original_pid']==latest['pid']
         and all(review[k] is True for k in ('human_review','terminal_code_path_checked','human_terminal_end_report','all_workers_ended','triggers_paused'))
         and isinstance(review['reviewer'],str) and review['reviewer'] and re.fullmatch('[0-9a-f]{64}',review['evidence_sha256'] or '')
@@ -157,20 +212,20 @@ def verify_state(plan,a,*,ledger=None):
     return rr
 
 def validate_locked(ledger,rows,state,a):
-    p.require(ledger.phase==PHASE and ledger.path.name==PHASE+'.jsonl' and rows==verify_state(ledger.p,a,ledger=ledger),'Public latest frontier differs')
+    p.require(ledger.phase==a['phase'] and ledger.path.name==a['phase']+'.jsonl' and rows==verify_state(ledger.p,a,ledger=ledger),'Public latest frontier differs')
 
 class PublicGuard(p.GrantGuard):
     def __init__(self,plan,grant,a):
         self.a=deepcopy(a);self.a_hash=p.digest(a);self.writer_authenticated=False
         self.tree_sha=c.git(Path(a['root']['directory']),'rev-parse',SEED+'^{tree}').decode().strip()
-        super().__init__(plan,grant,PHASE)
+        super().__init__(plan,grant,a['phase'])
     def deadlines(self):
         _,end=window(self.p,self.a)
         return [end,c.parse_utc(self.grant['expires_utc'])]
     def check(self,ledger=None):
         super().check(ledger)
         p.require(p.digest(self.a)==self.a_hash==self.grant['review_sha256'] and self.a['original_plan_sha256']==self.plan_hash
-            and self.a['scope']==SCOPE and self.phase==PHASE,'Live public review differs')
+            and self.a['scope']==SCOPE and self.phase==self.a['phase'],'Live public review differs')
         if ledger:
             p.require(ledger.public_root_hash==self.a_hash and ledger.counts['PUT']==0 and ledger.counts['GIT_PUSH']<=1,'Public live budget/review differs')
             c.root_matches(self.a)
@@ -185,31 +240,44 @@ class PublicGuard(p.GrantGuard):
 def authorize(plan,a,g,approved):
     shape(plan,a);window(plan,a)
     p.require(p.digest(a)==approved,'Independent public amendment hash differs')
-    r.validate_grant(plan,g,PHASE,approved)
+    r.validate_grant(plan,g,a['phase'],approved)
     p.require(c.parse_utc(g['expires_utc'])<=c.parse_utc(a['expires_utc']),'Grant exceeds public window')
     guard=PublicGuard(plan,g,a);r.verify_execution_code(a['execution_code']);verify_state(plan,a)
     return guard
 
 class PublicBoundary(r.RulesBoundary):
+    def request(self,method,route,payload=None):
+        try:return p.Boundary.request(self,method,route,payload)
+        except p.HTTPStatus as exc:
+            if exc.status==404:
+                category=(exc.diagnostic or {}).get('category')
+                if route==r.routes(self.p)[2] and category=='not-found':raise
+                if route==r.routes(self.p)[6] and getattr(self,'public_protection_checked',False) and category in ('not-found','branch-not-protected'):raise
+                raise PublicHalt('public-protection-unknown-404' if route==r.routes(self.p)[6] else 'public-unverified-404') from None
+            raise
     def identity(self,value):
-        p.require(isinstance(value,dict) and value.get('id')==RID and value.get('full_name')==REPO
+        ensure(isinstance(value,dict) and value.get('id')==RID and value.get('full_name')==REPO
             and value.get('private') is False and value.get('has_pages') is False and value.get('archived') is False
-            and value.get('permissions',{}).get('admin') is True,'Public exact identity/Pages/admin differs')
+            and value.get('permissions',{}).get('admin') is True,'public-identity-pages-admin-mismatch')
     def preflight(self,empty=False):
         fixed=r.routes(self.p);self.identity(self.request('GET',fixed[0]))
-        p.require(self.request('GET',fixed[1]).get('enabled') is False,'Actions must be disabled')
+        ensure(self.request('GET',fixed[1]).get('enabled') is False,'public-actions-enabled')
         for index in (2,):
             try:self.request('GET',fixed[index])
             except p.HTTPStatus as exc:p.require(exc.status==404,'Pages unavailable')
-            else:raise ValueError('Pages exists')
-        p.require(self.request('GET',fixed[3])==[] and self.request('GET',fixed[4])==[],'Positive200 empty rules/rulesets required')
+            else:raise PublicHalt('public-pages-present')
+        ensure(self.request('GET',fixed[3])==[] and self.request('GET',fixed[4])==[],'public-rules-or-rulesets-not-empty')
         branches=self.request('GET',fixed[5])
-        p.require(branches==[] if empty else isinstance(branches,list) and len(branches)==1
+        ensure(branches==[] if empty else isinstance(branches,list) and len(branches)==1
             and branches[0].get('name')==self.p['branch'] and branches[0].get('protected') is False
-            and branches[0].get('commit',{}).get('sha')==SEED, 'Empty repo or exact sole branch required')
-        try:self.request('GET',fixed[6])
-        except p.HTTPStatus as exc:p.require(exc.status==404,'Classic protection unavailable')
-        else:raise ValueError('Classic protection present')
+            and branches[0].get('commit',{}).get('sha')==SEED, 'public-branches-or-protection-mismatch')
+        if not empty:
+            self.public_protection_checked=True
+            try:
+                try:self.request('GET',fixed[6])
+                except p.HTTPStatus as exc:ensure(exc.status==404,'public-protection-inspection-unavailable')
+                else:raise PublicHalt('public-classic-protection-present')
+            finally:self.public_protection_checked=False
         self.ledger.emit('public_preflight',result='confirmed-public-empty' if empty else 'confirmed-public-original-root',scope=SCOPE)
     def writer_identity(self):
         original=self.reader;self.reader=self.writer
@@ -237,24 +305,26 @@ def push(client,a):
     head=p.verify_history(client,full=True)
     p.require(head['commit_sha']==SEED and head['body']==p.synthetic_seed(b.p) and len(head['body'])==1981,'Exact public root readback differs')
     b.preflight(empty=False);l.emit('phase_end',result='confirmed',scope=SCOPE,activation_allowed=False,
-        bootstrap_case_counts=deepcopy(l.cases['bootstrap']),phase_counts=deepcopy(l.phase_counts[PHASE]))
+        bootstrap_case_counts=deepcopy(l.cases['bootstrap']),phase_counts=deepcopy(l.phase_counts[a['phase']]))
 
 def main():
     cli=argparse.ArgumentParser(description=__doc__);cli.add_argument('--template');cli.add_argument('--real',action='store_true')
+    cli.add_argument('--phase',choices=p.PUBLIC_ROOT_PHASES,default=PHASE)
     for k in ('plan','amendment','grant','approved-amendment-sha256'):cli.add_argument('--'+k)
     args=cli.parse_args()
     if args.template:
         p.require(not args.real,'Template offline only')
-        with Path(args.template).open('x',encoding='utf-8') as f:json.dump(template(),f,indent=2)
+        with Path(args.template).open('x',encoding='utf-8') as f:json.dump(template(args.phase),f,indent=2)
         return 0
     p.require(args.real and all((args.plan,args.amendment,args.grant,args.approved_amendment_sha256)),'Default offline; full independent public review/grant required')
     plan,a,g=[read(x) for x in (args.plan,args.amendment,args.grant)]
+    p.require(args.phase==a['phase'],'Explicit public phase differs')
     guard=authorize(plan,a,g,args.approved_amendment_sha256)
     try:reader=p.read_token('Reader')
     except (KeyboardInterrupt,ValueError):
         print('Reader-Eingabe abgebrochen/ungueltig. Kein Sessionversuch/Request gestartet.');return 3
     guard.check();verify_state(plan,a)
-    root=Path(plan['journal_directory']);l=p.Ledger(plan,root/(PHASE+'.jsonl'),PHASE,root/'inspect.jsonl',public_root_amendment=a)
+    root=Path(plan['journal_directory']);l=p.Ledger(plan,root/(a['phase']+'.jsonl'),a['phase'],root/a['predecessor']['journal'],public_root_amendment=a)
     try:
         b=PublicBoundary(plan,l,reader,'',guard=guard);client=p.Client(b)
         l.emit('public_root_review',amendment_sha256=p.digest(a),grant_sha256=p.digest(g),scope=SCOPE,
@@ -263,7 +333,8 @@ def main():
         b.preflight(empty=True);guard.check(l)
         b.writer=p.read_token('Writer');guard.check(l);b.writer_identity();push(client,a)
         print('Urspruenglicher synthetischer blocked-Root bestaetigt. Keine Aktivierung.');return 0
-    except BaseException:
-        if not l.poisoned:l.emit('phase_halt',result='incomplete-no-retry-no-release',category='public-root-incomplete')
-        print('HALT: Public-Root nicht vollstaendig bestaetigt. Nicht erneut starten. Ergebnis: '+str(l.path));return 2
+    except BaseException as exc:
+        category=exc.category if isinstance(exc,PublicHalt) else 'public-http-'+str(exc.status) if isinstance(exc,p.HTTPStatus) else 'public-expired-or-local-verification'
+        if not l.poisoned:l.emit('phase_halt',result='incomplete-no-retry-no-release',category=category)
+        print('HALT: '+category+'. Nicht erneut starten. Ergebnis: '+str(l.path));return 2
     finally:l.close()

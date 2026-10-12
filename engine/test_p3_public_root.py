@@ -14,12 +14,12 @@ def inputs():return Path(os.environ.get('P3_PUBLIC_FIXTURE_INPUTS',str(W.parent/
 def read(f):return json.loads(Path(f).read_text(encoding='utf-8-sig'))
 def save(f,x):Path(f).write_text(p.canonical(x),encoding='utf-8')
 
-def fixture(td):
+def fixture(td,*,continuation=False):
     root=Path(td);session=root/'session';session.mkdir();base=inputs()
     plan=read(base/'p3-bootstrap-freigabevorbereitung-20261011/PLAN-NOT-APPROVED.json')
     oldplan=deepcopy(plan);plan['journal_directory']=str(session)
     i=read(base/'p3-reader-20h-20261012/INSPECTION.json');g=read(base/'p3-reader-20h-20261012/GRANT.json')
-    rows=read_rows(base/'p3-tarifbefund-20261012/session-snapshot/inspect.jsonl')
+    rows=read_rows(base/('p3-public-root-404-befund-20261012/session-snapshot/bootstrap-public-root-once.jsonl' if continuation else 'p3-tarifbefund-20261012/session-snapshot/inspect.jsonl'))
     original_root=Path(i['root']['directory']);shutil.copytree(base/'p3-tarifbefund-20261012/root-snapshot',root/'execution')
     proc=subprocess.Popen([sys.executable,'-B','-c','pass']);assert proc.wait(timeout=10)==0
     mapping={p.digest(oldplan):p.digest(plan),oldplan['journal_directory']:str(session),str(original_root):str(root/'execution')}
@@ -38,6 +38,9 @@ def fixture(td):
         if j==17:dd=bind(diag);bind(parent['interrupted_diagnosis']['grant'])
         if j==21:bind(parent['reader_validity']);pp=bind(parent);bind(i['parent_grant'])
         if j==24:ii=bind(i);gg=bind(g)
+        if j==35:
+            oldpublic=bind(read(base/'p3-public-root-hauptchat-abnahme-20261012/PUBLIC-AMENDMENT.json'))
+            oldgrant=bind(read(base/'p3-public-root-hauptchat-abnahme-20261012/PUBLIC-GRANT.json'))
         x=transform(row);x.pop('hash');x['hash']=p.digest(x);mapping[row['hash']]=x['hash'];translated.append(x)
     starts=[j for j,x in enumerate(translated) if x['event']=='phase_start']
     for n,j in enumerate(starts):
@@ -49,9 +52,9 @@ def fixture(td):
     db.execute('CREATE TABLE events (seq INTEGER PRIMARY KEY,body TEXT NOT NULL)')
     db.execute('CREATE TABLE frontier (id INTEGER PRIMARY KEY CHECK(id=1),plan TEXT NOT NULL,journal TEXT NOT NULL,published TEXT NOT NULL,highwater TEXT NOT NULL)')
     db.executemany('INSERT INTO events(body) VALUES (?)',[(p.canonical(x),) for x in translated])
-    db.execute('INSERT INTO frontier VALUES (1,?,?,?,?)',(p.digest(plan),'inspect.jsonl',translated[-1]['hash'],translated[-1]['utc']));db.commit();db.close()
+    db.execute('INSERT INTO frontier VALUES (1,?,?,?,?)',(p.digest(plan),u.PHASE+'.jsonl' if continuation else 'inspect.jsonl',translated[-1]['hash'],translated[-1]['utc']));db.commit();db.close()
     save(root/'plan.json',plan)
-    a=u.template();a.update(original_plan_sha256=p.digest(plan),original_expires_utc=plan['expires_utc'],root=ii['root'],
+    a=u.template(u.CONTINUE if continuation else u.PHASE);a.update(original_plan_sha256=p.digest(plan),original_expires_utc=plan['expires_utc'],root=ii['root'],
         execution_code=s.code_for(plan),not_before_utc=NOW,expires_utc='2026-10-14T20:00:00Z',time_authorization_sha256='e'*64)
     script=base/'p3-reader-20h-20261012/reader_inspection.py'
     a['history'].update(inspection=ii,grant=gg,operator_script={'path':str(script),'sha256':u.c.sha(script)},code_materialization=r.materialization(ii['execution_code']))
@@ -59,6 +62,7 @@ def fixture(td):
     a['predecessor'].update(frontier_hash=translated[-1]['hash'],highwater=translated[-1]['utc'],files_sha256={n:u.c.sha(session/n) for n in r.session_files(translated)})
     a['review'].update(reviewer='offline-fixture-only',evidence_sha256='e'*64,original_pid=proc.pid,observed_utc=NOW,
         terminal_code_path_checked=True,human_terminal_end_report=True,all_workers_ended=True,triggers_paused=True,human_review=True)
+    if continuation:a['stopped_public'].update(amendment=oldpublic,grant=oldgrant,code_materialization=r.materialization(oldpublic['execution_code']))
     save(root/'fixture-history-translation.json',{'copied_real_input_translated_to_fixture':True,'plan_directory_and_digests_rebound':True,'actual_ended_fixture_pid':proc.pid,'no_current_runtime_gate_bridged':True})
     return plan,a
 
@@ -66,14 +70,14 @@ def read_rows(f):return [json.loads(x) for x in Path(f).read_text(encoding='utf-
 
 def direct(root,a,*,mode='positive',kill=None,at=NOW,expiry=None,grant=None,approved=None):
     root=Path(root);out=root/'attempts';out.mkdir(exist_ok=True);out=out/('%03d'%len(list(out.iterdir())));out.mkdir()
-    plan=read(root/'plan.json');g=grant or s.t.fixture_grant(plan,a);g['phase']=u.PHASE
+    plan=read(root/'plan.json');g=grant or s.t.fixture_grant(plan,a);g['phase']=a['phase']
     if grant is None:g['expires_utc']=a['expires_utc']
     g['review_sha256']=p.digest(a) if grant is None else g['review_sha256']
     cfg={'root':str(root),'output':str(out),'mode':mode,'kill':kill,'at':at,'expiry':expiry,'deadline':a['expires_utc']}
     for name,x in [('amendment.json',a),('grant.json',g),('config.json',cfg)]:save(out/name,x)
     hook=out/'startup';hook.mkdir();(hook/'sitecustomize.py').write_text('import sys\nsys.path[:0]='+repr([str(W/'tools'),str(W/'engine')])+'\nimport p3_public_fixture\np3_public_fixture.install()\n',encoding='utf-8')
     env=p.git_environment();env.update(PYTHONPATH=str(hook),P3_PUBLIC_FIXTURE=str(out/'config.json'),PYTHONDONTWRITEBYTECODE='1',PYTHONUTF8='1',PYTHONIOENCODING='utf-8')
-    argv=[sys.executable,'-B',str(W/'tools/p3_public_root.py'),'--real','--plan',str(root/'plan.json'),'--amendment',str(out/'amendment.json'),'--grant',str(out/'grant.json'),'--approved-amendment-sha256',approved or p.digest(a)]
+    argv=[sys.executable,'-B',str(W/'tools/p3_public_root.py'),'--real','--phase',a['phase'],'--plan',str(root/'plan.json'),'--amendment',str(out/'amendment.json'),'--grant',str(out/'grant.json'),'--approved-amendment-sha256',approved or p.digest(a)]
     proc=subprocess.run(argv,env=env,capture_output=True,timeout=120);(out/'output.txt').write_bytes(proc.stdout+proc.stderr)
     save(out/'parent-wait.json',{'returncode':proc.returncode,'argv':argv});wire=read(out/'wire.json') if (out/'wire.json').exists() else None
     assert proc.returncode in (0,2,3,71),proc.stderr.decode();return proc.returncode,wire,out
@@ -81,9 +85,9 @@ def direct(root,a,*,mode='positive',kill=None,at=NOW,expiry=None,grant=None,appr
 def test_public_actual_positive_root_counters_no_activation_and_replay():
     with tempfile.TemporaryDirectory() as td:
         root=Path(td);plan,a=fixture(root);before=(root/'session/inspect.jsonl').read_bytes()
-        code,wire,out=direct(root,a);assert code==0 and len(wire['http'])==24 and wire['pushes']==1 and wire['prompts']==['Reader','Writer'],read(out/'output.txt') if False else (out/'output.txt').read_text()
-        rr=read_rows(root/'session'/ (u.PHASE+'.jsonl'));assert rr[-1]['counts']=={'GET':31,'PUT':0,'GIT_PUSH':1} and rr[-1]['result']=='confirmed'
-        assert rr[-1]['bootstrap_case_counts']==rr[-1]['counts'] and rr[-1]['phase_counts']=={'GET':24,'PUT':0,'GIT_PUSH':1}
+        code,wire,out=direct(root,a);assert code==0 and len(wire['http'])==23 and wire['pushes']==1 and wire['prompts']==['Reader','Writer'],(out/'output.txt').read_text()
+        rr=read_rows(root/'session'/ (u.PHASE+'.jsonl'));assert rr[-1]['counts']=={'GET':30,'PUT':0,'GIT_PUSH':1} and rr[-1]['result']=='confirmed'
+        assert rr[-1]['bootstrap_case_counts']==rr[-1]['counts'] and rr[-1]['phase_counts']=={'GET':23,'PUT':0,'GIT_PUSH':1}
         req=[x for x in rr if x['event']=='request' and x['phase']==u.PHASE];assert all(x['budget_phase']=='bootstrap' for x in req)
         assert (root/'session/inspect.jsonl').read_bytes()==before and (root/'session'/(u.PHASE+'.jsonl')).read_bytes().startswith(before)
         assert direct(root,a)[1]['prompts']==[]

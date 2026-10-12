@@ -44,6 +44,12 @@ def install():
             response=t.sim.Response(value)
         elif '/rules/branches/' in tail and mode=='403':raise t.http_error(req.full_url,403,'Resource not accessible by personal access token')
         elif '/rules/branches/' in tail and mode=='rules-present':response=t.sim.Response([{'type':'required_status_checks'}])
+        elif tail.endswith('/protection') and mode in ('unprotected-variant','protection-unknown','protection403'):
+            raise t.http_error(req.full_url,403 if mode=='protection403' else 404,'Branch not protected' if mode=='unprotected-variant' else 'Unknown protection reply')
+        elif tail.endswith('/protection') and mode=='protection-present':response=t.sim.Response({'required_status_checks':{}})
+        elif tail=='/pages' and mode=='pages-unknown':raise t.http_error(req.full_url,404,'Unknown missing site')
+        elif '/rules/branches/' in tail and mode=='rules404':raise t.http_error(req.full_url,404)
+        elif tail=='/branches' and mode=='protected':response=t.sim.Response([] if api.head is None else [{'name':u.p.PUBLIC_ROOT and plan['branch'],'protected':True,'commit':{'sha':u.SEED}}])
         else:
             response=api.open(req,**opts)
             if tail.startswith('/git/commits/') and mode=='bad-parent':

@@ -26,7 +26,7 @@ def unique(pairs):
     return obj
 
 
-def classify(error):
+def classify(error, *, protection_context=False):
     """Emit only allowlisted enums/numbers; no message, URL, header or raw body.
 
     Feature wording is merely a conservative lexical hint, NOT a documented
@@ -79,6 +79,7 @@ def classify(error):
         elif error.code == 403 and feature: category = 'feature-unavailable-hint'
         elif error.code == 401 and message == 'Bad credentials': category = 'authentication-denied'
         elif error.code == 404 and message == 'Not Found': category = 'not-found'
+        elif error.code == 404 and protection_context and message == 'Branch not protected': category = 'branch-not-protected'
         else: category = 'unknown-'+str(error.code)
         return {'category': category, 'feature_absence_proved': False, **hints}
     except Exception:

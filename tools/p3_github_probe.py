@@ -44,8 +44,10 @@ RULES_UPLOAD = 'bootstrap-rules403-upload-once'
 RULES_RESUME = 'bootstrap-rules403-preget-once'
 RULES_PHASES = (RULES_DIAG, RULES_UPLOAD, RULES_RESUME)
 PUBLIC_ROOT = 'bootstrap-public-root-once'
-BOOTSTRAP_PHASES = ('bootstrap', READER401_PHASE, *RULES_PHASES, PUBLIC_ROOT)
-GIT_PHASES = ('bootstrap', READER401_PHASE, RULES_UPLOAD, PUBLIC_ROOT)
+PUBLIC_CONTINUE = 'bootstrap-public-missing-branch-once'
+PUBLIC_ROOT_PHASES = (PUBLIC_ROOT, PUBLIC_CONTINUE)
+BOOTSTRAP_PHASES = ('bootstrap', READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES)
+GIT_PHASES = ('bootstrap', READER401_PHASE, RULES_UPLOAD, *PUBLIC_ROOT_PHASES)
 PHASES = ('bootstrap', 'activate', 'happy', 'lost-after', 'lost-before',
           'stale', 'process-loss', 'takeover', 'inspect')
 
@@ -259,17 +261,17 @@ class Ledger:
         require((phase in p['phases'] and reader401_amendment is None and rules403_amendment is None)
                 or (phase == READER401_PHASE and isinstance(reader401_amendment, dict) and rules403_amendment is None)
                 or (phase in RULES_PHASES and isinstance(rules403_amendment, dict) and reader401_amendment is None)
-                or (phase == PUBLIC_ROOT and isinstance(public_root_amendment, dict)
+                or (phase in PUBLIC_ROOT_PHASES and isinstance(public_root_amendment, dict)
                     and reader401_amendment is None and rules403_amendment is None),
                 'Phase outside plan/review')
-        require(public_root_amendment is None or phase == PUBLIC_ROOT, 'Public review cannot authorize another phase')
-        if phase in (READER401_PHASE, *RULES_PHASES, PUBLIC_ROOT):
+        require(public_root_amendment is None or phase in PUBLIC_ROOT_PHASES, 'Public review cannot authorize another phase')
+        if phase in (READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES):
             require(all((self.path.parent/name).is_file() for name in ('probe-session.sqlite3',
                 'probe-session.lock', 'attempt-bootstrap.json', 'bootstrap.jsonl')), 'Existing session files required')
             require((self.path.parent/'probe-session.lock').stat().st_size > 0, 'Original lock bytes required')
             require(not any((self.path.parent/name).exists() for name in ('probe-session.sqlite3-wal',
                 'probe-session.sqlite3-journal')), 'Unresolved session transaction')
-            if phase in (*RULES_PHASES, PUBLIC_ROOT):
+            if phase in (*RULES_PHASES, *PUBLIC_ROOT_PHASES):
                 require(all((self.path.parent/name).is_file() for name in
                     ('attempt-'+READER401_PHASE+'.json', READER401_PHASE+'.jsonl')), 'Original continuation files required')
         self.lock = self.path.parent/'probe-session.lock'
@@ -326,7 +328,7 @@ class Ledger:
                     validate_termination(p, reviewed_termination, previous)
                 if phase == 'takeover':
                     require(isinstance(reviewed_termination, dict), 'Separate exact termination review required')
-                if phase not in ('takeover', 'inspect', READER401_PHASE, *RULES_PHASES, PUBLIC_ROOT):
+                if phase not in ('takeover', 'inspect', READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES):
                     require(not halted and rows[-1]['event'] == 'phase_end' and rows[-1].get('result') == 'confirmed',
                             'Incomplete predecessor; inspection/review only')
                 if phase == 'activate':
@@ -353,7 +355,7 @@ class Ledger:
             if phase in RULES_PHASES:
                 from p3_rules403 import validate_locked
                 validate_locked(self, rows, state, rules403_amendment)
-            if phase == PUBLIC_ROOT:
+            if phase in PUBLIC_ROOT_PHASES:
                 from p3_public_root import validate_locked
                 validate_locked(self, rows, state, public_root_amendment)
                 # The two historical Inspector reads also belong to this
@@ -438,8 +440,9 @@ class Ledger:
         self.assert_published()
         require(method in self.counts and self.counts[method] < LIMITS[method], 'Global request budget exhausted')
         require(self.phase not in BOOTSTRAP_PHASES or method != 'PUT', 'Bootstrap forbids PUT')
-        if self.phase == PUBLIC_ROOT:
-            require(method in ('GET', 'GIT_PUSH') and self.phase_counts.get(self.phase, {}).get('GET', 0) < 24,
+        if self.phase in PUBLIC_ROOT_PHASES:
+            require(method in ('GET', 'GIT_PUSH') and self.phase_counts.get(self.phase, {}).get('GET', 0) < 23
+                    and sum(self.phase_counts.get(x, {}).get('GET', 0) for x in PUBLIC_ROOT_PHASES) < 30,
                     'Public root request scope/budget exhausted')
         if self.phase in (RULES_DIAG, RULES_RESUME):
             attempted = sum(self.phase_counts.get(phase, {}).get('GET', 0) for phase in (RULES_DIAG, RULES_RESUME))
@@ -447,7 +450,7 @@ class Ledger:
                     'Diagnosis GET-only budget exhausted')
         budget_phase = 'bootstrap' if self.phase in BOOTSTRAP_PHASES else self.phase
         case = self.cases.get(budget_phase, {})
-        if self.phase in (READER401_PHASE, *RULES_PHASES, PUBLIC_ROOT): fields['budget_phase'] = budget_phase
+        if self.phase in (READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES): fields['budget_phase'] = budget_phase
         if method in ('GET', 'PUT'):
             require(case.get(method, 0) < LIMITS['case_'+method.lower()+'s'], 'Case budget exhausted')
         if method != 'GET':
@@ -530,7 +533,7 @@ class Boundary:
             from p3_rules403 import RulesGuard
             require(isinstance(self.guard, RulesGuard), 'Bound rules review required')
             self.guard.validate_route(method, route)
-        if self.ledger.phase == PUBLIC_ROOT:
+        if self.ledger.phase in PUBLIC_ROOT_PHASES:
             from p3_public_root import PublicGuard
             require(isinstance(self.guard, PublicGuard), 'Bound public root guard required')
             self.guard.validate_route(method, route)
@@ -540,7 +543,7 @@ class Boundary:
                 and route == self.base+'/contents/'+gh.STORE_PATH), 'Unapproved request')
         fields = {'bytes': 0, 'write_id': None, 'old_blob': None, 'revision': None,
                   'parent_digest': None}
-        if self.ledger.phase in (*RULES_PHASES, PUBLIC_ROOT): fields['route'] = route
+        if self.ledger.phase in (*RULES_PHASES, *PUBLIC_ROOT_PHASES): fields['route'] = route
         if method == 'PUT':
             require(set(payload) == {'message', 'content', 'sha', 'branch'}
                     and payload['branch'] == self.p['branch'] and payload['sha'], 'No runtime bootstrap')
@@ -565,14 +568,16 @@ class Boundary:
                 require(len(raw) <= LIMITS['response_bytes'], 'Response limit')
                 status = resp.status
                 require(status in (200, 201), 'Unexpected HTTP status')
-                require(self.ledger.phase != PUBLIC_ROOT or status == 200, 'Public root GET needs positive200')
+                require(self.ledger.phase not in PUBLIC_ROOT_PHASES or status == 200, 'Public root GET needs positive200')
                 value = json.loads(raw)
             if fault == 'after': raise TimeoutError()
         except urllib.error.HTTPError as exc:
             diagnostic = None
-            if self.ledger.phase in (*RULES_PHASES, PUBLIC_ROOT):
+            if self.ledger.phase in (*RULES_PHASES, *PUBLIC_ROOT_PHASES):
                 from p3_http_diagnostics import classify
-                diagnostic = classify(exc)
+                diagnostic = classify(exc, protection_context=(self.ledger.phase in PUBLIC_ROOT_PHASES
+                    and getattr(self, 'public_protection_checked', False)
+                    and route == self.base+'/branches/'+urllib.parse.quote(self.p['branch'],safe='')+'/protection'))
             self.ledger.emit('response', result='http-'+str(exc.code),
                              **({'diagnostic': diagnostic} if diagnostic is not None else {}), **fields)
             self.guard.check(self.ledger)
@@ -595,7 +600,7 @@ class Boundary:
         self.ledger.assert_published()
         require(digest(self.p) == self.guard.plan_hash, 'Boundary plan changed')
         require(method != 'GIT_PUSH' or self.ledger.phase in GIT_PHASES, 'Bootstrap phase required')
-        if self.ledger.phase == PUBLIC_ROOT:
+        if self.ledger.phase in PUBLIC_ROOT_PHASES:
             from p3_public_root import PublicGuard
             require(isinstance(self.guard, PublicGuard), 'Bound public root guard required')
             require(method != 'GIT_PUSH' or self.guard.writer_authenticated, 'Writer authentication required before push')
