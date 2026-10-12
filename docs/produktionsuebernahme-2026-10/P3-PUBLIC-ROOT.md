@@ -1,5 +1,9 @@
 # Einmaliger öffentlicher Synthetik-Root
 
+Nachtrag: Die folgenden7GET-/24GET-Angaben beschreiben den historischen6ff40ca-
+Vertrag. Die korrigierte Vorprüfung und die gesonderte53-Zeilen-Fortsetzung stehen
+in P3-PUBLIC-MISSING-BRANCH.md: vor Anlage6GET, insgesamt23neueGET; alteZähler bleiben.
+
 Lokale Vorbereitung, kein Grant/Datum/API-Ergebnis oder echter Upload. Ausschließlich
 szoceikaiser/btc-p3-store-probe/ID1414013858, p3-synthetic-only, delivery/stream.json.
 Bewusste öffentliche Sichtbarkeit wird separat durch den unveränderten öffentlichen

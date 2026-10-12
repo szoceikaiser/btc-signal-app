@@ -122,7 +122,7 @@ def test_public_api_privacy_settings_writer_and_readback_denials():
             assert w['pushes']==int(mode in ('bad-parent','bad-tree','bad-body','lost-push'))
             assert w['prompts']==(['Reader','Writer'] if mode in ('writer403','bad-parent','bad-tree','bad-body','lost-push') else ['Reader'])
             rr=read_rows(root/'session'/(u.PHASE+'.jsonl'));assert not any(x['event']=='phase_end' and x.get('result')=='confirmed' for x in rr[35:])
-            if mode=='lost-push':assert len(w['http'])==8
+            if mode=='lost-push':assert len(w['http'])==7
             assert direct(root,a)[1]['prompts']==[];save(out/'countercase.json',{'mode':mode,'confirmed':False})
 
 def test_public_input_cancel_before_start_preserves_all_session_bytes():
@@ -151,7 +151,7 @@ def test_public_new_review_prepare_durable_hard_loss_blocks_replay():
             with tempfile.TemporaryDirectory() as td:
                 root=Path(td);plan,a=fixture(root);code,w,out=direct(root,a,kill=[point,event]);assert code==71 and w is None
                 trace=(out/'outbound.jsonl').read_text().splitlines() if (out/'outbound.jsonl').exists() else []
-                assert len(trace)==(0 if event=='public_root_review' else 8)
+                assert len(trace)==(0 if event=='public_root_review' else 7)
                 assert not any(json.loads(x)['method']=='GIT_PUSH' for x in trace)
                 assert direct(root,a)[1]['prompts']==[]
 
