@@ -91,7 +91,7 @@ def script(root,a,*,grant=None,mode='positive',kill=None,expiry=None,allow_push=
           '--amendment',str(out/'amendment.json'),'--grant',str(out/'grant.json'),'--approved-amendment-sha256',p.digest(a)]
     proc=subprocess.run(argv,env=env,capture_output=True,timeout=120)
     (out/'output.txt').write_bytes(proc.stdout+proc.stderr)
-    t.save(out/'parent-wait.json',{'returncode':proc.returncode,'actual_B_script':True})
+    t.save(out/'parent-wait.json',{'returncode':proc.returncode,'actual_B_script':True,'argv':argv})
     wire=t.read(out/'wire.json') if (out/'wire.json').exists() else None
     assert proc.returncode in (0,2,71),proc.stderr.decode()
     if wire:assert not wire['known_denial'],wire
