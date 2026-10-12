@@ -84,7 +84,12 @@ def template():
         'session_contract': 'sqlite-frontier-v2', 'expiry_policy': 'stop-all-outbound-no-grace'}
 
 
-def validate_plan(p):
+def validate_plan_structure(p):
+    """Original immutable contract, including a well-formed historical deadline.
+
+    This alone grants no current execution. Normal authorization also requires
+    validate_plan; the exact Reader amendment proves its own current validity.
+    """
     t = template()
     require(set(p) == set(t), 'Plan fields incomplete or unknown')
     require(p['schema'] == t['schema'] and p['source_head'] == SOURCE, 'Wrong source')
@@ -118,7 +123,14 @@ def validate_plan(p):
             and isinstance(r['nonce'], str) and re.fullmatch('[0-9a-f]{32}', r['nonce']), 'Fixed synthetic run required')
     require(len({r['nonce'] for r in p['runs']}) == 8, 'Unique nonces required')
     require(isinstance(p['expires_utc'], str) and p['expires_utc'].endswith('Z')
-            and datetime.fromisoformat(p['expires_utc'].replace('Z', '+00:00')) > datetime.now(timezone.utc),
+            and datetime.fromisoformat(p['expires_utc'].replace('Z', '+00:00')).tzinfo == timezone.utc,
+            'Plan expiry missing or invalid')
+    return p
+
+
+def validate_plan(p):
+    validate_plan_structure(p)
+    require(datetime.fromisoformat(p['expires_utc'].replace('Z', '+00:00')) > datetime.now(timezone.utc),
             'Plan expired or expiry missing')
     return p
 
@@ -206,8 +218,7 @@ class GrantGuard:
     def check(self, ledger=None):
         wall = datetime.now(timezone.utc)
         effective = max(wall, self.started + timedelta(seconds=time.monotonic()-self.started_mono))
-        deadlines = [datetime.fromisoformat(x['expires_utc'].replace('Z', '+00:00'))
-                     for x in (self.p, self.grant)]
+        deadlines = self.deadlines()
         valid = (not self.expired and wall >= self.last_wall and all(effective < d for d in deadlines)
                  and digest(self.p) == self.plan_hash and digest(self.grant) == self.grant_hash)
         self.expired = not valid
@@ -217,6 +228,10 @@ class GrantGuard:
             require(digest(ledger.p) == self.plan_hash and ledger.phase == self.phase,
                     'Live plan/phase differs from bound grant')
             ledger.check_time(wall)
+
+    def deadlines(self):
+        return [datetime.fromisoformat(x['expires_utc'].replace('Z', '+00:00'))
+                for x in (self.p, self.grant)]
 
 
 class Ledger:
@@ -237,6 +252,8 @@ class Ledger:
         require(self.path.parent.resolve() == Path(p['journal_directory']).resolve(), 'Journal directory pin mismatch')
         self.reader401_hash = digest(reader401_amendment) if reader401_amendment is not None else None
         self.rules403_hash = digest(rules403_amendment) if rules403_amendment is not None else None
+        self.reader_validity_hash = (digest(rules403_amendment['reader_validity'])
+            if isinstance(rules403_amendment, dict) and 'reader_validity' in rules403_amendment else None)
         require((phase in p['phases'] and reader401_amendment is None and rules403_amendment is None)
                 or (phase == READER401_PHASE and isinstance(reader401_amendment, dict) and rules403_amendment is None)
                 or (phase in RULES_PHASES and isinstance(rules403_amendment, dict) and reader401_amendment is None),
@@ -403,6 +420,10 @@ class Ledger:
             key = canonical(run); self.runs[key] = self.runs.get(key, 0)+1
 
     def charge(self, method, **fields):
+        if self.reader_validity_hash is not None:
+            self.checkpoint('before_reservation', method)
+            require(self.guard is not None, 'Reader validity needs bound guard before reservation')
+            self.guard.check(self)
         self.assert_published()
         require(method in self.counts and self.counts[method] < LIMITS[method], 'Global request budget exhausted')
         require(self.phase not in BOOTSTRAP_PHASES or method != 'PUT', 'Bootstrap forbids PUT')
@@ -435,6 +456,8 @@ class Ledger:
         try:
             self.checkpoint('before_commit', event)
             with self.transaction():
+                if event == 'phase_end' and self.reader_validity_hash is not None:
+                    self.guard.check(self)
                 self.db.execute('INSERT INTO events(body) VALUES (?)', (canonical(row),))
                 self.highwater = max((self.highwater, row['utc']),
                     key=lambda value: datetime.fromisoformat(value.replace('Z', '+00:00')))

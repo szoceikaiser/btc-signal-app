@@ -74,11 +74,12 @@ def upload_amendment(root,a,g):
     return u
 
 
-def script(root,a,*,grant=None,mode='positive',kill=None,expiry=None,allow_push=False):
+def script(root,a,*,grant=None,mode='positive',kill=None,expiry=None,allow_push=False,fixture_config=None):
     root=Path(root);plan=t.read(root/'plan.json');attempts=root/'direct-attempts';attempts.mkdir(exist_ok=True)
     out=attempts/('%03d'%len(list(attempts.iterdir())));out.mkdir()
     g=grant or t.fixture_grant(plan,a)
     cfg={'root':str(root),'output':str(out),'mode':mode,'kill':kill,'allow_fixture_push':allow_push}
+    if fixture_config:cfg.update(fixture_config)
     if expiry:
         start=datetime.now(timezone.utc)+timedelta(seconds=1);deadline=start+timedelta(seconds=60)
         cfg.update(start_utc=start.isoformat(),deadline=deadline.isoformat(),expire_on=expiry)

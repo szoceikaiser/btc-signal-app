@@ -35,6 +35,10 @@ SCOPES = {DIAG: 'reader-only-seven-fixed-routes-max-eight-GET-no-mutation',
           RESUME: 'reader-only-exact-21-row-pre-request-halt-shared-eight-GET-no-mutation',
           UPLOAD: 'one-original-root-push-positive-rules-only-no-activation'}
 END_BASIS = 'terminal-synchronous-phase-plus-human-end-report-fresh-os-check-exclusive-lock'
+WINDOW_SCHEMA = 'p3-rules403-preget-amendment-v2'
+WINDOW_SCOPE = 'exact21-reader-only-no-upload-no-grace-max60minutes'
+WINDOW_BASE_HEAD = 'cd082c225562cb4b80012458271993a29070605e'
+WINDOW_BASE_TREE = 'c41b792b0cb9ec4f8140dbe306470d01369f884a'
 
 
 class Halt(ValueError):
@@ -77,6 +81,44 @@ def grant_template(phase=DIAG):
     return {'schema': 'p3-human-grant-v2', 'plan_sha256': None, 'phase': phase,
             'approved_by': None, 'human_authorization': False, 'expires_utc': None,
             'approval_evidence_sha256': None, 'review_sha256': None}
+
+
+def reader_template():
+    value = template(RESUME)
+    value['schema'] = WINDOW_SCHEMA
+    value['reader_validity'] = {'schema': 'p3-reader-validity-v1', 'phase': RESUME,
+        'scope': WINDOW_SCOPE, 'original_plan_sha256': None, 'original_expires_utc': None,
+        'frontier_hash': None, 'frontier_rows': 21, 'counts': {'GET': 5, 'PUT': 0, 'GIT_PUSH': 0},
+        'independent_review_sha256': None, 'not_before_utc': None, 'expires_utc': None}
+    return value
+
+
+def has_reader_window(a):
+    return a.get('schema') == WINDOW_SCHEMA
+
+
+def validate_reader_window(plan, a, *, current):
+    """No general expiry override: only this exact reviewed Reader contract."""
+    p.require(a['phase'] == RESUME and has_reader_window(a), 'Reader time scope differs')
+    w = a['reader_validity']; pred = a['predecessor']
+    p.require(isinstance(w, dict) and set(w) == set(reader_template()['reader_validity'])
+        and w['schema'] == 'p3-reader-validity-v1' and w['phase'] == RESUME and w['scope'] == WINDOW_SCOPE
+        and w['original_plan_sha256'] == a['original_plan_sha256'] == p.digest(plan)
+        and w['original_expires_utc'] == plan['expires_utc']
+        and w['frontier_rows'] == pred['frontier_rows'] == 21
+        and w['frontier_hash'] == pred['frontier_hash']
+        and w['counts'] == pred['counts'] == {'GET': 5, 'PUT': 0, 'GIT_PUSH': 0}
+        and re.fullmatch('[0-9a-f]{64}', w['independent_review_sha256'] or '')
+        and w['independent_review_sha256'] == a['review']['evidence_sha256'], 'Reader validity binding differs')
+    for key in ('not_before_utc', 'expires_utc'):
+        p.require(isinstance(w[key], str) and w[key].endswith('Z'), 'Explicit UTC Reader window required')
+    start, end = [old.parse_utc(w[key]) for key in ('not_before_utc', 'expires_utc')]
+    p.require(old.parse_utc(plan['expires_utc']) <= start < end
+              and end-start <= p.timedelta(minutes=60) and a['expires_utc'] == w['expires_utc'],
+              'Reader window must follow original deadline and last at most60minutes')
+    if current:
+        p.require(start <= p.datetime.now(p.timezone.utc) < end, 'Reader window not started or expired')
+    return start, end
 
 
 def materialization(execution):
@@ -130,7 +172,7 @@ def validate_grant(plan, grant, phase, review_hash):
 
 
 def validate_shape(plan, a):
-    phase = a['phase']; t = template(phase)
+    phase = a['phase']; t = reader_template() if has_reader_window(a) else template(phase)
     p.require(set(a) == set(t) and a['schema'] == t['schema'] and a['scope'] == SCOPES[phase]
               and a['original_plan_sha256'] == p.digest(plan) and a['routes'] == routes(plan), 'Exact recovery scope required')
     for key in ('execution_code', 'predecessor', 'root', 'review'):
@@ -144,6 +186,7 @@ def validate_shape(plan, a):
         d = a['diagnosis']
         p.require(isinstance(d, dict) and set(d) == {'amendment', 'grant'}, 'Exact completed diagnosis review required')
         prior = d['amendment']
+        p.require(not has_reader_window(prior), 'Reader-only validity cannot authorize upload')
         p.require(prior['phase'] in (DIAG, RESUME) and prior['execution_code'] == a['execution_code']
                   and prior['reader401_amendment'] == a['reader401_amendment']
                   and prior['reader401_grant'] == a['reader401_grant'] and prior['root'] == a['root'],
@@ -160,15 +203,23 @@ def validate_shape(plan, a):
                   and set(a['execution_code']['code_pins']) >= set(prior['execution_code']['code_pins']),
                   'Original diagnosis/history or new executor mismatch')
         validate_shape(plan, prior); validate_grant(plan, d['grant'], DIAG, p.digest(prior))
+    if has_reader_window(a): validate_reader_window(plan, a, current=False)
 
 
 def authorize(plan, a, grant, approved_hash):
-    p.validate_plan(plan); validate_shape(plan, a)
+    validate_shape(plan, a)
+    if has_reader_window(a):
+        p.validate_plan_structure(plan); validate_reader_window(plan, a, current=True)
+    else: p.validate_plan(plan)
     p.require(p.digest(a) == approved_hash, 'Independent amendment hash required')
     validate_grant(plan, grant, a['phase'], approved_hash)
     p.require(old.parse_utc(grant['expires_utc']) <= old.parse_utc(a['expires_utc']), 'Grant outlives amendment')
     guard = RulesGuard(plan, grant, a)
     verify_historical_code(plan, a); verify_execution_code(a['execution_code'])
+    if has_reader_window(a):
+        p.require(old.git(p.ROOT, 'rev-parse', WINDOW_BASE_HEAD+'^{tree}').decode().strip() == WINDOW_BASE_TREE,
+                  'Accepted Reader predecessor code absent')
+        old.git(p.ROOT, 'merge-base', '--is-ancestor', WINDOW_BASE_HEAD, a['execution_code']['code_head'])
     return guard
 
 
@@ -184,7 +235,15 @@ class RulesGuard(p.GrantGuard):
                   and p.datetime.now(p.timezone.utc) < old.parse_utc(self.amendment['expires_utc']), 'Amendment changed/expired')
         if ledger:
             p.require(ledger.rules403_hash == self.amendment_hash, 'Live review differs from ledger')
+            if has_reader_window(self.amendment):
+                p.require(ledger.reader_validity_hash == p.digest(self.amendment['reader_validity']),
+                          'Live Reader validity differs from ledger')
             old.root_matches(self.amendment)
+
+    def deadlines(self):
+        if not has_reader_window(self.amendment): return super().deadlines()
+        _, end = validate_reader_window(self.p, self.amendment, current=True)
+        return [end, old.parse_utc(self.grant['expires_utc'])]
 
     def validate_route(self, method, route):
         p.require(method == 'GET', 'Recovery phases forbid mutating HTTP')
@@ -345,6 +404,7 @@ def validate_locked(ledger, rows, state, a):
     old.root_matches(a); old.verify_root(ledger.p, a['root']['directory'])
     p.require(not any((Path(a['root']['directory'])/name).exists() for name in
                       ('synthetic-askpass.py', 'synthetic-askpass.cmd')), 'Previous push preparation forbidden')
+    if has_reader_window(a): validate_reader_window(ledger.p, a, current=True)
 
 
 class RulesBoundary(p.Boundary):
@@ -387,9 +447,10 @@ def diagnose(client):
         if not ok: raise Halt('settings-identity-or-rules-not-empty')
         observations.append(positive_observations(plan)[i])
     ready = not blocked and observations == positive_observations(plan)
+    upload_eligible = ready and not has_reader_window(client.boundary.guard.amendment)
     ledger.emit('diagnosis', result='positive-normal-rules-path' if ready else 'blocked-feature-unavailable-hint',
-                observations=observations, upload_eligible=ready, feature_absence_proved=False)
-    ledger.emit('phase_end', result='confirmed', scope='read-only-diagnosis', upload_eligible=ready)
+                observations=observations, upload_eligible=upload_eligible, feature_absence_proved=False)
+    ledger.emit('phase_end', result='confirmed', scope='read-only-diagnosis', upload_eligible=upload_eligible)
     return ready
 
 
@@ -401,7 +462,8 @@ def main():
     args = parser.parse_args()
     if args.template:
         p.require(not args.real, 'Template offline only')
-        with Path(args.template).open('x', encoding='utf-8') as f: f.write(json.dumps(template(args.phase), indent=2)+'\n')
+        with Path(args.template).open('x', encoding='utf-8') as f:
+            f.write(json.dumps(reader_template() if args.phase == RESUME else template(args.phase), indent=2)+'\n')
         return 0
     p.require(args.real and all((args.plan, args.amendment, args.grant, args.approved_amendment_sha256)),
               'Default offline; exact independently reviewed amendment/grant required')
@@ -412,6 +474,12 @@ def main():
     ledger = p.Ledger(plan, result_path, args.phase, root/a['predecessor']['journal'], rules403_amendment=a)
     try:
         guard.check(ledger)
+        if has_reader_window(a):
+            ledger.emit('reader_validity', amendment_sha256=p.digest(a), grant_sha256=p.digest(grant),
+                        validity_sha256=p.digest(a['reader_validity']), validity=a['reader_validity'],
+                        execution_code=a['execution_code'], scope=WINDOW_SCOPE)
+            ledger.checkpoint('before_reader_input', 'reader_validity')
+            guard.check(ledger)
         reader = p.read_token('Reader')  # Diagnosis never asks for Writer.
         client = p.Client(RulesBoundary(plan, ledger, reader, '', guard=guard))
         ledger.emit('rules403_amendment', amendment_sha256=p.digest(a), execution_code=a['execution_code'],

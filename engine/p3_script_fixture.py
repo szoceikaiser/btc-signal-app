@@ -34,10 +34,16 @@ def install():
         @classmethod
         def now(cls,tz=None):return cls.current if tz else cls.current.replace(tzinfo=None)
     if Clock.current:p.datetime=Clock
+    if config.get('expire_on')=='monotonic':
+        monotonic=p.time.monotonic
+        Clock.elapsed=0
+        p.time.monotonic=lambda:monotonic()+Clock.elapsed
     def expire():Clock.current=datetime.fromisoformat(config['deadline'].replace('Z','+00:00'))
     def ask(label):
         result['prompts'].append(label)
         if config.get('expire_on')=='reader':expire()
+        if config.get('expire_on')=='rollback':Clock.current-=p.timedelta(seconds=1)
+        if config.get('expire_on')=='monotonic':Clock.elapsed=3601
         return t.sim.FIXTURE_TOKEN
     p.getpass.getpass=ask
     def reservation(method):
@@ -48,6 +54,7 @@ def install():
             f.write(p.canonical({'method':method,'published':published,'counts':last['counts']})+'\n');f.flush();os.fsync(f.fileno())
     def opened(req,**kw):
         reservation(req.method);result['http'].append({'method':req.method,'url':req.full_url})
+        if config.get('expire_on')=='lost-response':expire();raise TimeoutError('fixture lost response')
         value=api.open(req,**kw)
         if config.get('expire_on')=='response':expire()
         return value
@@ -68,6 +75,9 @@ def install():
         if [point,event]==config.get('kill'):
             save('cutpoint.json',{'point':point,'event':event,'pid':os.getpid()});os._exit(71)
         if point=='before_outbound' and config.get('expire_on')=='before-'+event:expire()
+        if (point,event)==('before_reader_input','reader_validity') and config.get('expire_on')=='before-input':expire()
+        if point=='before_reservation' and config.get('expire_on')=='before-reservation':expire()
+        if (point,event)==('before_commit','phase_end') and config.get('expire_on')=='before-confirmed':expire()
     p.Ledger.checkpoint=checkpoint
     # Observe the unchanged predicate; never change its input/result or exception.
     original_require=p.require

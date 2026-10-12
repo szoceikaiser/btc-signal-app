@@ -14,6 +14,13 @@ Write-Host 'Reader genau EINMAL verdeckt einfuegen, dann Enter. Keine Zeichen/St
 if ($Phase -ne 'Upload') {
     $probePhase = if ($Phase -eq 'DiagnoseFortsetzen') { 'bootstrap-rules403-preget-once' } else { 'bootstrap-rules403-diagnose-once' }
     Write-Host 'Nur lesende Diagnose, kein Writer und kein Upload.'
+    if ($Phase -eq 'DiagnoseFortsetzen') {
+        $readerAmendment = Get-Content -LiteralPath $AmendmentPath -Raw | ConvertFrom-Json
+        if ($readerAmendment.schema -ne 'p3-rules403-preget-amendment-v2') {
+            throw 'Exakter Reader-Gueltigkeitsnachtrag erforderlich. Originalplan nicht umdatieren.'
+        }
+        Write-Host 'Eigenes Reader-Zeitfenster maximal60Minuten; aktueller Reviewgrant erforderlich.'
+    }
 } else {
     $probePhase = 'bootstrap-rules403-upload-once'
     Write-Host 'Upload braucht einen eigenen spaeteren Reviewgrant. Writer erst nach erfolgreicher frischer Vorpruefung.'
