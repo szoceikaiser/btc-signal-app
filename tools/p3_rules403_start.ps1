@@ -1,5 +1,5 @@
 param(
-    [Parameter(Mandatory=$true)][ValidateSet('Diagnose','Upload')][string]$Phase,
+    [Parameter(Mandatory=$true)][ValidateSet('Diagnose','DiagnoseFortsetzen','Upload')][string]$Phase,
     [Parameter(Mandatory=$true)][string]$AmendmentPath,
     [Parameter(Mandatory=$true)][string]$GrantPath,
     [Parameter(Mandatory=$true)][string]$ApprovedAmendmentSha256,
@@ -11,8 +11,8 @@ if ([Console]::IsInputRedirected) { throw 'Ein sichtbares interaktives PowerShel
 Write-Host 'Nur nach eigener Hauptchat-Abnahme und exakt gebundenem Phasengrant starten.'
 Write-Host 'Vorhandene Session bleibt massgeblich. Nichts loeschen, neu anlegen oder erneut starten.'
 Write-Host 'Reader genau EINMAL verdeckt einfuegen, dann Enter. Keine Zeichen/Sternchen sind normal.'
-if ($Phase -eq 'Diagnose') {
-    $probePhase = 'bootstrap-rules403-diagnose-once'
+if ($Phase -ne 'Upload') {
+    $probePhase = if ($Phase -eq 'DiagnoseFortsetzen') { 'bootstrap-rules403-preget-once' } else { 'bootstrap-rules403-diagnose-once' }
     Write-Host 'Nur lesende Diagnose, kein Writer und kein Upload.'
 } else {
     $probePhase = 'bootstrap-rules403-upload-once'

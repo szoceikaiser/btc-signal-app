@@ -41,7 +41,8 @@ LIMITS = {'PUT': 48, 'GET': 384, 'GIT_PUSH': 1, 'mutations': 49,
 READER401_PHASE = 'bootstrap-reader401-once'
 RULES_DIAG = 'bootstrap-rules403-diagnose-once'
 RULES_UPLOAD = 'bootstrap-rules403-upload-once'
-RULES_PHASES = (RULES_DIAG, RULES_UPLOAD)
+RULES_RESUME = 'bootstrap-rules403-preget-once'
+RULES_PHASES = (RULES_DIAG, RULES_UPLOAD, RULES_RESUME)
 BOOTSTRAP_PHASES = ('bootstrap', READER401_PHASE, *RULES_PHASES)
 GIT_PHASES = ('bootstrap', READER401_PHASE, RULES_UPLOAD)
 PHASES = ('bootstrap', 'activate', 'happy', 'lost-after', 'lost-before',
@@ -405,8 +406,9 @@ class Ledger:
         self.assert_published()
         require(method in self.counts and self.counts[method] < LIMITS[method], 'Global request budget exhausted')
         require(self.phase not in BOOTSTRAP_PHASES or method != 'PUT', 'Bootstrap forbids PUT')
-        if self.phase == RULES_DIAG:
-            require(method == 'GET' and self.phase_counts.get(self.phase, {}).get('GET', 0) < 8,
+        if self.phase in (RULES_DIAG, RULES_RESUME):
+            attempted = sum(self.phase_counts.get(phase, {}).get('GET', 0) for phase in (RULES_DIAG, RULES_RESUME))
+            require(method == 'GET' and attempted < 8,
                     'Diagnosis GET-only budget exhausted')
         budget_phase = 'bootstrap' if self.phase in BOOTSTRAP_PHASES else self.phase
         case = self.cases.get(budget_phase, {})
