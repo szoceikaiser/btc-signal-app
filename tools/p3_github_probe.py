@@ -599,6 +599,7 @@ class Boundary:
             from p3_public_root import PublicGuard
             require(isinstance(self.guard, PublicGuard), 'Bound public root guard required')
             require(method != 'GIT_PUSH' or self.guard.writer_authenticated, 'Writer authentication required before push')
+            if method == 'GIT_PUSH': verify_code_pin(self.guard.a['execution_code'])
         self.guard.check(self.ledger)  # final check, after durable accounting/local prep
 
     def preflight(self, empty=False):

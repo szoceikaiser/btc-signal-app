@@ -236,7 +236,8 @@ def push(client,a):
     b.guard.check(l);l.emit('public_push_response',result='returned-success-not-yet-confirmed')
     head=p.verify_history(client,full=True)
     p.require(head['commit_sha']==SEED and head['body']==p.synthetic_seed(b.p) and len(head['body'])==1981,'Exact public root readback differs')
-    b.preflight(empty=False);l.emit('phase_end',result='confirmed',scope=SCOPE,activation_allowed=False)
+    b.preflight(empty=False);l.emit('phase_end',result='confirmed',scope=SCOPE,activation_allowed=False,
+        bootstrap_case_counts=deepcopy(l.cases['bootstrap']),phase_counts=deepcopy(l.phase_counts[PHASE]))
 
 def main():
     cli=argparse.ArgumentParser(description=__doc__);cli.add_argument('--template');cli.add_argument('--real',action='store_true')
@@ -257,7 +258,8 @@ def main():
     try:
         b=PublicBoundary(plan,l,reader,'',guard=guard);client=p.Client(b)
         l.emit('public_root_review',amendment_sha256=p.digest(a),grant_sha256=p.digest(g),scope=SCOPE,
-            execution_code=a['execution_code'],original_expires_utc=plan['expires_utc'],not_before_utc=a['not_before_utc'],expires_utc=a['expires_utc'])
+            execution_code=a['execution_code'],original_expires_utc=plan['expires_utc'],not_before_utc=a['not_before_utc'],expires_utc=a['expires_utc'],
+            bootstrap_case_counts=deepcopy(l.cases['bootstrap']))
         b.preflight(empty=True);guard.check(l)
         b.writer=p.read_token('Writer');guard.check(l);b.writer_identity();push(client,a)
         print('Urspruenglicher synthetischer blocked-Root bestaetigt. Keine Aktivierung.');return 0

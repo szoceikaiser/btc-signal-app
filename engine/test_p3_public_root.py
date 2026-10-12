@@ -83,6 +83,7 @@ def test_public_actual_positive_root_counters_no_activation_and_replay():
         root=Path(td);plan,a=fixture(root);before=(root/'session/inspect.jsonl').read_bytes()
         code,wire,out=direct(root,a);assert code==0 and len(wire['http'])==24 and wire['pushes']==1 and wire['prompts']==['Reader','Writer'],read(out/'output.txt') if False else (out/'output.txt').read_text()
         rr=read_rows(root/'session'/ (u.PHASE+'.jsonl'));assert rr[-1]['counts']=={'GET':31,'PUT':0,'GIT_PUSH':1} and rr[-1]['result']=='confirmed'
+        assert rr[-1]['bootstrap_case_counts']==rr[-1]['counts'] and rr[-1]['phase_counts']=={'GET':24,'PUT':0,'GIT_PUSH':1}
         req=[x for x in rr if x['event']=='request' and x['phase']==u.PHASE];assert all(x['budget_phase']=='bootstrap' for x in req)
         assert (root/'session/inspect.jsonl').read_bytes()==before and (root/'session'/(u.PHASE+'.jsonl')).read_bytes().startswith(before)
         assert direct(root,a)[1]['prompts']==[]
@@ -149,3 +150,35 @@ def test_public_new_review_prepare_durable_hard_loss_blocks_replay():
                 assert len(trace)==(0 if event=='public_root_review' else 8)
                 assert not any(json.loads(x)['method']=='GIT_PUSH' for x in trace)
                 assert direct(root,a)[1]['prompts']==[]
+
+def test_public_unknown_prior_mutation_missing_marker_live_exact_pid_and_kernel_lock():
+    for mode in ('unknown','prior-put','prior-push','missing-marker','live-exact-pid','kernel-lock','prior-preparation'):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);plan,a=fixture(root);session=root/'session'
+            if mode in ('unknown','prior-put','prior-push','live-exact-pid'):
+                rr=read_rows(session/'inspect.jsonl')
+                if mode=='unknown':rr[32]['result']='unknown'
+                elif mode=='live-exact-pid':rr[24]['pid']=os.getpid();a['review']['original_pid']=os.getpid()
+                else:rr[31]['method']='PUT' if mode=='prior-put' else 'GIT_PUSH'
+                counts={'GET':0,'PUT':0,'GIT_PUSH':0};prior='0'*64
+                for row in rr:
+                    row.pop('hash');row['previous_hash']=prior
+                    if row['event']=='request':counts[row['method']]+=1
+                    row['counts']=deepcopy(counts);row['hash']=p.digest(row);prior=row['hash']
+                (session/'inspect.jsonl').write_text(''.join(p.canonical(x)+'\n' for x in rr),encoding='utf-8',newline='\n')
+                save(session/'attempt-inspect.json',{k:rr[24][k] for k in ('plan_sha256','phase','journal','pid','predecessor')})
+                db=sqlite3.connect(session/'probe-session.sqlite3');db.execute('DELETE FROM events');db.executemany('INSERT INTO events(body) VALUES (?)',[(p.canonical(x),) for x in rr]);db.execute('UPDATE frontier SET published=?',(rr[-1]['hash'],));db.commit();db.close()
+                a['predecessor'].update(frontier_hash=rr[-1]['hash'],counts=rr[-1]['counts'],files_sha256={n:u.c.sha(session/n) for n in r.session_files(rr)})
+            if mode=='missing-marker':(session/'attempt-inspect.json').rename(session/'held-marker')
+            if mode=='prior-preparation':(root/'execution/synthetic-askpass.py').write_text('fixture prior preparation')
+            handle=None
+            if mode=='kernel-lock':
+                handle=(session/'probe-session.lock').open('r+b');handle.seek(0)
+                if os.name=='nt':
+                    import msvcrt;msvcrt.locking(handle.fileno(),msvcrt.LK_NBLCK,1)
+                else:
+                    import fcntl;fcntl.flock(handle,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            try:
+                code,w,out=direct(root,a);assert code==2 and not w['prompts'] and not w['http'];save(out/'countercase.json',{'mode':mode})
+            finally:
+                if handle:handle.close()
