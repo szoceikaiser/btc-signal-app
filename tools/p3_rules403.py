@@ -109,7 +109,7 @@ def verify_historical_code(plan, a):
         p.require(execution['code_head'] == SCRIPT_HEAD and execution['code_tree'] == SCRIPT_TREE
                   and old.git(p.ROOT, 'rev-parse', SCRIPT_HEAD+'^{tree}').decode().strip() == SCRIPT_TREE
                   and prior['code_materialization'] == materialization(execution), 'Wrong historical script executor')
-        names = set(plan['code_pins']) | set(old.git(p.ROOT, 'diff', '--name-only', old.ORIGINAL_HEAD, SCRIPT_HEAD).decode().splitlines())
+        names = set(plan['code_pins']) | old.EXTRA_PINS | set(old.git(p.ROOT, 'diff', '--name-only', old.ORIGINAL_HEAD, SCRIPT_HEAD).decode().splitlines())
         p.require(set(execution['code_pins']) == names, 'Complete historical script pins required')
         old.git(p.ROOT, 'merge-base', '--is-ancestor', SCRIPT_HEAD, a['execution_code']['code_head'])
     elif a['phase'] == UPLOAD and a['diagnosis']['amendment']['phase'] == RESUME:

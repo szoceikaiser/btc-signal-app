@@ -28,7 +28,7 @@ def execution(head=None):
 
 
 def code_for(plan,head=None):
-    value=execution(head);names=set(value['code_pins'])|set(plan['code_pins'])
+    value=execution(head);names=set(value['code_pins'])|set(plan['code_pins'])|t.c.EXTRA_PINS
     value['code_pins']={name:(hashlib.sha256(t.c.git(W,'show',head+':'+name)).hexdigest() if head else t.c.sha(W/name)) for name in names}
     return value
 
