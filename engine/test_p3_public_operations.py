@@ -20,7 +20,7 @@ def fixture(root):
 
 def direct(root,a,section='initial',*,review=None,mode='positive',grant=None):
     root=Path(root);plan=n.read(root/'plan.json');attempt=root/'ops-attempts';attempt.mkdir(exist_ok=True);out=attempt/('%03d'%len(list(attempt.iterdir())));out.mkdir()
-    g=grant or o.grant_template(section);rows=n.read_rows(root/'session'/next(x.name for x in sorted((root/'session').glob('*.jsonl'),key=lambda f:len(f.read_text()))[-1:])) if False else None
+    g=grant or o.grant_template(section)
     db=o.sqlite3.connect(root/'session/probe-session.sqlite3');state=db.execute('SELECT journal,published FROM frontier').fetchone();db.close();rr=n.read_rows(root/'session'/state[0])
     if grant is None:g.update(plan_sha256=p.digest(plan),amendment_sha256=p.digest(a),human_authorization=True,approved_by='offline-fixture',approval_evidence_sha256='e'*64,
         expires_utc=a['expires_utc'],review_sha256=p.digest(review) if section=='takeover' else p.digest(a),entry_journal=state[0],entry_frontier_hash=state[1],entry_rows=len(rr),entry_files_sha256={x:o.u.c.sha(root/'session'/x) for x in o.r.session_files(rr)})
@@ -50,6 +50,7 @@ def test_public_operations_full_actual_section_loss_parent_stop_takeover_uncerta
         assert not (root/'session/public-store-takeover.jsonl').exists()
         wire=[n.read(f) for f in out.glob('wire-*.json')];assert sum(len(x['prompts']) for x in wire)==2
         assert direct(root,a)[0]==2
+        assert direct(root,a,'takeover')[0]==2
         review=review_for(root,receipt);code,out2,_=direct(root,a,'takeover',review=review);assert code==0,(out2/'output.txt').read_text()
         assert direct(root,a,'takeover',review=review)[0]==2
         code,out3,_=direct(root,a,'inspect');assert code==0,(out3/'output.txt').read_text()
@@ -57,8 +58,28 @@ def test_public_operations_full_actual_section_loss_parent_stop_takeover_uncerta
         assert end['counts']['PUT']==29 and end['counts']['GIT_PUSH']==1 and end['counts']['GET']<=384
         api=n.read(root/'api-state.json');body=o.p.base64.b64decode(api['records'][api['head']]['body']);env=json.loads(body)
         messages=env['snapshot']['commands'][receipt['owner']['run_id']]['_delivery']['messages'];assert messages[0]['status']=='uncertain'
-        assert env['snapshot']['control']['owner'] is None and env['snapshot']['control']['mode']=='blocked'
+        assert env['snapshot']['control']['owner'] is None and env['snapshot']['control']['mode']=='active'
+        record={'body':body,'blob_sha':api['records'][api['head']]['blob'],'commit_sha':api['head']}
+        class FrozenRead:
+            def read(self,*a,**k):return record
+            def update(self,*a,**k):raise AssertionError('Uncertain claim must not write')
+        store=p.gh.GitHubStore(FrozenRead(),plan['repo'],plan['branch'],p.STORE,plan['runs'][6]['run_id'],plan['runs'][6]['run_attempt'])
+        store.owner=p.owner(plan,6);n.s.t.previous.rejects(p.gh.StoreConflict,store.__enter__)
         n.save(root/'FINAL-BUDGET.json',{'counts':end['counts'],'phase_counts':{phase:{m:sum(x['event']=='request' and x.get('method')==m and x['phase']==phase for x in n.read_rows(root/'session/public-store-inspect.jsonl')) for m in ('GET','PUT','GIT_PUSH')} for phase in o.ORDER},'receipt':receipt,'sending_uncertain':True})
+
+def test_public_operations_wrong_takeover_owner_revision_and_missing_wait_evidence():
+    root=Path(os.environ['P3_OPS_COMPLETED_FIXTURE'])
+    receipt=n.read(next(root.glob('ops-attempts/*/receipt.json')));plan=n.read(root/'plan.json')
+    review=review_for(root,receipt)
+    for mode in ('owner','revision','commit','not-waited','wrong-exit'):
+        changed=deepcopy(review)
+        if mode=='owner':changed['expected_owner']['nonce']='f'*32
+        if mode=='revision':changed['expected_revision']+=1
+        if mode=='commit':changed['expected_commit']='f'*40
+        if mode=='not-waited':changed['termination']['observed_wait']=False
+        if mode=='wrong-exit':changed['termination']['exit_code']=0
+        if mode=='wrong-exit':n.s.t.previous.rejects(ValueError,lambda:p.require(changed['termination']['exit_code']==23,'Actual loss exit23 required'))
+        else:n.s.t.previous.rejects(ValueError,lambda:p.validate_termination(plan,changed,root/'session/public-store-process-loss.jsonl'))
 
 def test_public_operations_input_deadline_public_settings_and_false_history_stop():
     for mode in ('input-cancel','input-expiry','private','rules-present','late-put','false-history'):

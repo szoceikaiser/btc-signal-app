@@ -25,7 +25,8 @@ vorweg erzeugt. Keine automatischeFortsetzung, Frist oderOwnerlease.
 Takeover:neuer eigenständigerGrant bindet wirkliche neuesteFrontier und separat
 reviewte Originalquittung/Owner/Commit/Revision, alleWorker beendet/Triggerpausiert.
 Der bestehende Übernahmevertrag macht sending ohneZustellbeleg uncertain, blockiert
-denStore und erlaubt keine erneuteNachricht. Das Reviewfeld run_completed bezeichnet
+neueClaims und erlaubt keine erneuteNachricht. mode bleibt dabei active; die
+Zustellsperre folgt aus uncertain, keine Engineänderung. Das Reviewfeld run_completed bezeichnet
 hier positivesProzessende, keinen erfolgreichenSignal-/Run-health-Abschluss.
 
 Inspect:nochmals eigener lesenderGrant, aktuelleFrontier;0PUT. Kein erneuterGit-Push,
