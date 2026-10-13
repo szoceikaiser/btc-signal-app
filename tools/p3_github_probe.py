@@ -47,6 +47,7 @@ PUBLIC_ROOT = 'bootstrap-public-root-once'
 PUBLIC_CONTINUE = 'bootstrap-public-missing-branch-once'
 PUBLIC_ROOT_PHASES = (PUBLIC_ROOT, PUBLIC_CONTINUE)
 OPS_PHASES = {'public-store-'+x:x for x in ('activate','happy','lost-after','process-loss','takeover','inspect')}
+HAPPY_READ_PHASE = 'public-store-happy-readback-once'
 BOOTSTRAP_PHASES = ('bootstrap', READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES)
 GIT_PHASES = ('bootstrap', READER401_PHASE, RULES_UPLOAD, *PUBLIC_ROOT_PHASES)
 PHASES = ('bootstrap', 'activate', 'happy', 'lost-after', 'lost-before',
@@ -249,7 +250,8 @@ class Ledger:
     blocks every later opener. No automatic repair, resume or lock bypass.
     """
     def __init__(self, p, path, phase, previous=None, reviewed_termination=None, reader401_amendment=None,
-                 rules403_amendment=None, public_root_amendment=None, operations_amendment=None):
+                 rules403_amendment=None, public_root_amendment=None, operations_amendment=None,
+                 happy_readback_amendment=None):
         self.p, self.path, self.phase = deepcopy(p), Path(path), phase
         self.counts = {'GET': 0, 'PUT': 0, 'GIT_PUSH': 0}
         self.cases, self.runs, self.run, self.phase_counts = {}, {}, None, {}
@@ -263,17 +265,21 @@ class Ledger:
             if isinstance(rules403_amendment, dict) and 'reader_validity' in rules403_amendment else None)
         self.public_root_hash = digest(public_root_amendment) if public_root_amendment is not None else None
         self.operations_hash = digest(operations_amendment) if operations_amendment is not None else None
+        self.happy_readback_hash = digest(happy_readback_amendment) if happy_readback_amendment is not None else None
         require((phase in p['phases'] and reader401_amendment is None and rules403_amendment is None)
                 or (phase == READER401_PHASE and isinstance(reader401_amendment, dict) and rules403_amendment is None)
                 or (phase in RULES_PHASES and isinstance(rules403_amendment, dict) and reader401_amendment is None)
                 or (phase in PUBLIC_ROOT_PHASES and isinstance(public_root_amendment, dict)
                     and reader401_amendment is None and rules403_amendment is None)
                 or (phase in OPS_PHASES and isinstance(operations_amendment,dict)
-                    and reader401_amendment is None and rules403_amendment is None and public_root_amendment is None),
+                    and reader401_amendment is None and rules403_amendment is None and public_root_amendment is None)
+                or (phase == HAPPY_READ_PHASE and isinstance(happy_readback_amendment,dict)
+                    and all(x is None for x in (reader401_amendment,rules403_amendment,public_root_amendment,operations_amendment))),
                 'Phase outside plan/review')
+        require(happy_readback_amendment is None or phase == HAPPY_READ_PHASE,'Happy read review cannot authorize another phase')
         require(operations_amendment is None or phase in OPS_PHASES,'Operations review cannot authorize another phase')
         require(public_root_amendment is None or phase in PUBLIC_ROOT_PHASES, 'Public review cannot authorize another phase')
-        if phase in (READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES,*OPS_PHASES):
+        if phase in (READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES,*OPS_PHASES,HAPPY_READ_PHASE):
             require(all((self.path.parent/name).is_file() for name in ('probe-session.sqlite3',
                 'probe-session.lock', 'attempt-bootstrap.json', 'bootstrap.jsonl')), 'Existing session files required')
             require((self.path.parent/'probe-session.lock').stat().st_size > 0, 'Original lock bytes required')
@@ -336,7 +342,7 @@ class Ledger:
                     validate_termination(p, reviewed_termination, previous)
                 if phase == 'takeover':
                     require(isinstance(reviewed_termination, dict), 'Separate exact termination review required')
-                if phase not in ('takeover', 'inspect', READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES,*OPS_PHASES):
+                if phase not in ('takeover', 'inspect', READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES,*OPS_PHASES,HAPPY_READ_PHASE):
                     require(not halted and rows[-1]['event'] == 'phase_end' and rows[-1].get('result') == 'confirmed',
                             'Incomplete predecessor; inspection/review only')
                 if phase == 'activate':
@@ -372,6 +378,10 @@ class Ledger:
             if phase in OPS_PHASES:
                 from p3_public_operations import validate_locked
                 validate_locked(self,rows,state,operations_amendment,reviewed_termination)
+                self.cases['bootstrap']['GET'] += self.cases.get('inspect',{}).get('GET',0)
+            if phase == HAPPY_READ_PHASE:
+                from p3_happy_readback import validate_locked
+                validate_locked(self,rows,state,happy_readback_amendment)
                 self.cases['bootstrap']['GET'] += self.cases.get('inspect',{}).get('GET',0)
             self.prior_rows = rows
             # An interrupted phase start must not disappear behind a previously
@@ -438,20 +448,23 @@ class Ledger:
         self.counts[method] += 1
         by_phase = self.phase_counts.setdefault(phase, {'GET': 0, 'PUT': 0, 'GIT_PUSH': 0})
         by_phase[method] += 1
-        phase = 'bootstrap' if phase in BOOTSTRAP_PHASES else OPS_PHASES.get(phase,phase)
+        phase = 'bootstrap' if phase in BOOTSTRAP_PHASES else 'happy' if phase == HAPPY_READ_PHASE else OPS_PHASES.get(phase,phase)
         case = self.cases.setdefault(phase, {'GET': 0, 'PUT': 0, 'GIT_PUSH': 0})
         case[method] += 1
         if method == 'PUT' and run:
             key = canonical(run); self.runs[key] = self.runs.get(key, 0)+1
 
     def charge(self, method, **fields):
-        if self.reader_validity_hash is not None or self.public_root_hash is not None or self.operations_hash is not None:
+        if self.reader_validity_hash is not None or self.public_root_hash is not None or self.operations_hash is not None or self.happy_readback_hash is not None:
             self.checkpoint('before_reservation', method)
             require(self.guard is not None, 'Reader validity needs bound guard before reservation')
             self.guard.check(self)
         self.assert_published()
         require(method in self.counts and self.counts[method] < LIMITS[method], 'Global request budget exhausted')
         require(self.phase not in BOOTSTRAP_PHASES or method != 'PUT', 'Bootstrap forbids PUT')
+        if self.phase == HAPPY_READ_PHASE:
+            require(method == 'GET' and self.phase_counts.get(self.phase,{}).get('GET',0)<13
+                    and self.counts['PUT']==11 and self.counts['GIT_PUSH']==1,'Happy read-only 13GET budget')
         if self.phase in OPS_PHASES:
             require(method in ('GET','PUT') and self.counts['GIT_PUSH']==1,'Operations forbid additional Git/methods')
             require(method!='PUT' or OPS_PHASES[self.phase]!='inspect','Inspection cannot write')
@@ -463,7 +476,7 @@ class Ledger:
             attempted = sum(self.phase_counts.get(phase, {}).get('GET', 0) for phase in (RULES_DIAG, RULES_RESUME))
             require(method == 'GET' and attempted < 8,
                     'Diagnosis GET-only budget exhausted')
-        budget_phase = 'bootstrap' if self.phase in BOOTSTRAP_PHASES else OPS_PHASES.get(self.phase,self.phase)
+        budget_phase = 'bootstrap' if self.phase in BOOTSTRAP_PHASES else 'happy' if self.phase == HAPPY_READ_PHASE else OPS_PHASES.get(self.phase,self.phase)
         case = self.cases.get(budget_phase, {})
         if self.phase in (READER401_PHASE, *RULES_PHASES, *PUBLIC_ROOT_PHASES): fields['budget_phase'] = budget_phase
         if method in ('GET', 'PUT'):
@@ -488,7 +501,7 @@ class Ledger:
         try:
             self.checkpoint('before_commit', event)
             with self.transaction():
-                if event == 'phase_end' and (self.reader_validity_hash is not None or self.public_root_hash is not None or self.operations_hash is not None):
+                if event == 'phase_end' and (self.reader_validity_hash is not None or self.public_root_hash is not None or self.operations_hash is not None or self.happy_readback_hash is not None):
                     self.guard.check(self)
                 self.db.execute('INSERT INTO events(body) VALUES (?)', (canonical(row),))
                 self.highwater = max((self.highwater, row['utc']),
@@ -556,13 +569,17 @@ class Boundary:
             from p3_public_operations import OperationsGuard
             require(isinstance(self.guard,OperationsGuard),'Bound public operations guard required')
             self.guard.validate_route(method,route)
+        if self.ledger.phase == HAPPY_READ_PHASE:
+            from p3_happy_readback import HappyReadGuard
+            require(isinstance(self.guard,HappyReadGuard),'Bound happy readback guard required')
+            self.guard.validate_route(method,route)
         require(method != 'PUT' or self.ledger.phase not in ('inspect', *BOOTSTRAP_PHASES), 'Phase cannot PUT')
         require(route.startswith(self.base+'/') or route == self.base, 'Foreign repository route')
         require(method == 'GET' or (method == 'PUT' and self.allowed
                 and route == self.base+'/contents/'+gh.STORE_PATH), 'Unapproved request')
         fields = {'bytes': 0, 'write_id': None, 'old_blob': None, 'revision': None,
                   'parent_digest': None}
-        if self.ledger.phase in (*RULES_PHASES, *PUBLIC_ROOT_PHASES,*OPS_PHASES): fields['route'] = route
+        if self.ledger.phase in (*RULES_PHASES, *PUBLIC_ROOT_PHASES,*OPS_PHASES,HAPPY_READ_PHASE): fields['route'] = route
         if method == 'PUT':
             require(set(payload) == {'message', 'content', 'sha', 'branch'}
                     and payload['branch'] == self.p['branch'] and payload['sha'], 'No runtime bootstrap')
@@ -587,14 +604,14 @@ class Boundary:
                 require(len(raw) <= LIMITS['response_bytes'], 'Response limit')
                 status = resp.status
                 require(status in (200, 201), 'Unexpected HTTP status')
-                require(self.ledger.phase not in PUBLIC_ROOT_PHASES or status == 200, 'Public root GET needs positive200')
+                require(self.ledger.phase not in (*PUBLIC_ROOT_PHASES,HAPPY_READ_PHASE) or status == 200, 'Public read needs positive200')
                 value = json.loads(raw)
             if fault == 'after': raise TimeoutError()
         except urllib.error.HTTPError as exc:
             diagnostic = None
-            if self.ledger.phase in (*RULES_PHASES, *PUBLIC_ROOT_PHASES,*OPS_PHASES):
+            if self.ledger.phase in (*RULES_PHASES, *PUBLIC_ROOT_PHASES,*OPS_PHASES,HAPPY_READ_PHASE):
                 from p3_http_diagnostics import classify
-                diagnostic = classify(exc, protection_context=(self.ledger.phase in (*PUBLIC_ROOT_PHASES,*OPS_PHASES)
+                diagnostic = classify(exc, protection_context=(self.ledger.phase in (*PUBLIC_ROOT_PHASES,*OPS_PHASES,HAPPY_READ_PHASE)
                     and getattr(self, 'public_protection_checked', False)
                     and route == self.base+'/branches/'+urllib.parse.quote(self.p['branch'],safe='')+'/protection'))
             self.ledger.emit('response', result='http-'+str(exc.code),
@@ -618,6 +635,9 @@ class Boundary:
         self.ledger.checkpoint('before_outbound', method)
         self.ledger.assert_published()
         require(digest(self.p) == self.guard.plan_hash, 'Boundary plan changed')
+        if self.ledger.phase == HAPPY_READ_PHASE:
+            from p3_happy_readback import HappyReadGuard
+            require(isinstance(self.guard,HappyReadGuard) and method=='GET','Happy readback HTTP GET only')
         if self.ledger.phase in OPS_PHASES:
             from p3_public_operations import OperationsGuard
             require(isinstance(self.guard,OperationsGuard) and method in ('GET','PUT'),'Bound operations HTTP only')
