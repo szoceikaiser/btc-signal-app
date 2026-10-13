@@ -109,6 +109,19 @@ def eligible(plan,a,rows,phase,review=None):
     for x in rows[112:]:
         if x['event']=='operations_review':p.require(x['amendment_sha256']==p.digest(a) and x['execution_code']==a['execution_code'],'Operations review/code changed')
         if x['event']=='response' and x['result']=='unknown':p.require(x['phase']=='public-store-lost-after' and x['bytes']>0,'Unclear write/read cannot be bypassed')
+    indices=[j for j,x in enumerate(rows) if j>=112 and x['event']=='phase_start']
+    for k,j in enumerate(indices):
+        stop=indices[k+1] if k+1<len(indices) else len(rows)
+        auth,record=rows[j+1:j+3]
+        p.require(auth['event']=='authorization' and record['event']=='operations_review','Missing durable operations authorization')
+        oldg=record['section_grant'];section=section_for(rows[j]['phase'])
+        p.require(set(oldg)==set(grant_template(section)) and oldg['schema']=='p3-human-operations-section-v1'
+            and oldg['section']==section and oldg['phases']==SECTIONS[section] and oldg['human_authorization'] is True
+            and oldg['plan_sha256']==p.digest(plan) and oldg['amendment_sha256']==p.digest(a)
+            and auth['grant_sha256']==record['grant_sha256']==p.digest(oldg)
+            and auth['review_sha256']==oldg['review_sha256'] and auth['grant_expires_utc']==oldg['expires_utc']
+            and all(u.c.parse_utc(a['not_before_utc'])<=u.c.parse_utc(x['utc'])<min(u.c.parse_utc(a['expires_utc']),u.c.parse_utc(oldg['expires_utc'])) for x in rows[j:stop]),
+            'Historical operations section/grant/timeliness differs')
 
 def latest(plan,a,phase,review=None):
     root=Path(plan['journal_directory']);db=sqlite3.connect((root/'probe-session.sqlite3').as_uri()+'?mode=ro&immutable=1',uri=True)
@@ -201,7 +214,7 @@ def run_phase(plan,a,g,phase,reader,writer,review):
         reviewed_termination=review if phase=='public-store-takeover' else None,operations_amendment=a)
     try:
         b=OperationsBoundary(plan,l,reader,writer,guard=guard);client=p.Client(b)
-        l.emit('operations_review',amendment_sha256=p.digest(a),grant_sha256=p.digest(g),execution_code=a['execution_code'],section=g['section'])
+        l.emit('operations_review',amendment_sha256=p.digest(a),grant_sha256=p.digest(g),execution_code=a['execution_code'],section=g['section'],section_grant=g)
         b.preflight();p.verify_history(client)
         native=p.OPS_PHASES[phase]
         if native=='activate':p.activation(client)
