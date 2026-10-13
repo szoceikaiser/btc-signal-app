@@ -14,12 +14,12 @@ def inputs():return Path(os.environ.get('P3_PUBLIC_FIXTURE_INPUTS',str(W.parent/
 def read(f):return json.loads(Path(f).read_text(encoding='utf-8-sig'))
 def save(f,x):Path(f).write_text(p.canonical(x),encoding='utf-8')
 
-def fixture(td,*,continuation=False):
+def fixture(td,*,continuation=False,root_success=False):
     root=Path(td);session=root/'session';session.mkdir();base=inputs()
     plan=read(base/'p3-bootstrap-freigabevorbereitung-20261011/PLAN-NOT-APPROVED.json')
     oldplan=deepcopy(plan);plan['journal_directory']=str(session)
     i=read(base/'p3-reader-20h-20261012/INSPECTION.json');g=read(base/'p3-reader-20h-20261012/GRANT.json')
-    rows=read_rows(base/('p3-public-root-404-befund-20261012/session-snapshot/bootstrap-public-root-once.jsonl' if continuation else 'p3-tarifbefund-20261012/session-snapshot/inspect.jsonl'))
+    rows=read_rows(base/('p3-public-root-erfolg-20261013/session-snapshot/bootstrap-public-missing-branch-once.jsonl' if root_success else 'p3-public-root-404-befund-20261012/session-snapshot/bootstrap-public-root-once.jsonl' if continuation else 'p3-tarifbefund-20261012/session-snapshot/inspect.jsonl'))
     original_root=Path(i['root']['directory']);shutil.copytree(base/'p3-tarifbefund-20261012/root-snapshot',root/'execution')
     proc=subprocess.Popen([sys.executable,'-B','-c','pass']);assert proc.wait(timeout=10)==0
     mapping={p.digest(oldplan):p.digest(plan),oldplan['journal_directory']:str(session),str(original_root):str(root/'execution')}
@@ -41,6 +41,9 @@ def fixture(td,*,continuation=False):
         if j==35:
             oldpublic=bind(read(base/'p3-public-root-hauptchat-abnahme-20261012/PUBLIC-AMENDMENT.json'))
             oldgrant=bind(read(base/'p3-public-root-hauptchat-abnahme-20261012/PUBLIC-GRANT.json'))
+        if j==53:
+            successful=bind(read(base/'p3-public-branch-hauptchat-abnahme-20261013/PUBLIC-CONTINUATION.json'))
+            successgrant=bind(read(base/'p3-public-branch-hauptchat-abnahme-20261013/PUBLIC-GRANT.json'))
         x=transform(row);x.pop('hash');x['hash']=p.digest(x);mapping[row['hash']]=x['hash'];translated.append(x)
     starts=[j for j,x in enumerate(translated) if x['event']=='phase_start']
     for n,j in enumerate(starts):
@@ -52,7 +55,7 @@ def fixture(td,*,continuation=False):
     db.execute('CREATE TABLE events (seq INTEGER PRIMARY KEY,body TEXT NOT NULL)')
     db.execute('CREATE TABLE frontier (id INTEGER PRIMARY KEY CHECK(id=1),plan TEXT NOT NULL,journal TEXT NOT NULL,published TEXT NOT NULL,highwater TEXT NOT NULL)')
     db.executemany('INSERT INTO events(body) VALUES (?)',[(p.canonical(x),) for x in translated])
-    db.execute('INSERT INTO frontier VALUES (1,?,?,?,?)',(p.digest(plan),u.PHASE+'.jsonl' if continuation else 'inspect.jsonl',translated[-1]['hash'],translated[-1]['utc']));db.commit();db.close()
+    db.execute('INSERT INTO frontier VALUES (1,?,?,?,?)',(p.digest(plan),u.CONTINUE+'.jsonl' if root_success else u.PHASE+'.jsonl' if continuation else 'inspect.jsonl',translated[-1]['hash'],translated[-1]['utc']));db.commit();db.close()
     save(root/'plan.json',plan)
     a=u.template(u.CONTINUE if continuation else u.PHASE);a.update(original_plan_sha256=p.digest(plan),original_expires_utc=plan['expires_utc'],root=ii['root'],
         execution_code=s.code_for(plan),not_before_utc=NOW,expires_utc='2026-10-14T20:00:00Z',time_authorization_sha256='e'*64)
@@ -64,6 +67,8 @@ def fixture(td,*,continuation=False):
         terminal_code_path_checked=True,human_terminal_end_report=True,all_workers_ended=True,triggers_paused=True,human_review=True)
     if continuation:a['stopped_public'].update(amendment=oldpublic,grant=oldgrant,code_materialization=r.materialization(oldpublic['execution_code']))
     save(root/'fixture-history-translation.json',{'copied_real_input_translated_to_fixture':True,'plan_directory_and_digests_rebound':True,'actual_ended_fixture_pid':proc.pid,'no_current_runtime_gate_bridged':True})
+    if root_success:
+        save(root/'successful-root-amendment.json',successful);save(root/'successful-root-grant.json',successgrant)
     return plan,a
 
 def read_rows(f):return [json.loads(x) for x in Path(f).read_text(encoding='utf-8').splitlines()]

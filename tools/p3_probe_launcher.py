@@ -8,15 +8,17 @@ import sys
 import p3_github_probe as probe
 
 
-def observe_exit(process, plan, journal, timeout=300):
+def observe_exit(process, plan, journal, timeout=300, *, expected_phase='process-loss'):
     code = process.wait(timeout=timeout)  # timeout is never evidence of termination
     rows = probe.Ledger.verify(journal, probe.digest(plan))
     boundaries = [r for r in rows if r['event'] == 'loss_boundary']
     sending = [r for r in rows if r['event'] == 'sending']
     probe.require(boundaries and sending and boundaries[-1]['run'] == sending[-1]['run']
-                  and not any(r['event'] == 'phase_end' and r['phase'] == 'process-loss' for r in rows),
+                  and expected_phase in ('process-loss','public-store-process-loss')
+                  and not any(r['event'] == 'phase_end' and r['phase'] == expected_phase for r in rows),
                   'No confirmed interrupted sending boundary')
-    probe.require([r for r in rows if r['event'] == 'phase_start'][-1]['pid'] == process.pid,
+    probe.require([r for r in rows if r['event'] == 'phase_start'][-1]['pid'] == process.pid
+                  and [r for r in rows if r['event'] == 'phase_start'][-1]['phase']==expected_phase,
                   'Observed process must own interrupted phase')
     row = sending[-1]
     return {'schema': 'p3-parent-wait-exit-v2', 'plan_sha256': probe.digest(plan),
