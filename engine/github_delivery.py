@@ -35,6 +35,22 @@ class StoreUnavailable(StoreError):
     pass
 
 
+class BranchMoved(StoreConflict):
+    def __init__(self, before, after):
+        self.before, self.after = before, after
+        super().__init__('GitHub store branch moved during read')
+
+
+class WriteUnconfirmed(StoreConflict):
+    def __init__(self, category):
+        self.category = category
+        super().__init__('GitHub write not confirmed at branch head')
+
+
+class StoreHTTPFailure(StoreUnavailable):
+    pass
+
+
 def _digest(value):
     return hashlib.sha256(canonical(value).encode('utf-8')).hexdigest()
 
@@ -85,7 +101,7 @@ class GitHubContentsClient:
             # Never include a response body, URL with credentials, or token in logs.
             if exc.code == 409:
                 raise StoreConflict('GitHub store conflict') from None
-            raise StoreUnavailable('GitHub store HTTP '+str(exc.code)) from None
+            raise StoreHTTPFailure('GitHub store HTTP '+str(exc.code)) from None
         except (urllib.error.URLError, TimeoutError, OSError):
             raise StoreUnavailable('GitHub store request outcome unknown') from None
 
@@ -105,7 +121,7 @@ class GitHubContentsClient:
         record = self.read_at(repo, commit_sha, path)
         latest = self._request('GET', self._route(repo, '/git/ref/heads/' + urllib.parse.quote(branch, safe='')))
         if latest['object']['sha'] != commit_sha:
-            raise StoreConflict('GitHub store branch moved during read')
+            raise BranchMoved(commit_sha, latest['object']['sha'])
         return record
 
     def read_at(self, repo, commit_sha, path=STORE_PATH):
@@ -247,15 +263,35 @@ class GitHubStore:
             try:
                 commit_sha = self.client.update(self.repo, self.branch,
                     self._record['blob_sha'], body, write_id, self.path)
+            except StoreHTTPFailure:
+                raise
             except StoreUnavailable:
                 # A lost PUT response is resolved only by an exact, independently
                 # read write and parent commit; all other outcomes remain blocked.
                 commit_sha = None
-            record, observed = self._read()
-            if (record['body'] != body or observed != next_envelope
-                    or (commit_sha is not None and record['commit_sha'] != commit_sha)
-                    or self.client.parents(self.repo, record['commit_sha']) != [prior_commit]):
-                raise StoreConflict('GitHub write not confirmed at branch head')
+            attempts = getattr(self.client, 'confirmation_attempts', 1)
+            if type(attempts) is not int or attempts not in (1, 3):
+                raise WriteUnconfirmed('invalid-confirmation-bound')
+            for attempt in range(attempts):
+                try:
+                    reader = getattr(self.client, 'confirmation_read', self.client.read)
+                    record = reader(self.repo, self.branch, self.path, retrying=attempt>0) if hasattr(self.client, 'confirmation_read') else reader(self.repo, self.branch, self.path)
+                    observed = self._parse(record)
+                except BranchMoved as exc:
+                    permitted = (prior_commit in (exc.before, exc.after)
+                        and all(isinstance(x,str) and re.fullmatch('[0-9a-f]{40}',x) for x in (exc.before,exc.after))
+                        and (commit_sha is None or {exc.before,exc.after}<={prior_commit,commit_sha}))
+                    if permitted and attempt+1<attempts: continue
+                    raise WriteUnconfirmed('unstable-confirmation-head') from None
+                if record['commit_sha'] == prior_commit and record == self._record:
+                    if attempt+1<attempts: continue
+                    raise WriteUnconfirmed('old-confirmed-only')
+                if (record['body'] != body or observed != next_envelope
+                        or (commit_sha is not None and record['commit_sha'] != commit_sha)):
+                    raise WriteUnconfirmed('foreign-or-different-confirmation')
+                if self.client.parents(self.repo, record['commit_sha']) != [prior_commit]:
+                    raise WriteUnconfirmed('wrong-confirmation-parent')
+                break
         except BaseException:
             self._halted = True
             raise

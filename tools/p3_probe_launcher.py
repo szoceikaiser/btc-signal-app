@@ -14,7 +14,7 @@ def observe_exit(process, plan, journal, timeout=300, *, expected_phase='process
     boundaries = [r for r in rows if r['event'] == 'loss_boundary']
     sending = [r for r in rows if r['event'] == 'sending']
     probe.require(boundaries and sending and boundaries[-1]['run'] == sending[-1]['run']
-                  and expected_phase in ('process-loss','public-store-process-loss')
+                  and expected_phase in ('process-loss','public-store-process-loss','public-rest-process-loss')
                   and not any(r['event'] == 'phase_end' and r['phase'] == expected_phase for r in rows),
                   'No confirmed interrupted sending boundary')
     probe.require([r for r in rows if r['event'] == 'phase_start'][-1]['pid'] == process.pid

@@ -1,0 +1,18 @@
+{
+  "schema": "p3-human-finish-section-v1",
+  "section": "inspect",
+  "phases": [
+    "public-rest-inspect"
+  ],
+  "plan_sha256": null,
+  "review_sha256": null,
+  "amendment_sha256": null,
+  "human_authorization": false,
+  "approved_by": null,
+  "approval_evidence_sha256": null,
+  "expires_utc": null,
+  "entry_journal": null,
+  "entry_rows": null,
+  "entry_frontier_hash": null,
+  "entry_files_sha256": null
+}
