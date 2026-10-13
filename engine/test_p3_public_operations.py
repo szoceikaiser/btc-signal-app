@@ -51,6 +51,7 @@ def test_public_operations_full_actual_section_loss_parent_stop_takeover_uncerta
         wire=[n.read(f) for f in out.glob('wire-*.json')];assert sum(len(x['prompts']) for x in wire)==2
         assert direct(root,a)[0]==2
         assert direct(root,a,'takeover')[0]==2
+        check_takeover_countercases(root)
         review=review_for(root,receipt);code,out2,_=direct(root,a,'takeover',review=review);assert code==0,(out2/'output.txt').read_text()
         assert direct(root,a,'takeover',review=review)[0]==2
         code,out3,_=direct(root,a,'inspect');assert code==0,(out3/'output.txt').read_text()
@@ -67,9 +68,10 @@ def test_public_operations_full_actual_section_loss_parent_stop_takeover_uncerta
         store.owner=p.owner(plan,6);n.s.t.previous.rejects(p.gh.StoreConflict,store.__enter__)
         n.save(root/'FINAL-BUDGET.json',{'counts':end['counts'],'phase_counts':{phase:{m:sum(x['event']=='request' and x.get('method')==m and x['phase']==phase for x in n.read_rows(root/'session/public-store-inspect.jsonl')) for m in ('GET','PUT','GIT_PUSH')} for phase in o.ORDER},'receipt':receipt,'sending_uncertain':True})
 
-def test_public_operations_wrong_takeover_owner_revision_and_missing_wait_evidence():
-    root=Path(os.environ['P3_OPS_COMPLETED_FIXTURE'])
+def check_takeover_countercases(root):
+    root=Path(root)
     receipt=n.read(next(root.glob('ops-attempts/*/receipt.json')));plan=n.read(root/'plan.json')
+    a=n.read(root/'ops-attempts/000/amendment.json');rows=n.read_rows(root/'session/public-store-process-loss.jsonl')
     review=review_for(root,receipt)
     for mode in ('owner','revision','commit','not-waited','wrong-exit'):
         changed=deepcopy(review)
@@ -78,8 +80,7 @@ def test_public_operations_wrong_takeover_owner_revision_and_missing_wait_eviden
         if mode=='commit':changed['expected_commit']='f'*40
         if mode=='not-waited':changed['termination']['observed_wait']=False
         if mode=='wrong-exit':changed['termination']['exit_code']=0
-        if mode=='wrong-exit':n.s.t.previous.rejects(ValueError,lambda:p.require(changed['termination']['exit_code']==23,'Actual loss exit23 required'))
-        else:n.s.t.previous.rejects(ValueError,lambda:p.validate_termination(plan,changed,root/'session/public-store-process-loss.jsonl'))
+        n.s.t.previous.rejects(ValueError,lambda:o.eligible(plan,a,rows,'public-store-takeover',changed))
 
 def test_public_operations_input_deadline_public_settings_and_false_history_stop():
     for mode in ('input-cancel','input-expiry','private','rules-present','late-put','false-history'):

@@ -54,7 +54,11 @@ Vorfahr/fremderRoot/Pfad. Die ersteAktivierung verlangt exaktRootbytes/Revision0
 GlobalAltGET37/PUT0/Git1 bleibt. VerbindlicheOriginalgrenzen384GET/48PUT/Git1/
 49Mutationen,12PUT und128GET jeRun/Fall,768000Storebytes/2MiBAntworten. Runidentitäten/
 Attempts/Nonces unverändert. Tatsächliche vollständigeFolge undGET-Restbudget werden
-imLieferbericht aus dem simuliertenWire ausgewiesen. Jede versuchteMutation/Read vor
+imLieferbericht aus dem simuliertenWire ausgewiesen: activate26GET/1PUT, happy76/11,
+lost-after103/11, process-loss71/5, takeover38/1, inspect19/0. Zusammen333neueGET,
+29PUT; mitAlt37GET/Git1 Gesamt370GET/29PUT/Git1=30Mutationsversuche. Rest14GET,
+19PUT/Mutationen,0Git. Drei CAS-Verlierer enthalten;26tatsächlicheFixturecommits.
+Jede versuchteMutation/Read vor
 Outbound durable gezählt, keineRefunds/Blind-Retries; Datumguard vorOutbound und
 confirmed, keinNachlauf. UngeklärterWrite/abgelaufenerGrant sperrtFolgephasen.
 
