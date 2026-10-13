@@ -158,7 +158,7 @@ class OperationsGuard(p.GrantGuard):
             or re.fullmatch(re.escape(base)+r'/contents/delivery/stream\.json\?ref=[0-9a-f]{40}',route)
             or re.fullmatch(re.escape(base)+r'/git/commits/[0-9a-f]{40}',route)
             or re.fullmatch(re.escape(base)+r'/git/trees/[0-9a-f]{40}\?recursive=1',route)
-            or re.fullmatch(re.escape(base)+r'/compare/[0-9a-f]{40}\.\.\.[0-9a-f]{40}',route)),'Unapproved operations route')
+            or re.fullmatch(re.escape(base)+r'/compare/[0-9a-f]{40}\.\.\.[0-9a-f]{40}\?per_page=1',route)),'Unapproved operations route')
 
 class OperationsBoundary(u.PublicBoundary):
     def preflight(self,empty=False):
@@ -183,6 +183,7 @@ def authorize(plan,a,g,section,approved,review):
     shape(plan,a);window(plan,a);r.verify_execution_code(a['execution_code'])
     p.require(p.digest(a)==approved and g['section']==section and u.c.parse_utc(g['expires_utc'])<=u.c.parse_utc(a['expires_utc']),'Section/amendment/deadline mismatch')
     guard=OperationsGuard(plan,g,a,SECTIONS[section][0]);state,rows=latest(plan,a,guard.phase,review)
+    u.c.root_matches(a['root_success']['amendment']);u.c.verify_root(plan,a['root_success']['amendment']['root']['directory'])
     p.require(g['entry_journal']==state[1] and g['entry_frontier_hash']==state[2] and g['entry_rows']==len(rows)
         and set(g['entry_files_sha256'])==r.session_files(rows),'Grant must bind actual latest entry')
     for name,value in g['entry_files_sha256'].items():p.require(u.c.sha(Path(plan['journal_directory'])/name)==value,'Grant entry bytes changed')
@@ -232,7 +233,9 @@ def main():
         p.require(args.receipt and not Path(args.receipt).exists(),'New actual parent receipt path required')
         command=[sys.executable,'-B',str(p.ROOT/'tools/p3_public_operations.py'),*sys.argv[1:],'--worker']
         process=subprocess.Popen(command)
-        code=process.wait(timeout=1200)
+        try:code=process.wait(timeout=1200)
+        except subprocess.TimeoutExpired:
+            print('HALT: parent-wait-timeout. PID '+str(process.pid)+' nicht als beendet belegt; keine Quittung, kein Retry.');return 2
         if code==3:print('Eingabe abgebrochen: kein neuer Versuch.');return 3
         if code!=23:print('HALT: initial-section-not-complete. Kein Takeover.');return 2
         journal=Path(plan['journal_directory'])/(INITIAL[-1]+'.jsonl')
