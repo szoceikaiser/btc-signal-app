@@ -1,5 +1,5 @@
-# P3 review template outside .github/workflows; never scheduled or installed.
-# P4 must review the complete activation diff and the actual private store.
+# Review template outside .github/workflows. No schedule, never installed here.
+# Keep literal false AND disabled runtime. P4 reviews every binding and trigger.
 name: Production delivery (DISABLED TEMPLATE)
 on:
   workflow_dispatch:
@@ -11,9 +11,46 @@ concurrency:
 jobs:
   delivery:
     if: ${{ false }}
-    runs-on: ubuntu-latest
+    # A surviving journal volume is required; hosted ephemeral checkout is insufficient.
+    runs-on: [self-hosted, btc-reviewed-host]
     timeout-minutes: 15
     steps:
-      - run: |
-          echo 'This template is intentionally disabled.'
-          exit 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Refuse disabled runtime before any credential or store access
+        run: >-
+          python tools/produktion_candidate_runner.py
+          --runtime ops/produktion/github-runtime.disabled.json
+          --kind signal --data-dir site/data
+      # Reviewable intended binding, still unreachable. No provisioning/startup fallback.
+      # The actual host must supply fresh policy/journal files for this exact run
+      # and an independently reviewed enabled runtime. No token retrieval here.
+      - name: Reviewed production entry (disabled)
+        if: ${{ false }}
+        env:
+          BTC_DELIVERY_ADAPTER: github
+          BTC_DELIVERY_RUNNER_ROOT: ${{ github.workspace }}
+          BTC_DELIVERY_RUN_REPOSITORY: ${{ github.repository }}
+          BTC_DELIVERY_WORKFLOW: .github/workflows/production-delivery.yml
+          BTC_DELIVERY_RUN_ID: ${{ github.run_id }}
+          BTC_DELIVERY_RUN_ATTEMPT: ${{ github.run_attempt }}
+          BTC_DELIVERY_CODE_SHA: ${{ github.sha }}
+          BTC_DELIVERY_EXPECTED_START_MS: ${{ vars.BTC_REVIEWED_EXPECTED_START_MS }}
+          BTC_DELIVERY_STORE_ID: ${{ vars.BTC_REVIEWED_STORE_ID }}
+          BTC_DELIVERY_GITHUB_REPO: ${{ vars.BTC_REVIEWED_STORE_REPOSITORY }}
+          BTC_DELIVERY_GITHUB_BRANCH: ${{ vars.BTC_REVIEWED_STORE_BRANCH }}
+          BTC_DELIVERY_BOT_IDENTITY: ${{ vars.BTC_REVIEWED_BOT_IDENTITY }}
+          BTC_DELIVERY_CONFIRMATION_POLICY: github-confirmation-v1
+          BTC_DELIVERY_CONFIRMATION_CONFIG: ${{ vars.BTC_REVIEWED_POLICY_FILE }}
+          BTC_DELIVERY_REQUEST_JOURNAL: ${{ vars.BTC_REVIEWED_JOURNAL_FILE }}
+          BTC_REVIEWED_RUNTIME_FILE: ${{ vars.BTC_REVIEWED_RUNTIME_FILE }}
+          BTC_DELIVERY_GITHUB_TOKEN: ${{ secrets.BTC_REVIEWED_STORE_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
+        run: >-
+          python tools/produktion_candidate_runner.py
+          --runtime "$BTC_REVIEWED_RUNTIME_FILE"
+          --kind signal --data-dir site/data

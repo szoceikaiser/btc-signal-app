@@ -92,9 +92,13 @@ class GitHubContentsClient:
             'Content-Type': 'application/json',
             'User-Agent': 'btc-delivery-store'})
         try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                raw = response.read(MAX_RESPONSE_BYTES+1)
-                if len(raw) > MAX_RESPONSE_BYTES:
+            opener = getattr(self, 'open_request', urllib.request.urlopen)
+            limit = getattr(self, 'response_byte_limit', MAX_RESPONSE_BYTES)
+            with opener(request, timeout=self.timeout) as response:
+                raw = response.read(limit+1)
+                if hasattr(self, '_response_bytes'):
+                    self._response_bytes = len(raw)
+                if len(raw) > limit:
                     raise StoreUnavailable('GitHub response budget exhausted')
                 return json.loads(raw)
         except urllib.error.HTTPError as exc:
@@ -291,9 +295,13 @@ class GitHubStore:
                     raise WriteUnconfirmed('foreign-or-different-confirmation')
                 if self.client.parents(self.repo, record['commit_sha']) != [prior_commit]:
                     raise WriteUnconfirmed('wrong-confirmation-parent')
+                if hasattr(self.client, 'finalize_confirmation'):
+                    self.client.finalize_confirmation(self.repo, self.branch, record['commit_sha'])
                 break
         except BaseException:
             self._halted = True
+            if hasattr(self.client, 'halt_confirmation'):
+                self.client.halt_confirmation()
             raise
         self._record, self._envelope = record, observed
         self.revision = observed['revision']

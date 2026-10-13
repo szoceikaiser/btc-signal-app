@@ -177,13 +177,14 @@ def configured_store(directory):
     if adapter == 'github':
         if raw:
             raise ValueError('GitHub store must not have a local fallback volume')
-        from github_delivery import GitHubContentsClient, GitHubStore
+        from github_delivery import GitHubStore
         keys = ('BTC_DELIVERY_GITHUB_REPO', 'BTC_DELIVERY_GITHUB_BRANCH',
                 'BTC_DELIVERY_GITHUB_TOKEN', 'BTC_DELIVERY_RUN_ID',
                 'BTC_DELIVERY_RUN_ATTEMPT')
         if any(not os.environ.get(k) for k in keys):
             raise ValueError('GitHub store identity, run or token missing')
-        return GitHubStore(GitHubContentsClient(os.environ['BTC_DELIVERY_GITHUB_TOKEN']),
+        from production_confirmation import configured_client
+        return GitHubStore(configured_client(os.environ['BTC_DELIVERY_GITHUB_TOKEN'], os.environ, runner),
             os.environ['BTC_DELIVERY_GITHUB_REPO'], os.environ['BTC_DELIVERY_GITHUB_BRANCH'],
             sid, os.environ['BTC_DELIVERY_RUN_ID'], os.environ['BTC_DELIVERY_RUN_ATTEMPT'])
     if adapter != 'sqlite':

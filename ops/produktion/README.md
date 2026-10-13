@@ -1,5 +1,14 @@
 # P2b/P3: deaktivierte Betriebsanbindung
 
+Aktueller begrenzter Vorschlag: `docs/produktionsuebernahme-2026-10/P4-KANDIDAT-VERTRAG.md`.
+`tools/produktion_candidate_runner.py` ist an den tatsächlichen Runner angebunden,
+verweigert aber die mitgelieferte disabled-Runtime vor jeder Store-/Markt-/Transportarbeit.
+Die neue opt-in Bestätigungsrichtlinie verlangt einen bereits vorbereiteten
+persistenten Requestjournalpfad außerhalb des Runners. Keine automatische Anlage.
+Reproduzierbarer Offlinebeweis: `python tools/produktion_candidate_offline.py`
+(unter Windows optional `--temp-root ABSOLUTES_EXISTIERENDES_TESTVERZEICHNIS`).
+Geerbtes `site/data` ist ausschließlich alte P1-Basis, kein aktueller Migrationsinput.
+
 Die Werkzeuge sind nur für lokale, isolierte Offline-Prüfungen vorbereitet.
 `runtime.example.json` ist absichtlich deaktiviert und enthält keine Pfade,
 Zugänge oder Scheduler-Registrierung. In P3 wurde D1 als GitHub gewählt.
