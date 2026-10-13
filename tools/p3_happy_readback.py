@@ -220,6 +220,9 @@ def content(b,sha):
     blob=hashlib.sha1(b'blob '+str(len(body)).encode()+b'\0'+body).hexdigest()
     need(len(body)<=p.LIMITS['store_bytes'] and item.get('sha')==blob and item.get('size')==len(body),'happy-readback-blob-or-size')
     env=p.check_identity(b.p,body);need(body==p.canonical(env).encode(),'happy-readback-noncanonical-body')
+    need(0<=env['revision']<=10 and re.fullmatch('[0-9a-f]{32}',env['write_id'])
+        and re.fullmatch('[0-9a-f]{64}',env['parent_digest'])
+        and re.fullmatch('[0-9a-f]{64}',env['body_digest']),'happy-readback-unsafe-metadata')
     b.ledger.emit('happy_content',commit=sha,old_blob=blob,bytes=len(body),body_sha256=hashlib.sha256(body).hexdigest(),
         revision=env['revision'],write_id=env['write_id'],parent_digest=env['parent_digest'],body_digest=env['body_digest'],result='observed-only')
     return body,env,blob
@@ -238,6 +241,7 @@ def reconcile(b,chain):
     need(isinstance(commit,dict) and commit.get('sha')==head and isinstance(commit.get('parents'),list)
         and re.fullmatch('[0-9a-f]{40}',commit.get('tree',{}).get('sha','')),'happy-readback-commit-shape')
     parents=[x.get('sha') for x in commit['parents']];tree_sha=commit['tree']['sha']
+    need(len(parents)<=1 and all(isinstance(x,str) and re.fullmatch('[0-9a-f]{40}',x) for x in parents),'happy-readback-unsafe-parent-metadata')
     b.ledger.emit('happy_parent',commit=head,parents=parents,tree=tree_sha,result='observed-only')
     tree=b.request('GET',b.base+'/git/trees/'+tree_sha+'?recursive=1')
     need(isinstance(tree,dict) and tree.get('sha')==tree_sha and tree.get('truncated') is False

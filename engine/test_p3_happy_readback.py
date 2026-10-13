@@ -131,3 +131,24 @@ def test_happy_readback_frontier_old_grant_code_live_process_and_history_gap_bef
         rows=n.read_rows(root/'session/public-store-happy.jsonl');broken=deepcopy(rows)
         next(x for x in broken if x['event']=='parent' and x['commit']==h.OLD)['parents']=['e'*40]
         n.s.t.previous.rejects(ValueError,lambda:h.history(plan,broken,a))
+
+def test_happy_readback_safe_metadata_and_shared_kernel_concurrency():
+    for mode in ('unsafe-metadata','unsafe-parent','concurrent'):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);plan,a=fixture(root)
+            if mode=='concurrent':
+                with (root/'session/probe-session.lock').open('r+b') as lock:
+                    if os.name=='nt':
+                        import msvcrt
+                        msvcrt.locking(lock.fileno(),msvcrt.LK_NBLCK,1)
+                    else:
+                        import fcntl
+                        fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+                    code,w,out=direct(root,a,'own')
+                assert not w['http'] and not (root/'session'/('attempt-'+h.PHASE+'.json')).exists()
+            else:
+                code,w,out=direct(root,a,mode)
+                rr=n.read_rows(root/'session'/(h.PHASE+'.jsonl'))
+                assert 'fixture-do-not-log-this-value' not in p.canonical(rr)
+                assert 'fixture-do-not-log-this-value' not in (out/'output.txt').read_text()
+            assert code==2 and len(w['prompts'])<=1 and all(x['method']=='GET' for x in w['http'])

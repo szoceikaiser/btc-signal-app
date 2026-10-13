@@ -47,11 +47,14 @@ def install():
             sha=tail.split('ref=')[1];record=records[sha];body=p.base64.b64decode(record['body'])
             if mode=='foreign' and sha=='f'*40:
                 env=json.loads(body);env['snapshot']['control']['owner']=p.owner(plan,3);env['body_digest']=p.digest(env['snapshot']);body=p.canonical(env).encode()
+            if mode=='unsafe-metadata' and sha=='f'*40:
+                env=json.loads(body);env['write_id']='fixture-do-not-log-this-value';body=p.canonical(env).encode()
             blob=p.hashlib.sha1(b'blob '+str(len(body)).encode()+b'\0'+body).hexdigest()
             return sim.Response({'type':'file','path':plan['path'],'encoding':'base64','content':p.base64.b64encode(body).decode(),'size':len(body),'sha':blob})
         if tail.startswith('/git/commits/'):
             sha=tail.rsplit('/',1)[1];parents=model['parents'][sha]
             if mode=='bad-parent':parents=['e'*40]
+            if mode=='unsafe-parent':parents=['fixture-do-not-log-this-value']
             return sim.Response({'sha':sha,'parents':[{'sha':x} for x in parents],'tree':{'sha':'d'*40}})
         if tail.startswith('/git/trees/'):
             body=p.base64.b64decode(records[head]['body'])
