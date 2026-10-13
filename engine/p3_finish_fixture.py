@@ -29,8 +29,8 @@ def install():
             if mode=='CAS409':raise t.http_error(req.full_url,409,'fixture conflict')
             old=api.head
             response=api.open(req,**kw);accepted+=1;pending=None
-            if mode in ('old-once','moving','old-forever','pool-exhaust') or mode=='worst30' and accepted<=5:
-                pending={'old':old,'new':api.head,'refs':0,'max':4 if mode in ('pool-exhaust','worst30') else 2,'kind':mode}
+            if mode in ('old-once','moving','old-forever','pool-exhaust') or mode=='worst18' and accepted<=3:
+                pending={'old':old,'new':api.head,'refs':0,'max':4 if mode in ('pool-exhaust','worst18') else 2,'kind':mode}
             if mode=='foreign':
                 env=json.loads(p.base64.b64decode(api.records[api.head]['body']));env['snapshot']['control']['owner']=p.owner(plan,4);env['body_digest']=p.digest(env['snapshot']);api.put(p.canonical(env).encode(),api.head)
             save()

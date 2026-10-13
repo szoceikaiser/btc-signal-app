@@ -15,7 +15,7 @@ CLAIM='372bda3718ca65b2e31e70aaca1d6bda1403aec6';BLOB='4f6141ad0690aea3c03571f8a
 CLAIM_SHA='ea3f2ff9d914839349872aadc46b65df77d16e96257198d4622b5bbf26aee522'
 ORDER=list(p.FINISH_PHASES);CLOSE,LOST,LOSS,TAKE,INSPECT=ORDER
 SECTIONS={'close':[CLOSE],'rest':[LOST,LOSS],'takeover':[TAKE],'inspect':[INSPECT]}
-SCOPE='only-confirmed412-claim-owner-null-one-CAS-ordered-rest-root-anchor-extraGET30'
+SCOPE='only-confirmed412-claim-owner-null-one-CAS-ordered-rest-root-anchor-extraGET18'
 read=h.read;need=h.need
 
 def template():
@@ -103,7 +103,7 @@ def eligible(plan,rows,a,phase,review=None):
             and anchor['commit']==trees[0]['commit'] and anchor['blob_sha']==trees[0]['blob_sha']
             and any(x['event']=='parent' and x['commit']==anchor['commit'] and x['parents']==[CLAIM] for x in closed)
             and any(x['event']=='readback' and x['commit']==anchor['commit'] and x['revision']==11 and x['old_blob']==anchor['blob_sha'] for x in closed), 'finish-close-anchor-invalid')
-    need(sum(x['event']=='request' and x.get('confirmation_retry') is True for x in rows)<=30,'finish-additional-read-pool')
+    need(sum(x['event']=='request' and x.get('confirmation_retry') is True for x in rows)<=18,'finish-additional-read-pool')
     need(not any(x['event']=='response' and x['result']=='unknown' and x['bytes']==0 for x in tail),'finish-unknown-read')
 
 def state(plan,a,phase,review=None,ledger=None):

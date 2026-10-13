@@ -24,7 +24,7 @@ CAS/HTTP-Denial/Deadline bleiben gesperrt. VerlorenePUTantwort kann so positiv
 aufgelöst werden, ohne PUTretry. Kein Beweis der früheren konkretenException.
 
 Jede zusätzliche Bestätigungs-GET zählt vorOutbounds in derselbenSQLitefrontier;
-gemeinsam höchstens30 überalle neuenPhasen. DreiVersuche bedeuten höchstens6
+gemeinsam höchstens18 überalle neuenPhasen. DreiVersuche bedeuten höchstens6
 zusätzlicheGET je Write, kein Sleep/TTL/Ownerlease oder Providerlimitprovokation.
 Kernel-Lock/FULL/fsync/Publikation/Highwater/Quellpins/Gültigkeitsguard bleiben.
 UngeklärterWrite bleibt persistiert und gesperrt, auch nach Prozessverlust.

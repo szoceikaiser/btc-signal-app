@@ -479,7 +479,7 @@ class Ledger:
             require(method!='PUT' or FINISH_PHASES[self.phase]!='inspect','Rest inspector cannot write')
             require(method!='PUT' or self.phase!='public-happy-finish-once' or self.phase_counts.get(self.phase,{}).get('PUT',0)==0,'One close CAS only')
             if fields.get('confirmation_retry') is True:
-                if method!='GET' or self.extra_confirmation_gets>=30:raise gh.WriteUnconfirmed('persistent-confirmation-GET-pool-exhausted')
+                if method!='GET' or self.extra_confirmation_gets>=18:raise gh.WriteUnconfirmed('persistent-confirmation-GET-pool-exhausted')
                 self.extra_confirmation_gets+=1
         if self.phase == HAPPY_READ_PHASE:
             require(method == 'GET' and self.phase_counts.get(self.phase,{}).get('GET',0)<13

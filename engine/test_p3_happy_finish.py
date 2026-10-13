@@ -50,9 +50,9 @@ def direct(root,a,section='close',mode='normal',review=None):
     result=subprocess.run(args,env=env,capture_output=True,timeout=900);(out/'output.txt').write_bytes(result.stdout+result.stderr)
     n.save(out/'parent-wait.json',{'exit_code':result.returncode,'actual_B_script':True});return result.returncode,out
 
-def test_full_finish_rest_parentwait_takeover_inspect_normal_and_worst30():
+def test_full_finish_rest_parentwait_takeover_inspect_normal_and_worst18():
     import test_p3_public_operations as ops
-    for mode in ('normal','worst30'):
+    for mode in ('normal','worst18'):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td);plan,a=fixture(root);old=(root/'session'/ (f.h.PHASE+'.jsonl')).read_bytes()
             code,out=direct(root,a,mode=mode);assert code==0,(out/'output.txt').read_text()
@@ -66,7 +66,7 @@ def test_full_finish_rest_parentwait_takeover_inspect_normal_and_worst30():
             code,out4=direct(root,a,'inspect',mode);assert code==0,(out4/'output.txt').read_text()
             rows=n.read_rows(root/'session'/ (f.INSPECT+'.jsonl'));end=rows[-1]
             assert end['counts']['PUT']==29 and end['counts']['GIT_PUSH']==1 and end['counts']['GET']<=384
-            extra=sum(x['event']=='request' and x.get('confirmation_retry') is True for x in rows);assert extra==(30 if mode=='worst30' else 0)
+            extra=sum(x['event']=='request' and x.get('confirmation_retry') is True for x in rows);assert extra==(18 if mode=='worst18' else 0)
             assert (root/'session'/(f.h.PHASE+'.jsonl')).read_bytes()==old
             api=n.read(root/'api-state.json');final=json.loads(p.base64.b64decode(api['records'][api['head']]['body']));assert final['snapshot']['commands'][receipt['owner']['run_id']]['_delivery']['messages'][0]['status']=='uncertain'
             n.save(root/'BUDGET-RESULT.json',{'mode':mode,'counts':end['counts'],'additional_confirmation_GET':extra,'phase_counts':{phase:{m:sum(x['event']=='request' and x['phase']==phase and x['method']==m for x in rows) for m in ('GET','PUT','GIT_PUSH')} for phase in f.ORDER},'receipt':receipt,'sending_uncertain':True})
@@ -81,4 +81,4 @@ def test_close_old_moving_lost_foreign_permanent_old_deadline_CAS_and_exhaustion
             if not good:assert not any(x['event']=='phase_end' for x in rows[412:])
             if mode=='pool-exhaust':
                 code,out=direct(root,a,'rest',mode);assert code==2 and not (out/'receipt.json').exists()
-                rr=n.read_rows(root/'session'/(f.LOST+'.jsonl'));assert sum(x['event']=='request' and x.get('confirmation_retry') is True for x in rr)==30
+                rr=n.read_rows(root/'session'/(f.LOST+'.jsonl'));assert sum(x['event']=='request' and x.get('confirmation_retry') is True for x in rr)==18
