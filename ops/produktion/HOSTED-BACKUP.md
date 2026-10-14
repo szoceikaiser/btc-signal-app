@@ -22,6 +22,13 @@ Verifierrollen: `BTC_HOSTED_SOURCE_READ_TOKEN`, `BTC_HOSTED_BACKUP_READ_TOKEN`,
 Vier unterschiedliche Werte sind zwingend. Gegenseitige Writerinjektionen
 werden abgewiesen. Source-/Backupreader des Verifiers separat vom Producer
 bereitstellen; Workflow-Environment/Secretzugriff später ebenfalls trennen.
+Die konkreten deaktivierten Vorlagen nennen dazu `btc-backup-producer`,
+`btc-backup-verifier`, `btc-delivery-v2`, `btc-freshness` und `github-pages`.
+Diese Environmentnamen sind Einrichtungsvorschläge, keine existierenden
+Ressourcenbehauptungen. Writersecrets ausschließlich im jeweiligen Environment
+mit reviewtem Zugriff, niemals gemeinsame Repositorysecrets. Insbesondere
+liegt der Quittungswriter nur im Verifierenvironment; Producer und Sender
+bekommen weder Token noch Schreibrolle dieses Ziels.
 
 Vor Facharbeit werden tatsächliche private Repository-IDs und effektive
 `permissions.pull/push/admin/maintain` gelesen. Source/Migration ausschließlich
