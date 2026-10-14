@@ -110,7 +110,7 @@ class BranchHTTP:
 def fixture():
     with tempfile.TemporaryDirectory() as td, fake_store() as api:
         root=Path(td); data=root/'runner/data'; data.mkdir(parents=True)
-        runtime=json.loads((ROOT/'ops/produktion/github-runtime.disabled.json').read_text(encoding='utf-8-sig'))
+        runtime=json.loads((ROOT/'ops/produktion/github-actions-runtime.disabled.json').read_text(encoding='utf-8-sig'))
         runtime.update(enabled=True,activation_review_sha256='b'*64,private_store_repository=REPO,
                        store_branch=BRANCH,fence_branch='actions-fence',store_id=STORE_ID,code_sha='a'*40,
                        code_repository='synthetic/code',code_ref='refs/heads/synthetic',
@@ -235,7 +235,7 @@ def test_budget_bytes_deadline_full_reserve_and_no_downgrade():
         fails(github.StoreError,lambda:invoke(path,data));assert http.puts==0
     clock=[1000]
     from production_confirmation import validate_policy
-    p=json.loads((ROOT/'ops/produktion/github-runtime.disabled.json').read_text())['confirmation_budgets']
+    p=json.loads((ROOT/'ops/produktion/github-actions-runtime.disabled.json').read_text())['confirmation_budgets']
     budget=actions.RunBudget({**p,'deadline_utc_ms':2000},{},clock=lambda:clock[0])
     clock[0]=2000;fails(github.StoreError,budget.guard)
     p={**p,'confirmation_cycles':1,'deadline_utc_ms':2000}
@@ -342,15 +342,15 @@ def test_completion_lost_reply_exact_confirmed_or_failed_closed_without_success(
 
 
 def test_workflow_and_runtime_are_disabled_hosted_and_no_site_data_input():
-    text=(ROOT/'ops/produktion/github-workflow.disabled.yml').read_text(encoding='utf-8-sig')
+    text=(ROOT/'ops/produktion/github-actions-workflow.disabled.yml').read_text(encoding='utf-8-sig')
     assert 'runs-on: ubuntu-24.04' in text and 'self-hosted' not in text
     assert 'if: ${{ false }}' in text and 'schedule:' not in text and 'site/data' not in text
     assert 'tools/produktion_actions_runner.py' in text
-    runtime=json.loads((ROOT/'ops/produktion/github-runtime.disabled.json').read_text())
+    runtime=json.loads((ROOT/'ops/produktion/github-actions-runtime.disabled.json').read_text())
     assert runtime['enabled'] is False and runtime['code_sha'] is None
     assert runtime['confirmation_budgets']['confirmation_cycles']==3
     child=subprocess.run([sys.executable,'-B',str(ROOT/'tools/produktion_actions_runner.py'),
-        '--runtime',str(ROOT/'ops/produktion/github-runtime.disabled.json'),
+        '--runtime',str(ROOT/'ops/produktion/github-actions-runtime.disabled.json'),
         '--kind','signal','--data-dir',str(ROOT/'.runtime/data')],capture_output=True,
         env={'SYSTEMROOT':os.environ.get('SYSTEMROOT',r'C:\Windows'),
              'WINDIR':os.environ.get('WINDIR',r'C:\Windows')})

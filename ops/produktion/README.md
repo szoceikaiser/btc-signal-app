@@ -71,8 +71,9 @@ Keine dieser Dateien gibt Einrichtung, Mailprobe oder P4 frei.
 # Sicherungskapazität N-P3-01: v2
 
 Deaktivierte hosted-Actions-Anbindung: [GITHUB-ACTIONS-VERTRAG.md](GITHUB-ACTIONS-VERTRAG.md).
-Die aktuelle github-runtime.disabled.json wählt drei Bestätigungszyklen mit
-dauerhaftem CAS-Sperrbranch im Store-Repository. Kein self-hosted/SQLitejournal.
+github-actions-runtime.disabled.json und github-actions-workflow.disabled.yml wählen drei Bestätigungszyklen mit
+dauerhaftem CAS-Sperrbranch im Store-Repository. Kein self-hosted/SQLitejournal im neuen Actionspfad. Die alten deaktivierten
+github-runtime/-workflow-Dateien bleiben für die abgenommenen Altbelege erhalten.
 
 Neue lokale Backupaufrufe verwenden `tools/p3_backup_chain.py` über die
 synthetische CLI `produktion_github_backup.py`; der Plan muss zusätzlich zur SHA

@@ -1,16 +1,8 @@
-# Review template outside active workflows. No schedule, no activation here.
-# Pin checkout action and verify hosted image/Python at the practical gate.
+# Review template outside .github/workflows. No schedule, never installed here.
+# Keep literal false AND disabled runtime. P4 reviews every binding and trigger.
 name: Production delivery (DISABLED TEMPLATE)
 on:
   workflow_dispatch:
-    inputs:
-      kind:
-        type: choice
-        options: [signal, watch]
-        required: true
-      expected_start_ms:
-        type: string
-        required: true
 permissions:
   contents: read
 concurrency:
@@ -19,33 +11,23 @@ concurrency:
 jobs:
   delivery:
     if: ${{ false }}
-    runs-on: ubuntu-24.04
+    # A surviving journal volume is required; hosted ephemeral checkout is insufficient.
+    runs-on: [self-hosted, btc-reviewed-host]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Refuse disabled runtime before credentials or store access
+      - name: Refuse disabled runtime before any credential or store access
         run: >-
-          python3 tools/produktion_actions_runner.py
+          python tools/produktion_candidate_runner.py
           --runtime ops/produktion/github-runtime.disabled.json
-          --kind signal --data-dir .runtime/data
-      - name: Prepare explicitly reviewed projection (disabled)
-        if: ${{ false }}
-        env:
-          REVIEWED_RUNTIME_JSON: ${{ vars.BTC_REVIEWED_RUNTIME_JSON }}
-          REVIEWED_CONFIG_JSON: ${{ vars.BTC_REVIEWED_CONFIG_JSON }}
-        run: |
-          python3 - <<'PY'
-          import json, os
-          from pathlib import Path
-          root = Path('.runtime'); root.mkdir(exist_ok=False)
-          (root/'data').mkdir()
-          for name, key in [('runtime.json','REVIEWED_RUNTIME_JSON'), ('data/config.json','REVIEWED_CONFIG_JSON')]:
-              (root/name).write_text(json.dumps(json.loads(os.environ[key])), encoding='utf-8')
-          PY
-      - name: Reviewed hosted Actions entry (disabled)
+          --kind signal --data-dir site/data
+      # Reviewable intended binding, still unreachable. No provisioning/startup fallback.
+      # The actual host must supply fresh policy/journal files for this exact run
+      # and an independently reviewed enabled runtime. No token retrieval here.
+      - name: Reviewed production entry (disabled)
         if: ${{ false }}
         env:
           BTC_DELIVERY_ADAPTER: github
@@ -55,17 +37,20 @@ jobs:
           BTC_DELIVERY_RUN_ID: ${{ github.run_id }}
           BTC_DELIVERY_RUN_ATTEMPT: ${{ github.run_attempt }}
           BTC_DELIVERY_CODE_SHA: ${{ github.sha }}
-          BTC_DELIVERY_EXPECTED_START_MS: ${{ inputs.expected_start_ms }}
+          BTC_DELIVERY_EXPECTED_START_MS: ${{ vars.BTC_REVIEWED_EXPECTED_START_MS }}
           BTC_DELIVERY_STORE_ID: ${{ vars.BTC_REVIEWED_STORE_ID }}
           BTC_DELIVERY_GITHUB_REPO: ${{ vars.BTC_REVIEWED_STORE_REPOSITORY }}
           BTC_DELIVERY_GITHUB_BRANCH: ${{ vars.BTC_REVIEWED_STORE_BRANCH }}
-          BTC_DELIVERY_FENCE_BRANCH: ${{ vars.BTC_REVIEWED_FENCE_BRANCH }}
           BTC_DELIVERY_BOT_IDENTITY: ${{ vars.BTC_REVIEWED_BOT_IDENTITY }}
-          BTC_DELIVERY_CONFIRMATION_POLICY: github-actions-fence-v1
+          BTC_DELIVERY_CONFIRMATION_POLICY: github-confirmation-v1
+          BTC_DELIVERY_CONFIRMATION_CONFIG: ${{ vars.BTC_REVIEWED_POLICY_FILE }}
+          BTC_DELIVERY_REQUEST_JOURNAL: ${{ vars.BTC_REVIEWED_JOURNAL_FILE }}
+          BTC_REVIEWED_RUNTIME_FILE: ${{ vars.BTC_REVIEWED_RUNTIME_FILE }}
           BTC_DELIVERY_GITHUB_TOKEN: ${{ secrets.BTC_REVIEWED_STORE_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
         run: >-
-          python3 tools/produktion_actions_runner.py --runtime .runtime/runtime.json
-          --kind '${{ inputs.kind }}' --data-dir .runtime/data
+          python tools/produktion_candidate_runner.py
+          --runtime "$BTC_REVIEWED_RUNTIME_FILE"
+          --kind signal --data-dir site/data
