@@ -34,7 +34,8 @@
       "response_byte_limit": 2097152,
       "run_request_byte_limit": 62914560,
       "run_response_byte_limit": 1447034880
-    }
+    },
+    "schedule_contract": "btc-actions-slots-v1"
   },
   "token_scope": "private store Contents: read only; no transport credential",
   "observed_max_age_ms": 2700000,

@@ -442,9 +442,9 @@ def restore_verified(root, manifest, target, required_pin, required_revision, id
         if stage.exists(): remove_staging(stage,target.parent)
 
 
-def append_local(repo, branch, pin, revision, identity, migration, root, *, fault=None):
+def append_local(repo, branch, pin, revision, identity, migration, root, *, fault=None, budget=None):
     """Resume immutable packages, fully verify, then publish LOCAL evidence only."""
-    repo=Path(repo).resolve();root=Path(root).resolve();budget=Budget();parse=parser(identity)
+    repo=Path(repo).resolve();root=Path(root).resolve();budget=budget or Budget();parse=parser(identity)
     if type(revision) is not int or revision<0:raise ValueError('Independent revision required')
     def event(name):
         if fault: fault(name)

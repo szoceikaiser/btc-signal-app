@@ -42,5 +42,6 @@
     ".github/workflows/signal.yml": "signal",
     ".github/workflows/watch.yml": "watch",
     ".github/workflows/lage.yml": "lage"
-  }
+  },
+  "schedule_contract": "btc-actions-slots-v1"
 }

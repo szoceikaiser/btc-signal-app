@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT/'engine'), str(ROOT/'tools')]
 import actions_delivery as actions
 import github_delivery as github
+import actions_schedule as schedule
 import produktion_runner as runner
 from production_contract import canonical, digest, effective_config
 
@@ -72,11 +73,11 @@ def validate(runtime, kind, data_dir):
     root = Path(os.environ.get('BTC_DELIVERY_RUNNER_ROOT',''))
     if not root.is_absolute() or not Path(data_dir).resolve().is_relative_to(root.resolve()):
         raise ValueError('Absolute contained runner projection required')
+    if runtime.get('schedule_contract') != schedule.CONTRACT:
+        raise ValueError('Reviewed fixed schedule contract required')
     if any(not os.environ.get(k) for k in ('BTC_DELIVERY_GITHUB_TOKEN',
-             'TELEGRAM_BOT_TOKEN','TELEGRAM_CHAT_ID','BTC_DELIVERY_EXPECTED_START_MS')):
+             'TELEGRAM_BOT_TOKEN','TELEGRAM_CHAT_ID')):
         raise ValueError('Production environment incomplete')
-    if not re.fullmatch('[1-9][0-9]*', os.environ['BTC_DELIVERY_EXPECTED_START_MS']):
-        raise ValueError('Explicit positive schedule occurrence required')
     config = json.loads(Path(data_dir,'config.json').read_text(encoding='utf-8'))
     if digest(effective_config(config)) != runtime.get('config_sha256'):
         raise ValueError('Effective strategy configuration differs')
@@ -89,7 +90,23 @@ def deployment(runtime):
     return {k: runtime[k] for k in ('code_repository','code_ref','workflows',
         'private_store_repository','store_branch','fence_branch','store_id','store_path','fence_path',
         'code_sha','config_sha256','bot_identity','activation_review_sha256',
-        'confirmation_policy','confirmation_budgets')}
+        'confirmation_policy','confirmation_budgets','schedule_contract')}
+
+
+def read_run_metadata(client, repository, run_id):
+    reader = github.GitHubContentsClient(os.environ.get('BTC_ACTIONS_METADATA_READ_TOKEN'))
+    reader.open_request = client.open_request
+    reader.response_byte_limit = client.response_byte_limit
+    reader._response_bytes = 0
+    route = reader._route(repository, '/actions/runs/'+run_id)
+    request_id, reader.timeout = client.journal.reserve('GET', route, 0, None)
+    try:
+        result = reader._request('GET', route)
+        client.journal.finish(request_id, reader._response_bytes, 'completed')
+        return result
+    except Exception:
+        client.journal.halt()
+        raise
 
 
 def run_runtime(runtime_path, kind, data_dir, **fixtures):
@@ -115,6 +132,26 @@ def run_runtime(runtime_path, kind, data_dir, **fixtures):
         fields['BTC_DELIVERY_OPERATION_ID'] = operation_id
     client = actions.ActionsClient(os.environ['BTC_DELIVERY_GITHUB_TOKEN'],
                                    actions.RunBudget(policy,binding), fields)
+    # One actual GET charged to the SAME accepted Actions run budget. Never use
+    # step start, run_started_at or a claimed scheduled_at to invent a new slot.
+    meta = read_run_metadata(client, runtime['code_repository'], binding['run_id'])
+    if (str(meta['id']) != binding['run_id'] or meta['run_attempt'] != 1
+            or str(meta['run_number']) != os.environ['GITHUB_RUN_NUMBER']
+            or meta['repository']['full_name'] != runtime['code_repository']
+            or meta['head_sha'] != runtime['code_sha']
+            or meta['head_branch'] != runtime['code_ref'].removeprefix('refs/heads/')
+            or meta['path'] != fields['BTC_DELIVERY_WORKFLOW']
+            or meta['event'] != os.environ['GITHUB_EVENT_NAME']):
+        raise ValueError('Actual run metadata differs from entry binding')
+    slot = schedule.bind(kind, meta, int(time.time()*1000),
+                         os.environ.get('BTC_ACTIONS_EXPLICIT_START_MS',''))
+    os.environ['BTC_DELIVERY_EXPECTED_START_MS'] = str(slot)
+    fields['BTC_DELIVERY_EXPECTED_START_MS'] = str(slot)
+    client.environment = dict(fields)
+    # Queue delay consumes the original obligation's remaining time.
+    policy['deadline_utc_ms'] = min(policy['deadline_utc_ms'],
+        slot+900000 if kind=='lage' else schedule.deadline(kind,slot))
+    client.journal.policy['deadline_utc_ms'] = policy['deadline_utc_ms']
     run = {'number':int(os.environ['GITHUB_RUN_NUMBER']), 'id':binding['run_id'], 'attempt':'1',
            'workflow': fields['BTC_DELIVERY_WORKFLOW'],
            'kind':kind, 'expected_start_ms':os.environ['BTC_DELIVERY_EXPECTED_START_MS'],

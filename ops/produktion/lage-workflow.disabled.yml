@@ -4,9 +4,11 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: btc-delivery-single-stream
   cancel-in-progress: false
+  queue: max
 jobs:
   delivery:
     if: ${{ false }}
@@ -22,22 +24,10 @@ jobs:
           REVIEWED_RUNTIME_JSON: ${{ vars.BTC_REVIEWED_RUNTIME_JSON }}
           REVIEWED_CONFIG_JSON: ${{ vars.BTC_REVIEWED_CONFIG_JSON }}
         run: python3 tools/produktion_runtime_prepare.py --kind lage --out .runtime
-      - name: Bind this occurrence
-        env:
-          EXPLICIT_OCCURRENCE: ${{ inputs.expected_start_ms }}
-        run: |
-          python3 - <<'PY'
-          import os, time
-          now = int(time.time()*1000)
-          slot = 0
-          occurrence = os.environ.get('EXPLICIT_OCCURRENCE') or str(now//slot*slot if slot else now)
-          if not occurrence.isdigit() or int(occurrence) <= 0:
-              raise ValueError('Positive UTC occurrence required')
-          with open(os.environ['GITHUB_ENV'],'a') as f:
-              f.write('BTC_DELIVERY_EXPECTED_START_MS='+occurrence+'\n')
-          PY
       - name: Checked lage entry
         env:
+          BTC_ACTIONS_METADATA_READ_TOKEN: ${{ github.token }}
+          BTC_ACTIONS_EXPLICIT_START_MS: ${{ inputs.expected_start_ms }}
           BTC_DELIVERY_ADAPTER: github
           BTC_DELIVERY_RUNNER_ROOT: ${{ github.workspace }}
           BTC_DELIVERY_RUN_REPOSITORY: ${{ github.repository }}

@@ -1,0 +1,26 @@
+# Disabled local contract template; no provider staging/publishing binding configured.
+name: backup-verify
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: btc-backup-verify
+  cancel-in-progress: false
+  queue: max
+jobs:
+  verify:
+    if: ${{ false }}
+    runs-on: [self-hosted, btc-independent-backup-verifier]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ vars.BTC_BACKUP_VERIFIER_CODE_SHA }}
+          persist-credentials: false
+      - name: Verify pre-staged local plan and full histories
+        env:
+          BTC_BACKUP_PLAN_PATH: ${{ vars.BTC_BACKUP_READBACK_PLAN_PATH }}
+        run: python3 tools/p4_backup_pair.py verify-readback --plan "$BTC_BACKUP_PLAN_PATH"
+      # Output remains LOCAL. Protected upload/readback/receipt publication require
+      # separately reviewed bindings; a successful producer alone is not health.

@@ -1,0 +1,38 @@
+# Same-provider convenience only; external deadman alarm remains unconfigured.
+name: BTC candidate freshness
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: btc-candidate-freshness
+  cancel-in-progress: false
+  queue: max
+jobs:
+  observe:
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ vars.BTC_MONITOR_CODE_SHA }}
+          persist-credentials: false
+      - name: Read bounded candidate evidence
+        env:
+          BTC_MONITOR_STORE_READ_TOKEN: ${{ secrets.BTC_MONITOR_STORE_READ_TOKEN }}
+          BTC_MONITOR_ACTIONS_READ_TOKEN: ${{ secrets.BTC_MONITOR_ACTIONS_READ_TOKEN }}
+          BTC_MONITOR_BACKUP_READ_TOKEN: ${{ secrets.BTC_MONITOR_BACKUP_READ_TOKEN }}
+          REVIEWED_MONITOR_JSON: ${{ vars.BTC_MONITOR_POLICY_JSON }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          policy=json.loads(os.environ['REVIEWED_MONITOR_JSON'])
+          with Path('monitor-policy.json').open('x',encoding='utf-8') as f:
+              json.dump(policy,f)
+          PY
+          python3 tools/produktion_actions_freshness.py --policy monitor-policy.json

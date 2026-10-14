@@ -14,15 +14,20 @@ kein Versand und kein Storebootstrap durch diesen lokalen Auftrag.
 | Chart-Webseite (Pages) | `.github/workflows/pages.yml` | `pages-workflow.disabled.yml` | Handstart, site-Push, erfolgreiche Signal/Wache/Lage/Backtest-Folge |
 
 Der vorhandene cron-job.org-Aufruf kann weiterhin `signal.yml` bzw. `watch.yml`
-mit `ref: main` und ohne Inputs verwenden; eine leere Eingabe bindet den aktuellen
-UTC-Slot (Signal 4h, Wache 15min). Ein explizites `expected_start_ms` ist optional.
+mit `ref: main` und ohne Inputs verwenden; eine leere Eingabe bindet den festen
+UTC-Slot aus dem tatsächlichen Run-created_at, niemals aus dem Stepbeginn.
+Signal hat Phasen :02/:32 je4h, Wache :08/:23/:38/:53. Späte Aufrufe werden
+abgewiesen; ein explizites ursprüngliches `expected_start_ms` ist optional.
+Der neue verbindliche Termin-/Backup-/Monitorvertrag und verbleibende echte
+Bindungen stehen in [BETRIEBSABSCHLUSS.md](BETRIEBSABSCHLUSS.md).
 Die tatsächlichen externen Einstellungen wurden hier nicht gelesen oder geändert.
 Alte Signal-Inputs `test_telegram`/`resend_all` gehören nicht zum neuen Sendepfad;
 historischen Resend nicht übernehmen. Coinalyze-Test bleibt eigener Diagnoseknopf.
 Tests, Backtest, Coinalyze-Archiv und Coinalyze-Test sowie sämtliche alten aktiven
 Workflowdateien sind bytegleich zur Ausgangsbasis. Keine Actionsbereinigung.
-Pages nutzt denselben Gruppennamen wie alle drei Sendeworkflows und bricht keinen
-laufenden Auftrag ab. Bei workflow_run muss der Auslöser erfolgreich, aus demselben
+Pages nutzt denselben Gruppennamen wie alle drei Sendeworkflows, mit `queue: max`
+(höchstens100 wartend, keine FIFO-Garantie), und bricht keinen laufenden Auftrag ab.
+Bei workflow_run muss der Auslöser erfolgreich, aus demselben
 Repo/main und auf demselben Codepin sein. Backtest-/Archivschreibrechte bleiben
 außerhalb des Versandstreams; neue Codecommits brauchen einen neuen geprüften Pin.
 
