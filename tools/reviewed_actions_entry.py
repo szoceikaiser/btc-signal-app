@@ -19,8 +19,10 @@ class EntryReader(GitHubContentsClient):
     def __init__(self,token,repo):
         super().__init__(token,timeout=3);self.repo=repo;self.gets=0;self.started=time.monotonic()
     def _request(self,method,route,payload=None):
+        from public_access import tail_allowed
+        tail=route.removeprefix(self._route(self.repo,''))
         left=20-(time.monotonic()-self.started)
-        if method!='GET' or payload is not None or self.gets>=3 or left<=0 or not route.startswith(self._route(self.repo,'/')):
+        if method!='GET' or payload is not None or self.gets>=3 or left<=0 or not route.startswith(self._route(self.repo,'/')) or not tail_allowed(tail,True):
             raise ValueError('Code-only entry binding budget/scope')
         self.gets+=1;self.timeout=min(3,left)
         result=super()._request(method,route)

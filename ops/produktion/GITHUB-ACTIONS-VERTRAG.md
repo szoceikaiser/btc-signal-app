@@ -1,5 +1,10 @@
 # Deaktivierter GitHub-Actions-Kandidat
 
+Aktueller Free/public-Einrichtungsvertrag: [FREE-EINRICHTUNG.md](FREE-EINRICHTUNG.md).
+Die folgenden älteren Funktionsnotizen begründen keinen private-only Reader oder
+manuellen Metadatentoken. Sieben aktuelle Hostedvorlagen verwenden Fence-v2,
+anonyme Datenreads und automatisch begrenztes GITHUB_TOKEN für Codejobmetadaten.
+
 Modellauftrag: gpt-6.1-sol, high. Basis: abgenommener Kandidat 6b600c71.
 Keine neue Strategieentscheidung. Alle Runtimepins bleiben null/disabled.
 Der Workflow liegt außerhalb aktiver Workflows, mit literal false. Kein Server.

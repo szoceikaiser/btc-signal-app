@@ -13,6 +13,7 @@ sys.path[:0] = [str(ROOT/'engine'), str(ROOT/'tools')]
 import actions_delivery as actions
 import github_delivery as github
 import actions_schedule as schedule
+import public_access as public
 import produktion_runner as runner
 from production_contract import canonical, digest, effective_config
 
@@ -84,10 +85,13 @@ def validate(runtime, kind, data_dir):
     if any(not os.environ.get(k) for k in ('BTC_DELIVERY_GITHUB_TOKEN',
              'TELEGRAM_BOT_TOKEN','TELEGRAM_CHAT_ID')):
         raise ValueError('Production environment incomplete')
+    if not os.environ.get('GITHUB_TOKEN') or os.environ['GITHUB_TOKEN']==os.environ['BTC_DELIVERY_GITHUB_TOKEN']:
+        raise ValueError('Separate automatic codejob metadata token required')
     config = json.loads(Path(data_dir,'config.json').read_text(encoding='utf-8'))
     if digest(effective_config(config)) != runtime.get('config_sha256'):
         raise ValueError('Effective strategy configuration differs')
     check_code_pin(runtime['code_sha'])
+    public.deployment(runtime['public_access'],runtime)
     return fields
 
 
@@ -96,15 +100,18 @@ def deployment(runtime):
     return {k: runtime[k] for k in ('code_repository','code_ref','workflows',
         'private_store_repository','store_branch','fence_branch','store_id','store_path','fence_path',
         'code_sha','config_sha256','bot_identity','activation_review_sha256',
-        'confirmation_policy','confirmation_budgets','schedule_contract')}
+        'confirmation_policy','confirmation_budgets','schedule_contract','public_access_sha256')}
 
 
 def read_run_metadata(client, repository, run_id, tail=None):
-    reader = github.GitHubContentsClient(os.environ.get('BTC_ACTIONS_METADATA_READ_TOKEN'))
+    tail='/actions/runs/'+run_id if tail is None else tail
+    if repository!=os.environ.get('GITHUB_REPOSITORY') or not public.tail_allowed(tail,True):
+        raise ValueError('Codejob-only metadata scope required')
+    reader = github.GitHubContentsClient(os.environ.get('GITHUB_TOKEN'))
     reader.open_request = client.open_request
     reader.response_byte_limit = client.response_byte_limit
     reader._response_bytes = 0
-    route = reader._route(repository, tail or '/actions/runs/'+run_id)
+    route = reader._route(repository, tail)
     request_id, reader.timeout = client.journal.reserve('GET', route, 0, None)
     try:
         result = reader._request('GET', route)
@@ -138,6 +145,11 @@ def run_runtime(runtime_path, kind, data_dir, **fixtures):
         fields['BTC_DELIVERY_OPERATION_ID'] = operation_id
     client = actions.ActionsClient(os.environ['BTC_DELIVERY_GITHUB_TOKEN'],
                                    actions.RunBudget(policy,binding), fields)
+    client.anonymous_reads=True
+    access=runtime['public_access'];repo=binding['repo']
+    branches=[runtime['store_branch'],runtime['fence_branch']]
+    public.credential(access,'sender_write',repo,branches)
+    public.check(client,access,[(repo,v) for v in branches],[(repo,v) for v in branches])
     # One actual GET charged to the SAME accepted Actions run budget. Never use
     # step start, run_started_at or a claimed scheduled_at to invent a new slot.
     meta = read_run_metadata(client, runtime['code_repository'], binding['run_id'])
@@ -154,6 +166,7 @@ def run_runtime(runtime_path, kind, data_dir, **fixtures):
         def request(self,method,repo,tail):
             if method!='GET': raise ValueError('Entry reader is GET-only')
             return read_run_metadata(client,repo,binding['run_id'],tail)
+    public.repository(ChargedReader(),access,runtime['code_repository'],runtime['code_ref'].removeprefix('refs/heads/'))
     verify(ChargedReader(),runtime['code_repository'],meta['head_sha'],runtime['code_sha'],
            fields['BTC_DELIVERY_WORKFLOW'],runtime.get('entry_workflows',{}).get(fields['BTC_DELIVERY_WORKFLOW']))
     client.reviewed_entry=(meta['head_sha'],runtime['code_sha'],fields['BTC_DELIVERY_WORKFLOW'])

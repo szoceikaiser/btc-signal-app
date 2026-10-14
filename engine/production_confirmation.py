@@ -192,7 +192,7 @@ class ProductionContentsClient(GitHubContentsClient):
     def _request(self, method, route, payload=None):
         # Scope every request to this store, including immutable reads.
         prefix = self._route(self.journal.binding['repo'], '/')
-        if not route.startswith(prefix): raise StoreUnavailable('Foreign request route')
+        if route!=prefix[:-1] and not route.startswith(prefix): raise StoreUnavailable('Foreign request route')
         request_bytes = 0 if payload is None else len(canonical(payload).encode('utf-8'))
         request_id, timeout = self.journal.reserve(method, route, request_bytes, self.case_id)
         old_timeout = self.timeout; self.timeout = timeout

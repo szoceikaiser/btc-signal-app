@@ -3,14 +3,16 @@
 Alle echten Werte bleiben unbekannt und deaktiviert. Dieser Ablauf ist ein
 Einrichtungsplan, kein Start-/Fortsetzungsprompt und keine Providerfreigabe.
 Keine Wiederverwendung abgeschlossener Grants, Starter oder Tokenkampagnen.
+Der konkrete öffentliche Einrichtungs- und Rollenvertrag steht verbindlich in
+[FREE-EINRICHTUNG.md](FREE-EINRICHTUNG.md); nachfolgende Ablaufgrenzen bleiben.
 
-1. Einmaliges Einrichtungsreview, höchstens60min: echte private Ziele
+1. Einmaliges Einrichtungsreview, höchstens60min: echte öffentliche Ziele
    `szoceikaiser/btc-delivery-store`, `btc-delivery-backup`,
    `btc-delivery-backup-verification` und deren numerische IDs/Sichtbarkeit,
-   heutiger Tarif, effektive getrennte Rollen und tatsächlicher Branchschutz.
-   Noch keine dieser Ressourcen ist hier erstellt worden. Schutzoptionen
-   sind tarifabhängig; ohne ausreichende private Schutzfunktionen stoppen,
-   keine Buchung/Planänderung, keine Veröffentlichung interner Daten.
+   explizit public unter gewähltem GitHub Free, tatsächliche getrennte Rollen
+   und aktive exakte Branchrules. Noch keine Ressource ist hier erstellt.
+   Datenklassen/Dateiinventar und Secret-Ausschluss vor Veröffentlichung prüfen;
+   keine Buchung/Planänderung. Ohne vollständige Schutz-/Bypassreviews stoppen.
    Offizielle bereits im Hauptchat gelesene Referenz:
    https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches
 2. Vor irgendeinem Schreib-/Versandbetrieb: Rollenreichweite und separate
@@ -19,9 +21,9 @@ Keine Wiederverwendung abgeschlossener Grants, Starter oder Tokenkampagnen.
    darf ausschließlich Quittungen schreiben. Alle Rollen dürfen fremde
    Repository-IDs nicht umleiten. Protection muss unveränderte Historie,
    keine Forcepushes/Branchlöschung und keine ungereviewten Bypässe sichern.
-   Für klassische Protectioneinsicht eventuell Administration:read gesondert
-   prüfen; keine Administration:write. Tatsächliche Permissionantworten und
-   Schutz-/Tarifbelege nötig; das lokale Fake ersetzt diese nicht.
+   Anonyme Rules-GETs und separater tatsächlicher Bypassreview; keine zusätzlichen
+   Administration:write-Rechte. GETrepo.permissions ist keine Tokenintrospektion.
+   Tatsächliche Ressourcen-/Writerbelege nötig; das lokale Fake ersetzt sie nicht.
 3. Einmaliger expliziter Bootstrap: vorgeschlagene dedicated Storebranches
    `delivery-stream-v2`, `delivery-fence-v2`, Backupbranch
    `verified-pair-packages` und Quittungsbranch `verified-receipts` einrichten.

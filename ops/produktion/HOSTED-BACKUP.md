@@ -1,5 +1,8 @@
 # Deaktivierter Hostedabschluss, 14.10.2026
 
+Free/public-Vertrag: [FREE-EINRICHTUNG.md](FREE-EINRICHTUNG.md) ist für die
+öffentliche Einrichtung, Rollen, Regeln und Quoten maßgeblich. IDs bleiben offen.
+
 Code: `btc-signal-app`; keine lokale Dauerinstallation. Die sieben Vorlagen
 bleiben außerhalb `.github/workflows`, jeder Job enthält `if: ${{ false }}`.
 `hosted-backup-runtime.disabled.json` enthält ausschließlich Vorschlagsnamen,
@@ -15,13 +18,12 @@ Linux-Runner, tatsächliche Actions-Metadaten, Repository-ID, Workflowpfad,
 Main-Ref, Attempt 1, Run-ID/-Nummer und den ursprünglichen Backuptermin.
 `RUNNER_TEMP` erhält ein exklusives neues Verzeichnis pro Ausführung.
 
-Producerrollen: `BTC_HOSTED_SOURCE_READ_TOKEN`, `BTC_HOSTED_BACKUP_WRITE_TOKEN`,
-`BTC_HOSTED_RECEIPT_READ_TOKEN`, `BTC_HOSTED_METADATA_READ_TOKEN`.
-Verifierrollen: `BTC_HOSTED_SOURCE_READ_TOKEN`, `BTC_HOSTED_BACKUP_READ_TOKEN`,
-`BTC_HOSTED_RECEIPT_WRITE_TOKEN`, `BTC_HOSTED_METADATA_READ_TOKEN`.
-Vier unterschiedliche Werte sind zwingend. Gegenseitige Writerinjektionen
-werden abgewiesen. Source-/Backupreader des Verifiers separat vom Producer
-bereitstellen; Workflow-Environment/Secretzugriff später ebenfalls trennen.
+Producerrollen: `BTC_HOSTED_BACKUP_WRITE_TOKEN` und automatisches `GITHUB_TOKEN`.
+Verifierrollen: `BTC_HOSTED_RECEIPT_WRITE_TOKEN` und automatisches `GITHUB_TOKEN`.
+Writer und Metadatenrolle müssen verschieden sein. Gegenseitige Writerinjektionen
+und alte Reader-Secrets werden abgewiesen. Source/Migration/Backup/Receiptreads
+sind anonym, einschließlich des eng gebundenen read-only Git-upload-pack POST.
+Workflow-Environment/Secretzugriff später tatsächlich getrennt reviewen.
 Die konkreten deaktivierten Vorlagen nennen dazu `btc-backup-producer`,
 `btc-backup-verifier`, `btc-delivery-v2`, `btc-freshness` und `github-pages`.
 Diese Environmentnamen sind Einrichtungsvorschläge, keine existierenden
@@ -30,13 +32,12 @@ mit reviewtem Zugriff, niemals gemeinsame Repositorysecrets. Insbesondere
 liegt der Quittungswriter nur im Verifierenvironment; Producer und Sender
 bekommen weder Token noch Schreibrolle dieses Ziels.
 
-Vor Facharbeit werden tatsächliche private Repository-IDs und effektive
-`permissions.pull/push/admin/maintain` gelesen. Source/Migration ausschließlich
-read; Backupwriter ausschließlich Backup; Receiptwriter ausschließlich
-Quittung. Gegen alle drei Ziele werden zusätzliche Schreibrechte abgewiesen.
-Nur ein explizites HTTP404 darf den negativen Zugriffstest erfüllen;
-Timeout, 401/403 und andere Fehler sind kein Rechtebeweis. Unvollständige
-Permissionantworten auf lesbaren Zielen führen zum Abbruch.
+Vor Facharbeit werden öffentliche Sichtbarkeit, echte Repo-ID, Branchbindung,
+aktive exakte Regeln und deren Reviewpins geprüft. `permissions` darf fehlen;
+Ownerrechte sagen nichts Vollständiges über tatsächliche PAT-Reichweite aus.
+Backupwriter ausschließlich Backup, Receiptwriter ausschließlich Quittung:
+Clientgrenzen plus separater tatsächlicher Einrichtungsreview statt erfundener
+negativer GET-Rechtebeweise. Unbelegte Schreibreichweite bleibt offen.
 
 Der Producer liest beide aktuellen Source-Refs und pinnt sie vor dem Transfer.
 `pins=null` bedeutet einen jeweils neu aufgenommenen Schnitt, keinen ungesteuerten
@@ -167,21 +168,19 @@ Die Entrybindung im Enginejob belastet denselben bestehenden640GET-Zähler.
 2. Authentifizierte GitDB-GETs liefern SHA1-Objektidentitäten, unverfälschte
    Base64bytes und untruncated vollständige Trees. Tree- und Blob-IDs werden
    selbst berechnet. Commit-SHA und Parent/Tree werden unabhängig über den
-   authentifizierten immutable GET bestätigt; alte Commitheader werden beim
+   anonymen immutable GET bestätigt; alte Commitheader werden beim
    Source-Gittransfer vollständig als echte Gitobjekte geprüft.
 3. GitDBRefupdate mit force=false ist tatsächlich atomarer Fastforward.
    Es ist keine API-CAS mit expected_sha. Der unveränderte Parent bildet den
    CAS-Ersatz; Geschwister werden abgewiesen. Eine Antwort auf Commitcreation
    ist allein kein Uploadbeleg.
-4. Effektive permissions und vollständige Branchprotection sind für die
-   injizierten Rollen sichtbar. Protection muss force/deletion=false,
-   enforce_admins=true und linear_history=true liefern. Die Einrichtung muss
-   zusätzliche Bypassrollen, Tokenreichweite, Writerrestrictions und
-   Workflowenvironmenttrennung unabhängig bestätigen. APIpermissions sind
-   kein vollständiger kryptographischer Tokenintrospektionsbeweis.
-   Unverfügbare oder unvollständige Protectionantwort: Abbruch. Gegebenenfalls
-   ausschließlich Administration:read für Protectioneinsicht prüfen, keine
-   Administrations-Schreibrechte. Tarif/Rechte heute unbekannt.
+4. Öffentliche Rules-GETs liefern aktive exakte Branchregeln; vollständige
+   Pagination, exakte Quelle/Bedingung und unveränderte Regelantworten sind
+   zwingend. Fehlendes bypass_actors ist unbekannt und benötigt den separaten
+   tatsächlichen versiegelten Einrichtungsbeleg. Keine zusätzlichen Admin-
+   Schreibrechte; kein klassischer private-only Protection-Endpunkt als Gate.
+   Echte Tokenreichweite und verdeckte Konfigurationsänderungen lassen sich
+   aus anonymen GETs allein nicht vollständig beweisen. Details im Freevertrag.
 5. Die echte Rollen-/Tarif-/APIabnahme und Referenz-/Runtimeversorgung bleiben
    offen. Die synthetischen Fakes belegen Codewege und Grenzen, keinen echten
    GitHubprovider, Branchschutz, Tarif oder Livebetrieb.

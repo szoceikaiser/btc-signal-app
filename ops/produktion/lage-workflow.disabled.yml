@@ -1,3 +1,4 @@
+# Free/public: explicit IDs and actual rules/credential reviews still required.
 # Disabled candidate; intended target .github/workflows/lage.yml
 name: Lage abrufen
 on:
@@ -16,11 +17,189 @@ jobs:
     environment: btc-delivery-v2
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          ref: ${{ vars.BTC_PRODUCTION_CODE_SHA }}
-          persist-credentials: false
-          fetch-depth: 1
+      - name: Bounded anonymous public code checkout
+        env:
+          BTC_PUBLIC_CODE_SHA: ${{ vars.BTC_PRODUCTION_CODE_SHA }}
+          BTC_PUBLIC_CODE_REPOSITORY_ID: ${{ vars.BTC_PUBLIC_CODE_REPOSITORY_ID }}
+        run: |
+          python3 - <<'PY'
+          """Standalone anonymous hosted bootstrap, embedded verbatim in disabled YAML.
+
+          Only public btc-signal-app/main; three HTTP operations, full one-ref pack.
+          No checkout action credentials, remote helpers, inherited Git config or hooks.
+          """
+          import hashlib
+          import io
+          import json
+          import os
+          import platform
+          from pathlib import Path
+          import re
+          import signal
+          import subprocess
+          import tempfile
+          import threading
+          import time
+          import urllib.request
+
+          REPOSITORY='szoceikaiser/btc-signal-app'
+          MIB=1024*1024
+
+
+          def checkout():
+              started=time.monotonic();workspace=Path.cwd();total=0
+              pin=os.environ.get('BTC_PUBLIC_CODE_SHA','');rid=os.environ.get('BTC_PUBLIC_CODE_REPOSITORY_ID','')
+              if (platform.system()!='Linux' or os.environ.get('GITHUB_REPOSITORY')!=REPOSITORY
+                      or not re.fullmatch('[0-9a-f]{40}',pin) or not re.fullmatch('[1-9][0-9]*',rid)
+                      or any(workspace.iterdir())): raise ValueError('Exact empty public code checkout required')
+              parent=Path(os.environ['RUNNER_TEMP'])
+              if not parent.is_dir() or parent.is_symlink(): raise ValueError('Runner temp required')
+              temp=Path(tempfile.mkdtemp(prefix='btc-public-code-',dir=parent))
+              class NoRedirect(urllib.request.HTTPRedirectHandler):
+                  def redirect_request(self,*args): raise ValueError('Redirect refused')
+              opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())
+              def guard():
+                  if time.monotonic()-started>=120: raise ValueError('Public checkout total deadline')
+                  size=count=0
+                  for root in (workspace,temp):
+                      for folder,dirs,files in os.walk(root):
+                          for name in dirs+files:
+                              p=Path(folder)/name
+                              if p.is_symlink(): raise ValueError('Checkout symlink refused')
+                          for name in files:
+                              try: size+=(Path(folder)/name).stat().st_size
+                              except FileNotFoundError: continue
+                              count+=1
+                              if size>256*MIB or count>32768: raise ValueError('Checkout disk/file budget')
+              def http(url,limit,data=None):
+                  nonlocal total
+                  guard();total+=limit+len(data or b'')
+                  if total>69*MIB: raise ValueError('Checkout transfer reservation')
+                  req=urllib.request.Request(url,data=data,method='GET' if data is None else 'POST',headers={
+                      'User-Agent':'btc-public-code','Accept':'application/vnd.github+json' if 'api.github.com/' in url else
+                      'application/x-git-upload-pack-'+('advertisement' if data is None else 'result'),
+                      'Content-Type':'application/x-git-upload-pack-request','X-GitHub-Api-Version':'2022-11-28'})
+                  done=threading.Event();values=[]
+                  seconds=min(15,120-(time.monotonic()-started))
+                  def work():
+                      try:
+                          with opener.open(req,timeout=seconds) as response:
+                              raw=response.read(limit+1)
+                              if len(raw)>limit: raise ValueError('Checkout response byte bound')
+                              values.append(raw)
+                      except BaseException as exc: values.append(exc)
+                      finally: done.set()
+                  threading.Thread(target=work,daemon=True).start()
+                  if not done.wait(seconds): raise ValueError('Checkout HTTP deadline')
+                  if isinstance(values[0],BaseException): raise ValueError('Checkout HTTP unconfirmed') from None
+                  guard();return values[0]
+              meta=json.loads(http('https://api.github.com/repos/'+REPOSITORY,2*MIB))
+              if (meta.get('full_name')!=REPOSITORY or meta.get('id')!=int(rid)
+                      or meta.get('private') is not False or meta.get('visibility')!='public'):
+                  raise ValueError('Public code repository ID/visibility differs')
+              def packets(raw):
+                  response=io.BytesIO(raw)
+                  for _ in range(1048576):
+                      header=response.read(4)
+                      if not header: return
+                      if not re.fullmatch(b'[0-9a-f]{4}',header): raise ValueError('Git packet header')
+                      n=int(header,16)
+                      if not n: yield None;continue
+                      if not 4<=n<=65524: raise ValueError('Git packet bound')
+                      body=response.read(n-4)
+                      if len(body)!=n-4: raise ValueError('Short Git packet')
+                      yield body
+                  raise ValueError('Git packet count bound')
+              url='https://github.com/'+REPOSITORY+'.git'
+              rows=list(packets(http(url+'/info/refs?service=git-upload-pack',2*MIB)))
+              if not rows or rows[0]!=b'# service=git-upload-pack\n': raise ValueError('Smart HTTP v0 required')
+              head=None;caps=set()
+              for row in rows[1:]:
+                  if row is None: continue
+                  if b'\0' in row:
+                      row,cap=row.split(b'\0',1);caps.update(cap.decode().split())
+                  sha,ref=row.decode().strip().split(' ',1)
+                  if not re.fullmatch('[0-9a-f]{40}',sha): raise ValueError('Git advertised identity')
+                  if ref=='refs/heads/main':
+                      if head is not None: raise ValueError('Duplicate main')
+                      head=sha
+              if head is None or 'side-band-64k' not in caps: raise ValueError('Exact main/sideband required')
+              def pkt(raw): return f'{len(raw)+4:04x}'.encode()+raw
+              want=pkt(('want '+head+' side-band-64k no-progress\n').encode())+b'0000'+pkt(b'done\n')
+              raw=http(url+'/git-upload-pack',64*MIB,want);pack=temp/'source.pack';begun=ended=False
+              with pack.open('xb') as out:
+                  for row in packets(raw):
+                      guard()
+                      if row is None:
+                          if begun: ended=True
+                          continue
+                      if ended: raise ValueError('Trailing Git data')
+                      if not begun and row==b'NAK\n': continue
+                      if not row or row[0] not in (1,2): raise ValueError('Git pack refused')
+                      if row[0]==1: out.write(row[1:]);begun=True
+              del raw
+              if not begun or not ended or pack.stat().st_size>64*MIB: raise ValueError('Complete bounded pack required')
+              clean={k:os.environ[k] for k in ('PATH','LANG','LC_ALL','TMPDIR') if k in os.environ}
+              clean.update(GIT_CONFIG_NOSYSTEM='1',GIT_CONFIG_GLOBAL='/dev/null',GIT_NO_REPLACE_OBJECTS='1')
+              def git(*args,stdin=None):
+                  guard()
+                  wrapper=('import os,resource,sys;'
+                      'resource.setrlimit(resource.RLIMIT_AS,(201326592,201326592));'
+                      'resource.setrlimit(resource.RLIMIT_FSIZE,(67108864,67108864));'
+                      'os.execvp(sys.argv[1],sys.argv[1:])')
+                  import sys
+                  cmd=['git','-c','core.hooksPath='+os.devnull,'-c','core.fsmonitor=false',
+                       '-c','protocol.allow=never','-c','pack.threads=1','-c','core.autocrlf=false',*args]
+                  if os.name=='posix': cmd=[sys.executable,'-c',wrapper,*cmd]
+                  with tempfile.TemporaryFile() as output, tempfile.TemporaryFile() as errors:
+                      p=subprocess.Popen(cmd,stdin=stdin or subprocess.DEVNULL,stdout=output,stderr=errors,env=clean,start_new_session=True)
+                      began=time.monotonic()
+                      try:
+                          while p.poll() is None:
+                              guard()
+                              if time.monotonic()-began>30: raise ValueError('Checkout Git deadline')
+                              if os.name=='posix':
+                                  parents={};rss={}
+                                  for folder in Path('/proc').iterdir():
+                                      if not folder.name.isdigit(): continue
+                                      try:
+                                          stat=(folder/'stat').read_text();fields=stat[stat.rfind(')')+2:].split()
+                                          parents[int(folder.name)]=int(fields[1]);rss[int(folder.name)]=int(fields[21])*os.sysconf('SC_PAGE_SIZE')
+                                      except (OSError,ValueError,IndexError): continue
+                                  children={p.pid}
+                                  while True:
+                                      found={pid for pid,parent in parents.items() if parent in children}-children
+                                      if not found: break
+                                      children.update(found)
+                                      if len(children)>64: raise ValueError('Checkout process count bound')
+                                  if sum(rss.get(pid,0) for pid in children)>192*MIB: raise ValueError('Checkout Git tree memory bound')
+                              if output.tell()>8192 or errors.tell()>8192: raise ValueError('Git output bound')
+                              time.sleep(.05)
+                          if p.returncode: raise ValueError('Checkout Git unconfirmed')
+                      except BaseException:
+                          try:
+                              if os.name=='posix': os.killpg(p.pid,signal.SIGKILL)
+                              else: p.kill()
+                          except ProcessLookupError: pass
+                          p.wait();raise
+              git('init','--quiet')
+              with pack.open('rb') as inp: git('index-pack','--stdin','--strict',stdin=inp)
+              git('merge-base','--is-ancestor',pin,head)
+              git('checkout','--quiet','--detach',pin)
+              guard()
+              return {'http':3,'reserved_transfer_bytes':total,'code_sha':pin}
+
+
+          def cli():
+              try:
+                  checkout();print('Anonymous reviewed public code checkout complete.')
+                  return 0
+              except Exception:
+                  print('Public code checkout refused; no credential fallback.');return 20
+
+
+          if __name__=='__main__': raise SystemExit(cli())
+          PY
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.12.14"
@@ -31,7 +210,7 @@ jobs:
         run: python3 tools/produktion_runtime_prepare.py --kind lage --out .runtime
       - name: Checked lage entry
         env:
-          BTC_ACTIONS_METADATA_READ_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
           BTC_ACTIONS_EXPLICIT_START_MS: ${{ inputs.expected_start_ms }}
           BTC_DELIVERY_ADAPTER: github
           BTC_DELIVERY_RUNNER_ROOT: ${{ github.workspace }}

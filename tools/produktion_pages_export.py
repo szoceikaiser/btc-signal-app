@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT/'engine'), str(ROOT/'tools')]
 import actions_delivery as actions
 import github_delivery as github
+import public_access as public
 from production_confirmation import ProductionContentsClient
 from production_contract import canonical, digest, verify_runtime_config
 from produktion_actions_runner import check_code_pin, deployment, verify_health
@@ -37,7 +38,8 @@ class ReadClient(github.GitHubContentsClient):
     response_byte_limit = 2*1024*1024
 
     def __init__(self, token, repo, branches, clock=time.monotonic):
-        super().__init__(token, timeout=10)
+        if token: raise ValueError('Public Pages data reads accept no secret')
+        super().__init__(None, timeout=10, anonymous=True)
         self.repo, self.branches, self.clock = repo, branches, clock
         self.started = self.highwater = clock()
         self.gets = self.bytes = self._response_bytes = 0
@@ -89,6 +91,7 @@ def validate(runtime):
     if runtime.get('python_version') and tuple(runtime['python_version'])!=sys.version_info[:3]:
         raise ValueError('Reviewed Pages Python runtime differs')
     d = runtime.get('deployment', {})
+    public.deployment(runtime['public_access'],d)
     if d != deployment(d):
         raise ValueError('Pages deployment fields must exactly match delivery deployment')
     if (runtime.get('enabled') is not True or runtime.get('schema') != SCHEMA
@@ -108,7 +111,7 @@ def validate(runtime):
     check_code_pin(d['code_sha'])
     if runtime.get('entry_workflows',{}).get(WORKFLOW):
         from reviewed_actions_entry import actual,EntryReader
-        actual(EntryReader(os.environ.get('BTC_PAGES_METADATA_READ_TOKEN'),d['code_repository']),
+        actual(EntryReader(os.environ.get('GITHUB_TOKEN'),d['code_repository']),
                d['code_repository'],d['code_ref'],d['code_sha'],WORKFLOW,runtime['entry_workflows'][WORKFLOW])
     return d
 
@@ -145,11 +148,13 @@ def observe(client, d, config):
 def export(runtime_path, config_path, out, verify=None):
     runtime = json.loads(Path(runtime_path).read_text(encoding='utf-8'))
     d = validate(runtime)
+    branches=[(d['private_store_repository'],b) for b in (d['store_branch'],d['fence_branch'])]
+    preflight_gets=public.preflight(runtime['public_access'],branches,branches)
     config = json.loads(Path(config_path).read_text(encoding='utf-8'))
     from production_contract import effective_config
     if digest(effective_config(config)) != d['config_sha256']:
         raise ValueError('Public export configuration differs from reviewed pin')
-    client = ReadClient(os.environ.get('BTC_PAGES_STORE_READ_TOKEN'), d['private_store_repository'],
+    client = ReadClient(None, d['private_store_repository'],
                         {d['store_branch']:github.STORE_PATH, d['fence_branch']:actions.FENCE_PATH})
     snapshot, private_pins = observe(client, d, config)
     if verify:
@@ -158,7 +163,7 @@ def export(runtime_path, config_path, out, verify=None):
             raise github.StoreConflict('Publication snapshot moved after package preparation')
         verify_package(Path(out), d, private_pins)
         client.guard()
-        return {'get':client.gets, 'put':0, 'transport':0}
+        return {'get':client.gets, 'preflight_get':preflight_gets, 'put':0, 'transport':0}
     now = int(time.time()*1000)
     # Observation time cannot make an old signal/data slice look fresh.
     if not 0 <= now-(snapshot['engine']['last_signal_ts']+14400000) <= 8*3600000:
@@ -193,7 +198,7 @@ def export(runtime_path, config_path, out, verify=None):
     with out.with_suffix('.receipt.json').open('x',encoding='utf-8') as f:
         f.write(canonical({'deployment':d, 'pins':private_pins}))
     client.guard()
-    return {'get':client.gets, 'put':0, 'transport':0, 'public_bytes':len(body)}
+    return {'get':client.gets, 'preflight_get':preflight_gets, 'put':0, 'transport':0, 'public_bytes':len(body)}
 
 
 def verify_package(out, d, private_pins):

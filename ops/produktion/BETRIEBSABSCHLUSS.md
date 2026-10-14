@@ -1,5 +1,9 @@
 # Lokaler Betriebsabschluss; weiterhin deaktiviert
 
+Aktuelle öffentliche Einrichtung/Rollen/Schutzprüfung und Budgets:
+[FREE-EINRICHTUNG.md](FREE-EINRICHTUNG.md). Historische lokale Adapterbeschreibungen
+weiter unten sind keine heutigen Einrichtungsanweisungen.
+
 Vertrag `btc-actions-slots-v1`, separate Sperre `github-actions-fence-v2`.
 Keine Livefreigabe, kein neuer Storeseed und keine Änderung bestehender aktiver
 Workflows. Alte Live-Sicherung 69e676d8… und abgeschlossene Testgrants bleiben
@@ -19,7 +23,7 @@ Runs bleiben ungesund. Ein externer Monitor muss auch den fehlenden Monitorlauf
 selbst überwachen; Actions-Warteschlangen versprechen keine Startfrist.
 
 Der Entry liest genau einmal die tatsächlichen Runmetadaten über GET, mit
-separatem Actions:read-Token. Run-ID/Nummer/Attempt/Repo/Pfad/Ref/Code/Event müssen
+automatischem begrenztem GITHUB_TOKEN (Actions:read). Run-ID/Nummer/Attempt/Repo/Pfad/Ref/Code/Event müssen
 zur tatsächlichen Runnerumgebung passen. `run_started_at` oder Stepzeit werden
 niemals zum neuen Solltermin. Es wird kein `scheduled_at` erfunden.
 
@@ -144,7 +148,7 @@ Transaktion über mehrere Repositories.
 | Pfad | GET / PUT | Zeit | Bytes und sonstige Grenzen |
 |---|---|---|---|
 | Actions incl. tatsächlichem Metadata-GET | 640 / 50 pro Run, unverändert | Request 15s, Run höchstens 900s UND ursprüngliche Terminfrist | Antwort 2MiB; Request 1.126.400; Run Request 62.914.560, reservierte Response 1.447.034.880 Bytes; CAS weiterhin max11GET/1PUT/3 Zyklen |
-| Neuer Monitor, drei getrennte Tokens, ein Zähler | 64 / 0, keine Retries | Request max3s, zusammen20s; Redirect/Proxy abgewiesen | 2MiB pro Antwort, maximal134.217.728 reservierte Bytes; höchstens100 Runs pro Liste (100 oder unvollständige Pagination wird abgewiesen),20 Jobs pro ausgewähltem Run, Policy/Receipt128KiB |
+| Monitor, anonyme Datenreads und automatische Codejobmetadaten, ein Zähler inkl. Schutzreads | 64 / 0, keine Retries | Request max3s, zusammen20s; Redirect/Proxy abgewiesen | 2MiB pro Antwort, maximal134.217.728 reservierte Bytes; höchstens100 Runs pro Liste (100 oder unvollständige Pagination wird abgewiesen),20 Jobs pro ausgewähltem Run, Policy/Receipt128KiB |
 | Paarappend/Restore/readback | 0 Netzrequests / 0 | gemeinsam1800s, je Git-Prozess120s | Python256MiB RSS, Gitprozessbaum192MiB,256 Commits/64MiB unpacked je Segment,20MiB Paket; beide Historien zusammen max512 Segmente/8GiB Paketbytes; Paarmanifest128KiB; Fence8KiB; Stream750KiB |
 
 Der neue Monitor hat ausdrücklich 64 statt der früheren p3-32-GET-Obergrenze:
@@ -160,20 +164,18 @@ Alle folgenden Namen sind **Vorschläge**, keine existierenden IDs oder Werte.
 Code bleibt `szoceikaiser/btc-signal-app`, `refs/heads/main`, exakter neu geprüfter
 Codepin. `btc-p3-store-probe` bleibt abgeschlossen und wird nicht verwendet.
 
-| Zweck | vorgeschlagenes privates Ziel / Branches | engste Rollen und Variablen |
+| Zweck | vorgeschlagenes öffentliches Ziel / Branches | engste Rollen und Variablen |
 |---|---|---|
 | Autoritativer Store | `szoceikaiser/btc-delivery-store`, `delivery-stream-v2` und `delivery-fence-v2` | Sendetoken nur dort Contents:write; keine PR-/Actions-/Adminrechte. `BTC_REVIEWED_STORE_REPOSITORY`, `BTC_REVIEWED_STORE_BRANCH`, `BTC_REVIEWED_FENCE_BRANCH`, `BTC_REVIEWED_STORE_ID`, `BTC_REVIEWED_BOT_IDENTITY`, `BTC_REVIEWED_RUNTIME_JSON`, `BTC_REVIEWED_CONFIG_JSON`, Secret `BTC_REVIEWED_STORE_TOKEN`. GitHub-Token des Codejobs nur Contents:read + Actions:read für Metadata. |
-| Vollständige Zweitsicherung | `szoceikaiser/btc-delivery-backup`, `verified-pair-packages` | eigener Producer Contents:write nur dort; Source-Reader Contents:read nur Store, plus geprüfte immutable Migration. Keine Forcepush-/Löschrechte; geschützte Historie/Retention einzurichten. `BTC_BACKUP_SOURCE_PLAN_PATH`, `BTC_BACKUP_VERIFIER_CODE_SHA`; Upload-/Downloadadapter und dessen tatsächliche Commit-/Blobquittung offen. |
-| Unabhängige Prüfung und Quittung | `szoceikaiser/btc-delivery-backup-verification`, `verified-receipts`; Codeworkflow `.github/workflows/backup-verify.yml` | separater Verifier liest Backup Contents:read, schreibt ausschließlich Quittungsziel Contents:write; Producer und Sendetoken dürfen hier nicht schreiben. Geschützter Schreibpfad/Review, exakter Verifier-Codepin und Workflow-/Runbindung einzurichten. `BTC_BACKUP_READBACK_PLAN_PATH`; authentifizierte Readbackbereitstellung und Quittungspublisher offen. |
-| Frischemonitor | eigener externer Ausführungs-/Alarmanbieter, optional zusätzlich Actions | Secrets `BTC_MONITOR_STORE_READ_TOKEN` (Store Contents:read), `BTC_MONITOR_ACTIONS_READ_TOKEN` (Code/Verifier Actions:read), `BTC_MONITOR_BACKUP_READ_TOKEN` (Backup/Quittungsziel Contents:read); `BTC_MONITOR_POLICY_JSON`, `BTC_MONITOR_CODE_SHA`; niemals PUT/Telegram-/Recoveryberechtigung. |
+| Vollständige Zweitsicherung | `szoceikaiser/btc-delivery-backup`, `verified-pair-packages` | eigener Producer Contents:write nur dort; Source/Migration anonym. Hostedadapter mit vollständigem Readback lokal umgesetzt; echte IDs/Writerreichweite/Rulesreview offen. |
+| Unabhängige Prüfung und Quittung | `szoceikaiser/btc-delivery-backup-verification`, `verified-receipts`; `.github/workflows/backup-verify.yml` | separater Verifier liest Backup anonym, schreibt ausschließlich Quittungsziel Contents:write. Keine Sender-/Backupwriterinjektion. Tatsächlicher Rollenreview offen. |
+| Frischemonitor | eigener externer Ausführungs-/Alarmanbieter, optional zusätzlich Actions | anonyme Datenreads; Codejobmetadaten über automatisches GITHUB_TOKEN. `BTC_MONITOR_POLICY_JSON`, `BTC_MONITOR_CODE_SHA`; kein PUT/Telegram/Recovery. Externer Alarm bleibt offen. |
 
-Für die beiden lokalen Backupvorlagen werden getrennte self-hosted Labels
-`btc-backup-staging` / `btc-independent-backup-verifier` vorgeschlagen. Sie
-verarbeiten nur zuvor begrenzt und authentifiziert bereitgestellte Quellen;
-sie enthalten absichtlich keinen ungeprüften `fetch --all` oder Publisher.
-Quellenbereitstellung, geschützter Upload, unabhängiges Readback und Veröffentlichung
-der Prüferquittung müssen als konkrete Providerbindungen vor Aktivierung ergänzt
-und abgenommen werden. Ein grüner lokaler Producerjob reicht niemals für Monitor200.
+Die sieben aktuellen Vorlagen verwenden gewöhnliche Hostedrunner und einen
+begrenzten anonymen Codebootstrap ohne Checkouttoken in Git. Quellenbereitstellung,
+Upload, unabhängiger Download und Quittungspublisher sind lokal implementiert;
+die echte Linux-/Provider-/Rollen-/Schutzabnahme fehlt. Ein grüner lokaler
+Producerjob reicht niemals für Monitor200.
 
 Zusätzlich offen: tatsächliche Repository-/Branchschutzrechte und IDs, Bot-/
 Zielbindung ohne Secretwerte, heutige Workflow-Startcursor, erste verpflichtende

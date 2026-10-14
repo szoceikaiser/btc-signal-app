@@ -20,18 +20,23 @@ class Reader(github.GitHubContentsClient):
     open_request=staticmethod(ProductionContentsClient.open_request)
     response_byte_limit=2*1024*1024
 
-    def __init__(self,token,repositories,budget):
-        super().__init__(token,timeout=3)
+    def __init__(self,token,repositories,budget,metadata=False):
+        if token and not metadata: raise ValueError('Public data monitor accepts no secret')
+        super().__init__(token,timeout=3,anonymous=not token)
+        self.metadata_routes=metadata
         self.repositories=set(repositories);self.budget=budget
         self._response_bytes=0
 
     def _request(self,method,route,payload=None):
         if (method!='GET' or payload is not None or self.budget.requests>=MAX_GET
-                or not any(route.startswith(self._route(r,'/')) for r in self.repositories)):
+                or not any(route==self._route(r,'') or route.startswith(self._route(r,'/')) for r in self.repositories)):
             raise github.StoreUnavailable('GET-only monitor scope/budget refused')
         remaining=MAX_SECONDS-(time.monotonic()-self.budget.started)
         if remaining<=0: raise github.StoreUnavailable('Monitor total deadline')
         self.timeout=min(3,remaining);self.budget.requests+=1
+        from public_access import tail_allowed
+        parts=route.split('/',4);tail='/'+parts[4] if len(parts)==5 else ''
+        if not tail_allowed(tail,self.metadata_routes): raise github.StoreUnavailable('Monitor path scope refused')
         result=super()._request(method,route)
         if time.monotonic()-self.budget.started>MAX_SECONDS: raise github.StoreUnavailable('Monitor total deadline')
         return result

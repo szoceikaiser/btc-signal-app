@@ -1,7 +1,7 @@
 """Bounded GitHub hosted backup protocol. No discovery, bootstrap or resend.
 
-Secrets enter through four distinct environment roles only. Both Git smart
-HTTP and REST credentials stay in memory, exclusively in request headers.
+Secrets enter through the distinct writer and automatic code metadata roles.
+All data reads and the separately bound read-only Git upload-pack are anonymous.
 Only dedicated full source refs are fetched, never a mirror or --all.
 """
 import argparse
@@ -31,6 +31,7 @@ import p4_backup_pair as pair
 import actions_schedule as slots
 import actions_delivery as actions
 import github_delivery as github
+import public_access as public
 from production_contract import canonical,digest
 from production_confirmation import ProductionContentsClient
 from produktion_actions_runner import check_code_pin,deployment
@@ -49,9 +50,10 @@ MAX_RESPONSE=28*MIB  # base64 of a <=20MiB segment; not Contents API
 REQUEST_SECONDS=15
 MANIFEST='pair-manifest.json'
 RECEIPT='receipt.json'
-ROLES={'producer':('source_read','backup_write','receipt_read','metadata_read'),
-       'verifier':('backup_read','receipt_write','source_read','metadata_read')}
-ENV={r:'BTC_HOSTED_'+r.upper()+'_TOKEN' for r in set(sum((list(v) for v in ROLES.values()),[]))}
+ROLES={'producer':('backup_write','metadata_read'),
+       'verifier':('receipt_write','metadata_read')}
+ENV={r:('GITHUB_TOKEN' if r=='metadata_read' else 'BTC_HOSTED_'+r.upper()+'_TOKEN')
+     for r in set(sum((list(v) for v in ROLES.values()),[]))}
 
 
 class Inaccessible(RuntimeError):
@@ -71,6 +73,7 @@ def wire(client,request,budget,limit):
     def work():
         try:
             with client.open_request(request,timeout=seconds) as response:
+                client._response_link=response.headers.get('Link','') if hasattr(response,'headers') else ''
                 responses.append(response);raw=response.read(limit+1)
                 if len(raw)>limit: raise ValueError('Response byte limit')
                 values.append(raw)
@@ -152,48 +155,52 @@ class Budget(b.Budget):
 class Client:
     open_request=staticmethod(ProductionContentsClient.open_request)
 
-    def __init__(self,token,scope,writable,budget):
-        if not token or '\n' in token or '\r' in token: raise ValueError('Injected role missing')
+    def __init__(self,token,scope,writable,budget,metadata=False):
+        if (writable or metadata) and (not token or '\n' in token or '\r' in token): raise ValueError('Injected role missing')
+        if not writable and not metadata and token: raise ValueError('Data reader must be anonymous')
         self.token=token;self.scope=scope;self.writable=writable;self.budget=budget
+        self.metadata=metadata;self.access=None
         self.allowed=set()
 
     def request(self,method,repo,tail,payload=None,limit=2*MIB):
         if repo not in self.scope or (method!='GET' and repo not in self.writable):
             raise ValueError('Role scope forbids request')
+        if method=='GET':
+            if payload is not None or not public.tail_allowed(tail,self.metadata): raise ValueError('Bounded read route required')
+        elif (self.metadata or method not in ('POST','PATCH') or not (
+                method=='POST' and tail in ('/git/blobs','/git/trees','/git/commits') or
+                method=='PATCH' and re.fullmatch(r'/git/refs/heads/[A-Za-z0-9_-]+',tail))):
+            raise ValueError('Exact writer protocol route required')
+        if not 0<limit<=MAX_RESPONSE: raise ValueError('Response byte bound')
+        if method=='PATCH' and (not self.access or not any(
+                tail=='/git/refs/heads/'+branch for branch in self.access['repositories'][repo]['branches'])):
+            raise ValueError('Unreviewed writer branch')
         # Routes are exclusively constructed by protocol methods below.
         route=github.GitHubContentsClient._route(repo,tail)
         raw=None if payload is None else canonical(payload).encode()
         if raw and len(raw)>MAX_RESPONSE: raise ValueError('Request byte limit')
         self.budget.reserve(method,len(raw or b''),limit)
         request=urllib.request.Request('https://api.github.com'+route,data=raw,method=method,headers={
-            'Authorization':'Bearer '+self.token,'Accept':'application/vnd.github+json',
+            'Accept':'application/vnd.github+json',
             'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json','User-Agent':'btc-p4-backup'})
+        if method!='GET' or self.metadata:
+            request.add_header('Authorization','Bearer '+self.token)
         try:
             body=wire(self,request,self.budget,limit)
             return json.loads(body)
         except urllib.error.HTTPError as exc:
-            if exc.code==404: raise Inaccessible('Private target inaccessible') from None
+            if exc.code==404: raise Inaccessible('Bound target inaccessible') from None
             raise RuntimeError('Provider HTTP outcome unconfirmed') from None
         except (urllib.error.URLError,TimeoutError,OSError):
             raise RuntimeError('Provider outcome unconfirmed') from None
 
     def repository(self,t,write):
-        meta=self.request('GET',t['repository'],'')
-        perms=meta.get('permissions',{})
-        if (meta.get('id')!=t['id'] or meta.get('full_name')!=t['repository'] or meta.get('private') is not True
-                or perms.get('pull') is not True or perms.get('push') is not write
-                or perms.get('admin') is not False or perms.get('maintain') is not False):
-            raise ValueError('Actual private repository/least role differs')
+        if public.target(self.access,t['repository'],t['branch'])['id']!=t['id']:
+            raise ValueError('Reviewed repository IDs differ')
+        public.repository(self,self.access,t['repository'],t['branch'])
 
     def protected(self,t):
-        # Protocol assumption: provider must expose full protection to the role.
-        # Unavailable entitlement/visibility is a hard stop, never a public fallback.
-        p=self.request('GET',t['repository'],'/branches/'+t['branch']+'/protection')
-        if (p.get('allow_force_pushes',{}).get('enabled') is not False
-                or p.get('allow_deletions',{}).get('enabled') is not False
-                or p.get('enforce_admins',{}).get('enabled') is not True
-                or p.get('required_linear_history',{}).get('enabled') is not True):
-            raise ValueError('Protected append-only destination required')
+        public.protection(self,self.access,t['repository'],t['branch'])
 
     def ref(self,t):
         value=self.request('GET',t['repository'],'/git/ref/heads/'+urllib.parse.quote(t['branch'],safe=''))
@@ -259,16 +266,25 @@ def tree_oid(files):
 def tokens(mode):
     values={r:os.environ.get(ENV[r]) for r in ROLES[mode]}
     if not all(values.values()) or len(set(values.values()))!=len(values):
-        raise ValueError('Four separately injected role credentials required')
+        raise ValueError('Distinct writer and automatic metadata credentials required')
     # A producer must not even possess the receipt writer, nor verifier the backup writer.
-    forbidden=('receipt_write','backup_read') if mode=='producer' else ('backup_write','receipt_read')
+    forbidden=('receipt_write',) if mode=='producer' else ('backup_write',)
     if any(os.environ.get(ENV[r]) for r in forbidden): raise ValueError('Forbidden role injection')
+    if any(os.environ.get('BTC_HOSTED_'+r+'_TOKEN') for r in ('SOURCE_READ','BACKUP_READ','RECEIPT_READ','METADATA_READ')):
+        raise ValueError('Obsolete secret reader injection refused')
+    if any(os.environ.get(k) for k in ('BTC_DELIVERY_GITHUB_TOKEN','TELEGRAM_BOT_TOKEN')):
+        raise ValueError('Sender credential injection forbidden in backup jobs')
     return values
 
 
 def validate(runtime,mode,budget=None,check_checkout=True):
     if runtime.get('enabled') is not True or runtime.get('schema')!=SCHEMA: raise ValueError('Hosted backup disabled')
     for key in ('source','backup','receipts'): validate_target(runtime[key])
+    access=runtime['public_access']
+    public.deployment(access,runtime['deployment'])
+    for key in ('source','backup','receipts'):
+        t=runtime[key]
+        if public.target(access,t['repository'],t['branch'])['id']!=t['id']: raise ValueError('Public target binding differs')
     if len({runtime[k]['id'] for k in ('source','backup','receipts')})!=3: raise ValueError('Distinct role destinations required')
     d=runtime['deployment'];binding=runtime[mode]
     if (d!=deployment(d) or d['private_store_repository']!=runtime['source']['repository']
@@ -316,16 +332,16 @@ def fetch_source(client,t,pin,target,budget):
     No shallow/haves/filter, so all reachable objects must arrive. No tags or
     other advertised refs are requested. Unsupported protocol is fail-closed.
     """
-    if client.writable or t['repository'] not in client.scope or not b.HEX40.fullmatch(pin):
+    if client.writable or client.token or client.metadata or t['repository'] not in client.scope or not b.HEX40.fullmatch(pin):
         raise ValueError('Read-only pinned Git source required')
+    if public.target(client.access,t['repository'],t['branch'])['id']!=t['id']: raise ValueError('Git source public target differs')
     target=Path(target);target.mkdir(exist_ok=False);budget.source_roots.append(target)
     b.git(target,budget,'init','--bare')
-    auth='Basic '+base64.b64encode(('x-access-token:'+client.token).encode()).decode()
     url='https://github.com/'+t['repository']+'.git'
     def request(method,tail,raw,limit):
         budget.reserve(method,len(raw or b''),limit)
         req=urllib.request.Request(url+tail,data=raw,method=method,headers={
-            'Authorization':auth,'User-Agent':'btc-p4-backup',
+            'User-Agent':'btc-p4-backup',
             'Content-Type':'application/x-git-upload-pack-request',
             'Accept':'application/x-git-upload-pack-'+('advertisement' if method=='GET' else 'result')})
         return io.BytesIO(wire(client,req,budget,limit))
@@ -441,6 +457,8 @@ def publish(client,t,base,additions,replace):
     Lost PATCH response permits ONE ref read; exact proposal is required. Blob,
     tree or commit response loss stops without a ref mutation. No blind retry.
     """
+    if t['repository'] not in client.writable: raise ValueError('Distinct target writer required')
+    client.protected(t)
     base_tree,old=client.tree(t,base);combined=deepcopy(old);changed=[]
     total=sum(v['bytes'] for v in old.values())
     for name,raw in additions.items():
@@ -470,6 +488,7 @@ def publish(client,t,base,additions,replace):
     observed=client.commit(t,pin)
     if observed['tree']['sha']!=expected_tree or [p['sha'] for p in observed['parents']]!=[base]:
         raise ValueError('Created commit parent/tree differs')
+    client.protected(t)
     if client.ref(t)!=base: raise ValueError('Destination moved before publication')
     try:
         answer=client.request('PATCH',t['repository'],'/git/refs/heads/'+t['branch'],{'sha':pin,'force':False})
@@ -493,24 +512,22 @@ def roles(runtime,mode,budget):
     scopes={'source_read':{repo,runtime['migration']['target']['repository']},'backup_write':{backup},
             'backup_read':{backup},'receipt_read':{receipt},'receipt_write':{receipt},
             'metadata_read':{runtime[mode]['repository']}}
-    clients={r:Client(token,scopes[r],scopes[r] if r.endswith('_write') else set(),budget) for r,token in values.items()}
-    # Positive read/write checks AND negative cross-target permissions before work.
-    for role,c in clients.items():
-        for key in ('source','backup','receipts'):
-            t=runtime[key]
-            probe=Client(c.token,{t['repository']},set(),budget)
-            # GitHub 404 for inaccessible private repos is also the expected denial.
-            if t['repository'] not in c.scope:
-                try: meta=probe.request('GET',t['repository'],'')
-                except Inaccessible: continue
-                perms=meta.get('permissions',{})
-                if any(perms.get(k) is not False for k in ('push','admin','maintain')):
-                    raise ValueError('Cross-target writer role refused')
-            else: c.repository(t,role.endswith('_write'))
+    role='backup_write' if mode=='producer' else 'receipt_write'
+    t=runtime['backup' if mode=='producer' else 'receipts']
+    public.credential(runtime['public_access'],role,t['repository'],[t['branch']])
+    clients={r:Client(values.get(r),scopes[r],scopes[r] if r.endswith('_write') else set(),budget,
+                       metadata=r=='metadata_read') for r in (*ROLES[mode], 'source_read',
+                        'receipt_read' if mode=='producer' else 'backup_read')}
+    for c in clients.values(): c.access=runtime['public_access']
+    for key in ('source','backup','receipts'):
+        t=runtime[key]
+        c=clients['source_read'] if key=='source' else clients['backup_write' if mode=='producer' else 'backup_read'] if key=='backup' else clients['receipt_read' if mode=='producer' else 'receipt_write']
+        c.repository(t,key==('backup' if mode=='producer' else 'receipts'));c.protected(t)
+    clients['source_read'].protected({**runtime['source'],'branch':runtime['deployment']['fence_branch']})
     c=clients['source_read'];spec=runtime['migration'];validate_target(spec['target'])
     c.repository(spec['target'],False)
-    clients['backup_write' if mode=='producer' else 'backup_read'].protected(runtime['backup'])
-    clients['receipt_read' if mode=='producer' else 'receipt_write'].protected(runtime['receipts'])
+    binding=runtime[mode]
+    clients['metadata_read'].repository({'repository':binding['repository'],'id':binding['repository_id'],'branch':binding['branch']},False)
     return clients
 
 

@@ -1,6 +1,6 @@
 """GitHub-backed v2 store. Network access occurs only when explicitly entered.
 
-The dedicated private branch contains one authoritative file. This adapter never
+The dedicated explicitly bound branch contains one authoritative file. This adapter never
 creates it, retries a write blindly, or treats a runner-local file as state.
 """
 import base64
@@ -77,9 +77,14 @@ def initial_envelope(snapshot, repo, branch, store_id):
 class GitHubContentsClient:
     """Small REST boundary; tests replace this class with a local fake."""
 
-    def __init__(self, token, timeout=15):
-        if not token:
+    anonymous_reads = False
+
+    def __init__(self, token, timeout=15, anonymous=False):
+        if not token and not anonymous:
             raise ValueError('GitHub store token missing')
+        if anonymous:
+            self.anonymous_reads = True
+            token = None
         self.token, self.timeout = token, timeout
 
     def _request(self, method, route, payload=None):
@@ -87,20 +92,35 @@ class GitHubContentsClient:
         data = None if payload is None else canonical(payload).encode('utf-8')
         request = urllib.request.Request(url, data=data, method=method, headers={
             'Accept': 'application/vnd.github+json',
-            'Authorization': 'Bearer ' + self.token,
             'X-GitHub-Api-Version': '2022-11-28',
             'Content-Type': 'application/json',
             'User-Agent': 'btc-delivery-store'})
+        if self.anonymous_reads and method == 'GET':
+            from public_access import tail_allowed
+            tail = route.split('/', 4)[4] if len(route.split('/', 4)) == 5 else ''
+            if payload is not None or not tail_allowed('/'+tail if tail else '', getattr(self,'metadata_routes',False)):
+                raise StoreUnavailable('Public read route refused')
+        elif self.token:
+            request.add_header('Authorization', 'Bearer ' + self.token)
+        else:
+            raise StoreUnavailable('Anonymous mutation refused')
         try:
             opener = getattr(self, 'open_request', urllib.request.urlopen)
             limit = getattr(self, 'response_byte_limit', MAX_RESPONSE_BYTES)
-            with opener(request, timeout=self.timeout) as response:
-                raw = response.read(limit+1)
-                if hasattr(self, '_response_bytes'):
-                    self._response_bytes = len(raw)
-                if len(raw) > limit:
-                    raise StoreUnavailable('GitHub response budget exhausted')
-                return json.loads(raw)
+            if self.anonymous_reads and method == 'GET':
+                from public_access import read_bytes
+                headers={}
+                raw = read_bytes(opener,request,self.timeout,limit,headers)
+                self._response_link=headers.get('link','')
+            else:
+                with opener(request, timeout=self.timeout) as response:
+                    self._response_link=response.headers.get('Link','') if hasattr(response,'headers') else ''
+                    raw = response.read(limit+1)
+            if hasattr(self, '_response_bytes'):
+                self._response_bytes = len(raw)
+            if len(raw) > limit:
+                raise StoreUnavailable('GitHub response budget exhausted')
+            return json.loads(raw)
         except urllib.error.HTTPError as exc:
             # Never include a response body, URL with credentials, or token in logs.
             if exc.code == 409:

@@ -149,8 +149,11 @@ class Provider:
         url=urllib.parse.urlparse(req.full_url)
         if url.netloc=='github.com':
             repo=url.path.split('.git/',1)[0].removeprefix('/')
-            auth=base64.b64decode(req.get_header('Authorization').removeprefix('Basic ')).decode()
-            assert auth=='x-access-token:'+self.tokens['source_read']
+            if getattr(self,'public_mode',False):
+                assert req.get_header('Authorization') is None
+            else:
+                auth=base64.b64decode(req.get_header('Authorization').removeprefix('Basic ')).decode()
+                assert auth=='x-access-token:'+self.tokens['source_read']
             def pkt(raw): return f'{len(raw)+4:04x}'.encode()+raw
             if req.get_method()=='GET':
                 rows=[(branch,pair.head(local,branch,b.Budget())) for (name,branch),local in self.repos.items() if name==repo]
@@ -170,7 +173,9 @@ class Provider:
             return io.BytesIO(body+b'0000')
         assert url.netloc=='api.github.com'
         method=req.get_method();path=urllib.parse.unquote(url.path);parts=path.split('/');repo='/'.join(parts[2:4]);tail='/'+('/'.join(parts[4:])) if len(parts)>4 else ''
-        token=req.get_header('Authorization').removeprefix('Bearer ');assert token in self.tokens.values()
+        auth=req.get_header('Authorization')
+        token=(auth.removeprefix('Bearer ') if auth else self.tokens['metadata_read'])
+        assert (auth or getattr(self,'public_mode',False)) and token in self.tokens.values()
         self.seen.append((method,repo,tail));payload=json.loads(req.data) if req.data else None
         if method!='GET': self.mutations.append((method,repo,tail,payload))
         if self.fault: self.fault(self,method,repo,tail,payload)

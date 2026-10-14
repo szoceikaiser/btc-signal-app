@@ -1,0 +1,25 @@
+{
+  "name": "REVIEW exact branch only",
+  "target": "branch",
+  "enforcement": "disabled",
+  "bypass_actors": [],
+  "conditions": {
+    "ref_name": {
+      "include": [
+        "refs/heads/REVIEW_EXACT_BRANCH"
+      ],
+      "exclude": []
+    }
+  },
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "required_linear_history"
+    }
+  ]
+}

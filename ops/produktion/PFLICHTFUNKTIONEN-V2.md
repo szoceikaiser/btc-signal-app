@@ -67,8 +67,9 @@ Alte Sperren bleiben erhalten, unklare Aufträge bleiben gesperrt.
 ## Öffentliche Projektion und Grenzen
 
 `produktion_pages_export.py` hat ausschließlich GET und keine Store-Claim-/PUT-
-oder Telegramfunktion. Ein Contents:read-Token für den privaten Store ist getrennt
-vom Sendetoken. Exact deployment, tatsächlicher Pagesentry/Repo/Ref/Codepin und
+oder Telegramfunktion. Der öffentliche Store wird anonym gelesen, ausdrücklich
+an ID/Branch/Regelreview gebunden (siehe FREE-EINRICHTUNG.md).
+Exact deployment, tatsächlicher Pagesentry/Repo/Ref/Codepin und
 sauberer Checkout einschließlich site werden geprüft. Der Store bleibt authentisch
 auf seinen Repo/Branch/Store-/Config-/Code-/Botpins; alle Outboxes müssen bestätigt,
 Owner leer und Fence geschlossen sein. Sein Abschluss muss exakt die aktuelle
