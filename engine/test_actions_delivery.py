@@ -122,6 +122,7 @@ def fixture():
         env={'SYSTEMROOT':os.environ.get('SYSTEMROOT',r'C:\Windows'),
              'WINDIR':os.environ.get('WINDIR',r'C:\Windows'),
              'TMP':tempfile.gettempdir(), 'TEMP':tempfile.gettempdir(),
+             'PYTHONUTF8':'1',
              'BTC_DELIVERY_ADAPTER':'github','BTC_DELIVERY_STORE_ID':STORE_ID,
              'BTC_DELIVERY_RUNNER_ROOT':str(data.parent),'BTC_DELIVERY_GITHUB_REPO':REPO,
              'BTC_DELIVERY_GITHUB_BRANCH':BRANCH,'BTC_DELIVERY_GITHUB_TOKEN':'synthetic-only',

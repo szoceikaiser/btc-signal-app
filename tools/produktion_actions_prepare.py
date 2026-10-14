@@ -19,5 +19,6 @@ if __name__ == '__main__':
     if (baseline.get('schema') != 'actions-v2-start-cursors-v1'
             or baseline.get('review_sha256') != pin['activation_review_sha256']):
         p.error('Explicit per-workflow start floors bound to this activation review required')
+    body = seed_fence(pin, baseline['cursors'])
     with Path(a.out).open('xb') as output:
-        output.write(seed_fence(pin, baseline['cursors']))
+        output.write(body)

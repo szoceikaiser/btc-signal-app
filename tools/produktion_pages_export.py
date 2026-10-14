@@ -24,6 +24,14 @@ STATIC = ('index.html', 'chart_signals.js', 'live_projection.js')
 HISTORY = ('backtest.json', 'backtest_signals.json', 'execution_v1.json')
 
 
+def bounded_file(path, limit):
+    with Path(path).open('rb') as f:
+        raw = f.read(limit+1)
+    if len(raw) > limit:
+        raise ValueError('Local publication byte budget exceeded')
+    return raw
+
+
 class ReadClient(github.GitHubContentsClient):
     open_request = staticmethod(ProductionContentsClient.open_request)
     response_byte_limit = 2*1024*1024
@@ -69,6 +77,12 @@ class ReadClient(github.GitHubContentsClient):
 
     def update(self, *args, **kwargs):
         raise github.StoreConflict('Export has no write path')
+
+    def guard(self):
+        now = self.clock()
+        if not self.highwater <= now < self.started+120:
+            raise github.StoreUnavailable('Export/package deadline exceeded')
+        self.highwater = now
 
 
 def validate(runtime):
@@ -133,10 +147,11 @@ def export(runtime_path, config_path, out, verify=None):
                         {d['store_branch']:github.STORE_PATH, d['fence_branch']:actions.FENCE_PATH})
     snapshot, private_pins = observe(client, d, config)
     if verify:
-        saved = json.loads(Path(verify).read_text(encoding='utf-8'))
+        saved = json.loads(bounded_file(verify, 16384))
         if saved != {'deployment': d, 'pins':private_pins}:
             raise github.StoreConflict('Publication snapshot moved after package preparation')
         verify_package(Path(out), d, private_pins)
+        client.guard()
         return {'get':client.gets, 'put':0, 'transport':0}
     now = int(time.time()*1000)
     # Observation time cannot make an old signal/data slice look fresh.
@@ -149,17 +164,17 @@ def export(runtime_path, config_path, out, verify=None):
     filename = 'projection-'+content_hash+'.json'
     # Construct only after all checks; never copy inherited live site/data.
     out = Path(out)
+    if out.with_suffix('.receipt.json').exists():
+        raise FileExistsError('Existing publication receipt must be preserved')
     out.mkdir(parents=True, exist_ok=False)
     for name in STATIC:
-        (out/name).write_bytes((ROOT/'site'/name).read_bytes())
+        (out/name).write_bytes(bounded_file(ROOT/'site'/name, 1024*1024))
     history = {}
     (out/'history').mkdir()
     for name in HISTORY:
         source = ROOT/'site/data'/name
         if source.is_file():
-            raw = source.read_bytes()
-            if len(raw) > 16*1024*1024:
-                raise ValueError('Historical artifact size exceeded')
+            raw = bounded_file(source, 16*1024*1024)
             json.loads(raw)  # reviewed, previously public frozen artifacts only
             sha = hashlib.sha256(raw).hexdigest()
             (out/'history'/name).write_bytes(raw)
@@ -171,18 +186,19 @@ def export(runtime_path, config_path, out, verify=None):
     # Private locators stay alongside the package, never inside the upload tree.
     with out.with_suffix('.receipt.json').open('x',encoding='utf-8') as f:
         f.write(canonical({'deployment':d, 'pins':private_pins}))
+    client.guard()
     return {'get':client.gets, 'put':0, 'transport':0, 'public_bytes':len(body)}
 
 
 def verify_package(out, d, private_pins):
-    manifest = json.loads((out/'projection-manifest.json').read_text(encoding='utf-8'))
+    manifest = json.loads(bounded_file(out/'projection-manifest.json', 16384))
     sha = manifest['sha256']
     pins = {'code_sha':d['code_sha'], 'config_sha256':d['config_sha256'],
             'projection_binding':digest({'deployment':d, 'pins':private_pins})}
     if (not re.fullmatch('[0-9a-f]{64}', sha) or manifest['projection'] != 'projection-'+sha+'.json'
             or manifest['pins'] != pins):
         raise github.StoreConflict('Public package pins changed')
-    body = (out/manifest['projection']).read_bytes()
+    body = bounded_file(out/manifest['projection'],750*1024)
     value = json.loads(body)
     now = int(time.time()*1000)
     if (hashlib.sha256(body).hexdigest() != sha or value['pins'] != pins
@@ -191,12 +207,12 @@ def verify_package(out, d, private_pins):
         raise github.StoreConflict('Public package changed or expired')
     expected = set(STATIC) | {'projection-manifest.json',manifest['projection']}
     for name in STATIC:
-        if (out/name).read_bytes() != (ROOT/'site'/name).read_bytes():
+        if bounded_file(out/name,1024*1024) != bounded_file(ROOT/'site'/name,1024*1024):
             raise github.StoreConflict('Public code differs from reviewed pin')
     for name, item in manifest['history'].items():
         if (name not in HISTORY or item['path'] != 'history/'+name or item['source_code_sha'] != d['code_sha']
-                or hashlib.sha256((out/item['path']).read_bytes()).hexdigest() != item['sha256']
-                or (out/item['path']).read_bytes() != (ROOT/'site/data'/name).read_bytes()):
+                or hashlib.sha256(bounded_file(out/item['path'],16*1024*1024)).hexdigest() != item['sha256']
+                or bounded_file(out/item['path'],16*1024*1024) != bounded_file(ROOT/'site/data'/name,16*1024*1024)):
             raise github.StoreConflict('Historical public artifact changed')
         expected.add(item['path'])
     if {p.relative_to(out).as_posix() for p in out.rglob('*') if p.is_file()} != expected:

@@ -218,6 +218,8 @@ def test_export_fixed_get_byte_deadline_and_method_bounds():
     fails(github.StoreError,lambda:client.read('foreign/store','stream'))
     client.allowed={'/synthetic'};client.gets=12
     fails(github.StoreError,lambda:client._request('GET','/synthetic'))
+    client.gets=0;clock[0]=120
+    fails(github.StoreError,lambda:client._request('GET','/synthetic'))
 
 
 def test_fixed_disabled_templates_prepare_factory_and_legacy_workflows_preserved():
@@ -262,5 +264,14 @@ def test_public_pin_failures_before_reads_and_disabled_cli_refusal():
         '--runtime',str(ROOT/'ops/produktion/pages-runtime.disabled.json'),
         '--config','missing','--out','missing'],capture_output=True)
     assert child.returncode==20 and b'no new publication' in child.stderr
-    client.gets=0;clock[0]=120
-    fails(github.StoreError,lambda:client._request('GET','/synthetic'))
+
+
+def test_public_export_actual_oversize_and_stale_slice_refused():
+    for mode in ('oversize','stale'):
+        with fixture() as (root,data,path,runtime,http):
+            invoke(path,data);p=pages_runtime(root,runtime);before=http.puts
+            if mode=='oversize': http.mode='oversize'
+            timestamp=json.loads(http.file(github.STORE_PATH))['snapshot']['engine']['last_signal_ts']
+            with pages_environment(),patch.object(pages,'check_code_pin'),patch.object(pages.ReadClient,'open_request',side_effect=http.open),patch.object(pages.time,'time',return_value=(timestamp+14400000+8*3600000+1)/1000):
+                fails(github.StoreError,lambda:pages.export(p,data/'config.json',root/'public'))
+            assert http.puts==before and not (root/'public').exists()
