@@ -39,5 +39,19 @@
   },
   "token_scope": "private store Contents: read only; no transport credential",
   "observed_max_age_ms": 2700000,
-  "signal_max_age_ms": 28800000
+  "signal_max_age_ms": 28800000,
+  "entry_workflows": {
+    ".github/workflows/signal.yml": null,
+    ".github/workflows/watch.yml": null,
+    ".github/workflows/lage.yml": null,
+    ".github/workflows/pages.yml": null,
+    ".github/workflows/backup.yml": null,
+    ".github/workflows/backup-verify.yml": null,
+    ".github/workflows/freshness.yml": null
+  },
+  "python_version": [
+    3,
+    12,
+    14
+  ]
 }

@@ -43,7 +43,7 @@
   "backup_target": {
     "repository": null,
     "branch": null,
-    "manifest_path": "pair-manifest.json"
+    "manifest_prefix": "manifests/"
   },
   "independent_verifier": {
     "repository": null,
@@ -61,5 +61,26 @@
     "provider": null,
     "target": null,
     "deadman_seconds": null
+  },
+  "entry_workflows": {
+    ".github/workflows/signal.yml": null,
+    ".github/workflows/watch.yml": null,
+    ".github/workflows/lage.yml": null,
+    ".github/workflows/pages.yml": null,
+    ".github/workflows/backup.yml": null,
+    ".github/workflows/backup-verify.yml": null,
+    ".github/workflows/freshness.yml": null
+  },
+  "python_version": [
+    3,
+    12,
+    14
+  ],
+  "monitor_entry": {
+    "repository": "szoceikaiser/btc-signal-app",
+    "branch": "main",
+    "workflow": ".github/workflows/freshness.yml",
+    "code_sha": null,
+    "workflow_sha256": null
   }
 }

@@ -8,3 +8,6 @@ docs/audit-nacharbeit-2026-10/A8-* -text
 docs/produktionsuebernahme-2026-10/*.json -text
 docs/produktionsuebernahme-2026-10/*.csv -text
 docs/produktionsuebernahme-2026-10/*.log -text
+
+# Immutable entry workflow digests use canonical LF bytes on every checkout.
+ops/produktion/*workflow.disabled.yml text eol=lf

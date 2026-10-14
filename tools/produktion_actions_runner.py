@@ -17,10 +17,12 @@ import produktion_runner as runner
 from production_contract import canonical, digest, effective_config
 
 
-def check_code_pin(code_sha):
-    head = subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT, text=True).strip()
-    changed = subprocess.check_output(['git','status','--porcelain','--untracked-files=all',
-                                      '--','engine','tools','ops','site'], cwd=ROOT, text=True)
+def check_code_pin(code_sha,budget=None):
+    import p3_backup_chain as b
+    budget=budget or b.Budget()
+    head=b.git(ROOT,budget,'rev-parse','HEAD').decode().strip()
+    changed=b.git(ROOT,budget,'status','--porcelain','--untracked-files=all',
+                  '--','engine','tools','ops','site').decode()
     if head != code_sha or changed:
         raise ValueError('Checked-out runtime code differs from reviewed clean commit')
 
@@ -28,6 +30,8 @@ def check_code_pin(code_sha):
 def validate(runtime, kind, data_dir):
     if runtime.get('enabled') is not True:
         raise ValueError('Hosted Actions runtime is disabled')
+    if runtime.get('python_version') and tuple(runtime['python_version'])!=sys.version_info[:3]:
+        raise ValueError('Reviewed Python runtime differs')
     if (runtime.get('schema') != actions.POLICY or kind not in ('signal','watch','lage')
             or runtime.get('workflows') != actions.WORKFLOWS
             or runtime.get('confirmation_policy') != actions.POLICY
@@ -56,10 +60,12 @@ def validate(runtime, kind, data_dir):
         raise ValueError('Separate fence branch preserves accepted store backup format')
     for actual, pinned in (('GITHUB_REPOSITORY','BTC_DELIVERY_RUN_REPOSITORY'),
                           ('GITHUB_RUN_ID','BTC_DELIVERY_RUN_ID'),
-                          ('GITHUB_RUN_ATTEMPT','BTC_DELIVERY_RUN_ATTEMPT'),
-                          ('GITHUB_SHA','BTC_DELIVERY_CODE_SHA')):
+                          ('GITHUB_RUN_ATTEMPT','BTC_DELIVERY_RUN_ATTEMPT')):
         if not os.environ.get(actual) or os.environ[actual] != os.environ.get(pinned):
             raise ValueError('Actual Actions run binding differs')
+    if (os.environ.get('GITHUB_SHA')!=runtime['code_sha'] and
+            not runtime.get('entry_workflows',{}).get(workflow)):
+        raise ValueError('Changing entry requires reviewed workflow binding')
     if (os.environ.get('GITHUB_REF') != runtime.get('code_ref')
             or os.environ.get('GITHUB_WORKFLOW_REF') != runtime['code_repository']+'/'
                 +workflow+'@'+runtime['code_ref']
@@ -93,12 +99,12 @@ def deployment(runtime):
         'confirmation_policy','confirmation_budgets','schedule_contract')}
 
 
-def read_run_metadata(client, repository, run_id):
+def read_run_metadata(client, repository, run_id, tail=None):
     reader = github.GitHubContentsClient(os.environ.get('BTC_ACTIONS_METADATA_READ_TOKEN'))
     reader.open_request = client.open_request
     reader.response_byte_limit = client.response_byte_limit
     reader._response_bytes = 0
-    route = reader._route(repository, '/actions/runs/'+run_id)
+    route = reader._route(repository, tail or '/actions/runs/'+run_id)
     request_id, reader.timeout = client.journal.reserve('GET', route, 0, None)
     try:
         result = reader._request('GET', route)
@@ -138,11 +144,19 @@ def run_runtime(runtime_path, kind, data_dir, **fixtures):
     if (str(meta['id']) != binding['run_id'] or meta['run_attempt'] != 1
             or str(meta['run_number']) != os.environ['GITHUB_RUN_NUMBER']
             or meta['repository']['full_name'] != runtime['code_repository']
-            or meta['head_sha'] != runtime['code_sha']
+            or meta['head_sha'] != os.environ.get('GITHUB_SHA')
             or meta['head_branch'] != runtime['code_ref'].removeprefix('refs/heads/')
             or meta['path'] != fields['BTC_DELIVERY_WORKFLOW']
             or meta['event'] != os.environ['GITHUB_EVENT_NAME']):
         raise ValueError('Actual run metadata differs from entry binding')
+    from reviewed_actions_entry import verify
+    class ChargedReader:
+        def request(self,method,repo,tail):
+            if method!='GET': raise ValueError('Entry reader is GET-only')
+            return read_run_metadata(client,repo,binding['run_id'],tail)
+    verify(ChargedReader(),runtime['code_repository'],meta['head_sha'],runtime['code_sha'],
+           fields['BTC_DELIVERY_WORKFLOW'],runtime.get('entry_workflows',{}).get(fields['BTC_DELIVERY_WORKFLOW']))
+    client.reviewed_entry=(meta['head_sha'],runtime['code_sha'],fields['BTC_DELIVERY_WORKFLOW'])
     slot = schedule.bind(kind, meta, int(time.time()*1000),
                          os.environ.get('BTC_ACTIONS_EXPLICIT_START_MS',''))
     os.environ['BTC_DELIVERY_EXPECTED_START_MS'] = str(slot)

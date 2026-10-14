@@ -86,6 +86,8 @@ class ReadClient(github.GitHubContentsClient):
 
 
 def validate(runtime):
+    if runtime.get('python_version') and tuple(runtime['python_version'])!=sys.version_info[:3]:
+        raise ValueError('Reviewed Pages Python runtime differs')
     d = runtime.get('deployment', {})
     if d != deployment(d):
         raise ValueError('Pages deployment fields must exactly match delivery deployment')
@@ -99,11 +101,15 @@ def validate(runtime):
             or any(not re.fullmatch('[0-9a-f]{64}', d.get(k) or '') for k in ('config_sha256','activation_review_sha256'))
             or os.environ.get('GITHUB_REPOSITORY') != d.get('code_repository')
             or os.environ.get('GITHUB_REF') != d.get('code_ref')
-            or os.environ.get('GITHUB_SHA') != d.get('code_sha')
+            or (os.environ.get('GITHUB_SHA') != d.get('code_sha') and not runtime.get('entry_workflows',{}).get(WORKFLOW))
             or os.environ.get('GITHUB_WORKFLOW_REF') != d['code_repository']+'/'+WORKFLOW+'@'+d['code_ref']
             or os.environ.get('GITHUB_RUN_ATTEMPT') != '1'):
         raise ValueError('Explicit reviewed Pages deployment and actual entry required')
     check_code_pin(d['code_sha'])
+    if runtime.get('entry_workflows',{}).get(WORKFLOW):
+        from reviewed_actions_entry import actual,EntryReader
+        actual(EntryReader(os.environ.get('BTC_PAGES_METADATA_READ_TOKEN'),d['code_repository']),
+               d['code_repository'],d['code_ref'],d['code_sha'],WORKFLOW,runtime['entry_workflows'][WORKFLOW])
     return d
 
 

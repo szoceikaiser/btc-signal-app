@@ -149,12 +149,14 @@ class ProcessTree:
 
     def memory(self):
         if not self.handle:
-            total=0
+            total=count=0
             for item in Path('/proc').iterdir():
                 if not item.name.isdigit():continue
                 try:
                     fields=(item/'stat').read_text().rpartition(')')[2].split()
-                    if int(fields[2])==self.p.pid:total+=rss(int(item.name))
+                    if int(fields[2])==self.p.pid:
+                        total+=rss(int(item.name));count+=1
+                        if count>64: raise ValueError('Git process-tree limit')
                 except (OSError,IndexError,ValueError):continue
             return total
         ids=self.Pids()
@@ -174,22 +176,29 @@ class ProcessTree:
 
 
 @contextmanager
-def process(repo, args, budget, env=None):
+def process(repo, args, budget, env=None, file_limit=None):
     budget.check(); budget.steps += 1
     command = ['git','-c','safe.directory='+Path(repo).resolve().as_posix(),
         '-c','pack.threads=1','-c','pack.windowMemory=32m','-c','pack.deltaCacheSize=16m',
         '-c','core.hooksPath='+('NUL' if os.name=='nt' else '/dev/null'),'-c','core.fsmonitor=false',
+        '-c','core.longpaths=true',
         '-c','protocol.allow=never','-c','protocol.file.allow=always',
         '-c','core.autocrlf=false','-C',str(repo),*args]
     # No inherited alternate object stores, replace refs, or injected Git options.
-    clean = {k:os.environ[k] for k in os.environ if not k.startswith(
-        ('GIT_','GITHUB_','GH_','TELEGRAM_','BTC_DELIVERY_'))}
+    clean = {k:os.environ[k] for k in (
+        'PATH','SystemRoot','SYSTEMROOT','WINDIR','TEMP','TMP','TMPDIR','LANG','LC_ALL') if k in os.environ}
     clean['GIT_NO_REPLACE_OBJECTS'] = '1'
+    clean['GIT_CONFIG_NOSYSTEM']='1';clean['GIT_CONFIG_GLOBAL']=os.devnull
     if env: clean.update(env)
     with tempfile.TemporaryFile() as errors:
+        def limits():
+            import resource
+            resource.setrlimit(resource.RLIMIT_FSIZE,(file_limit,file_limit))
+            resource.setrlimit(resource.RLIMIT_AS,(MAX_GIT_RSS,MAX_GIT_RSS))
         p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=errors, env=clean,creationflags=0x4 if os.name=='nt' else 0,
-                             start_new_session=os.name!='nt')
+                             start_new_session=os.name!='nt',
+                             preexec_fn=limits if file_limit and os.name!='nt' else None)
         tree=ProcessTree(p)
         stopped = threading.Event(); failure = []; began = time.monotonic()
         def watch():

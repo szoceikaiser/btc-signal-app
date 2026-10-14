@@ -52,6 +52,16 @@ def selected(runs,kind,now,first):
     return result
 
 
+def reviewed_run(reader,policy,repo,head,code,workflow):
+    from reviewed_actions_entry import verify
+    signature=policy.get('entry_workflows',{}).get(workflow)
+    key=(repo,head,code,workflow,signature)
+    if not hasattr(reader,'entry_verified'): reader.entry_verified=set()
+    if key not in reader.entry_verified:
+        verify(reader,repo,head,code,workflow,signature)
+        reader.entry_verified.add(key)
+
+
 def read_runs(client,policy,now):
     d=policy['deployment'];raws={};runs={}
     for kind in ('signal','watch'):
@@ -66,9 +76,10 @@ def read_runs(client,policy,now):
         for item in items:
             slot=slots.run_slot(kind,item)
             if (item['repository']['full_name']!=d['code_repository'] or item['path']!=workflow
-                    or item['head_sha']!=d['code_sha'] or item['head_branch']!=d['code_ref'].removeprefix('refs/heads/')
+                    or item['head_branch']!=d['code_ref'].removeprefix('refs/heads/')
                     or item['run_attempt']!=1 or not re.fullmatch('[1-9][0-9]*',str(item['id']))):
                 raise ValueError('Run identity mismatch')
+            reviewed_run(client,policy,d['code_repository'],item['head_sha'],d['code_sha'],workflow)
             normalized.append(dict(repository=d['code_repository'],workflow=workflow,run_id=str(item['id']),
                 run_attempt='1',expected_start_ms=slot,created_ms=utc_ms(item['created_at']),
                 started_ms=utc_ms(item.get('run_started_at') or item['created_at']),
@@ -79,7 +90,8 @@ def read_runs(client,policy,now):
                 '/actions/runs/'+run['run_id']+'/attempts/1/jobs?per_page=100&page=1'))
             if not 1<=len(jobs['jobs'])<=20 or jobs['total_count']!=len(jobs['jobs']): raise ValueError('Jobs incomplete')
             for job in jobs['jobs']:
-                if (str(job['run_id'])!=run['run_id'] or job['run_attempt']!=1 or job['head_sha']!=d['code_sha']
+                actual=next(item['head_sha'] for item in items if str(item['id'])==run['run_id'])
+                if (str(job['run_id'])!=run['run_id'] or job['run_attempt']!=1 or job['head_sha']!=actual
                         or job['status']!='completed' or job['conclusion']!='success'):
                     raise ValueError('Job skipped/failed/foreign')
             run['completed_ms']=max(utc_ms(j['completed_at']) for j in jobs['jobs'])
@@ -127,15 +139,15 @@ def verify_completions(store,runs,policy,now):
                 raise ValueError('Watch observation mismatch')
 
 
-def verify_fence_run(reader,deployment,fence,now):
+def verify_fence_run(reader,deployment,fence,now,policy=None):
     run=fence['run'];repo=deployment['code_repository']
     meta=reader._request('GET',reader._route(repo,'/actions/runs/'+run['id']))
     if (str(meta['id'])!=run['id'] or meta['run_attempt']!=1 or meta['run_number']!=run['number']
             or meta['repository']['full_name']!=repo or meta['path']!=run['workflow']
-            or meta['head_sha']!=deployment['code_sha']
             or meta['head_branch']!=deployment['code_ref'].removeprefix('refs/heads/')
             or meta['status']!='completed' or meta['conclusion']!='success'):
         raise ValueError('Latest fence run metadata incomplete/foreign')
+    reviewed_run(reader,policy or {},repo,meta['head_sha'],deployment['code_sha'],run['workflow'])
     kind=run['kind']
     if kind=='lage':
         if meta['event']!='workflow_dispatch': raise ValueError('Latest Lage not manual')
@@ -146,7 +158,7 @@ def verify_fence_run(reader,deployment,fence,now):
     jobs=reader._request('GET',reader._route(repo,'/actions/runs/'+run['id']+'/attempts/1/jobs?per_page=100&page=1'))
     if not 1<=len(jobs['jobs'])<=20 or jobs['total_count']!=len(jobs['jobs']): raise ValueError('Latest fence jobs incomplete')
     for j in jobs['jobs']:
-        if (str(j['run_id'])!=run['id'] or j['run_attempt']!=1 or j['head_sha']!=deployment['code_sha']
+        if (str(j['run_id'])!=run['id'] or j['run_attempt']!=1 or j['head_sha']!=meta['head_sha']
                 or j['status']!='completed' or j['conclusion']!='success'
                 or not utc_ms(meta['created_at'])<=utc_ms(j['completed_at'])<=min(now,end)):
             raise ValueError('Latest fence job failed/late/future')
@@ -178,7 +190,11 @@ def read_backup(reader,code_reader,policy,now):
             or not slot<=v['verified_ms']<=now or now>slots.deadline('backup',slot)):
         raise ValueError('Backup overdue/future')
     dest=receipt['destination'];target=policy['backup_target']
-    if any(dest[k]!=target[k] for k in ('repository','branch','manifest_path')): raise ValueError('Foreign backup target')
+    if any(dest[k]!=target[k] for k in ('repository','branch')): raise ValueError('Foreign backup target')
+    if target.get('manifest_prefix')=='manifests/':
+        if dest['manifest_path']!='manifests/'+digest(m)+'.json': raise ValueError('Foreign immutable manifest path')
+        if m['hosted']['expected_start_ms']!=slot: raise ValueError('Old hosted publication occurrence')
+    elif dest['manifest_path']!=target['manifest_path']: raise ValueError('Foreign backup manifest path')
     # Actual immutable uploaded manifest, and ancestry on the pinned protected branch.
     uploaded=reader.read_at(dest['repository'],dest['commit_sha'],dest['manifest_path'])
     if (json.loads(uploaded['body'])!=m or uploaded['blob_sha']!=dest['blob_sha']):
@@ -189,14 +205,15 @@ def read_backup(reader,code_reader,policy,now):
     binding=t['binding'];run=code_reader._request('GET',code_reader._route(binding['repository'],
         '/actions/runs/'+str(receipt['verifier_run_id'])))
     if (run['repository']['full_name']!=binding['repository'] or run['path']!=binding['workflow']
-            or run['head_sha']!=binding['code_sha'] or run['head_branch']!=binding['branch']
+            or run['head_branch']!=binding['branch']
             or run['run_attempt']!=1 or run['status']!='completed' or run['conclusion']!='success'
             or not utc_ms(run['created_at'])<=v['verified_ms']<=utc_ms(run['updated_at'])<=now):
         raise ValueError('Independent verifier run missing/foreign/failed')
+    reviewed_run(code_reader,policy,binding['repository'],run['head_sha'],binding['code_sha'],binding['workflow'])
     jobs=code_reader._request('GET',code_reader._route(binding['repository'],
         '/actions/runs/'+str(receipt['verifier_run_id'])+'/attempts/1/jobs?per_page=100&page=1'))
     if (not 1<=len(jobs['jobs'])<=20 or jobs['total_count']!=len(jobs['jobs'])
-            or any(j['conclusion']!='success' or j['status']!='completed' or j['head_sha']!=binding['code_sha']
+            or any(j['conclusion']!='success' or j['status']!='completed' or j['head_sha']!=run['head_sha']
                    or str(j['run_id'])!=str(receipt['verifier_run_id']) or j['run_attempt']!=1 for j in jobs['jobs'])):
         raise ValueError('Verifier jobs incomplete')
     return receipt,record,current
@@ -223,7 +240,7 @@ def check(store_reader,code_reader,backup_reader,policy,now):
         else:
             from produktion_actions_runner import verify_health
             verify_health(store,d,fence['run'])
-        verify_fence_run(code_reader,d,fence,now)
+        verify_fence_run(code_reader,d,fence,now,policy)
         runs,raws=read_runs(code_reader,policy,now)
         verify_completions(store,runs,policy,now)
         receipt,backup_record,backup_ref=read_backup(backup_reader,code_reader,policy,now)

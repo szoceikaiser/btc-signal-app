@@ -18,8 +18,16 @@ def run(path):
     if len(raw)>128*1024: return response('monitor_configuration_invalid')
     policy=json.loads(raw)
     if policy.get('enabled') is not True: return response('monitor_disabled')
+    if policy.get('python_version') and tuple(policy['python_version'])!=sys.version_info[:3]:
+        return response('monitor_configuration_invalid')
     d=policy['deployment'];v=policy['independent_verifier'];budget=ReadBudget()
     try:
+        if policy.get('monitor_entry'):
+            from reviewed_actions_entry import EntryReader,actual
+            from produktion_actions_runner import check_code_pin
+            t=policy['monitor_entry'];check_code_pin(t['code_sha'])
+            actual(EntryReader(os.environ.get('BTC_MONITOR_ACTIONS_READ_TOKEN'),t['repository']),
+                   t['repository'],'refs/heads/'+t['branch'],t['code_sha'],t['workflow'],t['workflow_sha256'])
         source=monitor.Reader(os.environ.get('BTC_MONITOR_STORE_READ_TOKEN'),[d['private_store_repository']],budget)
         code=monitor.Reader(os.environ.get('BTC_MONITOR_ACTIONS_READ_TOKEN'),
             [d['code_repository'],v['binding']['repository']],budget)

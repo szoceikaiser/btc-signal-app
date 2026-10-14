@@ -187,3 +187,6 @@ Ein Monitor im selben GitHub-Anbieter erkennt dessen Gesamtausfall nicht unabhä
 Keine Löschung/Stilllegung alter Workflows, Runs, Logs, Artefakte oder Branches.
 Vor jeder späteren Actionsbereinigung: konkreten Namen, frühere Aufgabe,
 Abhängigkeiten und Folgen erläutern und Nutzer fragen. Keine Freigabe hieraus.
+
+## Fortschreibung Hostedbackup
+Die früheren lokalen Staging-/Selfhostedannahmen sind durch die ausführbaren, weiterhin deaktivierten Hostedpfade ersetzt. Aktueller Vertrag: HOSTED-BACKUP.md; begrenzter Einrichtungsablauf: HOSTED-EINRICHTUNGSABNAHME.md. Alte Auditbelege bleiben unverändert erhalten. Keine Provider-/Liveabnahme hieraus.

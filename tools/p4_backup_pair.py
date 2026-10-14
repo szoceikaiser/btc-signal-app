@@ -281,8 +281,8 @@ def restore(root,manifest,target,required,budget=None):
     return receipt
 
 
-def append(plan,fault=None):
-    budget=b.Budget();d=plan['deployment'];root=Path(plan['out']).resolve()
+def append(plan,fault=None,budget=None):
+    budget=budget or b.Budget();d=plan['deployment'];root=Path(plan['out']).resolve()
     root.mkdir(exist_ok=True)
     # A crash leaves the owner file. No TTL, overwrite or automatic retry.
     with (root/'.pair-owner').open('x') as f: f.write('Interrupted pair requires explicit operator review\n')

@@ -39,10 +39,17 @@ def run_checked(kind,data_dir,fetch=None,watch_raw=None,now_ms=None,sth=None):
             raise ValueError('Explicit run and schedule identity missing')
         if os.environ.get('BTC_DELIVERY_ADAPTER') == 'github':
             for actual, pinned in (('GITHUB_REPOSITORY','BTC_DELIVERY_RUN_REPOSITORY'),
-                ('GITHUB_RUN_ID','BTC_DELIVERY_RUN_ID'), ('GITHUB_RUN_ATTEMPT','BTC_DELIVERY_RUN_ATTEMPT'),
-                ('GITHUB_SHA','BTC_DELIVERY_CODE_SHA')):
+                ('GITHUB_RUN_ID','BTC_DELIVERY_RUN_ID'), ('GITHUB_RUN_ATTEMPT','BTC_DELIVERY_RUN_ATTEMPT')):
                 if not os.environ.get(actual) or os.environ[actual] != os.environ[pinned]:
                     raise ValueError('Actual GitHub run differs from runtime binding')
+            if os.environ.get('GITHUB_SHA')!=os.environ['BTC_DELIVERY_CODE_SHA']:
+                import actions_delivery as actions
+                client=actions.active_client.get()
+                expected=(os.environ.get('GITHUB_SHA'),os.environ['BTC_DELIVERY_CODE_SHA'],os.environ['BTC_DELIVERY_WORKFLOW'])
+                if (client is None or not client.admitted or getattr(client,'reviewed_entry',None)!=expected
+                        or any(client.environment.get(k)!=os.environ.get(k) for k in
+                            ('GITHUB_SHA','BTC_DELIVERY_CODE_SHA','BTC_DELIVERY_WORKFLOW'))):
+                    raise ValueError('Changing entry has no admitted authenticated workflow/code proof')
             expected_ref=(os.environ['BTC_DELIVERY_RUN_REPOSITORY']+'/'
                 +os.environ['BTC_DELIVERY_WORKFLOW']+'@'+os.environ.get('GITHUB_REF',''))
             if not os.environ.get('GITHUB_REF') or os.environ.get('GITHUB_WORKFLOW_REF')!=expected_ref:

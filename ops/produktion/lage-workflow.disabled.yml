@@ -15,10 +15,14 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ vars.BTC_PRODUCTION_CODE_SHA }}
           persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12.14"
       - name: Prepare exact reviewed runtime (no store or transport)
         env:
           REVIEWED_RUNTIME_JSON: ${{ vars.BTC_REVIEWED_RUNTIME_JSON }}
@@ -34,7 +38,7 @@ jobs:
           BTC_DELIVERY_WORKFLOW: .github/workflows/lage.yml
           BTC_DELIVERY_RUN_ID: ${{ github.run_id }}
           BTC_DELIVERY_RUN_ATTEMPT: ${{ github.run_attempt }}
-          BTC_DELIVERY_CODE_SHA: ${{ github.sha }}
+          BTC_DELIVERY_CODE_SHA: ${{ vars.BTC_PRODUCTION_CODE_SHA }}
           BTC_DELIVERY_STORE_ID: ${{ vars.BTC_REVIEWED_STORE_ID }}
           BTC_DELIVERY_GITHUB_REPO: ${{ vars.BTC_REVIEWED_STORE_REPOSITORY }}
           BTC_DELIVERY_GITHUB_BRANCH: ${{ vars.BTC_REVIEWED_STORE_BRANCH }}

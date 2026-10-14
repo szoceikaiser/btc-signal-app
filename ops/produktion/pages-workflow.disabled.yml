@@ -10,6 +10,7 @@ on:
     paths: ["site/**"]
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 concurrency:
@@ -25,10 +26,14 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ vars.BTC_PRODUCTION_CODE_SHA }}
           persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12.14"
       - name: Refuse foreign or failed triggering workflow
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -43,7 +48,7 @@ jobs:
               os.environ['SOURCE_CONCLUSION'] != 'success' or
               os.environ['SOURCE_BRANCH'] != 'main' or
               os.environ['SOURCE_REPOSITORY'] != os.environ['GITHUB_REPOSITORY'] or
-              os.environ['SOURCE_SHA'] != os.environ['GITHUB_SHA']):
+              not os.environ['SOURCE_SHA']):
               raise ValueError('Foreign, failed or differently pinned Pages trigger')
           PY
       - name: Prepare reviewed Pages runtime only
@@ -53,27 +58,30 @@ jobs:
         run: python3 tools/produktion_runtime_prepare.py --kind pages --out .runtime
       - name: Export one closed store/fence pair (read only)
         env:
+          BTC_PAGES_METADATA_READ_TOKEN: ${{ github.token }}
           BTC_PAGES_STORE_READ_TOKEN: ${{ secrets.BTC_PAGES_STORE_READ_TOKEN }}
         run: >-
           python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
           --config .runtime/data/config.json --out .runtime/public
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
       - name: Verify package and unchanged closed pair before upload
         env:
+          BTC_PAGES_METADATA_READ_TOKEN: ${{ github.token }}
           BTC_PAGES_STORE_READ_TOKEN: ${{ secrets.BTC_PAGES_STORE_READ_TOKEN }}
         run: >-
           python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
           --config .runtime/data/config.json --out .runtime/public
           --verify .runtime/public.receipt.json
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
         with:
           path: .runtime/public
       - name: Verify unchanged closed pair immediately before deploy
         env:
+          BTC_PAGES_METADATA_READ_TOKEN: ${{ github.token }}
           BTC_PAGES_STORE_READ_TOKEN: ${{ secrets.BTC_PAGES_STORE_READ_TOKEN }}
         run: >-
           python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
           --config .runtime/data/config.json --out .runtime/public
           --verify .runtime/public.receipt.json
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4.0.5
