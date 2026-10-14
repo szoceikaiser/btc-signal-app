@@ -191,14 +191,17 @@ def process(repo, args, budget, env=None, file_limit=None):
     clean['GIT_CONFIG_NOSYSTEM']='1';clean['GIT_CONFIG_GLOBAL']=os.devnull
     if env: clean.update(env)
     with tempfile.TemporaryFile() as errors:
-        def limits():
-            import resource
-            resource.setrlimit(resource.RLIMIT_FSIZE,(file_limit,file_limit))
-            resource.setrlimit(resource.RLIMIT_AS,(MAX_GIT_RSS,MAX_GIT_RSS))
+        if file_limit and os.name!='nt':
+            # No preexec_fn in this HTTP-threaded parent: a fork-time Python
+            # import lock could otherwise bypass the launch watchdog entirely.
+            wrapper=('import os,resource,sys;'
+                f'resource.setrlimit(resource.RLIMIT_FSIZE,({file_limit},{file_limit}));'
+                f'resource.setrlimit(resource.RLIMIT_AS,({MAX_GIT_RSS},{MAX_GIT_RSS}));'
+                'os.execvp(sys.argv[1],sys.argv[1:])')
+            command=[sys.executable,'-c',wrapper,*command]
         p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=errors, env=clean,creationflags=0x4 if os.name=='nt' else 0,
-                             start_new_session=os.name!='nt',
-                             preexec_fn=limits if file_limit and os.name!='nt' else None)
+                             start_new_session=os.name!='nt')
         tree=ProcessTree(p)
         stopped = threading.Event(); failure = []; began = time.monotonic()
         def watch():
