@@ -156,8 +156,9 @@ class ProcessTree:
                     fields=(item/'stat').read_text().rpartition(')')[2].split()
                     if int(fields[2])==self.p.pid:
                         total+=rss(int(item.name));count+=1
-                        if count>64: raise ValueError('Git process-tree limit')
                 except (OSError,IndexError,ValueError):continue
+                # Do not catch the deliberate limit failure as a vanished PID.
+                if count>64: raise ValueError('Git process-tree limit')
             return total
         ids=self.Pids()
         if not self.k.QueryInformationJobObject(self.handle,3,ctypes.byref(ids),ctypes.sizeof(ids),None):
