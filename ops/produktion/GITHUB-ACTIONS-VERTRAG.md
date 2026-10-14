@@ -58,7 +58,9 @@ automatischer Wechsel zu einem Zyklus. Alte/unbestätigte Writes sind kein Erfol
 Zusatz pro vollständig abgeschlossenem Run: zwei Sperr-PUT, zweimal initiale
 Sperrreads (6 GET), zwei Bestätigungen (10 bis 22 GET) und der abschließende
 Storepin (3 GET): **19 bis 31 GET + 2 PUT**. Kein Gitrequest im Runtimepfad.
-Sperrpayload je PUT konservativ unter 12 KiB; Bestätigungsresponses werden
+Sperrpayload je PUT konservativ unter 24 KiB (Base64 des 8-KiB-Files plus
+Branchname und JSON; dessen tatsächliche Bytes zählen vollständig).
+Bestätigungsresponses werden
 innerhalb derselben 2-MiB-Reservierung wie Storeantworten gezählt.
 
 Gesamtrun einschließlich Zusatz: GET <=640, PUT <=50 (also höchstens 48
