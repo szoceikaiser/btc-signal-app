@@ -68,7 +68,11 @@ zurückgelesen; Source- und Zielbewegung verweigern den Beleg.
 Der Verifier nimmt einen eigenen Backupzielpin, lädt alle benötigten Pakete
 und Migration ausschließlich aus diesem Ziel und führt den vollständigen
 Zwei-Historien-Restore in ein neues blocked-Verzeichnis aus. Zusätzlich prüft
-er die Pins gegen authentifizierte Quellhistorie, unveränderte beobachtete
+er die vollständige Streamidentität gegen die unabhängig reviewte Runtime
+und sämtliche Migrationsblob-IDs/Bytes gegen den authentifizierten gepinnten
+Migrationsquellbaum und dessen reviewed Inventar. Eine Selbstbehauptung des
+Paketmanifests reicht für diese beiden Bindungen nicht. Zusätzlich prüft er
+die Pins gegen authentifizierte Quellhistorie, unveränderte beobachtete
 Source-Refs und den tatsächlich erfolgreichen gepinnten Producerlauf desselben
 Termins. Ein zwischenzeitlicher regulärer Sourcefortschritt ist erlaubt, falls
 der gesicherte Pin sein Vorfahr ist; Bewegung innerhalb des Verifierchecks

@@ -533,6 +533,24 @@ def test_freshness_understands_immutable_published_manifest_and_actual_receipt()
         fails(ValueError,lambda:freshness.read_backup(backup,code,policy,p.slot+26*slots.HOUR+1))
 
 
+def test_independent_reviewed_identity_and_migration_are_not_self_attested():
+    for case in ('identity','migration'):
+        p=fixture('review-bind-'+case);p.invoke();before=len(p.mutations)
+        if case=='identity': p.runtime['identity']['stream_id']='foreign-reviewed-stream'
+        else:
+            name=next(iter(p.runtime['migration']['files']))
+            p.runtime['migration']['files'][name]['sha']='f'*40
+        p.set_digest()
+        with p.context('verifier'): assert h.cli(['verifier'])==20
+        assert len(p.mutations)==before and not list(p.root.glob('btc-verifier-*/confirmed.json'))
+    p=fixture('migration-bytes');root=p.root/'package'
+    import shutil
+    folder=root/'stream/packages/000000/migration';shutil.copytree(p.fixture['migration'],folder)
+    budget=h.Budget(root);h.validate_migration_bytes(root,p.runtime['migration'],budget)
+    (folder/'projection/watch.json').write_bytes(b'[]\nchanged')
+    fails(ValueError,lambda:h.validate_migration_bytes(root,p.runtime['migration'],budget))
+
+
 def main():
     import argparse,traceback
     global ARTIFACT_ROOT

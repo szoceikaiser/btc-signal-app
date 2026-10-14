@@ -422,6 +422,19 @@ def migration(client,spec,target):
     return target
 
 
+def validate_migration_bytes(root,spec,budget):
+    folder=Path(root)/'stream/packages/000000/migration';files={}
+    if not folder.is_dir() or folder.is_symlink(): raise ValueError('Complete immutable migration missing')
+    for p in folder.rglob('*'):
+        budget.check()
+        if p.is_symlink(): raise ValueError('Migration symlink')
+        if p.is_file():
+            if p.stat().st_size>b.MAX_PACKAGE: raise ValueError('Migration byte bound')
+            raw=p.read_bytes();files[p.relative_to(folder).as_posix()]={'sha':oid('blob',raw),'bytes':len(raw)}
+    if files!=spec['files'] or tree_oid(files)!=spec['tree_sha']:
+        raise ValueError('Backup migration differs from independently reviewed immutable source')
+
+
 def publish(client,t,base,additions,replace):
     """One parent, one ref PATCH, then exact complete immutable byte readback.
 
@@ -505,6 +518,9 @@ def run(runtime,mode,root):
     budget=Budget(root);binding=validate(runtime,mode,budget);clients=roles(runtime,mode,budget)
     slot=metadata(clients['metadata_read'],runtime,binding)
     source=clients['source_read'];s=runtime['source'];f={**s,'branch':runtime['deployment']['fence_branch']}
+    spec=runtime['migration'];migration_tree,migration_files=source.tree(spec['target'],spec['commit_sha'])
+    if migration_tree!=spec['tree_sha'] or migration_files!=spec['files']:
+        raise ValueError('Authenticated immutable migration binding differs')
     heads={key:source.ref(t) for t,key in ((s,'stream'),(f,'fence'))}
     backup=clients['backup_write' if mode=='producer' else 'backup_read'];bt=runtime['backup'];base=backup.ref(bt)
     if mode=='producer':
@@ -535,6 +551,7 @@ def run(runtime,mode,root):
         # Stamp the occurrence into the immutable manifest, then verify that exact
         # final manifest. An old package cannot earn today's verifier receipt.
         pair.restore(Path(root)/'pair',m,Path(root)/'final-manifest-blocked',pins,budget)
+        validate_migration_bytes(Path(root)/'pair',spec,budget)
         raw=(canonical(m)+'\n').encode()
         additions={name:(Path(root)/'pair'/name).read_bytes() for name in m['files']}
         if any(len(additions[name])!=item['bytes'] or hashlib.sha256(additions[name]).hexdigest()!=item['sha256']
@@ -551,8 +568,10 @@ def run(runtime,mode,root):
                 'upload_readback_verified':True}
     else:
         m,dest=download(backup,bt,base,Path(root)/'download')
-        if (runtime.get('pins') is not None and m['pins']!=runtime['pins']) or m['deployment']!=runtime['deployment']:
+        if ((runtime.get('pins') is not None and m['pins']!=runtime['pins']) or m['deployment']!=runtime['deployment']
+                or m['stream']['identity']!=runtime['identity']):
             raise ValueError('Independent cut differs')
+        validate_migration_bytes(Path(root)/'download',spec,budget)
         h=m['hosted'];producer=runtime['producer']
         if h['expected_start_ms']!=slot or h['producer']!={k:producer[k] for k in ('repository','workflow','branch','code_sha')}:
             raise ValueError('Old/foreign producer occurrence')
