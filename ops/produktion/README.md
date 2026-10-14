@@ -70,6 +70,10 @@ und Vorschläge; `p3-run-binding.disabled.yml` liegt außerhalb aktiver Workflow
 Keine dieser Dateien gibt Einrichtung, Mailprobe oder P4 frei.
 # Sicherungskapazität N-P3-01: v2
 
+Deaktivierte hosted-Actions-Anbindung: [GITHUB-ACTIONS-VERTRAG.md](GITHUB-ACTIONS-VERTRAG.md).
+Die aktuelle github-runtime.disabled.json wählt drei Bestätigungszyklen mit
+dauerhaftem CAS-Sperrbranch im Store-Repository. Kein self-hosted/SQLitejournal.
+
 Neue lokale Backupaufrufe verwenden `tools/p3_backup_chain.py` über die
 synthetische CLI `produktion_github_backup.py`; der Plan muss zusätzlich zur SHA
 die unabhängig verlangte `revision` enthalten. Basis und unveränderliche

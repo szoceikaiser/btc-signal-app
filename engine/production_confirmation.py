@@ -241,6 +241,11 @@ class ProductionContentsClient(GitHubContentsClient):
 def configured_client(token, environment, runner):
     """Only an explicit selection changes the legacy one-cycle behavior."""
     selected = environment.get('BTC_DELIVERY_CONFIRMATION_POLICY')
+    if selected == 'github-actions-fence-v1':
+        if environment.get('BTC_DELIVERY_CONFIRMATION_CONFIG') or environment.get('BTC_DELIVERY_REQUEST_JOURNAL'):
+            raise ValueError('Hosted Actions policy forbids alternate journals')
+        from actions_delivery import configured_actions_client
+        return configured_actions_client(token, environment)
     if not selected:
         if any(environment.get(k) for k in ('BTC_DELIVERY_CONFIRMATION_CONFIG', 'BTC_DELIVERY_REQUEST_JOURNAL')):
             raise ValueError('Confirmation configuration without explicit policy')
