@@ -84,3 +84,10 @@ v1-Funktionen bleiben explizit für alte Belege erhalten. Betriebsquittungen
 müssen v2 sein und den vollständigen privat gelesenen und restored Verbund
 binden. Lokale Verifikationsdateien sind keine privaten Backupquittungen.
 Keine reale Einrichtung, neue externe Berechtigung oder Aktivierung hierdurch.
+# Neuer deaktivierter Pflichtfunktionenstand
+
+Für getrennte Signal-/Wache-/Lageaktionen und die bestätigte Pagesprojektion gilt
+[PFLICHTFUNKTIONEN-V2.md](PFLICHTFUNKTIONEN-V2.md). Der frühere generische v1-Entry
+bleibt historische deaktivierte Vorlage und wird nicht installiert. Keine aktive
+Workflowdatei wurde für diese lokale Implementierung geändert.
+

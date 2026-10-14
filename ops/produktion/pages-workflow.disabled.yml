@@ -1,0 +1,78 @@
+# Disabled candidate; intended target .github/workflows/pages.yml.
+name: Chart-Webseite (Pages)
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Signal-Engine", "Flush-Wache", "Lage abrufen", "Backtest"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths: ["site/**"]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: btc-delivery-single-stream
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Refuse foreign or failed triggering workflow
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SOURCE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_REPOSITORY: ${{ github.event.workflow_run.repository.full_name }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          python3 - <<'PY'
+          import os
+          if os.environ['EVENT_NAME'] == 'workflow_run' and (
+              os.environ['SOURCE_CONCLUSION'] != 'success' or
+              os.environ['SOURCE_BRANCH'] != 'main' or
+              os.environ['SOURCE_REPOSITORY'] != os.environ['GITHUB_REPOSITORY'] or
+              os.environ['SOURCE_SHA'] != os.environ['GITHUB_SHA']):
+              raise ValueError('Foreign, failed or differently pinned Pages trigger')
+          PY
+      - name: Prepare reviewed Pages runtime only
+        env:
+          REVIEWED_RUNTIME_JSON: ${{ vars.BTC_REVIEWED_PAGES_RUNTIME_JSON }}
+          REVIEWED_CONFIG_JSON: ${{ vars.BTC_REVIEWED_CONFIG_JSON }}
+        run: python3 tools/produktion_runtime_prepare.py --kind pages --out .runtime
+      - name: Export one closed store/fence pair (read only)
+        env:
+          BTC_PAGES_STORE_READ_TOKEN: ${{ secrets.BTC_PAGES_STORE_READ_TOKEN }}
+        run: >-
+          python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
+          --config .runtime/data/config.json --out .runtime/public
+      - uses: actions/configure-pages@v5
+      - name: Verify package and unchanged closed pair before upload
+        env:
+          BTC_PAGES_STORE_READ_TOKEN: ${{ secrets.BTC_PAGES_STORE_READ_TOKEN }}
+        run: >-
+          python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
+          --config .runtime/data/config.json --out .runtime/public
+          --verify .runtime/public.receipt.json
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .runtime/public
+      - name: Verify unchanged closed pair immediately before deploy
+        env:
+          BTC_PAGES_STORE_READ_TOKEN: ${{ secrets.BTC_PAGES_STORE_READ_TOKEN }}
+        run: >-
+          python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
+          --config .runtime/data/config.json --out .runtime/public
+          --verify .runtime/public.receipt.json
+      - id: deployment
+        uses: actions/deploy-pages@v4

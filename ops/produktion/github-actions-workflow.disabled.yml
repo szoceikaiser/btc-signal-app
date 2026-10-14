@@ -1,3 +1,5 @@
+# Historical v1 review template, never install this generic entry.
+# v2 uses signal/watch/lage-workflow.disabled.yml and a separate fresh v2 fence.
 # Review template outside active workflows. No schedule, no activation here.
 # Pin checkout action and verify hosted image/Python at the practical gate.
 name: Production delivery (DISABLED TEMPLATE)

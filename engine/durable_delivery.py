@@ -350,6 +350,20 @@ def durable_command(kind):
                 key = kind if kind == 'watch' else box.identity('command', kind, 0, request_id)
                 commands = store.snapshot['commands']
                 entry = commands.get(key)
+                # Hosted Lage proves its own frozen command, never signal health.
+                from actions_delivery import active_client, command_binding, command_evidence
+                hosted = active_client.get() if kind == 'lage' else None
+                before = contract.digest({'engine': store.snapshot['engine'], 'watch': store.snapshot['watch']})
+                def complete_command(entry, done):
+                    if hosted is None:
+                        return
+                    if not done or before != contract.digest({
+                            'engine': store.snapshot['engine'], 'watch': store.snapshot['watch']}):
+                        raise RuntimeError('Lage incomplete or trading state changed')
+                    entry['actions_completion'] = {**command_binding(hosted, request_id),
+                                                  **command_evidence(store.snapshot, entry)}
+                    commands[key] = deepcopy(entry)
+                    store.commit()
                 def drain(entry):
                     if not can_dispatch():
                         return False
@@ -367,6 +381,7 @@ def durable_command(kind):
                 if entry is not None:
                     done = drain(entry)
                     if kind != 'watch' or not done:
+                        complete_command(entry, done)
                         health_event(kind,'finish',None if done else 'delivery_incomplete')
                         return deepcopy(entry['result'])
                 if store.blocked():
@@ -395,7 +410,8 @@ def durable_command(kind):
                 if kind == 'watch':
                     store.snapshot['watch'] = deepcopy(result)
                 store.commit()
-                drain(entry)
+                done = drain(entry)
+                complete_command(entry, done)
                 health_event(kind,'finish',None if not store.blocked() else 'delivery_uncertain')
                 return result
         return wrapped

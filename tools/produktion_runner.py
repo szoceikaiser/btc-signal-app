@@ -32,7 +32,7 @@ def run_checked(kind,data_dir,fetch=None,watch_raw=None,now_ms=None,sth=None):
             'TELEGRAM_BOT_TOKEN','TELEGRAM_CHAT_ID')
     if any(not os.environ.get(k) for k in needed):
         raise ValueError('Production store/config/identity/transport environment incomplete')
-    if kind in ('signal','watch'):
+    if kind in ('signal','watch','lage'):
         metadata=('BTC_DELIVERY_RUN_REPOSITORY','BTC_DELIVERY_WORKFLOW','BTC_DELIVERY_RUN_ID',
                   'BTC_DELIVERY_RUN_ATTEMPT','BTC_DELIVERY_EXPECTED_START_MS')
         if any(not os.environ.get(k) for k in metadata):

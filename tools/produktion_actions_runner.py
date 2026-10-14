@@ -19,7 +19,7 @@ from production_contract import canonical, digest, effective_config
 def check_code_pin(code_sha):
     head = subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT, text=True).strip()
     changed = subprocess.check_output(['git','status','--porcelain','--untracked-files=all',
-                                      '--','engine','tools','ops'], cwd=ROOT, text=True)
+                                      '--','engine','tools','ops','site'], cwd=ROOT, text=True)
     if head != code_sha or changed:
         raise ValueError('Checked-out runtime code differs from reviewed clean commit')
 
@@ -27,12 +27,18 @@ def check_code_pin(code_sha):
 def validate(runtime, kind, data_dir):
     if runtime.get('enabled') is not True:
         raise ValueError('Hosted Actions runtime is disabled')
-    if (runtime.get('schema') != actions.POLICY or kind not in ('signal','watch')
+    if (runtime.get('schema') != actions.POLICY or kind not in ('signal','watch','lage')
+            or runtime.get('workflows') != actions.WORKFLOWS
             or runtime.get('confirmation_policy') != actions.POLICY
             or runtime.get('store_path') != github.STORE_PATH
             or runtime.get('fence_path') != actions.FENCE_PATH
             or not re.fullmatch('[0-9a-f]{64}', runtime.get('activation_review_sha256') or '')):
         raise ValueError('Explicit reviewed Actions activation binding required')
+    workflow = os.environ.get('BTC_DELIVERY_WORKFLOW')
+    if actions.WORKFLOWS.get(workflow) != kind:
+        raise ValueError('Workflow does not admit this operation')
+    if kind == 'lage' and os.environ.get('GITHUB_EVENT_NAME') != 'workflow_dispatch':
+        raise ValueError('Lage requires its own manual Actions entry')
     fields = {'BTC_DELIVERY_ADAPTER': 'github',
               'BTC_DELIVERY_GITHUB_REPO': runtime.get('private_store_repository'),
               'BTC_DELIVERY_GITHUB_BRANCH': runtime.get('store_branch'),
@@ -41,7 +47,7 @@ def validate(runtime, kind, data_dir):
               'BTC_DELIVERY_CODE_SHA': runtime.get('code_sha'),
               'BTC_DELIVERY_BOT_IDENTITY': runtime.get('bot_identity'),
               'BTC_DELIVERY_RUN_REPOSITORY': runtime.get('code_repository'),
-              'BTC_DELIVERY_WORKFLOW': runtime.get('workflow'),
+              'BTC_DELIVERY_WORKFLOW': workflow,
               'BTC_DELIVERY_CONFIRMATION_POLICY': actions.POLICY}
     if any(not v or os.environ.get(k) != v for k,v in fields.items()):
         raise ValueError('Actions environment differs from reviewed deployment')
@@ -55,7 +61,7 @@ def validate(runtime, kind, data_dir):
             raise ValueError('Actual Actions run binding differs')
     if (os.environ.get('GITHUB_REF') != runtime.get('code_ref')
             or os.environ.get('GITHUB_WORKFLOW_REF') != runtime['code_repository']+'/'
-                +runtime['workflow']+'@'+runtime['code_ref']
+                +workflow+'@'+runtime['code_ref']
             or os.environ.get('GITHUB_RUN_ATTEMPT') != '1'
             or not re.fullmatch('[1-9][0-9]*', os.environ.get('GITHUB_RUN_NUMBER',''))
             or not re.fullmatch('[1-9][0-9]*', os.environ.get('GITHUB_RUN_ID',''))
@@ -80,7 +86,7 @@ def validate(runtime, kind, data_dir):
 
 def deployment(runtime):
     # Fixed size deployment pin, including budgets, ref, strategy and review.
-    return {k: runtime[k] for k in ('code_repository','code_ref','workflow',
+    return {k: runtime[k] for k in ('code_repository','code_ref','workflows',
         'private_store_repository','store_branch','fence_branch','store_id','store_path','fence_path',
         'code_sha','config_sha256','bot_identity','activation_review_sha256',
         'confirmation_policy','confirmation_budgets')}
@@ -94,46 +100,69 @@ def run_runtime(runtime_path, kind, data_dir, **fixtures):
     binding = {'repo':runtime['private_store_repository'], 'branch':runtime['store_branch'],
                'store_id':runtime['store_id'], 'run_id':os.environ['GITHUB_RUN_ID'],
                'run_attempt':'1', 'code_sha':runtime['code_sha']}
+    operation_id = digest({'repository': runtime['code_repository'],
+                           'workflow': fields['BTC_DELIVERY_WORKFLOW'], 'run_id': binding['run_id']})
+    prior_operation_id = os.environ.get('BTC_DELIVERY_OPERATION_ID')
+    if kind == 'lage' and os.environ.get('BTC_DELIVERY_OPERATION_ID', operation_id) != operation_id:
+        raise ValueError('Manual command identity must be derived from this Actions run')
     # Snapshot exact factory environment; all clients in this process share counters.
     fields.update({k: os.environ.get(k,'') for k in (
         'BTC_DELIVERY_RUN_ID','BTC_DELIVERY_RUN_ATTEMPT','BTC_DELIVERY_RUNNER_ROOT',
         'BTC_DELIVERY_EXPECTED_START_MS','GITHUB_REPOSITORY','GITHUB_SHA','GITHUB_REF',
-        'GITHUB_WORKFLOW_REF','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT','GITHUB_RUN_NUMBER')})
+        'GITHUB_WORKFLOW_REF','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT','GITHUB_RUN_NUMBER',
+        'GITHUB_EVENT_NAME')})
+    if kind == 'lage':
+        fields['BTC_DELIVERY_OPERATION_ID'] = operation_id
     client = actions.ActionsClient(os.environ['BTC_DELIVERY_GITHUB_TOKEN'],
                                    actions.RunBudget(policy,binding), fields)
     run = {'number':int(os.environ['GITHUB_RUN_NUMBER']), 'id':binding['run_id'], 'attempt':'1',
+           'workflow': fields['BTC_DELIVERY_WORKFLOW'],
            'kind':kind, 'expected_start_ms':os.environ['BTC_DELIVERY_EXPECTED_START_MS'],
            'deadline_utc_ms':policy['deadline_utc_ms']}
     pin = deployment(runtime)
     client.acquire(pin,run)
+    if kind == 'lage':
+        os.environ['BTC_DELIVERY_OPERATION_ID'] = operation_id
     scope = actions.active_client.set(client)
     try:
         result = runner.run_checked(kind, Path(data_dir), **fixtures)
         store = github.read_only(client,binding['repo'],binding['branch'],binding['store_id'])
         if store.snapshot['control'].get('owner') is not None or store.blocked() or client.journal.halted:
             raise github.StoreConflict('Incomplete/uncertain stream keeps Actions fence open')
-        health = store.snapshot['control']['health']
-        finished = health.get('successful_runs',{}).get(kind,{}).get('run',{})
-        current = health.get('current_run',{})
-        if (current.get('status') != 'completed' or finished.get('status') != 'completed'
-                or any(current.get(k) != v or finished.get(k) != v for k,v in (
-                    ('run_id',run['id']),('run_attempt','1'),('kind',kind),
-                    ('repository',runtime['code_repository']),('workflow',runtime['workflow']),
-                    ('code_sha',runtime['code_sha']),('config_sha256',runtime['config_sha256']),
-                    ('expected_start_ms',int(run['expected_start_ms']))))):
-            raise github.StoreConflict('Exact successful engine run attestation missing')
+        if kind == 'lage':
+            actions.verify_command(store.snapshot, client, operation_id)
+        else:
+            verify_health(store, runtime, run)
         client.close(pin,store.confirmed_record())
         return {'result':result, 'get':client.journal.get, 'put':client.journal.put,
                 'request_bytes':client.journal.request, 'response_reserve':client.journal.response}
     finally:
         client.admitted = False
         actions.active_client.reset(scope)
+        if kind == 'lage':
+            if prior_operation_id is None:
+                os.environ.pop('BTC_DELIVERY_OPERATION_ID', None)
+            else:
+                os.environ['BTC_DELIVERY_OPERATION_ID'] = prior_operation_id
+
+
+def verify_health(store, runtime, run):
+    health = store.snapshot['control']['health']
+    finished = health.get('successful_runs',{}).get(run['kind'],{}).get('run',{})
+    current = health.get('current_run',{})
+    if (current.get('status') != 'completed' or finished.get('status') != 'completed'
+            or any(current.get(k) != v or finished.get(k) != v for k,v in (
+                ('run_id',run['id']),('run_attempt','1'),('kind',run['kind']),
+                ('repository',runtime['code_repository']),('workflow',run['workflow']),
+                ('code_sha',runtime['code_sha']),('config_sha256',runtime['config_sha256']),
+                ('expected_start_ms',int(run['expected_start_ms']))))):
+        raise github.StoreConflict('Exact successful engine run attestation missing')
 
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
     p.add_argument('--runtime',required=True)
-    p.add_argument('--kind',choices=('signal','watch'),required=True)
+    p.add_argument('--kind',choices=('signal','watch','lage'),required=True)
     p.add_argument('--data-dir',required=True)
     a = p.parse_args()
     try: run_runtime(a.runtime,a.kind,a.data_dir)

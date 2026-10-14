@@ -121,6 +121,7 @@ def fixture():
                         actions.FENCE_PATH:actions.seed_fence(entry.deployment(runtime)).decode()})
         env={'SYSTEMROOT':os.environ.get('SYSTEMROOT',r'C:\Windows'),
              'WINDIR':os.environ.get('WINDIR',r'C:\Windows'),
+             'TMP':tempfile.gettempdir(), 'TEMP':tempfile.gettempdir(),
              'BTC_DELIVERY_ADAPTER':'github','BTC_DELIVERY_STORE_ID':STORE_ID,
              'BTC_DELIVERY_RUNNER_ROOT':str(data.parent),'BTC_DELIVERY_GITHUB_REPO':REPO,
              'BTC_DELIVERY_GITHUB_BRANCH':BRANCH,'BTC_DELIVERY_GITHUB_TOKEN':'synthetic-only',
@@ -128,12 +129,13 @@ def fixture():
              'BTC_DELIVERY_RUN_ID':'100','BTC_DELIVERY_RUN_ATTEMPT':'1','BTC_DELIVERY_CODE_SHA':'a'*40,
              'BTC_DELIVERY_BOT_IDENTITY':'synthetic-bot','BTC_DELIVERY_CONFIRMATION_POLICY':actions.POLICY,
              'TELEGRAM_BOT_TOKEN':'synthetic-only','TELEGRAM_CHAT_ID':'synthetic-target',
-             'BTC_DELIVERY_OPERATION_ID':'synthetic-request','BTC_DELIVERY_RUN_REPOSITORY':'synthetic/code',
-             'BTC_DELIVERY_WORKFLOW':'.github/workflows/production-delivery.yml',
+             'BTC_DELIVERY_RUN_REPOSITORY':'synthetic/code',
+             'BTC_DELIVERY_WORKFLOW':'.github/workflows/signal.yml',
              'BTC_DELIVERY_EXPECTED_START_MS':'1791100800000','GITHUB_REPOSITORY':'synthetic/code',
              'GITHUB_RUN_ID':'100','GITHUB_RUN_ATTEMPT':'1','GITHUB_RUN_NUMBER':'10','GITHUB_SHA':'a'*40,
              'GITHUB_REF':'refs/heads/synthetic',
-             'GITHUB_WORKFLOW_REF':'synthetic/code/.github/workflows/production-delivery.yml@refs/heads/synthetic'}
+             'GITHUB_WORKFLOW_REF':'synthetic/code/.github/workflows/signal.yml@refs/heads/synthetic',
+             'GITHUB_EVENT_NAME':'workflow_dispatch'}
         with patch.dict(os.environ,env,clear=True), patch.object(entry,'check_code_pin'),\
              patch.object(actions.ActionsClient,'open_request',side_effect=http.open),\
              patch('urllib.request.urlopen',side_effect=AssertionError('Real HTTP forbidden')):
@@ -251,8 +253,8 @@ def test_two_contenders_same_old_blob_exactly_one_admission():
             return actions.ActionsClient('synthetic-only',actions.RunBudget(p,binding),fields)
         first,second=client(),client(); pin=entry.deployment(runtime)
         old,value=second.fence_read(pin)
-        first.acquire(pin,{'number':10,'id':'100','attempt':'1'})
-        stale={**value,'phase':'open','run':{'number':11,'id':'101','attempt':'1'},'write_id':'contender'}
+        first.acquire(pin,{'number':10,'id':'100','attempt':'1','kind':'signal','workflow':'.github/workflows/signal.yml'})
+        stale={**first.fence,'phase':'open','run':{'number':11,'id':'101','attempt':'1'},'write_id':'contender'}
         fails(github.StoreConflict,lambda:second.fence_write(old,stale))
         assert json.loads(http.file(actions.FENCE_PATH))['run']['id']=='100'
         assert http.puts==2  # successful claim + denied stale CAS, no retry
@@ -264,7 +266,9 @@ def test_transport_uncertain_persists_and_blocks_replacement_without_send():
     with fixture() as (_,data,path,runtime,http):
         # Exercise the actual command runner/transport path inside the admitted
         # Actions scope; ordinary signal invocation is separately exercised above.
-        def command(*args,**kwargs): return actual('test',data)
+        def command(*args,**kwargs):
+            with patch.dict(os.environ,{'BTC_DELIVERY_OPERATION_ID':'synthetic-request'}):
+                return actual('test',data)
         with patch.object(runner,'run_checked',side_effect=command),\
              patch.object(tg,'deliver_telegram',side_effect=TimeoutError('synthetic')) as send:
             fails(github.StoreConflict,lambda:invoke(path,data))
@@ -363,8 +367,11 @@ def test_real_clean_checkout_pin_and_offline_prepare_exclusive_seed():
     fails(ValueError,lambda:entry.check_code_pin('f'*40))
     with fixture() as (root,data,path,runtime,http):
         out=root/'offline-fence.json'
+        baseline=root/'cursors.json'
+        baseline.write_text(canonical({'schema':'actions-v2-start-cursors-v1','review_sha256':runtime['activation_review_sha256'],
+                                      'cursors':{w:{'number':0,'id':None} for w in actions.WORKFLOWS}}),encoding='utf-8')
         args=[sys.executable,'-B',str(ROOT/'tools/produktion_actions_prepare.py'),
-              '--runtime',str(path),'--out',str(out)]
+              '--runtime',str(path),'--out',str(out),'--cursors',str(baseline)]
         child=subprocess.run(args,capture_output=True)
         assert child.returncode==0,child.stderr
         assert out.read_bytes()==actions.seed_fence(entry.deployment(runtime))
@@ -376,10 +383,29 @@ def test_real_clean_checkout_pin_and_offline_prepare_exclusive_seed():
 if __name__=='__main__' and '--crash' in sys.argv:
     remote=Path(sys.argv[4]);http=BranchHTTP(state=json.loads(remote.read_text(encoding='utf-8')),remote=remote)
     http.crash=(sys.argv[5],int(sys.argv[6]))
+    if sys.argv[5].startswith('lage-'):
+        import telegram_notify as tg
+        from test_pflichtfunktionen import lage, receipt
+        if sys.argv[5] in ('lage-before-close','lage-after-close'):
+            http.crash=(sys.argv[5].removeprefix('lage-'),0)
+        def transport(*args):
+            if sys.argv[5]=='lage-after':
+                with (remote.parent/'synthetic-delivered.txt').open('wb') as out:
+                    out.write(b'synthetic Lage delivery only');out.flush();os.fsync(out.fileno())
+            if sys.argv[5] in ('lage-before','lage-after'):
+                os._exit(23)
+            return receipt(*args)
+        with patch.object(tg,'deliver_telegram',side_effect=transport),\
+             patch.object(entry,'check_code_pin'),patch.object(actions.ActionsClient,'open_request',side_effect=http.open),\
+             patch('socket.create_connection',side_effect=AssertionError('Network forbidden')):
+            lage(Path(sys.argv[2]),Path(sys.argv[3]))
+        sys.exit(24)
     if sys.argv[5].startswith('transport-'):
         import telegram_notify as tg
         actual=runner.run_checked
-        def command(*args,**kwargs): return actual('test',Path(sys.argv[3]))
+        def command(*args,**kwargs):
+            with patch.dict(os.environ,{'BTC_DELIVERY_OPERATION_ID':'synthetic-request'}):
+                return actual('test',Path(sys.argv[3]))
         def transport(*args):
             if sys.argv[5]=='transport-after':
                 with (remote.parent/'synthetic-delivered.txt').open('wb') as out:

@@ -1,6 +1,6 @@
 """Hosted-runner admission fence on a separate branch in the store repository.
 
-No resume: attempt 1 only, monotonically increasing workflow run_number,
+No resume: attempt 1 only, increasing run_number independently per workflow,
 open fence has no TTL. Counters may be volatile because admission survives
 every subsequent request and a replacement process cannot enter that run.
 """
@@ -10,23 +10,83 @@ import json
 import secrets
 import time
 
-from production_contract import canonical
+from production_contract import canonical, digest
 from production_confirmation import ProductionContentsClient, validate_policy
 from github_delivery import StoreUnavailable, StoreConflict, StoreHTTPFailure
 
-POLICY = 'github-actions-fence-v1'
+POLICY = 'github-actions-fence-v2'
 FENCE_PATH = 'delivery/actions-fence.json'
 MAX_FENCE_BYTES = 8192
+WORKFLOWS = {'.github/workflows/signal.yml': 'signal',
+             '.github/workflows/watch.yml': 'watch',
+             '.github/workflows/lage.yml': 'lage'}
 active_client = ContextVar('hosted_actions_client', default=None)
 
 
-def seed_fence(deployment):
+def command_binding(client, operation_id):
+    return {'schema': 'actions-lage-completion-v1', 'operation_id': operation_id,
+            'repository': client.environment['BTC_DELIVERY_RUN_REPOSITORY'],
+            'code_sha': client.environment['BTC_DELIVERY_CODE_SHA'], 'run': client.run}
+
+
+def command_evidence(snapshot, entry):
+    messages = entry['_delivery']['messages']
+    if (entry['result'] is None or not messages
+            or any(m['status'] != 'confirmed' or type(m.get('receipt')) is not int
+                   or m['receipt'] <= 0 or m.get('target') != snapshot['control']['target_binding']
+                   or m.get('attempts') != 1 for m in messages)):
+        raise StoreConflict('Exact Lage command has no fully confirmed outbox')
+    return {'outbox_sha256': digest(entry['_delivery']), 'result_sha256': digest(entry['result']),
+            'engine_sha256': digest(snapshot['engine']), 'watch_sha256': digest(snapshot['watch']),
+            'config_sha256': snapshot['control']['config_sha256']}
+
+
+def verify_command(snapshot, client, operation_id):
+    from telegram_outbox import identity
+    entry = snapshot['commands'].get(identity('command', 'lage', 0, operation_id))
+    if not entry or entry.get('actions_completion') != {
+            **command_binding(client, operation_id), **command_evidence(snapshot, entry)}:
+        raise StoreConflict('Exact Lage completion attestation missing')
+
+
+def seed_fence(deployment, cursors=None):
     """Offline bytes only; separately reviewed bootstrap, no API creation."""
+    if deployment.get('workflows') != WORKFLOWS:
+        raise ValueError('Exact bounded workflow/kind bindings required')
     body = canonical({'schema': POLICY, 'deployment': deployment, 'phase': 'closed',
-                      'run': {'number': 0, 'id': None, 'attempt': '1'},
+                      'cursors': cursors if cursors is not None else {w: {'number': 0, 'id': None} for w in WORKFLOWS},
+                      'run': None,
                       'write_id': 'offline-seed', 'completion': None}).encode()
+    parse_fence({'body':body},deployment)
     if len(body) > MAX_FENCE_BYTES: raise ValueError('Fence seed too large')
     return body
+
+
+def parse_fence(record, deployment):
+    if len(record['body']) > MAX_FENCE_BYTES:
+        raise StoreUnavailable('Fence too large')
+    try:
+        value = json.loads(record['body'])
+        cursors = value['cursors']
+        if (record['body'] != canonical(value).encode() or value.get('schema') != POLICY
+                or value.get('deployment') != deployment or value.get('phase') not in ('open','closed')
+                or deployment.get('workflows') != WORKFLOWS or set(cursors) != set(WORKFLOWS)
+                or any(type(c.get('number')) is not int or c['number'] < 0
+                       or (c['number'] == 0 and c.get('id') is not None)
+                       or (c['number'] > 0 and (not isinstance(c.get('id'), str)
+                                               or not c['id'].isdigit())) for c in cursors.values())):
+            raise ValueError('shape')
+        run = value['run']
+        if run is None:
+            if value['phase'] != 'closed' or value['completion'] is not None:
+                raise ValueError('seed')
+        elif (run.get('workflow') not in WORKFLOWS or run.get('kind') != WORKFLOWS[run['workflow']]
+              or run.get('attempt') != '1' or cursors[run['workflow']] != {'number': run['number'], 'id': run['id']}
+              or not run['number']):
+            raise ValueError('run')
+        return value
+    except (ValueError, KeyError, TypeError, AttributeError):
+        raise StoreConflict('Fence identity/shape mismatch') from None
 
 
 class RunBudget:
@@ -146,21 +206,22 @@ class ActionsClient(ProductionContentsClient):
 
     def fence_read(self, deployment):
         record = self.read(self.journal.binding['repo'], self.fence_branch, FENCE_PATH)
-        if len(record['body']) > MAX_FENCE_BYTES: raise StoreUnavailable('Fence too large')
-        value = json.loads(record['body'])
-        if (record['body'] != canonical(value).encode() or value.get('schema') != POLICY
-                or value.get('deployment') != deployment or value.get('phase') not in ('open','closed')
-                or type(value.get('run',{}).get('number')) is not int
-                or value['run']['number'] < 0):
-            raise StoreConflict('Fence identity/shape mismatch')
-        return record, value
+        return record, parse_fence(record, deployment)
 
     def acquire(self, deployment, run):
         record, value = self.fence_read(deployment)
-        if value['phase'] != 'closed' or run['number'] <= value['run']['number'] or run['attempt'] != '1':
+        workflow = run.get('workflow')
+        if (workflow not in WORKFLOWS or run.get('kind') != WORKFLOWS[workflow]
+                or type(run.get('number')) is not int or run['number'] <= 0
+                or not isinstance(run.get('id'), str) or not run['id'].isdigit()
+                or run.get('attempt') != '1'):
+            raise StoreConflict('Unknown workflow or wrong operation binding')
+        if (value['phase'] != 'closed' or run['number'] <= value['cursors'][workflow]['number']
+                or any(c['id'] == run['id'] for c in value['cursors'].values())):
             raise StoreConflict('Open/old/repeated Actions run requires operator review')
         self.run = dict(run)
         self.fence = {**value, 'phase': 'open', 'run': dict(run),
+                      'cursors': {**value['cursors'], workflow: {'number': run['number'], 'id': run['id']}},
                       'write_id': secrets.token_hex(16), 'completion': None}
         self.fence_write(record, self.fence)
         self.admitted = True
