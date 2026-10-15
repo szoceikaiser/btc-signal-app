@@ -10,8 +10,8 @@ on:
         type: string
         required: false
         default: ""
-  schedule:
-    - cron: "8,23,38,53 * * * *"
+# Production occurrences are dispatched by the existing external Cron service.
+# No parallel GitHub schedule: duplicate jobs also spend the shared API quota.
 permissions:
   contents: read
   actions: read

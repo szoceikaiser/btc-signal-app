@@ -104,3 +104,9 @@ Externer Alarm, frischer Stillstandsschnitt, vollstÃƒÆ’Ã‚Â¤ndige C05-Z
 P4/Cutover bleiben eigene offene Schritte. Keine Actionsbereinigung: Vor jeder
 spÃƒÆ’Ã‚Â¤teren LÃƒÆ’Ã‚Â¶schung/Stilllegung Zweck, AbhÃƒÆ’Ã‚Â¤ngigkeiten und Folgen erklÃƒÆ’Ã‚Â¤ren und
 Nutzer fragen, auch bei Runs, Logs, Artefakten und Branches.
+
+## Vorhandene externe Cronjobs
+
+Fuer Signal und Wache gilt die bestehende externe Ausloesung; die deaktivierten
+Vorlagen besitzen keinen parallelen internen schedule-Ausloeser mehr. Details,
+Termine, Abgleich vor Cutover und Grenzen stehen in EXTERNE-CRONJOBS.md.
