@@ -311,7 +311,7 @@ def tokens(mode):
     if any(os.environ.get(ENV[r]) for r in forbidden): raise ValueError('Forbidden role injection')
     if any(os.environ.get('BTC_HOSTED_'+r+'_TOKEN') for r in ('SOURCE_READ','BACKUP_READ','RECEIPT_READ','METADATA_READ')):
         raise ValueError('Obsolete secret reader injection refused')
-    if any(os.environ.get(k) for k in ('BTC_DELIVERY_GITHUB_TOKEN','TELEGRAM_BOT_TOKEN')):
+    if any(os.environ.get(k) for k in ('BTC_DELIVERY_GITHUB_TOKEN','BTC_REVIEWED_STORE_TOKEN','TELEGRAM_BOT_TOKEN')):
         raise ValueError('Sender credential injection forbidden in backup jobs')
     return values
 
@@ -349,6 +349,23 @@ def validate(runtime,mode,budget=None,check_checkout=True):
     return binding
 
 
+def verify_binding(client,runtime,binding,entry_sha):
+    from reviewed_actions_entry import verify
+    if 'probe_entry_sha' in binding:
+        # Narrow synthetic-only detached-code rehearsal. Main entry and checked
+        # out code are independently immutable, without merging candidate code.
+        if (runtime.get('probe_name')!='btc-synthetic-backup-20261015'
+                or binding['repository']!='szoceikaiser/btc-signal-app' or binding['branch']!='main'
+                or entry_sha!=binding['probe_entry_sha'] or not b.HEX40.fullmatch(entry_sha or '')
+                or runtime['identity']['store_id']!='btc-synthetic-backup-20261015-store'
+                or runtime['source']['branch']!='probe-20261015-stream'
+                or runtime['deployment']['fence_branch']!='probe-20261015-fence'):
+            raise ValueError('Exact isolated synthetic entry required')
+        verify(client,binding['repository'],entry_sha,entry_sha,binding['workflow'],binding['workflow_sha256'])
+    else:
+        verify(client,binding['repository'],entry_sha,binding['code_sha'],binding['workflow'],binding['workflow_sha256'])
+
+
 def metadata(client,runtime,binding):
     rid=os.environ['GITHUB_RUN_ID'];repo=binding['repository']
     meta=client.request('GET',repo,'/actions/runs/'+rid)
@@ -357,8 +374,7 @@ def metadata(client,runtime,binding):
             or meta['head_sha']!=os.environ['GITHUB_SHA']
             or meta['head_branch']!=binding['branch'] or meta['path']!=binding['workflow']
             or meta['event']!=os.environ['GITHUB_EVENT_NAME']): raise ValueError('Actual run metadata differs')
-    from reviewed_actions_entry import verify
-    verify(client,repo,meta['head_sha'],binding['code_sha'],binding['workflow'],binding['workflow_sha256'])
+    verify_binding(client,runtime,binding,meta['head_sha'])
     slot=slots.bind('backup',meta,int(time.time()*1000),os.environ.get('BTC_ACTIONS_EXPLICIT_START_MS',''))
     client.budget.deadline_ms=slots.deadline('backup',slot)
     return slot
@@ -576,11 +592,16 @@ def run(runtime,mode,root):
     budget=Budget(root);binding=validate(runtime,mode,budget);clients=roles(runtime,mode,budget)
     slot=metadata(clients['metadata_read'],runtime,binding)
     source=clients['source_read'];s=runtime['source'];f={**s,'branch':runtime['deployment']['fence_branch']}
+    if runtime.get('probe_name')=='btc-synthetic-backup-20261015':
+        if runtime.get('probe_expected_start_ms')!=slot or runtime.get('pins') is None:
+            raise ValueError('Reviewed synthetic source cut/occurrence required before mutation')
     spec=runtime['migration'];migration_tree,migration_files=source.tree(spec['target'],spec['commit_sha'])
     if migration_tree!=spec['tree_sha'] or migration_files!=spec['files']:
         raise ValueError('Authenticated immutable migration binding differs')
     heads={key:source.ref(t) for t,key in ((s,'stream'),(f,'fence'))}
     backup=clients['backup_write' if mode=='producer' else 'backup_read'];bt=runtime['backup'];base=backup.ref(bt)
+    if runtime.get('probe_name')=='btc-synthetic-backup-20261015' and mode=='producer' and base!=runtime['probe_seed']['backup']:
+        raise ValueError('Synthetic backup already moved; no repeat/resume')
     if mode=='producer':
         _,existing=backup.tree(bt,base)
         previous=None
@@ -639,9 +660,7 @@ def run(runtime,mode,root):
                 or meta['head_branch']!=producer['branch'] or meta['head_sha']!=h['entry_sha']
                 or meta['status']!='completed' or meta['conclusion']!='success' or slots.run_slot('backup',meta)!=slot):
             raise ValueError('Actual successful producer run missing')
-        from reviewed_actions_entry import verify
-        verify(clients['metadata_read'],producer['repository'],h['entry_sha'],producer['code_sha'],
-               producer['workflow'],producer['workflow_sha256'])
+        verify_binding(clients['metadata_read'],runtime,producer,h['entry_sha'])
         # Authenticate each backed-up pin against the actual source repository.
         # Live sources may have advanced after the producer; no freeze is invented.
         for t,key,path in ((s,'stream',github.STORE_PATH),(f,'fence',actions.FENCE_PATH)):

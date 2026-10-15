@@ -1,0 +1,25 @@
+{
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "required_linear_history"
+    }
+  ],
+  "bypass_actors": [],
+  "enforcement": "active",
+  "name": "btc-synthetic-backup-20261015-receipts",
+  "conditions": {
+    "ref_name": {
+      "include": [
+        "refs/heads/probe-20261015-receipts"
+      ],
+      "exclude": []
+    }
+  },
+  "target": "branch"
+}
