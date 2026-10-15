@@ -21,11 +21,15 @@ class Reader(github.GitHubContentsClient):
     response_byte_limit=2*1024*1024
 
     def __init__(self,token,repositories,budget,metadata=False):
-        if token and not metadata: raise ValueError('Public data monitor accepts no secret')
-        super().__init__(token,timeout=3,anonymous=not token)
+        from job_quota import bind,Headers
+        super().__init__(token,timeout=3)
+        if not hasattr(budget,'quota_headers'): budget.quota_headers=Headers()
+        bind(self,token,budget.quota_headers)
         self.metadata_routes=metadata
         self.repositories=set(repositories);self.budget=budget
         self._response_bytes=0
+        self.mutable_metadata={}
+        self.current_pins={}
 
     def _request(self,method,route,payload=None):
         if (method!='GET' or payload is not None or self.budget.requests>=MAX_GET
@@ -33,13 +37,37 @@ class Reader(github.GitHubContentsClient):
             raise github.StoreUnavailable('GET-only monitor scope/budget refused')
         remaining=MAX_SECONDS-(time.monotonic()-self.budget.started)
         if remaining<=0: raise github.StoreUnavailable('Monitor total deadline')
-        self.timeout=min(3,remaining);self.budget.requests+=1
+        self.timeout=min(3,remaining)
         from public_access import tail_allowed
         parts=route.split('/',4);tail='/'+parts[4] if len(parts)==5 else ''
         if not tail_allowed(tail,self.metadata_routes): raise github.StoreUnavailable('Monitor path scope refused')
+        from job_quota import cached
+        self.quota_headers.before()
+        hit=cached(self,route)
+        if hit is not None: return hit
+        self.budget.requests+=1
         result=super()._request(method,route)
+        if '/actions/runs/' in route:
+            self.mutable_metadata.setdefault(route,deepcopy(result))
         if time.monotonic()-self.budget.started>MAX_SECONDS: raise github.StoreUnavailable('Monitor total deadline')
         return result
+
+    def read(self,repo,branch,path=github.STORE_PATH):
+        # One initial ref, one final ref after ALL checks in check(). Immutable
+        # contents remain bound to the initial commit; no mid-check head cache.
+        ref=self._request('GET',self._route(repo,'/git/ref/heads/'+urllib.parse.quote(branch,safe='')))
+        pin=self.current_pins.get((repo,branch,path))
+        if pin:
+            if ref['object']['sha']!=pin['commit_sha']: raise ValueError('Fence/stream head differs')
+            return self.read_pinned(repo,ref['object']['sha'],path,blob=pin['blob_sha'])
+        return self.read_at(repo,ref['object']['sha'],path)
+
+    def jobs(self,repo,run_id):
+        route=self._route(repo,'/actions/runs/'+run_id+'/attempts/1/jobs?per_page=100&page=1')
+        # Reuse an earlier completed-job observation. check() re-GETs every
+        # unique run/job route at the end, including this route.
+        if route in self.mutable_metadata: return deepcopy(self.mutable_metadata[route])
+        return self._request('GET',route)
 
     def update(self,*args,**kwargs): raise github.StoreUnavailable('No monitor mutation')
 
@@ -91,8 +119,7 @@ def read_runs(client,policy,now):
                 status=item['status'],conclusion=item['conclusion']))
         for run in selected(normalized,kind,now,policy['first_start_ms'][kind]):
             if run['status']!='completed' or run['conclusion']!='success': raise ValueError('Run failed/queued/incomplete')
-            jobs=client._request('GET',client._route(d['code_repository'],
-                '/actions/runs/'+run['run_id']+'/attempts/1/jobs?per_page=100&page=1'))
+            jobs=client.jobs(d['code_repository'],run['run_id'])
             if not 1<=len(jobs['jobs'])<=20 or jobs['total_count']!=len(jobs['jobs']): raise ValueError('Jobs incomplete')
             for job in jobs['jobs']:
                 actual=next(item['head_sha'] for item in items if str(item['id'])==run['run_id'])
@@ -201,7 +228,7 @@ def read_backup(reader,code_reader,policy,now):
         if m['hosted']['expected_start_ms']!=slot: raise ValueError('Old hosted publication occurrence')
     elif dest['manifest_path']!=target['manifest_path']: raise ValueError('Foreign backup manifest path')
     # Actual immutable uploaded manifest, and ancestry on the pinned protected branch.
-    uploaded=reader.read_at(dest['repository'],dest['commit_sha'],dest['manifest_path'])
+    uploaded=reader.read_pinned(dest['repository'],dest['commit_sha'],dest['manifest_path'],blob=dest['blob_sha'])
     if (json.loads(uploaded['body'])!=m or uploaded['blob_sha']!=dest['blob_sha']):
         raise ValueError('Uploaded manifest mismatch')
     current=reader._request('GET',reader._route(dest['repository'],'/git/ref/heads/'+urllib.parse.quote(dest['branch'],safe='')))
@@ -224,7 +251,7 @@ def read_backup(reader,code_reader,policy,now):
     return receipt,record,current
 
 
-def check(store_reader,code_reader,backup_reader,policy,now):
+def check(store_reader,code_reader,backup_reader,policy,now,admission=None):
     from freshness import response
     try:
         if policy.get('enabled') is not True or policy.get('schema')!='p4-actions-monitor-v1': raise ValueError('Monitor disabled')
@@ -234,6 +261,7 @@ def check(store_reader,code_reader,backup_reader,policy,now):
         fence_record=store_reader.read(repo,d['fence_branch'],actions.FENCE_PATH)
         fence=actions.parse_fence(fence_record,d)
         if fence['phase']!='closed' or not fence['completion']: raise ValueError('Fence open/uninitialized')
+        store_reader.current_pins[(repo,d['store_branch'],github.STORE_PATH)]=fence['completion']['stream']
         store=github.read_only(store_reader,repo,d['store_branch'],d['store_id'])
         original=deepcopy(store._record)
         if fence['completion']['stream']!=store.confirmed_record(): raise ValueError('Fence/stream completion differs')
@@ -253,7 +281,7 @@ def check(store_reader,code_reader,backup_reader,policy,now):
             pin=receipt['manifest']['pins'][kind]
             current=original if kind=='stream' else fence_record
             if not store_reader.is_ancestor(repo,pin['commit_sha'],current['commit_sha']): raise ValueError('Foreign backup history')
-            observed=store_reader.read_at(repo,pin['commit_sha'],path)
+            observed=store_reader.read_pinned(repo,pin['commit_sha'],path,blob=pin['blob_sha'])
             if kind=='stream':
                 env=store._parse(observed)
                 if (env['revision']!=pin['revision'] or env['body_digest']!=pin['snapshot_digest']
@@ -261,14 +289,19 @@ def check(store_reader,code_reader,backup_reader,policy,now):
             elif observed['blob_sha']!=pin['blob_sha'] or digest(json.loads(observed['body']))!=pin['body_sha256']:
                 raise ValueError('Backup fence pin mismatch')
         # Reobserve every mutable input after ALL completion and backup checks.
+        if admission: admission()
+        for route,raw in list(code_reader.mutable_metadata.items()):
+            if code_reader._request('GET',route)!=raw: raise ValueError('Run/jobs moved during check')
         for route,raw in raws.items():
             if code_reader._request('GET',route)!=raw: raise ValueError('Runs moved during check')
         t=policy['independent_verifier'];dest=policy['backup_target']
-        if (backup_reader.read(t['repository'],t['receipt_branch'],t['receipt_path'])!=backup_record
+        def same(reader,repo,branch,record):
+            return reader._request('GET',reader._route(repo,'/git/ref/heads/'+urllib.parse.quote(branch,safe='')))['object']['sha']==record['commit_sha']
+        if (not same(backup_reader,t['repository'],t['receipt_branch'],backup_record)
                 or backup_reader._request('GET',backup_reader._route(dest['repository'],
                     '/git/ref/heads/'+urllib.parse.quote(dest['branch'],safe='')))!=backup_ref
-                or store_reader.read(repo,d['store_branch'],github.STORE_PATH)!=original
-                or store_reader.read(repo,d['fence_branch'],actions.FENCE_PATH)!=fence_record):
+                or not same(store_reader,repo,d['store_branch'],original)
+                or not same(store_reader,repo,d['fence_branch'],fence_record)):
             raise ValueError('Store/fence/backup moved during check')
         return response()
     except ValueError as exc:

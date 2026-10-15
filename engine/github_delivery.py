@@ -88,6 +88,28 @@ class GitHubContentsClient:
         self.token, self.timeout = token, timeout
 
     def _request(self, method, route, payload=None):
+        import job_quota
+        bounded = bool(getattr(self, 'public_read_token', None))
+        if bounded:
+            self.quota_headers.before()
+        if bounded and method == 'GET':
+            from public_access import tail_allowed
+            tail = route.split('/', 4)[4] if len(route.split('/', 4)) == 5 else ''
+            if payload is not None or not tail_allowed('/'+tail if tail else '', getattr(self,'metadata_routes',False)):
+                raise StoreUnavailable('Bounded jobtoken route refused')
+            hit = job_quota.cached(self, route)
+            if hit is not None: return hit
+            expected=getattr(self,'pinned_expected',{}).get(route)
+            if expected:
+                value=job_quota.raw_file(self,route,expected,getattr(self,'open_request',urllib.request.urlopen),
+                    self.timeout,getattr(self,'response_byte_limit',MAX_RESPONSE_BYTES))
+                job_quota.remember(self,route,value)
+                return value
+            if getattr(self,'git_refs',False) and tail.startswith('git/ref/heads/'):
+                parts=route.split('/')
+                return job_quota.git_ref(self,'/'.join(parts[2:4]),tail.removeprefix('git/ref/heads/'),
+                    getattr(self,'open_request',urllib.request.urlopen),self.timeout,
+                    getattr(self,'response_byte_limit',MAX_RESPONSE_BYTES))
         url = 'https://api.github.com' + route
         data = None if payload is None else canonical(payload).encode('utf-8')
         request = urllib.request.Request(url, data=data, method=method, headers={
@@ -95,7 +117,9 @@ class GitHubContentsClient:
             'X-GitHub-Api-Version': '2022-11-28',
             'Content-Type': 'application/json',
             'User-Agent': 'btc-delivery-store'})
-        if self.anonymous_reads and method == 'GET':
+        if bounded and method == 'GET':
+            request.add_header('Authorization', 'Bearer ' + self.public_read_token)
+        elif self.anonymous_reads and method == 'GET':
             from public_access import tail_allowed
             tail = route.split('/', 4)[4] if len(route.split('/', 4)) == 5 else ''
             if payload is not None or not tail_allowed('/'+tail if tail else '', getattr(self,'metadata_routes',False)):
@@ -107,10 +131,11 @@ class GitHubContentsClient:
         try:
             opener = getattr(self, 'open_request', urllib.request.urlopen)
             limit = getattr(self, 'response_byte_limit', MAX_RESPONSE_BYTES)
-            if self.anonymous_reads and method == 'GET':
+            if bounded or self.anonymous_reads and method == 'GET':
                 from public_access import read_bytes
                 headers={}
-                raw = read_bytes(opener,request,self.timeout,limit,headers)
+                raw = read_bytes(opener,request,self.timeout,limit,headers,
+                                 self.quota_headers if bounded else None)
                 self._response_link=headers.get('link','')
             else:
                 with opener(request, timeout=self.timeout) as response:
@@ -120,8 +145,11 @@ class GitHubContentsClient:
                 self._response_bytes = len(raw)
             if len(raw) > limit:
                 raise StoreUnavailable('GitHub response budget exhausted')
-            return json.loads(raw)
+            value = json.loads(raw)
+            if bounded and method == 'GET': job_quota.remember(self,route,value)
+            return value
         except urllib.error.HTTPError as exc:
+            if bounded: self.quota_headers.observe(exc.headers,exc.code)
             # Never include a response body, URL with credentials, or token in logs.
             if exc.code == 409:
                 raise StoreConflict('GitHub store conflict') from None
@@ -165,6 +193,19 @@ class GitHubContentsClient:
             raise StoreUnavailable('GitHub store blob SHA mismatch')
         return {'commit_sha': commit_sha, 'blob_sha': item['sha'], 'body': body}
 
+    def read_pinned(self,repo,pin,path,blob=None,sha256=None):
+        if not getattr(self,'public_read_token',None): return self.read_at(repo,pin,path)
+        if (blob is not None and not re.fullmatch('[0-9a-f]{40}',blob) or
+                sha256 is not None and not re.fullmatch('[0-9a-f]{64}',sha256) or not (blob or sha256)):
+            raise StoreUnavailable('Independent immutable byte pin required')
+        route=self._route(repo,'/contents/'+urllib.parse.quote(path,safe='/'))+'?'+urllib.parse.urlencode({'ref':pin})
+        if not hasattr(self,'pinned_expected'): self.pinned_expected={}
+        self.pinned_expected[route]={'blob':blob,'sha256':sha256}
+        record=self.read_at(repo,pin,path)
+        if (blob and record['blob_sha']!=blob or sha256 and hashlib.sha256(record['body']).hexdigest()!=sha256):
+            raise StoreUnavailable('Immutable byte pin differs')
+        return record
+
     def update(self, repo, branch, expected_blob_sha, body, write_id, path=STORE_PATH):
         if not expected_blob_sha:
             raise ValueError('No runtime bootstrap through Contents API')
@@ -181,6 +222,7 @@ class GitHubContentsClient:
     def is_ancestor(self, repo, base, head):
         if any(not isinstance(x,str) or not re.fullmatch('[0-9a-f]{40}',x) for x in (base,head)):
             raise StoreUnavailable('Invalid ancestry SHA')
+        if base == head: return True
         result = self._request('GET', self._route(repo, '/compare/'+base+'...'+head+'?per_page=1'))
         return (result['base_commit']['sha'] == base
                 and result['merge_base_commit']['sha'] == base
@@ -342,7 +384,9 @@ class GitHubStore:
     def read_revision(self, locator):
         if not self.client.is_ancestor(self.repo, locator['commit_sha'], self._record['commit_sha']):
             raise StoreConflict('Completion is not in current store history')
-        record = self.client.read_at(self.repo, locator['commit_sha'], self.path)
+        if hasattr(self.client,'public_read_token'):
+            record = self.client.read_pinned(self.repo,locator['commit_sha'],self.path,blob=locator['blob_sha'])
+        else: record = self.client.read_at(self.repo, locator['commit_sha'], self.path)
         envelope = self._parse(record)
         if (record['commit_sha'] != locator['commit_sha'] or record['blob_sha'] != locator['blob_sha']
                 or envelope['revision'] != locator['revision']

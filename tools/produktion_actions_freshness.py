@@ -1,4 +1,4 @@
-"""Public data monitor; automatic codejob token only for code metadata."""
+"""Bounded public GET monitor with the existing automatic jobtoken."""
 import argparse
 import json
 import os
@@ -23,25 +23,37 @@ def run(path):
         return response('monitor_configuration_invalid')
     d=policy['deployment'];v=policy['independent_verifier'];budget=ReadBudget()
     try:
+        from job_quota import read_only_environment
+        read_only_environment()
         public.deployment(policy['public_access'],d)
+        if (v['binding']['repository']!=d['code_repository']
+                or v['binding']['branch']!=d['code_ref'].removeprefix('refs/heads/')
+                or v['binding']['workflow']!='.github/workflows/backup-verify.yml'):
+            raise ValueError('Verifier code must use the reviewed code repository/ref')
         if policy.get('monitor_entry'):
-            from reviewed_actions_entry import EntryReader,actual
+            from reviewed_actions_entry import actual
             from produktion_actions_runner import check_code_pin
             t=policy['monitor_entry'];check_code_pin(t['code_sha'])
-            actual(EntryReader(os.environ.get('GITHUB_TOKEN'),t['repository']),
+            entry_reader=monitor.Reader(os.environ.get('GITHUB_TOKEN'),[t['repository']],budget,metadata=True)
+            actual(entry_reader,
                    t['repository'],'refs/heads/'+t['branch'],t['code_sha'],t['workflow'],t['workflow_sha256'])
-        source=monitor.Reader(None,[d['private_store_repository']],budget)
+        source=monitor.Reader(os.environ.get('GITHUB_TOKEN'),[d['private_store_repository']],budget)
         code=monitor.Reader(os.environ.get('GITHUB_TOKEN'),
             [d['code_repository'],v['binding']['repository']],budget,metadata=True)
         public.check(code,policy['public_access'],[(d['code_repository'],d['code_ref'].removeprefix('refs/heads/'))])
-        backup=monitor.Reader(None,
+        backup=monitor.Reader(os.environ.get('GITHUB_TOKEN'),
             [v['repository'],policy['backup_target']['repository']],budget)
         branches=[(d['private_store_repository'],b) for b in (d['store_branch'],d['fence_branch'])]
-        public.check(source,policy['public_access'],branches,branches)
+        source_branches=branches
+        public.check(source,policy['public_access'],branches)
         branches=[(v['repository'],v['receipt_branch']),
                   (policy['backup_target']['repository'],policy['backup_target']['branch'])]
-        public.check(backup,policy['public_access'],branches,branches)
-        result=monitor.check(source,code,backup,policy,int(time.time()*1000))
+        public.check(backup,policy['public_access'],branches)
+        def admission():
+            public.check(source,policy['public_access'],source_branches,source_branches)
+            public.check(backup,policy['public_access'],branches,branches)
+            public.check(code,policy['public_access'],[(d['code_repository'],d['code_ref'].removeprefix('refs/heads/'))])
+        result=monitor.check(source,code,backup,policy,int(time.time()*1000),admission)
     except Exception: result=response('candidate_evidence_unavailable')
     result['budget']={'get':budget.requests,'put':0,'transport':0,
         'reserved_response_bytes':budget.requests*2*1024*1024}

@@ -16,8 +16,10 @@ from production_confirmation import ProductionContentsClient
 class EntryReader(GitHubContentsClient):
     """Separate code-only binding budget: 3GET/0write, 6MiB, 20s total."""
     open_request=staticmethod(ProductionContentsClient.open_request)
-    def __init__(self,token,repo):
+    def __init__(self,token,repo,quota=None):
         super().__init__(token,timeout=3);self.repo=repo;self.gets=0;self.started=time.monotonic()
+        from job_quota import bind
+        bind(self,token,quota);self.metadata_routes=True
     def _request(self,method,route,payload=None):
         from public_access import tail_allowed
         tail=route.removeprefix(self._route(self.repo,''))
@@ -59,7 +61,11 @@ def verify(client,repo,entry_sha,code_sha,workflow,workflow_sha256=None):
     if (not re.fullmatch('[0-9a-f]{64}',workflow_sha256) or
             not re.fullmatch(r'\.github/workflows/[a-z-]+\.yml',workflow)):
         raise ValueError('Reviewed workflow path/hash required')
-    item=get(client,repo,'/contents/'+workflow+'?'+urllib.parse.urlencode({'ref':entry_sha}))
+    if hasattr(client,'public_read_token'):
+        raw=client.read_pinned(repo,entry_sha,workflow,sha256=workflow_sha256)['body']
+        item={'type':'file','encoding':'base64','content':base64.b64encode(raw).decode(),
+              'sha':hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()}
+    else: item=get(client,repo,'/contents/'+workflow+'?'+urllib.parse.urlencode({'ref':entry_sha}))
     if item.get('type')!='file' or item.get('encoding')!='base64': raise ValueError('Workflow bytes missing')
     raw=base64.b64decode(''.join(item['content'].split()),validate=True)
     blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()

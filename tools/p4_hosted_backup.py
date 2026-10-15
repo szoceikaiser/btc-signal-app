@@ -1,7 +1,7 @@
 """Bounded GitHub hosted backup protocol. No discovery, bootstrap or resend.
 
 Secrets enter through the distinct writer and automatic code metadata roles.
-All data reads and the separately bound read-only Git upload-pack are anonymous.
+All public reads use the automatic jobtoken, separate from destination writers.
 Only dedicated full source refs are fetched, never a mirror or --all.
 """
 import argparse
@@ -73,6 +73,7 @@ def wire(client,request,budget,limit):
     def work():
         try:
             with client.open_request(request,timeout=seconds) as response:
+                client.quota_headers.observe(getattr(response,'headers',{}),getattr(response,'status',200))
                 client._response_link=response.headers.get('Link','') if hasattr(response,'headers') else ''
                 responses.append(response);raw=response.read(limit+1)
                 if len(raw)>limit: raise ValueError('Response byte limit')
@@ -156,11 +157,14 @@ class Client:
     open_request=staticmethod(ProductionContentsClient.open_request)
 
     def __init__(self,token,scope,writable,budget,metadata=False):
-        if (writable or metadata) and (not token or '\n' in token or '\r' in token): raise ValueError('Injected role missing')
-        if not writable and not metadata and token: raise ValueError('Data reader must be anonymous')
+        if not token or '\n' in token or '\r' in token: raise ValueError('Injected role missing')
+        from job_quota import Headers,bind
         self.token=token;self.scope=scope;self.writable=writable;self.budget=budget
+        if not hasattr(budget,'quota_headers'): budget.quota_headers=Headers()
+        bind(self,os.environ.get('GITHUB_TOKEN'),budget.quota_headers)
         self.metadata=metadata;self.access=None
         self.allowed=set()
+        self.blob_paths={};self.blob_cache={}
 
     def request(self,method,repo,tail,payload=None,limit=2*MIB):
         if repo not in self.scope or (method!='GET' and repo not in self.writable):
@@ -172,23 +176,30 @@ class Client:
                 method=='PATCH' and re.fullmatch(r'/git/refs/heads/[A-Za-z0-9_-]+',tail))):
             raise ValueError('Exact writer protocol route required')
         if not 0<limit<=MAX_RESPONSE: raise ValueError('Response byte bound')
+        from job_quota import cached,remember
+        self.quota_headers.before()
         if method=='PATCH' and (not self.access or not any(
                 tail=='/git/refs/heads/'+branch for branch in self.access['repositories'][repo]['branches'])):
             raise ValueError('Unreviewed writer branch')
         # Routes are exclusively constructed by protocol methods below.
         route=github.GitHubContentsClient._route(repo,tail)
+        if method=='GET':
+            hit=cached(self,route)
+            if hit is not None: return hit
         raw=None if payload is None else canonical(payload).encode()
         if raw and len(raw)>MAX_RESPONSE: raise ValueError('Request byte limit')
         self.budget.reserve(method,len(raw or b''),limit)
         request=urllib.request.Request('https://api.github.com'+route,data=raw,method=method,headers={
             'Accept':'application/vnd.github+json',
             'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json','User-Agent':'btc-p4-backup'})
-        if method!='GET' or self.metadata:
-            request.add_header('Authorization','Bearer '+self.token)
+        request.add_header('Authorization','Bearer '+(self.public_read_token if method=='GET' else self.token))
         try:
             body=wire(self,request,self.budget,limit)
-            return json.loads(body)
+            value=json.loads(body)
+            if method=='GET': remember(self,route,value)
+            return value
         except urllib.error.HTTPError as exc:
+            self.quota_headers.observe(exc.headers,exc.code)
             if exc.code==404: raise Inaccessible('Bound target inaccessible') from None
             raise RuntimeError('Provider HTTP outcome unconfirmed') from None
         except (urllib.error.URLError,TimeoutError,OSError):
@@ -203,10 +214,25 @@ class Client:
         public.protection(self,self.access,t['repository'],t['branch'])
 
     def ref(self,t):
-        value=self.request('GET',t['repository'],'/git/ref/heads/'+urllib.parse.quote(t['branch'],safe=''))
+        from job_quota import git_ref
+        if t['repository'] not in self.scope: raise ValueError('Bound Git ref scope')
+        public.target(self.access,t['repository'],t['branch'])
+        self.budget.reserve('GET',0,2*MIB)
+        value=git_ref(self,t['repository'],t['branch'],self.open_request,
+            min(REQUEST_SECONDS,b.TOTAL_SECONDS-(time.monotonic()-self.budget.start)),2*MIB)
         if (value.get('ref')!='refs/heads/'+t['branch'] or value['object']['type']!='commit'
                 or not b.HEX40.fullmatch(value['object']['sha'])): raise ValueError('Exact ref required')
         return value['object']['sha']
+
+    def read_pinned(self,repo,pin,path,sha256=None):
+        from job_quota import raw_file
+        if repo not in self.scope or not self.metadata or not b.HEX64.fullmatch(sha256 or ''):
+            raise ValueError('Exact reviewed code workflow required')
+        self.budget.reserve('GET',0,2*MIB)
+        v=raw_file(self,github.GitHubContentsClient._route(repo,'/contents/'+safe_path(path)+'?ref='+pin),
+            {'sha256':sha256},self.open_request,
+            min(REQUEST_SECONDS,b.TOTAL_SECONDS-(time.monotonic()-self.budget.start)),2*MIB)
+        return {'body':base64.b64decode(v['content']),'commit_sha':pin,'blob_sha':v['sha']}
 
     def commit(self,t,pin):
         if not b.HEX40.fullmatch(pin): raise ValueError('Commit pin')
@@ -230,19 +256,32 @@ class Client:
             result[item['path']]={'sha':item['sha'],'bytes':item['size']};total+=item['size']
         if len(result)>MAX_FILES or total>MAX_PAYLOAD: raise ValueError('Destination capacity')
         if tree_oid(result)!=tree: raise ValueError('Full tree object SHA differs')
+        for name,item in result.items(): self.blob_paths[(t['repository'],item['sha'])]=(pin,name)
         return tree,result
 
     def blob(self,t,item):
-        # GitHub may line-wrap Base64 and JSON-escape each newline. Reserve that
-        # overhead as well as metadata; exact decoded byte length remains pinned.
-        limit=min(MAX_RESPONSE,(item['bytes']*7+4)//5+8192)
-        v=self.request('GET',t['repository'],'/git/blobs/'+item['sha'],limit=limit)
-        if v.get('encoding')!='base64' or v.get('sha')!=item['sha'] or v.get('size')!=item['bytes']:
-            raise ValueError('Immutable blob metadata differs')
-        raw=base64.b64decode(''.join(v['content'].split()),validate=True)
-        if len(raw)!=item['bytes'] or oid('blob',raw)!=item['sha']: raise ValueError('Immutable blob bytes differ')
+        # Tree identity and expected blob SHA are independently verified before
+        # choosing the pinned raw transport. This is never an error fallback.
+        key=(t['repository'],item['sha'])
+        self.budget.check();self.quota_headers.before()
+        if t['repository'] not in self.scope: raise ValueError('Raw repository scope')
+        if key in self.blob_cache:
+            raw=self.blob_cache[key]
+        elif key in self.blob_paths:
+            from job_quota import raw_file
+            pin,path=self.blob_paths[key]
+            self.budget.reserve('GET',0,max(1,item['bytes']))
+            value=raw_file(self,github.GitHubContentsClient._route(t['repository'],'/contents/'+path+'?ref='+pin),
+                {'blob':item['sha']},self.open_request,
+                min(REQUEST_SECONDS,b.TOTAL_SECONDS-(time.monotonic()-self.budget.start)),max(1,item['bytes']))
+            raw=base64.b64decode(value['content'])
+            if len(raw)<=8*MIB:
+                while self.blob_cache and sum(map(len,self.blob_cache.values()))+len(raw)>8*MIB:
+                    self.blob_cache.pop(next(iter(self.blob_cache)))
+                self.blob_cache[key]=raw
+        else: raise ValueError('Verified tree path required for pinned raw read')
+        if len(raw)!=item['bytes'] or oid('blob',raw)!=item['sha']: raise ValueError('Immutable raw bytes differ')
         return raw
-
 
 def tree_oid(files):
     root={}
@@ -332,18 +371,20 @@ def fetch_source(client,t,pin,target,budget):
     No shallow/haves/filter, so all reachable objects must arrive. No tags or
     other advertised refs are requested. Unsupported protocol is fail-closed.
     """
-    if client.writable or client.token or client.metadata or t['repository'] not in client.scope or not b.HEX40.fullmatch(pin):
+    if client.writable or client.metadata or t['repository'] not in client.scope or not b.HEX40.fullmatch(pin):
         raise ValueError('Read-only pinned Git source required')
     if public.target(client.access,t['repository'],t['branch'])['id']!=t['id']: raise ValueError('Git source public target differs')
     target=Path(target);target.mkdir(exist_ok=False);budget.source_roots.append(target)
     b.git(target,budget,'init','--bare')
     url='https://github.com/'+t['repository']+'.git'
     def request(method,tail,raw,limit):
+        client.quota_headers.before()
         budget.reserve(method,len(raw or b''),limit)
         req=urllib.request.Request(url+tail,data=raw,method=method,headers={
             'User-Agent':'btc-p4-backup',
             'Content-Type':'application/x-git-upload-pack-request',
             'Accept':'application/x-git-upload-pack-'+('advertisement' if method=='GET' else 'result')})
+        req.add_header('Authorization','Basic '+base64.b64encode(('x-access-token:'+client.public_read_token).encode()).decode())
         return io.BytesIO(wire(client,req,budget,limit))
     def pkt(raw): return f'{len(raw)+4:04x}'.encode()+raw
     def packets(response,limit):
@@ -515,7 +556,7 @@ def roles(runtime,mode,budget):
     role='backup_write' if mode=='producer' else 'receipt_write'
     t=runtime['backup' if mode=='producer' else 'receipts']
     public.credential(runtime['public_access'],role,t['repository'],[t['branch']])
-    clients={r:Client(values.get(r),scopes[r],scopes[r] if r.endswith('_write') else set(),budget,
+    clients={r:Client(values.get(r,values['metadata_read']),scopes[r],scopes[r] if r.endswith('_write') else set(),budget,
                        metadata=r=='metadata_read') for r in (*ROLES[mode], 'source_read',
                         'receipt_read' if mode=='producer' else 'backup_read')}
     for c in clients.values(): c.access=runtime['public_access']
@@ -632,6 +673,21 @@ def run(runtime,mode,root):
         if backup.ref(bt)!=base: raise ValueError('Backup moved during receipt publication')
         result={**receipt,'receipt_publication':{**rt,'commit_sha':pub['commit_sha'],'tree_sha':pub['tree_sha'],
                                                'blob_sha':oid('blob',raw)}}
+    # Current public identities and rules, then movement checks, after every
+    # byte/restore/publication check. No old review or old freshness replaces it.
+    source_bindings=[(s['repository'],t['branch']) for t in (s,f)]
+    public.check(source,runtime['public_access'],source_bindings,source_bindings)
+    for key,reader in (('backup',backup),('receipts',clients['receipt_read' if mode=='producer' else 'receipt_write'])):
+        target=runtime[key];bindings=[(target['repository'],target['branch'])]
+        public.check(reader,runtime['public_access'],bindings,bindings)
+    code=runtime[mode];clients['metadata_read'].repository({'repository':code['repository'],
+        'id':code['repository_id'],'branch':code['branch']},False)
+    for target,key in ((s,'stream'),(f,'fence')):
+        if source.ref(target)!=heads[key]: raise ValueError('Source moved after final public review')
+    if backup.ref(bt)!=(result['destination']['commit_sha'] if mode=='producer' else base):
+        raise ValueError('Backup moved after final public review')
+    if mode=='verifier' and clients['receipt_write'].ref(runtime['receipts'])!=result['receipt_publication']['commit_sha']:
+        raise ValueError('Receipt moved after final public review')
     result['metrics']={**budget.metrics(),'http':budget.http,'mutations':budget.mutations,
                        'reserved_transfer_bytes':budget.transfer}
     b.write_json(Path(root)/'confirmed.json',result)

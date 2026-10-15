@@ -108,6 +108,9 @@ def read_run_metadata(client, repository, run_id, tail=None):
     if repository!=os.environ.get('GITHUB_REPOSITORY') or not public.tail_allowed(tail,True):
         raise ValueError('Codejob-only metadata scope required')
     reader = github.GitHubContentsClient(os.environ.get('GITHUB_TOKEN'))
+    from job_quota import bind
+    bind(reader,os.environ.get('GITHUB_TOKEN'),client.quota_headers)
+    reader.metadata_routes=True
     reader.open_request = client.open_request
     reader.response_byte_limit = client.response_byte_limit
     reader._response_bytes = 0
@@ -145,7 +148,8 @@ def run_runtime(runtime_path, kind, data_dir, **fixtures):
         fields['BTC_DELIVERY_OPERATION_ID'] = operation_id
     client = actions.ActionsClient(os.environ['BTC_DELIVERY_GITHUB_TOKEN'],
                                    actions.RunBudget(policy,binding), fields)
-    client.anonymous_reads=True
+    from job_quota import bind
+    bind(client,os.environ.get('GITHUB_TOKEN'))
     access=runtime['public_access'];repo=binding['repo']
     branches=[runtime['store_branch'],runtime['fence_branch']]
     public.credential(access,'sender_write',repo,branches)

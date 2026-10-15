@@ -37,9 +37,10 @@ class ReadClient(github.GitHubContentsClient):
     open_request = staticmethod(ProductionContentsClient.open_request)
     response_byte_limit = 2*1024*1024
 
-    def __init__(self, token, repo, branches, clock=time.monotonic):
-        if token: raise ValueError('Public Pages data reads accept no secret')
-        super().__init__(None, timeout=10, anonymous=True)
+    def __init__(self, token, repo, branches, clock=time.monotonic, quota=None):
+        from job_quota import bind
+        super().__init__(token, timeout=10)
+        bind(self,token,quota)
         self.repo, self.branches, self.clock = repo, branches, clock
         self.started = self.highwater = clock()
         self.gets = self.bytes = self._response_bytes = 0
@@ -52,6 +53,10 @@ class ReadClient(github.GitHubContentsClient):
                 or not self.highwater <= now < self.started+120):
             raise github.StoreUnavailable('Read-only export request/time/byte binding refused')
         self.highwater = now
+        from job_quota import cached
+        self.quota_headers.before()
+        hit=cached(self,route)
+        if hit is not None: return hit
         self.gets += 1
         # Reserve all response bytes, including failed responses.
         self.bytes += self.response_byte_limit
@@ -68,7 +73,9 @@ class ReadClient(github.GitHubContentsClient):
             raise github.StoreConflict('Export branch/path differs from pin')
         route = self._route(repo, '/git/ref/heads/'+urllib.parse.quote(branch, safe=''))
         self.allowed = {route}
-        return super().read(repo, branch, path)
+        # observe() checks both heads again after projection validation.
+        ref=self._request('GET',route)
+        return self.read_at(repo,ref['object']['sha'],path)
 
     def read_at(self, repo, commit_sha, path=github.STORE_PATH):
         if repo != self.repo or path not in self.branches.values():
@@ -87,7 +94,7 @@ class ReadClient(github.GitHubContentsClient):
         self.highwater = now
 
 
-def validate(runtime):
+def validate(runtime,quota=None):
     if runtime.get('python_version') and tuple(runtime['python_version'])!=sys.version_info[:3]:
         raise ValueError('Reviewed Pages Python runtime differs')
     d = runtime.get('deployment', {})
@@ -111,7 +118,7 @@ def validate(runtime):
     check_code_pin(d['code_sha'])
     if runtime.get('entry_workflows',{}).get(WORKFLOW):
         from reviewed_actions_entry import actual,EntryReader
-        actual(EntryReader(os.environ.get('GITHUB_TOKEN'),d['code_repository']),
+        actual(EntryReader(os.environ.get('GITHUB_TOKEN'),d['code_repository'],quota),
                d['code_repository'],d['code_ref'],d['code_sha'],WORKFLOW,runtime['entry_workflows'][WORKFLOW])
     return d
 
@@ -145,17 +152,23 @@ def observe(client, d, config):
     return store.snapshot, {'stream':store.confirmed_record(), 'fence_commit':first['commit_sha'], 'fence_blob':first['blob_sha']}
 
 
-def export(runtime_path, config_path, out, verify=None):
+def export(runtime_path, config_path, out, verify=None, identities_only=False):
+    from job_quota import read_only_environment
+    read_only_environment()
+    from job_quota import Headers
+    quota=Headers()
     runtime = json.loads(Path(runtime_path).read_text(encoding='utf-8'))
-    d = validate(runtime)
+    d = validate(runtime,quota)
     branches=[(d['private_store_repository'],b) for b in (d['store_branch'],d['fence_branch'])]
-    preflight_gets=public.preflight(runtime['public_access'],branches,branches)
+    # The reviewed workflow performs the full mutable protection check at its
+    # final pre-deploy gate. Earlier package steps still verify public identity.
+    preflight_gets=public.preflight(runtime['public_access'],branches,() if identities_only else branches,quota)
     config = json.loads(Path(config_path).read_text(encoding='utf-8'))
     from production_contract import effective_config
     if digest(effective_config(config)) != d['config_sha256']:
         raise ValueError('Public export configuration differs from reviewed pin')
-    client = ReadClient(None, d['private_store_repository'],
-                        {d['store_branch']:github.STORE_PATH, d['fence_branch']:actions.FENCE_PATH})
+    client = ReadClient(os.environ.get('GITHUB_TOKEN'), d['private_store_repository'],
+                        {d['store_branch']:github.STORE_PATH, d['fence_branch']:actions.FENCE_PATH},quota=quota)
     snapshot, private_pins = observe(client, d, config)
     if verify:
         saved = json.loads(bounded_file(verify, 16384))
@@ -234,9 +247,10 @@ if __name__ == '__main__':
     p=argparse.ArgumentParser()
     for k in ('runtime','config','out'): p.add_argument('--'+k,required=True)
     p.add_argument('--verify')
+    p.add_argument('--identities-only',action='store_true')
     a=p.parse_args()
     try:
-        export(a.runtime,a.config,a.out,a.verify)
+        export(a.runtime,a.config,a.out,a.verify,a.identities_only)
     except Exception:
         print('Pages export refused; no new publication.',file=sys.stderr)
         sys.exit(20)

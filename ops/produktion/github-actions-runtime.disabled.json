@@ -30,7 +30,7 @@
   "strategy_proposal_active": false,
   "runtime_source": "fresh stopped cutover; ephemeral projections restored only from authoritative GitHub stream",
   "private_backup_repository": "szoceikaiser/btc-delivery-backup",
-  "token_scope": "anonymous data GET; separate reviewed writer only; GITHUB_TOKEN for codejob metadata",
+  "token_scope": "bounded public GET with automatic GITHUB_TOKEN; separate reviewed writers",
   "owner": "user; contact and response windows unverified",
   "dispatch": "existing cron-job.org configuration unverified",
   "independent_freshness_monitor": null,

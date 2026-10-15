@@ -1,7 +1,7 @@
-"""Explicit public bindings and bounded, anonymous rules evidence.
+"""Explicit public bindings and bounded automatic-jobtoken rules evidence.
 
 GET repo permissions are deliberately irrelevant. Hidden bypass settings need a
-separate sealed human review; anonymous API equality cannot attest hidden drift.
+separate sealed human review; public API equality cannot attest hidden drift.
 This is an admission check, never repository setup or credential introspection.
 """
 import json
@@ -16,12 +16,13 @@ REQUIRED = {'deletion', 'non_fast_forward', 'required_linear_history'}
 MAX_PAGES = 4
 
 
-def read_bytes(opener, request, timeout, limit, headers=None):
+def read_bytes(opener, request, timeout, limit, headers=None, quota=None):
     """Bound even a trickling public response by the caller's remaining time."""
     done = threading.Event(); values = []
     def work():
         try:
             with opener(request, timeout=timeout) as response:
+                if quota is not None: quota.observe(getattr(response,'headers',{}),getattr(response,'status',200))
                 if headers is not None:
                     headers['link']=response.headers.get('Link','') if hasattr(response,'headers') else ''
                 raw = response.read(limit+1)
@@ -176,10 +177,10 @@ def check(client, access, bindings, protected=()):
     for repo,branch in protected: protection(client,access,repo,branch)
 
 
-def preflight(access, bindings, protected):
+def preflight(access, bindings, protected, quota=None):
     """Pages setup evidence budget, separate from its unchanged 12 data GETs.
 
-    At most 24 GET / 20 seconds / 48 MiB reserved; no credential accepted.
+    At most 24 GET / 20 seconds / 48 MiB reserved; automatic jobtoken only.
     Monitor and sender use their existing shared budgets instead.
     """
     from github_delivery import GitHubContentsClient
@@ -188,7 +189,10 @@ def preflight(access, bindings, protected):
         open_request=staticmethod(ProductionContentsClient.open_request)
         response_byte_limit=2*1024*1024
         def __init__(self):
-            super().__init__(None,timeout=3,anonymous=True)
+            import os
+            from job_quota import bind
+            super().__init__(os.environ.get('GITHUB_TOKEN'),timeout=3)
+            bind(self,os.environ.get('GITHUB_TOKEN'),quota)
             self.count=0;self.started=time.monotonic()
             self.repos={repo for repo,_ in bindings}
         def _request(self,method,route,payload=None):

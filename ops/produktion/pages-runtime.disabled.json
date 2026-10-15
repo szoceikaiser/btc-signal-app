@@ -38,7 +38,7 @@
     "schedule_contract": "btc-actions-slots-v1",
     "public_access_sha256": null
   },
-  "token_scope": "anonymous data GET; separate reviewed writer only; GITHUB_TOKEN for codejob metadata",
+  "token_scope": "bounded public GET with automatic GITHUB_TOKEN; separate reviewed writers",
   "observed_max_age_ms": 2700000,
   "signal_max_age_ms": 28800000,
   "entry_workflows": {

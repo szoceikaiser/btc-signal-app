@@ -193,6 +193,20 @@ class ProductionContentsClient(GitHubContentsClient):
         # Scope every request to this store, including immutable reads.
         prefix = self._route(self.journal.binding['repo'], '/')
         if route!=prefix[:-1] and not route.startswith(prefix): raise StoreUnavailable('Foreign request route')
+        if method=='PUT' and hasattr(self,'public_read_token') and '/contents/' in route:
+            import base64
+            body=base64.b64decode(payload['content'],validate=True)
+            self.confirmation_content=(route,hashlib.sha1(b'blob '+str(len(body)).encode()+b'\0'+body).hexdigest())
+        if method=='GET' and hasattr(self,'public_read_token'):
+            from job_quota import cached
+            self.journal.guard()
+            self.quota_headers.before()
+            hit=cached(self,route)
+            if hit is not None: return hit
+            expected=getattr(self,'confirmation_content',None)
+            if self.case_id and expected and route.partition('?')[0]==expected[0]:
+                if not hasattr(self,'pinned_expected'): self.pinned_expected={}
+                self.pinned_expected[route]={'blob':expected[1]}
         request_bytes = 0 if payload is None else len(canonical(payload).encode('utf-8'))
         request_id, timeout = self.journal.reserve(method, route, request_bytes, self.case_id)
         old_timeout = self.timeout; self.timeout = timeout

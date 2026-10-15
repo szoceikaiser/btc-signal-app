@@ -47,7 +47,7 @@ def main():
         d['public_access_sha256']=None
         d['private_store_repository']=STORE  # retained wire key, explicitly public in public_access
         d['store_branch']='delivery-stream-v2';d['fence_branch']='delivery-fence-v2'
-        if 'token_scope' in r: r['token_scope']='anonymous data GET; separate reviewed writer only; GITHUB_TOKEN for codejob metadata'
+        if 'token_scope' in r: r['token_scope']='bounded public GET with automatic GITHUB_TOKEN; separate reviewed writers'
         if name=='github-actions-runtime':
             r['private_backup_repository']=BACKUP
         if name=='hosted-backup-runtime':
@@ -62,15 +62,26 @@ def main():
                  'BTC_PAGES_STORE_READ_TOKEN:','BTC_MONITOR_STORE_READ_TOKEN:','BTC_MONITOR_BACKUP_READ_TOKEN:')
         lines=[line for line in lines if not any(key in line for key in removed)]
         start=next(i for i,line in enumerate(lines) if 'uses: actions/checkout@' in line or 'name: Bounded anonymous public code checkout' in line)
-        end=next(i for i in range(start+1,len(lines)) if lines[i].startswith('      - '))
+        end=next(i for i in range(start+1,len(lines)) if 'uses: actions/setup-python@' in lines[i])
         codevar=('BTC_HOSTED_CODE_SHA' if kind in ('backup','backup-verify') else
                  'BTC_MONITOR_CODE_SHA' if kind=='monitor' else 'BTC_PRODUCTION_CODE_SHA')
-        bootstrap=(ROOT/'tools/public_code_checkout.py').read_text().splitlines()
-        lines[start:end]=['      - name: Bounded anonymous public code checkout',
+        lines[start:end]=['      - name: Checkout exact reviewed code',
+            '        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683',
+            '        with:',
+            '          ref: ${{ vars.'+codevar+' }}',
+            '          token: ${{ github.token }}',
+            '          persist-credentials: false',
+            '          fetch-depth: 1',
+            '          submodules: false',
+            '          lfs: false',
+            '      - name: Verify checkout pin before loading code',
             '        env:',
-            '          BTC_PUBLIC_CODE_SHA: ${{ vars.'+codevar+' }}',
-            '          BTC_PUBLIC_CODE_REPOSITORY_ID: ${{ vars.BTC_PUBLIC_CODE_REPOSITORY_ID }}',
-            '        run: |',"          python3 - <<'PY'",*['          '+line if line else '' for line in bootstrap],'          PY']
+            '          REVIEWED_CODE_SHA: ${{ vars.'+codevar+' }}',
+            '        shell: bash',
+            '        run: |',
+            '          [[ "$GITHUB_REPOSITORY" == "szoceikaiser/btc-signal-app" ]]',
+            '          [[ "$REVIEWED_CODE_SHA" =~ ^[0-9a-f]{40}$ ]]',
+            '          [[ "$(git rev-parse HEAD)" == "$REVIEWED_CODE_SHA" ]]']
         for i,line in enumerate(lines):
             if any(key in line for key in ('BTC_ACTIONS_METADATA_READ_TOKEN:','BTC_HOSTED_METADATA_READ_TOKEN:',
                        'BTC_PAGES_METADATA_READ_TOKEN:','BTC_MONITOR_ACTIONS_READ_TOKEN:')):
