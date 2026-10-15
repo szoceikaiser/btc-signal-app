@@ -1,0 +1,324 @@
+name: backup-quota-preflight
+run-name: Read-only backup quota preflight
+on:
+  workflow_dispatch:
+    inputs:
+      probe_name:
+        description: Exact synthetic probe name
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: btc-synthetic-backup-probe-20261015
+  cancel-in-progress: false
+  queue: max
+jobs:
+  store:
+    if: ${{ github.ref == 'refs/heads/main' && github.run_attempt == 1 && inputs.probe_name == 'btc-synthetic-backup-20261015' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    environment: btc-delivery-v2
+    steps:
+      - name: Read quota only; never mutate storage
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          QUOTA_WRITER: ${{ secrets.BTC_REVIEWED_STORE_TOKEN }}
+          QUOTA_ROLE: store
+          PROBE_NAME: ${{ inputs.probe_name }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          """Proposed inline diagnostic: exactly two fixed read-only quota requests per job."""
+          import json
+          import os
+          import sys
+          import time
+          import urllib.request
+          
+          
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, request, fp, code, msg, headers, newurl):
+                  raise ValueError('Redirect refused')
+          
+          
+          def main():
+              expected = {
+                  'GITHUB_REPOSITORY': 'szoceikaiser/btc-signal-app',
+                  'GITHUB_REF': 'refs/heads/main',
+                  'GITHUB_EVENT_NAME': 'workflow_dispatch',
+                  'GITHUB_RUN_ATTEMPT': '1',
+                  'GITHUB_WORKFLOW_REF': 'szoceikaiser/btc-signal-app/.github/workflows/backup-quota-preflight.yml@refs/heads/main',
+                  'PROBE_NAME': 'btc-synthetic-backup-20261015',
+              }
+              if any(os.environ.get(k) != v for k, v in expected.items()):
+                  raise ValueError('Entry differs')
+              role = os.environ.get('QUOTA_ROLE')
+              if role not in ('store', 'producer', 'verifier'):
+                  raise ValueError('Role differs')
+              tokens = [('automatic', os.environ.get('GITHUB_TOKEN')), ('writer', os.environ.get('QUOTA_WRITER'))]
+              if any(not t or '\n' in t or '\r' in t for _, t in tokens) or tokens[0][1] == tokens[1][1]:
+                  raise ValueError('Distinct injected credentials required')
+              opener = urllib.request.build_opener(NoRedirect())
+              evidence = []
+              for kind, token in tokens:
+                  req = urllib.request.Request('https://api.github.com/rate_limit', method='GET', headers={
+                      'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json',
+                      'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'btc-readonly-quota-preflight'})
+                  with opener.open(req, timeout=10) as response:
+                      if response.status != 200 or response.headers.get('Retry-After'):
+                          raise ValueError('Provider refused quota observation')
+                      raw = response.read(65537)
+                      if len(raw) > 65536:
+                          raise ValueError('Quota response limit')
+                      data = json.loads(raw)['resources']['core']
+                      header_core = {}
+                      if response.headers.get('X-RateLimit-Resource') != 'core':
+                          raise ValueError('Missing authoritative core headers')
+                      for key in ('limit', 'remaining', 'used', 'reset'):
+                          value = response.headers.get('X-RateLimit-' + key.capitalize())
+                          if not isinstance(value, str) or not value.isdigit() or len(value) > 20:
+                              raise ValueError('Invalid authoritative quota header')
+                          header_core[key] = int(value)
+                  # GitHub identifies enforcement headers as authoritative, including
+                  # when the periodic /rate_limit body disagrees. Keep both observations.
+                  core = header_core
+                  body_core = {k: data[k] for k in ('limit', 'remaining', 'used', 'reset')}
+                  if any(type(v) is not int or v < 0 for v in body_core.values()):
+                      raise ValueError('Invalid quota overview')
+                  if (any(type(v) is not int or v < 0 for v in core.values())
+                          or core['remaining'] > core['limit'] or core['used'] > core['limit']
+                          or not time.time() < core['reset'] <= time.time() + 3700):
+                      raise ValueError('Invalid quota observation')
+                  # Keep the shared conservative 1000/hour model even if a provider says 5000.
+                  available = min(core['remaining'], max(0, 1000-core['used'])) if kind == 'automatic' else core['remaining']
+                  minimum = 896 if kind == 'automatic' else 256
+                  record = {'role': role, 'credential_kind': kind, 'core': core,
+                      'core_source': 'authoritative_response_headers', 'overview_core': body_core,
+                      'conservative_available': available, 'required': minimum, 'sufficient': available >= minimum}
+                  evidence.append(record)
+                  if available < minimum:
+                      print(json.dumps({'status': 'insufficient_no_retry', 'observations': evidence}), flush=True)
+                      raise ValueError('Insufficient shared quota')
+              # Whitelist output only. Never serialize tokens, requests, headers, raw bodies or exceptions.
+              result = {'schema': 'btc-quota-preflight-v1', 'status': 'observed_sufficient',
+                  'repository': expected['GITHUB_REPOSITORY'], 'run_id': os.environ.get('GITHUB_RUN_ID'),
+                  'entry_sha': os.environ.get('GITHUB_SHA'), 'role': role, 'observed_at_unix': int(time.time()),
+                  'http_gets': 2, 'http_writes': 0, 'observations': evidence}
+              print(json.dumps(result, sort_keys=True), flush=True)
+              return result
+          
+          
+          if __name__ == '__main__':
+              try:
+                  main()
+              except Exception:
+                  print('Quota preflight stopped. No retry. No store, backup or receipt writes.', flush=True)
+                  sys.exit(1)
+          PY
+  producer:
+    needs: store
+    if: ${{ github.ref == 'refs/heads/main' && github.run_attempt == 1 && inputs.probe_name == 'btc-synthetic-backup-20261015' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    environment: btc-backup-producer
+    steps:
+      - name: Read quota only; never mutate storage
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          QUOTA_WRITER: ${{ secrets.BTC_HOSTED_BACKUP_WRITE_TOKEN }}
+          QUOTA_ROLE: producer
+          PROBE_NAME: ${{ inputs.probe_name }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          """Proposed inline diagnostic: exactly two fixed read-only quota requests per job."""
+          import json
+          import os
+          import sys
+          import time
+          import urllib.request
+          
+          
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, request, fp, code, msg, headers, newurl):
+                  raise ValueError('Redirect refused')
+          
+          
+          def main():
+              expected = {
+                  'GITHUB_REPOSITORY': 'szoceikaiser/btc-signal-app',
+                  'GITHUB_REF': 'refs/heads/main',
+                  'GITHUB_EVENT_NAME': 'workflow_dispatch',
+                  'GITHUB_RUN_ATTEMPT': '1',
+                  'GITHUB_WORKFLOW_REF': 'szoceikaiser/btc-signal-app/.github/workflows/backup-quota-preflight.yml@refs/heads/main',
+                  'PROBE_NAME': 'btc-synthetic-backup-20261015',
+              }
+              if any(os.environ.get(k) != v for k, v in expected.items()):
+                  raise ValueError('Entry differs')
+              role = os.environ.get('QUOTA_ROLE')
+              if role not in ('store', 'producer', 'verifier'):
+                  raise ValueError('Role differs')
+              tokens = [('automatic', os.environ.get('GITHUB_TOKEN')), ('writer', os.environ.get('QUOTA_WRITER'))]
+              if any(not t or '\n' in t or '\r' in t for _, t in tokens) or tokens[0][1] == tokens[1][1]:
+                  raise ValueError('Distinct injected credentials required')
+              opener = urllib.request.build_opener(NoRedirect())
+              evidence = []
+              for kind, token in tokens:
+                  req = urllib.request.Request('https://api.github.com/rate_limit', method='GET', headers={
+                      'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json',
+                      'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'btc-readonly-quota-preflight'})
+                  with opener.open(req, timeout=10) as response:
+                      if response.status != 200 or response.headers.get('Retry-After'):
+                          raise ValueError('Provider refused quota observation')
+                      raw = response.read(65537)
+                      if len(raw) > 65536:
+                          raise ValueError('Quota response limit')
+                      data = json.loads(raw)['resources']['core']
+                      header_core = {}
+                      if response.headers.get('X-RateLimit-Resource') != 'core':
+                          raise ValueError('Missing authoritative core headers')
+                      for key in ('limit', 'remaining', 'used', 'reset'):
+                          value = response.headers.get('X-RateLimit-' + key.capitalize())
+                          if not isinstance(value, str) or not value.isdigit() or len(value) > 20:
+                              raise ValueError('Invalid authoritative quota header')
+                          header_core[key] = int(value)
+                  # GitHub identifies enforcement headers as authoritative, including
+                  # when the periodic /rate_limit body disagrees. Keep both observations.
+                  core = header_core
+                  body_core = {k: data[k] for k in ('limit', 'remaining', 'used', 'reset')}
+                  if any(type(v) is not int or v < 0 for v in body_core.values()):
+                      raise ValueError('Invalid quota overview')
+                  if (any(type(v) is not int or v < 0 for v in core.values())
+                          or core['remaining'] > core['limit'] or core['used'] > core['limit']
+                          or not time.time() < core['reset'] <= time.time() + 3700):
+                      raise ValueError('Invalid quota observation')
+                  # Keep the shared conservative 1000/hour model even if a provider says 5000.
+                  available = min(core['remaining'], max(0, 1000-core['used'])) if kind == 'automatic' else core['remaining']
+                  minimum = 896 if kind == 'automatic' else 256
+                  record = {'role': role, 'credential_kind': kind, 'core': core,
+                      'core_source': 'authoritative_response_headers', 'overview_core': body_core,
+                      'conservative_available': available, 'required': minimum, 'sufficient': available >= minimum}
+                  evidence.append(record)
+                  if available < minimum:
+                      print(json.dumps({'status': 'insufficient_no_retry', 'observations': evidence}), flush=True)
+                      raise ValueError('Insufficient shared quota')
+              # Whitelist output only. Never serialize tokens, requests, headers, raw bodies or exceptions.
+              result = {'schema': 'btc-quota-preflight-v1', 'status': 'observed_sufficient',
+                  'repository': expected['GITHUB_REPOSITORY'], 'run_id': os.environ.get('GITHUB_RUN_ID'),
+                  'entry_sha': os.environ.get('GITHUB_SHA'), 'role': role, 'observed_at_unix': int(time.time()),
+                  'http_gets': 2, 'http_writes': 0, 'observations': evidence}
+              print(json.dumps(result, sort_keys=True), flush=True)
+              return result
+          
+          
+          if __name__ == '__main__':
+              try:
+                  main()
+              except Exception:
+                  print('Quota preflight stopped. No retry. No store, backup or receipt writes.', flush=True)
+                  sys.exit(1)
+          PY
+  verifier:
+    needs: producer
+    if: ${{ github.ref == 'refs/heads/main' && github.run_attempt == 1 && inputs.probe_name == 'btc-synthetic-backup-20261015' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    environment: btc-backup-verifier
+    steps:
+      - name: Read quota only; never mutate storage
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          QUOTA_WRITER: ${{ secrets.BTC_HOSTED_RECEIPT_WRITE_TOKEN }}
+          QUOTA_ROLE: verifier
+          PROBE_NAME: ${{ inputs.probe_name }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          """Proposed inline diagnostic: exactly two fixed read-only quota requests per job."""
+          import json
+          import os
+          import sys
+          import time
+          import urllib.request
+          
+          
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, request, fp, code, msg, headers, newurl):
+                  raise ValueError('Redirect refused')
+          
+          
+          def main():
+              expected = {
+                  'GITHUB_REPOSITORY': 'szoceikaiser/btc-signal-app',
+                  'GITHUB_REF': 'refs/heads/main',
+                  'GITHUB_EVENT_NAME': 'workflow_dispatch',
+                  'GITHUB_RUN_ATTEMPT': '1',
+                  'GITHUB_WORKFLOW_REF': 'szoceikaiser/btc-signal-app/.github/workflows/backup-quota-preflight.yml@refs/heads/main',
+                  'PROBE_NAME': 'btc-synthetic-backup-20261015',
+              }
+              if any(os.environ.get(k) != v for k, v in expected.items()):
+                  raise ValueError('Entry differs')
+              role = os.environ.get('QUOTA_ROLE')
+              if role not in ('store', 'producer', 'verifier'):
+                  raise ValueError('Role differs')
+              tokens = [('automatic', os.environ.get('GITHUB_TOKEN')), ('writer', os.environ.get('QUOTA_WRITER'))]
+              if any(not t or '\n' in t or '\r' in t for _, t in tokens) or tokens[0][1] == tokens[1][1]:
+                  raise ValueError('Distinct injected credentials required')
+              opener = urllib.request.build_opener(NoRedirect())
+              evidence = []
+              for kind, token in tokens:
+                  req = urllib.request.Request('https://api.github.com/rate_limit', method='GET', headers={
+                      'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json',
+                      'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'btc-readonly-quota-preflight'})
+                  with opener.open(req, timeout=10) as response:
+                      if response.status != 200 or response.headers.get('Retry-After'):
+                          raise ValueError('Provider refused quota observation')
+                      raw = response.read(65537)
+                      if len(raw) > 65536:
+                          raise ValueError('Quota response limit')
+                      data = json.loads(raw)['resources']['core']
+                      header_core = {}
+                      if response.headers.get('X-RateLimit-Resource') != 'core':
+                          raise ValueError('Missing authoritative core headers')
+                      for key in ('limit', 'remaining', 'used', 'reset'):
+                          value = response.headers.get('X-RateLimit-' + key.capitalize())
+                          if not isinstance(value, str) or not value.isdigit() or len(value) > 20:
+                              raise ValueError('Invalid authoritative quota header')
+                          header_core[key] = int(value)
+                  # GitHub identifies enforcement headers as authoritative, including
+                  # when the periodic /rate_limit body disagrees. Keep both observations.
+                  core = header_core
+                  body_core = {k: data[k] for k in ('limit', 'remaining', 'used', 'reset')}
+                  if any(type(v) is not int or v < 0 for v in body_core.values()):
+                      raise ValueError('Invalid quota overview')
+                  if (any(type(v) is not int or v < 0 for v in core.values())
+                          or core['remaining'] > core['limit'] or core['used'] > core['limit']
+                          or not time.time() < core['reset'] <= time.time() + 3700):
+                      raise ValueError('Invalid quota observation')
+                  # Keep the shared conservative 1000/hour model even if a provider says 5000.
+                  available = min(core['remaining'], max(0, 1000-core['used'])) if kind == 'automatic' else core['remaining']
+                  minimum = 896 if kind == 'automatic' else 256
+                  record = {'role': role, 'credential_kind': kind, 'core': core,
+                      'core_source': 'authoritative_response_headers', 'overview_core': body_core,
+                      'conservative_available': available, 'required': minimum, 'sufficient': available >= minimum}
+                  evidence.append(record)
+                  if available < minimum:
+                      print(json.dumps({'status': 'insufficient_no_retry', 'observations': evidence}), flush=True)
+                      raise ValueError('Insufficient shared quota')
+              # Whitelist output only. Never serialize tokens, requests, headers, raw bodies or exceptions.
+              result = {'schema': 'btc-quota-preflight-v1', 'status': 'observed_sufficient',
+                  'repository': expected['GITHUB_REPOSITORY'], 'run_id': os.environ.get('GITHUB_RUN_ID'),
+                  'entry_sha': os.environ.get('GITHUB_SHA'), 'role': role, 'observed_at_unix': int(time.time()),
+                  'http_gets': 2, 'http_writes': 0, 'observations': evidence}
+              print(json.dumps(result, sort_keys=True), flush=True)
+              return result
+          
+          
+          if __name__ == '__main__':
+              try:
+                  main()
+              except Exception:
+                  print('Quota preflight stopped. No retry. No store, backup or receipt writes.', flush=True)
+                  sys.exit(1)
+          PY
