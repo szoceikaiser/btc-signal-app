@@ -154,7 +154,12 @@ def protection(client, access, repo, branch):
     for rid in sorted(ids):
         if type(rid) is not int or rid<=0: raise ValueError('Ruleset identity required')
         rs=get(client,repo,'/rulesets/'+str(rid));expected=p['rulesets'][str(rid)]
-        visible={k:v for k,v in rs.items() if k!='bypass_actors'}
+        # Authenticated GitHub reads add caller-specific presentation metadata.
+        # Only the actually observed non-bypass value is admitted; it never
+        # replaces the separate reviewed bypass_actors evidence below.
+        if 'current_user_can_bypass' in rs and rs['current_user_can_bypass']!='never':
+            raise ValueError('Caller bypass capability requires a separate review')
+        visible={k:v for k,v in rs.items() if k not in ('bypass_actors','current_user_can_bypass')}
         if (rs.get('id')!=rid or rs.get('target')!='branch' or rs.get('enforcement')!='active'
                 or rs.get('source_type')!='Repository' or rs.get('source')!=repo
                 or not exact_protected_targets(access,repo,branch,rs.get('conditions'),rid,digest(visible))
