@@ -96,6 +96,29 @@ def review_hash(value):
     return digest({k:v for k,v in value.items() if k!='sha256'})
 
 
+def exact_protected_targets(access, repo, branch, conditions, ruleset_id, public_sha256):
+    """A shared ruleset may cover only individually reviewed protected refs.
+
+    The complete ordered condition object is still pinned by public_sha256.
+    No wildcard, default/all-branch marker, exclusion or unreviewed ref allowed.
+    """
+    if not isinstance(conditions,dict) or set(conditions)!={'ref_name'}: return False
+    names=conditions['ref_name']
+    if not isinstance(names,dict) or set(names)!={'include','exclude'} or names['exclude']!=[]: return False
+    refs=names['include']
+    if (not isinstance(refs,list) or not 1<=len(refs)<=4
+            or any(not isinstance(ref,str) or not re.fullmatch(r'refs/heads/[A-Za-z0-9_-]+',ref) for ref in refs)
+            or len(set(refs))!=len(refs) or 'refs/heads/'+branch not in refs): return False
+    for ref in refs:
+        name=ref.removeprefix('refs/heads/')
+        pin=access.get('protections',{}).get(repo+'@'+name,{})
+        if (name not in access['repositories'][repo]['branches'] or pin.get('repository')!=repo
+                or pin.get('repository_id')!=access['repositories'][repo]['id'] or pin.get('branch')!=name
+                or not re.fullmatch(r'[0-9a-f]{64}',pin.get('active_rules_sha256') or '')
+                or pin.get('rulesets',{}).get(str(ruleset_id),{}).get('public_sha256')!=public_sha256): return False
+    return True
+
+
 def protection(client, access, repo, branch):
     t=target(access,repo,branch);p=access['protections'][repo+'@'+branch]
     if (p.get('repository_id')!=t['id'] or p.get('branch')!=branch
@@ -134,7 +157,7 @@ def protection(client, access, repo, branch):
         visible={k:v for k,v in rs.items() if k!='bypass_actors'}
         if (rs.get('id')!=rid or rs.get('target')!='branch' or rs.get('enforcement')!='active'
                 or rs.get('source_type')!='Repository' or rs.get('source')!=repo
-                or rs.get('conditions')!={'ref_name':{'include':['refs/heads/'+branch],'exclude':[]}}
+                or not exact_protected_targets(access,repo,branch,rs.get('conditions'),rid,digest(visible))
                 or digest(visible)!=expected.get('public_sha256')):
             raise ValueError('Changed/inactive/foreign ruleset')
         if 'bypass_actors' in rs and rs['bypass_actors']!=[]: raise ValueError('Ruleset bypass refused')
