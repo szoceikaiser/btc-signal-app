@@ -38,12 +38,16 @@ deaktivierten Beispieldateien dürfen nicht vorab gepusht werden.
 Code wird später auf einem eigenen Branch publiziert und auf seinem genauen
 Commit ausgecheckt. Nur die drei YAMLs werden als eigener Datei-Commit auf
 Main vorgeschlagen, ohne Kandidatenmerge. Für diese Probe bindet
-`probe_entry_sha` jeden Einstieg exakt an diesen separat geprüften Maincommit
-und dessen authentifiziert rückgelesene YAMLbytes. Ein neuer Main-HEAD ist
-kein stillschweigend erlaubter Nachfolger. Normale Hostedruntimes ohne das Feld
-behalten die bisherige Code-Abstammungsprüfung. Alte Livejobs und Cronauslöser
-werden weder angehalten noch geändert; verschieben sie den Einstieg vor einem
-Dispatch, muss der Hauptchat neu prüfen und die Probe bleibt angehalten.
+`probe_entry_sha` den separat geprüften Main-Installationscommit als festen
+Abstammungsanker. Jeder tatsächliche Einstieg muss dieser Commit oder dessen
+authentifizierter Nachfolger sein und weiterhin exakt die geprüften YAMLbytes
+enthalten. Normale Datencommits der alten Engine sind dadurch zulässig;
+fremde Historien, Rücksprünge vor die Installation oder geänderte Workflowbytes
+werden abgewiesen. Der separat geprüfte Codecheckout bleibt unverändert auf
+seinen eigenen Commit gebunden. Normale Hostedruntimes ohne das Feld behalten
+die bisherige Code-Abstammungsprüfung. Alte Livejobs und Cronauslöser werden
+weder angehalten noch geändert. Der tatsächliche Entry-SHA jedes einzelnen
+Probelaufs wird weiterhin separat aus authentifizierten Metadaten geprüft.
 
 Geplante Einmalfolge: Main/Code/Schutz/Seed-Abnahme → Storewriter im Environment
 `btc-delivery-v2` → Hauptchat prüft tatsächliche Run-/Ref-/Blobbelege →

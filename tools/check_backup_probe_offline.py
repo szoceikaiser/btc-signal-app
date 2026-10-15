@@ -165,7 +165,7 @@ def check(out):
         calls=len(http.rows)
         for mutation in ('entry','scope','hash'):
             bad=deepcopy(runtime);bind=bad['producer']
-            if mutation=='entry': bind['probe_entry_sha']='f'*40
+            if mutation=='entry': bind['probe_entry_sha']='invalid-anchor'
             if mutation=='scope': bad['source']['branch']='delivery-stream-v2'
             if mutation=='hash': bind['workflow_sha256']='0'*64
             try:

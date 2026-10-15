@@ -352,16 +352,17 @@ def validate(runtime,mode,budget=None,check_checkout=True):
 def verify_binding(client,runtime,binding,entry_sha):
     from reviewed_actions_entry import verify
     if 'probe_entry_sha' in binding:
-        # Narrow synthetic-only detached-code rehearsal. Main entry and checked
-        # out code are independently immutable, without merging candidate code.
+        # Narrow synthetic-only detached-code rehearsal. Main descends from
+        # its reviewed installation; checkout remains independently immutable.
         if (runtime.get('probe_name')!='btc-synthetic-backup-20261015'
                 or binding['repository']!='szoceikaiser/btc-signal-app' or binding['branch']!='main'
-                or entry_sha!=binding['probe_entry_sha'] or not b.HEX40.fullmatch(entry_sha or '')
+                or not b.HEX40.fullmatch(binding['probe_entry_sha'] or '')
+                or not b.HEX40.fullmatch(entry_sha or '')
                 or runtime['identity']['store_id']!='btc-synthetic-backup-20261015-store'
                 or runtime['source']['branch']!='probe-20261015-stream'
                 or runtime['deployment']['fence_branch']!='probe-20261015-fence'):
             raise ValueError('Exact isolated synthetic entry required')
-        verify(client,binding['repository'],entry_sha,entry_sha,binding['workflow'],binding['workflow_sha256'])
+        verify(client,binding['repository'],entry_sha,binding['probe_entry_sha'],binding['workflow'],binding['workflow_sha256'])
     else:
         verify(client,binding['repository'],entry_sha,binding['code_sha'],binding['workflow'],binding['workflow_sha256'])
 
