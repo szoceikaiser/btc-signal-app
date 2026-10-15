@@ -1,0 +1,219 @@
+name: backup-rule-preflight
+run-name: Read-only diagnosis for Store run 38793206279
+on:
+  workflow_dispatch:
+    inputs:
+      failed_store_run_id:
+        description: Exact failed Store run ID
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: btc-synthetic-backup-probe-20261015
+  cancel-in-progress: false
+  queue: max
+jobs:
+  diagnose:
+    if: ${{ github.ref == 'refs/heads/main' && github.run_attempt == 1 && inputs.failed_store_run_id == '38793206279' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Two read-only rule requests; no writer credentials
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PROBE_RUNTIME_JSON: ${{ vars.BTC_BACKUP_PROBE_RUNTIME_JSON }}
+          FAILED_STORE_RUN_ID: ${{ inputs.failed_store_run_id }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import re
+          import sys
+          import urllib.request
+          REQUIRED={'deletion','non_fast_forward','required_linear_history'}
+          MAX_PAGES=4
+          def canonical(value):
+              return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False,
+                                allow_nan=False)
+          
+          def digest(value):
+              return hashlib.sha256(canonical(value).encode('utf-8')).hexdigest()
+          
+          def target(access, repo, branch):
+              if access.get('schema')!='btc-public-access-v1' or access.get('enabled') is not True:
+                  raise ValueError('Explicit public access review required')
+              t=access['repositories'][repo]
+              if (set(t)!={'id','visibility','branches'} or type(t['id']) is not int or t['id']<=0
+                      or t['visibility']!='public' or branch not in t['branches']
+                      or not re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+',repo)
+                      or not re.fullmatch(r'[A-Za-z0-9_-]+',branch)):
+                  raise ValueError('Exact public repository ID/branch required')
+              return t
+          
+          def get(client, repo, tail):
+              if hasattr(client,'request'): return client.request('GET',repo,tail)
+              return client._request('GET',client._route(repo,tail))
+          
+          def review_hash(value):
+              return digest({k:v for k,v in value.items() if k!='sha256'})
+          
+          def exact_protected_targets(access, repo, branch, conditions, ruleset_id, public_sha256):
+              """A shared ruleset may cover only individually reviewed protected refs.
+          
+              The complete ordered condition object is still pinned by public_sha256.
+              No wildcard, default/all-branch marker, exclusion or unreviewed ref allowed.
+              """
+              if not isinstance(conditions,dict) or set(conditions)!={'ref_name'}: return False
+              names=conditions['ref_name']
+              if not isinstance(names,dict) or set(names)!={'include','exclude'} or names['exclude']!=[]: return False
+              refs=names['include']
+              if (not isinstance(refs,list) or not 1<=len(refs)<=4
+                      or any(not isinstance(ref,str) or not re.fullmatch(r'refs/heads/[A-Za-z0-9_-]+',ref) for ref in refs)
+                      or len(set(refs))!=len(refs) or 'refs/heads/'+branch not in refs): return False
+              for ref in refs:
+                  name=ref.removeprefix('refs/heads/')
+                  pin=access.get('protections',{}).get(repo+'@'+name,{})
+                  if (name not in access['repositories'][repo]['branches'] or pin.get('repository')!=repo
+                          or pin.get('repository_id')!=access['repositories'][repo]['id'] or pin.get('branch')!=name
+                          or not re.fullmatch(r'[0-9a-f]{64}',pin.get('active_rules_sha256') or '')
+                          or pin.get('rulesets',{}).get(str(ruleset_id),{}).get('public_sha256')!=public_sha256): return False
+              return True
+          
+          def protection(client, access, repo, branch):
+              t=target(access,repo,branch);p=access['protections'][repo+'@'+branch]
+              if (p.get('repository_id')!=t['id'] or p.get('branch')!=branch
+                      or p.get('repository')!=repo): raise ValueError('Protection review target differs')
+              rules=[]
+              for page in range(1,MAX_PAGES+1):
+                  rows=get(client,repo,f'/rules/branches/{branch}?per_page=100&page={page}')
+                  if not isinstance(rows,list) or len(rows)>100: raise ValueError('Incomplete rules page')
+                  link=getattr(client,'_response_link','')
+                  if link:
+                      if len(link)>4096: raise ValueError('Pagination header byte bound')
+                      entries=link.split(',')
+                      for entry in entries:
+                          match=re.fullmatch(r'\s*<([^>]+)>;\s*rel="(next|prev|first|last)"\s*',entry)
+                          if not match: raise ValueError('Unreviewable pagination header')
+                          url,rel=match.groups()
+                          expected='https://api.github.com/repos/'+repo+'/rules/branches/'+branch+'?per_page=100&page='
+                          if not url.startswith(expected) or not re.fullmatch('[1-9][0-9]*',url[len(expected):]):
+                              raise ValueError('Foreign pagination target')
+                          if rel=='next' and (len(rows)!=100 or url!=expected+str(page+1)):
+                              raise ValueError('Incomplete or changed pagination')
+                  rules.extend(rows)
+                  if len(rows)<100: break
+              else: raise ValueError('Rules pagination not complete within bound')
+              if (not REQUIRED.issubset({r['type'] for r in rules}) or
+                      digest(rules)!=p.get('active_rules_sha256')):
+                  raise ValueError('Missing or changed active exact-branch rules')
+              if any(r.get('ruleset_source_type')!='Repository' or r.get('ruleset_source')!=repo for r in rules):
+                  raise ValueError('Foreign or inherited rules require a separate supported review')
+              ids={r['ruleset_id'] for r in rules}
+              if {str(i) for i in ids}!=set(p['rulesets']): raise ValueError('Ruleset coverage differs')
+              if not 1<=len(ids)<=4: raise ValueError('Ruleset count bound')
+              for rid in sorted(ids):
+                  if type(rid) is not int or rid<=0: raise ValueError('Ruleset identity required')
+                  rs=get(client,repo,'/rulesets/'+str(rid));expected=p['rulesets'][str(rid)]
+                  visible={k:v for k,v in rs.items() if k!='bypass_actors'}
+                  if (rs.get('id')!=rid or rs.get('target')!='branch' or rs.get('enforcement')!='active'
+                          or rs.get('source_type')!='Repository' or rs.get('source')!=repo
+                          or not exact_protected_targets(access,repo,branch,rs.get('conditions'),rid,digest(visible))
+                          or digest(visible)!=expected.get('public_sha256')):
+                      raise ValueError('Changed/inactive/foreign ruleset')
+                  if 'bypass_actors' in rs and rs['bypass_actors']!=[]: raise ValueError('Ruleset bypass refused')
+                  # Missing bypass_actors is UNKNOWN. It is never converted into [].
+                  proof=expected.get('bypass_review',{})
+                  if (proof.get('schema')!='btc-bypass-review-v1' or proof.get('repository')!=repo
+                          or proof.get('repository_id')!=t['id'] or proof.get('branch')!=branch
+                          or proof.get('ruleset_id')!=rid or proof.get('public_sha256')!=digest(visible)
+                          or proof.get('bypass_actors')!=[] or proof.get('status')!='actually-reviewed'
+                          or not proof.get('reviewer') or not proof.get('reviewed_at')
+                          or not re.fullmatch(r'[0-9a-f]{64}',proof.get('evidence_sha256') or '')
+                          or proof.get('sha256')!=review_hash(proof)):
+                      raise ValueError('Separate actual bypass review unresolved')
+          
+          BASELINE=json.loads('{"id": 25165987, "name": "btc-synthetic-backup-20261015-store", "target": "branch", "source_type": "Repository", "source": "szoceikaiser/btc-delivery-store", "enforcement": "active", "conditions": {"ref_name": {"exclude": [], "include": ["refs/heads/probe-20261015-stream", "refs/heads/probe-20261015-fence", "refs/heads/probe-20261015-migration"]}}, "rules": [{"type": "deletion"}, {"type": "non_fast_forward"}, {"type": "required_linear_history"}], "node_id": "RRS_lACqUmVwb3NpdG9yec5UqEeVzgGAAKM", "created_at": "2026-10-15T14:07:22.413Z", "updated_at": "2026-10-15T14:07:22.488Z", "_links": {"self": {"href": "https://api.github.com/repos/szoceikaiser/btc-delivery-store/rulesets/25165987"}, "html": {"href": "https://github.com/szoceikaiser/btc-delivery-store/rules/25165987"}}}')
+          
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,request,fp,code,msg,headers,newurl):
+                  raise ValueError('Redirect refused')
+          
+          def run():
+              repo='szoceikaiser/btc-delivery-store'
+              branch='probe-20261015-stream'
+              expected={'GITHUB_REPOSITORY':'szoceikaiser/btc-signal-app','GITHUB_REF':'refs/heads/main',
+                  'GITHUB_EVENT_NAME':'workflow_dispatch','GITHUB_RUN_ATTEMPT':'1',
+                  'GITHUB_WORKFLOW_REF':'szoceikaiser/btc-signal-app/.github/workflows/backup-rule-preflight.yml@refs/heads/main',
+                  'FAILED_STORE_RUN_ID':'38793206279'}
+              if any(os.environ.get(k)!=v for k,v in expected.items()):raise ValueError('Entry differs')
+              if any(os.environ.get(k) for k in ('BTC_REVIEWED_STORE_TOKEN','BTC_HOSTED_BACKUP_WRITE_TOKEN',
+                  'BTC_HOSTED_RECEIPT_WRITE_TOKEN','TELEGRAM_BOT_TOKEN','TELEGRAM_CHAT_ID','COINALYZE_API_KEY')):
+                  raise ValueError('Writer/live credentials refused')
+              token=os.environ.get('GITHUB_TOKEN')
+              if not token or '\n' in token or '\r' in token:raise ValueError('Automatic token required')
+              runtime=json.loads(os.environ['PROBE_RUNTIME_JSON'])
+              if (runtime['runtime_sha256']!='b07b7a1ce835b679d2481250d5d0e0ae3c6ca8a12e291ce81ab10d5bf0f2f502'
+                  or runtime['runtime_sha256']!=digest({k:v for k,v in runtime.items() if k!='runtime_sha256'})):
+                  raise ValueError('Initial reviewed runtime differs')
+              scope={'/rules/branches/'+branch+'?per_page=100&page=1','/rulesets/25165987'}
+              captured={};trace=[]
+              opener=urllib.request.build_opener(NoRedirect())
+              class Reader:
+                  _response_link=''
+                  def request(self,method,target,tail):
+                      if method!='GET' or target!=repo or tail not in scope or tail in captured or len(trace)>=2:
+                          raise ValueError('Two exact reads only')
+                      request=urllib.request.Request('https://api.github.com/repos/'+repo+tail,method='GET',headers={
+                          'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json',
+                          'X-GitHub-Api-Version':'2022-11-28','User-Agent':'btc-safe-ruleset-diagnostic'})
+                      trace.append({'method':'GET','tail':tail})
+                      with opener.open(request,timeout=10) as response:
+                          if response.status!=200 or response.headers.get('Retry-After'):raise ValueError('Provider stopped')
+                          self._response_link=response.headers.get('Link','')
+                          raw=response.read(2*1024*1024+1)
+                          if len(raw)>2*1024*1024:raise ValueError('Response bound')
+                          value=json.loads(raw)
+                      captured[tail]=value
+                      return value
+              reader=Reader();passed=False;reason='unexpected_safe_stop'
+              allowed={'Protection review target differs','Incomplete rules page','Missing or changed active exact-branch rules',
+                  'Foreign or inherited rules require a separate supported review','Ruleset coverage differs',
+                  'Ruleset count bound','Ruleset identity required','Changed/inactive/foreign ruleset',
+                  'Ruleset bypass refused','Separate actual bypass review unresolved'}
+              try:
+                  protection(reader,runtime['public_access'],repo,branch)
+                  passed=True;reason='passed'
+              except Exception as exc:
+                  # Only reviewed constant messages can select a category; never print an exception.
+                  if isinstance(exc,ValueError) and str(exc) in allowed:reason=str(exc)
+              actual=captured.get('/rulesets/25165987')
+              diff=[];visible_sha=None;bypass='not_observed'
+              if isinstance(actual,dict):
+                  visible={k:v for k,v in actual.items() if k!='bypass_actors'}
+                  expected_visible={k:v for k,v in BASELINE.items() if k!='bypass_actors'}
+                  visible_sha=digest(visible)
+                  for key in sorted(set(visible)|set(expected_visible)):
+                      if (key not in visible or key not in expected_visible or visible[key]!=expected_visible[key]):
+                          safe_key=key if re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,63}',key) else 'unusual_key'
+                          diff.append({'key':safe_key,'expected_present':key in expected_visible,'actual_present':key in visible,
+                              'expected_digest':digest(expected_visible[key]) if key in expected_visible else None,
+                              'actual_digest':digest(visible[key]) if key in visible else None})
+                  bypass='missing_unknown' if 'bypass_actors' not in actual else ('present_empty' if actual['bypass_actors']==[] else 'present_nonempty_or_invalid')
+              result={'schema':'btc-rule-readonly-diagnostic-v1','failed_store_run_id':'38793206279',
+                  'run_id':os.environ.get('GITHUB_RUN_ID'),'entry_sha':os.environ.get('GITHUB_SHA'),
+                  'http_gets':len(trace),'http_writes':0,'checker_source_pin':'e9c02f22f6781864e7e3cc0b0d3b9f8ff8691c4b',
+                  'checker_passed':passed,'checker_category':reason,'expected_public_sha256':digest({k:v for k,v in BASELINE.items() if k!='bypass_actors'}),
+                  'actual_public_sha256':visible_sha,'differences':diff,'bypass_observation':bypass,'trace':trace}
+              print(json.dumps(result,sort_keys=True),flush=True)
+              return result
+          
+          if __name__=='__main__':
+              try:run()
+              except Exception:
+                  print('Read-only rule diagnostic stopped; no retry or store writes.',flush=True)
+                  sys.exit(1)
+          PY
