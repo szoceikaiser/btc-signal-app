@@ -211,6 +211,8 @@ class Provider:
                     'parents':[{'sha':x[7:].decode()} for x in headers if x.startswith(b'parent ')]}
         elif tail.startswith('/git/trees/'):
             pin=tail.rsplit('/',1)[-1];local=self.repo(repo,pin);_,files=self.tree_files(local,pin)
+            if pin==h.oid('tree',b''):
+                raise urllib.error.HTTPError(req.full_url,404,'Not Found',{},None)
             result={'sha':pin,'truncated':False,'tree':[{'path':n,'type':'blob','mode':'100644','sha':v['sha'],'size':v['bytes']} for n,v in files.items()]}
         elif tail.startswith('/git/blobs/'):
             pin=tail.rsplit('/',1)[-1];local=self.repo(repo,pin)
@@ -220,7 +222,12 @@ class Provider:
             local=self.repo(repo,branch=self.targets['backup' if repo=='synthetic/backup' else 'receipts']['branch'])
             result={'sha':write_object(local,'blob',base64.b64decode(payload['content']))}
         elif method=='POST' and tail=='/git/trees':
-            local=self.repo(repo,payload['base_tree']);_,files=self.tree_files(local,payload['base_tree'])
+            if 'base_tree' in payload:
+                assert payload['base_tree']!=h.oid('tree',b'')
+                local=self.repo(repo,payload['base_tree']);_,files=self.tree_files(local,payload['base_tree'])
+            else:
+                local=self.repo(repo,branch=self.targets['backup' if repo=='synthetic/backup' else 'receipts']['branch'])
+                files={}
             for v in payload['tree']:
                 raw=b.git(local,b.Budget(),'cat-file','blob',v['sha']);files[v['path']]={'sha':v['sha'],'bytes':len(raw)}
             result={'sha':write_tree(local,files)}
@@ -274,6 +281,10 @@ def fixture(name,mode='closed'):
 
 def test_complete_first_backup_fresh_independent_download_receipt_readback():
     p=fixture('first-complete');upload,producer=p.invoke();receipt,verifier=p.invoke('verifier')
+    tree_writes=[(repo,payload) for method,repo,tail,payload in p.mutations if method=='POST' and tail=='/git/trees']
+    assert {repo for repo,_ in tree_writes}=={'synthetic/backup','synthetic/receipts'}
+    assert len(tree_writes)==2 and all('base_tree' not in payload for _,payload in tree_writes)
+    assert not any('/git/trees/'+h.oid('tree',b'')==tail for method,repo,tail in p.seen)
     assert upload['upload_readback_verified'] and receipt['upload_readback_verified']
     assert producer!=verifier and (verifier/'fresh-blocked/RESTORE-BLOCKED.json').exists()
     assert receipt['destination']['commit_sha']==upload['destination']['commit_sha']
@@ -306,6 +317,10 @@ def test_follow_backup_keeps_prior_increments_manifests_and_history():
     p.slot+=24*slots.HOUR
     for meta in p.metadata.values(): meta.update(created_at=iso(p.slot+1000),updated_at=iso(p.slot+60000))
     second,root2=p.invoke();receipt,_=p.invoke('verifier')
+    backup_trees=[payload for method,repo,tail,payload in p.mutations
+                  if method=='POST' and repo=='synthetic/backup' and tail=='/git/trees']
+    assert len(backup_trees)==2 and 'base_tree' not in backup_trees[0]
+    assert backup_trees[1]['base_tree']==first['destination']['tree_sha']
     assert all(pair.inventory(root2/'pair',b.Budget())[n]==v for n,v in old.items())
     bt=p.targets['backup'];local=p.repo(bt['repository'],branch=bt['branch'])
     b.git(local,b.Budget(),'merge-base','--is-ancestor',oldpin,second['destination']['commit_sha'])

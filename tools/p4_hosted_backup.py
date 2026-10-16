@@ -245,6 +245,10 @@ class Client:
 
     def tree(self,t,pin):
         commit=self.commit(t,pin);tree=commit['tree']['sha']
+        # The authenticated pinned commit proves this exact empty inventory.
+        # GitHub can return 404 for this well-known object; never turn a failed
+        # request for any other tree into an empty destination.
+        if tree==oid('tree',b''): return tree,{}
         v=self.request('GET',t['repository'],'/git/trees/'+tree+'?recursive=1')
         if v.get('sha')!=tree or v.get('truncated') is not False or len(v['tree'])>MAX_FILES*2:
             raise ValueError('Incomplete/oversized destination tree')
@@ -537,7 +541,12 @@ def publish(client,t,base,additions,replace):
         result=client.request('POST',t['repository'],'/git/blobs',{'encoding':'base64','content':base64.b64encode(raw).decode()})
         if result.get('sha')!=item['sha']: raise ValueError('Created blob identity differs')
         changed.append({'path':name,'mode':'100644','type':'blob','sha':item['sha']})
-    tree=client.request('POST',t['repository'],'/git/trees',{'base_tree':base_tree,'tree':changed})
+    tree_payload={'tree':changed}
+    # Only the proven empty parent can omit base_tree. Otherwise omission would
+    # discard prior increments; the original parent commit is always retained.
+    if base_tree!=oid('tree',b''): tree_payload['base_tree']=base_tree
+    elif old: raise ValueError('Empty base tree contains entries')
+    tree=client.request('POST',t['repository'],'/git/trees',tree_payload)
     if tree.get('sha')!=expected_tree: raise ValueError('Created complete tree identity differs')
     stamp=datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z')
     identity={'name':'BTC verified backup','email':'backup@example.invalid','date':stamp}

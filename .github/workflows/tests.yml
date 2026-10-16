@@ -1,10 +1,10 @@
 name: Tests
-run-name: One Linux offline repair acceptance
+run-name: One Linux empty-tree acceptance
 
 on:
   push:
     branches:
-      - codex/linux-reparatur-abnahme-20261016
+      - codex/backup-empty-tree-abnahme-20261016
 
 permissions:
   contents: read

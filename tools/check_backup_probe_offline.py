@@ -13,6 +13,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+import urllib.error
 import urllib.parse
 from unittest.mock import patch
 
@@ -73,6 +74,8 @@ class LocalHTTP:
             return reply({'sha':pin,'tree':{'sha':rows[0][5:].decode()},'parents':[{'sha':v[7:].decode()} for v in rows if v.startswith(b'parent ')]})
         if tail.startswith('/git/trees/'):
             pin=tail.rsplit('/',1)[1];rows=prep.git(local,'ls-tree','-r','-l',pin).splitlines();items=[]
+            if pin==h.oid('tree',b''):
+                raise urllib.error.HTTPError(req.full_url,404,'Not Found',{},None)
             for row in rows:
                 info,name=row.split('\t');mode,kind,sha,size=info.split()
                 items.append({'path':name,'mode':mode,'type':kind,'sha':sha,'size':int(size)})
@@ -85,7 +88,8 @@ class LocalHTTP:
         if method=='POST' and tail=='/git/trees':
             # All writes here replace the single stream/fence blob or add backup files.
             files={}
-            for row in prep.git(local,'ls-tree','-r',payload['base_tree']).splitlines():
+            if 'base_tree' in payload: assert payload['base_tree']!=h.oid('tree',b'')
+            for row in (prep.git(local,'ls-tree','-r',payload['base_tree']).splitlines() if 'base_tree' in payload else []):
                 info,name=row.split('\t');sha=info.split()[2]
                 files[name]=subprocess.check_output(['git','cat-file','blob',sha],cwd=local)
             for v in payload['tree']: files[v['path']]=subprocess.check_output(['git','cat-file','blob',v['sha']],cwd=local)
