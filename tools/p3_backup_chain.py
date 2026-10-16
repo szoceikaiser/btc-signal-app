@@ -45,6 +45,9 @@ HEX40 = re.compile(r'^[0-9a-f]{40}$')
 HEX64 = re.compile(r'^[0-9a-f]{64}$')
 
 
+from local_publication import publish_new
+
+
 def remove_staging(path, parent):
     path=Path(path); parent=Path(parent).resolve()
     if path.is_symlink() or path.resolve().parent!=parent:
@@ -447,7 +450,7 @@ def restore_verified(root, manifest, target, required_pin, required_revision, id
         with durable.read_only_volume(stage/'blocked-store',identity['store_id']) as check:
             if check.snapshot!=snapshot: raise ValueError('Blocked restore readback')
         git(repo,budget,'config','remote.origin.pushurl','DISABLED-OFFLINE-RESTORE')
-        budget.check();stage.rename(target)
+        publish_new(stage,target,budget)
         return dict(mode='blocked',history_verified=True,restore_blocked_verified=True,
             pin=required_pin,revision=required_revision,history_count=count,git_fsck=True,
             manifest_sha256=digest(manifest),chain_sha256=manifest['chain_sha256'],**budget.metrics())
@@ -521,7 +524,7 @@ def append_local(repo, branch, pin, revision, identity, migration, root, *, faul
                 size=sum(x['bytes'] for x in m['files'].values())+(stage/'segment.json').stat().st_size
                 if size>MAX_PACKAGE or total+size>MAX_SET_BYTES: raise ValueError('Package/set byte budget')
                 if inventory(stage)!=m['files'] or read_json(stage/'segment.json')!=m: raise ValueError('Package readback')
-                event('before_package_publish');stage.rename(root/'packages'/f'{index:06d}')
+                event('before_package_publish');publish_new(stage,root/'packages'/f'{index:06d}',budget)
                 manifests.append(m);total+=size;pending=[];unpacked=0
                 event('after_package_publish')
             finally:
@@ -560,7 +563,7 @@ def append_local(repo, branch, pin, revision, identity, migration, root, *, faul
             stage=Path(tempfile.mkdtemp(prefix='.pending-',dir=root/'completions'))
             try:
                 write_json(stage/'manifest.json',m);write_json(stage/'local-verification.json',receipt)
-                event('before_completion_publish');stage.rename(final)
+                event('before_completion_publish');publish_new(stage,final,budget)
             finally:
                 if stage.exists():remove_staging(stage,root/'completions')
         return dict(manifest=m,completion=str(final),metrics=budget.metrics())

@@ -6,7 +6,7 @@ import p3_happy_finish as f
 n=t.n;p=f.p;W=n.W
 
 def fixture(td):
-    root=Path(td);plan,old375=t.fixture(root);base=n.inputs()
+    root=Path(td);plan,old375=t.fixture(root);base=n.inputs();__import__('p3_portable_inputs').bind_happy(base)
     old=n.read(base/'p3-happy-abgleich-start-20261013/READER-CONTRACT.json');g=n.read(base/'p3-happy-abgleich-start-20261013/READER-GRANT.json')
     old.update(original_plan_sha256=p.digest(plan),operations=old375['operations'],initial_grant=old375['initial_grant'],historical_code_materialization=old375['historical_code_materialization'])
     old['entry']=old375['entry'];old['review']['original_pid']=old375['review']['original_pid']

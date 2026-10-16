@@ -276,6 +276,10 @@ def test_seven_entries_and_associated_pages():
 
 def test_shared_hour_and_header_stops():
     from p4_quota_hour import model
+    # This model depends on three complete transcripts, not prior test order.
+    test_seven_entries_and_associated_pages()
+    test_pair_counts_and_full_independent_restore()
+    test_full_monitor_cli_and_mutable_failure()
     report=model(OUT);(OUT/'HOUR.json').write_text(canonical(report))
     from github_freshness import ReadBudget
     cases=[({'X-RateLimit-Remaining':'0','X-RateLimit-Reset':'1'},200),

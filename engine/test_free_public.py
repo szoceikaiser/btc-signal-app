@@ -58,6 +58,9 @@ def access_for(repos):
             access['protections'][repo+'@'+branch]={'repository':repo,'repository_id':t['id'],
                 'branch':branch,'active_rules_sha256':digest(rows),
                 'rulesets':{str(rid):{'public_sha256':digest(rs),'bypass_review':proof}}}
+            # Actual authenticated caller metadata; the separate bypass proof
+            # above binds the public ruleset without this presentation field.
+            rs['current_user_can_bypass']='never'
             rules[(repo,branch)]=rows;sets[(repo,rid)]=rs
     return access,rules,sets
 
@@ -73,7 +76,7 @@ def writer_review(access,role,repo,branches):
 class PublicProvider(Provider):
     def __init__(self,name):
         super().__init__(OUT/name)
-        self.public_mode=True;self.headers=[];self.overrides={};self.drops=set();self.calls=[]
+        self.public_mode=False;self.headers=[];self.overrides={};self.drops=set();self.calls=[]
         repos={}
         for repo,branch in self.repos:
             t=next(t for t in self.targets.values() if t['repository']==repo)
@@ -113,14 +116,14 @@ class PublicProvider(Provider):
         u=urllib.parse.urlsplit(req.full_url);method=req.get_method()
         self.headers.append({'method':method,'url':req.full_url,'has_authorization':bool(req.get_header('Authorization'))})
         if u.netloc=='github.com':
-            assert req.get_header('Authorization') is None
+            assert req.get_header('Authorization') is not None
             return super().open(req,timeout)
         parts=u.path.split('/');repo='/'.join(parts[2:4]);tail='/'+('/'.join(parts[4:])) if len(parts)>4 else ''
         self.calls.append((method,repo,tail,u.query))
         if repo=='synthetic/code':
             assert req.get_header('Authorization')=='Bearer '+self.tokens['metadata_read']
-        elif method=='GET': assert req.get_header('Authorization') is None
-        else:
+        elif method=='GET': assert req.get_header('Authorization')=='Bearer '+self.tokens['metadata_read']
+        elif method!='GET':
             role='backup_write' if repo=='synthetic/backup' else 'receipt_write'
             assert repo in ('synthetic/backup','synthetic/receipts')
             assert req.get_header('Authorization')=='Bearer '+self.tokens[role]
@@ -148,7 +151,7 @@ def test_public_cli_pair_and_confirmed_receipt():
     assert receipt['verification']['restore_blocked_verified'] is True
     assert receipt['destination']['commit_sha']==upload['destination']['commit_sha']
     # Real fresh download through anonymous tree/blob client, independent of writer memory.
-    budget=h.Budget(p.root);c=h.Client(None,{'synthetic/receipts'},set(),budget);c.access=p.access
+    budget=h.Budget(p.root);c=h.Client(os.environ['GITHUB_TOKEN'],{'synthetic/receipts'},set(),budget);c.access=p.access
     with patch.object(h.Client,'open_request',side_effect=p.open):
         t=p.targets['receipts'];pin=c.ref(t);_,files=c.tree(t,pin)
         raw=c.blob(t,files['receipt.json'])
@@ -156,7 +159,7 @@ def test_public_cli_pair_and_confirmed_receipt():
         assert h.oid('blob',raw)==receipt['receipt_publication']['blob_sha']
     assert len(p.fetches)==2
     for row in p.headers:
-        if '/repos/synthetic/code' not in row['url'] and row['method']=='GET': assert not row['has_authorization']
+        if row['method']=='GET': assert row['has_authorization']
     for root in (producer,verifier):
         for f in root.rglob('*'):
             if f.is_file(): assert all(t.encode() not in f.read_bytes() for t in p.tokens.values())
@@ -175,7 +178,7 @@ def test_public_identity_and_no_permissions_introspection():
         if case=='wrong-name': meta['full_name']='foreign/repo'
         if case=='visibility': meta['visibility']='private'
         p.overrides[(repo,'')]=meta
-        budget=h.Budget(p.root);client=h.Client(None,{repo},set(),budget);client.access=p.access
+        budget=h.Budget(p.root);client=h.Client(os.environ['GITHUB_TOKEN'],{repo},set(),budget);client.access=p.access
         with patch.object(h.Client,'open_request',side_effect=p.open):
             if case in ('no-permissions','owner-permissions'): client.repository(t,False)
             else: fails(ValueError,lambda:client.repository(t,False))
@@ -211,7 +214,7 @@ def test_rule_and_bypass_failures_before_cli_write():
     p=PublicProvider('rules-pagination-ok');t=p.targets['source'];key=(t['repository'],t['branch'])
     rows=p.rules[key];p.rules[key]=rows+[deepcopy(rows[0]) for _ in range(98)]
     p.access['protections']['@'.join(key)]['active_rules_sha256']=digest(p.rules[key]);p.set_digest()
-    c=h.Client(None,{key[0]},set(),h.Budget(p.root));c.access=p.access
+    c=h.Client(os.environ['GITHUB_TOKEN'],{key[0]},set(),h.Budget(p.root));c.access=p.access
     with patch.object(h.Client,'open_request',side_effect=p.open): c.protected(t)
     assert any(q=='per_page=100&page=2' for _,_,_,q in p.calls)
 
@@ -232,7 +235,7 @@ def test_writer_review_separation_and_no_secret_read_cycle():
             if case=='sender-secret': os.environ['BTC_DELIVERY_GITHUB_TOKEN']='synthetic-forbidden'
             assert h.cli(['producer'])==20,case
         assert not p.mutations and not p.fetches
-    root=OUT/'client-scope';root.mkdir();c=h.Client(None,{'synthetic/backup'},set(),h.Budget(root))
+    root=OUT/'client-scope';root.mkdir();c=h.Client(os.environ['GITHUB_TOKEN'],{'synthetic/backup'},set(),h.Budget(root))
     fails(ValueError,lambda:c.request('POST','synthetic/backup','/git/blobs',{}))
     fails(ValueError,lambda:c.request('GET','foreign/repo',''))
 
@@ -257,9 +260,9 @@ def test_lost_response_exact_readback_without_retry():
 def test_anonymous_client_paths_headers_bytes_and_wall_deadline():
     root=OUT/'read-limits';root.mkdir();seen=[]
     def reply(req,timeout):
-        seen.append(req);assert req.get_header('Authorization') is None
+        seen.append(req);assert req.get_header('Authorization') is not None
         return io.BytesIO(b'{}')
-    budget=h.Budget(root);c=h.Client(None,{'synthetic/data'},set(),budget)
+    budget=h.Budget(root);c=h.Client(os.environ['GITHUB_TOKEN'],{'synthetic/data'},set(),budget)
     with patch.object(h.Client,'open_request',side_effect=reply):
         c.request('GET','synthetic/data','/git/blobs/'+'a'*40)
         for tail in ('/issues','/contents/../secret?ref='+'a'*40,'/git/blobs/'+'a'*40+'?evil=1'):
@@ -267,14 +270,17 @@ def test_anonymous_client_paths_headers_bytes_and_wall_deadline():
         fails(ValueError,lambda:c.request('GET','synthetic/data','',limit=h.MAX_RESPONSE+1))
         budget.http=h.MAX_HTTP;fails(ValueError,lambda:c.request('GET','synthetic/data',''))
         budget.http=0;budget.transfer=h.MAX_TRANSFER;fails(ValueError,lambda:c.request('GET','synthetic/data',''))
-    data=pages.ReadClient(None,'synthetic/data',{'stream':github.STORE_PATH})
+    data=pages.ReadClient(os.environ['GITHUB_TOKEN'],'synthetic/data',{'stream':github.STORE_PATH})
     with patch.object(pages.ReadClient,'open_request',side_effect=reply):
-        for _ in range(4): fails(KeyError,lambda:data.read('synthetic/data','stream'))
+        for _ in range(4):
+            try:data.read('synthetic/data','stream')
+            except ValueError as exc:assert str(exc)=='Git packet header'
+            else:raise AssertionError('Malformed Git advertisement accepted')
         assert data.gets==4
         fails(github.StoreUnavailable,lambda:data._request('POST','/repos/synthetic/data/x',{}))
         data.gets=12;fails(github.StoreUnavailable,lambda:data.read('synthetic/data','stream'))
     fails(ValueError,lambda:pages.ReadClient('synthetic-forbidden','synthetic/data',{}))
-    m=monitor.Reader(None,['synthetic/data'],ReadBudget())
+    m=monitor.Reader(os.environ['GITHUB_TOKEN'],['synthetic/data'],ReadBudget())
     with patch.object(monitor.Reader,'open_request',side_effect=reply):
         m._request('GET','/repos/synthetic/data/git/blobs/'+'a'*40)
         fails(github.StoreUnavailable,lambda:m._request('GET','/repos/foreign/data/git/blobs/'+'a'*40))
@@ -282,11 +288,11 @@ def test_anonymous_client_paths_headers_bytes_and_wall_deadline():
         m.budget.requests=64;fails(github.StoreUnavailable,lambda:m._request('GET','/repos/synthetic/data'))
     class Slow(io.BytesIO):
         def read(self,*args): time.sleep(.2);return b'{}'
-    c=h.Client(None,{'synthetic/data'},set(),h.Budget(root));began=time.monotonic()
+    c=h.Client(os.environ['GITHUB_TOKEN'],{'synthetic/data'},set(),h.Budget(root));began=time.monotonic()
     with patch.object(h,'REQUEST_SECONDS',.05),patch.object(h.Client,'open_request',return_value=Slow()):
         fails(RuntimeError,lambda:c.request('GET','synthetic/data',''))
     assert time.monotonic()-began<.18
-    c=h.Client(None,{'synthetic/data'},set(),h.Budget(root))
+    c=h.Client(os.environ['GITHUB_TOKEN'],{'synthetic/data'},set(),h.Budget(root))
     with patch.object(h.Client,'open_request',return_value=io.BytesIO(b'x'*5)):
         fails(ValueError,lambda:c.request('GET','synthetic/data','',limit=4))
     # Existing process helper strips all injected secrets before any Git child.
@@ -307,13 +313,18 @@ def test_disabled_overlay_and_original_process_correction():
     for path in pins:
         text=(OUT/'overlay'/path).read_text()
         assert 'if: ${{ false }}' in text and 'queue: max' in text
-        assert 'actions/checkout@' not in text and 'Bounded anonymous public code checkout' in text
+        assert 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' in text
+        assert 'persist-credentials: false' in text and 'Require Git and stop checkout network after any Git failure' in text
         assert 'GITHUB_TOKEN: ${{ github.token }}' in text
         assert not any(v in text for v in ('secrets.BTC_HOSTED_SOURCE_READ_TOKEN','secrets.BTC_PAGES_STORE_READ_TOKEN','secrets.BTC_MONITOR_'))
     # Directly compare inherited process-count implementation bytes to exact base.
     import subprocess
     base=subprocess.check_output(['git','show','9a458483f56244882954f7d2bb40b6ab5cae2128:tools/p3_backup_chain.py'],cwd=ROOT)
-    assert base.replace(b'\r\n',b'\n')==(ROOT/'tools/p3_backup_chain.py').read_bytes().replace(b'\r\n',b'\n')
+    import ast
+    def guarded(source):
+        source=source.decode().replace('\r\n','\n')
+        return {node.name:ast.get_source_segment(source,node) for node in ast.parse(source).body if isinstance(node,(ast.FunctionDef,ast.ClassDef)) and node.name in ('process','ProcessTree','Budget','rss','windows_job_api','windows_memory_api')}
+    assert guarded(base)==guarded((ROOT/'tools/p3_backup_chain.py').read_bytes())
     for name in ('public-access','hosted-backup-runtime','github-actions-runtime','pages-runtime','monitor-runtime'):
         value=json.loads((ROOT/'ops/produktion'/f'{name}.disabled.json').read_text())
         assert value['enabled'] is False
@@ -344,7 +355,7 @@ def test_sender_and_pages_actual_entry_share_public_bindings():
             u=urllib.parse.urlsplit(req.full_url);parts=u.path.split('/');r='/'.join(parts[2:4]);tail='/'+('/'.join(parts[4:])) if len(parts)>4 else ''
             seen.append((req.get_method(),r,tail,bool(req.get_header('Authorization'))))
             if r=='synthetic/code': assert req.get_header('Authorization')=='Bearer synthetic-codejob'
-            elif req.get_method()=='GET': assert req.get_header('Authorization') is None
+            elif req.get_method()=='GET': assert req.get_header('Authorization') is not None
             else: assert req.get_header('Authorization')=='Bearer synthetic-only'
             if not tail: value={'id':repos[r]['id'],'full_name':r,'private':False,'visibility':'public'}
             elif '/rules/branches/' in tail: value=rules[(r,tail.rsplit('/',1)[-1])]
@@ -362,13 +373,13 @@ def test_sender_and_pages_actual_entry_share_public_bindings():
         pp=root/'pages-runtime.json';pp.write_text(canonical(pr),encoding='utf-8');out=root/'public'
         stamp=json.loads(http.file(github.STORE_PATH))['snapshot']['engine']['last_signal_ts']
         before=http.puts
-        with patch.dict(os.environ,{'GITHUB_TOKEN':'synthetic-codejob','GITHUB_WORKFLOW_REF':'synthetic/code/'+pages.WORKFLOW+'@refs/heads/synthetic'}),\
+        with patch.dict(os.environ,{'GITHUB_TOKEN':'synthetic-codejob','BTC_DELIVERY_GITHUB_TOKEN':'','TELEGRAM_BOT_TOKEN':'','GITHUB_WORKFLOW_REF':'synthetic/code/'+pages.WORKFLOW+'@refs/heads/synthetic'}),\
              patch.object(pages,'check_code_pin'),patch.object(pages.ReadClient,'open_request',side_effect=reply),\
              patch.object(ProductionContentsClient,'open_request',side_effect=reply),\
              patch.object(pages.time,'time',return_value=(stamp+14400000+1000)/1000):
             exported=pages.export(pp,data/'config.json',out)
-            assert exported['get']==12 and exported['preflight_get']==5
-            assert pages.export(pp,data/'config.json',out,verify=out.with_suffix('.receipt.json'))['get']==12
+            assert exported['get']==6 and exported['preflight_get']==5
+            assert pages.export(pp,data/'config.json',out,verify=out.with_suffix('.receipt.json'))['get']==6
         assert http.puts==before
         b.write_json(OUT/'SENDER-PAGES.json',{'offline_only':True,'sender':result,'pages':exported,'headers_without_values':seen})
 
@@ -378,7 +389,7 @@ def test_short_page_with_next_or_foreign_link_is_refused():
     fails(ValueError,lambda:public.deployment(access,{'public_access_sha256':'0'*64}))
     class Response(io.BytesIO):
         def __init__(self,raw,link): super().__init__(raw);self.headers={'Link':link}
-    root=OUT/'pagination-headers';root.mkdir();c=h.Client(None,{repo},set(),h.Budget(root));c.access=access
+    root=OUT/'pagination-headers';root.mkdir();c=h.Client(os.environ['GITHUB_TOKEN'],{repo},set(),h.Budget(root));c.access=access
     for url in ('https://api.github.com/repos/synthetic/data/rules/branches/stream?per_page=100&page=2',
                 'https://api.github.com/repos/foreign/repo/rules/branches/stream?per_page=100&page=2'):
         with patch.object(h.Client,'open_request',return_value=Response(canonical(rules[(repo,branch)]).encode(),'<'+url+'>; rel="next"')):
@@ -427,8 +438,8 @@ def test_public_checkout_real_pack_and_no_git_secret():
     bootstrap=(ROOT/'tools/public_code_checkout.py').read_text()
     for kind in ('signal','watch','lage','pages','backup','backup-verify','monitor'):
         raw=(ROOT/'ops/produktion'/f'{kind}-workflow.disabled.yml').read_text()
-        embedded=raw.split("          python3 - <<'PY'\n",1)[1].split('          PY\n',1)[0]
-        assert '\n'.join(line[10:] for line in embedded.splitlines())+'\n'==bootstrap
+        assert 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' in raw
+        assert 'persist-credentials: false' in raw and 'fetch-depth: 1' in raw
 
 
 def test_preflight_cli_anonymous_and_monitor_receipt_readback():
@@ -452,7 +463,7 @@ def test_preflight_cli_anonymous_and_monitor_receipt_readback():
     def http(req,timeout):
         u=urllib.parse.urlsplit(req.full_url)
         if '/contents/' in u.path and '/synthetic/code/' not in u.path:
-            assert req.get_header('Authorization') is None
+            assert req.get_header('Authorization') is not None
             parts=u.path.split('/');repo='/'.join(parts[2:4]);name=u.path.split('/contents/')[1]
             pin=urllib.parse.parse_qs(u.query)['ref'][0];local=p.repo(repo,pin)
             with b.batch(local,b.Budget()) as read: raw=read(pin+':'+name,'blob',b.MAX_MANIFEST)
@@ -464,7 +475,7 @@ def test_preflight_cli_anonymous_and_monitor_receipt_readback():
         return p.open(req,timeout)
     budget=ReadBudget();before=len(p.mutations)
     with patch.object(monitor.Reader,'open_request',side_effect=http):
-        data=monitor.Reader(None,['synthetic/backup','synthetic/receipts'],budget)
+        data=monitor.Reader(os.environ['GITHUB_TOKEN'],['synthetic/backup','synthetic/receipts'],budget)
         code=monitor.Reader(p.tokens['metadata_read'],['synthetic/code'],budget,metadata=True)
         result,_,_=monitor.read_backup(data,code,policy,p.slot+60000)
         assert result['manifest_sha256']==receipt['manifest_sha256'] and budget.requests<=64

@@ -10,7 +10,13 @@ import p3_rules403 as r
 import test_p3_script_start as s
 NOW='2026-10-14T00:00:00Z'
 
-def inputs():return Path(os.environ.get('P3_PUBLIC_FIXTURE_INPUTS',str(W.parent/'audit-backups')))
+def inputs():
+    from p3_portable_inputs import generate
+    supplied=os.environ.get('P3_PUBLIC_FIXTURE_INPUTS')
+    if supplied:
+        assert read(Path(supplied)/'SYNTHETIC-INPUTS.json')['generated_from_source_only'] is True
+        return Path(supplied)
+    return generate()
 def read(f):return json.loads(Path(f).read_text(encoding='utf-8-sig'))
 def save(f,x):Path(f).write_text(p.canonical(x),encoding='utf-8')
 
@@ -66,7 +72,7 @@ def fixture(td,*,continuation=False,root_success=False):
     a['review'].update(reviewer='offline-fixture-only',evidence_sha256='e'*64,original_pid=proc.pid,observed_utc=NOW,
         terminal_code_path_checked=True,human_terminal_end_report=True,all_workers_ended=True,triggers_paused=True,human_review=True)
     if continuation:a['stopped_public'].update(amendment=oldpublic,grant=oldgrant,code_materialization=r.materialization(oldpublic['execution_code']))
-    save(root/'fixture-history-translation.json',{'copied_real_input_translated_to_fixture':True,'plan_directory_and_digests_rebound':True,'actual_ended_fixture_pid':proc.pid,'no_current_runtime_gate_bridged':True})
+    save(root/'fixture-history-translation.json',{'source_generated_synthetic_input':True,'plan_directory_and_digests_rebound':True,'actual_ended_fixture_pid':proc.pid,'no_current_runtime_gate_bridged':True})
     if root_success:
         save(root/'successful-root-amendment.json',successful);save(root/'successful-root-grant.json',successgrant)
     return plan,a

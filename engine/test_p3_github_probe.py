@@ -119,13 +119,19 @@ def test_lost_before_403_429_attempt_once_and_halt_without_unlock():
             s = p.store_for(client, 1); s.__enter__()
             old = api.head; before = ledger.counts['PUT']; api.fail = mode
             s.snapshot['control']['health']['synthetic'] = mode
-            rejects(p.gh.StoreConflict, s.commit)
-            assert api.head == old and ledger.counts['PUT'] == before+1
-            rejects(p.gh.StoreConflict, s.commit)
-            s.__exit__(None, None, None)
-            assert api.head == old and ledger.counts['PUT'] == before+1
-            assert json.loads(base64.b64decode(api.records[api.head]['body']))['snapshot']['control']['owner'] == s.owner
-            ledger.close()
+            try:
+                # Explicit HTTP rejection is terminal, unlike a lost response.
+                expected=p.HTTPStatus if mode in (403,429) else p.gh.StoreConflict
+                trace=len(api.trace)
+                rejects(expected, s.commit)
+                assert s._halted and api.head == old and ledger.counts['PUT'] == before+1
+                if mode in (403,429): assert len(api.trace)==trace+1  # no confirmation GET
+                rejects(p.gh.StoreConflict, s.commit)
+                s.__exit__(None, None, None)
+                assert api.head == old and ledger.counts['PUT'] == before+1
+                assert json.loads(base64.b64decode(api.records[api.head]['body']))['snapshot']['control']['owner'] == s.owner
+            finally:
+                ledger.close()
 
 
 def test_lost_after_exact_readback_confirms_only_matching_parent():

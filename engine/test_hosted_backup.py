@@ -75,6 +75,10 @@ class Provider:
         c=env['snapshot']['control'];runtime.update(code_repository='synthetic/code',code_ref='refs/heads/synthetic',
             private_store_repository=identity['repo'],store_branch=identity['branch'],fence_branch='fence',store_id=identity['store_id'],
             code_sha=c['code_sha'],config_sha256=c['config_sha256'],bot_identity=c['bot_identity'],activation_review_sha256='b'*64)
+        from offline_test_fixtures import hosted_access
+        access,rules,sets=hosted_access(runtime,identity)
+        runtime['public_access_sha256']=digest(access)
+        self.access,self.rules,self.rulesets=access,rules,sets
         d=entry.deployment(runtime);fence=json.loads(actions.seed_fence(d));fr=self.root/'fence'
         fpin=commit_file(fr,'fence',actions.FENCE_PATH,canonical(fence).encode())
         self.slot=1791072000000  # immutable midnight UTC obligation
@@ -108,7 +112,7 @@ class Provider:
         self.repos[(identity['repo'],'migration')]=mig
         self.yaml={w:('reviewed offline '+w+'\n').encode() for w in ('.github/workflows/backup.yml','.github/workflows/backup-verify.yml')}
         self.runtime={'schema':h.SCHEMA,'enabled':True,**self.targets,'deployment':d,'identity':identity,
-            'pins':None,'activation_review_sha256':'c'*64,'runner_os':'Linux','python_version':list(sys.version_info[:3]),
+            'pins':None,'public_access':access,'activation_review_sha256':'c'*64,'runner_os':'Linux','python_version':list(sys.version_info[:3]),
             'migration':{'target':{**self.targets['source'],'branch':'migration'},'commit_sha':mp,'tree_sha':tree,'files':files}}
         for kind,w in (('producer','.github/workflows/backup.yml'),('verifier','.github/workflows/backup-verify.yml')):
             self.runtime[kind]={'repository':'synthetic/code','repository_id':4,'branch':'synthetic','code_sha':d['code_sha'],
@@ -120,7 +124,7 @@ class Provider:
                 'head_sha':v['code_sha'],'head_branch':'synthetic','path':v['workflow'],'event':'workflow_dispatch',
                 'display_title':'btc-v2:backup:created','created_at':iso(self.slot+1000),
                 'updated_at':iso(self.slot+60000),'status':'completed','conclusion':'success'}
-        self.tokens={r:'offline-'+r for r in h.ENV};self.permissions={}
+        self.tokens={r:'offline-'+r for r in h.ENV};self.tokens['metadata_read']='offline-automatic-jobtoken';self.tokens['source_read']=self.tokens['metadata_read'];self.permissions={}
         for role in h.ENV:
             for target in self.targets.values():
                 repo=target['repository'];write=(role=='backup_write' and repo=='synthetic/backup') or (role=='receipt_write' and repo=='synthetic/receipts')
@@ -146,6 +150,9 @@ class Provider:
         return tree,items
 
     def open(self,req,timeout):
+        from offline_test_fixtures import provider_reply
+        response=provider_reply(self,req,timeout)
+        if response is not None:return response
         url=urllib.parse.urlparse(req.full_url)
         if url.netloc=='github.com':
             repo=url.path.split('.git/',1)[0].removeprefix('/')
@@ -181,7 +188,7 @@ class Provider:
         if self.fault: self.fault(self,method,repo,tail,payload)
         if not tail:
             t=next(t for t in self.targets.values() if t['repository']==repo)
-            result={'id':t['id'],'full_name':repo,'private':True,'permissions':self.permissions[(token,repo)]}
+            result={'id':t['id'],'full_name':repo,'private':False,'visibility':'public'}
         elif tail.endswith('/protection'):
             result={k:{'enabled':v} for k,v in (('allow_force_pushes',False),('allow_deletions',False),('enforce_admins',True),('required_linear_history',True))}
         elif tail.startswith('/actions/runs/'):
@@ -239,17 +246,24 @@ class Provider:
              'GITHUB_WORKFLOW_REF':binding['repository']+'/'+binding['workflow']+'@refs/heads/'+binding['branch'],
              'GITHUB_SHA':binding['code_sha'],'GITHUB_RUN_ID':rid,'GITHUB_RUN_NUMBER':'1','GITHUB_RUN_ATTEMPT':'1',
              'GITHUB_EVENT_NAME':'workflow_dispatch','RUNNER_OS':'Linux','RUNNER_TEMP':str(self.root),
-             'BTC_HOSTED_RUNTIME_JSON':canonical(runtime),'BTC_HOSTED_RUNTIME_SHA256':runtime['runtime_sha256']}
+             'GITHUB_TOKEN':self.tokens['metadata_read'],'BTC_HOSTED_RUNTIME_JSON':canonical(runtime),'BTC_HOSTED_RUNTIME_SHA256':runtime['runtime_sha256']}
         env.update({h.ENV[r]:self.tokens[r] for r in h.ROLES[mode]})
         for r in set(h.ENV)-set(h.ROLES[mode]): env[h.ENV[r]]=''
+        env['BTC_HOSTED_SOURCE_READ_TOKEN']=''
         with patch.dict(os.environ,env),patch.object(h,'check_code_pin'),patch.object(h.Client,'open_request',side_effect=self.open),\
              patch.object(h.time,'time',return_value=(self.slot+10000)/1000),\
              patch.object(h.platform,'system',return_value='Linux'):
             yield
 
     def invoke(self,mode='producer'):
-        with self.context(mode):
-            assert h.cli([mode])==0
+        errors=[];actual=h.run
+        def observed(*args,**kwargs):
+            try:return actual(*args,**kwargs)
+            except Exception as exc:errors.append(exc);raise
+        with self.context(mode),patch.object(h,'run',side_effect=observed):
+            status=h.cli([mode])
+            if status and errors:raise errors[0]
+            assert status==0
         roots=sorted(self.root.glob('btc-'+mode+'-*'),key=lambda p:p.stat().st_mtime_ns)
         return b.read_json(roots[-1]/'confirmed.json'),roots[-1]
 
@@ -263,7 +277,7 @@ def test_complete_first_backup_fresh_independent_download_receipt_readback():
     assert upload['upload_readback_verified'] and receipt['upload_readback_verified']
     assert producer!=verifier and (verifier/'fresh-blocked/RESTORE-BLOCKED.json').exists()
     assert receipt['destination']['commit_sha']==upload['destination']['commit_sha']
-    assert any(method=='GET' and repo=='synthetic/backup' and tail.startswith('/git/blobs/') for method,repo,tail in p.seen)
+    assert any(method=='GET' and repo=='synthetic/backup' and tail.startswith('/raw/') for method,repo,tail in p.seen)
     assert all(repo=='synthetic/backup' for _,repo,_,_ in p.mutations if repo!='synthetic/receipts')
     rt=p.targets['receipts'];local=p.repo(rt['repository'],branch=rt['branch']);pin=pair.head(local,rt['branch'],b.Budget())
     with b.batch(local,b.Budget()) as read:
@@ -304,12 +318,13 @@ def test_roles_entry_runtime_and_disabled_fail_before_mutation():
         p=fixture('role-'+case);runtime=deepcopy(p.runtime)
         if case=='disabled': runtime['enabled']=False;p.runtime=runtime;p.set_digest()
         if case=='runtime': p.runtime['python_version']=[0,0,0];p.set_digest()
-        if case=='cross-write': p.permissions[(p.tokens['source_read'],'synthetic/receipts')]['push']=True
+        if case=='cross-write':
+            p.runtime['public_access']['credential_reviews']['backup_write']['other_repository_write']=True;p.set_digest()
         if case=='metadata': p.metadata['100']['head_sha']='f'*40
         if case=='protection':
             original=p.open
             def bad(req,timeout):
-                if req.full_url.endswith('/protection'): return io.BytesIO(b'{}')
+                if '/rules/branches/' in req.full_url: return io.BytesIO(b'[]')
                 return original(req,timeout)
             p.open=bad
         with p.context():
@@ -342,9 +357,8 @@ def test_upload_lost_response_and_concurrent_cas_are_bounded():
                 if case=='lost-confirmed': raise TimeoutError()
                 return response
             if case=='blob-loss' and method=='POST' and url.endswith('/git/blobs'): raise TimeoutError()
-            if case=='partial' and method=='GET' and '/git/blobs/' in url and patched['n']:
-                value=json.loads(original(req,timeout).read());value['content']=base64.b64encode(b'partial').decode()
-                return io.BytesIO(canonical(value).encode())
+            if case=='partial' and method=='GET' and url.startswith('https://raw.githubusercontent.com/') and patched['n']:
+                return io.BytesIO(b'partial')
             return original(req,timeout)
         p.open=transport
         with p.context(): assert h.cli(['producer'])==(0 if case=='lost-confirmed' else 20),case
@@ -356,7 +370,20 @@ def test_missing_old_foreign_moving_parts_and_receipt_confirmation_fail_closed()
     for case in ('missing','foreign','old','backup-move','source-move','receipt-loss','receipt-corrupt'):
         p=fixture('verify-'+case);p.invoke();original=p.open;count={'patch':0}
         def transport(req,timeout):
-            response=original(req,timeout);url=req.full_url;method=req.get_method();raw=response.read();v=json.loads(raw)
+            response=original(req,timeout);url=req.full_url;method=req.get_method();raw=response.read()
+            host=urllib.parse.urlsplit(url).netloc
+            if host=='github.com':
+                if case in ('source-move','backup-move'):
+                    key='source' if case=='source-move' else 'backup'
+                    if p.targets[key]['repository']+'.git/' in url:
+                        count[url]=count.get(url,0)+1
+                        if count[url]>1:
+                            raw=raw.replace(pair.head(p.repo(p.targets[key]['repository'],branch=p.targets[key]['branch']),p.targets[key]['branch'],b.Budget()).encode(),b'f'*40)
+                return io.BytesIO(raw)
+            if host=='raw.githubusercontent.com':
+                if case=='receipt-corrupt' and count['patch'] and '/synthetic/receipts/' in url: raw=b'foreign'
+                return io.BytesIO(raw)
+            v=json.loads(raw)
             if method=='PATCH' and '/synthetic/receipts/' in url:
                 count['patch']+=1
                 if case=='receipt-loss': raise TimeoutError()
@@ -414,7 +441,7 @@ def test_numeric_byte_time_process_and_get_only_boundaries():
 
 def test_reviewed_changing_entry_requires_workflow_bytes_and_ancestry():
     from reviewed_actions_entry import verify
-    p=fixture('entry-pins');binding=p.runtime['producer'];client=h.Client(p.tokens['metadata_read'],{'synthetic/code'},set(),h.Budget(p.root))
+    p=fixture('entry-pins');binding=p.runtime['producer'];client=h.Client(p.tokens['metadata_read'],{'synthetic/code'},set(),h.Budget(p.root),metadata=True)
     sha='e'*40;calls=[]
     def reply(req,timeout):
         calls.append(req.full_url)
@@ -524,13 +551,12 @@ def test_freshness_understands_immutable_published_manifest_and_actual_receipt()
         if '/attempts/1/jobs' in url:
             return io.BytesIO(canonical({'total_count':1,'jobs':[{'run_id':200,'run_attempt':1,'head_sha':v['code_sha'],
                 'status':'completed','conclusion':'success'}]}).encode())
-        # Reader's separately injected monitor token is mapped only inside this fake.
-        req.add_header('Authorization','Bearer '+p.tokens['backup_read'] if '/synthetic/code/' not in url else 'Bearer '+p.tokens['metadata_read'])
+        # One automatic read-only job token, separate from writer roles.
         return original(req,timeout)
     budget=ReadBudget()
     with patch.object(freshness.Reader,'open_request',side_effect=monitor_http):
-        backup=freshness.Reader('offline-monitor',['synthetic/backup','synthetic/receipts'],budget)
-        code=freshness.Reader('offline-monitor',['synthetic/code'],budget)
+        backup=freshness.Reader(os.environ['GITHUB_TOKEN'],['synthetic/backup','synthetic/receipts'],budget)
+        code=freshness.Reader(os.environ['GITHUB_TOKEN'],['synthetic/code'],budget,metadata=True)
         result,_,_=freshness.read_backup(backup,code,policy,p.slot+60000)
         assert result['manifest_sha256']==digest(m)
         bad=deepcopy(policy);bad['backup_target']['manifest_prefix']='foreign/'

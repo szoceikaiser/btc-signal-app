@@ -140,6 +140,8 @@ def example():
         private_store_repository=f['identity']['repo'],store_branch=f['identity']['branch'],fence_branch='actions-fence',
         store_id=f['identity']['store_id'],code_sha=c['code_sha'],config_sha256=c['config_sha256'],
         bot_identity=c['bot_identity'],activation_review_sha256='b'*64)
+    from offline_test_fixtures import sender_access
+    access,_,_=sender_access(runtime);runtime['public_access_sha256']=digest(access)
     d=entry.deployment(runtime)
     fence=json.loads(actions.seed_fence(d));fence_repo=root/'fence-source'
     fence_pin=commit_file(fence_repo,d['fence_branch'],actions.FENCE_PATH,canonical(fence).encode());fence_rev=0
@@ -323,6 +325,9 @@ class HTTP:
         self.add('synthetic/verifier','protected-receipts','receipt.json','d'*40,canonical(self.receipt).encode())
 
     def open(self,request,timeout):
+        from offline_test_fixtures import monitor_reply
+        answer=monitor_reply(self,request,timeout)
+        if answer is not None:return answer
         assert request.get_method()=='GET' and request.data is None and 0<timeout<=3
         url=urllib.parse.urlsplit(request.full_url);path=urllib.parse.unquote(url.path);q=urllib.parse.parse_qs(url.query)
         self.seen.append(path)
@@ -347,9 +352,9 @@ class HTTP:
     def check(self,now=None):
         budget=ReadBudget();d=self.policy['deployment'];v=self.policy['independent_verifier']
         with patch.object(monitor.Reader,'open_request',side_effect=self.open),patch.object(tg,'deliver_telegram',side_effect=AssertionError('No monitor send')):
-            source=monitor.Reader('synthetic-read',[d['private_store_repository']],budget)
-            code=monitor.Reader('synthetic-read',[d['code_repository'],v['binding']['repository']],budget)
-            backup=monitor.Reader('synthetic-read',[v['repository'],self.policy['backup_target']['repository']],budget)
+            source=monitor.Reader(os.environ['GITHUB_TOKEN'],[d['private_store_repository']],budget)
+            code=monitor.Reader(os.environ['GITHUB_TOKEN'],[d['code_repository'],v['binding']['repository']],budget,metadata=True)
+            backup=monitor.Reader(os.environ['GITHUB_TOKEN'],[v['repository'],self.policy['backup_target']['repository']],budget)
             result=monitor.check(source,code,backup,self.policy,now if now is not None else self.f['base']+60*slots.MINUTE)
         assert budget.requests<=64
         return result
@@ -420,14 +425,14 @@ def test_monitor_signal_watch_and_backup_exact_freshness_boundaries():
     http=HTTP(f);slot=http.receipt['expected_start_ms'];end=slots.deadline('backup',slot)
     budget=ReadBudget()
     with patch.object(monitor.Reader,'open_request',side_effect=http.open):
-        backup=monitor.Reader('synthetic-read',['synthetic/verifier','synthetic/backup'],budget)
-        code=monitor.Reader('synthetic-read',['synthetic/code'],budget)
+        backup=monitor.Reader(os.environ['GITHUB_TOKEN'],['synthetic/verifier','synthetic/backup'],budget)
+        code=monitor.Reader(os.environ['GITHUB_TOKEN'],['synthetic/code'],budget,metadata=True)
         read_backup(backup,code,http.policy,end)
         fails(ValueError,lambda:read_backup(backup,code,http.policy,end+1))
 
 
 def test_reader_get_response_deadline_and_shared_request_caps():
-    budget=ReadBudget();reader=monitor.Reader('synthetic',['synthetic/code'],budget)
+    budget=ReadBudget();reader=monitor.Reader(os.environ['GITHUB_TOKEN'],['synthetic/code'],budget,metadata=True)
     fails(github.StoreUnavailable,lambda:reader._request('PUT','/repos/synthetic/code/contents/x',{}))
     fails(github.StoreUnavailable,lambda:reader._request('GET','/repos/foreign/code/x'))
     budget.requests=64;fails(github.StoreUnavailable,lambda:reader._request('GET','/repos/synthetic/code/x'))

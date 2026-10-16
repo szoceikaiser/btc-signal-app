@@ -4,6 +4,7 @@ from datetime import datetime,timezone
 from pathlib import Path
 
 def install():
+    __import__('offline_git_objects').install()
     import p3_github_probe as p
     import p3_public_root as u
     import test_p3_rules403 as t

@@ -52,7 +52,8 @@ def provision(package, target):
         with durable.VolumeStore(stage/'store',snapshot['control']['store_id']) as check:
             if check.snapshot!=snapshot:
                 raise ValueError('Provision verification failed')
-        (stage/'store').rename(target)
+        from local_publication import publish_new
+        publish_new(stage/'store',target)
     finally:
         shutil.rmtree(stage)
     return {'store_id':snapshot['control']['store_id'],'mode':'blocked','path':str(Path(target).resolve())}

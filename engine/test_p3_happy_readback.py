@@ -47,7 +47,7 @@ def body_model(plan,rows):
     return records,client.parents_map
 
 def fixture(td):
-    root=Path(td);plan,_=n.fixture(root,root_success=True);base=n.inputs()
+    root=Path(td);plan,_=n.fixture(root,root_success=True);base=n.inputs();__import__('p3_portable_inputs').bind_happy(base)
     real=n.read_rows(base/'p3-store-happy-halt-20261013/session-snapshot/public-store-happy.jsonl')
     rows=n.read_rows(root/'session'/ (h.o.u.CONTINUE+'.jsonl'))
     old=n.read(base/'p3-public-storebetrieb-start-20261013/OPERATIONS.json');g=n.read(base/'p3-public-storebetrieb-start-20261013/INITIAL-GRANT.json')

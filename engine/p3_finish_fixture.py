@@ -2,6 +2,8 @@ import os,json,sqlite3,atexit,types,socket
 from pathlib import Path
 from datetime import datetime
 def install():
+    __import__('offline_git_objects').install()
+    __import__('p3_portable_inputs').bind_happy(os.environ['P3_PUBLIC_FIXTURE_INPUTS'])
     import p3_happy_finish as f
     import p3_probe_simulation as sim
     import test_p3_rules403 as t

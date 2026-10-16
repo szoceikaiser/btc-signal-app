@@ -16,6 +16,7 @@ import types
 
 
 def install():
+    __import__('offline_git_objects').install()
     import p3_github_probe as p
     import p3_rules403 as r
     import test_p3_rules403 as t

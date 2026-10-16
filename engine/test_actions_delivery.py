@@ -52,6 +52,9 @@ class BranchHTTP:
         return self.state['history'][self.state['heads'][branch]][path].encode()
 
     def open(self, request, timeout):
+        from offline_test_fixtures import branch_reply
+        response=branch_reply(self,request,timeout)
+        if response is not None: return response
         method = request.get_method(); url = request.full_url
         self.seen.append((method,url,timeout))
         path = urllib.parse.urlsplit(url).path
@@ -111,15 +114,19 @@ def fixture():
     with tempfile.TemporaryDirectory() as td, fake_store() as api:
         root=Path(td); data=root/'runner/data'; data.mkdir(parents=True)
         runtime=json.loads((ROOT/'ops/produktion/github-actions-runtime.disabled.json').read_text(encoding='utf-8-sig'))
-        runtime.update(enabled=True,activation_review_sha256='b'*64,private_store_repository=REPO,
+        runtime.update(python_version=list(sys.version_info[:3]),enabled=True,activation_review_sha256='b'*64,private_store_repository=REPO,
                        store_branch=BRANCH,fence_branch='actions-fence',store_id=STORE_ID,code_sha='a'*40,
                        code_repository='synthetic/code',code_ref='refs/heads/synthetic',
                        bot_identity='synthetic-bot',config_sha256=digest(api.envelope()['snapshot']['engine']['config']))
+        from offline_test_fixtures import sender_access
+        access,rules,rulesets=sender_access(runtime)
+        runtime.update(public_access=access,public_access_sha256=digest(access))
         path=root/'runtime.json';path.write_text(canonical(runtime),encoding='utf-8')
         (data/'config.json').write_text(canonical(api.envelope()['snapshot']['engine']['config']),encoding='utf-8')
         http=BranchHTTP({github.STORE_PATH:api.record['body'].decode(),
                         actions.FENCE_PATH:actions.seed_fence(entry.deployment(runtime)).decode()})
-        env={'SYSTEMROOT':os.environ.get('SYSTEMROOT',r'C:\Windows'),
+        http.access,http.rules,http.rulesets=access,rules,rulesets
+        env={'GITHUB_TOKEN':'synthetic-codejob','PATH':os.environ.get('PATH',''),'BTC_OFFLINE_TEST':'1','PYTHONPATH':str(ROOT/'engine/offline_guard'),'SYSTEMROOT':os.environ.get('SYSTEMROOT',r'C:\Windows'),
              'WINDIR':os.environ.get('WINDIR',r'C:\Windows'),
              'TMP':tempfile.gettempdir(), 'TEMP':tempfile.gettempdir(),
              'PYTHONUTF8':'1',
@@ -139,7 +146,8 @@ def fixture():
              'GITHUB_EVENT_NAME':'workflow_dispatch'}
         with patch.dict(os.environ,env,clear=True), patch.object(entry,'check_code_pin'),\
              patch.object(actions.ActionsClient,'open_request',side_effect=http.open),\
-             patch('urllib.request.urlopen',side_effect=AssertionError('Real HTTP forbidden')):
+             patch('urllib.request.urlopen',side_effect=AssertionError('Real HTTP forbidden')),\
+             patch.object(entry.time,'time',return_value=1791100921):
             yield root,data,path,runtime,http
 
 
@@ -235,7 +243,10 @@ def test_budget_bytes_deadline_full_reserve_and_no_downgrade():
             assert http.puts<=1
     with fixture() as (_,data,path,runtime,http):
         http.mode='oversize'
-        fails(github.StoreError,lambda:invoke(path,data));assert http.puts==0
+        try:invoke(path,data)
+        except ValueError as exc:assert str(exc)=='Public response byte bound'
+        else:raise AssertionError('Oversize response accepted')
+        assert http.puts==0
     clock=[1000]
     from production_confirmation import validate_policy
     p=json.loads((ROOT/'ops/produktion/github-actions-runtime.disabled.json').read_text())['confirmation_budgets']
@@ -382,6 +393,7 @@ def test_real_clean_checkout_pin_and_offline_prepare_exclusive_seed():
 
 
 if __name__=='__main__' and '--crash' in sys.argv:
+    entry.time.time=lambda:1791100921
     remote=Path(sys.argv[4]);http=BranchHTTP(state=json.loads(remote.read_text(encoding='utf-8')),remote=remote)
     http.crash=(sys.argv[5],int(sys.argv[6]))
     if sys.argv[5].startswith('lage-'):

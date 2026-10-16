@@ -24,17 +24,7 @@ SCHEMA = 'p4-two-history-backup-v1'
 
 
 def publish_new(source,target,budget):
-    # Windows scanners can briefly hold a newly closed local payload directory.
-    # Retry only this unchanged local rename, never a Git/HTTP mutation.
-    for attempt in range(10):
-        budget.check()
-        if Path(target).exists(): raise FileExistsError(target)
-        try:
-            Path(source).rename(target)
-            return
-        except PermissionError:
-            if os.name!='nt' or attempt==9: raise
-            time.sleep(.1)
+    return b.publish_new(source,target,budget)
 
 
 def head(repo, branch, budget):

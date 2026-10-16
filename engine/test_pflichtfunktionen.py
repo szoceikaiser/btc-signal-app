@@ -3,6 +3,7 @@ from copy import deepcopy
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -14,10 +15,11 @@ import telegram_notify as tg
 from production_contract import canonical, digest
 from strategy_core import Candle
 from test_actions_delivery import fixture, invoke, entry, ROOT
+from production_confirmation import ProductionContentsClient
 from test_github_delivery import fails
 import produktion_pages_export as pages
 import produktion_runtime_prepare as prepare
-NODE = os.environ.get('BTC_TEST_NODE')
+NODE = os.environ.get('BTC_TEST_NODE') or shutil.which('node')
 
 
 def binding(kind, number, run_id):
@@ -130,13 +132,13 @@ def test_lage_real_process_loss_before_after_send_and_close_no_replacement_resen
 def pages_runtime(root, runtime):
     p=root/'pages-runtime.json'
     p.write_text(canonical({'schema':pages.SCHEMA, 'enabled':True, 'workflow':pages.WORKFLOW,
-                           'deployment_schema':actions.POLICY, 'deployment':entry.deployment(runtime)}),encoding='utf-8')
+                           'deployment_schema':actions.POLICY, 'deployment':entry.deployment(runtime),'public_access':runtime['public_access']}),encoding='utf-8')
     return p
 
 
 def pages_environment():
     return patch.dict(os.environ,{'GITHUB_WORKFLOW_REF':'synthetic/code/'+pages.WORKFLOW+'@refs/heads/synthetic',
-                                 'BTC_PAGES_STORE_READ_TOKEN':'synthetic-read-only'})
+                                 'BTC_DELIVERY_GITHUB_TOKEN':'','TELEGRAM_BOT_TOKEN':'', 'GITHUB_TOKEN':'synthetic-codejob'})
 
 
 def test_pages_actual_read_client_entry_whitelist_package_and_stable_revalidation():
@@ -152,9 +154,9 @@ def test_pages_actual_read_client_entry_whitelist_package_and_stable_revalidatio
         p=pages_runtime(root,runtime); out=root/'public'
         timestamp=json.loads(http.file(github.STORE_PATH))['snapshot']['engine']['last_signal_ts']
         before=http.puts
-        with pages_environment(),patch.object(pages,'check_code_pin'),patch.object(pages.ReadClient,'open_request',side_effect=http.open),patch.object(pages.time,'time',return_value=(timestamp+14400000+1000)/1000),patch.object(tg,'deliver_telegram',side_effect=AssertionError('Export cannot send')):
+        with pages_environment(),patch.object(pages,'check_code_pin'),patch.object(ProductionContentsClient,'open_request',side_effect=http.open),patch.object(pages.ReadClient,'open_request',side_effect=http.open),patch.object(pages.time,'time',return_value=(timestamp+14400000+1000)/1000),patch.object(tg,'deliver_telegram',side_effect=AssertionError('Export cannot send')):
             result=pages.export(p,data/'config.json',out)
-            assert result['get']==12 and result['put']==0 and result['transport']==0
+            assert result['get']==6 and result['put']==0 and result['transport']==0
             manifest=json.loads((out/'projection-manifest.json').read_text())
             payload=(out/manifest['projection']).read_bytes()
             assert hashlib.sha256(payload).hexdigest()==manifest['sha256']
@@ -162,12 +164,11 @@ def test_pages_actual_read_client_entry_whitelist_package_and_stable_revalidatio
             assert set(value['pins'])=={'code_sha','config_sha256','projection_binding'}
             assert not (out/'data').exists()
             assert all(x not in payload for x in (b'_delivery',b'commands',b'control',b'outbox',b'receipt',b'target_binding',b'synthetic-only',b'PRIVATE-'))
-            assert pages.export(p,data/'config.json',out,verify=out.with_suffix('.receipt.json'))['get']==12
+            assert pages.export(p,data/'config.json',out,verify=out.with_suffix('.receipt.json'))['get']==6
             assert http.puts==before
-            node=NODE
-            if node:
-                proc=subprocess.run([node,str(ROOT/'tools/test_pages_projection.cjs'),str(out)],capture_output=True)
-                assert proc.returncode==0,proc.stdout.decode()+proc.stderr.decode()
+            assert NODE,'Node is required for the public package case'
+            proc=subprocess.run([NODE,str(ROOT/'tools/test_pages_projection.cjs'),str(out)],capture_output=True)
+            assert proc.returncode==0,proc.stdout.decode()+proc.stderr.decode()
             (out/'unreviewed.txt').write_text('private')
             fails(github.StoreConflict,lambda:pages.export(p,data/'config.json',out,verify=out.with_suffix('.receipt.json')))
 
@@ -205,14 +206,15 @@ def test_pages_refuses_open_foreign_unconfirmed_and_moved_pairs_without_put_or_p
                     state['messages'][0].update(status='rejected',attempts=1,target='x')
                     v['snapshot']['commands']['synthetic']={'_delivery':state,'result':None}
                 mutate(http,github.STORE_PATH,reject)
-            with pages_environment(),patch.object(pages,'check_code_pin'),patch.object(pages.ReadClient,'open_request',side_effect=moving):
+            with pages_environment(),patch.object(pages,'check_code_pin'),patch.object(ProductionContentsClient,'open_request',side_effect=http.open),patch.object(pages.ReadClient,'open_request',side_effect=moving):
                 fails((ValueError,github.StoreError),lambda:pages.export(p,data/'config.json',root/'public'))
             assert http.puts==before and not (root/'public').exists()
 
 
 def test_export_fixed_get_byte_deadline_and_method_bounds():
     clock=[0]
-    client=pages.ReadClient('synthetic','synthetic/store',{'stream':github.STORE_PATH},clock=lambda:clock[0])
+    with patch.dict(os.environ,{'GITHUB_TOKEN':'synthetic'}):
+        client=pages.ReadClient('synthetic','synthetic/store',{'stream':github.STORE_PATH},clock=lambda:clock[0])
     fails(github.StoreError,lambda:client.update())
     fails(github.StoreError,lambda:client._request('PUT','anything'))
     fails(github.StoreError,lambda:client.read('foreign/store','stream'))
@@ -243,23 +245,26 @@ def test_fixed_disabled_templates_prepare_factory_and_legacy_workflows_preserved
     ptext=(ROOT/'ops/produktion/pages-workflow.disabled.yml').read_text()
     assert 'if: ${{ false }}' in ptext and 'group: btc-delivery-single-stream' in ptext
     assert 'path: .runtime/public' in ptext and 'path: site' not in ptext
-    assert ptext.count('--verify .runtime/public.receipt.json')==2
+    assert ptext.count('--verify .runtime/public.receipt.json')==1
     assert 'TELEGRAM_' not in ptext and 'BTC_REVIEWED_STORE_TOKEN' not in ptext
     assert all(x in ptext for x in ('Signal-Engine','Flush-Wache','Lage abrufen','Backtest'))
     assert json.loads((ROOT/'ops/produktion/pages-runtime.disabled.json').read_text())['enabled'] is False
-    assert subprocess.run(['git','diff','--quiet','e245ba08028fb19d2af39a7f418454f2054e3250','--','.github/workflows','site/data'],cwd=ROOT).returncode==0
+    assert subprocess.run(['git','diff','--quiet','e245ba08028fb19d2af39a7f418454f2054e3250','--','.github/workflows/backtest.yml','.github/workflows/pages.yml','.github/workflows/signal.yml','.github/workflows/watch.yml','.github/workflows/lage.yml','site/data'],cwd=ROOT).returncode==0
 
 
 def test_public_pin_failures_before_reads_and_disabled_cli_refusal():
     with fixture() as (root,data,path,runtime,http):
         p=pages_runtime(root,runtime)
-        with patch.object(pages,'check_code_pin'),patch.object(pages.ReadClient,'open_request',side_effect=http.open):
+        with patch.object(pages,'check_code_pin'),patch.object(ProductionContentsClient,'open_request',side_effect=http.open),patch.object(pages.ReadClient,'open_request',side_effect=http.open):
             fails(ValueError,lambda:pages.export(p,data/'config.json',root/'public'))  # actual wrong Actions entry
-        with pages_environment(),patch.object(pages,'check_code_pin'),patch.object(pages.ReadClient,'open_request',side_effect=http.open):
+        with pages_environment(),patch.object(pages,'check_code_pin'),patch.object(ProductionContentsClient,'open_request',side_effect=http.open),patch.object(pages.ReadClient,'open_request',side_effect=http.open):
             bad=json.loads((data/'config.json').read_text());bad['muster_cvd']='alt'
             (root/'wrong-config.json').write_text(canonical(bad))
             fails(ValueError,lambda:pages.export(p,root/'wrong-config.json',root/'public'))
-        assert http.seen==[]
+        # Current export verifies public identity/protection before config; no
+        # stream/fence body is read and no package or mutation is admitted.
+        assert len(http.seen)==5 and all(method=='GET' and '/contents/' not in url for method,url,_ in http.seen)
+        assert http.puts==0 and not (root/'public').exists()
     child=subprocess.run([sys.executable,'-B',str(ROOT/'tools/produktion_pages_export.py'),
         '--runtime',str(ROOT/'ops/produktion/pages-runtime.disabled.json'),
         '--config','missing','--out','missing'],capture_output=True)
@@ -272,6 +277,10 @@ def test_public_export_actual_oversize_and_stale_slice_refused():
             invoke(path,data);p=pages_runtime(root,runtime);before=http.puts
             if mode=='oversize': http.mode='oversize'
             timestamp=json.loads(http.file(github.STORE_PATH))['snapshot']['engine']['last_signal_ts']
-            with pages_environment(),patch.object(pages,'check_code_pin'),patch.object(pages.ReadClient,'open_request',side_effect=http.open),patch.object(pages.time,'time',return_value=(timestamp+14400000+8*3600000+1)/1000):
-                fails(github.StoreError,lambda:pages.export(p,data/'config.json',root/'public'))
+            with pages_environment(),patch.object(pages,'check_code_pin'),patch.object(ProductionContentsClient,'open_request',side_effect=http.open),patch.object(pages.ReadClient,'open_request',side_effect=http.open),patch.object(pages.time,'time',return_value=(timestamp+14400000+8*3600000+1)/1000):
+                if mode=='oversize':
+                    try:pages.export(p,data/'config.json',root/'public')
+                    except ValueError as exc:assert str(exc)=='Public response byte bound'
+                    else:raise AssertionError('Oversize public response accepted')
+                else:fails(github.StoreError,lambda:pages.export(p,data/'config.json',root/'public'))
             assert http.puts==before and not (root/'public').exists()
