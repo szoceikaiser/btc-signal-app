@@ -194,6 +194,11 @@ def test_public_unknown_prior_mutation_missing_marker_live_exact_pid_and_kernel_
                 else:
                     import fcntl;fcntl.flock(handle,fcntl.LOCK_EX|fcntl.LOCK_NB)
             try:
-                code,w,out=direct(root,a);assert code==2 and not w['prompts'] and not w['http'];save(out/'countercase.json',{'mode':mode})
+                code,w,out=direct(root,a)
+                detail={'mode':mode,'exit':code,'prompts':w['prompts'] if w else None,
+                        'http_count':len(w['http']) if w else None,'pushes':w['pushes'] if w else None}
+                save(out/'countercase.json',detail)
+                print('P3_COUNTERCASE '+p.canonical(detail),flush=True)
+                assert code==2 and w is not None and not w['prompts'] and not w['http'],detail
             finally:
                 if handle:handle.close()

@@ -1,24 +1,19 @@
 name: Tests
-run-name: Read-only Linux offline diagnosis
+run-name: One Linux offline repair acceptance
 
 on:
   push:
     branches:
-      - codex/linux-offline-diagnose-20261016
+      - codex/linux-offline-reparatur-20261016
 
 permissions:
   contents: read
 
 jobs:
-  diagnosis:
-    name: offline-diagnosis-${{ matrix.python }}
+  tests:
+    name: full-offline-python-3.12.15
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        python: ['3.12.14', '3.12.15']
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,11 +21,11 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
+          python-version: '3.12.15'
       - name: Fixed scientific test dependency
         run: python -m pip install numpy==2.3.5
       - uses: actions/setup-node@v4
         with:
           node-version: '24.12.0'
-      - name: Ten exact offline cases with bounded failure details
-        run: python -B tools/linux_offline_diagnosis.py --out "${{ runner.temp }}/btc-linux-diagnosis"
+      - name: Complete offline acceptance, inventory, AS measurements and bounded details
+        run: python -B tools/offline_acceptance.py --jobs 4 --out "${{ runner.temp }}/btc-linux-repair"

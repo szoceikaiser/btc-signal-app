@@ -75,8 +75,7 @@ def wire(client,request,budget,limit):
             with client.open_request(request,timeout=seconds) as response:
                 client.quota_headers.observe(getattr(response,'headers',{}),getattr(response,'status',200))
                 client._response_link=response.headers.get('Link','') if hasattr(response,'headers') else ''
-                responses.append(response);raw=response.read(limit+1)
-                if len(raw)>limit: raise ValueError('Response byte limit')
+                responses.append(response);raw=b.read_bounded(response,limit)
                 values.append(raw)
         except BaseException as exc: values.append(exc)
         finally: finished.set()
@@ -85,6 +84,10 @@ def wire(client,request,budget,limit):
         while not finished.wait(.05):
             budget.check()
             if time.monotonic()-began>=seconds: raise TimeoutError('Bounded HTTP wall deadline')
+        # Event.set precedes thread teardown. Reap successful workers before a
+        # subsequent CLI request can overlap their stack/address reservations.
+        worker.join(max(0,seconds-(time.monotonic()-began)))
+        if worker.is_alive(): raise TimeoutError('Bounded HTTP wall deadline')
         budget.check()
         if time.monotonic()-began>seconds: raise TimeoutError('Bounded HTTP wall deadline')
         value=values[0]

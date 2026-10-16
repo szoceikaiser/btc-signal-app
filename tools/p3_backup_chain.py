@@ -8,6 +8,7 @@ from copy import deepcopy
 import ctypes
 from functools import lru_cache
 import hashlib
+import io
 from itertools import islice
 import json
 import os
@@ -236,11 +237,25 @@ def process(repo, args, budget, env=None, file_limit=None):
             p.stdout.close()
 
 
+def read_bounded(stream, limit):
+    """Grow with received bytes, never preallocate the entire allowed response.
+
+    Read one excess byte to distinguish exact EOF from a truncated transfer.
+    The surrounding HTTP deadline / Git process watchdog still bounds stalls.
+    """
+    if type(limit) is not int or limit < 0: raise ValueError('Invalid byte limit')
+    with io.BytesIO() as out:
+        while True:
+            chunk=stream.read(min(65536,limit-out.tell()+1))
+            if not chunk: return out.getvalue()
+            if len(chunk)>limit-out.tell(): raise ValueError('Response byte limit')
+            out.write(chunk)
+
+
 def git(repo, budget, *args):
     with process(repo, args, budget) as p:
         p.stdin.close()
-        out = p.stdout.read(16*MIB+1)
-        if len(out)>16*MIB: raise ValueError('Git output budget')
+        out = read_bounded(p.stdout,16*MIB)
     return out
 
 

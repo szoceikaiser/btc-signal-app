@@ -307,6 +307,25 @@ def push(client,a):
     b.preflight(empty=False);l.emit('phase_end',result='confirmed',scope=SCOPE,activation_allowed=False,
         bootstrap_case_counts=deepcopy(l.cases['bootstrap']),phase_counts=deepcopy(l.phase_counts[a['phase']]))
 
+def check_existing_kernel_lock(plan):
+    """Reject an occupied session before Reader input, without session writes.
+
+    POSIX advisory flock does not make the preceding hash read fail. This
+    nonblocking preflight supplements the authoritative Ledger lock below;
+    Ledger must still acquire and validate everything again before any request.
+    """
+    with (Path(plan['journal_directory'])/'probe-session.lock').open('r+b') as handle:
+        p.require(os.fstat(handle.fileno()).st_size>0,'Original lock bytes required')
+        if os.name=='nt':
+            import msvcrt
+            msvcrt.locking(handle.fileno(),msvcrt.LK_NBLCK,1)
+            msvcrt.locking(handle.fileno(),msvcrt.LK_UNLCK,1)
+        else:
+            import fcntl
+            fcntl.flock(handle,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            fcntl.flock(handle,fcntl.LOCK_UN)
+
+
 def main():
     cli=argparse.ArgumentParser(description=__doc__);cli.add_argument('--template');cli.add_argument('--real',action='store_true')
     cli.add_argument('--phase',choices=p.PUBLIC_ROOT_PHASES,default=PHASE)
@@ -320,6 +339,7 @@ def main():
     plan,a,g=[read(x) for x in (args.plan,args.amendment,args.grant)]
     p.require(args.phase==a['phase'],'Explicit public phase differs')
     guard=authorize(plan,a,g,args.approved_amendment_sha256)
+    check_existing_kernel_lock(plan)
     try:reader=p.read_token('Reader')
     except (KeyboardInterrupt,ValueError):
         print('Reader-Eingabe abgebrochen/ungueltig. Kein Sessionversuch/Request gestartet.');return 3

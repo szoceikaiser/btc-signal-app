@@ -16,7 +16,8 @@ def test_b_next_function_has_fresh_module_environment_and_output():
 def test_descendant_python_and_node_cannot_open_sockets_even_with_clean_environment():
     child=subprocess.run([sys.executable,'-c',"import socket;socket.socket().connect(('127.0.0.1',9))"],env={},capture_output=True)
     assert child.returncode!=0 and b'Offline acceptance forbids actual network' in child.stderr,(child.returncode,child.stdout,child.stderr)
-    child=subprocess.run(['node','-e',"require('net').connect(9,'127.0.0.1')"],env={},capture_output=True)
+    node=os.environ['BTC_TEST_NODE'];assert Path(node).is_absolute() and Path(node).is_file()
+    child=subprocess.run([node,'-e',"require('net').connect(9,'127.0.0.1')"],env={},capture_output=True)
     assert child.returncode!=0 and b'Offline acceptance forbids actual network' in child.stderr,(child.returncode,child.stdout,child.stderr)
 
 def test_runner_environment_contains_only_synthetic_automatic_reader():

@@ -173,7 +173,7 @@ class Provider:
             branch=next(branch for (name,branch),candidate in self.repos.items() if name==repo and candidate==local)
             self.fetches.append((repo,branch,want))
             with self.original_process(local,['pack-objects','--stdout','--revs'],b.Budget()) as proc:
-                proc.stdin.write((want+'\n').encode());proc.stdin.close();raw=proc.stdout.read(64*h.MIB+1)
+                proc.stdin.write((want+'\n').encode());proc.stdin.close();raw=b.read_bounded(proc.stdout,64*h.MIB)
             assert len(raw)<=64*h.MIB
             body=pkt(b'NAK\n')
             for i in range(0,len(raw),65500): body+=pkt(b'\x01'+raw[i:i+65500])
