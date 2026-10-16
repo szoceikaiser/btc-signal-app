@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "FULL",
- "last_signal_ts": 1792123200000,
+ "last_signal_ts": 1792137600000,
  "retrace_extreme": 79800.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -44,39 +44,38 @@
  },
  "widerstand": {
   "richtung": "LONG",
-  "bein_start": 84352.0,
-  "bein_ende": 81033.66,
-  "level_05": 82692.83,
-  "gp_von": 83084.39412,
-  "gp_bis": 83190.581,
-  "level_0786": 83641.87524,
-  "ausbruch": 84352.0
+  "bein_start": 84168.0,
+  "bein_ende": 79800.0,
+  "level_05": 81984.0,
+  "gp_von": 82499.424,
+  "gp_bis": 82639.2,
+  "level_0786": 83233.248,
+  "ausbruch": 84168.0
  },
  "plan": {
   "richtung": "LONG",
   "anteil_pct": 105,
   "einstand": 83217.57662380954,
-  "kurs": 82290.0,
+  "kurs": 82640.73,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 82.290 $ ueber EMA200 (73.828 $)",
+   "trend_text": "Uebergeordnet: Kurs 82.641 $ ueber EMA200 (73.864 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
-   "spot": "schwach",
-   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
+   "spot": "zurueckgekehrt",
+   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)"
   },
   "ampel": {
    "stufe": "guenstig",
    "richtung": "LONG",
    "dafuer": [
     "Trend",
-    "Struktur"
-   ],
-   "dagegen": [
+    "Struktur",
     "Spot-Nachfrage"
    ],
+   "dagegen": [],
    "gezaehlt": 3,
-   "text": "GUENSTIG \u2014 2 von 3 sprechen dafuer"
+   "text": "GUENSTIG \u2014 3 von 3 sprechen dafuer"
   },
   "nachkauf": [
    {
@@ -100,14 +99,14 @@
   ],
   "teilgewinn": [
    {
-    "preis": 81888.5,
-    "was": "kurz unter dem letzten Hoch 82.300",
+    "preis": 82435.75,
+    "was": "kurz unter dem letzten Hoch 82.850",
     "tranche": 15
    },
    {
     "zone": [
-     83084.39412,
-     83190.581
+     82499.424,
+     82639.2
     ],
     "was": "Widerstand der Gegenbewegung \u2014 nur Hinweis, die Engine verkauft dort nicht",
     "tranche": 0
@@ -184,29 +183,28 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-16T08:42:26Z",
- "last_close": 82290.0,
+ "updated_at": "2026-10-16T12:02:24Z",
+ "last_close": 82640.73,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 82.290 $ ueber EMA200 (73.828 $)",
+   "trend_text": "Uebergeordnet: Kurs 82.641 $ ueber EMA200 (73.864 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
-   "spot": "schwach",
-   "spot_text": "Spot-Nachfrage schwach (Verkaufsdruck haelt an)"
+   "spot": "zurueckgekehrt",
+   "spot_text": "Spot-Nachfrage zurueckgekehrt (Kaeufer sind zurueck)"
   },
   "ampel": {
-   "stufe": "gemischt",
+   "stufe": "guenstig",
    "richtung": "LONG",
    "dafuer": [
-    "Trend"
-   ],
-   "dagegen": [
+    "Trend",
     "Spot-Nachfrage"
    ],
+   "dagegen": [],
    "gezaehlt": 2,
-   "text": "GEMISCHT \u2014 1 von 2 spricht dafuer"
+   "text": "GUENSTIG \u2014 2 von 2 sprechen dafuer"
   },
   "impuls_start": 80126.04,
   "impuls_ende": 87395.67,
