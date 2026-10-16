@@ -4,14 +4,14 @@ run-name: One Linux offline repair acceptance
 on:
   push:
     branches:
-      - codex/linux-offline-reparatur-20261016
+      - codex/linux-reparatur-abnahme-20261016
 
 permissions:
   contents: read
 
 jobs:
   tests:
-    name: full-offline-python-3.12.15
+    name: full-offline-python-3.12.14
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -21,7 +21,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12.15'
+          python-version: '3.12.14'
       - name: Fixed scientific test dependency
         run: python -m pip install numpy==2.3.5
       - uses: actions/setup-node@v4

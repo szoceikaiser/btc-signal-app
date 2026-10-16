@@ -42,8 +42,15 @@ async function main() {
     ChartSignals,LiveProjection:loader,fetch:async url => url.startsWith('https://data-api.binance.vision/')
       ? new Response(JSON.stringify([[value.signal_asof_ms,100,110,90,105,0]])) : fetcher(url)};
   context.ChartSignals={...ChartSignals,renderList:(container,records,issues)=>ChartSignals.renderList(container,records,issues,context.document)};
-  vm.createContext(context);vm.runInContext(inline,context);
-  await new Promise(resolve=>setTimeout(resolve,40));
+  vm.createContext(context);
+  const loaded=vm.runInContext(inline,context,{timeout:1000});
+  assert(loaded && typeof loaded.then==='function','Actual initial chart load exposes completion');
+  let deadline;
+  try {
+    await Promise.race([loaded,new Promise((_,reject)=>{
+      deadline=setTimeout(()=>reject(new Error('Actual chart load did not finish within 5 seconds')),5000);
+    })]);
+  } finally { clearTimeout(deadline); }
   assert(series.data?.length>0,'Actual chart loads candles');
   assert(!element('status').textContent.startsWith('Fehler'),element('status').textContent);
   assert(element('status').textContent.includes('Bestätigter Export'));
