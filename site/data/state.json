@@ -1,7 +1,7 @@
 {
  "direction": "LONG",
  "pos_state": "FULL",
- "last_signal_ts": 1792209600000,
+ "last_signal_ts": 1792224000000,
  "retrace_extreme": 79800.0,
  "tp_rungs": 0,
  "dip_buys": 0,
@@ -56,16 +56,14 @@
   "richtung": "LONG",
   "anteil_pct": 105,
   "einstand": 83217.57662380954,
-  "kurs": 81738.87,
+  "kurs": 81576.33,
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 81.739 $ ueber EMA200 (73.932 $)",
+   "trend_text": "Uebergeordnet: Kurs 81.576 $ ueber EMA200 (74.113 $)",
    "struktur": "unveraendert",
    "struktur_text": "Struktur unveraendert - Bein 80.126 $ -> 87.396 $",
    "spot": "stabil",
-   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)",
-   "muster": "DERIVATE_PUMP",
-   "muster_text": "Derivate-Pump (Hebel treibt, Spot fehlt)"
+   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)"
   },
   "ampel": {
    "stufe": "guenstig",
@@ -75,11 +73,9 @@
     "Struktur",
     "Spot-Nachfrage"
    ],
-   "dagegen": [
-    "Muster"
-   ],
-   "gezaehlt": 4,
-   "text": "GUENSTIG \u2014 3 von 4 sprechen dafuer"
+   "dagegen": [],
+   "gezaehlt": 3,
+   "text": "GUENSTIG \u2014 3 von 3 sprechen dafuer"
   },
   "nachkauf": [
    {
@@ -91,12 +87,12 @@
     "tranche": 15
    },
    {
-    "preis": 81588.88,
+    "preis": 81033.66,
     "was": "Liquidationszone",
     "tranche": 20
    },
    {
-    "preis": 81033.66,
+    "preis": 80914.23,
     "was": "Liquidationszone",
     "tranche": 20
    }
@@ -187,19 +183,17 @@
   "ausbruch_ruecktest": false,
   "ruecktest_fenster": 12
  },
- "updated_at": "2026-10-17T08:13:16Z",
- "last_close": 81738.87,
+ "updated_at": "2026-10-17T12:02:23Z",
+ "last_close": 81576.33,
  "zonen_vorschau": {
   "richtung": "LONG",
   "lage": {
    "trend": "ueber",
-   "trend_text": "Uebergeordnet: Kurs 81.739 $ ueber EMA200 (73.932 $)",
+   "trend_text": "Uebergeordnet: Kurs 81.576 $ ueber EMA200 (74.113 $)",
    "struktur": "neu",
    "struktur_text": "Aktuelles Bein 80.126 $ -> 87.396 $",
    "spot": "stabil",
-   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)",
-   "muster": "DERIVATE_PUMP",
-   "muster_text": "Derivate-Pump (Hebel treibt, Spot fehlt)"
+   "spot_text": "Spot-Nachfrage stabil (Nachfrage traegt)"
   },
   "ampel": {
    "stufe": "guenstig",
@@ -208,11 +202,9 @@
     "Trend",
     "Spot-Nachfrage"
    ],
-   "dagegen": [
-    "Muster"
-   ],
-   "gezaehlt": 3,
-   "text": "GUENSTIG \u2014 2 von 3 sprechen dafuer"
+   "dagegen": [],
+   "gezaehlt": 2,
+   "text": "GUENSTIG \u2014 2 von 2 sprechen dafuer"
   },
   "impuls_start": 80126.04,
   "impuls_ende": 87395.67,
