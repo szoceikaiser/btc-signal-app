@@ -474,6 +474,16 @@
    "stop_ref": 80126.04,
    "tag": "",
    "label": "NACHKAUF (0.786-Zone)"
+  },
+  {
+   "ts": 1792209600000,
+   "type": "WARNUNG",
+   "price": 81738.87,
+   "tranche_pct": 0,
+   "reason": "Derivate-Pump: anfaellig fuer Long-Flush",
+   "stop_ref": null,
+   "tag": "",
+   "label": "WARNUNG (Derivate-Pump aktiv)"
   }
  ]
 }
