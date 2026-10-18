@@ -11,8 +11,8 @@ from github_freshness import ReadBudget, utc_ms, iso
 from production_confirmation import ProductionContentsClient
 from production_contract import digest, validate_v2
 
-MAX_GET = 64
-MAX_SECONDS = 20
+MAX_GET = 80
+MAX_SECONDS = 30
 MAX_RUNS = 100
 
 
