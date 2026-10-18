@@ -1,0 +1,233 @@
+{
+  "schema": "btc-hosted-backup-v1",
+  "enabled": false,
+  "runner_os": "Linux",
+  "python_version": [
+    3,
+    12,
+    14
+  ],
+  "source": {
+    "repository": "szoceikaiser/btc-delivery-store",
+    "id": null,
+    "branch": "delivery-stream-v2"
+  },
+  "backup": {
+    "repository": "szoceikaiser/btc-delivery-backup",
+    "id": null,
+    "branch": "verified-pair-packages"
+  },
+  "receipts": {
+    "repository": "szoceikaiser/btc-delivery-backup-verification",
+    "id": null,
+    "branch": "verified-receipts"
+  },
+  "identity": {
+    "repo": "szoceikaiser/btc-delivery-store",
+    "branch": "delivery-stream-v2",
+    "store_id": null,
+    "stream_id": null
+  },
+  "deployment": {
+    "code_repository": "szoceikaiser/btc-signal-app",
+    "code_ref": "refs/heads/main",
+    "workflows": {
+      ".github/workflows/signal.yml": "signal",
+      ".github/workflows/watch.yml": "watch",
+      ".github/workflows/lage.yml": "lage"
+    },
+    "private_store_repository": "szoceikaiser/btc-delivery-store",
+    "store_branch": "delivery-stream-v2",
+    "fence_branch": "delivery-fence-v2",
+    "store_id": null,
+    "store_path": "delivery/stream.json",
+    "fence_path": "delivery/actions-fence.json",
+    "code_sha": null,
+    "config_sha256": null,
+    "bot_identity": null,
+    "activation_review_sha256": null,
+    "confirmation_policy": "github-actions-fence-v2",
+    "confirmation_budgets": {
+      "policy": "github-confirmation-v1",
+      "confirmation_cycles": 3,
+      "timeout_seconds": 15,
+      "run_get_limit": 640,
+      "run_put_limit": 50,
+      "case_get_limit": 11,
+      "case_put_limit": 1,
+      "request_byte_limit": 1126400,
+      "response_byte_limit": 2097152,
+      "run_request_byte_limit": 62914560,
+      "run_response_byte_limit": 1447034880
+    },
+    "schedule_contract": "btc-actions-slots-v1",
+    "public_access_sha256": null
+  },
+  "pins": null,
+  "migration": {
+    "target": {
+      "repository": "szoceikaiser/btc-delivery-store",
+      "id": null,
+      "branch": "reviewed-migration"
+    },
+    "commit_sha": null,
+    "tree_sha": null,
+    "files": {}
+  },
+  "activation_review_sha256": null,
+  "runtime_sha256": null,
+  "producer": {
+    "repository": "szoceikaiser/btc-signal-app",
+    "repository_id": null,
+    "branch": "main",
+    "workflow": ".github/workflows/backup.yml",
+    "code_sha": null,
+    "workflow_sha256": null
+  },
+  "verifier": {
+    "repository": "szoceikaiser/btc-signal-app",
+    "repository_id": null,
+    "branch": "main",
+    "workflow": ".github/workflows/backup-verify.yml",
+    "code_sha": null,
+    "workflow_sha256": null
+  },
+  "public_access": {
+    "schema": "btc-public-access-v1",
+    "enabled": false,
+    "repositories": {
+      "szoceikaiser/btc-delivery-store": {
+        "id": null,
+        "visibility": "public",
+        "branches": [
+          "delivery-stream-v2",
+          "delivery-fence-v2",
+          "reviewed-migration"
+        ]
+      },
+      "szoceikaiser/btc-delivery-backup": {
+        "id": null,
+        "visibility": "public",
+        "branches": [
+          "verified-pair-packages"
+        ]
+      },
+      "szoceikaiser/btc-delivery-backup-verification": {
+        "id": null,
+        "visibility": "public",
+        "branches": [
+          "verified-receipts"
+        ]
+      },
+      "szoceikaiser/btc-signal-app": {
+        "id": null,
+        "visibility": "public",
+        "branches": [
+          "main"
+        ]
+      }
+    },
+    "protections": {
+      "szoceikaiser/btc-delivery-store@delivery-stream-v2": {
+        "repository": "szoceikaiser/btc-delivery-store",
+        "repository_id": null,
+        "branch": "delivery-stream-v2",
+        "active_rules_sha256": null,
+        "rulesets": {}
+      },
+      "szoceikaiser/btc-delivery-store@delivery-fence-v2": {
+        "repository": "szoceikaiser/btc-delivery-store",
+        "repository_id": null,
+        "branch": "delivery-fence-v2",
+        "active_rules_sha256": null,
+        "rulesets": {}
+      },
+      "szoceikaiser/btc-delivery-backup@verified-pair-packages": {
+        "repository": "szoceikaiser/btc-delivery-backup",
+        "repository_id": null,
+        "branch": "verified-pair-packages",
+        "active_rules_sha256": null,
+        "rulesets": {}
+      },
+      "szoceikaiser/btc-delivery-backup-verification@verified-receipts": {
+        "repository": "szoceikaiser/btc-delivery-backup-verification",
+        "repository_id": null,
+        "branch": "verified-receipts",
+        "active_rules_sha256": null,
+        "rulesets": {}
+      }
+    },
+    "credential_reviews": {
+      "sender_write": {
+        "schema": "btc-writer-review-v1",
+        "status": "pending",
+        "role": "sender_write",
+        "repository_id": null,
+        "credential_type": null,
+        "credential_reference": null,
+        "repositories": [
+          "szoceikaiser/btc-delivery-store"
+        ],
+        "branches": [
+          "delivery-stream-v2",
+          "delivery-fence-v2"
+        ],
+        "permissions": {
+          "contents": "write",
+          "metadata": "read"
+        },
+        "other_repository_write": null,
+        "reviewer": null,
+        "reviewed_at": null,
+        "evidence_sha256": null,
+        "sha256": null
+      },
+      "backup_write": {
+        "schema": "btc-writer-review-v1",
+        "status": "pending",
+        "role": "backup_write",
+        "repository_id": null,
+        "credential_type": null,
+        "credential_reference": null,
+        "repositories": [
+          "szoceikaiser/btc-delivery-backup"
+        ],
+        "branches": [
+          "verified-pair-packages"
+        ],
+        "permissions": {
+          "contents": "write",
+          "metadata": "read"
+        },
+        "other_repository_write": null,
+        "reviewer": null,
+        "reviewed_at": null,
+        "evidence_sha256": null,
+        "sha256": null
+      },
+      "receipt_write": {
+        "schema": "btc-writer-review-v1",
+        "status": "pending",
+        "role": "receipt_write",
+        "repository_id": null,
+        "credential_type": null,
+        "credential_reference": null,
+        "repositories": [
+          "szoceikaiser/btc-delivery-backup-verification"
+        ],
+        "branches": [
+          "verified-receipts"
+        ],
+        "permissions": {
+          "contents": "write",
+          "metadata": "read"
+        },
+        "other_repository_write": null,
+        "reviewer": null,
+        "reviewed_at": null,
+        "evidence_sha256": null,
+        "sha256": null
+      }
+    }
+  }
+}

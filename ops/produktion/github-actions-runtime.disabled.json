@@ -1,0 +1,200 @@
+{
+  "schema": "github-actions-fence-v2",
+  "enabled": false,
+  "store_adapter": "github",
+  "code_repository": "szoceikaiser/btc-signal-app",
+  "private_store_repository": "szoceikaiser/btc-delivery-store",
+  "store_branch": "delivery-stream-v2",
+  "fence_branch": "delivery-fence-v2",
+  "store_path": "delivery/stream.json",
+  "store_id": null,
+  "code_sha": null,
+  "config_sha256": null,
+  "bot_identity": null,
+  "activation_review_sha256": null,
+  "confirmation_policy": "github-actions-fence-v2",
+  "confirmation_budgets": {
+    "policy": "github-confirmation-v1",
+    "confirmation_cycles": 3,
+    "timeout_seconds": 15,
+    "run_get_limit": 640,
+    "run_put_limit": 50,
+    "case_get_limit": 11,
+    "case_put_limit": 1,
+    "request_byte_limit": 1126400,
+    "response_byte_limit": 2097152,
+    "run_request_byte_limit": 62914560,
+    "run_response_byte_limit": 1447034880
+  },
+  "strategy_proposal": "docs/um2-engine-integration/candidates/C05-UM2.inactive.json",
+  "strategy_proposal_active": false,
+  "runtime_source": "fresh stopped cutover; ephemeral projections restored only from authoritative GitHub stream",
+  "private_backup_repository": "szoceikaiser/btc-delivery-backup",
+  "token_scope": "bounded public GET with automatic GITHUB_TOKEN; separate reviewed writers",
+  "owner": "user; contact and response windows unverified",
+  "dispatch": "existing cron-job.org configuration unverified",
+  "independent_freshness_monitor": null,
+  "live_activation": "P4 only",
+  "fence_path": "delivery/actions-fence.json",
+  "code_ref": "refs/heads/main",
+  "runner": "ubuntu-24.04 (GitHub hosted); attempt 1 only; open fence never expires",
+  "workflows": {
+    ".github/workflows/signal.yml": "signal",
+    ".github/workflows/watch.yml": "watch",
+    ".github/workflows/lage.yml": "lage"
+  },
+  "schedule_contract": "btc-actions-slots-v1",
+  "entry_workflows": {
+    ".github/workflows/signal.yml": null,
+    ".github/workflows/watch.yml": null,
+    ".github/workflows/lage.yml": null,
+    ".github/workflows/pages.yml": null,
+    ".github/workflows/backup.yml": null,
+    ".github/workflows/backup-verify.yml": null,
+    ".github/workflows/freshness.yml": null
+  },
+  "python_version": [
+    3,
+    12,
+    14
+  ],
+  "public_access": {
+    "schema": "btc-public-access-v1",
+    "enabled": false,
+    "repositories": {
+      "szoceikaiser/btc-delivery-store": {
+        "id": null,
+        "visibility": "public",
+        "branches": [
+          "delivery-stream-v2",
+          "delivery-fence-v2",
+          "reviewed-migration"
+        ]
+      },
+      "szoceikaiser/btc-delivery-backup": {
+        "id": null,
+        "visibility": "public",
+        "branches": [
+          "verified-pair-packages"
+        ]
+      },
+      "szoceikaiser/btc-delivery-backup-verification": {
+        "id": null,
+        "visibility": "public",
+        "branches": [
+          "verified-receipts"
+        ]
+      },
+      "szoceikaiser/btc-signal-app": {
+        "id": null,
+        "visibility": "public",
+        "branches": [
+          "main"
+        ]
+      }
+    },
+    "protections": {
+      "szoceikaiser/btc-delivery-store@delivery-stream-v2": {
+        "repository": "szoceikaiser/btc-delivery-store",
+        "repository_id": null,
+        "branch": "delivery-stream-v2",
+        "active_rules_sha256": null,
+        "rulesets": {}
+      },
+      "szoceikaiser/btc-delivery-store@delivery-fence-v2": {
+        "repository": "szoceikaiser/btc-delivery-store",
+        "repository_id": null,
+        "branch": "delivery-fence-v2",
+        "active_rules_sha256": null,
+        "rulesets": {}
+      },
+      "szoceikaiser/btc-delivery-backup@verified-pair-packages": {
+        "repository": "szoceikaiser/btc-delivery-backup",
+        "repository_id": null,
+        "branch": "verified-pair-packages",
+        "active_rules_sha256": null,
+        "rulesets": {}
+      },
+      "szoceikaiser/btc-delivery-backup-verification@verified-receipts": {
+        "repository": "szoceikaiser/btc-delivery-backup-verification",
+        "repository_id": null,
+        "branch": "verified-receipts",
+        "active_rules_sha256": null,
+        "rulesets": {}
+      }
+    },
+    "credential_reviews": {
+      "sender_write": {
+        "schema": "btc-writer-review-v1",
+        "status": "pending",
+        "role": "sender_write",
+        "repository_id": null,
+        "credential_type": null,
+        "credential_reference": null,
+        "repositories": [
+          "szoceikaiser/btc-delivery-store"
+        ],
+        "branches": [
+          "delivery-stream-v2",
+          "delivery-fence-v2"
+        ],
+        "permissions": {
+          "contents": "write",
+          "metadata": "read"
+        },
+        "other_repository_write": null,
+        "reviewer": null,
+        "reviewed_at": null,
+        "evidence_sha256": null,
+        "sha256": null
+      },
+      "backup_write": {
+        "schema": "btc-writer-review-v1",
+        "status": "pending",
+        "role": "backup_write",
+        "repository_id": null,
+        "credential_type": null,
+        "credential_reference": null,
+        "repositories": [
+          "szoceikaiser/btc-delivery-backup"
+        ],
+        "branches": [
+          "verified-pair-packages"
+        ],
+        "permissions": {
+          "contents": "write",
+          "metadata": "read"
+        },
+        "other_repository_write": null,
+        "reviewer": null,
+        "reviewed_at": null,
+        "evidence_sha256": null,
+        "sha256": null
+      },
+      "receipt_write": {
+        "schema": "btc-writer-review-v1",
+        "status": "pending",
+        "role": "receipt_write",
+        "repository_id": null,
+        "credential_type": null,
+        "credential_reference": null,
+        "repositories": [
+          "szoceikaiser/btc-delivery-backup-verification"
+        ],
+        "branches": [
+          "verified-receipts"
+        ],
+        "permissions": {
+          "contents": "write",
+          "metadata": "read"
+        },
+        "other_repository_write": null,
+        "reviewer": null,
+        "reviewed_at": null,
+        "evidence_sha256": null,
+        "sha256": null
+      }
+    }
+  },
+  "public_access_sha256": null
+}

@@ -1,0 +1,56 @@
+{
+  "schema": "p3-public-root-amendment-v1",
+  "phase": "bootstrap-public-root-once",
+  "scope": "public-synthetic-original-blocked-root-only-no-activation",
+  "original_plan_sha256": null,
+  "original_expires_utc": null,
+  "root": {
+    "directory": null,
+    "files_sha256": null
+  },
+  "history": {
+    "inspection": null,
+    "grant": null,
+    "operator_script": {
+      "path": null,
+      "sha256": null
+    },
+    "code_materialization": null
+  },
+  "visibility": {
+    "acceptance_path": null,
+    "files_sha256": null
+  },
+  "execution_code": {
+    "code_head": null,
+    "code_tree": null,
+    "code_pins": null
+  },
+  "predecessor": {
+    "journal": "inspect.jsonl",
+    "frontier_hash": null,
+    "frontier_rows": 35,
+    "highwater": null,
+    "counts": {
+      "GET": 7,
+      "PUT": 0,
+      "GIT_PUSH": 0
+    },
+    "files_sha256": null
+  },
+  "review": {
+    "reviewer": null,
+    "evidence_sha256": null,
+    "original_pid": null,
+    "observed_utc": null,
+    "end_basis": "terminal-synchronous-phase-plus-human-end-report-fresh-os-check-exclusive-lock",
+    "terminal_code_path_checked": false,
+    "human_terminal_end_report": false,
+    "all_workers_ended": false,
+    "triggers_paused": false,
+    "human_review": false
+  },
+  "not_before_utc": null,
+  "expires_utc": null,
+  "time_authorization_sha256": null
+}

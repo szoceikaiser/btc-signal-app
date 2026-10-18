@@ -24,6 +24,7 @@ Detailauswertung der besten). Ausfuehren: python3 backtest.py
 from __future__ import annotations
 
 import json
+import math
 import os
 import time
 import urllib.request
@@ -32,6 +33,8 @@ from pathlib import Path
 
 import archiv
 import coinalyze
+from flow_contract import (AsOfSeries, asof, direct, FOUR_HOURS_MS, MAX_OI_AGE_MS,
+                           MAX_FUNDING_AGE_MS)
 from main import _get_json, fetch_funding_8h
 from strategy_core import Candle, FlowPoint, LADDER_TRANCHE, Position, evaluate, oi_in_btc
 
@@ -654,7 +657,8 @@ def fetch_candles_range(start_ms: int, end_ms: int) -> list:
         if len(chunk) < 1000:
             break
         time.sleep(0.3)
-    return out
+    # API endTime begrenzt den Anfang, nicht den Abschluss der letzten Kerze.
+    return [k for k in out if int(k[0]) + CANDLE_MS <= end_ms]
 
 
 def archiv_mischen(oi_map: dict, liq_map: dict, fut_map: dict, ls_map: dict,
@@ -709,11 +713,24 @@ def abschnitt_oder_grund(titel: str, daten, fehler: str, bauen) -> list:
     ]
 
 
+def closed_series(candles, flow, *, end_ms: int):
+    """Gespeicherte 4h-Reihen am DAMALIGEN Stichtag gemeinsam abgrenzen.
+
+    ts ist der UTC-Kerzenanfang in Millisekunden. Das Intervall [ts, ts+4h)
+    ist genau bei ts+4h abgeschlossen; Binance closeTime ist dagegen Ende-1ms.
+    Eingaben bleiben unveraendert. Fehlende/falsch gepaarte Reihen sind ein Fehler.
+    """
+    if len(candles) != len(flow) or any(c.ts != f.ts for c, f in zip(candles, flow)):
+        raise ValueError('Kerzen und Flow muessen zeitlich identisch gepaart sein')
+    pairs = [(c, f) for c, f in zip(candles, flow) if c.ts + CANDLE_MS <= end_ms]
+    return [c for c, _ in pairs], [f for _, f in pairs]
+
+
 def build_series(raw: list, funding: list[tuple[int, float]],
                  oi_map: dict | None = None, liq_map: dict | None = None,
                  fut_map: dict | None = None, ls_map: dict | None = None,
-                 spot_map: dict | None = None):
-    """OI aus oi_map (Coinalyze, E9.1) je Kerze; ohne oi_map bleibt OI konstant (neutral).
+                 spot_map: dict | None = None, *, end_ms: int | None = None):
+    """OI aus oi_map (Coinalyze, E9.1) je Kerze; ohne oi_map fehlt OI.
     liq_map liefert (long_liq, short_liq) je Kerzen-Open-ts.
     fut_map (E16) liefert das Futures-Taker-Delta je Kerze -> wird hier zum Futures-CVD
     aufsummiert; ohne fut_map bleibt es 0 und classify_pattern nutzt den Ersatzweg.
@@ -731,14 +748,19 @@ def build_series(raw: list, funding: list[tuple[int, float]],
 
     E43.4: Neben dem Dollar-OI entsteht die Reihe in Kontrakten (FlowPoint.oi_btc) -
     jeder OI-Punkt mit dem Schlusskurs SEINER Kerze umgerechnet (oi_in_btc), erst dann
-    aufgefuellt, genau wie live in main.fetch_market_data. Ohne oi_map bleibt sie 0.0
-    (keine Daten), waehrend das Dollar-OI konstant 1.0 steht - beides neutral."""
+    aufgefuellt, genau wie live in main.fetch_market_data. Ohne oi_map zeigen
+    beide Zahlen 0.0 mit provenance.coverage="missing" statt neutraler Messung."""
+    # Ein Messlauf hat einen festen Stichtag (END_MS); Replays geben ihren
+    # gespeicherten Stichtag explizit an, niemals die heutige Uhrzeit.
+    cutoff = END_MS if end_ms is None else end_ms
+    raw = [k for k in raw if int(k[0]) + CANDLE_MS <= cutoff]
     candles, flow, spot_cvd, fut_cvd = [], [], 0.0, 0.0
     oi_pairs = sorted(oi_map.items()) if oi_map else []
-    first_oi = oi_pairs[0][1] if oi_pairs else 1.0
     btc_pairs = sorted(oi_in_btc(oi_map, {int(k[0]): float(k[4]) for k in raw}).items()) \
         if oi_map else []
-    first_btc = btc_pairs[0][1] if btc_pairs else 0.0
+    oi_series = AsOfSeries(oi_pairs, FOUR_HOURS_MS)
+    btc_series = AsOfSeries(btc_pairs, FOUR_HOURS_MS)
+    funding_series = AsOfSeries(funding)
 
     def latest_leq(pairs, ts, default=0.0):
         val = default
@@ -756,18 +778,41 @@ def build_series(raw: list, funding: list[tuple[int, float]],
         # nie beides, sonst zaehlt Binance doppelt und in zwei Einheiten.
         spot_cvd += (spot_map.get(ts, 0.0) if spot_map is not None
                      else 2.0 * float(k[10]) - float(k[7]))
-        oi_val = latest_leq(oi_pairs, ts, first_oi) if oi_pairs else 1.0
+        close_ts = ts + CANDLE_MS
+        oi_val, oi_meta = asof(oi_series, close_ts, "coinalyze_4h_oi_usd",
+                               MAX_OI_AGE_MS)
         long_liq, short_liq = (liq_map.get(ts, (0.0, 0.0)) if liq_map else (0.0, 0.0))
         fut_cvd += (fut_map.get(ts, 0.0) if fut_map else 0.0)
+        funding_val, funding_meta = asof(funding_series, close_ts, "kraken_funding_8h",
+                                           MAX_FUNDING_AGE_MS)
+        btc_val, btc_meta = asof(btc_series, close_ts, "coinalyze_4h_oi_btc",
+                                 MAX_OI_AGE_MS)
+        provenance = {
+            "spot_cvd": direct(ts, close_ts, "aggregate_spot_delta_btc" if spot_map is not None
+                               else "binance_spot_taker_usd",
+                               spot_map is None or ts in spot_map),
+            "fut_cvd": direct(ts, close_ts, "coinalyze_fut_delta_btc",
+                              fut_map is not None and ts in fut_map),
+            "oi": oi_meta, "oi_btc": btc_meta, "funding": funding_meta,
+            "long_liq": direct(ts, close_ts, "coinalyze_long_liq_usd",
+                               liq_map is not None and ts in liq_map),
+            "short_liq": direct(ts, close_ts, "coinalyze_short_liq_usd",
+                                liq_map is not None and ts in liq_map),
+            "long_pct": direct(ts, close_ts, "coinalyze_long_pct",
+                               ls_map is not None and ts in ls_map),
+        }
         flow.append(FlowPoint(ts, spot_cvd, fut_cvd, oi_val,
-                              latest_leq(funding, ts + CANDLE_MS), long_liq, short_liq,
+                              funding_val, long_liq, short_liq,
                               (ls_map.get(ts, 0.0) if ls_map else 0.0),
-                              latest_leq(btc_pairs, ts, first_btc)))
+                              btc_val, provenance))
     return candles, flow
 
 
 def run_backtest(candles, flow, cfg: dict, start_ms: int = START_MS) -> list[dict]:
-    """Signale ab `start_ms` (Voll-Daten-Fenster). Vorher nur Warmup (kein Signal)."""
+    """Legacy signal-band diagnostic; no execution feedback. For V1 use run_execution.
+
+    Preserved for historical reports and regression tests, not corrected V1 P&L.
+    """
     params = {k: cfg[k] for k in EVAL_KEYS if k in cfg}
     pos = Position()
     signals = []
@@ -778,6 +823,27 @@ def run_backtest(candles, flow, cfg: dict, start_ms: int = START_MS) -> list[dic
         for s in evaluate(candles[:i + 1], flow[:i + 1], pos, **params):
             signals.append(s.to_dict())
     return signals
+
+
+def run_execution(candles, flow, cfg: dict, *, start_ms: int, end_ms: int,
+                  fee: float = .001, slippage: float = 0., start_capital: float = 10000.,
+                  checkpoint_at: int | None = None):
+    """V1 closed-loop Long/Spot, using the frozen input's explicit D01 cutoff.
+
+    Return signal candidates AND execution ledger together. Recompute this path
+    separately for every cost scenario; never pass an old signal band to it.
+    No network access, site writes or workflow dispatch.
+    """
+    from execution_v1 import run_v1
+    return run_v1(candles, flow, cfg, start_ms=start_ms, end_ms=end_ms,
+                  fee=fee, slippage=slippage, start_capital=start_capital,
+                  checkpoint_at=checkpoint_at)
+
+
+def run_execution_half(candles, flow, cfg: dict, *, start_ms: int, end_ms: int,
+                       **costs):
+    """Fresh V1 half: historical warmup only, no transferred orders or holdings."""
+    return run_execution(candles, flow, cfg, start_ms=start_ms, end_ms=end_ms, **costs)
 
 
 def to_date(ts_ms: int) -> date:
@@ -799,13 +865,7 @@ def run_half(candles, flow, cfg: dict, start_ms: int, end_ms: int | None = None)
     """
     cs, fl = candles, flow
     if end_ms is not None:
-        cut = 0
-        for i, c in enumerate(candles):
-            if c.ts <= end_ms:
-                cut = i + 1
-            else:
-                break
-        cs, fl = candles[:cut], flow[:cut]
+        cs, fl = closed_series(candles, flow, end_ms=end_ms)
     if not cs:
         return [], None
     sigs = run_backtest(cs, fl, cfg, start_ms=start_ms)
@@ -851,10 +911,18 @@ def score(signals: list[dict], tol_days: int = 1, start_ms: int = START_MS) -> d
 
 def simulate(signals: list[dict], candles, fee: float = 0.001,
              start_capital: float = 10000.0, start_ms: int | None = None,
-             deploy_pct: float = 1.0, fill: str = "level") -> dict:
-    """Tranchen-genaue P&L-Simulation der Signale.
+             deploy_pct: float = 1.0, fill: str = "level", *,
+             legacy_derivatives: bool = False) -> dict:
+    """LEGACY DIAGNOSTIC: historical signal-band accounting, not contract V1.
 
-    Annahmen (dokumentiert): kein Hebel; Kauf-Tranchen als %-Anteil des beim
+    Level/close prices are retrospective assumptions, not evidence of prior
+    orders or attainable Telegram fills. Their difference is neither the value
+    of a prior order nor a guaranteed lower bound. This function deliberately
+    preserves historical arithmetic/tests; run_execution is the corrected path.
+
+    Tranchen-genaue P&L-Simulation der Signale.
+
+    Alte Annahmen (bei Shorts widerlegt, F02): kein Hebel; Kauf-Tranchen als %-Anteil des beim
     Ladder-Start verfuegbaren Kapitals (aus tranche_pct des Signals); Teilverkaeufe
     40 %/40 %/Rest der vollen Position; 0,1 % Gebuehr je Order; Shorts nominal
     ohne Funding-Kosten. Ergebnis inkl. Buy&Hold-Vergleich ueber denselben Zeitraum.
@@ -873,25 +941,17 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     Monatsuebersicht im Bericht — Kaisers Frage "was haette ich Monat fuer Monat verdient
     oder verloren?".
 
-    `fill` (E17, Kaisers Frage 2026-07-29 "was ist die Vorab-Info wert?"):
-    - "level"  = zum genannten Preis abgerechnet. Das sind bei Einstiegen am 0.5-Level,
-                 im Golden Pocket, an der 0.786-Zone und bei den Extension-Zielen
-                 FIB-LEVELS, die die Kerze nur BERUEHRT hat — moeglicherweise in Stunde 2
-                 einer 4h-Kerze. Diese Preise bekommt nur, wer die Limit-Order VORHER
-                 dort liegen hat.
-    - "close"  = alles zum SCHLUSSKURS der ausloesenden Kerze. Das bildet ab, dass man
-                 erst nach der Telegram-Nachricht reagiert, der Kurs sich also vom Level
-                 wieder wegbewegt haben kann.
-    Der Unterschied beider Laeufe IST der Wert der Vorab-Order. Signale, die ohnehin zum
-    Kerzenschluss feuern (Stop, Restverkauf, Flush, Kaufleiter), sind in beiden Faellen
-    identisch — der Effekt isoliert also genau die Level-Signale.
-
-    EINORDNUNG, damit die Zahl nicht ueberschaetzt wird: "close" ist noch freundlich
-    gerechnet. Es unterstellt, dass man GENAU zum Kerzenschluss handelt. Tatsaechlich
-    laeuft die Engine 1 bis 3 Stunden spaeter (GitHub-Verzoegerung, gemessen 29.07.2026),
-    der reale Preis liegt also noch einmal weiter weg. Die gemessene Luecke ist damit
-    eine UNTERGRENZE fuer den Wert der Vorab-Order.
+    Legacy price variants: "level" uses signal.price; "close" uses the same
+    signal candle's close. Neither schedules fills or confirms holdings to the
+    strategy. Legacy max_drawdown_pct uses the old time-inconsistent inventory
+    and is kept under its old name solely for historical comparisons.
     """
+    from derivative_accounting import NotEvaluable
+    has_shorts = any(s['type'].startswith('SHORT_') for s in signals)
+    if type(legacy_derivatives) is not bool:
+        raise TypeError('legacy_derivatives must be bool')
+    if has_shorts and not legacy_derivatives:
+        raise NotEvaluable('F02: legacy Short accounting has no margin/funding; not evaluable')
     schluss_je_ts = {c.ts: c.close for c in candles}
 
     def _preis(s: dict) -> float:
@@ -986,6 +1046,12 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
                 sell = min(units, LADDER_TRANCHE / 100.0 * peak_units)
             else:
                 sell = min(units, 0.4 * peak_units)
+            # F09: Prozentuale Teilverkaeufe koennen nach rechnerisch 100 % einen
+            # Float-Rest lassen. Nur wenige Rundungsschritte der Positionsgroesse
+            # ausgleichen, keinen festen BTC-Mindestbestand abschneiden. Den Rest
+            # mitverkaufen, damit Cash, Gebuehr und Rueckkauf-Anteil konsistent sind.
+            if sell > 0 and 0 < units - sell <= 8 * math.ulp(peak_units):
+                sell = units
             if t == "RUECKKAUF_STOP" or sell >= units:
                 rk_units = 0.0
             elif units > 0:
@@ -1085,6 +1151,11 @@ def simulate(signals: list[dict], candles, fee: float = 0.001,
     hold_start = next(c for c in candles if c.ts >= hs).close
     return {
         "start": start_capital,
+        "execution_contract": "legacy_retrospective_diagnostic",
+        "historically_executable": False,
+        "derivative_evaluable": False if has_shorts else None,
+        "limitations": ["F12: no prior orders/fills proven"] + (
+            ["F02: invalid margin/funding; reproduction only"] if has_shorts else []),
         "ende": round(end_equity, 2),
         "rendite_pct": round((end_equity / start_capital - 1) * 100, 2),
         "buyhold_pct": round((last_price / hold_start - 1) * 100, 2),
@@ -2803,9 +2874,14 @@ def main():
     # Coinalyze keinen Spot). Nur fuer den VERGLEICH geholt — die Hauptreihe `flow`
     # bleibt auf dem bisherigen Binance-Vision-Weg, damit alle Zahlen des Berichts
     # weiter mit frueheren Laeufen vergleichbar sind.
-    spot_agg, spot_bericht = {}, {}
-    spot_alle, spot_alle_bericht = {}, {}
-    if api_key:
+    # A3: Die heutige Markt-API ist kein Point-in-time-Marktmanifest fuer den
+    # historischen Messzeitraum. Bis ein solches Manifest vorliegt, sind die
+    # historischen Aggregationsvarianten ausdruecklich nicht auswertbar.
+    historischer_korb = None
+    korb_grenze = "Historische Marktauswahl nicht belegt; heutiger Boersenkorb gilt nicht rueckwirkend"
+    spot_agg, spot_bericht = {}, {"fehler": korb_grenze}
+    spot_alle, spot_alle_bericht = {}, {"fehler": korb_grenze}
+    if api_key and historischer_korb:
         try:
             auswahl = coinalyze.spot_auswahl(api_key)       # beide Wahlen, ein Durchgang
         except Exception as exc:  # noqa: BLE001
@@ -2817,7 +2893,8 @@ def main():
                 continue
             try:
                 karte, bericht = coinalyze.spot_delta_aggregiert(
-                    api_key, syms, frm=WARMUP_MS // 1000, to=END_MS // 1000)
+                    api_key, syms, einheiten={s: "BTC" for s in syms},
+                    frm=WARMUP_MS // 1000, to=END_MS // 1000)
                 if wahl == coinalyze.SPOT_WAHL_GROESSTER:
                     spot_agg, spot_bericht = karte, bericht
                 else:
@@ -2832,8 +2909,8 @@ def main():
     # Wieder nur fuer den Vergleich — die Hauptreihe bleibt auf Binance.
     oi_agg, liq_agg, fut_agg, derivate_bericht = {}, {}, {}, {}
     fund_agg, ls_agg = {}, {}
-    derivate_fehler = "kein COINALYZE_API_KEY gesetzt"
-    if api_key:
+    derivate_fehler = korb_grenze
+    if api_key and historischer_korb:
         derivate_fehler = ""
         try:
             pa = coinalyze.perp_auswahl(api_key)
@@ -2851,7 +2928,10 @@ def main():
             oi_agg, b_oi = coinalyze._summiere_vollstaendig(
                 oi_einzeln, alle_syms, b_oi_roh, "USD (convert_to_usd)")
             liq_agg, b_liq = coinalyze.liq_aggregiert(api_key, alle_syms, **zeitraum)
-            fut_agg, b_fut = coinalyze.fut_delta_aggregiert(api_key, cvd_syms, **zeitraum)
+            fut_agg, b_fut = coinalyze.fut_delta_aggregiert(
+                api_key, cvd_syms,
+                einheiten={d["symbol"]: d["denominierung"] for d in gewaehlt.values()},
+                **zeitraum)
             derivate_bericht = {
                 "maerkte": {d["boerse"]: d["symbol"] for d in gewaehlt.values()},
                 "cvd_maerkte": cvd_syms, "cvd_ausgeschlossen": ausgeschlossen,
@@ -2903,6 +2983,8 @@ def main():
                                    f"Bloecke: {_bl}")
 
     candles, flow = build_series(raw, funding, oi_map, liq_map, fut_map, ls_map)
+    if not candles:
+        raise ValueError('Keine abgeschlossene 4h-Kerze am Messstichtag')
 
     # --- E37.5: ALLE Datenvarianten an EINER Stelle ---------------------------------
     # Bis hierher baute jeder Vergleichsabschnitt seine Reihen selbst. Fuer die

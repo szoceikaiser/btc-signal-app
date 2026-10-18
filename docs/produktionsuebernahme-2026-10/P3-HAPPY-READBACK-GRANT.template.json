@@ -1,0 +1,10 @@
+{
+  "schema": "p3-human-happy-readback-v1",
+  "phase": "public-store-happy-readback-once",
+  "plan_sha256": null,
+  "review_sha256": null,
+  "human_authorization": false,
+  "approved_by": null,
+  "approval_evidence_sha256": null,
+  "expires_utc": null
+}

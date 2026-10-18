@@ -1,89 +1,99 @@
+# Free/public: explicit IDs and actual rules/credential reviews still required.
+# Disabled candidate; intended target .github/workflows/signal.yml
 name: Signal-Engine
-
+run-name: btc-v2:signal:${{ inputs.expected_start_ms || 'created' }}
 on:
-  schedule:
-    # Gezielt statt haeufig (Befund 2026-07-27): Der 15-Minuten-Takt wurde von GitHub
-    # massiv verworfen — statt ~96 Laeufen am Tag kamen nur 6-7 an, im Abstand von 1 bis
-    # 3,5 Stunden, alle gruen (kein Fehler, GitHub laesst Schedules bei Last einfach aus).
-    # Die Strategie wertet ABGESCHLOSSENE 4h-Kerzen aus (Schluss 00/04/08/12/16/20 UTC),
-    # dazwischen gibt es nichts zu tun.
-    #
-    # NACHMESSUNG 2026-07-29 (Kaiser): Der Versuch, das ueber die Anzahl zu loesen, ist
-    # GESCHEITERT und die Annahme dahinter war falsch. Von 4 Versuchen kam einer an; auf
-    # 7 Versuche erhoeht — es kam weiterhin GENAU EINER an (Verzug 2:26 h und 2:45 h),
-    # ein Kerzenschluss fiel ganz aus (8 h Luecke). In sechs beobachteten Fenstern gab es
-    # NIE zwei Laeufe. Bei echtem Zufall (p=0,25) haette man bei 7 Versuchen im Schnitt
-    # fast zwei erwartet. Das deutet auf eine Drosselung PRO REPOSITORY hin, nicht auf
-    # zufaelliges Verwerfen — mehr Cron-Eintraege helfen dagegen nicht.
-    #
-    # KONSEQUENZ: Der Zeitplan ist nur noch das NETZ. Puenktlich angestossen wird die
-    # Engine von aussen ueber workflow_dispatch (cron-job.org, Einrichtung siehe
-    # ANLEITUNG-PUENKTLICHER-START.md). Solche Anstoesse laufen nicht ueber die
-    # Schedule-Warteschlange und starten binnen Sekunden.
-    #
-    # Deshalb hier zurueck auf 2 Versuche je Kerzenschluss (12 Laeufe/Tag): Das reicht
-    # als Rueckfall, wenn der externe Dienst ausfaellt, und haelt die Actions-Liste
-    # uebersichtlich. Doppelte Nachrichten kann es nicht geben — die Engine merkt sich
-    # ueber pos.last_signal_ts, welche Kerze sie zuletzt ausgewertet hat.
-    #
-    # Erst ab Minute 2, damit die 4h-Kerze sicher geschlossen ist.
-    - cron: "2,32 0,4,8,12,16,20 * * *"
   workflow_dispatch:
     inputs:
-      test_telegram:
-        description: "Nur Telegram-Testnachricht senden"
-        type: boolean
-        default: false
-      resend_all:
-        description: "Alle bisherigen Trigger erneut an Telegram senden"
-        type: boolean
-        default: false
-
+      expected_start_ms:
+        description: Original UTC occurrence in milliseconds; empty binds actual run created_at
+        type: string
+        required: false
+        default: ""
+# Production occurrences are dispatched by the existing external Cron service.
+# No parallel GitHub schedule: duplicate jobs also spend the shared API quota.
 permissions:
-  contents: write
-
+  contents: read
+  actions: read
 concurrency:
-  group: signal-engine
+  group: btc-delivery-single-stream
   cancel-in-progress: false
-
+  queue: max
 jobs:
-  run:
-    runs-on: ubuntu-latest
+  delivery:
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    environment: btc-delivery-v2
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Telegram-Testnachricht
-        if: ${{ inputs.test_telegram }}
+      - name: Require Git and stop checkout network after any Git failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          real_git="$(command -v git)"
+          [[ "$(printf '%s\n' 2.18.0 "$(git version | cut -d' ' -f3)" | sort -V | head -n1)" == "2.18.0" ]]
+          gate_dir="$(mktemp -d "$RUNNER_TEMP/btc-checkout-XXXXXX")"
+          printf '#!/bin/bash\nreal_git=%q\n' "$real_git" > "$gate_dir/git"
+          cat >> "$gate_dir/git" <<'GIT_GATE'
+          set -u
+          network=false
+          for arg in "$@"; do
+            case "$arg" in fetch|clone|ls-remote) network=true ;; esac
+          done
+          if ! "$network"; then exec "$real_git" "$@"; fi
+          stop_file="$(dirname "$0")/STOP"
+          if [[ -e "$stop_file" ]]; then exit 86; fi
+          "$real_git" "$@"
+          status=$?
+          if [[ "$status" -ne 0 ]]; then : > "$stop_file"; fi
+          exit "$status"
+          GIT_GATE
+          chmod 700 "$gate_dir/git"
+          printf '%s\n' "$gate_dir" >> "$GITHUB_PATH"
+      - name: Checkout exact reviewed code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: 20d755a4332fb32aeab08b1973b650eeae10f31e
+          token: ${{ github.token }}
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+      - name: Verify checkout pin before loading code
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: cd engine && python3 main.py --test-telegram
-
-      - name: Alle Trigger erneut senden
-        if: ${{ inputs.resend_all }}
+          REVIEWED_CODE_SHA: 20d755a4332fb32aeab08b1973b650eeae10f31e
+        shell: bash
+        run: |
+          [[ "$GITHUB_REPOSITORY" == "szoceikaiser/btc-signal-app" ]]
+          [[ "$REVIEWED_CODE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$(git rev-parse HEAD)" == "$REVIEWED_CODE_SHA" ]]
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12.14"
+      - name: Prepare exact reviewed runtime (no store or transport)
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: cd engine && python3 main.py --resend-all
-
-      - name: Engine-Lauf
-        if: ${{ !inputs.test_telegram && !inputs.resend_all }}
+          REVIEWED_RUNTIME_JSON: ${{ vars.BTC_REVIEWED_RUNTIME_JSON }}
+          REVIEWED_CONFIG_JSON: ${{ vars.BTC_REVIEWED_CONFIG_JSON }}
+        run: python3 tools/produktion_runtime_prepare.py --kind signal --out .runtime
+      - name: Checked signal entry
         env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BTC_ACTIONS_EXPLICIT_START_MS: ${{ inputs.expected_start_ms }}
+          BTC_DELIVERY_ADAPTER: github
+          BTC_DELIVERY_RUNNER_ROOT: ${{ github.workspace }}
+          BTC_DELIVERY_RUN_REPOSITORY: ${{ github.repository }}
+          BTC_DELIVERY_WORKFLOW: .github/workflows/signal.yml
+          BTC_DELIVERY_RUN_ID: ${{ github.run_id }}
+          BTC_DELIVERY_RUN_ATTEMPT: ${{ github.run_attempt }}
+          BTC_DELIVERY_CODE_SHA: 20d755a4332fb32aeab08b1973b650eeae10f31e
+          BTC_DELIVERY_STORE_ID: ${{ vars.BTC_REVIEWED_STORE_ID }}
+          BTC_DELIVERY_GITHUB_REPO: ${{ vars.BTC_REVIEWED_STORE_REPOSITORY }}
+          BTC_DELIVERY_GITHUB_BRANCH: ${{ vars.BTC_REVIEWED_STORE_BRANCH }}
+          BTC_DELIVERY_FENCE_BRANCH: ${{ vars.BTC_REVIEWED_FENCE_BRANCH }}
+          BTC_DELIVERY_BOT_IDENTITY: ${{ vars.BTC_REVIEWED_BOT_IDENTITY }}
+          BTC_DELIVERY_CONFIRMATION_POLICY: github-actions-fence-v2
+          BTC_DELIVERY_GITHUB_TOKEN: ${{ secrets.BTC_REVIEWED_STORE_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
-        run: cd engine && python3 main.py
-
-      - name: Zustand committen
-        if: ${{ !inputs.test_telegram && !inputs.resend_all }}
-        run: |
-          git config user.name "signal-engine"
-          git config user.email "actions@users.noreply.github.com"
-          git add site/data
-          git diff --cached --quiet || git commit -m "Engine-Lauf: Zustand aktualisiert"
-          # Erst ziehen, dann schieben: sonst scheitert der Push, sobald zwischen
-          # Checkout und Push etwas anderes committet hat (Backtest-Workflow, Kaisers
-          # Aenderung an config.json im Browser). Der Backtest-Workflow macht das
-          # laengst richtig, hier fehlte es.
-          git pull --no-rebase --no-edit
-          git push
+        run: python3 tools/produktion_actions_runner.py --runtime .runtime/runtime.json --kind signal --data-dir .runtime/data

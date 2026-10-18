@@ -1,0 +1,2 @@
+{"commit": "ccf2b01c0578346f325261e72445b7375a9ac706", "F02": {"return_pct": 20, "nominal_exposure_pct": 200, "unlevered_single_short_return_pct": 10}, "F12": {"old_target": 200, "same_bar_new_target": 170, "candle": [140, 190, 90, 140], "prior_order_proven": false}}
+{"commit": "291588946206333ca58d771f1cc96f261da1a981", "F02": {"return_pct": 20, "nominal_exposure_pct": 200, "unlevered_single_short_return_pct": 10}, "F12": {"old_target": 200, "same_bar_new_target": 170, "candle": [140, 190, 90, 140], "prior_order_proven": false}}

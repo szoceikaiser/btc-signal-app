@@ -1,0 +1,14 @@
+{
+  "schema": "btc-bypass-review-v1",
+  "status": "pending",
+  "repository": null,
+  "repository_id": null,
+  "branch": null,
+  "ruleset_id": null,
+  "public_sha256": null,
+  "bypass_actors": null,
+  "reviewer": null,
+  "reviewed_at": null,
+  "evidence_sha256": null,
+  "sha256": null
+}

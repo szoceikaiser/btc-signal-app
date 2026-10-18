@@ -1,0 +1,62 @@
+{
+  "schema": "a7-v035-funding-gap-reconciliation-v1",
+  "frozen_funding_sha256": "49ca8546d8e7508777e4797b2dd25f697a5ed63c1213e5bf77a160ef31a04035",
+  "contract": "Exact UTC hour; chart close checked against both neighboring frozen endpoint rates. At both gaps the chart repeats the prior close, so payment remains unproven. No zero, carry, or interpolation is inserted into accounting.",
+  "historical_api_as_of_proven": false,
+  "full_window_complete": false,
+  "observations": [
+    {
+      "timestamp": "2026-02-04T12:00:00Z",
+      "status": "missing_in_archive_and_public_chart",
+      "chart_absolute_usd_per_btc": null,
+      "chart_file": "funding-chart-feb04-empty.json",
+      "chart_sha256": "5b83239da90473ffbccebca3c85be133404d553b87d1d2190e3d8bad33eef915",
+      "chart_url": "https://futures.kraken.com/api/charts/v1/analytics/PF_XBTUSD/funding?since=1770199200&interval=3600&to=1770217200",
+      "adjacent_checks": []
+    },
+    {
+      "timestamp": "2026-02-13T18:00:00Z",
+      "status": "chart_displays_previous_value_settlement_unproven",
+      "chart_absolute_usd_per_btc": "-0.2194312434243132",
+      "chart_file": "funding-chart-feb13.json",
+      "chart_sha256": "676b770917e1eb3d06741b11fb5e09bd01eac03376f1d85d084736fba1300d1f",
+      "chart_url": "https://futures.kraken.com/api/charts/v1/analytics/PF_XBTUSD/funding?since=1771002000&interval=3600&to=1771012800",
+      "adjacent_checks": [
+        {
+          "timestamp_ms": 1771002000000,
+          "chart_close": "-0.2194312434243132",
+          "archive_rate": "-0.219431243424313213",
+          "absolute_difference": "1.3E-17"
+        },
+        {
+          "timestamp_ms": 1771009200000,
+          "chart_close": "-0.3572840323372629",
+          "archive_rate": "-0.357284032337262824",
+          "absolute_difference": "7.6E-17"
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-05-09T06:00:00Z",
+      "status": "chart_displays_previous_value_settlement_unproven",
+      "chart_absolute_usd_per_btc": "0.0753317531723135",
+      "chart_file": "funding-chart-may09.json",
+      "chart_sha256": "74ade414997ab783e98d0129da27f63df7f2f10507b16678d64179964fa7683d",
+      "chart_url": "https://futures.kraken.com/api/charts/v1/analytics/PF_XBTUSD/funding?since=1778302800&interval=3600&to=1778313600",
+      "adjacent_checks": [
+        {
+          "timestamp_ms": 1778302800000,
+          "chart_close": "0.0753317531723135",
+          "archive_rate": "0.075331753172313524",
+          "absolute_difference": "2.4E-17"
+        },
+        {
+          "timestamp_ms": 1778310000000,
+          "chart_close": "0.2808442169011264",
+          "archive_rate": "0.280844216901126444",
+          "absolute_difference": "4.4E-17"
+        }
+      ]
+    }
+  ]
+}

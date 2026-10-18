@@ -1,0 +1,55 @@
+{
+  "base": "6c0c6fdd56db9bb27febaf42c56f6e33bcab0685",
+  "secured_5a_hashes_verified": true,
+  "original_f17": {
+    "shown_price": 100,
+    "expected_live_price": 105,
+    "conflicts": [
+      {
+        "live": {
+          "ts": 1787716800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 78925.56,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 79500",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        },
+        "historical": {
+          "ts": 1787716800000,
+          "type": "TEILVERKAUF_LADDER",
+          "price": 78925.56,
+          "tranche_pct": 15,
+          "reason": "Teilgewinn am letzten Hoch 79199",
+          "stop_ref": null,
+          "tag": "",
+          "label": "TEILVERKAUF Leiter (Zwischenziel vor 1.0)"
+        }
+      },
+      {
+        "live": {
+          "ts": 1788753600000,
+          "type": "NACHKAUF",
+          "price": 79397.83,
+          "tranche_pct": 15,
+          "reason": "Mehrtages-Leiter: Nachkauf in die Schwaeche, Struktur intakt (NEUTRAL)",
+          "stop_ref": 76264,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        },
+        "historical": {
+          "ts": 1788753600000,
+          "type": "NACHKAUF",
+          "price": 79397.83,
+          "tranche_pct": 20,
+          "reason": "Konfluenz: Fib-Zone + Liquidationszone 78660 — aufstocken (NEUTRAL)",
+          "stop_ref": 76264,
+          "tag": "",
+          "label": "NACHKAUF (0.786-Zone)"
+        }
+      }
+    ]
+  },
+  "scope": "Original production JavaScript, frozen snapshot; no remote page/session inspected"
+}

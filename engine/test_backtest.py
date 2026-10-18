@@ -77,7 +77,8 @@ def test_simulate_short_gewinn():
     ]
     candles = [Candle(backtest.START_MS, 100, 100, 100, 100),
                Candle(backtest.START_MS + 1, 90, 90, 90, 90)]
-    pnl = backtest.simulate(sigs, candles, fee=0.0)
+    # A5: original numerical assertion preserved as invalid legacy reproduction.
+    pnl = backtest.simulate(sigs, candles, fee=0.0, legacy_derivatives=True)
     # 7500 nominal short, 10 % Kursrueckgang -> +750
     assert abs(pnl["ende"] - 10750.0) < 0.01
 
@@ -394,7 +395,10 @@ def test_panel_variante_entspricht_der_live_einstellung():
     im_panel = {k: panel[0][k] for k in backtest.EVAL_KEYS if k in panel[0]}
     abweichend = {k: (im_panel.get(k), live.get(k))
                   for k in set(im_panel) | set(live) if im_panel.get(k) != live.get(k)}
-    assert not abweichend, f"Panel-Zeile weicht von config.json ab: {abweichend}"
+    # A2 keeps the historical 86-row grid pinned for A7's paired recalculation.
+    # Its old panel row is explicitly stale until that recalculation; no new
+    # performance claim may use it as the corrected live setting.
+    assert abweichend == {"muster_cvd": ("alt", "usd")}, abweichend
 
 
 # ---------------------------------------- E22: Beteiligung an der Marktbewegung
@@ -624,7 +628,8 @@ def test_rueckgang_short_nutzt_das_kerzenhoch():
           Candle(start + H4, 100, 120, 99, 100),          # Docht nach OBEN
           Candle(start + 2 * H4, 100, 100, 100, 100)]
     sigs = [{"ts": cs[0].ts, "type": "SHORT_2", "price": 100.0, "tranche_pct": 100}]
-    p = backtest.simulate(sigs, cs, start_ms=start, fee=0.0)
+    # A5: original assertion retained, no valid derivative performance claim.
+    p = backtest.simulate(sigs, cs, start_ms=start, fee=0.0, legacy_derivatives=True)
     assert p["max_drawdown_pct"] < -15, (
         f"Kerzenhoch bei Short nicht beruecksichtigt: {p['max_drawdown_pct']} %")
 
@@ -1692,7 +1697,8 @@ def test_e433_live_konfig_steht_auf_alt():
         print("  UEBERSPRUNGEN: site/data/config.json fehlt - muster_cvd ungeprueft!")
         return
     cfg = json.loads(cfg_datei.read_text(encoding="utf-8"))
-    assert cfg.get("muster_cvd") == "alt"
+    # A2: current isolated-branch configuration follows the corrected signal.
+    assert cfg.get("muster_cvd") == "usd"
     assert "_hinweis_muster_cvd" in cfg
 
 
@@ -1820,8 +1826,9 @@ def test_e434_build_series_rechnet_um_und_fuellt_dann_kontrakte_auf():
     raw = _rohkerzen_kurs([100.0, 110.0, 120.0, 130.0, 140.0])
     oi_map = _e434_oi_mit_luecken(raw)
     _cs, flow = backtest.build_series(raw, [], oi_map)
-    assert [f.oi_btc for f in flow] == [10.0, 10.0, 10.0, 12.0, 12.0], flow
-    assert [f.oi for f in flow] == [1100.0, 1100.0, 1100.0, 1560.0, 1560.0]
+    # A2: the original expectation put the first later value into an earlier bar.
+    assert [f.oi_btc for f in flow] == [0.0, 10.0, 10.0, 12.0, 12.0], flow
+    assert [f.oi for f in flow] == [0.0, 1100.0, 1100.0, 1560.0, 1560.0]
     # Vorprobe: der naive Weg (Dollar auffuellen, dann durch den Kurs der Kerze teilen)
     # ergaebe hier andere Zahlen - der Test unterscheidet die beiden Wege also.
     naiv = [f.oi / c.close for f, c in zip(flow, _cs)]
@@ -1834,7 +1841,8 @@ def test_e434_build_series_ohne_oi_map_hat_keine_kontrakt_reihe():
     Reihe, die sich gegenlaeufig zum Kurs bewegt."""
     raw = _rohkerzen_kurs([100.0, 110.0, 120.0])
     _cs, flow = backtest.build_series(raw, [], None)
-    assert [f.oi for f in flow] == [1.0, 1.0, 1.0]
+    # A2: the old neutral 1.0 was an invented observation.
+    assert [f.oi for f in flow] == [0.0, 0.0, 0.0]
     assert [f.oi_btc for f in flow] == [0.0, 0.0, 0.0]
 
 

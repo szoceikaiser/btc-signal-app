@@ -1,0 +1,32 @@
+{
+  "result": "PASS",
+  "existing_scenarios": 6,
+  "projected_fills": 1101,
+  "checks": [
+    {
+      "fills": 171,
+      "result": "PASS"
+    },
+    {
+      "fills": 171,
+      "result": "PASS"
+    },
+    {
+      "fills": 171,
+      "result": "PASS"
+    },
+    {
+      "fills": 196,
+      "result": "PASS"
+    },
+    {
+      "fills": 196,
+      "result": "PASS"
+    },
+    {
+      "fills": 196,
+      "result": "PASS"
+    }
+  ],
+  "no_historical_recalculation": true
+}
