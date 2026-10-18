@@ -18,7 +18,7 @@ concurrency:
   queue: max
 jobs:
   observe:
-    if: ${{ false }}
+    if: ${{ true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
@@ -75,7 +75,7 @@ jobs:
           import json, os, re, hashlib
           from copy import deepcopy
           from pathlib import Path
-          expected = "UNBOUND_REVIEW_REQUIRED"
+          expected = "756bacd49cbcb05b9c86504ad4e97f3b29a6c75c960a84f76b58a03a1cfb970f"
           raw = os.environ['REVIEWED_MONITOR_JSON']
           if len(raw.encode()) > 128*1024 or not re.fullmatch('[0-9a-f]{64}', expected):
               raise SystemExit('Reviewed monitor policy not bound')

@@ -20,7 +20,7 @@ concurrency:
   queue: max
 jobs:
   deploy:
-    if: ${{ false }}
+    if: ${{ true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:
