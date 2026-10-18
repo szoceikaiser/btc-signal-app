@@ -1,0 +1,20 @@
+{
+  "schema": "btc-publication-inventory-v1",
+  "enabled": false,
+  "status": "pending-fresh-stopped-cut-and-actual-secret-exclusion-review",
+  "coverage": "every reachable commit and blob, not only current checkout",
+  "classes": [
+    {"repository": "szoceikaiser/btc-delivery-store", "branch": "delivery-stream-v2", "paths": ["delivery/stream.json"], "data": ["engine state", "signal history", "generated Telegram texts", "delivery receipts", "commands", "target hashes", "health and ownership"]},
+    {"repository": "szoceikaiser/btc-delivery-store", "branch": "delivery-fence-v2", "paths": ["delivery/actions-fence.json"], "data": ["run cursors", "open/closed fence", "deployment pins", "completion locators"]},
+    {"repository": "szoceikaiser/btc-delivery-store", "branch": "reviewed-migration", "paths": null, "data": ["reviewed immutable blocked migration package"]},
+    {"repository": "szoceikaiser/btc-delivery-backup", "branch": "verified-pair-packages", "paths": ["pair-manifest.json", "manifests/<sha256>.json", "stream/packages/**", "fence/packages/**"], "data": ["full stream/fence history", "migration", "immutable manifests", "blocked restore evidence"]},
+    {"repository": "szoceikaiser/btc-delivery-backup-verification", "branch": "verified-receipts", "paths": ["receipt.json", "receipts/<sha256>.json"], "data": ["independent verification", "manifest copies", "provider run and destination pins"]}
+  ],
+  "required_per_file": ["repository_id", "repository", "branch", "commit_sha", "tree_sha", "path", "mode", "bytes", "git_blob_sha", "sha256", "data_class", "secret_exclusion_review_sha256"],
+  "actual_files": null,
+  "bootstrap_backup_and_receipt_trees": "must be empty, independently pinned before first runtime write",
+  "excluded": ["keys", "tokens", "passwords", "credential URLs", "Authorization or Cookie values", "foreign private data", "working-copy .git directories", "local environments", "test fixtures", "audit backups", "unreviewed logs or artifacts"],
+  "actual_secret_exclusion_review_sha256": null,
+  "reviewer": null,
+  "reviewed_at": null
+}

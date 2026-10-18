@@ -1,0 +1,41 @@
+{
+  "schema": "p3-rules403-amendment-v1",
+  "phase": "bootstrap-rules403-diagnose-once",
+  "scope": "reader-only-seven-fixed-routes-max-eight-GET-no-mutation",
+  "original_plan_sha256": null,
+  "reader401_amendment": null,
+  "reader401_grant": null,
+  "reader401_code_materialization": null,
+  "execution_code": {
+    "code_head": null,
+    "code_tree": null,
+    "code_pins": null
+  },
+  "predecessor": {
+    "journal": "bootstrap-reader401-once.jsonl",
+    "frontier_hash": null,
+    "frontier_rows": null,
+    "highwater": null,
+    "counts": null,
+    "files_sha256": null
+  },
+  "root": {
+    "directory": null,
+    "files_sha256": null
+  },
+  "routes": null,
+  "review": {
+    "reviewer": null,
+    "evidence_sha256": null,
+    "original_pid": null,
+    "observed_utc": null,
+    "end_basis": "terminal-synchronous-phase-plus-human-end-report-fresh-os-check-exclusive-lock",
+    "terminal_code_path_checked": false,
+    "human_terminal_end_report": false,
+    "all_workers_ended": false,
+    "triggers_paused": false,
+    "human_review": false
+  },
+  "diagnosis": null,
+  "expires_utc": null
+}

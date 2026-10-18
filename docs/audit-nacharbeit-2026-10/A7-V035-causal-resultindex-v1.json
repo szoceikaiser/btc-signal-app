@@ -1,0 +1,20 @@
+{
+  "schema": "a7-v035-causal-resultindex-v1",
+  "stage": "A7 F02 V035 follow-up",
+  "base_sha": "969e69467149b2d8ab8c11cb5a7cb8aa47151343",
+  "row": "V035",
+  "historical_return_valid": false,
+  "return_usd": null,
+  "return_pct": null,
+  "result_source": "A7-V035-sources/causal-position-discovery-v1.json",
+  "result_sha256": "0e4d70c6b6445c2c9aa27d58caa0fe1dbaaf191b517811cf8a3f4def1f841af4",
+  "report": "A7-V035-KAUSALBERICHT.md",
+  "first_missing_payment": "2026-02-13T19:00:00Z",
+  "missing_rate_set_at": "2026-02-13T18:00:00Z",
+  "first_hypothetical_risk_breach": "2026-04-17T15:00:00Z",
+  "may_position": "conditional only; prior funding and risk invalidity",
+  "old_v035_diagnostic_comparable_as_return": false,
+  "spot_rows_modified": 0,
+  "register_ids": 22,
+  "changed_finding": "F02"
+}

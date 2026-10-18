@@ -1,0 +1,156 @@
+{
+  "schema": "a7-intermediate-A2-S0-v1",
+  "historical_api_as_of_proven": false,
+  "scope": "conditional spot model; no historical as-of or execution claim",
+  "scenario": "S0",
+  "design_sha256": "a988d3d48a3f08391deb15bc3f983628474ac85b768bcf8d0688409b70fa1625",
+  "modeled_flow_sha256": "3fdc7d8f2860eb2f8fdf1a93774f46ca60b859b46875633a3ce62753e278e29c",
+  "numeric_R1_sha256": "701c0eea34098317d0fae2827a16afd4cb73f7e9684c724d70881c2df49e5089",
+  "book_sha256": "f919af6641400fd91d2f231ed02c5bf68e69242b8267065f8220a6160589f1b8",
+  "results": [
+    {
+      "package": "R0",
+      "id": "V050",
+      "cutoff_ms": 1790497748840,
+      "outcomes": {
+        "numeric_alt": {
+          "end_usd": 13427.756952564165,
+          "return_pct": 34.27756952564165,
+          "fees_usd": 527.0203105556124,
+          "fills": 177,
+          "signal_count": 249,
+          "result_sha256": "e1db708d934576660c66c6f474735252056293a5649447f66efbb6b70f02a1f6",
+          "independent_book_verified": true
+        },
+        "modeled_alt": {
+          "end_usd": 13587.21854813015,
+          "return_pct": 35.872185481301486,
+          "fees_usd": 526.1448106007082,
+          "fills": 175,
+          "signal_count": 247,
+          "result_sha256": "697a481e9d11ffda071452afc0e63637bd2e72c0161d981038114d4b04eaaab4",
+          "independent_book_verified": true
+        },
+        "modeled_corrected_cvd": {
+          "end_usd": 13587.21854813015,
+          "return_pct": 35.872185481301486,
+          "fees_usd": 526.1448106007082,
+          "fills": 175,
+          "signal_count": 247,
+          "result_sha256": "697a481e9d11ffda071452afc0e63637bd2e72c0161d981038114d4b04eaaab4",
+          "independent_book_verified": true
+        }
+      },
+      "numeric_to_modeled_delta_usd": 159.46159556598468,
+      "cvd_delta_usd": 0.0
+    },
+    {
+      "package": "R0",
+      "id": "V075",
+      "cutoff_ms": 1790497748840,
+      "outcomes": {
+        "numeric_alt": {
+          "end_usd": 11698.40189278614,
+          "return_pct": 16.98401892786139,
+          "fees_usd": 460.9799978531421,
+          "fills": 176,
+          "signal_count": 225,
+          "result_sha256": "7b4a67020db83ccfee1c92b4c0e41e4cc6d4b4e85b2b9f903d062a5bab6ca10c",
+          "independent_book_verified": true
+        },
+        "modeled_alt": {
+          "end_usd": 11698.40189278614,
+          "return_pct": 16.98401892786139,
+          "fees_usd": 460.9799978531421,
+          "fills": 176,
+          "signal_count": 225,
+          "result_sha256": "7b4a67020db83ccfee1c92b4c0e41e4cc6d4b4e85b2b9f903d062a5bab6ca10c",
+          "independent_book_verified": true
+        },
+        "modeled_corrected_cvd": {
+          "end_usd": 11698.40189278614,
+          "return_pct": 16.98401892786139,
+          "fees_usd": 460.9799978531421,
+          "fills": 176,
+          "signal_count": 225,
+          "result_sha256": "7b4a67020db83ccfee1c92b4c0e41e4cc6d4b4e85b2b9f903d062a5bab6ca10c",
+          "independent_book_verified": true
+        }
+      },
+      "numeric_to_modeled_delta_usd": 0.0,
+      "cvd_delta_usd": 0.0
+    },
+    {
+      "package": "R1",
+      "id": "V050",
+      "cutoff_ms": 1790683200000,
+      "outcomes": {
+        "numeric_alt": {
+          "end_usd": 13390.450409417383,
+          "return_pct": 33.904504094173824,
+          "fees_usd": 529.6413526253585,
+          "fills": 179,
+          "signal_count": 251,
+          "result_sha256": "4002966fcc07a96440bf0ada8a4cb001e9a0d23669a69c3a70fd8fbfab2f2e6a",
+          "independent_book_verified": true
+        },
+        "modeled_alt": {
+          "end_usd": 13549.468970385986,
+          "return_pct": 35.49468970385985,
+          "fees_usd": 528.796978907842,
+          "fills": 177,
+          "signal_count": 249,
+          "result_sha256": "05c1b255390aae7afde1909af631f43cc7214a866830393f4c7515db0c804ccd",
+          "independent_book_verified": true
+        },
+        "modeled_corrected_cvd": {
+          "end_usd": 13549.468970385986,
+          "return_pct": 35.49468970385985,
+          "fees_usd": 528.796978907842,
+          "fills": 177,
+          "signal_count": 249,
+          "result_sha256": "05c1b255390aae7afde1909af631f43cc7214a866830393f4c7515db0c804ccd",
+          "independent_book_verified": true
+        }
+      },
+      "numeric_to_modeled_delta_usd": 159.0185609686032,
+      "cvd_delta_usd": 0.0
+    },
+    {
+      "package": "R1",
+      "id": "V075",
+      "cutoff_ms": 1790683200000,
+      "outcomes": {
+        "numeric_alt": {
+          "end_usd": 11665.900043333297,
+          "return_pct": 16.65900043333297,
+          "fees_usd": 463.2634770386912,
+          "fills": 178,
+          "signal_count": 227,
+          "result_sha256": "45927b2793df1e04e69b78b8e28b8c9660883e67670937ff6b76cb8b7816d1ee",
+          "independent_book_verified": true
+        },
+        "modeled_alt": {
+          "end_usd": 11665.900043333297,
+          "return_pct": 16.65900043333297,
+          "fees_usd": 463.2634770386912,
+          "fills": 178,
+          "signal_count": 227,
+          "result_sha256": "45927b2793df1e04e69b78b8e28b8c9660883e67670937ff6b76cb8b7816d1ee",
+          "independent_book_verified": true
+        },
+        "modeled_corrected_cvd": {
+          "end_usd": 11665.900043333297,
+          "return_pct": 16.65900043333297,
+          "fees_usd": 463.2634770386912,
+          "fills": 178,
+          "signal_count": 227,
+          "result_sha256": "45927b2793df1e04e69b78b8e28b8c9660883e67670937ff6b76cb8b7816d1ee",
+          "independent_book_verified": true
+        }
+      },
+      "numeric_to_modeled_delta_usd": 0.0,
+      "cvd_delta_usd": 0.0
+    }
+  ]
+}

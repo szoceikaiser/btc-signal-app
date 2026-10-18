@@ -17,12 +17,36 @@ from strategy_core import (Candle, FlowPoint, LADDER_TRANCHE, Pattern, Pivot, Im
                            Signal, _ENTRY_TYPES,
                            resample_daily)
 
+from synthetic_flow_fixture import synthetic_liquidation_point
+
 DAY_MS = 86_400_000
 H4_MS = 4 * 3600 * 1000
 
 
 def c(ts, o, h, l, cl):
     return Candle(ts, o, h, l, cl)
+
+
+def test_atr_kurzer_vorlauf_und_volles_fenster_gegen_unabhaengige_true_ranges():
+    from strategy_core import atr
+    candles = [c(0, 100, 101, 99, 100), c(1, 120, 121, 119, 120),
+               c(2, 90, 91, 89, 90)]
+    assert atr([], 14) == 0.0
+    assert atr(candles[:1], 14) == 0.0
+
+    def independent(values):
+        ranges = [max(cur.high-cur.low, abs(cur.high-prev.close),
+                      abs(cur.low-prev.close))
+                  for prev, cur in zip(values, values[1:])]
+        return sum(ranges) / len(ranges) if ranges else 0.0
+
+    # Original F16 vector: independently calculated TRs are 21 and 31.
+    assert independent(candles) == 26.0
+    assert atr(candles, 14) == independent(candles)
+    assert atr(candles, 2) == independent(candles)
+    long = candles + [c(3, 91, 130, 90, 125), c(4, 125, 126, 115, 118),
+                      c(5, 118, 124, 117, 121)]
+    assert atr(long, 3) == independent(long[-4:])
 
 
 # ------------------------------------------------- Fib: Zahlen aus dem Video
@@ -85,7 +109,7 @@ def test_find_pivots_und_impuls():
 # ------------------------------------------------------------------ Kompass
 
 def flow_series(spot, fut, oi, funding):
-    return [FlowPoint(i, s, f, o, fu) for i, (s, f, o, fu)
+    return [synthetic_liquidation_point(i, s, f, o, fu) for i, (s, f, o, fu)
             in enumerate(zip(spot, fut, oi, funding))]
 
 
@@ -314,10 +338,12 @@ def test_resample_daily_und_ema():
 
 
 def test_daily_trend_richtung():
-    rising = [c(d * DAY_MS, 80 + d, 81 + d, 79 + d, 80 + d) for d in range(12)]
+    rising = [c(d * DAY_MS + h * H4_MS, 80 + d, 81 + d, 79 + d, 80 + d)
+              for d in range(12) for h in range(6)]
     close, e = daily_trend(rising, 50)
     assert close > e                                  # Aufwaerts: Preis ueber EMA
-    falling = [c(d * DAY_MS, 100 - d, 101 - d, 99 - d, 100 - d) for d in range(12)]
+    falling = [c(d * DAY_MS + h * H4_MS, 100 - d, 101 - d, 99 - d, 100 - d)
+               for d in range(12) for h in range(6)]
     close, e = daily_trend(falling, 50)
     assert close < e                                  # Abwaerts: Preis unter EMA
 
@@ -432,7 +458,8 @@ def test_daily_fib_zone_liefert_zone():
     # Genug Tage fuer 1D-Pivots (n=5): klarer Impuls 100->140 mit Ruecklauf
     daily_closes = [100, 100, 100, 100, 100, 100, 120, 140, 140, 140,
                     140, 140, 130, 125, 120]
-    cs = [c(d * DAY_MS, p, p + 1, p - 1, p) for d, p in enumerate(daily_closes)]
+    cs = [c(d * DAY_MS + h * H4_MS, p, p + 1, p - 1, p)
+          for d, p in enumerate(daily_closes) for h in range(6)]
     z = daily_fib_zone(cs, pivot_n=5)
     assert z is not None and z.impulse.up
     assert z.gp_lower < z.level_05                    # Zonen korrekt geordnet
@@ -601,7 +628,7 @@ def test_einstand_ist_tranchengewichtet():
 
 def _liq_flow(n, short_liq_last=0.0, short_liq_base=1000.0):
     """Flow mit ruhigen Short-Liquidationen und optionaler Kaskade in der letzten Kerze."""
-    return [FlowPoint(i, 100 + i, 100, 1000, -0.0001,
+    return [synthetic_liquidation_point(i, 100 + i, 100, 1000, -0.0001,
                       short_liq=(short_liq_last if i == n - 1 else short_liq_base))
             for i in range(n)]
 
@@ -628,7 +655,7 @@ def test_liq_exit_spike_verkauft_in_die_kaskade():
 
 def test_liq_levels_findet_nur_ausreisser():
     cs = [c(i, 100, 100 + i, 99, 100) for i in range(20)]
-    fl = [FlowPoint(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 5 else 1000.0))
+    fl = [synthetic_liquidation_point(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 5 else 1000.0))
           for i in range(20)]
     lv = liq_levels(cs, fl, "short")
     assert len(lv) == 1 and lv[0][0] == cs[5].high          # Kerzen-Hoch als Niveau
@@ -637,9 +664,9 @@ def test_liq_levels_findet_nur_ausreisser():
 
 
 def test_liq_cascade_erkennt_nur_ausschlag():
-    ruhig = [FlowPoint(i, 0, 0, 1000, 0.0, short_liq=1000.0) for i in range(12)]
+    ruhig = [synthetic_liquidation_point(i, 0, 0, 1000, 0.0, short_liq=1000.0) for i in range(12)]
     assert liq_cascade(ruhig, "short") is False
-    kaskade = ruhig[:-1] + [FlowPoint(11, 0, 0, 1000, 0.0, short_liq=50_000.0)]
+    kaskade = ruhig[:-1] + [synthetic_liquidation_point(11, 0, 0, 1000, 0.0, short_liq=50_000.0)]
     assert liq_cascade(kaskade, "short") is True
     assert liq_cascade(kaskade, "long") is False            # falsche Seite
 
@@ -648,7 +675,7 @@ def test_liq_exit_zone_nutzt_keine_zukunft():
     """Kausalitaet: die Kaskade der AKTUELLEN Kerze darf keine Zone fuer sich selbst
     erzeugen — sonst wuesste der Backtest die Zukunft."""
     cs = [c(i, 100, 101, 99, 100) for i in range(20)]
-    fl = [FlowPoint(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 19 else 1000.0))
+    fl = [synthetic_liquidation_point(i, 0, 0, 1000, 0.0, short_liq=(9_000_000.0 if i == 19 else 1000.0))
           for i in range(20)]
     # Aus allen Kerzen ausser der letzten: kein Ausreisser -> keine Zone
     assert liq_levels(cs[:-1], fl[:-1], "short") == []
@@ -684,7 +711,7 @@ def _liq_entry_pfad():
 
 def _liq_flow_long(n, tief_kerze: int, betrag: float = 9_000_000.0):
     """Flow mit einer Long-Liquidations-Kaskade in Kerze `tief_kerze`."""
-    return [FlowPoint(i, 100 + i, 100, 1000, -0.0001,
+    return [synthetic_liquidation_point(i, 100 + i, 100, 1000, -0.0001,
                       long_liq=(betrag if i == tief_kerze else 1000.0))
             for i in range(n)]
 
@@ -919,9 +946,10 @@ def e13_szenario(spot_faellt=True, oi_steigt=True, funding_positiv=True):
     Ueber die drei Schalter laesst sich der Order-Flow gesund/ungesund stellen.
     """
     werte = [100, 99, 98, 99, 104, 110, 116, 122, 128, 130] + [130 - i for i in range(1, 17)]
-    cs = [Candle(1_600_000_000_000 + i * H4_MS, v, v * 1.004, v * 0.996, v)
+    cs = [Candle((1_600_000_000_000 // DAY_MS) * DAY_MS + i * H4_MS,
+                 v, v * 1.004, v * 0.996, v)
           for i, v in enumerate(werte)]
-    fl = [FlowPoint(c.ts,
+    fl = [synthetic_liquidation_point(c.ts,
                     5000.0 - i * 30 if spot_faellt else 5000.0 + i * 30,
                     0.0,
                     1e9 + i * 1e6 if oi_steigt else 1e9 - i * 2e7,
@@ -1057,14 +1085,14 @@ def test_muster2_nutzt_echtes_futures_cvd_wenn_vorhanden():
     # (a) Futures-CVD stark hoch, Spot flach -> echter Derivate-Pump
     mit_fut = flow_series(spot=[100] * n, fut=[100 + i * 10 for i in range(n)],
                           oi=stark_oi, funding=funding)
-    assert classify_pattern(candles, mit_fut) == Pattern.DERIVATE_PUMP
+    assert classify_pattern(candles, mit_fut, muster_cvd="alt") == Pattern.DERIVATE_PUMP
 
     # (b) Gleiche Lage, aber Spot traegt die Bewegung MIT (Spot steigt so stark wie
     #     Futures) -> mit echten Daten ist das KEIN Derivate-Pump mehr.
     spot_traegt = flow_series(spot=[100 + i * 10 for i in range(n)],
                               fut=[100 + i * 10 for i in range(n)],
                               oi=stark_oi, funding=funding)
-    assert classify_pattern(candles, spot_traegt) != Pattern.DERIVATE_PUMP
+    assert classify_pattern(candles, spot_traegt, muster_cvd="alt") != Pattern.DERIVATE_PUMP
 
     # (c) Ohne Futures-Daten (fut=0) sieht die Engine denselben Fall (b) FALSCH:
     #     Der Ersatzweg prueft nur, ob Spot flach ist — die Information, dass Spot
@@ -1074,10 +1102,10 @@ def test_muster2_nutzt_echtes_futures_cvd_wenn_vorhanden():
     ohne_fut = flow_series(spot=[100 + i for i in range(n)],    # Spot steigt leicht
                            fut=[0] * n,
                            oi=stark_oi, funding=funding)
-    ersatz = classify_pattern(candles, ohne_fut)
+    ersatz = classify_pattern(candles, ohne_fut, muster_cvd="alt")
     mit = classify_pattern(candles, flow_series(
         spot=[100 + i for i in range(n)], fut=[100 + i * 10 for i in range(n)],
-        oi=stark_oi, funding=funding))
+        oi=stark_oi, funding=funding), muster_cvd="alt")
     assert mit == Pattern.DERIVATE_PUMP
     assert ersatz != mit, "Ersatzweg und echter Zweig muessen sich unterscheiden koennen"
 
@@ -1313,9 +1341,10 @@ def test_be_im_plus_zieht_den_stop_auf_den_einstand():
     # erst eine Kerze im Plus (schaltet den Break-even scharf), dann der Rueckfall
     evaluate(cs[:-1], flow, p2, trail_stop=True, be_im_plus=True)
     assert p2.be_aktiv is True
+    assert p2.valid_stop == 145  # Confirmed structure already tighter than entry140.
     s2 = evaluate(cs, flow, p2, trail_stop=True, be_im_plus=True)
     stops = [x for x in s2 if x.type == SignalType.STOPLOSS]
-    assert len(stops) == 1 and "Einstand" in stops[0].reason
+    assert len(stops) == 1 and "Struktur-Tief" in stops[0].reason and "145" in stops[0].reason
     assert p2.state == PosState.FLAT
 
 
@@ -1941,7 +1970,7 @@ def test_pivot_n_1d_kommt_durch_evaluate_an():
 
 # ------------- E33: uebergeordneter Trend (13.09.2026)
 
-def _lange_serie(n_kerzen=1300, seed=42):
+def _lange_serie(n_kerzen=1302, seed=42):
     """Eine lange, schwankende 4h-Serie - lang genug fuer einen echten EMA200 auf 1D."""
     import random
     r = random.Random(seed)
@@ -2211,10 +2240,10 @@ def test_e433_mehr_historie_aendert_muster2_nicht_bei_usd():
     """Der Kern von E43.3: Mit "usd" erkennt die Engine bei 400 und bei 1200 geladenen
     Kerzen DIESELBEN Muster - live und Backtest sehen dieselbe Lage gleich.
 
-    Und durch evaluate() hindurch: Die Signale sind gleich - mit einer benannten
-    Ausnahme, Nebenbefund A5 (Teilgewinn am letzten Hoch haengt von der Laenge der
-    Historie ab, docs/PLAN-E43-PRUEFUNGS-KORREKTUREN.md, Abschnitt E43.5). Jede ANDERE
-    Abweichung macht den Test rot. Wird A5 behoben, faellt die Ausnahme weg.
+    Und durch evaluate() hindurch, isoliert vom Struktur-Nachzug: trail_stop=False.
+    F03 speichert nun den bei Aktivierung gueltigen Strukturstop; zusaetzlich geladene
+    alte Pivots koennen ihn berechtigt veraendern. Muster 2 bleibt identisch, gesamte
+    Stop-Pfade muessen es nicht. A5 (high_exit) bleibt wie zuvor separat ausgefiltert.
 
     Vorprobe: Bei "alt" unterscheiden sich die Derivate-Pump-Warnungen zwischen den
     Fenstern - der Vergleich erreicht Muster 2 also auch auf Signal-Ebene.
@@ -2228,7 +2257,7 @@ def test_e433_mehr_historie_aendert_muster2_nicht_bei_usd():
     n = len(kerzen)
 
     def lauf(fenster, muster_cvd, n_letzte=60):
-        live = dict(_live_einstellung(), muster_cvd=muster_cvd)
+        live = dict(_live_einstellung(), muster_cvd=muster_cvd, trail_stop=False)
         pos, sigs = Position(), []
         for i in range(n - n_letzte, n + 1):
             aus = max(0, i - fenster)
@@ -2286,7 +2315,7 @@ def _oi_lage(kurs, kontrakte, spot_d, fut_d, funding, spot_dreht=False):
         sp += d if i else 0
         fu += fut_d / 11 if i else 0
         f = funding[i] if isinstance(funding, list) else funding
-        fl.append(FlowPoint(i, sp, fu, 100_000.0 * (1 + kontrakte * i / 11) * p, f))
+        fl.append(synthetic_liquidation_point(i, sp, fu, 100_000.0 * (1 + kontrakte * i / 11) * p, f))
     btc = oi_in_btc({x.ts: x.oi for x in fl}, {x.ts: x.close for x in cs})
     return cs, [replace(x, oi_btc=btc[x.ts]) for x in fl]
 
@@ -2353,14 +2382,18 @@ def test_e434_oi_in_btc_rechnet_jeden_punkt_mit_dem_kurs_seiner_kerze():
 
 
 def test_e434_ohne_oi_daten_rechnen_usd_und_btc_gleich():
-    """Ohne OI-Daten steht das Dollar-OI konstant (Backtest: 1.0) und es gibt keine
-    Kontrakt-Reihe (oi_btc = 0). Beide Einstellungen muessen dann dasselbe sagen: keine
-    OI-Bewegung. Sonst erfaende "btc" aus fehlenden Daten ein Signal."""
+    """A2: fehlendes OI bleibt in beiden Einheiten als missing gekennzeichnet.
+
+    Die alte Backtest-Erwartung oi=1.0 als neutrale Ersatzmessung war gerade die
+    D02-Vermischung; beide Einstellungen duerfen daraus kein Signal erfinden.
+    """
     from dataclasses import replace
     from strategy_core import oi_aenderung
     for lage in (_A3_KAPITULATION, _A3_PUMP, (0.03, -0.025, 200e6, 100, 0.00002, False)):
         cs, fl = _oi_lage(*lage)
-        leer = [replace(x, oi=1.0, oi_btc=0.0) for x in fl]
+        missing = {"coverage": "missing"}
+        leer = [replace(x, oi=0.0, oi_btc=0.0,
+                        provenance={"oi": missing, "oi_btc": missing}) for x in fl]
         assert oi_aenderung(leer, "btc") == 0.0 == oi_aenderung(leer, "usd")
         assert classify_pattern(cs, leer, muster_oi="btc") == \
             classify_pattern(cs, leer, muster_oi="usd"), lage
@@ -2613,7 +2646,7 @@ def e34_signale(cs, fl, **kw):
     auf trend_filter, der hier aus ist); Basis- und Vergleichslauf bekommen denselben
     Wert, der Vergleich bleibt einer mit genau einem Unterschied.
     """
-    kw.setdefault("trend_ema", 5)
+    kw.setdefault("trend_ema", 3)
     pos = Position()
     raus = []
     for i in range(len(cs)):
@@ -2655,7 +2688,7 @@ def e34_szenario_mit_ausstieg():
     cs, fl = e13_szenario()
     for v in (104, 101, 98, 95, 92):
         cs.append(Candle(cs[-1].ts + H4_MS, v, v * 1.004, v * 0.996, v))
-        fl.append(FlowPoint(cs[-1].ts, fl[-1].spot_cvd - 30, 0.0,
+        fl.append(synthetic_liquidation_point(cs[-1].ts, fl[-1].spot_cvd - 30, 0.0,
                             fl[-1].oi + 1e6, 0.0002))
     return cs, fl
 
@@ -2731,7 +2764,7 @@ def test_ampel_filter_gegenprobe_und_nullhypothese():
     # unguenstige Stufe kommt jetzt aus Trend + Spot. (Diese Vorprobe hat die Aenderung
     # als einzige der Ampel-Filter-Tests sofort gemeldet - genau dafuer steht sie da.)
     assert ampel(lage_bericht(cs, fl, pattern=classify_pattern(cs, fl),
-                              trend_period=5))["stufe"] == "unguenstig"
+                              trend_period=3))["stufe"] == "unguenstig"
     voll = [t for _s, t in _tranchen(e34_signale(cs, fl))]
     klein = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="klein"))]
     gross = [t for _s, t in _tranchen(e34_signale(cs, fl, ampel_filter="gross"))]
@@ -2926,7 +2959,7 @@ def test_orderflow_detail_ist_reine_anzeige():
     """Die Engine darf diese Funktion nicht aufrufen - sonst waere sie eine Regel."""
     import inspect
     from strategy_core import evaluate
-    quelle = inspect.getsource(evaluate)
+    quelle = inspect.getsource(__import__('strategy_core')._evaluate)
     assert "orderflow_detail" not in quelle
 
 
@@ -2999,7 +3032,7 @@ def _m5_lage():
         hi = pr * 1.5 if i in (50, 52) else pr * 1.004
         cs.append(Candle(1_600_000_000_000 + i * ms, pr, hi, pr * 0.996, pr))
         cvd = 1000.0 + i * 30.0 if i < 30 else 1000.0 + 900.0 - (i - 30) * 90.0
-        fl.append(FlowPoint(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
+        fl.append(synthetic_liquidation_point(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
     return cs, fl
 
 
@@ -3085,7 +3118,7 @@ def _m5_absturz():
         pr = max(pr, 1.0)
         cs.append(Candle(1_600_000_000_000 + i * ms, pr, pr * 1.004, pr * 0.996, pr))
         cvd = 1000.0 + i * 30.0 if i < 30 else 1000.0 + 900.0 - (i - 30) * 90.0
-        fl.append(FlowPoint(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
+        fl.append(synthetic_liquidation_point(cs[-1].ts, cvd, 0.0, 1e9, 0.00005, 0.0, 0.0, 50.0))
     return cs, fl
 
 
@@ -3163,7 +3196,7 @@ def test_muster5_halten_behandelt_beide_ziele_gleich():
     Einstufung selbst ist eine strukturelle Aussage, also wird sie strukturell geprueft.
     """
     import inspect
-    quelle = inspect.getsource(evaluate)
+    quelle = inspect.getsource(__import__('strategy_core')._evaluate)
     assert quelle.count("_darf_teilverkaufen(ziel=True)") == 2, (
         "Genau zwei Stellen sind geplante Ziele (Extension 1.0 und 1.618) — "
         "alles andere sind Zwischenverkaeufe")

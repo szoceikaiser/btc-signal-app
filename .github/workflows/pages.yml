@@ -1,43 +1,118 @@
+# Free/public: explicit IDs and actual rules/credential reviews still required.
+# Disabled candidate; intended target .github/workflows/pages.yml.
 name: Chart-Webseite (Pages)
-
 on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Signal-Engine", "Flush-Wache", "Lage abrufen", "Backtest"]
+    types: [completed]
   push:
     branches: [main]
     paths: ["site/**"]
-  # GitHub loest bei einem Push, den ein Workflow mit dem Standard-GITHUB_TOKEN
-  # macht, KEINE weiteren Workflows aus (Schutz vor Endlosschleifen). Die Commits
-  # von "Signal-Engine" und "Backtest" aendern site/data, konnten die Webseite aber
-  # trotzdem nicht neu bauen: die veroeffentlichte Seite blieb auf dem Stand des
-  # letzten Pushes von Hand stehen (05.09.2026 aufgefallen - Backtest-Zahlen der
-  # Webseite waren 8 Tage alt). workflow_run schliesst diese Luecke.
-  workflow_run:
-    workflows: ["Signal-Engine", "Backtest"]
-    types: [completed]
-  workflow_dispatch:
-
 permissions:
+  contents: read
+  actions: read
   pages: write
   id-token: write
-
 concurrency:
-  group: pages
-  cancel-in-progress: true
-
+  group: btc-delivery-single-stream
+  cancel-in-progress: false
+  queue: max
 jobs:
   deploy:
-    # Bei workflow_run nur bauen, wenn der ausloesende Lauf erfolgreich war.
-    if: >-
-      github.event_name != 'workflow_run' ||
-      github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Require Git and stop checkout network after any Git failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          real_git="$(command -v git)"
+          [[ "$(printf '%s\n' 2.18.0 "$(git version | cut -d' ' -f3)" | sort -V | head -n1)" == "2.18.0" ]]
+          gate_dir="$(mktemp -d "$RUNNER_TEMP/btc-checkout-XXXXXX")"
+          printf '#!/bin/bash\nreal_git=%q\n' "$real_git" > "$gate_dir/git"
+          cat >> "$gate_dir/git" <<'GIT_GATE'
+          set -u
+          network=false
+          for arg in "$@"; do
+            case "$arg" in fetch|clone|ls-remote) network=true ;; esac
+          done
+          if ! "$network"; then exec "$real_git" "$@"; fi
+          stop_file="$(dirname "$0")/STOP"
+          if [[ -e "$stop_file" ]]; then exit 86; fi
+          "$real_git" "$@"
+          status=$?
+          if [[ "$status" -ne 0 ]]; then : > "$stop_file"; fi
+          exit "$status"
+          GIT_GATE
+          chmod 700 "$gate_dir/git"
+          printf '%s\n' "$gate_dir" >> "$GITHUB_PATH"
+      - name: Checkout exact reviewed code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          path: site
+          ref: 20d755a4332fb32aeab08b1973b650eeae10f31e
+          token: ${{ github.token }}
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+      - name: Verify checkout pin before loading code
+        env:
+          REVIEWED_CODE_SHA: 20d755a4332fb32aeab08b1973b650eeae10f31e
+        shell: bash
+        run: |
+          [[ "$GITHUB_REPOSITORY" == "szoceikaiser/btc-signal-app" ]]
+          [[ "$REVIEWED_CODE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$(git rev-parse HEAD)" == "$REVIEWED_CODE_SHA" ]]
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12.14"
+      - name: Refuse foreign or failed triggering workflow
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SOURCE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_REPOSITORY: ${{ github.event.workflow_run.repository.full_name }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          python3 - <<'PY'
+          import os
+          if os.environ['EVENT_NAME'] == 'workflow_run' and (
+              os.environ['SOURCE_CONCLUSION'] != 'success' or
+              os.environ['SOURCE_BRANCH'] != 'main' or
+              os.environ['SOURCE_REPOSITORY'] != os.environ['GITHUB_REPOSITORY'] or
+              not os.environ['SOURCE_SHA']):
+              raise ValueError('Foreign, failed or differently pinned Pages trigger')
+          PY
+      - name: Prepare reviewed Pages runtime only
+        env:
+          REVIEWED_RUNTIME_JSON: ${{ vars.BTC_REVIEWED_PAGES_RUNTIME_JSON }}
+          REVIEWED_CONFIG_JSON: ${{ vars.BTC_REVIEWED_CONFIG_JSON }}
+        run: python3 tools/produktion_runtime_prepare.py --kind pages --out .runtime
+      - name: Export one closed store/fence pair (read only)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
+          --config .runtime/data/config.json --out .runtime/public --identities-only
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
+        with:
+          path: .runtime/public
+      - name: Verify unchanged closed pair immediately before deploy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
+          --config .runtime/data/config.json --out .runtime/public
+          --verify .runtime/public.receipt.json
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5, official release commit
+        with:
+          timeout: "20000"
+          reporting_interval: "10000"
+          error_count: "1"

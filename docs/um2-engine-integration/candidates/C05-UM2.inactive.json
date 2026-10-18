@@ -1,0 +1,71 @@
+{
+  "active": false,
+  "aliases": [
+    "C05-UM2"
+  ],
+  "caveat": "Old conditional minimax candidate; C05 worst-case lead over S006 only 55.38 USD, no independent future confirmation. Corrected comparison of four configs is not a new 137-config ranking.",
+  "config_sha256": "a99be30ae26a753f9734fbe2d67ac49f33e090a691904336421742f92420f787",
+  "differences_from_um2_basis": {
+    "muster5_entry": {
+      "base": false,
+      "candidate": true
+    },
+    "pivot_n": {
+      "base": 5,
+      "candidate": 6
+    }
+  },
+  "label": "C05-UM2",
+  "parameter_hash_encoding": "SHA256 UTF-8 JSON: sorted keys, separators comma/colon, ensure_ascii=false",
+  "params": {
+    "ampel_filter": "off",
+    "ausbruch_ruecktest": false,
+    "be_im_plus": false,
+    "bein_richtung": "bias",
+    "bein_wahl": "juengstes",
+    "bias_long": true,
+    "bias_short": false,
+    "block_unhealthy": false,
+    "buy_ladder": true,
+    "conditional_stop": false,
+    "confirm_t1": false,
+    "confluence": false,
+    "cooldown_h": 0,
+    "flush_entry": "core",
+    "freeze_targets": false,
+    "high_exit": "on",
+    "high_exit_hist": "voll",
+    "k_atr": 2,
+    "liq_entry": "boost",
+    "liq_exit": "off",
+    "min_bein_pct": 0.05,
+    "min_stop_pct": 0.02,
+    "muster5_entry": true,
+    "muster5_halten": "off",
+    "muster_cvd": "usd",
+    "muster_oi": "usd",
+    "neustart_mit_rest": true,
+    "no_flip": true,
+    "pivot_n": 6,
+    "pivot_n_1d": 0,
+    "release_stale_rest": false,
+    "rest_halten": false,
+    "ruecktest_fenster": 12,
+    "stop_auf_docht": false,
+    "stop_puffer_pct": 0,
+    "stop_rueckeroberung": 1,
+    "strict_confirm": false,
+    "tp_ladder": true,
+    "trail_stop": true,
+    "trend_ema": 200,
+    "trend_filter": false,
+    "verkauf_faktor": 1,
+    "widerstand_exit": "off",
+    "zonen_1d": false,
+    "zonen_nachziehen": true
+  },
+  "position_migration": false,
+  "runtime_binding": null,
+  "schema": "inactive-um2-candidate-v1",
+  "source_search_space_sha256": "98d80b5bec2ae4c3c0de8229aeedb001af2da67dd9fcdf3bac6dbe5c9eee354a"
+}

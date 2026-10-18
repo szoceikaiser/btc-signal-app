@@ -1,0 +1,201 @@
+{
+  "version": 2,
+  "base": "bb862204c97c6bb4c0da49cb6f1de90dd58af663",
+  "status": "Retrospektives Prüfdesign; keine Jahreswartezeit; Umsetzung offen",
+  "measured": false,
+  "live_go": false,
+  "implementation_registration_complete": false,
+  "family_size": 1,
+  "primary_scenario": "S1",
+  "alpha_one_sided": 0.05,
+  "rows": [
+    {
+      "name": "LIVE-heute +Bein in Handelsrichtung",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": false,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": false,
+        "ruecktest_fenster": 12
+      },
+      "params_sha256": "1ffd9f2209577d43caa60be80a99f7bea84262b7f169712e048288b1e1d4c84e"
+    },
+    {
+      "name": "LIVE-heute +E42",
+      "params": {
+        "bias_long": true,
+        "bias_short": false,
+        "pivot_n": 5,
+        "k_atr": 2.0,
+        "flush_entry": "core",
+        "tp_ladder": true,
+        "trend_filter": false,
+        "trend_ema": 200,
+        "strict_confirm": false,
+        "confluence": false,
+        "conditional_stop": false,
+        "buy_ladder": true,
+        "release_stale_rest": false,
+        "trail_stop": true,
+        "liq_exit": "off",
+        "high_exit": "on",
+        "liq_entry": "boost",
+        "block_unhealthy": false,
+        "muster5_entry": false,
+        "muster5_halten": "off",
+        "stop_puffer_pct": 0.0,
+        "stop_rueckeroberung": 1,
+        "stop_auf_docht": false,
+        "confirm_t1": false,
+        "cooldown_h": 0.0,
+        "min_stop_pct": 0.02,
+        "no_flip": true,
+        "freeze_targets": false,
+        "min_bein_pct": 0.05,
+        "bein_wahl": "juengstes",
+        "be_im_plus": false,
+        "bein_richtung": "bias",
+        "widerstand_exit": "off",
+        "rest_halten": false,
+        "neustart_mit_rest": true,
+        "zonen_1d": false,
+        "zonen_nachziehen": true,
+        "pivot_n_1d": 0,
+        "ampel_filter": "off",
+        "muster_cvd": "alt",
+        "muster_oi": "usd",
+        "high_exit_hist": "voll",
+        "ausbruch_ruecktest": true,
+        "ruecktest_fenster": 12
+      },
+      "params_sha256": "2d95bc8a6999368024f38d947eaa76f284d2c0a31101c8734a5943995adeaa68"
+    }
+  ],
+  "document_sha256": "e6733a2c4ca2c0e900ea2cea864b1897d6b475dc6ff4200868b3e3cc16991b41",
+  "decisions": {
+    "D6-A": {
+      "status": "confirmed",
+      "resolution": "Retrospective historical assessment to current fixed cutoff; future-year proposal superseded",
+      "source": "Current user instruction: historical assessment from the past to the current cutoff without waiting one year",
+      "previous_proposal": "E42/12 vs frozen basis; 2026-10-01T00:00:00Z to 2027-10-01T00:00:00Z; registration before start and as-of evidence required"
+    },
+    "D6-B": {
+      "status": "withdrawn",
+      "resolution": "Unconfirmed 2% personal benefit threshold withdrawn; report actual effect and uncertainty",
+      "source": "Design revision: no personal benefit/risk preference inferred from user instruction",
+      "previous_proposal": "2% relative annual terminal wealth advantage; one-sided 95% lower bound exceeds 2%"
+    },
+    "D6-C": {
+      "status": "withdrawn",
+      "resolution": "Unconfirmed 15%/20%/+2pp risk budgets withdrawn; report risk and dominance/trade-off",
+      "source": "Design revision: no personal benefit/risk preference inferred from user instruction",
+      "previous_proposal": "Close DD <=15%; upper intrabar DD <=20%; each <= basis +2 percentage points in all scenarios"
+    }
+  },
+  "scenarios": [
+    {
+      "id": "S0",
+      "next_open_offset": 1,
+      "fee_pct": 0.1,
+      "slippage_pct": 0.0
+    },
+    {
+      "id": "S1",
+      "next_open_offset": 1,
+      "fee_pct": 0.1,
+      "slippage_pct": 0.1
+    },
+    {
+      "id": "S2",
+      "next_open_offset": 1,
+      "fee_pct": 0.1,
+      "slippage_pct": 0.5
+    },
+    {
+      "id": "S3",
+      "next_open_offset": 2,
+      "fee_pct": 0.1,
+      "slippage_pct": 0.1
+    },
+    {
+      "id": "S4",
+      "next_open_offset": 2,
+      "fee_pct": 0.1,
+      "slippage_pct": 0.5
+    }
+  ],
+  "bootstrap": {
+    "method": "paired stationary daily log returns",
+    "replicates": 20000,
+    "mean_block_days": 14,
+    "sensitivity_days": [
+      7,
+      28
+    ],
+    "seed": 20260929,
+    "rng": "PCG64",
+    "quantile": "linear",
+    "numpy_version": "to freeze before registration",
+    "purpose": "Conditional descriptive uncertainty; no unqualified post-selection confirmation"
+  },
+  "unresolved_technical_prerequisites": [
+    "R1 historical data package and field/source/revision manifest",
+    "statistical implementation and synthetic validation",
+    "verified offline i+2 implementation",
+    "inventory of historical selection; U2 only if complete"
+  ],
+  "document_hash_convention": "UTF-8 text, newlines normalized to LF",
+  "inference_scope": "Conditional fixed pair; historical selection adjustment not established",
+  "historical_selection_family_size": null,
+  "family_size_meaning": "Current fixed-pair candidate count only; not the historical search family",
+  "minimum_wealth_advantage": null,
+  "absolute_dd_budgets": null,
+  "window": {
+    "mode": "retrospective",
+    "r0_start_ms": 1768766400000,
+    "r0_cutoff_ms": 1790497748840,
+    "r1_cutoff_utc": "2026-09-29T12:00:00Z",
+    "r1_measured": false,
+    "r1_inputs_acquired": false,
+    "no_waiting_year": true
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "p3-reader401-amendment-v1",
+  "phase": "bootstrap-reader401-once",
+  "original_plan_sha256": null,
+  "original_grant": null,
+  "original_code_head": "b0b0386e51c62a35b7c18053edf284862479da54",
+  "original_code_tree": "81ef0047f94ea8fe99783e5b269254e6c7c8fd9a",
+  "original_code_materialization": null,
+  "execution_code": {
+    "code_head": null,
+    "code_tree": null,
+    "code_pins": null
+  },
+  "predecessor": {
+    "journal": "bootstrap.jsonl",
+    "journal_sha256": null,
+    "frontier_hash": null,
+    "frontier_rows": 5,
+    "highwater": null,
+    "counts": {
+      "GET": 1,
+      "PUT": 0,
+      "GIT_PUSH": 0
+    },
+    "database_sha256": null,
+    "marker_sha256": null,
+    "lock_sha256": null
+  },
+  "root": {
+    "directory": null,
+    "files_sha256": null
+  },
+  "review": {
+    "reviewer": null,
+    "evidence_sha256": null,
+    "original_pid": null,
+    "observed_utc": null,
+    "end_basis": "terminal-reader401-plus-fresh-os-end-and-exclusive-lock",
+    "terminal_code_path_checked": false,
+    "all_workers_ended": false,
+    "triggers_paused": false,
+    "human_review": false
+  },
+  "scope": "same-plan-same-root-one-continuation-no-PUT-no-later-phase",
+  "expires_utc": null
+}

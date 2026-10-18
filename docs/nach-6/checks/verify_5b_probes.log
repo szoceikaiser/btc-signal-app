@@ -1,0 +1,87 @@
+{
+  "passed": 16,
+  "total": 16,
+  "results": [
+    {
+      "name": "source erased",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "legacy duplicates lost",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "explicit repeats retained",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "ID conflict hidden",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "content removed",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "ID source ignored",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "order unsorted",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "unstable identity",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "V1 reference time",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "V1 reference price",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "rejections shown",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "unknown model accepted",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "marker origin erased",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "HTML injection",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "invalid time accepted",
+      "reached_baseline": true,
+      "caught": true
+    },
+    {
+      "name": "sequence ignored",
+      "reached_baseline": true,
+      "caught": true
+    }
+  ]
+}
+

@@ -1,0 +1,41 @@
+{
+  "schema": "p3-happy-readback-v1",
+  "phase": "public-store-happy-readback-once",
+  "scope": "only-exact375-happy-halt-reader-13GET-no-recovery",
+  "original_plan_sha256": null,
+  "original_expires_utc": null,
+  "operations": null,
+  "initial_grant": null,
+  "historical_code_materialization": null,
+  "entry": {
+    "journal": "public-store-happy.jsonl",
+    "rows": 375,
+    "frontier_hash": null,
+    "highwater": null,
+    "counts": {
+      "GET": 134,
+      "PUT": 11,
+      "GIT_PUSH": 1
+    },
+    "files_sha256": null
+  },
+  "execution_code": {
+    "code_head": null,
+    "code_tree": null,
+    "code_pins": null
+  },
+  "review": {
+    "reviewer": null,
+    "evidence_sha256": null,
+    "original_pid": null,
+    "observed_utc": null,
+    "end_basis": "terminal-synchronous-phase-plus-human-end-report-fresh-os-check-exclusive-lock",
+    "terminal_code_path_checked": false,
+    "human_terminal_end_report": false,
+    "all_workers_ended": false,
+    "triggers_paused": false,
+    "human_review": false
+  },
+  "not_before_utc": null,
+  "expires_utc": null
+}

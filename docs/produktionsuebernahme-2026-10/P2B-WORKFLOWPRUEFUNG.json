@@ -1,0 +1,18 @@
+{
+  "schema": "produktion-p2b-workflows-v1",
+  "remote_default_branch": "main",
+  "remote_default_sha_checked": "e3af493cae7ebb62e0ff9058c291d589d62bfb1c",
+  "candidate_branch": "codex/produktion-audit-uebernahme",
+  "candidate_push_workflows": ["Produktionsuebernahme Offline", "Tests"],
+  "candidate_offline_job_branch_guard": true,
+  "candidate_offline_workflow_read_only": true,
+  "candidate_active_production_jobs_main_guarded": true,
+  "remote_default_scheduled_workflows": ["Coinalyze-Archiv", "Signal-Engine", "Flush-Wache"],
+  "remote_default_workflow_run": {
+    "workflow": "Chart-Webseite (Pages)",
+    "subscribed_workflows": ["Signal-Engine", "Backtest"],
+    "candidate_offline_name_subscribed": false
+  },
+  "candidate_dispatch_executed": false,
+  "main_merge_or_deployment": false
+}

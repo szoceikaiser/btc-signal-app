@@ -1,0 +1,42 @@
+{
+  "schema": "p3-public-operations-v1",
+  "scope": "public-existing-synthetic-store-only-28PUT-stop-then-separate-1PUT-takeover-inspect",
+  "original_plan_sha256": null,
+  "original_expires_utc": null,
+  "root_success": {
+    "amendment": null,
+    "grant": null,
+    "code_materialization": null
+  },
+  "entry": {
+    "journal": "bootstrap-public-missing-branch-once.jsonl",
+    "rows": 112,
+    "frontier_hash": null,
+    "highwater": null,
+    "counts": {
+      "GET": 37,
+      "PUT": 0,
+      "GIT_PUSH": 1
+    },
+    "files_sha256": null
+  },
+  "execution_code": {
+    "code_head": null,
+    "code_tree": null,
+    "code_pins": null
+  },
+  "review": {
+    "reviewer": null,
+    "evidence_sha256": null,
+    "original_pid": null,
+    "observed_utc": null,
+    "end_basis": "terminal-synchronous-phase-plus-human-end-report-fresh-os-check-exclusive-lock",
+    "terminal_code_path_checked": false,
+    "human_terminal_end_report": false,
+    "all_workers_ended": false,
+    "triggers_paused": false,
+    "human_review": false
+  },
+  "not_before_utc": null,
+  "expires_utc": null
+}

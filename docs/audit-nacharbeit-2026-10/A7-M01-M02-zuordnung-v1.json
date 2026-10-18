@@ -1,0 +1,1309 @@
+{
+  "schema": "a7-decision-basis-v1",
+  "scope": "Index of the original audit chronology and the 85 old code rows; original decisions are not rerun or silently mapped to current V000",
+  "source_sha256": {
+    "ENTSCHEIDUNGEN.md": "e7b40bb5bb6999a0df5a4a5265c100df0102128441ec21d93e919aa5edbd946d",
+    "PARAMETER.md": "0d391c7ebc7e671abebee88fe82ae859e633e83a09d690e849a6f15cae982370",
+    "search-inventory.json": "46bec687916c099434af8e6843a98c4723c782c022262c362b96e990aee58a75"
+  },
+  "decision_count": 76,
+  "decisions": [
+    {
+      "stage_and_choice": "E1 Regeln aus Furkan ableiten",
+      "contemporary_basis_and_window": "S/Quellen; keine Renditebasis",
+      "original_observation": "Fibonacci, Bestätigung, Stop, Stufenkäufe formalisiert",
+      "original_decision_and_audit_limit": "Grundformeln nachvollziehbar. Feste 4h, n=5, Prozenttranchen und numerische Musterschwellen sind zusätzliche Entwicklerregeln. Kein vollständiges Abbild der Originalstrategie.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 44,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E2 notierte Kauf-/Verkaufstage gegen Markt prüfen",
+      "contemporary_basis_and_window": "H, manuelle Datenlisten; keine Größen/Ausführungen",
+      "original_observation": "Datumsnähe und Marktverlauf; teilweise Tief der Folgewoche",
+      "original_decision_and_audit_limit": "Nur rückblickende Plausibilität. Echte Furkan-Rendite und damals erreichbare Preise nicht belegt. Doppelte Tage und Kauf/Short-Deckung dürfen nicht als unabhängige Trades zählen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 45,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E3–E7 Engine, Webseite, Automatisierung, Telegram",
+      "contemporary_basis_and_window": "S, teilweise L; Demo-/Funktionsfälle",
+      "original_observation": "Ausgabe, Persistenz, Verbindung; dokumentierte API-451-Ausfälle und Kraken-Ersatz",
+      "original_decision_and_audit_limit": "Betrieb nachgewiesen, kein Renditenachweis. Der Audit versendet nichts. Aktuell F05/F10/F13 und Datenqualitätsgrenzen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 46,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E4 Pivot-/ATR-Kalibrierung",
+      "contemporary_basis_and_window": "H, 8 Kombinationen n=3…6 und k=2/3, W0",
+      "original_observation": "n=5/k=2: etwa 45 % Recall, 54 % Präzision; Ziel ≥70 % nicht erreicht",
+      "original_decision_and_audit_limit": "Gewählt als Datumsnäherung. Die Ziele waren nicht Nettorendite oder unabhängige Vorhersagekraft; ±1 Tag erlaubt viel Zufall. Audit S000–S007: vollständiges altes 4×2-Gitter auf heutiger Basis, keine Reproduktion der alten Kalibrierung; kein robuster Vorteil beider Hälften.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 47,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E8.1 Kapitulation/Flush",
+      "contemporary_basis_and_window": "H, frühere Long+Short-Basis, W0, teilweise ohne echtes OI",
+      "original_observation": "Ohne Flush ca. −6 %, T1 ca. −8,7 %, Core ca. −9,8 %",
+      "original_decision_and_audit_limit": "Damals zunächst aus. Gilt nicht gegen heutige Basis; E9 führte auf neuer Datenbasis zum gegenteiligen Ergebnis.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 48,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E8.2/3/4 Zwischenverkäufe und Bestätigung",
+      "contemporary_basis_and_window": "H/S, W0",
+      "original_observation": "Leiter 0,8/0,9 mit 15-%-Tranchen etwa −5,3 % statt −6 %; Recall kaum verändert",
+      "original_decision_and_audit_limit": "Leiter aktiv, gewählte Größen sind Setzungen. Softwaretests prüfen die gewählte Mechanik, keinen statistisch gesicherten Mehrertrag.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 49,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E8.5 nur Long",
+      "contemporary_basis_and_window": "H, bisher Long+Short, W0",
+      "original_observation": "ungefähr +2,5 % statt −5,3 %",
+      "original_decision_and_audit_limit": "Long-only aktiv. Heutiger Short-Vergleich durch F02 nicht als unverschuldete Anlagebilanz interpretierbar. „Shorts generell ungeeignet“ folgt daraus nicht.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 50,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E8.5 Trend/strenge Bestätigung/Konfluenz",
+      "contemporary_basis_and_window": "H, Long-only +2,5 %, W0",
+      "original_observation": "EMA etwa −3,1 %, Konfluenz +2,9 % mit weniger Signalen, strenge Variante teils ohne Wirkung bei Ersatzdaten",
+      "original_decision_and_audit_limit": "Filter aus. Diese frühe Basis ist überholt; aktuelle gemeinsame Proben erfassen die vorhandenen Regeln.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 51,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E8.5 KI-Makro-Bias",
+      "contemporary_basis_and_window": "Plan, keine Messung; [PLAN-E8.5](../../PLAN-E8.5-KI-MAKRO-BIAS.md)",
+      "original_observation": "Rückwirkende LLM-Beurteilung wegen möglichem Ausgangswissen nicht belastbar",
+      "original_decision_and_audit_limit": "Pausiert/nicht gebaut. Kein Beleg gegen zeitpunktgerecht protokollierte Makrosignale generell.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 52,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E9.1/2 OI und tatsächliche Liquidationen",
+      "contemporary_basis_and_window": "S/H, Ersatz-OI → Coinalyze-Binance, W1",
+      "original_observation": "Muster wurden erstmals mit echter OI-Zeitreihe bewertbar",
+      "original_decision_and_audit_limit": "Datenpfad aktiv bei verfügbarem API-Zugriff. Quellen-/Ausfallabhängigkeit ist kein Konfigurationsschalter und muss je Lauf archiviert werden.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 53,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E9.3 bedingter Stop mit Nachkauf",
+      "contemporary_basis_and_window": "H, damalige Basis +12,3 %, W1",
+      "original_observation": "etwa +9,2 %; zusammen mit Flush ca. +33,1 statt +33,5 %",
+      "original_decision_and_audit_limit": "Aus. Größeres Risiko durch spätere Invalidierung. Aktuelle Einzelprobe eingeschlossen; nicht identisch mit E41-Warten ohne Nachkauf.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 54,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E9.4–7 vollständiger Datenbereich/Portfoliomessung/Flush-Core",
+      "contemporary_basis_and_window": "H/S, W1",
+      "original_observation": "Voll-Daten-Fenster statt künstlich neutralem OI; Flush-Core wurde vorteilhaft",
+      "original_decision_and_audit_limit": "Core aktiv. Neue Datenbasis erklärt, warum E8-Ablehnung nicht übertragbar war. „Voll-Daten“ garantiert weder damalige Publikationszeit noch unveränderte Daten.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 55,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E9.8 Kaufleiter",
+      "contemporary_basis_and_window": "H, damalige Long/Flush-Basis, W1",
+      "original_observation": "ca. +18,0 statt +9,8 %",
+      "original_decision_and_audit_limit": "Aktiv. Im Audit einzeln und mit Flush/Liquidationsaufstockung aus-/eingeschaltet (G4). Keine einheitliche Stoprisiko-Skalierung.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 56,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E9.9 alten Rest freigeben",
+      "contemporary_basis_and_window": "H, Buy-ladder/Trail-Basis; spätere alte Zeile +22,2 %, DD −13,0 %",
+      "original_observation": "Verkauf bei neuer Struktur, um neue Einstiege zu ermöglichen",
+      "original_decision_and_audit_limit": "Aus; E21/E26 adressieren das Problem anders. E43.8 prüfte später erneut gegen aktuelle Basis.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 57,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E9.10 Stop nach Teilgewinn nachziehen",
+      "contemporary_basis_and_window": "H/S, W1",
+      "original_observation": "Einstands-/Pivotstop nach realisiertem Teilverkauf",
+      "original_decision_and_audit_limit": "Aktiv. F03 beweist, dass die berechnete Stoplinie wieder sinken kann; F04, dass der Einstand falsch gewichtet ist. Im aktuellen Datensatz wirkt das Abschalten nicht auf die Rendite. Das beweist keine korrekte Implementierung.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 58,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E9.11 Liquidationsverkäufe spike/zone/both",
+      "contemporary_basis_and_window": "H, Buy-ladder/Trail-Basis, W1",
+      "original_observation": "Keiner der geprüften Ausstiege überzeugte",
+      "original_decision_and_audit_limit": "Alle aus; alte Ablehnungen nur für damalige Basis. Heutige Einzelproben enthalten alle drei Werte. Bereits ausgelöste Liquidationen sind keine Karte offener Liquidität.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 59,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E10 Cashreserve 100/60/50 %",
+      "contemporary_basis_and_window": "H, damalige Basis, W1",
+      "original_observation": "+30,0 / +17,9 / +14,8 %",
+      "original_decision_and_audit_limit": "100 % Modellkapital gewählt. Niedrigere Roh-Rendite widerlegt keine vernünftige Risikoreduktion. Auf heutiger Basis neu: [KAPITAL.md](KAPITAL.md), +36,13 / +31,19 / +26,14 %.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 60,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E10 Verkauf am alten Hoch",
+      "contemporary_basis_and_window": "H, alte Basis, W1",
+      "original_observation": "zunächst etwa −2,8 Punkte gegenüber Basis",
+      "original_decision_and_audit_limit": "Zunächst aus; **durch E14 überholt**. Das ist ein belegtes Beispiel, warum einzelne frühere Ablehnungen nicht endgültig sind.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 61,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E10 Liquidations-Einstieg boost/filter",
+      "contemporary_basis_and_window": "H, alte Basis, W1",
+      "original_observation": "Boost zunächst ohne Renditewirkung trotz 19 Signalen wegen fehlendem Cash; Filter +22,5 statt +29,8 %",
+      "original_decision_and_audit_limit": "Zunächst nicht gewählt; Boost später mit Mindeststop sinnvoller. Die Signalzahl misst keine ausgeführten Käufe.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 62,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E11 halbes Fenster / Rangvergleich",
+      "contemporary_basis_and_window": "H, W1: ungefähr 18.11.–24.03. und 24.03.–27.07.",
+      "original_observation": "Schnittmenge der Top-5, Interpretation anhand 25/N",
+      "original_decision_and_audit_limit": "Keine unabhängige Validierung: Parameter wurden schon mit beiden Hälften entwickelt. 25/N unterstellt unabhängige, gleichverteilte Ranglisten; die Varianten sind stark korreliert.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 63,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E12 Verlust- und Reset-Prüfung",
+      "contemporary_basis_and_window": "S/H, [Verlustanalyse](../VERLUST-ANALYSE-2026-07-27.md)",
+      "original_observation": "Nicht zurückgesetzte Zähler verfälschten wiederholte Positionen; pro Teilverkauf gezählte „Gewinntrades“ überhöhten Positions-Trefferquote",
+      "original_decision_and_audit_limit": "Reset repariert, frühere Hebel neu gemessen. Behauptung „Strategie gut“ war stärker als die Belege. 77 % profitable Teilverkäufe waren nicht 77 % profitable Gesamtpositionen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 64,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E13 Filter/Bestätigung/Wartezeit",
+      "contemporary_basis_and_window": "H, LIVE+Trail etwa +32,2 %, W2",
+      "original_observation": "Abverkaufssperre ~30 %, confirm_t1 ~27,6 %, 48h-Wartezeit ~33,9 %, DD teils geringer; Rangfolge H1/H2 wechselte",
+      "original_decision_and_audit_limit": "Nicht gewählt. Spätere alte Gitterzeilen zeigten andere Vorzeichen; deshalb E43.6-Nachmessung. Ein Rangwechsel beweist für sich weder Zufall noch das Gegenteil.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 65,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E13 Mindeststop 2 %",
+      "contemporary_basis_and_window": "H, +32,2 %-Basis, W2",
+      "original_observation": "+33,0 %, DD etwa −7 statt −12,3 % nach damaliger DD-Formel; H1 +0,9, H2 −2,4 Punkte",
+      "original_decision_and_audit_limit": "Aktiv wegen Risikoabwägung, nicht weil beide Hälften gewinnen. Alte DD-Zahlen vor E27 und heutiger F01 begrenzen das Argument.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 66,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E13 Mindeststop × Liquidations-Boost",
+      "contemporary_basis_and_window": "H, gleiche vier Ecken, W2",
+      "original_observation": "Boost allein ~37 %, Mindeststop+Boost ~39,1 %, Basis ~32,2 %",
+      "original_decision_and_audit_limit": "Kombination aktiv. Tatsächlich untersuchte Wechselwirkung, keine bloße Einzelannahme. Heutige G4-/Einzelproben enthalten die Mechanismen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 67,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E14 Hochverkauf auf neuer Basis",
+      "contemporary_basis_and_window": "H, Mindeststop+Boost +39,1 %, W2",
+      "original_observation": "high_exit +40,3 %, DD −7,5 statt −6,9; Liquidationsverkauf ~33,8, beide ~30,7 %",
+      "original_decision_and_audit_limit": "high_exit aktiv, Liquidationsausstiege aus. Frühe high_exit-Ablehnung E10 ausdrücklich überholt. Neue G2 zeigt bisher nicht gemessene Interaktion mit E42.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 68,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E15 hypothetische Furkan-Bilanz",
+      "contemporary_basis_and_window": "H, unvollständige Notizen, Größenannahmen",
+      "original_observation": "12 Szenarien; kurzes Fenster 19.11.–22.04. −9,2 bis +0,5 %, langes 09/2025–22.04. −23,7 bis −6,1 %",
+      "original_decision_and_audit_limit": "Keine tatsächliche Furkan-Rendite. Größen, Instrument, Finanzierung und Ausführungen fehlen. Ein Vergleich „Engine schlägt Furkan“ ist nicht zulässig.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 69,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E16 Futures-CVD/Long-Anteil",
+      "contemporary_basis_and_window": "H/S, +40,3 %-Basis, W2",
+      "original_observation": "echte Futures-Deltas statt Ersatz, etwa +41,5 %; Long-Anteil zusätzlich gesammelt",
+      "original_decision_and_audit_limit": "Futures-Datenweg übernommen, Long-Anteil ohne eigene Handelsregel. Ein kleiner Effekt widerlegt den Nutzen besserer Daten nicht allgemein.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 70,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E17 Vorschau, Planbarkeit, Flush-Wache",
+      "contemporary_basis_and_window": "S/L/H, folgende Juliläufe",
+      "original_observation": "61 von 214 Signalpreisen verschieden vom Schluss; Warnung für laufende Kerze",
+      "original_decision_and_audit_limit": "Anzeigen aktiv. Frühere Level lassen sich nur dann als Limit handeln, wenn alle Voraussetzungen schon vorher bekannt waren. F12 widerlegt pauschale Gleichsetzung mit realer Ausführung.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 71,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E18.1 Konfiguration durchreichen",
+      "contemporary_basis_and_window": "S, [Plan E18](../PLAN-E18-MECHANIK-FIXES.md)",
+      "original_observation": "Mehrere Schlüssel kamen live nicht an; zentraler Durchreich-Test",
+      "original_decision_and_audit_limit": "Reparatur übernommen. Heutige normale Werte stimmen; Zeichenkette false wird trotzdem zu true (F11).",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 72,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E18.2 no_flip und E18.3 Ziele einfrieren",
+      "contemporary_basis_and_window": "H/S, W3, damalige Basis ca. +35,5 %",
+      "original_observation": "no_flip ~31,4 %, freeze ~29,9 %, gemeinsam ~34 %",
+      "original_decision_and_audit_limit": "Zunächst aus. Gleichkerzen-Reihenfolge bleibt eine Modellentscheidung; später E25 no_flip aus Bedienungsgründen aktiv. freeze bleibt aus.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 73,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E19 Mindestbein, Auswahl, Richtung, Break-even",
+      "contemporary_basis_and_window": "H, W3, Basis +35,4 %",
+      "original_observation": "Mindestbein +37,4 %, Richtung bias +32,6 %, Kombination +38,6 %, größtes Bein +17,6 %, be_im_plus +15,9 %",
+      "original_decision_and_audit_limit": "min_bein 5 % aktiv, übrige damals aus. **Beinrichtung-Ablehnung durch E43.2 überholt.** be_im_plus bildet Furkans „bereits Gewinne realisiert“ nicht ab.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 74,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E20 Gegenbein-Widerstand / Positionsplan",
+      "contemporary_basis_and_window": "H/S, W3, Basis +37,9 %",
+      "original_observation": "Widerstand zusätzlich +30,4 %, statt high_exit +33,0 %; DD −6,2/−6,8 statt −6,9 %",
+      "original_decision_and_audit_limit": "widerstand_exit aus, Plan/Anzeige an. Fehlendes Persistenzfeld F05 verhindert verlässlichen Live-Vergleich bei Aktivierung; Planstop weicht ab (F10).",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 75,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E21 Rest halten × Neustart",
+      "contemporary_basis_and_window": "H/S, W3, Basis +37,9 %",
+      "original_observation": "Rest allein +18,9 %, Neustart +39,0 %, beide +39,4 %; noch ohne no_flip",
+      "original_decision_and_audit_limit": "Vollständiges kleines Zusammenspiel bereits gemessen. Rest blockiert ohne Neustart weitere Einstiege. Nicht einfach gegen heutige +36,13 % halten.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 76,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E22 Markt-Beteiligung",
+      "contemporary_basis_and_window": "H/S, W3, Monatsvergleich",
+      "original_observation": "Aufwärtsmonate summiert +48,3 % BTC/+23,4 % Engine; Abwärts −52,0/+9,9 %",
+      "original_decision_and_audit_limit": "Anzeige, kein Handelsschalter. Summierte Monatsrenditen sind keine Vermögensentwicklung. Verhältnis wird nahe null instabil; Kapitalbindung und Kosten getrennt betrachten.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 77,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E23 zusätzliche Tageszonen",
+      "contemporary_basis_and_window": "H/S, W4, Basis +37,9 %, DD −6,9",
+      "original_observation": "+23,4 %, DD −17,6; H1 +27,0 vs +26,4, H2 −2,9 vs +9,1; Gegenprobe ohne Mindestbein +26,5 %",
+      "original_decision_and_audit_limit": "Aus. Andere Stops bei gleicher Kapitaltranche vermischen Signalqualität und Risiko. Vorabrechnung auf anderem Fenster ist keine Reproduktion.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 83,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E24 Chart/Plan und Einstand",
+      "contemporary_basis_and_window": "S/L, [Plan E24](../PLAN-E24-CHART-UND-PLAN.md)",
+      "original_observation": "Fehlende Planmarken im Chart, Einstand versus einzelner K1 verwechselt",
+      "original_decision_and_audit_limit": "Chart liest state.plan; lokaler Anzeigeumschalter. F04 betrifft auch den dargestellten Einstand, F10 den gemeinsamen Planstop. Geteilte Datenquelle kann einen gemeinsamen Fehler verbreiten.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 84,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E25 no_flip",
+      "contemporary_basis_and_window": "H/S/Nutzerpräferenz, W4, Basis +37,3 %, 16 Gegengeschäftskerzen",
+      "original_observation": "+34,2 %, 0 Gegengeschäfte, DD −7,1 statt −6,9; H1 −3,3, H2 +0,3 Punkte",
+      "original_decision_and_audit_limit": "Aktiv auf Wunsch. Praktische Konsistenzentscheidung, kein belegter Renditegewinn. Dass Kauf/Verkauf netto zusammenfallen, macht sie nicht physikalisch unmöglich; Reihenfolge und reale Auftragsausführung sind die offene Frage.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 85,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E26 Neustart mit Rest auf no_flip-Basis",
+      "contemporary_basis_and_window": "H/S, W4, Basis +34,5 %",
+      "original_observation": "+36,6 %, gleiche alte DD-Zahl; nur drei Neustarts, Vorteil aus zwei Fällen",
+      "original_decision_and_audit_limit": "Aktiv als Konstruktionsentscheidung. Drei Ereignisse tragen keinen allgemeinen Renditenachweis; „kostet nichts“ gilt nur für gemessenen Pfad.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 86,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E26 Rest halten × Neustart auf neuer Basis",
+      "contemporary_basis_and_window": "H, W4",
+      "original_observation": "+35,7 %, zunächst DD −8,2 statt −7,1; nach E27 DD −9,8 statt −9,4, Return +34,0 statt +34,9",
+      "original_decision_and_audit_limit": "Rest aus. Ursprüngliches Risikoargument wurde bereits im Projekt korrigiert. Audit F09 ändert die Buchung erneut.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 87,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E27 DD zwischen Signalen und an Kerzentiefs",
+      "contemporary_basis_and_window": "S/H, W4",
+      "original_observation": "Live DD −7,1 → −9,4 %, Median 52 Varianten −9,9 %",
+      "original_decision_and_audit_limit": "Richtige grundsätzliche Korrektur. F01: Positionsstand nach den Trades wird noch immer für die ganze aktuelle Kerze verwendet; Reihenfolge von Hoch/Tief ungesichert.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 88,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E28 Break-even nach Aufstockung",
+      "contemporary_basis_and_window": "S/Plan, [Plan E28](../PLAN-E28-BREAKEVEN-NACH-AUFSTOCKUNG.md)",
+      "original_observation": "gebaut und vor Push vollständig zurückgenommen; keine tragende Renditemessung",
+      "original_decision_and_audit_limit": "Expliziter Nutzerwunsch, manuell entscheiden. Nicht live. Keine Wiederaufnahme im Audit; trail_stop ist ein anderer Mechanismus.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 89,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E29 MVRV-Z",
+      "contemporary_basis_and_window": "Recherche/Plan, W4; wenige bekannte Werte",
+      "original_observation": "~0,24–0,42; klassische 0/7-Schwellen nicht berührt",
+      "original_decision_and_audit_limit": "Nicht gebaut. Kein aussagekräftiger Test einer zyklischen On-Chain-Regel. Kostenbasis/Valuezone sind zudem nicht dasselbe wie MVRV-Z.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 90,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E30 Zonen nachziehen",
+      "contemporary_basis_and_window": "H/S, W5",
+      "original_observation": "zunächst +37,2 vs +36,2, nach zusätzlicher no_flip-Reparatur +36,4 vs +36,3, DD gleich −9,7; Folgetag +36,1 vs +37,1",
+      "original_decision_and_audit_limit": "Aktiv als strukturelle Entscheidung, nicht Renditebeweis. Zwei bewegte Fensterränder und Pfadänderung: kein wissenschaftlicher Nachweis einer universellen 1-Punkt-Rauschgrenze.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 91,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E30 Pages-Aktualisierung",
+      "contemporary_basis_and_window": "L/S, 05.09.",
+      "original_observation": "Webseite acht Tage alt, weil Workflow-Push keinen Push-Folgeworkflow auslöste",
+      "original_decision_and_audit_limit": "workflow_run ergänzt. Heute unbeschränkter Folgeauslöser auch nach Backtest auf fremdem Zweig: im Audit deshalb kein gewöhnlicher Backtest-Workflow gestartet.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 92,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E31 Wissens-Layer und falsch benannte Vergleichsbasis",
+      "contemporary_basis_and_window": "S/Dokumentation",
+      "original_observation": "„ohne Flush“ hatte zwischenzeitlich vier Unterschiede zu live; korrigiert",
+      "original_decision_and_audit_limit": "Positiver Regressionstest. Alte Namen bleiben trotzdem gefährlich: heute sind nur 23 von 85 Gitterzeilen echte Einzelabweichungen und eine identisch; 61 unterscheiden sich mehrfach.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 93,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E32.1 Lageanzeige und E32.2 Wechselmeldung",
+      "contemporary_basis_and_window": "S, [Plan E32](../PLAN-E32-LAGEZEILE.md)",
+      "original_observation": "Struktur/Spot/Muster in Plan; Wechselmeldung offen",
+      "original_decision_and_audit_limit": "Anzeige aktiv, keine zusätzliche Handelshandlung. Nachträgliche Begriffe wie „Short-Wetten“ sind Interpretation, keine eindeutig identifizierten Kontopositionen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 94,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E32.3 Tages-Pivotweiten 5/8/12",
+      "contemporary_basis_and_window": "H, W6, Basis +31,4 %, DD −9,7",
+      "original_observation": "n8 +5,5 %, DD −22,9; n5 +21,6, n12 +6,4",
+      "original_decision_and_audit_limit": "Aus. Heutige abhängige Gegenproben V075/V076 prüfen n8/12 mit aktivierter Tagesebene. Nur n ändern, während zonen_1d aus ist, wäre keine echte Probe.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 95,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E33 Tagestrend EMA200/50",
+      "contemporary_basis_and_window": "H/S, W6, Basis +30,9 %",
+      "original_observation": "EMA200 −0,4 %, EMA50 +4,7 %, starke Signalreduktion; zu kurze EMA-Historie repariert",
+      "original_decision_and_audit_limit": "Filter aus, Anzeige an. Ein misslungener Eintrittsfilter widerlegt keinen übergeordneten Trendansatz generell; F08 betrifft unfertigen Tag.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 96,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E34 Ampel klein/gross/immer",
+      "contemporary_basis_and_window": "H/S, W6, Basis +30,9 %",
+      "original_observation": "+26,6 / +26,4 / +19,0 %; H2 umgekehrte Ampel besser",
+      "original_decision_and_audit_limit": "Filter aus, Anzeige an. Gute Gegenprobe; ähnliche Gesamtrenditen beweisen nicht, dass sämtliche Eingaben informationslos sind. Seit E38 zählt Muster 5 neutral, deshalb unterscheiden sich Regelversionen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 97,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E35 Lage auf Abruf",
+      "contemporary_basis_and_window": "S/L, [Plan E35](../PLAN-E35-LAGE-ABRUF.md)",
+      "original_observation": "Kontext unabhängig vom Engine-Positionsstand, Ampelrichtung korrigiert",
+      "original_decision_and_audit_limit": "Anzeige an/auf Abruf. Kein Replay menschlicher Handlungen. Keine Nachricht im Audit ausgelöst.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 98,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E36 Order-Flow-Rohwerte",
+      "contemporary_basis_and_window": "S/L, [Plan E36](../PLAN-E36-ORDERFLOW-ROHWERTE.md)",
+      "original_observation": "Zahlen/Umbruch/Quellenausfälle geprüft; zwischenzeitlich Tests nicht zuverlässig sichtbar",
+      "original_decision_and_audit_limit": "Anzeige aktiv. E43.1 korrigiert Futures-Einheit. Ein Zahlenblock ist nicht automatisch unabhängig bestätigte Information.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 99,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E37 Spot größter Markt/alle Dollar-Märkte",
+      "contemporary_basis_and_window": "H/S, W7, 19.09., Basis +23,5 %, DD −9,4",
+      "original_observation": "+20,9 / +21,3 %, DD beide −8,2; Coinbase-Auswahl von kleinem USDT zu großem USD korrigiert",
+      "original_decision_and_audit_limit": "Nicht live übernommen. Einheiten/Börsenauswahl wichtig; heutige F14/F15 zeigen zusätzliche Lücken. Kein Beweis gegen Mehrbörsendaten generell.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 100,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E37 Futures-CVD/OI/Funding/Liquidationen einzeln und zusammen",
+      "contemporary_basis_and_window": "H/S, W7, neun Datenvarianten",
+      "original_observation": "Keine erfüllt ≥1 Punkt je Hälfte; OI etwa +0,6/+1,0, Funding deutlich schwächer",
+      "original_decision_and_audit_limit": "Alte Aussage „keine in beiden besser“ war zu stark und wurde im Projekt korrigiert. Basis vor E41/E43.2; Originalreihen fehlen. Neue Performance-Reproduktion daher nicht möglich.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 101,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E38 Muster 5: Kerzen und Episoden",
+      "contemporary_basis_and_window": "H, W7, 20.09.",
+      "original_observation": "45 Kerzen/26 Episoden; anfängliche Trefferquote und p≈0,5 % vermischten Zählebenen; spätere Episodenrechnung ergänzt",
+      "original_decision_and_audit_limit": "Nachlauf ist kein Handelsertrag. Auch getrennte Episoden haben überlappende 1/2/4-Tage-Zukunftsfenster; Unabhängigkeit nicht bewiesen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 102,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E38 muster5_entry, Halten leiter/alle, Sperre",
+      "contemporary_basis_and_window": "H/S, W7",
+      "original_observation": "Haltevarianten berühren keine relevanten Verkäufe; Einstiegsvariante fünf zusätzliche Bestätigungen, ca. +1,4 Punkte nur H2",
+      "original_decision_and_audit_limit": "Handelsschalter aus, erklärende Anzeige aktiv. Null effektive Ereignisse widerlegen einen Mechanismus nicht. Audit Einzelproben erneuert; keine Optimierung der Musterschwellen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 103,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E39 Verlauf nach Stop",
+      "contemporary_basis_and_window": "H, W7, 21.09., zehn Stops der Live-Basis",
+      "original_observation": "Median Schluss 0,28 % unter Marke; 9/10 nach zwei Tagen wieder darüber; behauptete 1,1-%-Zufallszahl",
+      "original_decision_and_audit_limit": "Kleine abhängige Stichprobe, ausgewählter Horizont, Stops bereits nach Kursfall selektiert. Kein zulässiger Beweis, Stops abzuschalten oder Verluste auszusitzen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 104,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E40 STH-Kostenbasis",
+      "contemporary_basis_and_window": "H/S, W7",
+      "original_observation": "Preis 84 % der Zeit darunter; 90/108 Käufe darunter, sieben Kreuzungen; zwei Anbieter",
+      "original_decision_and_audit_limit": "Anzeige an, kein Filter gebaut. Historische Veröffentlichung/Revision und 150/155-Tage-Definition offen. 84 % Dominanz allein beweist keine Nutzlosigkeit.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 105,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E41 Puffer 0,5 %, Rückeroberung 1/3, Dochtstop",
+      "contemporary_basis_and_window": "H/S, W7, Basis +23,5 %, DD −9,4",
+      "original_observation": "1 Kerze +26,4 %, H1 +2,6/H2 +0,2 Punkte, DD −10,3; 1/3/Puffer bestanden damalige Regel >0 je Hälfte, DD höchstens 1 Punkt schlechter",
+      "original_decision_and_audit_limit": "1 Kerze auf Wunsch aktiv, Puffer/3 nur Gegenproben, Docht aus. Die damalige Einschaltregel hatte **keine** 1-Punkt-Rauschgrenze je Hälfte.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 106,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E41 Ausschaltregel überschrieben",
+      "contemporary_basis_and_window": "H/Nutzerentscheidung, W8",
+      "original_observation": "+25,2 vs +22,6 %, aber DD −10,9 vs −9,4: Grenze 1 Punkt verletzt",
+      "original_decision_and_audit_limit": "Nutzer ließ aktiv; kein automatischer Regelvollzug. W9 nach Beinrichtung bias DD gleich, Hälften +4,0/+0,2. Alter Abschaltbefund ist basenabhängig; F01 begrenzt sämtliche DD-Abwägungen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 107,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E41.6 pfadunabhängiger Stopvergleich",
+      "contemporary_basis_and_window": "Plan",
+      "original_observation": "vorgeschlagen, nicht gebaut",
+      "original_decision_and_audit_limit": "Gesamtpfad bleibt relevant; zusätzlich identische Startposition je Stopereignis vergleichen. Audit erklärt direkte/indirekte Effekte bei E42, liefert keine historische E41.6-Reproduktion.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 108,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E42 Vorschlag des Nutzers",
+      "contemporary_basis_and_window": "Regel/Plan, [E41](../PLAN-E41-STOP.md), [E44](../PLAN-E44-KOMBINATIONEN.md)",
+      "original_observation": "Ausbruch und gehaltener Rücktest als Rückkauf; kein eigener damaliger Messlauf",
+      "original_decision_and_audit_limit": "In E44.3 gebaut. Keine automatische Ableitung aus der rückblickenden STH-Aussage im Furkan-Video.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 109,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E43.1 Futures-CVD-Anzeige in USD",
+      "contemporary_basis_and_window": "S, W9",
+      "original_observation": "BTC fälschlich als Dollar angezeigt; historische Delta-Umrechnung je Kerze",
+      "original_decision_and_audit_limit": "Anzeige korrigiert. Richtige Einheiten sind keine neue Alpha-Hypothese und brauchen keinen Renditesieg.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 110,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E43.2 Bein in Handelsrichtung",
+      "contemporary_basis_and_window": "H/S, W9, alte live-Basis auto +25,2 %",
+      "original_observation": "bias ~35,4 %; Hälften +3,6/+5,2 Punkte, DD 1 Punkt flacher; Regel ≥1 je Hälfte und DD-Toleranz",
+      "original_decision_and_audit_limit": "Seit 26.09. live bias. Ein starkes Ergebnis im Entwicklungsfenster, kein unabhängiger Zukunftstest. Genau dieselbe Idee war E19 auf anderer Basis verworfen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 111,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E43.3 Muster 2 in lokalen USD-Deltas",
+      "contemporary_basis_and_window": "H/S, W9, Basis +35,3 %",
+      "original_observation": "nur 2/1504 Musterkerzen anders; Rendite/Hälften/Signale gleich, ≥1-Regel verfehlt",
+      "original_decision_and_audit_limit": "Handel bleibt alt. F06 bestätigt den Nullpunktfehler unabhängig. Kein Renditeunterschied rechtfertigt nicht den fehlerhaften Messbegriff.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 112,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E43.4 OI in Kontrakten",
+      "contemporary_basis_and_window": "H/S, W9, Basis +35,4 %",
+      "original_observation": "210/1504 Musterkerzen anders, 227 statt 244 Signale, Rendite gleich",
+      "original_decision_and_audit_limit": "Handel bleibt USD. Neue G5: gleiche Portfoliorendite trotz Klassifikationsunterschieden. USD-OI und Preis sind keine unabhängigen Informationen über neue Kontrakte.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 113,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E43.4b OI-Anzeige",
+      "contemporary_basis_and_window": "S",
+      "original_observation": "Kontraktveränderung zusätzlich zum Dollarstand",
+      "original_decision_and_audit_limit": "Anzeige übernommen, Handelsmuster unverändert. Quellenkonvention muss für jeden Anbieter erhalten bleiben.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 114,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E43.5 Test auf Historienlänge / A5",
+      "contemporary_basis_and_window": "S/H, W9",
+      "original_observation": "früherer Test erreichte Muster 2 nicht; nachgebessert. 53/1177 andere mögliche Pivots; high_exit_hist=live ohne Signal-/Renditeeffekt",
+      "original_decision_and_audit_limit": "high_exit_hist bleibt voll. Audit: volles Präfix, rollende 1300 Kerzen und persistierter Neustart erzeugen gleiche tatsächliche Signale in diesem Fenster. Prinzipielle Fensterabhängigkeit bleibt.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 115,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E43.6 Rest/strict/T1/cooldown erneut",
+      "contemporary_basis_and_window": "H, W9, Basis +35,3 %",
+      "original_observation": "Rest +34,5, Hälften −4,3/+3,2; strict +28,5 (+2,4/−7,6); T1 +34,9 (−0,8/+0,9); cooldown +33,4 (−1,8/0)",
+      "original_decision_and_audit_limit": "Alle aus nach ≥1 je Hälfte. Diese Ablehnungen sind relativ aktuell; heutige gemeinsame Wiederholung und F09-Korrektur getrennt in KOMBINATIONEN.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 116,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E43.7 Wissens-Korrekturen",
+      "contemporary_basis_and_window": "Dokumentation",
+      "original_observation": "sechs zu starke/überholte Aussagen eingegrenzt",
+      "original_decision_and_audit_limit": "Positiv; kein neuer Handels- oder Renditetest. Weitere Überdehnungen nennt dieser Audit.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 117,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E43.8 be_im_plus und release_stale_rest erneut",
+      "contemporary_basis_and_window": "H, W9, Basis +35,3 %",
+      "original_observation": "be +18,0 %, Hälften −15,5/+0,5; Freigabe +34,6 (−1,1/0)",
+      "original_decision_and_audit_limit": "Beide aus; neue Einzelproben auf gemeinsamer Basis vorhanden. be_im_plus bleibt eine andere Regel als E28/trail_stop.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 118,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E44.1 Archiv",
+      "contemporary_basis_and_window": "S, seit 26.09. in main",
+      "original_observation": "alte Coinalyze-Zeitpunkte behalten, frische Werte gewinnen",
+      "original_decision_and_audit_limit": "Hilfreich, aber kein unveränderliches Archiv des damaligen Wissens. Empfangs-/Publikationszeiten und frühere Versionen fehlen.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 119,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E44.2 Wechselwirkungen/Monatsprobe",
+      "contemporary_basis_and_window": "S/H, W9",
+      "original_observation": "16 frühere 2×2-Gruppen aus altem Gitter extrahiert",
+      "original_decision_and_audit_limit": "Tatsächlich untersuchte Kombinationen dokumentiert. Aussagen „zwei Filter schaden immer“ oder „Stops sind kein Hebel“ sind daraus nicht ableitbar.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 120,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E44.3 E42 implementieren",
+      "contemporary_basis_and_window": "S, main 5a50fd8",
+      "original_observation": "25 % Rückkauf; 0,5-%-Zone, 12 Kerzen; eigener Teilstop, Persistenz/Telegram; Default false",
+      "original_decision_and_audit_limit": "Code in main, **Schalter aus**. Audit rekonstruiert 57 Beobachtungen, 33 Ausbrüche, 16 Rückkäufe, alle Abgänge und den Gesamtpfad.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 121,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E44.4 kleinere Teilverkäufe",
+      "contemporary_basis_and_window": "S, Zweig eeb4eea",
+      "original_observation": "Faktor 1/0,67, zwölf neue Tests; 14 Mutationen",
+      "original_decision_and_audit_limit": "Nur Zweig, Default 1; damals noch keine Renditemessung. Keine Live-Aktivierung durch Vorhandensein von Code.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 122,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E44.5 acht Kombinationen plus Frist 6",
+      "contemporary_basis_and_window": "H/S, W10, ursprüngliche Live-Basis +36,14 %",
+      "original_observation": "E42 +35,93 %, H1 +1,76/H2 −1,71 Punkte, DD gleich, Monatsprobe −0,83. E42 ≥1, erklärende Kombinationen ≥2 je Hälfte, DD höchstens 1 schlechter, Monatsvorteil stets positiv",
+      "original_decision_and_audit_limit": "Originales Replay gelingt. **Keine Zeile besteht**. F09 verändert einzelne korrigierte Renditen um bis zu 1,30 Punkte; D01 entfernt laufende Kerze. Urteil „keine Aktivierung belegt“ bleibt, Zahlen sind nicht unverändert belastbar.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 123,
+      "same_as_current_basis_claim": false
+    },
+    {
+      "stage_and_choice": "E44.6 Shorts im Abwärts-Regime",
+      "contemporary_basis_and_window": "Plan, kein implementierter/gesicherter Lauf",
+      "original_observation": "EMA-bedingte Shorts zusätzlich zu Long",
+      "original_decision_and_audit_limit": "Kein Audit-Auftrag zur Umsetzung/Live-Schaltung. Erst F02, Finanzierung, Daten und Kausalität klären; kein Merge-Go.",
+      "source": "audit-work/docs/audit-2026-09-27/ENTSCHEIDUNGEN.md",
+      "line": 124,
+      "same_as_current_basis_claim": false
+    }
+  ],
+  "old_code_rows_count": 85,
+  "old_code_rows": [
+    {
+      "original_label": "nur Long (Basis)",
+      "differences_to_current": 12,
+      "effective_differences": "flush_entry=\"off\", buy_ladder=false, trail_stop=false, high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 113
+    },
+    {
+      "original_label": "+Kaufleiter",
+      "differences_to_current": 11,
+      "effective_differences": "flush_entry=\"off\", trail_stop=false, high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 114
+    },
+    {
+      "original_label": "+Flush core",
+      "differences_to_current": 11,
+      "effective_differences": "buy_ladder=false, trail_stop=false, high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 115
+    },
+    {
+      "original_label": "LIVE: nur Long +Kaufleiter +Flush core",
+      "differences_to_current": 10,
+      "effective_differences": "trail_stop=false, high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 116
+    },
+    {
+      "original_label": "+Kaufleiter +Bed.Stop",
+      "differences_to_current": 12,
+      "effective_differences": "flush_entry=\"off\", conditional_stop=true, trail_stop=false, high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 117
+    },
+    {
+      "original_label": "LIVE +Rest-Freigabe",
+      "differences_to_current": 11,
+      "effective_differences": "release_stale_rest=true, trail_stop=false, high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 118
+    },
+    {
+      "original_label": "LIVE +Stop nachziehen",
+      "differences_to_current": 9,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 119
+    },
+    {
+      "original_label": "LIVE +Stop nachziehen +Rest-Freigabe",
+      "differences_to_current": 10,
+      "effective_differences": "release_stale_rest=true, high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 120
+    },
+    {
+      "original_label": "LIVE +Stop +Liq-Kaskade",
+      "differences_to_current": 10,
+      "effective_differences": "liq_exit=\"spike\", high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 121
+    },
+    {
+      "original_label": "LIVE +Stop +Liq-Zonen",
+      "differences_to_current": 10,
+      "effective_differences": "liq_exit=\"zone\", high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 122
+    },
+    {
+      "original_label": "LIVE +Stop +Liq beides",
+      "differences_to_current": 10,
+      "effective_differences": "liq_exit=\"both\", high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 123
+    },
+    {
+      "original_label": "MEINE Einstellung ohne Flush",
+      "differences_to_current": 1,
+      "effective_differences": "flush_entry=\"off\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 124
+    },
+    {
+      "original_label": "LIVE +Stop +Liq-Konfluenz aufstocken",
+      "differences_to_current": 8,
+      "effective_differences": "high_exit=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 125
+    },
+    {
+      "original_label": "LIVE +Stop +nur bei Liq-Konfluenz einsteigen",
+      "differences_to_current": 9,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"filter\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 126
+    },
+    {
+      "original_label": "LIVE +Stop +Verkauf am letzten Hoch",
+      "differences_to_current": 8,
+      "effective_differences": "liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 127
+    },
+    {
+      "original_label": "LIVE +Stop +Verkauf am schwachen Hoch",
+      "differences_to_current": 9,
+      "effective_differences": "high_exit=\"weak\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 128
+    },
+    {
+      "original_label": "LIVE +Stop, 60 % Einsatz (40 % Reserve)",
+      "differences_to_current": 10,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false, deploy_pct=0.6",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 129
+    },
+    {
+      "original_label": "LIVE +Stop, 50 % Einsatz (50 % Reserve)",
+      "differences_to_current": 10,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false, deploy_pct=0.5",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 130
+    },
+    {
+      "original_label": "LIVE +Stop +Warnlicht (kein Kauf in ungesunden Abverkauf)",
+      "differences_to_current": 10,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"off\", block_unhealthy=true, stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 131
+    },
+    {
+      "original_label": "LIVE +Stop +Flow-Pruefung am 0.5-Level",
+      "differences_to_current": 10,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, confirm_t1=true, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 132
+    },
+    {
+      "original_label": "LIVE +Stop +Sperre 48 h nach Stop",
+      "differences_to_current": 10,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, cooldown_h=48, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 133
+    },
+    {
+      "original_label": "LIVE +Stop +Mindest-Stopabstand 2 %",
+      "differences_to_current": 8,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 134
+    },
+    {
+      "original_label": "LIVE +Stop +Sperre 48 h +Mindestabstand 2 %",
+      "differences_to_current": 9,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, cooldown_h=48, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 135
+    },
+    {
+      "original_label": "LIVE +Stop +alle vier neuen Hebel",
+      "differences_to_current": 11,
+      "effective_differences": "high_exit=\"off\", liq_entry=\"off\", block_unhealthy=true, stop_rueckeroberung=0, confirm_t1=true, cooldown_h=48, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 136
+    },
+    {
+      "original_label": "LIVE +Stop +Mindestabstand 2 % +Liq-Konfluenz",
+      "differences_to_current": 7,
+      "effective_differences": "high_exit=\"off\", stop_rueckeroberung=0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 137
+    },
+    {
+      "original_label": "LIVE +Stop +Sperre 48 h +Liq-Konfluenz",
+      "differences_to_current": 9,
+      "effective_differences": "high_exit=\"off\", stop_rueckeroberung=0, cooldown_h=48, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 138
+    },
+    {
+      "original_label": "NEU-LIVE +Verkauf unter dem letzten Hoch",
+      "differences_to_current": 6,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 139
+    },
+    {
+      "original_label": "NEU-LIVE +Verkauf an den Liquidations-Niveaus",
+      "differences_to_current": 8,
+      "effective_differences": "liq_exit=\"zone\", high_exit=\"off\", stop_rueckeroberung=0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 140
+    },
+    {
+      "original_label": "NEU-LIVE +Verkauf unter dem Hoch +an den Liq-Niveaus",
+      "differences_to_current": 7,
+      "effective_differences": "liq_exit=\"zone\", stop_rueckeroberung=0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 141
+    },
+    {
+      "original_label": "NEU-LIVE +kein Gegengeschaeft je Kerze",
+      "differences_to_current": 5,
+      "effective_differences": "stop_rueckeroberung=0, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 142
+    },
+    {
+      "original_label": "NEU-LIVE +Ziele festhalten",
+      "differences_to_current": 7,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, freeze_targets=true, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 143
+    },
+    {
+      "original_label": "NEU-LIVE +kein Gegengeschaeft +Ziele festhalten",
+      "differences_to_current": 6,
+      "effective_differences": "stop_rueckeroberung=0, freeze_targets=true, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 144
+    },
+    {
+      "original_label": "NEU-LIVE +Mindest-Bein 5 %",
+      "differences_to_current": 5,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 145
+    },
+    {
+      "original_label": "NEU-LIVE +groesstes Bein",
+      "differences_to_current": 7,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, min_bein_pct=0.0, bein_wahl=\"groesstes\", bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 146
+    },
+    {
+      "original_label": "NEU-LIVE +Mindest-Bein 5 % +groesstes Bein",
+      "differences_to_current": 6,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, bein_wahl=\"groesstes\", bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 147
+    },
+    {
+      "original_label": "NEU-LIVE +Bein in Handelsrichtung",
+      "differences_to_current": 5,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, min_bein_pct=0.0, neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 148
+    },
+    {
+      "original_label": "NEU-LIVE +Bein in Handelsrichtung +Mindest-Bein 5 %",
+      "differences_to_current": 4,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 149
+    },
+    {
+      "original_label": "NEU-LIVE +Break-even im Plus",
+      "differences_to_current": 7,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, min_bein_pct=0.0, be_im_plus=true, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 150
+    },
+    {
+      "original_label": "NEU-LIVE +Bein-Wahl +Break-even im Plus",
+      "differences_to_current": 7,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, bein_wahl=\"groesstes\", be_im_plus=true, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 151
+    },
+    {
+      "original_label": "LIVE +Widerstand des Gegen-Beins",
+      "differences_to_current": 6,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, bein_richtung=\"auto\", widerstand_exit=\"on\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 152
+    },
+    {
+      "original_label": "LIVE +Widerstand statt Verkauf am letzten Hoch",
+      "differences_to_current": 7,
+      "effective_differences": "high_exit=\"off\", stop_rueckeroberung=0, no_flip=false, bein_richtung=\"auto\", widerstand_exit=\"on\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 153
+    },
+    {
+      "original_label": "LIVE +Rest halten",
+      "differences_to_current": 6,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, bein_richtung=\"auto\", rest_halten=true, neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 154
+    },
+    {
+      "original_label": "LIVE +Rest halten +Neustart mit Rest",
+      "differences_to_current": 5,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, bein_richtung=\"auto\", rest_halten=true, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 155
+    },
+    {
+      "original_label": "LIVE +Neustart mit Rest (ohne Halten)",
+      "differences_to_current": 4,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, bein_richtung=\"auto\", zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 156
+    },
+    {
+      "original_label": "NEU-LIVE +1D-Ebene als zweiter Zonensatz",
+      "differences_to_current": 6,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_1d=true, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 157
+    },
+    {
+      "original_label": "NEU-LIVE +1D-Ebene, ohne Mindest-Bein (Gegenprobe)",
+      "differences_to_current": 7,
+      "effective_differences": "stop_rueckeroberung=0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_1d=true, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 158
+    },
+    {
+      "original_label": "NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft",
+      "differences_to_current": 4,
+      "effective_differences": "stop_rueckeroberung=0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 159
+    },
+    {
+      "original_label": "NEU-LIVE +Mindest-Bein 5 % +kein Gegengeschaeft +Ziele festhalten",
+      "differences_to_current": 5,
+      "effective_differences": "stop_rueckeroberung=0, freeze_targets=true, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 160
+    },
+    {
+      "original_label": "LIVE-heute +Neustart mit Rest",
+      "differences_to_current": 3,
+      "effective_differences": "stop_rueckeroberung=0, bein_richtung=\"auto\", zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 161
+    },
+    {
+      "original_label": "LIVE-heute +Rueckeroberung vor dem Stop (1 Kerze)",
+      "differences_to_current": 1,
+      "effective_differences": "bein_richtung=\"auto\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 162
+    },
+    {
+      "original_label": "LIVE-heute +Trendfilter EMA200",
+      "differences_to_current": 2,
+      "effective_differences": "trend_filter=true, bein_richtung=\"auto\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 163
+    },
+    {
+      "original_label": "LIVE-heute +Trendfilter EMA50",
+      "differences_to_current": 3,
+      "effective_differences": "trend_filter=true, trend_ema=50, bein_richtung=\"auto\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 164
+    },
+    {
+      "original_label": "LIVE-heute +1D-Ebene grob (n=8)",
+      "differences_to_current": 3,
+      "effective_differences": "bein_richtung=\"auto\", zonen_1d=true, pivot_n_1d=8",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 165
+    },
+    {
+      "original_label": "LIVE-heute +1D-Ebene fein (n=5, Gegenprobe zu E23)",
+      "differences_to_current": 2,
+      "effective_differences": "bein_richtung=\"auto\", zonen_1d=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 166
+    },
+    {
+      "original_label": "LIVE-heute +1D-Ebene sehr grob (n=12)",
+      "differences_to_current": 3,
+      "effective_differences": "bein_richtung=\"auto\", zonen_1d=true, pivot_n_1d=12",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 167
+    },
+    {
+      "original_label": "LIVE-heute +Ampel klein bei unguenstig",
+      "differences_to_current": 1,
+      "effective_differences": "ampel_filter=\"klein\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 168
+    },
+    {
+      "original_label": "LIVE-heute +Ampel UMGEKEHRT (Gegenprobe)",
+      "differences_to_current": 1,
+      "effective_differences": "ampel_filter=\"gross\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 169
+    },
+    {
+      "original_label": "LIVE-heute +immer halbe Tranche (Nullhypothese)",
+      "differences_to_current": 1,
+      "effective_differences": "ampel_filter=\"immer\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 170
+    },
+    {
+      "original_label": "LIVE-heute +Rest halten +Neustart mit Rest",
+      "differences_to_current": 4,
+      "effective_differences": "stop_rueckeroberung=0, bein_richtung=\"auto\", rest_halten=true, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 171
+    },
+    {
+      "original_label": "LIVE-heute +Muster 5 als Kauf-Bestaetigung",
+      "differences_to_current": 1,
+      "effective_differences": "muster5_entry=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 172
+    },
+    {
+      "original_label": "LIVE-heute +Muster 5 haelt Zwischenverkaeufe",
+      "differences_to_current": 1,
+      "effective_differences": "muster5_halten=\"leiter\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 173
+    },
+    {
+      "original_label": "LIVE-heute +Muster 5 haelt ALLE Teilverkaeufe",
+      "differences_to_current": 1,
+      "effective_differences": "muster5_halten=\"alle\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 174
+    },
+    {
+      "original_label": "LIVE-heute +Muster 5 sperrt Kaeufe (Bremse, Gegenprobe)",
+      "differences_to_current": 1,
+      "effective_differences": "block_unhealthy=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 175
+    },
+    {
+      "original_label": "LIVE-heute +Muster 5 Kauf UND Halten (zwei Unterschiede)",
+      "differences_to_current": 2,
+      "effective_differences": "muster5_entry=true, muster5_halten=\"leiter\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 176
+    },
+    {
+      "original_label": "LIVE bis 21.09.2026 (Stop ohne Rueckeroberung)",
+      "differences_to_current": 1,
+      "effective_differences": "stop_rueckeroberung=0",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 177
+    },
+    {
+      "original_label": "LIVE-heute +Rueckeroberung 3 statt 1 Kerze (Robustheit)",
+      "differences_to_current": 1,
+      "effective_differences": "stop_rueckeroberung=3",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 178
+    },
+    {
+      "original_label": "LIVE-heute +Bein in Handelsrichtung",
+      "differences_to_current": 0,
+      "effective_differences": "identisch",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 179
+    },
+    {
+      "original_label": "LIVE bis 26.09.2026 (ohne Bein-Richtung)",
+      "differences_to_current": 1,
+      "effective_differences": "bein_richtung=\"auto\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 180
+    },
+    {
+      "original_label": "LIVE-heute +Muster 2 in Dollar (E43.3)",
+      "differences_to_current": 1,
+      "effective_differences": "muster_cvd=\"usd\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 181
+    },
+    {
+      "original_label": "LIVE-heute +OI in Kontrakten (E43.4)",
+      "differences_to_current": 1,
+      "effective_differences": "muster_oi=\"btc\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 182
+    },
+    {
+      "original_label": "LIVE-heute +Pivot-Hoch nur letzte 1.300 Kerzen (A5)",
+      "differences_to_current": 1,
+      "effective_differences": "high_exit_hist=\"live\"",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 183
+    },
+    {
+      "original_label": "LIVE-heute +Rest halten (E43.6)",
+      "differences_to_current": 1,
+      "effective_differences": "rest_halten=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 184
+    },
+    {
+      "original_label": "LIVE-heute +Strenge Bestaetigung (E43.6)",
+      "differences_to_current": 1,
+      "effective_differences": "strict_confirm=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 185
+    },
+    {
+      "original_label": "LIVE-heute +Bestaetigung am 0.5-Level (E43.6)",
+      "differences_to_current": 1,
+      "effective_differences": "confirm_t1=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 186
+    },
+    {
+      "original_label": "LIVE-heute +Sperrfrist nach Stop 48h (E43.6)",
+      "differences_to_current": 1,
+      "effective_differences": "cooldown_h=48.0",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 187
+    },
+    {
+      "original_label": "LIVE-heute +Break-even im Plus (E43.8)",
+      "differences_to_current": 1,
+      "effective_differences": "be_im_plus=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 188
+    },
+    {
+      "original_label": "LIVE-heute +Rest-Freigabe bei neuer Struktur (E43.8)",
+      "differences_to_current": 1,
+      "effective_differences": "release_stale_rest=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 189
+    },
+    {
+      "original_label": "Long+Short (Ref)",
+      "differences_to_current": 13,
+      "effective_differences": "bias_short=true, flush_entry=\"off\", buy_ladder=false, trail_stop=false, high_exit=\"off\", liq_entry=\"off\", stop_rueckeroberung=0, min_stop_pct=0.0, no_flip=false, min_bein_pct=0.0, bein_richtung=\"auto\", neustart_mit_rest=false, zonen_nachziehen=false",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 190
+    },
+    {
+      "original_label": "LIVE-heute +kleinere Verkaeufe",
+      "differences_to_current": 1,
+      "effective_differences": "verkauf_faktor=0.67",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 191
+    },
+    {
+      "original_label": "LIVE-heute +kleinere Verkaeufe +Rest halten",
+      "differences_to_current": 2,
+      "effective_differences": "rest_halten=true, verkauf_faktor=0.67",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 192
+    },
+    {
+      "original_label": "LIVE-heute +E42",
+      "differences_to_current": 1,
+      "effective_differences": "ausbruch_ruecktest=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 193
+    },
+    {
+      "original_label": "LIVE-heute +E42 +Rest halten",
+      "differences_to_current": 2,
+      "effective_differences": "rest_halten=true, ausbruch_ruecktest=true",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 194
+    },
+    {
+      "original_label": "LIVE-heute +E42 +kleinere Verkaeufe",
+      "differences_to_current": 2,
+      "effective_differences": "ausbruch_ruecktest=true, verkauf_faktor=0.67",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 195
+    },
+    {
+      "original_label": "LIVE-heute +E42 +kleinere Verkaeufe +Rest halten",
+      "differences_to_current": 3,
+      "effective_differences": "rest_halten=true, ausbruch_ruecktest=true, verkauf_faktor=0.67",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 196
+    },
+    {
+      "original_label": "LIVE-heute +E42 (6 Kerzen, Robustheit)",
+      "differences_to_current": 2,
+      "effective_differences": "ausbruch_ruecktest=true, ruecktest_fenster=6",
+      "source": "audit-work/docs/audit-2026-09-27/PARAMETER.md",
+      "line": 197
+    }
+  ],
+  "old_code_row_distance": {
+    "identical": 1,
+    "one_change": 23,
+    "multiple_changes": 61
+  },
+  "M02": {
+    "previously_indexed_versioned_entries": 94,
+    "complete_search_family": false,
+    "search_family_source": "docs/nach-6/search-inventory.json",
+    "reused_data": true,
+    "halves_and_months_unseen_validation": false,
+    "selection_adjusted_p_value": null,
+    "independent_new_sample": false,
+    "claim": "Historical comparisons are conditional diagnostics, not a selection-corrected significance test or proof of future performance"
+  }
+}

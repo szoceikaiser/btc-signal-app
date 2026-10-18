@@ -354,6 +354,19 @@ def test_eval_params_faengt_unbrauchbare_werte_ab():
     assert p["k_atr"] == 2.0 and p["cooldown_h"] == 0.0
 
 
+def test_eval_params_verlangt_json_booleans_statt_truthy_text():
+    """Bool-Schalter akzeptieren nur JSON-Bools; Text darf keine Richtung umkehren."""
+    assert main.eval_params({"bias_short": False})["bias_short"] is False
+    assert main.eval_params({"bias_short": True})["bias_short"] is True
+    for value in ("false", "true", 0, 1, None):
+        try:
+            main.eval_params({"bias_short": value})
+        except TypeError as exc:
+            assert "muss true oder false" in str(exc)
+        else:
+            raise AssertionError(f"ungueltiger Booleanwert akzeptiert: {value!r}")
+
+
 def test_leere_config_ergibt_bisheriges_verhalten():
     """Ohne config.json muss exakt das herauskommen, was evaluate ohnehin tut."""
     import inspect
@@ -687,7 +700,8 @@ def _lage_kerzen(auf: bool = True):
     else:
         werte = [130, 131, 132, 131, 126, 120, 114, 108, 102, 100] \
             + [100 + i * 0.8 for i in range(1, 17)]
-    cs = [Candle(1_700_000_000_000 + i * ms, v, v * 1.004, v * 0.996, v)
+    cs = [Candle((1_700_000_000_000 // (6 * ms)) * (6 * ms) + i * ms,
+                 v, v * 1.004, v * 0.996, v)
           for i, v in enumerate(werte)]
     fl = [FlowPoint(c.ts, 5000.0 + i * 30, 0.0, 1e9 + i * 1e6, 0.0001)
           for i, c in enumerate(cs)]
@@ -1237,7 +1251,8 @@ def test_plan_nachgezogener_stop_bleibt_ohne_rueckeroberung():
     pos.state, pos.tp_rungs = PosState.TP1, 1
     p = main.positions_plan(cs, fl, {"pivot_n": 2, "k_atr": 2.0, "trail_stop": True,
                                      "stop_rueckeroberung": 1}, pos)
-    assert p["stop"]["grund"] == "Einstand (nachgezogen)"        # Vorprobe
+    # F10: the shared resolver includes the confirmed structure120 above entry115.
+    assert p["stop"] == {"preis": 120, "grund": "Struktur-Tief"}
     assert "rueckeroberung" not in p["stop"]
 
 
@@ -1252,7 +1267,8 @@ def test_e433_anzeige_rechnet_muster2_wie_der_handel():
     assert aufrufe >= 3, "Vorprobe: die Anzeige-Aufrufe sind nicht mehr da"
     assert len(re.findall(r'classify_pattern\(candles, flow, muster_cvd=par\["muster_cvd"\][,)]',
                           q)) == aufrufe
-    assert main.EVAL_DEFAULTS["muster_cvd"] == "alt"
+    # A2 makes the already specified offset-invariant dollar comparison active.
+    assert main.EVAL_DEFAULTS["muster_cvd"] == "usd"
 
 
 def test_e434_anzeige_rechnet_das_oi_wie_der_handel():
@@ -1328,7 +1344,7 @@ def test_e434_live_und_backtest_rechnen_dieselben_kontrakte():
     oi_map = _e434_oi_mit_luecken(raw)
     live = _e434_live_flow(raw, oi_map)
     _cs, bt = backtest.build_series(raw, [], oi_map)
-    assert [f.oi_btc for f in live] == [f.oi_btc for f in bt] == [10.0, 10.0, 10.0,
+    assert [f.oi_btc for f in live] == [f.oi_btc for f in bt] == [0.0, 10.0, 10.0,
                                                                   12.0, 12.0]
     assert [f.oi for f in live] == [f.oi for f in bt]
 

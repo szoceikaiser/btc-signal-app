@@ -1,0 +1,42 @@
+{
+  "base": "aaadbf6606ae1082e2eb59fd0ef1e1d4e1f23c1b",
+  "original_F13": "see original-f13 below",
+  "lost_runner_duplicate_acceptances": 2,
+  "identical_text": true,
+  "excluded_commands": {
+    "test": {
+      "rejected_first_attempts": 1,
+      "second_attempts": 1,
+      "durable_receipt": false,
+      "watch_marked_despite_rejection": false
+    },
+    "resend": {
+      "rejected_first_attempts": 2,
+      "second_attempts": 2,
+      "durable_receipt": false,
+      "watch_marked_despite_rejection": false
+    },
+    "lage": {
+      "rejected_first_attempts": 1,
+      "second_attempts": 1,
+      "durable_receipt": false,
+      "watch_marked_despite_rejection": false
+    },
+    "watch": {
+      "rejected_first_attempts": 1,
+      "second_attempts": 0,
+      "durable_receipt": false,
+      "watch_marked_despite_rejection": true
+    }
+  }
+}
+{
+  "F13_failed_delivery_not_retried": {
+    "first_signal_count": 1,
+    "first_attempts": 1,
+    "retry_signal_count": 0,
+    "retry_attempts": 0,
+    "persisted_last_signal_ts": 14400000,
+    "all_send_attempts_returned": false
+  }
+}

@@ -1,0 +1,90 @@
+# Free/public: explicit IDs and actual rules/credential reviews still required.
+# Disabled candidate; intended target .github/workflows/lage.yml
+name: Lage abrufen
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: btc-delivery-single-stream
+  cancel-in-progress: false
+  queue: max
+jobs:
+  delivery:
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    environment: btc-delivery-v2
+    timeout-minutes: 15
+    steps:
+      - name: Require Git and stop checkout network after any Git failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          real_git="$(command -v git)"
+          [[ "$(printf '%s\n' 2.18.0 "$(git version | cut -d' ' -f3)" | sort -V | head -n1)" == "2.18.0" ]]
+          gate_dir="$(mktemp -d "$RUNNER_TEMP/btc-checkout-XXXXXX")"
+          printf '#!/bin/bash\nreal_git=%q\n' "$real_git" > "$gate_dir/git"
+          cat >> "$gate_dir/git" <<'GIT_GATE'
+          set -u
+          network=false
+          for arg in "$@"; do
+            case "$arg" in fetch|clone|ls-remote) network=true ;; esac
+          done
+          if ! "$network"; then exec "$real_git" "$@"; fi
+          stop_file="$(dirname "$0")/STOP"
+          if [[ -e "$stop_file" ]]; then exit 86; fi
+          "$real_git" "$@"
+          status=$?
+          if [[ "$status" -ne 0 ]]; then : > "$stop_file"; fi
+          exit "$status"
+          GIT_GATE
+          chmod 700 "$gate_dir/git"
+          printf '%s\n' "$gate_dir" >> "$GITHUB_PATH"
+      - name: Checkout exact reviewed code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ vars.BTC_PRODUCTION_CODE_SHA }}
+          token: ${{ github.token }}
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+      - name: Verify checkout pin before loading code
+        env:
+          REVIEWED_CODE_SHA: ${{ vars.BTC_PRODUCTION_CODE_SHA }}
+        shell: bash
+        run: |
+          [[ "$GITHUB_REPOSITORY" == "szoceikaiser/btc-signal-app" ]]
+          [[ "$REVIEWED_CODE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$(git rev-parse HEAD)" == "$REVIEWED_CODE_SHA" ]]
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12.14"
+      - name: Prepare exact reviewed runtime (no store or transport)
+        env:
+          REVIEWED_RUNTIME_JSON: ${{ vars.BTC_REVIEWED_RUNTIME_JSON }}
+          REVIEWED_CONFIG_JSON: ${{ vars.BTC_REVIEWED_CONFIG_JSON }}
+        run: python3 tools/produktion_runtime_prepare.py --kind lage --out .runtime
+      - name: Checked lage entry
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BTC_ACTIONS_EXPLICIT_START_MS: ${{ inputs.expected_start_ms }}
+          BTC_DELIVERY_ADAPTER: github
+          BTC_DELIVERY_RUNNER_ROOT: ${{ github.workspace }}
+          BTC_DELIVERY_RUN_REPOSITORY: ${{ github.repository }}
+          BTC_DELIVERY_WORKFLOW: .github/workflows/lage.yml
+          BTC_DELIVERY_RUN_ID: ${{ github.run_id }}
+          BTC_DELIVERY_RUN_ATTEMPT: ${{ github.run_attempt }}
+          BTC_DELIVERY_CODE_SHA: ${{ vars.BTC_PRODUCTION_CODE_SHA }}
+          BTC_DELIVERY_STORE_ID: ${{ vars.BTC_REVIEWED_STORE_ID }}
+          BTC_DELIVERY_GITHUB_REPO: ${{ vars.BTC_REVIEWED_STORE_REPOSITORY }}
+          BTC_DELIVERY_GITHUB_BRANCH: ${{ vars.BTC_REVIEWED_STORE_BRANCH }}
+          BTC_DELIVERY_FENCE_BRANCH: ${{ vars.BTC_REVIEWED_FENCE_BRANCH }}
+          BTC_DELIVERY_BOT_IDENTITY: ${{ vars.BTC_REVIEWED_BOT_IDENTITY }}
+          BTC_DELIVERY_CONFIRMATION_POLICY: github-actions-fence-v2
+          BTC_DELIVERY_GITHUB_TOKEN: ${{ secrets.BTC_REVIEWED_STORE_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          COINALYZE_API_KEY: ${{ secrets.COINALYZE_API_KEY }}
+        run: python3 tools/produktion_actions_runner.py --runtime .runtime/runtime.json --kind lage --data-dir .runtime/data
