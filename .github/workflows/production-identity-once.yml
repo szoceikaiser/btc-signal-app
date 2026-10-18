@@ -1,0 +1,59 @@
+name: BTC Produktionszuordnung (einmalig)
+on:
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: btc-production-identity-once
+  cancel-in-progress: false
+jobs:
+  identity:
+    if: ${{ github.repository == 'szoceikaiser/btc-signal-app' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && github.run_attempt == '1' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Derive configured identifiers without network or messages
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          """Derive configured identifiers only; no network, files, logging or sending."""
+          import hashlib
+          import json
+          import re
+          import sys
+
+
+          def configured_identity(token, target):
+              if not isinstance(token, str) or not isinstance(target, str):
+                  raise ValueError('Configured identity unavailable')
+              if not 20 <= len(token) <= 512 or not 1 <= len(target) <= 256:
+                  raise ValueError('Configured identity unavailable')
+              if any(ord(char) < 32 or ord(char) == 127 for char in token + target):
+                  raise ValueError('Configured identity unavailable')
+              match = re.fullmatch(r'([0-9]{4,20}):[A-Za-z0-9_-]{16,}', token)
+              if not match or target != target.strip():
+                  raise ValueError('Configured identity unavailable')
+              if not re.fullmatch(r'-?[0-9]+|@[A-Za-z][A-Za-z0-9_]{3,}', target):
+                  raise ValueError('Configured identity unavailable')
+              return {'schema': 'btc-configured-telegram-identity-v1',
+                      'bot_identity': 'telegram-bot:' + match.group(1),
+                      'target_binding': hashlib.sha256(target.encode('utf-8')).hexdigest()}
+
+
+          def main():
+              import os
+              try:
+                  result = configured_identity(os.environ['TELEGRAM_BOT_TOKEN'], os.environ['TELEGRAM_CHAT_ID'])
+              except Exception:
+                  print('Configured identity unavailable; no credential values emitted.', file=sys.stderr)
+                  return 20
+              print(json.dumps(result, sort_keys=True, separators=(',', ':')))
+              return 0
+
+
+          if __name__ == '__main__':
+              raise SystemExit(main())
+          PY
