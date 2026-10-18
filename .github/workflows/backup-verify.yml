@@ -1,28 +1,26 @@
-# Synthetic-only proposal: new branch rules and exact main entry still require actual review.
-# Disabled local proposal; intended target .github/workflows/backup-verify.yml
+# Free/public: explicit IDs and actual rules/credential reviews still required.
+# Disabled hosted candidate; intended target .github/workflows/backup-verify.yml
 name: backup-verify
 run-name: btc-v2:backup:${{ inputs.expected_start_ms || 'created' }}
 on:
   workflow_dispatch:
     inputs:
-      probe_name:
-        description: Exact synthetic probe name from approval
-        type: string
-        required: true
       expected_start_ms:
-        description: Original UTC midnight occurrence in milliseconds; use identical value in all three runs
+        description: Original UTC backup occurrence in milliseconds; empty binds run created_at
         type: string
-        required: true
+        required: false
+        default: ""
+  # Separate external verifier occurrence; no native GitHub schedule.
 permissions:
   contents: read
   actions: read
 concurrency:
-  group: btc-synthetic-backup-probe-20261015
+  group: btc-backup-verify
   cancel-in-progress: false
   queue: max
 jobs:
   verify:
-    if: ${{ github.ref == 'refs/heads/main' && github.run_attempt == 1 && inputs.probe_name == 'btc-synthetic-backup-20261015' }}
+    if: ${{ true }}
     runs-on: ubuntu-24.04
     environment: btc-backup-verifier
     timeout-minutes: 35
@@ -54,7 +52,7 @@ jobs:
       - name: Checkout exact reviewed code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: ${{ vars.BTC_BACKUP_PROBE_CODE_SHA }}
+          ref: 20d755a4332fb32aeab08b1973b650eeae10f31e
           token: ${{ github.token }}
           persist-credentials: false
           fetch-depth: 1
@@ -62,7 +60,7 @@ jobs:
           lfs: false
       - name: Verify checkout pin before loading code
         env:
-          REVIEWED_CODE_SHA: ${{ vars.BTC_BACKUP_PROBE_CODE_SHA }}
+          REVIEWED_CODE_SHA: 20d755a4332fb32aeab08b1973b650eeae10f31e
         shell: bash
         run: |
           [[ "$GITHUB_REPOSITORY" == "szoceikaiser/btc-signal-app" ]]
@@ -71,11 +69,11 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.12.14"
-      - name: Checked exclusive temporary producer entry
+      - name: Checked exclusive temporary verifier entry
         env:
-          BTC_HOSTED_RUNTIME_JSON: ${{ vars.BTC_BACKUP_PROBE_RUNTIME_JSON }}
-          BTC_HOSTED_RUNTIME_SHA256: ${{ vars.BTC_BACKUP_PROBE_RUNTIME_SHA256 }}
+          BTC_HOSTED_RUNTIME_JSON: ${{ vars.BTC_HOSTED_RUNTIME_JSON }}
+          BTC_HOSTED_RUNTIME_SHA256: ${{ vars.BTC_HOSTED_RUNTIME_SHA256 }}
           GITHUB_TOKEN: ${{ github.token }}
           BTC_ACTIONS_EXPLICIT_START_MS: ${{ inputs.expected_start_ms }}
           BTC_HOSTED_RECEIPT_WRITE_TOKEN: ${{ secrets.BTC_HOSTED_RECEIPT_WRITE_TOKEN }}
-        run: python3 tools/p4_backup_probe.py verifier
+        run: python3 tools/p4_hosted_backup.py verifier

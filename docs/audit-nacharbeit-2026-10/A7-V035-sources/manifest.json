@@ -1,0 +1,105 @@
+{
+  "schema": "a7-v035-public-source-snapshot-v1",
+  "retrieved_at_utc": "2026-10-02T21:52:13.650702+00:00",
+  "source": "Kraken public charts API",
+  "symbol": "PF_XBTUSD",
+  "active_start_ms": 1768766400000,
+  "r1_cutoff_ms": 1790683200000,
+  "historical_api_as_of_proven": false,
+  "historical_trading_fills_proven": false,
+  "series": {
+    "trade-4h": {
+      "file": "trade-4h.json.gz",
+      "sha256": "2f581d604a7c3dd207e7399298842b6ca7dada4d20cdb37ff805efcc33612b52",
+      "count": 1523,
+      "first_ms": 1768766400000,
+      "last_ms": 1790683200000,
+      "step_ms": 14400000,
+      "pages": [
+        {
+          "url": "https://futures.kraken.com/api/charts/v1/trade/PF_XBTUSD/4h?from=1768766400&to=1790683200",
+          "sha256": "ba917b5892d656be58a6df7294f830fbe724fe59ac1f7738ba7d0c70b9d03077",
+          "count": 1523,
+          "first": 1768766400000,
+          "last": 1790683200000
+        }
+      ]
+    },
+    "mark-1h": {
+      "file": "mark-1h.json.gz",
+      "sha256": "8630d8e9824aea5f44593697fff334976907ee63262998c17c2ef98a8a8532ab",
+      "count": 6090,
+      "first_ms": 1768762800000,
+      "last_ms": 1790683200000,
+      "step_ms": 3600000,
+      "pages": [
+        {
+          "url": "https://futures.kraken.com/api/charts/v1/mark/PF_XBTUSD/1h?from=1768762800&to=1790683200",
+          "sha256": "625355c2a80d812ddcbccb81035b60a70f29a4c1ab09492dee1c310a3b15e764",
+          "count": 2000,
+          "first": 1768762800000,
+          "last": 1775959200000
+        },
+        {
+          "url": "https://futures.kraken.com/api/charts/v1/mark/PF_XBTUSD/1h?from=1775962800&to=1790683200",
+          "sha256": "d7cd0d60fd49102eadf268ad6714537c7b279508d17e7c38918a6db7d0644ee0",
+          "count": 2000,
+          "first": 1775962800000,
+          "last": 1783159200000
+        },
+        {
+          "url": "https://futures.kraken.com/api/charts/v1/mark/PF_XBTUSD/1h?from=1783162800&to=1790683200",
+          "sha256": "178c89eeb2f8dc2988db288393ccb428062330fdcd04f3400e228660420cf225",
+          "count": 2000,
+          "first": 1783162800000,
+          "last": 1790359200000
+        },
+        {
+          "url": "https://futures.kraken.com/api/charts/v1/mark/PF_XBTUSD/1h?from=1790362800&to=1790683200",
+          "sha256": "5185b767e79fbdb450887d2722bcad6dcf9010cc819cdaa911503133c054124e",
+          "count": 90,
+          "first": 1790362800000,
+          "last": 1790683200000
+        }
+      ]
+    },
+    "spot-1h": {
+      "file": "spot-1h.json.gz",
+      "sha256": "fc3ed22cc085acd6d753f72d98a99a702685cd79e32f3ac45eceb50eab333645",
+      "count": 6090,
+      "first_ms": 1768762800000,
+      "last_ms": 1790683200000,
+      "step_ms": 3600000,
+      "pages": [
+        {
+          "url": "https://futures.kraken.com/api/charts/v1/spot/PF_XBTUSD/1h?from=1768762800&to=1790683200",
+          "sha256": "82c744650cca8727301212ba7094da3e68f5d26318ddd2f3f6aad16276887dc9",
+          "count": 2000,
+          "first": 1768762800000,
+          "last": 1775959200000
+        },
+        {
+          "url": "https://futures.kraken.com/api/charts/v1/spot/PF_XBTUSD/1h?from=1775962800&to=1790683200",
+          "sha256": "598b34ac3479ac26326bd03a4fc190bcabbbab21fc3b47fa55e9c1c225be79bd",
+          "count": 2000,
+          "first": 1775962800000,
+          "last": 1783159200000
+        },
+        {
+          "url": "https://futures.kraken.com/api/charts/v1/spot/PF_XBTUSD/1h?from=1783162800&to=1790683200",
+          "sha256": "b6bd0b9a10c73a6c270f2e3b3d69231ad7c031c2c4b4362cc5a319ff7e6a2bad",
+          "count": 2000,
+          "first": 1783162800000,
+          "last": 1790359200000
+        },
+        {
+          "url": "https://futures.kraken.com/api/charts/v1/spot/PF_XBTUSD/1h?from=1790362800&to=1790683200",
+          "sha256": "3928f719f7aa3a59952bf5c8c1a58c0ec9fc9d22e0f7fb5cb1968a3c400158cf",
+          "count": 90,
+          "first": 1790362800000,
+          "last": 1790683200000
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "complete_fields": true,
+  "as_of_proven": false,
+  "raw_manifest": {
+    "start": 1790481600,
+    "end": 1790683200,
+    "run_id": "36592684701",
+    "commit": "4315e4a5a2654b161e05f79c5f74b3b31d4c32e1",
+    "sources": [
+      {
+        "name": "open-interest-history",
+        "url": "https://api.coinalyze.net/v1/open-interest-history?symbols=BTCUSDT_PERP.A&interval=4hour&from=1790481600&to=1790683200&convert_to_usd=true",
+        "retrieved_at": "2026-09-29T15:46:04.058741+00:00",
+        "status": 200,
+        "sha256": "0f7515f3aad31aa03c8969f273c7dd5fd42eb09eaa5030919e5a2af4af397da2"
+      },
+      {
+        "name": "liquidation-history",
+        "url": "https://api.coinalyze.net/v1/liquidation-history?symbols=BTCUSDT_PERP.A&interval=4hour&from=1790481600&to=1790683200&convert_to_usd=true",
+        "retrieved_at": "2026-09-29T15:46:04.368196+00:00",
+        "status": 200,
+        "sha256": "0180cce7e1927fd6cdc83a4e03a6ec834b52cfdc4d3969f6b86bdb397e3de13e"
+      },
+      {
+        "name": "ohlcv-history",
+        "url": "https://api.coinalyze.net/v1/ohlcv-history?symbols=BTCUSDT_PERP.A&interval=4hour&from=1790481600&to=1790683200&convert_to_usd=true",
+        "retrieved_at": "2026-09-29T15:46:04.577239+00:00",
+        "status": 200,
+        "sha256": "39abd4e978b8e2c66da677dbe03b0191fb002cbd53ad6fbecf43b66b88d86c4f"
+      },
+      {
+        "name": "long-short-ratio-history",
+        "url": "https://api.coinalyze.net/v1/long-short-ratio-history?symbols=BTCUSDT_PERP.A&interval=4hour&from=1790481600&to=1790683200&convert_to_usd=true",
+        "retrieved_at": "2026-09-29T15:46:04.763091+00:00",
+        "status": 200,
+        "sha256": "9993c283725d0edd9c0413996cd68a257c089b3803c6075079007388e66d920f"
+      },
+      {
+        "name": "spot",
+        "url": "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&startTime=1790481600000&endTime=1790683199999&limit=1000",
+        "retrieved_at": "2026-09-29T15:46:04.960999+00:00",
+        "status": 200,
+        "sha256": "6049d0c0087fe8e83d2976d2066f9cc9ab9406a1bc8a3645ef1d951fa427ceee"
+      },
+      {
+        "name": "funding",
+        "url": "https://futures.kraken.com/derivatives/api/v4/historicalfundingrates?symbol=PF_XBTUSD",
+        "retrieved_at": "2026-09-29T15:46:05.573425+00:00",
+        "status": 200,
+        "sha256": "49ca8546d8e7508777e4797b2dd25f697a5ed63c1213e5bf77a160ef31a04035"
+      }
+    ]
+  },
+  "raw_artifact_sha256": "437811d73da6837b13794827bc189cc918ad1371a83d9309cd06a1b29fe8ef83",
+  "inputs_sha256": "701c0eea34098317d0fae2827a16afd4cb73f7e9684c724d70881c2df49e5089",
+  "preserved_closed_prefix_bars": 2480,
+  "prefix_fields_identical": true,
+  "prefix_sha256": "c8b0c4ec73a24e0df38a9cced809d1f9e1c480ed5f37c73d35677ef563356363",
+  "original_r0_preserved": true,
+  "discarded_r0_partial_bar": 1790496000000,
+  "partial_bar_policy": "R0 partial bar never used; R1 adds its completed later version as first extension bar",
+  "overlap_checks": {
+    "ohlc": true,
+    "oi": true,
+    "liquidations": true,
+    "long_pct": true,
+    "spot_delta_abs_difference": 5.811452865600586e-07,
+    "fut_delta_abs_difference": 0.0,
+    "funding_abs_difference": 0.0
+  },
+  "extension_bars": 13,
+  "total_bars": 2493,
+  "warmup_bars": 971,
+  "trade_bars": 1522,
+  "cutoff": 1790683200000,
+  "first_provable_availability": [
+    {
+      "bar_open": 1790496000000,
+      "bar_close": 1790510400000,
+      "funding_timestamp": 1790510400000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790510400000,
+      "bar_close": 1790524800000,
+      "funding_timestamp": 1790524800000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790524800000,
+      "bar_close": 1790539200000,
+      "funding_timestamp": 1790539200000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790539200000,
+      "bar_close": 1790553600000,
+      "funding_timestamp": 1790553600000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790553600000,
+      "bar_close": 1790568000000,
+      "funding_timestamp": 1790568000000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790568000000,
+      "bar_close": 1790582400000,
+      "funding_timestamp": 1790582400000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790582400000,
+      "bar_close": 1790596800000,
+      "funding_timestamp": 1790596800000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790596800000,
+      "bar_close": 1790611200000,
+      "funding_timestamp": 1790611200000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790611200000,
+      "bar_close": 1790625600000,
+      "funding_timestamp": 1790625600000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790625600000,
+      "bar_close": 1790640000000,
+      "funding_timestamp": 1790640000000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790640000000,
+      "bar_close": 1790654400000,
+      "funding_timestamp": 1790654400000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790654400000,
+      "bar_close": 1790668800000,
+      "funding_timestamp": 1790668800000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    },
+    {
+      "bar_open": 1790668800000,
+      "bar_close": 1790683200000,
+      "funding_timestamp": 1790683200000,
+      "first_provable_version": "See raw GET retrieval times, all later than fixed cutoff",
+      "as_of_proven": false
+    }
+  ],
+  "transforms": {
+    "spot": "previous frozen cumulative + (2*k[10]-k[7]), USD",
+    "futures": "previous frozen cumulative + (2*bv-v), BTC",
+    "oi": "Coinalyze USD close",
+    "oi_btc": "OI USD / same spot close",
+    "liquidations": "l,s USD",
+    "long_pct": "l percent",
+    "funding": "Kraken PF_XBTUSD hourly relativeFundingRate *8 at bar close; exact timestamp required"
+  },
+  "limitations": [
+    "Original R0 raw vintages/availability not preserved",
+    "Extra four hours do not prove real execution feasibility",
+    "Warmup retained exactly, including original default/carried OI and funding; no warmup trading",
+    "No revision of any completed R0 candle or flow value",
+    "Boundary funding timestamp is an original model convention, not proof of publication before decision"
+  ]
+}

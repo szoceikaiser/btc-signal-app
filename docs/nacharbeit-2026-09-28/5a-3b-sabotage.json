@@ -1,0 +1,101 @@
+{
+  "result": "PASS",
+  "mutations": 19,
+  "cases": [
+    {
+      "name": "old_signal_price_instead_of_next_open",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "omit_buy_fee",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "overspend_cash",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "omit_reservation",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "no_full_exit_priority",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "allow_buy_with_sell",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "wrong_partstop_quantity",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "gap_silent_next_existing",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "recover_unclosed_next_open",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "wrong_risk_pre_fill",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "omit_gap_before_sell",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "upper_uses_low_first",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "reset_peak_every_bar",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "no_execution_feedback",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "partial_cash_not_reported",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "invent_last_close_fill",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "confirm_rejected_actions",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "consume_rejected_buy_rung",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    },
+    {
+      "name": "suppress_sell_after_buy_no_flip",
+      "baseline": "PASS",
+      "detected": "AssertionError"
+    }
+  ]
+}

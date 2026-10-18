@@ -1,0 +1,102 @@
+# Free/public: explicit IDs and actual rules/credential reviews still required.
+# Same-provider convenience only; external deadman alarm remains unconfigured.
+name: BTC candidate freshness
+run-name: btc-health:${{ inputs.invoked_epoch_seconds }}
+on:
+  workflow_dispatch:
+    inputs:
+      invoked_epoch_seconds:
+        description: Actual cron invocation Unix seconds; external observer checks its fixed five-minute slot
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: btc-candidate-freshness
+  cancel-in-progress: false
+  queue: max
+jobs:
+  observe:
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require Git and stop checkout network after any Git failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          real_git="$(command -v git)"
+          [[ "$(printf '%s\n' 2.18.0 "$(git version | cut -d' ' -f3)" | sort -V | head -n1)" == "2.18.0" ]]
+          gate_dir="$(mktemp -d "$RUNNER_TEMP/btc-checkout-XXXXXX")"
+          printf '#!/bin/bash\nreal_git=%q\n' "$real_git" > "$gate_dir/git"
+          cat >> "$gate_dir/git" <<'GIT_GATE'
+          set -u
+          network=false
+          for arg in "$@"; do
+            case "$arg" in fetch|clone|ls-remote) network=true ;; esac
+          done
+          if ! "$network"; then exec "$real_git" "$@"; fi
+          stop_file="$(dirname "$0")/STOP"
+          if [[ -e "$stop_file" ]]; then exit 86; fi
+          "$real_git" "$@"
+          status=$?
+          if [[ "$status" -ne 0 ]]; then : > "$stop_file"; fi
+          exit "$status"
+          GIT_GATE
+          chmod 700 "$gate_dir/git"
+          printf '%s\n' "$gate_dir" >> "$GITHUB_PATH"
+      - name: Checkout exact reviewed code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: 20d755a4332fb32aeab08b1973b650eeae10f31e
+          token: ${{ github.token }}
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+      - name: Verify checkout pin before loading code
+        env:
+          REVIEWED_CODE_SHA: 20d755a4332fb32aeab08b1973b650eeae10f31e
+        shell: bash
+        run: |
+          [[ "$GITHUB_REPOSITORY" == "szoceikaiser/btc-signal-app" ]]
+          [[ "$REVIEWED_CODE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$(git rev-parse HEAD)" == "$REVIEWED_CODE_SHA" ]]
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12.14"
+      - name: Read bounded candidate evidence
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REVIEWED_MONITOR_JSON: ${{ vars.BTC_MONITOR_POLICY_JSON }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, hashlib
+          from copy import deepcopy
+          from pathlib import Path
+          expected = "UNBOUND_REVIEW_REQUIRED"
+          raw = os.environ['REVIEWED_MONITOR_JSON']
+          if len(raw.encode()) > 128*1024 or not re.fullmatch('[0-9a-f]{64}', expected):
+              raise SystemExit('Reviewed monitor policy not bound')
+          policy = json.loads(raw)
+          entry = policy['monitor_entry']
+          if (policy.get('enabled') is not True
+                  or entry['repository'] != 'szoceikaiser/btc-signal-app'
+                  or entry['branch'] != 'main'
+                  or entry['workflow'] != '.github/workflows/freshness.yml'
+                  or entry['code_sha'] != '20d755a4332fb32aeab08b1973b650eeae10f31e'
+                  or not re.fullmatch('[0-9a-f]{64}', entry['workflow_sha256'])):
+              raise SystemExit('Reviewed monitor entry not bound')
+          # Break only the policy/workflow self-hash cycle. The existing checker
+          # independently authenticates this field against the actual YAML bytes;
+          # the external gate additionally pins the complete actual YAML digest.
+          bound = deepcopy(policy)
+          bound['monitor_entry']['workflow_sha256'] = 'SELF_WORKFLOW_SHA256'
+          normalized = json.dumps(bound,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
+          if hashlib.sha256(normalized).hexdigest() != expected:
+              raise SystemExit('Reviewed monitor policy changed')
+          with Path('monitor-policy.json').open('x',encoding='utf-8') as f:
+              json.dump(policy,f,allow_nan=False)
+          PY
+          python3 tools/produktion_actions_freshness.py --policy monitor-policy.json

@@ -1,0 +1,520 @@
+{
+  "base": "05208cecce8d5a0e856a1ea56984b209f403ccd6",
+  "r0_sha256": "ce749958a3ab1679f5cfee303ee58e37cc93d42eeee35f28d7f954d0cb1dcd7a",
+  "r0_generated": "2026-09-27T08:29:16.179427+00:00",
+  "r0_cutoff": 1790497748840,
+  "r0_first": 1754784000000,
+  "r0_closed_bars": 2480,
+  "r0_field_prefix_sha256": "c8b0c4ec73a24e0df38a9cced809d1f9e1c480ed5f37c73d35677ef563356363",
+  "r0_unfinished_excluded": 1790496000000,
+  "r1_cutoff": 1790683200000,
+  "needed_bar_open_ms": [
+    1790496000000,
+    1790510400000,
+    1790524800000,
+    1790539200000,
+    1790553600000,
+    1790568000000,
+    1790582400000,
+    1790596800000,
+    1790611200000,
+    1790625600000,
+    1790640000000,
+    1790654400000,
+    1790668800000
+  ],
+  "needed_bars": 13,
+  "archives": [
+    {
+      "commit": "6b73f17f81bac01ef11cc13f136ac7eede29e472",
+      "sha256": "07e2173f12e4b4fa6c55eb53cd531cf1054471b19421366766bc1cf6367e5f14",
+      "committed_at": "2026-09-28T10:10:54Z",
+      "fields": {
+        "oi": {
+          "count": 1515,
+          "first": 1768766400000,
+          "last": 1790568000000,
+          "missing_extension": [
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "liq": {
+          "count": 1516,
+          "first": 1768694400000,
+          "last": 1790568000000,
+          "missing_extension": [
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "fut": {
+          "count": 2014,
+          "first": 1761580800000,
+          "last": 1790568000000,
+          "missing_extension": [
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "ls": {
+          "count": 2014,
+          "first": 1761580800000,
+          "last": 1790568000000,
+          "missing_extension": [
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        }
+      }
+    },
+    {
+      "commit": "e35030b327386901407ae4e5f7f2f172ba4058c1",
+      "sha256": "09ffc86778aeab9819cf547455332d1434213c4f06d1c95e84fffce13a5ccfb9",
+      "committed_at": "2026-09-27T15:04:06+02:00",
+      "fields": {
+        "oi": {
+          "count": 1509,
+          "first": 1768766400000,
+          "last": 1790481600000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "liq": {
+          "count": 1510,
+          "first": 1768694400000,
+          "last": 1790481600000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "fut": {
+          "count": 2008,
+          "first": 1761580800000,
+          "last": 1790481600000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "ls": {
+          "count": 2008,
+          "first": 1761580800000,
+          "last": 1790481600000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        }
+      }
+    },
+    {
+      "commit": "8651bc8c056caeca0f4e7c4b3acb4128bd38087d",
+      "sha256": "09ffc86778aeab9819cf547455332d1434213c4f06d1c95e84fffce13a5ccfb9",
+      "committed_at": "2026-09-27T09:32:09Z",
+      "fields": {
+        "oi": {
+          "count": 1509,
+          "first": 1768766400000,
+          "last": 1790481600000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "liq": {
+          "count": 1510,
+          "first": 1768694400000,
+          "last": 1790481600000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "fut": {
+          "count": 2008,
+          "first": 1761580800000,
+          "last": 1790481600000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "ls": {
+          "count": 2008,
+          "first": 1761580800000,
+          "last": 1790481600000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        }
+      }
+    },
+    {
+      "commit": "33df11196c11abcf914cf5f01bcadcce8edfd021",
+      "sha256": "7a100508da3f28c2bd8b94daf6f257a872b82460fc3ecfdb694724cfeed26bc4",
+      "committed_at": "2026-09-26T19:20:01Z",
+      "fields": {
+        "oi": {
+          "count": 1505,
+          "first": 1768766400000,
+          "last": 1790424000000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "liq": {
+          "count": 1506,
+          "first": 1768694400000,
+          "last": 1790424000000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "fut": {
+          "count": 2004,
+          "first": 1761580800000,
+          "last": 1790424000000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        },
+        "ls": {
+          "count": 2004,
+          "first": 1761580800000,
+          "last": 1790424000000,
+          "missing_extension": [
+            1790496000000,
+            1790510400000,
+            1790524800000,
+            1790539200000,
+            1790553600000,
+            1790568000000,
+            1790582400000,
+            1790596800000,
+            1790611200000,
+            1790625600000,
+            1790640000000,
+            1790654400000,
+            1790668800000
+          ]
+        }
+      }
+    },
+    {
+      "commit": "ea291e8ecc42c5d82dc8834cd0b01a7c04b57074",
+      "source": "remote exact SHA, data only",
+      "sha256": "9736e067992d137baa1c5f24b536573b800f71d3b814f5c8cdcd86293464362b",
+      "retrieved_at": "2026-09-29T12:38:31.900743+00:00",
+      "fields": {
+        "oi": {
+          "count": 1521,
+          "first": 1768766400000,
+          "last": 1790654400000,
+          "missing_extension": [
+            1790668800000
+          ]
+        },
+        "liq": {
+          "count": 1522,
+          "first": 1768694400000,
+          "last": 1790654400000,
+          "missing_extension": [
+            1790668800000
+          ]
+        },
+        "fut": {
+          "count": 2020,
+          "first": 1761580800000,
+          "last": 1790654400000,
+          "missing_extension": [
+            1790668800000
+          ]
+        },
+        "ls": {
+          "count": 2020,
+          "first": 1761580800000,
+          "last": 1790654400000,
+          "missing_extension": [
+            1790668800000
+          ]
+        }
+      }
+    }
+  ],
+  "requests": [
+    {
+      "name": "remote-main",
+      "url": "https://api.github.com/repos/szoceikaiser/btc-signal-app/branches/main",
+      "retrieved_at": "2026-09-29T12:38:31.554652+00:00",
+      "status": 200,
+      "sha256": "6f9d8e92106294476aca4dd2eba310ad952a340eecb6089343636daaad046555"
+    },
+    {
+      "name": "remote-archive",
+      "url": "https://raw.githubusercontent.com/szoceikaiser/btc-signal-app/ea291e8ecc42c5d82dc8834cd0b01a7c04b57074/site/data/archiv/coinalyze_4h.json",
+      "retrieved_at": "2026-09-29T12:38:31.900743+00:00",
+      "status": 200,
+      "sha256": "9736e067992d137baa1c5f24b536573b800f71d3b814f5c8cdcd86293464362b"
+    },
+    {
+      "name": "binance-extension",
+      "url": "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&startTime=1790496000000&endTime=1790683199999&limit=1000",
+      "retrieved_at": "2026-09-29T12:38:32.316816+00:00",
+      "status": 200,
+      "sha256": "c2cfad7dbff1d053ef1b785b9010411de60e1b759dc0b3ff1fc58d8bf381e125"
+    }
+  ],
+  "coinalyze_key_available": false,
+  "fields": {
+    "candles.ts/open/high/low/close": {
+      "source_transform": "Binance Vision BTCUSDT spot 4h kline open timestamp; OHLC fields 1..4",
+      "first_provable_version": "frozen file generated 2026-09-27T08:29:16.179427+00:00",
+      "availability_at_historical_close": "unknown/idealized",
+      "vintage": "original API responses not preserved in R0; later archives may revise"
+    },
+    "flow.spot_cvd": {
+      "source_transform": "Same Binance kline: cumulative sum 2*taker_buy_quote_volume - quote_volume (USD)",
+      "first_provable_version": "frozen file generated 2026-09-27T08:29:16.179427+00:00",
+      "availability_at_historical_close": "unknown/idealized",
+      "vintage": "original API responses not preserved in R0; later archives may revise"
+    },
+    "flow.fut_cvd": {
+      "source_transform": "Coinalyze BTCUSDT_PERP.A Binance perp, cumulative taker BTC delta",
+      "first_provable_version": "frozen file generated 2026-09-27T08:29:16.179427+00:00",
+      "availability_at_historical_close": "unknown/idealized",
+      "vintage": "original API responses not preserved in R0; later archives may revise"
+    },
+    "flow.oi": {
+      "source_transform": "Coinalyze BTCUSDT_PERP.A open interest converted to USD",
+      "first_provable_version": "frozen file generated 2026-09-27T08:29:16.179427+00:00",
+      "availability_at_historical_close": "unknown/idealized",
+      "vintage": "original API responses not preserved in R0; later archives may revise"
+    },
+    "flow.oi_btc": {
+      "source_transform": "flow.oi divided by same bar close, legacy fallback/carry behavior",
+      "first_provable_version": "frozen file generated 2026-09-27T08:29:16.179427+00:00",
+      "availability_at_historical_close": "unknown/idealized",
+      "vintage": "original API responses not preserved in R0; later archives may revise"
+    },
+    "flow.long_liq/short_liq": {
+      "source_transform": "Coinalyze BTCUSDT_PERP.A liquidations in USD",
+      "first_provable_version": "frozen file generated 2026-09-27T08:29:16.179427+00:00",
+      "availability_at_historical_close": "unknown/idealized",
+      "vintage": "original API responses not preserved in R0; later archives may revise"
+    },
+    "flow.long_pct": {
+      "source_transform": "Coinalyze BTCUSDT_PERP.A long-short-ratio, long percent",
+      "first_provable_version": "frozen file generated 2026-09-27T08:29:16.179427+00:00",
+      "availability_at_historical_close": "unknown/idealized",
+      "vintage": "original API responses not preserved in R0; later archives may revise"
+    },
+    "flow.funding": {
+      "source_transform": "Legacy fetch_funding_8h source/fallback requires provenance; last timestamp <= bar close",
+      "first_provable_version": "frozen file generated 2026-09-27T08:29:16.179427+00:00",
+      "availability_at_historical_close": "unknown/idealized",
+      "vintage": "original API responses not preserved in R0; later archives may revise"
+    }
+  },
+  "r1_complete": false,
+  "r1_measured": false,
+  "status": "Review inventory and missing required fields before any R1 assembly",
+  "local_worktrees": [
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\e444-work",
+      "status": "?? baseline-tests.log\n?? e444-final-tests.log\n?? e444-sabotage-02.log\n?? e444-sabotage-03.log\n?? e444-sabotage.log\n?? e444-tests.log\n"
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\audit-work",
+      "status": ""
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\e445-work",
+      "status": "?? e444-sabotage-e445.err\n?? e444-sabotage-e445.log\n?? e445-e42-counts.json\n?? e445-messung02.zip\n?? e445-run02-logs/\n?? e445-run02.zip\n?? e445-sabotage-01.err\n?? e445-sabotage-01.log\n?? e445-tests-01.err\n?? e445-tests-01.log\n?? e445-tests-02.err\n?? e445-tests-02.log\n"
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\etappe-3b-work",
+      "status": ""
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\etappe-4-work",
+      "status": ""
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\etappe-5a-work",
+      "status": ""
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\etappe-5b-work",
+      "status": ""
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\etappe-6-work",
+      "status": ""
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\fix-d01-work",
+      "status": ""
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\fix-f09-work",
+      "status": ""
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\nach-6-work",
+      "status": "?? docs/nach-6/\n?? engine/execution_delayed.py\n?? tools/historical_sources.py\n?? tools/historical_stats.py\n"
+    },
+    {
+      "path": "C:\\Users\\oeztu\\BTC-Trading\\vertrag-3a-work",
+      "status": ""
+    }
+  ]
+}

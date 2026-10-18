@@ -1,0 +1,10 @@
+{
+  "schema": "p3-human-grant-v2",
+  "plan_sha256": null,
+  "phase": "bootstrap-public-root-once",
+  "approved_by": null,
+  "human_authorization": false,
+  "expires_utc": null,
+  "approval_evidence_sha256": null,
+  "review_sha256": null
+}

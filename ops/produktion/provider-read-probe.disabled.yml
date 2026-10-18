@@ -1,0 +1,136 @@
+# Optional manual probe. Never installed or enabled by the normal overlay.
+name: BTC optional public jobtoken read probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-public:
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: At most ten GET, zero write, zero send
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BTC_PROBE_PUBLIC_IDS_JSON: ${{ vars.BTC_PROBE_PUBLIC_IDS_JSON }}
+        run: |
+          python3 - <<'PY'
+          """OPTIONAL MANUAL PROVIDER PROBE. Disabled template only; never auto-run.
+
+          10 GET maximum, no write, no send, no checkout, no retry or fallback. Payloads
+          stay in memory and output contains only status, public IDs/pins and rate headers.
+          """
+          import base64
+          import hashlib
+          import json
+          import os
+          import re
+          import sys
+          import threading
+          import urllib.request
+          import urllib.error
+
+          CODE='szoceikaiser/btc-signal-app'
+          TARGETS=(('szoceikaiser/btc-delivery-store','delivery-stream-v2'),
+                   ('szoceikaiser/btc-delivery-backup','verified-pair-packages'),
+                   ('szoceikaiser/btc-delivery-backup-verification','verified-receipts'))
+          FILE='delivery/stream.json'
+          COUNT=0
+          OBSERVATIONS=[]
+
+
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,*args): raise ValueError('Redirect refused')
+
+
+          def get(url,token,basic=False):
+              global COUNT
+              if COUNT>=10: raise ValueError('Probe GET ceiling')
+              COUNT+=1
+              auth='Basic '+base64.b64encode(('x-access-token:'+token).encode()).decode() if basic else 'Bearer '+token
+              req=urllib.request.Request(url,method='GET',headers={'Authorization':auth,'User-Agent':'btc-public-provider-probe',
+                  'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'})
+              done=threading.Event();result=[]
+              def read():
+                  try:
+                      with urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect()).open(req,timeout=10) as r:
+                          headers={k.lower():r.headers[k] for k in r.headers if k.lower() in (
+                              'x-ratelimit-limit','x-ratelimit-remaining','x-ratelimit-used','x-ratelimit-reset','x-ratelimit-resource','retry-after')}
+                          if any(not re.fullmatch(r'[A-Za-z0-9 .,:+-]{1,80}',v) for v in headers.values()): raise ValueError('Header refused')
+                          raw=r.read(2*1024*1024+1)
+                          if r.status!=200 or len(raw)>2*1024*1024: raise ValueError('Status/bytes refused')
+                          OBSERVATIONS.append({'status':r.status,'headers':headers})
+                          if headers.get('retry-after') or headers.get('x-ratelimit-remaining')=='0': raise ValueError('Quota stop')
+                          result.append((raw,headers))
+                  except urllib.error.HTTPError as exc:
+                      safe={k:str(v) for k,v in (exc.headers or {}).items() if k.lower() in (
+                          'x-ratelimit-limit','x-ratelimit-remaining','x-ratelimit-used','x-ratelimit-reset','x-ratelimit-resource','retry-after')
+                          and re.fullmatch(r'[A-Za-z0-9 .,:+-]{1,80}',str(v))}
+                      OBSERVATIONS.append({'status':exc.code,'headers':safe});result.append(None)
+                  except BaseException: result.append(None)
+                  finally: done.set()
+              threading.Thread(target=read,daemon=True).start()
+              if not done.wait(12) or not result or result[0] is None: raise ValueError('Probe refused')
+              return result[0]
+
+
+          def run():
+              token=os.environ['GITHUB_TOKEN'];ids=json.loads(os.environ['BTC_PROBE_PUBLIC_IDS_JSON'])
+              if (not token or '\n' in token or '\r' in token
+                      or os.environ.get('GITHUB_REPOSITORY')!=CODE or set(ids)!={CODE,*[r for r,_ in TARGETS]}
+                      or str(ids[CODE])!=os.environ.get('GITHUB_REPOSITORY_ID')
+                      or any(type(v) is not int or v<=0 for v in ids.values())): raise ValueError('Bindings unresolved')
+              if any(os.environ.get(k) for k in ('BTC_DELIVERY_GITHUB_TOKEN','BTC_HOSTED_BACKUP_WRITE_TOKEN',
+                                                'BTC_HOSTED_RECEIPT_WRITE_TOKEN','TELEGRAM_BOT_TOKEN')):
+                  raise ValueError('Writer injection refused')
+              rows=[];heads={}
+              for repo,_ in TARGETS:
+                  raw,headers=get('https://api.github.com/repos/'+repo,token);v=json.loads(raw)
+                  if v.get('id')!=ids[repo] or v.get('full_name')!=repo or v.get('private') is not False or v.get('visibility')!='public':
+                      raise ValueError('Public identity differs')
+                  rows.append({'status':200,'id':v['id'],'headers':headers})
+              for repo,branch in TARGETS:
+                  raw,headers=get('https://api.github.com/repos/'+repo+'/git/ref/heads/'+branch,token);v=json.loads(raw)
+                  head=v['object']['sha']
+                  if v.get('ref')!='refs/heads/'+branch or v['object'].get('type')!='commit' or not re.fullmatch('[0-9a-f]{40}',head):
+                      raise ValueError('Ref differs')
+                  heads[repo]=head;rows.append({'status':200,'id':ids[repo],'pin':head,'headers':headers})
+              repo,branch=TARGETS[0];pin=heads[repo]
+              raw,headers=get('https://api.github.com/repos/'+repo+'/contents/'+FILE+'?ref='+pin,token);item=json.loads(raw)
+              content=base64.b64decode(''.join(item['content'].split()),validate=True)
+              blob=hashlib.sha1(b'blob '+str(len(content)).encode()+b'\0'+content).hexdigest()
+              if item.get('type')!='file' or item.get('encoding')!='base64' or item['sha']!=blob: raise ValueError('Code blob differs')
+              rows.append({'status':200,'id':ids[repo],'pin':pin,'blob':blob,'headers':headers})
+              raw,headers=get('https://raw.githubusercontent.com/'+repo+'/'+pin+'/'+FILE,token)
+              if raw!=content: raise ValueError('Pinned raw bytes differ')
+              rows.append({'status':200,'id':ids[repo],'pin':pin,'blob':blob,'headers':headers})
+              repo,branch=TARGETS[0]
+              raw,headers=get('https://github.com/'+repo+'.git/info/refs?service=git-upload-pack',token,True)
+              pos=0;matches=[];first=True
+              while pos<len(raw):
+                  if not re.fullmatch(b'[0-9a-f]{4}',raw[pos:pos+4]): raise ValueError('Git header')
+                  size=int(raw[pos:pos+4],16);pos+=4
+                  if size==0: continue
+                  if not 4<=size<=65524 or pos+size-4>len(raw): raise ValueError('Git packet')
+                  row=raw[pos:pos+size-4];pos+=size-4
+                  if first:
+                      if row!=b'# service=git-upload-pack\n': raise ValueError('Git protocol')
+                      first=False;continue
+                  sha,_,name=row.rstrip(b'\n').split(b'\0',1)[0].partition(b' ')
+                  if name==('refs/heads/'+branch).encode(): matches.append(sha.decode())
+              if matches!=[heads[repo]]: raise ValueError('Git identity/motion')
+              rows.append({'status':200,'id':ids[repo],'pin':heads[repo],'headers':headers})
+              raw,headers=get('https://api.github.com/repos/'+CODE,token);value=json.loads(raw)
+              if value.get('id')!=ids[CODE] or value.get('full_name')!=CODE or value.get('private') is not False or value.get('visibility')!='public':
+                  raise ValueError('Automatic job repository differs')
+              rows.append({'status':200,'id':ids[CODE],'headers':headers})
+              if COUNT!=10: raise ValueError('Incomplete probe')
+              print(json.dumps(rows,separators=(',',':')))
+
+
+          if __name__=='__main__':
+              try: run()
+              except BaseException:
+                  print(json.dumps({'status':'refused','rate_observations':OBSERVATIONS},separators=(',',':')));sys.exit(20)
+          PY

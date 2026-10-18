@@ -1,0 +1,1555 @@
+Archiv: kein COINALYZE_API_KEY - nichts zu tun.
+PASS test_archiv::test_archiv_ohne_key_tut_nichts
+PASS test_archiv::test_backtest_mischt_das_archiv_wirklich_dazu
+PASS test_archiv::test_backtest_ruft_archiv_mischen_im_hauptlauf_auf
+PASS test_archiv::test_fehlende_oder_kaputte_datei_ist_kein_fehler
+PASS test_archiv::test_nur_abgeschlossene_kerzen
+PASS test_archiv::test_speichern_und_laden_behaelt_liquidations_paare
+PASS test_archiv::test_zusammen_mit_leeren_karten
+PASS test_archiv::test_zusammen_neu_gewinnt_alt_bleibt
+PASS test_backtest::test_a5_abschnitt_meldet_null_treffer_als_kein_befund
+PASS test_backtest::test_a5_abschnitt_meldet_treffer_ohne_gitter_als_nicht_gemessen
+PASS test_backtest::test_a5_abschnitt_meldet_urteil_und_kein_urteil
+PASS test_backtest::test_a5_abschnitt_ohne_zeile_im_gitter_sagt_nicht_gemessen
+PASS test_backtest::test_a5_einschalten_folgt_derselben_regel_wie_e43
+PASS test_backtest::test_a5_findet_einen_unterschied_wenn_die_live_historie_das_alte_hoch_verliert
+PASS test_backtest::test_a5_ist_im_bericht_verdrahtet
+PASS test_backtest::test_a5_keine_kerzen_nachstellbar_ohne_1300_kerzen_vorlauf
+PASS test_backtest::test_a5_live_konfig_steht_auf_voll
+PASS test_backtest::test_a5_ohne_jeden_unterschied_gleiche_pivots_ueberall
+PASS test_backtest::test_a5_zaehlt_kerzen_ausserhalb_des_nachstellbaren_bereichs_nicht
+PASS test_backtest::test_a5_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live
+PASS test_backtest::test_abschnitt_oder_grund_baut_bei_daten_den_echten_abschnitt
+PASS test_backtest::test_abschnitt_oder_grund_nennt_den_grund_statt_zu_verschwinden
+PASS test_backtest::test_abschnitt_oder_grund_rechnet_im_fehlerfall_NICHT
+PASS test_backtest::test_abschnitt_oder_grund_sagt_auch_wenn_niemand_einen_grund_festhielt
+PASS test_backtest::test_alle_live_heute_zeilen_tragen_den_neuen_live_schalter
+PASS test_backtest::test_ampel_filter_kommt_im_backtest_ueberhaupt_an
+PASS test_backtest::test_ampel_zeilen_unterscheiden_sich_von_der_live_zeile_in_genau_einem_punkt
+PASS test_backtest::test_besser_in_beiden_haelften_behauptet_nichts_ohne_basis
+PASS test_backtest::test_besser_in_beiden_haelften_nennt_alle_gewinner_nicht_nur_den_ersten
+PASS test_backtest::test_besser_in_beiden_haelften_verlangt_BEIDE
+PASS test_backtest::test_besser_in_beiden_haelften_zaehlt_gleichstand_NICHT_als_besser
+PASS test_backtest::test_beteiligung_erkennt_das_muster_grosser_anstiege
+PASS test_backtest::test_beteiligung_rechnet_auf_und_abwaerts_getrennt
+PASS test_backtest::test_beteiligung_steht_im_pnl_dict_fuer_die_tabellenspalte
+PASS test_backtest::test_build_series_fehlende_kerze_in_der_spot_map_aendert_das_cvd_nicht
+PASS test_backtest::test_build_series_leere_spot_map_haelt_das_cvd_flach_statt_binance_zu_nehmen
+PASS test_backtest::test_build_series_mit_spot_map_ERSETZT_die_binance_rechnung
+PASS test_backtest::test_build_series_ohne_futures_daten_bleibt_bei_null
+PASS test_backtest::test_build_series_ohne_spot_map_rechnet_wie_bisher
+PASS test_backtest::test_build_series_summiert_futures_delta_auf
+PASS test_backtest::test_build_series_uebernimmt_long_anteil
+PASS test_backtest::test_deploy_pct_haelt_reserve_zurueck
+PASS test_backtest::test_e38_die_beiden_halten_zeilen_messen_wirklich_verschiedenes
+PASS test_backtest::test_e38_gegenprobe_bremse_ist_im_gitter
+PASS test_backtest::test_e38_schalter_stehen_in_eval_keys_und_kommen_so_ueberhaupt_an
+PASS test_backtest::test_e38_zeilen_unterscheiden_sich_in_genau_einem_punkt_von_live
+PASS test_backtest::test_e39_misst_die_live_einstellung_und_nicht_die_beste_variante
+PASS test_backtest::test_e41_abschnitt_bleibt_an_und_sagt_warum
+PASS test_backtest::test_e41_abschnitt_hinweis_wenn_die_regel_nicht_greift
+PASS test_backtest::test_e41_abschnitt_kein_ausstieg_bis_fensterende
+PASS test_backtest::test_e41_abschnitt_leer_ohne_basis_oder_ohne_alten_stop
+PASS test_backtest::test_e41_abschnitt_meldet_ausschalten_bei_klar_besserem_alten_stop
+PASS test_backtest::test_e41_abschnitt_meldet_ausschalten_bei_zu_tiefem_rueckgang
+PASS test_backtest::test_e41_abschnitt_nennt_die_ueberstimmung_nur_bei_ausschalten
+PASS test_backtest::test_e41_abschnitt_vorprobe_die_zeilen_sind_da
+PASS test_backtest::test_e41_abschnitt_wiedereinstieg_nach_dem_live_ausstieg_zaehlt_nicht
+PASS test_backtest::test_e41_abschnitt_zeigt_was_aus_der_position_wurde_samt_wiedereinstieg
+PASS test_backtest::test_e41_alter_stop_und_b3_unterscheiden_sich_in_genau_einem_punkt
+PASS test_backtest::test_e41_ausschalten_alter_stop_muss_in_beiden_haelften_klar_besser_sein
+PASS test_backtest::test_e41_ausschalten_bei_zu_tiefem_rueckgang
+PASS test_backtest::test_e41_ausschalten_bleibt_an_bei_den_zahlen_vom_umschalttag
+PASS test_backtest::test_e41_greift_nicht_ist_kein_ausschaltgrund
+PASS test_backtest::test_e41_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis
+PASS test_backtest::test_e41_labels_stimmen_mit_dem_bericht_ueberein
+PASS test_backtest::test_e41_rueckeroberung_ist_live_und_das_panel_ist_mitgewandert
+PASS test_backtest::test_e41_schalter_kommen_an
+PASS test_backtest::test_e433_abschnitt_meldet_urteil_und_kein_urteil_ohne_umklassifizierung
+PASS test_backtest::test_e433_einschalten_nicht_bei_zu_tiefem_rueckgang
+PASS test_backtest::test_e433_einschalten_nur_wenn_beide_haelften_klar_besser
+PASS test_backtest::test_e433_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis
+PASS test_backtest::test_e433_live_konfig_steht_auf_alt
+PASS test_backtest::test_e433_vorprobe_im_bericht_zaehlt_umklassifizierte_kerzen
+PASS test_backtest::test_e433_vorprobe_zaehlt_nur_nachstellbare_kerzen_fuer_live
+PASS test_backtest::test_e433_vorprobe_zeigt_live_gegen_backtest
+PASS test_backtest::test_e433_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live
+PASS test_backtest::test_e434_abschnitt_meldet_urteil_und_kein_urteil
+PASS test_backtest::test_e434_build_series_ohne_oi_map_hat_keine_kontrakt_reihe
+PASS test_backtest::test_e434_build_series_rechnet_um_und_fuellt_dann_kontrakte_auf
+PASS test_backtest::test_e434_einschalten_nicht_bei_zu_tiefem_rueckgang
+PASS test_backtest::test_e434_einschalten_nur_wenn_beide_haelften_klar_besser
+PASS test_backtest::test_e434_ist_im_bericht_verdrahtet_mit_der_live_zeile_als_basis
+PASS test_backtest::test_e434_live_konfig_steht_auf_usd
+PASS test_backtest::test_e434_vorprobe_im_pump_szenario_findet_umklassifizierte_kerzen
+PASS test_backtest::test_e434_vorprobe_ohne_oi_daten_misst_nichts
+PASS test_backtest::test_e434_vorprobe_zaehlt_a3_je_muster
+PASS test_backtest::test_e434_zeile_unterscheidet_sich_in_genau_einem_punkt_von_live
+PASS test_backtest::test_e436_abschnitt_meldet_urteil_je_zeile
+PASS test_backtest::test_e436_abschnitt_ohne_panel_zeile_kein_urteil
+PASS test_backtest::test_e436_abschnitt_ohne_treffer_meldet_kein_urteil
+PASS test_backtest::test_e436_confirm_t1_vorprobe_zaehlt_einstiege_ohne_bestaetigung
+PASS test_backtest::test_e436_confirm_t1_vorprobe_zaehlt_nur_0_5_level_einstiege
+PASS test_backtest::test_e436_cooldown_vorprobe_ohne_vorherigen_stop_kein_treffer
+PASS test_backtest::test_e436_cooldown_vorprobe_zaehlt_einstiege_kurz_nach_einem_stop
+PASS test_backtest::test_e436_einschalten_folgt_derselben_regel_wie_e43
+PASS test_backtest::test_e436_ist_im_bericht_verdrahtet
+PASS test_backtest::test_e436_rest_halten_vorprobe_zaehlt_gegen_muster_verkaeufe
+PASS test_backtest::test_e436_strict_confirm_vorprobe_findet_den_unterschied
+PASS test_backtest::test_e436_strict_confirm_vorprobe_ohne_unterschied_bei_negativem_funding
+PASS test_backtest::test_e436_vier_zeilen_haben_genau_einen_unterschied_zur_panel_zeile
+PASS test_backtest::test_e438_abschnitt_meldet_urteil_je_zeile
+PASS test_backtest::test_e438_abschnitt_ohne_panel_zeile_kein_urteil
+PASS test_backtest::test_e438_abschnitt_ohne_unterschied_meldet_kein_urteil
+PASS test_backtest::test_e438_einschalten_folgt_derselben_regel_wie_e43
+PASS test_backtest::test_e438_ist_im_bericht_verdrahtet
+PASS test_backtest::test_e438_signale_verschieden_zaehlt_symmetrische_differenz
+PASS test_backtest::test_e438_zwei_zeilen_haben_genau_einen_unterschied_zur_panel_zeile
+PASS test_backtest::test_e43_alte_bein_richtung_unterscheidet_sich_in_genau_einem_punkt
+PASS test_backtest::test_e43_bein_richtung_ist_live_und_das_panel_ist_mitgewandert
+PASS test_backtest::test_furkan_pnl_fenster_wird_beachtet
+PASS test_backtest::test_furkan_pnl_gebuehr_wird_abgezogen
+PASS test_backtest::test_furkan_pnl_ohne_kerzen_im_fenster_liefert_leer
+PASS test_backtest::test_furkan_pnl_rechnet_kauf_und_verkauf_korrekt
+PASS test_backtest::test_furkan_pnl_rotationstag_verkauft_erst_dann_kauft
+PASS test_backtest::test_furkan_pnl_verkauf_ohne_position_tut_nichts
+PASS test_backtest::test_gegengeschaeft_wird_je_kerze_gezaehlt_nicht_je_signal
+PASS test_backtest::test_gegenprobe_tabelle_nennt_die_episodenzahl_nicht_die_kerzenzahl
+PASS test_backtest::test_gegenprobe_vergleicht_gegen_dieselbe_grundrate_wie_oben
+PASS test_backtest::test_gegenprobe_zaehlt_nur_episodenbeginne
+PASS test_backtest::test_gegenprobe_zeile_steht_im_gitter_und_heisst_wie_erwartet
+PASS test_backtest::test_max_drawdown_wird_berechnet
+PASS test_backtest::test_median_mittelt_bei_gerader_anzahl
+PASS test_backtest::test_monatsuebersicht_zerlegt_das_ergebnis
+PASS test_backtest::test_muster_abschnitt_leer_bei_leerer_statistik
+PASS test_backtest::test_muster_abschnitt_nennt_den_abstand_zur_grundrate
+PASS test_backtest::test_muster_abschnitt_sagt_dass_es_keine_ertragsaussage_ist
+PASS test_backtest::test_muster_abschnitt_sagt_es_wenn_muster5_gar_nicht_vorkam
+PASS test_backtest::test_muster_abschnitt_warnt_bei_zu_wenigen_episoden
+PASS test_backtest::test_muster_abschnitt_warnt_nicht_bei_genug_episoden
+PASS test_backtest::test_muster_nachlauf_alle_horizonte_teilen_dieselbe_stichprobe
+PASS test_backtest::test_muster_nachlauf_grundrate_enthaelt_jede_bewertete_kerze
+PASS test_backtest::test_muster_nachlauf_laesst_kerzen_ohne_vollen_nachlauf_aus
+PASS test_backtest::test_muster_nachlauf_median_widersteht_einem_ausreisser
+PASS test_backtest::test_muster_nachlauf_misst_den_rueckgang_als_rueckgang
+PASS test_backtest::test_muster_nachlauf_misst_nach_vorn_nicht_nach_hinten
+PASS test_backtest::test_muster_nachlauf_wertet_kerzen_vor_dem_start_nicht
+PASS test_backtest::test_muster_nachlauf_zaehlt_episoden_nicht_kerzen
+PASS test_backtest::test_neustart_varianten_unterscheiden_sich_nur_im_gemeinten_punkt
+PASS test_backtest::test_no_flip_variante_gegen_die_live_einstellung_existiert
+PASS test_backtest::test_ohne_flush_zeile_unterscheidet_sich_nur_im_flush
+PASS test_backtest::test_panel_variante_entspricht_der_live_einstellung
+PASS test_backtest::test_reserve_laesst_geld_fuer_die_tiefere_tranche
+PASS test_backtest::test_rueckgang_nutzt_das_kerzentief_nicht_den_schluss
+PASS test_backtest::test_rueckgang_short_nutzt_das_kerzenhoch
+PASS test_backtest::test_rueckgang_zwischen_den_signalen_wird_mitgemessen
+PASS test_backtest::test_run_half_schneidet_haelfte_1_hinten_ab
+PASS test_backtest::test_score_fehltreffer_druecken_praezision
+PASS test_backtest::test_score_ignoriert_signale_nach_dem_letzten_trigger
+PASS test_backtest::test_score_short_zuordnung
+PASS test_backtest::test_score_trifft_mit_toleranz
+PASS test_backtest::test_simulate_fill_aendert_nichts_bei_kerzenschluss_signalen
+PASS test_backtest::test_simulate_fill_close_faellt_auf_signalpreis_zurueck
+PASS test_backtest::test_simulate_fill_close_nutzt_den_kerzenschluss
+PASS test_backtest::test_simulate_fill_default_ist_level
+PASS test_backtest::test_simulate_long_zyklus_ohne_gebuehr
+PASS test_backtest::test_simulate_schreibt_die_btc_rendite_je_monat_mit
+PASS test_backtest::test_simulate_short_gewinn
+PASS test_backtest::test_simulate_stoploss_verlust
+PASS test_backtest::test_sth_abgleich_erkennt_einen_verschobenen_tag
+PASS test_backtest::test_sth_abgleich_findet_versatz_null_bei_gleichen_reihen
+PASS test_backtest::test_sth_abgleich_ohne_gemeinsame_tage
+PASS test_backtest::test_sth_abschnitt_nennt_vortag_und_warnt_bei_duennen_gruppen
+PASS test_backtest::test_sth_abschnitt_ohne_gegenpruefung_sagt_es
+PASS test_backtest::test_sth_abschnitt_warnt_bei_zweifelhafter_zuordnung
+PASS test_backtest::test_sth_bgeometrics_wandelt_text_in_zahlen
+PASS test_backtest::test_sth_bgeometrics_wird_genau_einmal_gefragt
+PASS test_backtest::test_sth_bitview_beachtet_den_startindex
+PASS test_backtest::test_sth_bitview_index_null_ist_der_1_januar_2009
+PASS test_backtest::test_sth_ist_im_bericht_verdrahtet_und_die_probe_weg
+PASS test_backtest::test_sth_je_kerze_nimmt_den_wert_des_vortags
+PASS test_backtest::test_sth_quellen_halten_fehler_fest_statt_abzustuerzen
+PASS test_backtest::test_sth_vorfrage_einstiege_am_fensterende_zaehlen_nicht_still_mit
+PASS test_backtest::test_sth_vorfrage_misst_einstiege_ab_einstiegspreis_nach_vorn
+PASS test_backtest::test_sth_vorfrage_nutzt_die_live_einstellung
+PASS test_backtest::test_sth_vorfrage_ohne_sth_wert_kein_raten
+PASS test_backtest::test_sth_vorfrage_trennt_unter_und_ueber
+PASS test_backtest::test_stop_abschnitt_markiert_duenne_gruppen
+PASS test_backtest::test_stop_abschnitt_nennt_die_grundrate_wenn_vorhanden
+PASS test_backtest::test_stop_abschnitt_nennt_keinen_namen
+PASS test_backtest::test_stop_abschnitt_sagt_was_wieder_drueber_nicht_heisst
+PASS test_backtest::test_stop_abschnitt_warnt_bei_zu_wenigen_stops_insgesamt
+PASS test_backtest::test_stop_abschnitt_zeigt_den_tiefsten_punkt_in_jeder_zelle
+PASS test_backtest::test_stop_nachlauf_alle_horizonte_teilen_dieselbe_stichprobe
+PASS test_backtest::test_stop_nachlauf_gleichstand_ist_nicht_wieder_drueber
+PASS test_backtest::test_stop_nachlauf_misst_ab_dem_stop_preis_nach_vorn
+PASS test_backtest::test_stop_nachlauf_ohne_stops_liefert_keine_gruppe
+PASS test_backtest::test_stop_nachlauf_ordnet_nach_dem_muster_in_der_stop_kerze
+PASS test_backtest::test_stop_nachlauf_schaut_nicht_auf_die_stop_kerze_selbst
+PASS test_backtest::test_stop_nachlauf_schlimmster_fall_ist_das_minimum_ueber_alle_stops
+PASS test_backtest::test_stop_nachlauf_stops_am_fensterende_zaehlen_nicht_mit_aber_nicht_still
+PASS test_backtest::test_stop_nachlauf_tiefster_punkt_ist_das_minimum_bis_zum_horizont
+PASS test_backtest::test_stop_nachlauf_trennt_invalidierung_und_nachgezogenen_stop
+PASS test_backtest::test_stop_nachlauf_zaehlt_nur_stops
+PASS test_backtest::test_tabellenkopf_und_trennlinie_haben_gleich_viele_spalten
+PASS test_backtest::test_vollstaendiger_ausstieg_ist_kein_gegengeschaeft
+PASS test_coinalyze::test_abgelehnte_je_boerse_erklaert_warum_okx_leer_ausgeht
+PASS test_coinalyze::test_ablehnungsgrund_nennt_den_grund_statt_nur_nein
+PASS test_coinalyze::test_auswahl_misst_nur_30_tage_die_datenabfrage_aber_das_volle_fenster
+PASS test_coinalyze::test_build_url_enthaelt_endpoint_und_params
+  Coinalyze 429 bei open-interest-history (1 Symbole) — warte 1.6s (Versuch 2/4)
+PASS test_coinalyze::test_der_echte_abruf_benutzt_die_wiederholung_auch_wirklich
+PASS test_coinalyze::test_einheit_einschaetzen_unterscheidet_btc_von_dollar
+PASS test_coinalyze::test_funding_und_long_short_holen_die_richtigen_endpunkte_und_felder
+PASS test_coinalyze::test_fut_delta_aggregiert_rechnet_wie_das_spot_delta
+PASS test_coinalyze::test_fut_delta_rechnet_kaeufe_minus_verkaeufe
+PASS test_coinalyze::test_get_json_nutzt_injizierten_opener_und_key
+PASS test_coinalyze::test_gewichte_werden_normiert
+PASS test_coinalyze::test_gewichtetes_mittel_ist_KEIN_einfacher_durchschnitt
+PASS test_coinalyze::test_gewichtetes_mittel_laesst_zeitpunkte_ohne_gewicht_aus
+PASS test_coinalyze::test_gewichtetes_mittel_meldet_symbole_ganz_ohne_gewichtsreihe
+PASS test_coinalyze::test_gewichtetes_mittel_ueberspringt_zeitpunkte_mit_gewicht_null
+  Coinalyze 429 bei test — warte 1.6s (Versuch 2/4)
+  Coinalyze 429 bei test — warte 1.6s (Versuch 3/4)
+  Coinalyze 429 bei test — warte 1.6s (Versuch 4/4)
+PASS test_coinalyze::test_gibt_nach_MAX_VERSUCHEN_auf_statt_ewig_zu_warten
+PASS test_coinalyze::test_groesster_je_boerse_nimmt_keinen_markt_den_wir_nicht_lesen_koennen
+PASS test_coinalyze::test_groesster_je_boerse_schlaegt_die_alte_usdt_rangfolge
+PASS test_coinalyze::test_history_points_findet_symbol
+PASS test_coinalyze::test_hole_reihen_faellt_auf_einzelabruf_zurueck
+PASS test_coinalyze::test_hole_reihen_fragt_nicht_einzeln_nach_wenn_alles_kam
+PASS test_coinalyze::test_kandidaten_je_boerse_behaelt_ALLE_maerkte_nicht_nur_einen
+PASS test_coinalyze::test_liq_aggregiert_haelt_long_und_short_auf_denselben_zeitpunkten
+PASS test_coinalyze::test_liquidations_by_ts_long_und_short
+PASS test_coinalyze::test_long_short_liest_den_long_anteil
+PASS test_coinalyze::test_nach_denominierung_laesst_alle_drin_wenn_die_einheit_gleich_ist
+PASS test_coinalyze::test_nach_denominierung_trennt_einheiten_und_das_volumen_entscheidet
+  Coinalyze 429 bei test — warte 1.6s (Versuch 2/4)
+  Coinalyze 429 bei test — warte 3.2s (Versuch 3/4)
+  Coinalyze 429 bei test — warte 6.4s (Versuch 4/4)
+PASS test_coinalyze::test_ohne_retry_after_wird_die_wartezeit_verdoppelt
+PASS test_coinalyze::test_oi_aggregiert_summiert_und_laesst_luecken_aus
+PASS test_coinalyze::test_oi_by_ts_nimmt_close_und_wandelt_in_ms
+PASS test_coinalyze::test_parser_ueberspringen_unvollstaendige_punkte
+PASS test_coinalyze::test_perp_ablehnungsgrund_nennt_den_grund
+PASS test_coinalyze::test_perp_auswahl_liefert_die_einheiten_trennung_gleich_mit
+PASS test_coinalyze::test_perp_auswahl_waehlt_nach_volumen_und_gibt_die_denominierung_mit
+PASS test_coinalyze::test_pruefe_symbole_ein_kaputter_block_reisst_den_rest_nicht_mit
+PASS test_coinalyze::test_pruefe_symbole_teilt_in_bloecke_und_sammelt_alle_reihen
+PASS test_coinalyze::test_reihe_auswerten_summiert_das_volumen_ueber_alle_punkte
+PASS test_coinalyze::test_rueckfall_greift_auch_wenn_die_ANZAHL_stimmt_aber_ein_symbol_fehlt
+PASS test_coinalyze::test_sample_deckelt_lange_listen_und_sagt_wie_viele_fehlen
+PASS test_coinalyze::test_sample_kuerzt_history_auf_letzte_drei
+PASS test_coinalyze::test_skalen_vergleich_findet_einen_faktor_und_das_vorzeichen
+PASS test_coinalyze::test_skalen_vergleich_meldet_wenn_es_nichts_zu_vergleichen_gibt
+PASS test_coinalyze::test_skalen_vergleich_zeigt_abweichende_vorzeichen
+PASS test_coinalyze::test_spot_auswahl_holt_die_marktliste_nur_EINMAL
+PASS test_coinalyze::test_spot_delta_laesst_unvollstaendige_zeitpunkte_aus_und_zaehlt_sie
+PASS test_coinalyze::test_spot_delta_meldet_symbole_ohne_antwort
+PASS test_coinalyze::test_spot_delta_summiert_ueber_die_boersen
+PASS test_coinalyze::test_spot_delta_ueberspringt_punkte_ohne_v_oder_bv
+PASS test_coinalyze::test_spot_probe_meldet_fehlenden_endpunkt_als_klares_nein
+PASS test_coinalyze::test_spot_probe_waehlt_nach_volumen_und_nennt_fehlende_boersen
+PASS test_coinalyze::test_spot_symbole_groesster_gegen_alle_dollar
+PASS test_coinalyze::test_spot_symbole_nimmt_bei_alle_dollar_nur_lesbare_reihen
+PASS test_coinalyze::test_summiere_vollstaendig_ist_die_EINE_regel_fuer_alle_vier_werte
+PASS test_coinalyze::test_symbol_konstante_ist_binance_nicht_aggregiert
+PASS test_coinalyze::test_taktung_haengt_nicht_mehr_daran_ob_kw_leer_ist
+  Coinalyze 429 bei test — warte 30.0s (Versuch 2/4)
+PASS test_coinalyze::test_wartezeit_wird_gedeckelt_und_andere_fehler_fliegen_sofort
+  Coinalyze 429 bei test — warte 7.0s (Versuch 2/4)
+  Coinalyze 429 bei test — warte 7.0s (Versuch 3/4)
+PASS test_coinalyze::test_wiederholt_bei_429_und_haelt_sich_an_retry_after
+PASS test_e442::test_abschnitt_ist_im_bericht_verdrahtet
+PASS test_e442::test_abschnitt_zeigt_tabelle_und_probe
+PASS test_e442::test_echtes_gitter_hat_die_16_gruppen_der_analyse
+PASS test_e442::test_monats_probe_haelt_bei_breitem_vorsprung
+PASS test_e442::test_monats_probe_kippt_bei_einem_ausreisser
+PASS test_e442::test_monats_probe_ohne_gemeinsame_monate
+PASS test_e442::test_ohne_a_plus_b_keine_gruppe
+PASS test_e442::test_vierergruppe_wird_gefunden_und_auf_die_aus_ecke_ausgerichtet
+PASS test_e442::test_wechselwirkung_rechnet_richtig
+PASS test_e442::test_zeilen_mit_zwei_unterschieden_bilden_keine_gruppe
+PASS test_e443::test_aus_flat_nach_rest_verkauf_rueckkauf_eroeffnet_neue_position
+PASS test_e443::test_aus_flat_ohne_passendes_bein_kein_rueckkauf
+PASS test_e443::test_aus_flat_stop_des_teils_ist_voller_ausstieg
+PASS test_e443::test_ausbruch_nur_bei_schluss_ueber_der_marke_nicht_beim_docht
+PASS test_e443::test_bestand_nach_kaeufe_teilverkaeufe_und_voller_ausstieg
+PASS test_e443::test_default_aus_exakt_dieselben_signale_und_keine_beobachtung
+PASS test_e443::test_die_ausbruchskerze_selbst_ist_nie_der_ruecktest
+PASS test_e443::test_die_verkaufskerze_ist_nie_der_ruecktest_auch_ohne_no_flip
+PASS test_e443::test_gegengeschaeft_zaehlt_rueckkauf_und_stop_des_teils_mit
+PASS test_e443::test_hauptstop_nimmt_den_rueckkauf_teil_mit
+PASS test_e443::test_kein_zweiter_rueckkauf_auf_dieselbe_marke
+PASS test_e443::test_keine_beobachtung_einer_marke_auf_die_schon_zurueckgekauft_wurde
+PASS test_e443::test_kerzen_seit_zaehlt_in_der_liste
+Vorschau gesendet: LONG, GP 104-104, Stop-Abstand 3.68 %
+Lauf ok: 21 Kerzen, 6 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 12 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Vorschau gesendet: LONG, GP 104-104, Stop-Abstand 3.68 %
+Lauf ok: 13 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Plan gesendet: 1 Nachkauf-, 3 Teilgewinn-Marken.
+Lauf ok: 14 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 1 Nachkauf-, 3 Teilgewinn-Marken.
+Lauf ok: 15 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/CORE
+Lauf ok: 16 Kerzen, 2 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 17 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 18 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Plan gesendet: 1 Nachkauf-, 3 Teilgewinn-Marken.
+Lauf ok: 19 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 1 Nachkauf-, 3 Teilgewinn-Marken.
+Lauf ok: 20 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Lauf ok: 21 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+PASS test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_aus_flat
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Vorschau gesendet: LONG, GP 120-120, Stop-Abstand 5.74 %
+Lauf ok: 36 Kerzen, 7 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Vorschau gesendet: LONG, GP 109-110, Stop-Abstand 11.41 %
+Lauf ok: 24 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 25 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Plan gesendet: 2 Nachkauf-, 5 Teilgewinn-Marken.
+Lauf ok: 26 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Lauf ok: 27 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 6 Teilgewinn-Marken.
+Lauf ok: 28 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Lauf ok: 29 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Lauf ok: 30 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 5 Teilgewinn-Marken.
+Lauf ok: 31 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 5 Teilgewinn-Marken.
+Lauf ok: 32 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 5 Teilgewinn-Marken.
+Vorschau gesendet: LONG, GP 120-120, Stop-Abstand 5.74 %
+Lauf ok: 33 Kerzen, 2 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Vorschau gesendet: LONG, GP 120-120, Stop-Abstand 5.74 %
+Lauf ok: 34 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 35 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Lauf ok: 36 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+PASS test_e443::test_live_am_stueck_gleich_kerze_fuer_kerze_nach_high_exit
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Vorschau gesendet: LONG, GP 120-120, Stop-Abstand 5.74 %
+Lauf ok: 34 Kerzen, 7 neue Signale, OI-Punkte: 0, Position: LONG/T1
+PASS test_e443::test_live_meldungen_stehen_je_kerze_vor_ihren_signalen
+PASS test_e443::test_meldung_short_und_nur_rueckkauf
+PASS test_e443::test_meldungen_sagen_was_passiert_und_passen_aufs_handy
+PASS test_e443::test_nach_einem_stop_keine_beobachtung
+PASS test_e443::test_nach_gescheitertem_ausbruch_braucht_es_einen_neuen
+PASS test_e443::test_nicht_wenn_schon_voll_investiert
+PASS test_e443::test_no_flip_kein_nachkauf_in_der_kerze_des_teil_stops
+PASS test_e443::test_no_flip_kein_rueckkauf_in_einer_kerze_mit_teilverkauf
+PASS test_e443::test_plan_nennt_den_stop_des_rueckkauf_teils
+PASS test_e443::test_plan_ohne_e42_unveraendert
+PASS test_e443::test_rueckkauf_aendert_weder_einstand_noch_hauptstop
+PASS test_e443::test_rueckkauf_nach_teilverkauf_am_hoch_ausbruch_und_ruecktest
+PASS test_e443::test_ruecktest_fenster_zaehlt_zwoelf_kerzen
+PASS test_e443::test_ruecktest_nach_dem_fenster_kauft_nicht
+PASS test_e443::test_ruecktest_schritt_short_spiegelbildlich
+PASS test_e443::test_ruecktest_zone_und_docht_regel
+PASS test_e443::test_schluss_unter_der_marke_im_fenster_scheitert_dann_neuer_ausbruch
+PASS test_e443::test_short_spiegelbildlich
+PASS test_e443::test_simulate_short_rueckteil
+PASS test_e443::test_simulate_stop_des_teils_verkauft_genau_den_rueckkauf
+PASS test_e443::test_simulate_teilverkauf_nimmt_den_rueckkauf_anteilig_mit
+PASS test_e443::test_stop_nur_fuer_den_rueckkauf_teil_mit_rueckeroberung
+PASS test_e443::test_teil_stop_harter_boden_sofort
+PASS test_e443::test_zurueckeroberte_marke_ist_geprueft_naechster_bruch_sofort
+PASS test_e443::test_zustand_ueberlebt_den_neustart_der_live_engine
+PASS test_f09_wiederanlage::test_echte_kleine_restposition_wird_nicht_auf_null_gerundet
+PASS test_f09_wiederanlage::test_neue_verkaufsleiter_nutzt_den_hoechstbestand_des_neuen_zyklus
+PASS test_f09_wiederanlage::test_neuer_kauf_nutzt_das_kapital_nach_vollstaendigem_teilverkauf
+PASS test_f09_wiederanlage::test_verkaufter_rueckkauf_erzeugt_keinen_zusaetzlichen_geister_stop
+PASS test_main::test_alle_evaluate_parameter_werden_durchgereicht
+PASS test_main::test_ampel_steht_in_plan_und_vorschau
+PASS test_main::test_be_aktiv_ueberlebt_den_neustart
+[DRY-RUN]
+📋 PLAN — Long-Position, 25 % investiert
+Einstand 105 $ · Kurs 105 $
+
+Nachkaufen:
+  100 $ - 105 $   Kaufleiter: neue Tiefkerze in dieser Zone (15 %)
+  102 $   0.786-Zone (25 %)
+
+Teilgewinne:
+  112 $   Zwischenziel (Extension 0.8) (15 %)
+  114 $   Zwischenziel (Extension 0.9) (15 %)
+  114 $   Ziel 1.0 (40 %)
+  121 $   Ziel 1.618 (40 %)
+
+Stop 100 $ — Invalidierung, bei Kerzenschluss darunter
+
+Lage:  Struktur unveraendert - Bein 100 $ -> 110 $
+       Spot-Nachfrage schwach (Verkaufsdruck haelt an)
+
+Ampel (fuer LONG): GEMISCHT — 1 von 2 spricht dafuer
+       dafuer:  Struktur
+       dagegen: Spot-Nachfrage
+       Der Plan oben bleibt unveraendert. Die Engine handelt die Lage NICHT — die Ampel ist eine Beobachtung, keine Anweisung.
+
+— Diese Preise kannst du als Limit-Order hinterlegen. Neue Nachricht gibt es erst, wenn sich eine Marke aendert.
+
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+[DRY-RUN]
+📍 VORSCHAU — noch KEIN Trigger, nur zur Vorbereitung
+
+Neue Struktur erkannt: Aufwaerts-Impuls 100 $ -> 110 $
+
+Hier wuerde gekauft:
+  0.5-Level        105 $   (erste Teilposition)
+  Golden Pocket    104 $ - 104 $   (Kern)
+  0.786-Zone       102 $   (Nachkauf)
+
+Ungueltig ab       100 $   (dort liegt der Stop)
+Abstand Golden Pocket -> Stop: 3.7 %
+
+Lage:  Spot-Nachfrage schwach (Verkaufsdruck haelt an)
+
+17.11.2023 22:13 UTC
+— Diese Preise kannst du JETZT als Limit-Order hinterlegen. Die Engine meldet sich erst, wenn der Kurs sie beruehrt hat — dann ist der Preis oft schon weg.
+
+Vorschau gesendet: LONG, GP 104-104, Stop-Abstand 3.68 %
+[DRY-RUN]
+🟢 KAUF 1 (Teilposition am 0.5-Level)
+BTC 105 $
+Tranche: 25 % der Position
+Stop-Referenz: 100 $
+Grund: 0.5-Retracement des Impulses 100->110
+17.11.2023 22:13 UTC
+— Kein Trade-Auto-Pilot: Order selbst pruefen und platzieren.
+
+Lauf ok: 19 Kerzen, 1 neue Signale, OI-Punkte: 1, Position: LONG/T1
+PASS test_main::test_demo_state_wird_verworfen
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 37 Kerzen, 3 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Vorschau gesendet: LONG, GP 109-110, Stop-Abstand 11.41 %
+Lauf ok: 20 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 21 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 22 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 23 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 24 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 25 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 26 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 27 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 28 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 29 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 30 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 31 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Lauf ok: 32 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 5 Teilgewinn-Marken.
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 33 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 34 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Lauf ok: 35 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 36 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 37 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+PASS test_main::test_e41_live_gleiches_ergebnis_ob_am_stueck_oder_kerze_fuer_kerze
+Vorschau gesendet: LONG, GP 109-110, Stop-Abstand 11.41 %
+Lauf ok: 20 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 21 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 22 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 23 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 24 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 25 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 26 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 27 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 28 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 29 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 30 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 31 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Lauf ok: 32 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 5 Teilgewinn-Marken.
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 33 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 34 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Lauf ok: 35 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 36 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 37 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+PASS test_main::test_e41_live_meldet_warten_rueckeroberung_und_den_echten_bruch
+Vorschau gesendet: LONG, GP 109-110, Stop-Abstand 11.41 %
+Lauf ok: 20 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 21 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 22 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 23 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 24 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 25 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 26 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 27 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 28 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 29 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 30 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Lauf ok: 31 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 32 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 33 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 34 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 35 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 36 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 37 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Vorschau gesendet: LONG, GP 109-110, Stop-Abstand 11.41 %
+Lauf ok: 20 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 21 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 22 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 23 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 24 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 25 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 26 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 27 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 28 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 29 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 30 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 31 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Lauf ok: 32 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 5 Teilgewinn-Marken.
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 33 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 34 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Lauf ok: 35 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 36 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 37 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+PASS test_main::test_e41_live_stop_kommt_spaeter_als_ohne_regel
+Vorschau gesendet: LONG, GP 109-110, Stop-Abstand 11.41 %
+Lauf ok: 20 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 21 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 22 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 23 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 24 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 25 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 26 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 27 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 28 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/T1
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 29 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Plan gesendet: 1 Nachkauf-, 4 Teilgewinn-Marken.
+Lauf ok: 30 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: LONG/FULL
+Lauf ok: 31 Kerzen, 1 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 32 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 33 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 34 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 35 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 36 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 37 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+PASS test_main::test_e41_live_vorprobe_ohne_regel_kommt_der_knappe_stop
+Vorschau gesendet: SHORT, GP 119-118, Stop-Abstand 10.77 %
+Lauf ok: 37 Kerzen, 3 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+PASS test_main::test_e41_live_wartemeldung_steht_vor_dem_stop_wenn_ein_lauf_nachholt
+PASS test_main::test_e41_meldung_schweigt_beim_stop_ohne_warten_und_ohne_position
+PASS test_main::test_e41_meldung_wartet
+PASS test_main::test_e41_meldung_zaehlt_bei_drei_kerzen_herunter
+PASS test_main::test_e41_meldung_zurueckerobert_nur_fuer_genau_diese_marke
+PASS test_main::test_e41_warten_ueberlebt_den_neustart_der_live_engine
+PASS test_main::test_e433_anzeige_rechnet_muster2_wie_der_handel
+PASS test_main::test_e434_anzeige_rechnet_das_oi_wie_der_handel
+PASS test_main::test_e434_kraken_rueckfall_hat_keine_kontrakt_reihe
+Coinalyze: 2 OI-Punkte, 0 Liq-Punkte.
+Coinalyze: 0 Futures-Delta-Punkte, 0 Long-Short-Punkte.
+PASS test_main::test_e434_live_und_backtest_rechnen_dieselben_kontrakte
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 76.524 $
+
+Kein signifikantes Aufwaerts-Bein
+erkennbar - fuer einen Long gibt es
+derzeit keine Struktur, an der sich
+Zonen oder eine Invalidierung
+festmachen liessen.
+
+ORDER-FLOW (48 h)
+
+Preis: +3,0 % ↑
+Spot-CVD: +12,0 Mio $ ↑
+  echte Nachfrage, ohne Hebel
+Open Interest: +225,5 Mio $ (+3,0 %),
+Kontrakte +0,0 % →
+  unveraendert - der Dollar-Anstieg
+  kommt nur vom Kurs
+Funding: +0,0100 % →
+  Longueberhang
+
+LAGE
+
+Uebergeordnet: Kurs 76.524 $ ueber
+EMA3 (75.978 $)
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+AMPEL (fuer LONG)
+
+GUENSTIG — 2 von 2 sprechen dafuer
+dafuer:  Trend, Spot-Nachfrage
+
+Der Plan oben bleibt unveraendert. Die
+Engine handelt die Lage NICHT — die
+Ampel ist eine Beobachtung, keine
+Anweisung.
+
+21.11.2023 10:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+PASS test_main::test_e434b_oi_zeile_in_kontrakten_steht_handytauglich_in_der_nachricht
+PASS test_main::test_eval_defaults_hat_keinen_doppelten_schluessel
+config.json: 'k_atr' = 'zwei' ist unbrauchbar -> Vorgabewert 2.0.
+config.json: 'cooldown_h' = None ist unbrauchbar -> Vorgabewert 0.0.
+PASS test_main::test_eval_params_faengt_unbrauchbare_werte_ab
+PASS test_main::test_eval_params_uebernimmt_config_und_ignoriert_hinweise
+PASS test_main::test_fetch_spot_bricht_ab_wenn_die_api_nicht_vorankommt
+PASS test_main::test_fetch_spot_gibt_zurueck_was_da_ist_wenn_die_api_versiegt
+PASS test_main::test_fetch_spot_paginiert_ueber_1000_kerzen
+PASS test_main::test_flush_aufloesung_meldet_nicht_bestaetigt
+PASS test_main::test_flush_wache_abschaltbar
+PASS test_main::test_flush_wache_beachtet_mindest_stopabstand
+PASS test_main::test_flush_wache_schweigt_bei_offener_position
+PASS test_main::test_flush_wache_schweigt_ohne_durchbruch
+PASS test_main::test_flush_wache_schweigt_unter_der_invalidierung
+Flush-Warnung gesendet: Kurs 106, GP 109, Puffer 7.92 %
+PASS test_main::test_flush_wache_warnt_nur_einmal_je_kerze
+Flush-Warnung gesendet: Kurs 106, GP 109, Puffer 7.92 %
+PASS test_main::test_flush_wache_warnt_wenn_kurs_durch_das_golden_pocket_faellt
+PASS test_main::test_futures_cvd_ohne_passende_kerze_entfaellt
+PASS test_main::test_futures_cvd_rechnet_jede_kerze_mit_ihrem_eigenen_kurs
+PASS test_main::test_futures_cvd_zeigt_das_verhaeltnis_zum_spot
+PASS test_main::test_hauptlauf_laedt_mehr_historie_als_die_flush_wache
+PASS test_main::test_kurze_spot_ebene_nutzt_dasselbe_fenster_wie_die_lage_zeile
+PASS test_main::test_kurze_spot_ebene_zeigt_das_vorzeichen_nicht_den_massstab
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 77.540 $
+
+Aufwaerts-Bein
+73.415 $ -> 78.239 $
+
+0.5-Level: 75.827 $
+Golden Pocket: 75.103 $
+  bis 75.257 $
+0.786-Zone: 74.447 $
+Ungueltig ab: 73.415 $
+
+ORDER-FLOW (48 h)
+
+Preis: +2,3 % ↑
+Spot-CVD: +57,6 Mio $ ↑
+  echte Nachfrage, ohne Hebel
+Futures-CVD: +142,1 Mrd $ ↑
+  246956 % des Spot-Flows
+Open Interest: +17,7 Mio $ (+1,8 %) ↑
+  neues Geld kommt herein
+Funding: +0,0247 % ↑
+  Longueberhang
+Long-Liquidationen: 23,1 Mio $
+Short-Liquidationen: 12,2 Mio $
+Positionierung: 54 % long
+  mehrheitlich long
+
+LAGE
+
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+21.11.2023 10:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+PASS test_main::test_lage_abruf_enthaelt_furkans_rohwerte
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 113 $
+
+Kein signifikantes Aufwaerts-Bein
+erkennbar - fuer einen Long gibt es
+derzeit keine Struktur, an der sich
+Zonen oder eine Invalidierung
+festmachen liessen.
+
+ORDER-FLOW (48 h)
+
+Preis: +9,3 % ↑
+Spot-CVD: +360 $ ↑
+  echte Nachfrage, ohne Hebel
+Open Interest: +12,0 Mio $ (+1,2 %) ↑
+  neues Geld kommt herein
+Funding: +0,0100 % →
+  Longueberhang
+
+LAGE
+
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+19.11.2023 02:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+PASS test_main::test_lage_abruf_erfindet_kein_bein_wenn_keins_da_ist
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 117 $
+
+Aufwaerts-Bein
+98 $ -> 131 $
+
+0.5-Level: 114 $
+Golden Pocket: 109 $
+  bis 110 $
+0.786-Zone: 105 $
+Ungueltig ab: 98 $
+
+ORDER-FLOW (48 h)
+
+Preis: -7,6 % ↓
+Spot-CVD: +360 $ ↑
+  echte Nachfrage, ohne Hebel
+Open Interest: +12,0 Mio $ (+1,2 %) ↑
+  neues Geld kommt herein
+Funding: +0,0100 % →
+  Longueberhang
+
+LAGE
+
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+19.11.2023 02:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+PASS test_main::test_lage_abruf_fasst_den_zustand_nicht_an
+PASS test_main::test_lage_abruf_holt_die_sth_im_normalfall_selbst
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 117 $
+
+Aufwaerts-Bein
+98 $ -> 131 $
+
+0.5-Level: 114 $
+Golden Pocket: 109 $
+  bis 110 $
+0.786-Zone: 105 $
+Ungueltig ab: 98 $
+
+ORDER-FLOW (48 h)
+
+Preis: -7,6 % ↓
+Spot-CVD: +360 $ ↑
+  echte Nachfrage, ohne Hebel
+Open Interest: +12,0 Mio $ (+1,2 %) ↑
+  neues Geld kommt herein
+Funding: +0,0100 % →
+  Longueberhang
+
+LAGE
+
+Uebergeordnet: Kurs 117 $ unter EMA3
+(118 $)
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+AMPEL (fuer LONG)
+
+GEMISCHT — 1 von 2 spricht dafuer
+dafuer:  Spot-Nachfrage
+dagegen: Trend
+
+Der Plan oben bleibt unveraendert. Die
+Engine handelt die Lage NICHT — die
+Ampel ist eine Beobachtung, keine
+Anweisung.
+
+19.11.2023 02:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+PASS test_main::test_lage_abruf_rechnet_die_ampel_fuer_long
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 117 $
+
+Aufwaerts-Bein
+98 $ -> 131 $
+
+0.5-Level: 114 $
+Golden Pocket: 109 $
+  bis 110 $
+0.786-Zone: 105 $
+Ungueltig ab: 98 $
+
+ORDER-FLOW (48 h)
+
+Preis: -7,6 % ↓
+Spot-CVD: +360 $ ↑
+  echte Nachfrage, ohne Hebel
+Open Interest: +12,0 Mio $ (+1,2 %) ↑
+  neues Geld kommt herein
+Funding: +0,0100 % →
+  Longueberhang
+
+LAGE
+
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+19.11.2023 02:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 117 $
+
+Aufwaerts-Bein
+98 $ -> 131 $
+
+0.5-Level: 114 $
+Golden Pocket: 109 $
+  bis 110 $
+0.786-Zone: 105 $
+Ungueltig ab: 98 $
+
+ORDER-FLOW (48 h)
+
+Preis: -7,6 % ↓
+Spot-CVD: +360 $ ↑
+  echte Nachfrage, ohne Hebel
+Open Interest: +12,0 Mio $ (+1,2 %) ↑
+  neues Geld kommt herein
+Funding: +0,0100 % →
+  Longueberhang
+
+LAGE
+
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+19.11.2023 02:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+PASS test_main::test_lage_abruf_sucht_immer_ein_aufwaerts_bein
+STH-Kostenbasis nicht abrufbar (Quelle weg) - Zeile entfaellt.
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 117 $
+
+Aufwaerts-Bein
+98 $ -> 131 $
+
+0.5-Level: 114 $
+Golden Pocket: 109 $
+  bis 110 $
+0.786-Zone: 105 $
+Ungueltig ab: 98 $
+
+ORDER-FLOW (48 h)
+
+Preis: -7,6 % ↓
+Spot-CVD: +360 $ ↑
+  echte Nachfrage, ohne Hebel
+Open Interest: +12,0 Mio $ (+1,2 %) ↑
+  neues Geld kommt herein
+Funding: +0,0100 % →
+  Longueberhang
+
+LAGE
+
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+19.11.2023 02:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+PASS test_main::test_lage_abruf_ueberlebt_einen_sth_fehler
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 117 $
+
+Aufwaerts-Bein
+98 $ -> 131 $
+
+0.5-Level: 114 $
+Golden Pocket: 109 $
+  bis 110 $
+0.786-Zone: 105 $
+Ungueltig ab: 98 $
+
+STH-Kostenbasis: 71.262 $
+Kurs 99,8 % darunter
+(Einstand der kurzfristigen Halter,
+Stand 14.09.2026. Nur Anzeige, keine
+Regel.)
+
+ORDER-FLOW (48 h)
+
+Preis: -7,6 % ↓
+Spot-CVD: +360 $ ↑
+  echte Nachfrage, ohne Hebel
+Open Interest: +12,0 Mio $ (+1,2 %) ↑
+  neues Geld kommt herein
+Funding: +0,0100 % →
+  Longueberhang
+
+LAGE
+
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+19.11.2023 02:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+PASS test_main::test_lage_abruf_uebernimmt_die_sth_kostenbasis
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 79.690 $
+
+Kein signifikantes Aufwaerts-Bein
+erkennbar - fuer einen Long gibt es
+derzeit keine Struktur, an der sich
+Zonen oder eine Invalidierung
+festmachen liessen.
+
+ORDER-FLOW (48 h)
+
+Preis: -1,3 % ↓
+Spot-CVD: +191,3 Mio $ ↑
+  echte Nachfrage, ohne Hebel
+Futures-CVD: +616,8 Mio $ ↑
+  322 % des Spot-Flows
+Open Interest: +115,0 Mio $ (+1,3 %) ↑
+  neues Geld kommt herein
+Funding: +0,0038 % →
+  Longueberhang
+Long-Liquidationen: 7,6 Mio $
+Short-Liquidationen: 105,4 Mio $
+Positionierung: 47 % long
+  mehrheitlich short
+
+LAGE
+
+Uebergeordnet: Kurs 79.690 $ unter
+EMA3 (79.955 $)
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+
+AMPEL (fuer LONG)
+
+GEMISCHT — 1 von 2 spricht dafuer
+dafuer:  Spot-Nachfrage
+dagegen: Trend
+
+Der Plan oben bleibt unveraendert. Die
+Engine handelt die Lage NICHT — die
+Ampel ist eine Beobachtung, keine
+Anweisung.
+
+21.11.2023 06:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+[DRY-RUN]
+🔎 LAGE AUF ABRUF
+Annahme: LONG-Position
+
+Kurs 78.874 $
+
+Kein signifikantes Aufwaerts-Bein
+erkennbar - fuer einen Long gibt es
+derzeit keine Struktur, an der sich
+Zonen oder eine Invalidierung
+festmachen liessen.
+
+ORDER-FLOW (48 h)
+
+Preis: +1,4 % ↑
+Spot-CVD: +167,4 Mio $ ↑
+  echte Nachfrage, ohne Hebel
+Futures-CVD: +724,3 Mio $ ↑
+  433 % des Spot-Flows
+Open Interest: +450,8 Mio $ (+4,8 %) ↑
+  neues Geld kommt herein
+Funding: +0,0038 % →
+  Longueberhang
+Long-Liquidationen: 10,4 Mio $
+Short-Liquidationen: 92,6 Mio $
+Positionierung: 47 % long
+  mehrheitlich short
+
+LAGE
+
+Uebergeordnet: Kurs 78.874 $ ueber
+EMA3 (78.609 $)
+Spot-Nachfrage stabil (Nachfrage
+traegt)
+Muster: gesunder Trend (Spot traegt
+die Bewegung)
+
+AMPEL (fuer LONG)
+
+GUENSTIG — 3 von 3 sprechen dafuer
+dafuer:  Trend, Spot-Nachfrage, Muster
+
+Der Plan oben bleibt unveraendert. Die
+Engine handelt die Lage NICHT — die
+Ampel ist eine Beobachtung, keine
+Anweisung.
+
+21.11.2023 06:13 UTC
+
+Abruf auf Knopfdruck. Die Engine steht
+selbst auf FLAT und hat keine Position
+- diese Angaben sind unter der Annahme
+gerechnet, dass eine Long-Position
+laeuft. Es wurde nichts ausgeloest und
+nichts veraendert.
+
+PASS test_main::test_lage_nachricht_bleibt_handy_tauglich
+PASS test_main::test_leere_config_ergibt_bisheriges_verhalten
+PASS test_main::test_plan_fuehrt_die_rueckeroberung_nur_wenn_sie_an_ist
+PASS test_main::test_plan_marken_stimmen_mit_der_engine_ueberein
+PASS test_main::test_plan_meldet_verschobene_marken_weiterhin
+PASS test_main::test_plan_nachgezogener_stop_bleibt_ohne_rueckeroberung
+PASS test_main::test_plan_nachricht_ist_lesbar
+PASS test_main::test_plan_nachricht_wird_nur_bei_aenderung_gesendet
+PASS test_main::test_plan_nennt_nachkauf_teilgewinn_und_stop
+PASS test_main::test_plan_zeigt_die_widerstandszone_auch_ohne_aktiven_schalter
+[DRY-RUN]
+📋 PLAN — Long-Position, 25 % investiert
+Einstand 105 $ · Kurs 105 $
+
+Nachkaufen:
+  100 $ - 105 $   Kaufleiter: neue Tiefkerze in dieser Zone (15 %)
+  102 $   0.786-Zone (25 %)
+
+Teilgewinne:
+  112 $   Zwischenziel (Extension 0.8) (15 %)
+  114 $   Zwischenziel (Extension 0.9) (15 %)
+  114 $   Ziel 1.0 (40 %)
+  121 $   Ziel 1.618 (40 %)
+
+Stop 100 $ — Invalidierung, bei Kerzenschluss darunter
+
+Lage:  Struktur unveraendert - Bein 100 $ -> 110 $
+       Spot-Nachfrage schwach (Verkaufsdruck haelt an)
+
+Ampel (fuer LONG): GEMISCHT — 1 von 2 spricht dafuer
+       dafuer:  Struktur
+       dagegen: Spot-Nachfrage
+       Der Plan oben bleibt unveraendert. Die Engine handelt die Lage NICHT — die Ampel ist eine Beobachtung, keine Anweisung.
+
+— Diese Preise kannst du als Limit-Order hinterlegen. Neue Nachricht gibt es erst, wenn sich eine Marke aendert.
+
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+[DRY-RUN]
+📍 VORSCHAU — noch KEIN Trigger, nur zur Vorbereitung
+
+Neue Struktur erkannt: Aufwaerts-Impuls 100 $ -> 110 $
+
+Hier wuerde gekauft:
+  0.5-Level        105 $   (erste Teilposition)
+  Golden Pocket    104 $ - 104 $   (Kern)
+  0.786-Zone       102 $   (Nachkauf)
+
+Ungueltig ab       100 $   (dort liegt der Stop)
+Abstand Golden Pocket -> Stop: 3.7 %
+
+Lage:  Spot-Nachfrage schwach (Verkaufsdruck haelt an)
+
+17.11.2023 22:13 UTC
+— Diese Preise kannst du JETZT als Limit-Order hinterlegen. Die Engine meldet sich erst, wenn der Kurs sie beruehrt hat — dann ist der Preis oft schon weg.
+
+Vorschau gesendet: LONG, GP 104-104, Stop-Abstand 3.68 %
+[DRY-RUN]
+🟢 KAUF 1 (Teilposition am 0.5-Level)
+BTC 105 $
+Tranche: 25 % der Position
+Stop-Referenz: 100 $
+Grund: 0.5-Retracement des Impulses 100->110
+17.11.2023 22:13 UTC
+— Kein Trade-Auto-Pilot: Order selbst pruefen und platzieren.
+
+Lauf ok: 19 Kerzen, 1 neue Signale, OI-Punkte: 1, Position: LONG/T1
+PASS test_main::test_run_engine_erzeugt_signal_und_dateien
+PASS test_main::test_spot_cvd_zeigt_beide_zeitebenen_wenn_sie_sich_unterscheiden
+[DRY-RUN]
+📍 VORSCHAU — noch KEIN Trigger, nur zur Vorbereitung
+
+Neue Struktur erkannt: Aufwaerts-Impuls 98 $ -> 131 $
+
+Hier wuerde gekauft:
+  0.5-Level        114 $   (erste Teilposition)
+  Golden Pocket    109 $ - 110 $   (Kern)
+  0.786-Zone       105 $   (Nachkauf)
+
+Ungueltig ab       98 $   (dort liegt der Stop)
+Abstand Golden Pocket -> Stop: 11.4 %
+
+Lage:  Spot-Nachfrage stabil (Nachfrage traegt)
+
+16.09.2020 20:26 UTC
+— Diese Preise kannst du JETZT als Limit-Order hinterlegen. Die Engine meldet sich erst, wenn der Kurs sie beruehrt hat — dann ist der Preis oft schon weg.
+
+Vorschau gesendet: LONG, GP 109-110, Stop-Abstand 11.41 %
+Lauf ok: 21 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+PASS test_main::test_state_enthaelt_vorschau_auch_im_zustand_flat
+[DRY-RUN]
+📋 PLAN — Long-Position, 25 % investiert
+Einstand 105 $ · Kurs 105 $
+
+Nachkaufen:
+  100 $ - 105 $   Kaufleiter: neue Tiefkerze in dieser Zone (15 %)
+  102 $   0.786-Zone (25 %)
+
+Teilgewinne:
+  112 $   Zwischenziel (Extension 0.8) (15 %)
+  114 $   Zwischenziel (Extension 0.9) (15 %)
+  114 $   Ziel 1.0 (40 %)
+  121 $   Ziel 1.618 (40 %)
+
+Stop 100 $ — Invalidierung, bei Kerzenschluss darunter
+
+Lage:  Struktur unveraendert - Bein 100 $ -> 110 $
+       Spot-Nachfrage schwach (Verkaufsdruck haelt an)
+
+Ampel (fuer LONG): GEMISCHT — 1 von 2 spricht dafuer
+       dafuer:  Struktur
+       dagegen: Spot-Nachfrage
+       Der Plan oben bleibt unveraendert. Die Engine handelt die Lage NICHT — die Ampel ist eine Beobachtung, keine Anweisung.
+
+— Diese Preise kannst du als Limit-Order hinterlegen. Neue Nachricht gibt es erst, wenn sich eine Marke aendert.
+
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+[DRY-RUN]
+📍 VORSCHAU — noch KEIN Trigger, nur zur Vorbereitung
+
+Neue Struktur erkannt: Aufwaerts-Impuls 100 $ -> 110 $
+
+Hier wuerde gekauft:
+  0.5-Level        105 $   (erste Teilposition)
+  Golden Pocket    104 $ - 104 $   (Kern)
+  0.786-Zone       102 $   (Nachkauf)
+
+Ungueltig ab       100 $   (dort liegt der Stop)
+Abstand Golden Pocket -> Stop: 3.7 %
+
+Lage:  Spot-Nachfrage schwach (Verkaufsdruck haelt an)
+
+17.11.2023 22:13 UTC
+— Diese Preise kannst du JETZT als Limit-Order hinterlegen. Die Engine meldet sich erst, wenn der Kurs sie beruehrt hat — dann ist der Preis oft schon weg.
+
+Vorschau gesendet: LONG, GP 104-104, Stop-Abstand 3.68 %
+[DRY-RUN]
+🟢 KAUF 1 (Teilposition am 0.5-Level)
+BTC 105 $
+Tranche: 25 % der Position
+Stop-Referenz: 100 $
+Grund: 0.5-Retracement des Impulses 100->110
+17.11.2023 22:13 UTC
+— Kein Trade-Auto-Pilot: Order selbst pruefen und platzieren.
+
+Lauf ok: 19 Kerzen, 1 neue Signale, OI-Punkte: 1, Position: LONG/T1
+PASS test_main::test_state_roundtrip
+PASS test_main::test_sth_kostenbasis_faellt_auf_die_zweite_quelle_zurueck
+PASS test_main::test_sth_kostenbasis_nimmt_den_juengsten_wert
+PASS test_main::test_sth_kostenbasis_ohne_quelle_ist_none
+Lauf ok: 21 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+PASS test_main::test_vorschau_abschaltbar
+PASS test_main::test_vorschau_ampel_folgt_dem_bias_nicht_dem_bein
+PASS test_main::test_vorschau_nachricht_enthaelt_die_wichtigen_zahlen
+PASS test_main::test_vorschau_warnt_bei_zu_engem_stop
+Vorschau gesendet: LONG, GP 109-110, Stop-Abstand 11.41 %
+Lauf ok: 21 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+Lauf ok: 21 Kerzen, 0 neue Signale, OI-Punkte: 0, Position: NONE/FLAT
+PASS test_main::test_vorschau_wird_nur_bei_NEUER_struktur_gesendet
+PASS test_main::test_widerstand_marken_liefert_die_zweite_zonenreihe
+PASS test_main::test_ziel_extrem_ueberlebt_den_neustart
+PASS test_main::test_zonen_vorschau_auch_ohne_position
+PASS test_main::test_zonen_vorschau_ohne_impuls_ist_none
+[DRY-RUN]
+📋 PLAN — Long-Position, 25 % investiert
+Einstand 105 $ · Kurs 105 $
+
+Nachkaufen:
+  100 $ - 105 $   Kaufleiter: neue Tiefkerze in dieser Zone (15 %)
+  102 $   0.786-Zone (25 %)
+
+Teilgewinne:
+  112 $   Zwischenziel (Extension 0.8) (15 %)
+  114 $   Zwischenziel (Extension 0.9) (15 %)
+  114 $   Ziel 1.0 (40 %)
+  121 $   Ziel 1.618 (40 %)
+
+Stop 100 $ — Invalidierung, bei Kerzenschluss darunter
+
+Lage:  Struktur unveraendert - Bein 100 $ -> 110 $
+       Spot-Nachfrage schwach (Verkaufsdruck haelt an)
+
+Ampel (fuer LONG): GEMISCHT — 1 von 2 spricht dafuer
+       dafuer:  Struktur
+       dagegen: Spot-Nachfrage
+       Der Plan oben bleibt unveraendert. Die Engine handelt die Lage NICHT — die Ampel ist eine Beobachtung, keine Anweisung.
+
+— Diese Preise kannst du als Limit-Order hinterlegen. Neue Nachricht gibt es erst, wenn sich eine Marke aendert.
+
+Plan gesendet: 2 Nachkauf-, 4 Teilgewinn-Marken.
+[DRY-RUN]
+📍 VORSCHAU — noch KEIN Trigger, nur zur Vorbereitung
+
+Neue Struktur erkannt: Aufwaerts-Impuls 100 $ -> 110 $
+
+Hier wuerde gekauft:
+  0.5-Level        105 $   (erste Teilposition)
+  Golden Pocket    104 $ - 104 $   (Kern)
+  0.786-Zone       102 $   (Nachkauf)
+
+Ungueltig ab       100 $   (dort liegt der Stop)
+Abstand Golden Pocket -> Stop: 3.7 %
+
+Lage:  Spot-Nachfrage schwach (Verkaufsdruck haelt an)
+
+17.11.2023 22:13 UTC
+— Diese Preise kannst du JETZT als Limit-Order hinterlegen. Die Engine meldet sich erst, wenn der Kurs sie beruehrt hat — dann ist der Preis oft schon weg.
+
+Vorschau gesendet: LONG, GP 104-104, Stop-Abstand 3.68 %
+[DRY-RUN]
+🟢 KAUF 1 (Teilposition am 0.5-Level)
+BTC 105 $
+Tranche: 25 % der Position
+Stop-Referenz: 100 $
+Grund: 0.5-Retracement des Impulses 100->110
+17.11.2023 22:13 UTC
+— Kein Trade-Auto-Pilot: Order selbst pruefen und platzieren.
+
+Lauf ok: 19 Kerzen, 1 neue Signale, OI-Punkte: 1, Position: LONG/T1
+Lauf ok: 19 Kerzen, 0 neue Signale, OI-Punkte: 2, Position: LONG/T1
+PASS test_main::test_zweiter_lauf_ist_idempotent
+PASS test_strategy_core::test_ampel_behaelt_die_uebrigen_muster_wie_bisher
+PASS test_strategy_core::test_ampel_dreht_sich_mit_der_richtung_echter_livestand
+PASS test_strategy_core::test_ampel_filter_aus_aendert_nichts
+PASS test_strategy_core::test_ampel_filter_bei_guenstiger_lage_genau_andersherum
+PASS test_strategy_core::test_ampel_filter_gegenprobe_und_nullhypothese
+PASS test_strategy_core::test_ampel_filter_haelt_still_wenn_die_ampel_schweigt
+PASS test_strategy_core::test_ampel_filter_klein_halbiert_bei_unguenstiger_lage
+PASS test_strategy_core::test_ampel_filter_laesst_ausstiege_auch_im_lauf_unberuehrt
+PASS test_strategy_core::test_ampel_kapitulation_spricht_fuer_den_long
+PASS test_strategy_core::test_ampel_nennt_die_richtung_im_ergebnis
+PASS test_strategy_core::test_ampel_richtung_folgt_dem_bias_nicht_dem_bein
+PASS test_strategy_core::test_ampel_schweigt_bei_zu_duenner_lage
+PASS test_strategy_core::test_ampel_spiegelt_fuer_short_aber_nicht_die_struktur
+PASS test_strategy_core::test_ampel_stufen_nach_einfacher_mehrheit
+PASS test_strategy_core::test_ampel_vergleicht_nicht_das_bein_mit_sich_selbst
+PASS test_strategy_core::test_ampel_zaehlt_muster_5_fuer_keine_seite
+PASS test_strategy_core::test_be_im_plus_zieht_NICHT_wenn_die_position_im_minus_steht
+PASS test_strategy_core::test_be_im_plus_zieht_den_stop_auf_den_einstand
+PASS test_strategy_core::test_bein_richtung_ueberspringt_gegenlaeufiges_bein
+PASS test_strategy_core::test_bein_wahl_groesstes_nimmt_die_groesste_spanne
+PASS test_strategy_core::test_buy_ladder_nachkauf_bei_neuen_tiefkerzen_in_zone
+PASS test_strategy_core::test_capitulation_einstieg_modus_core_und_off
+PASS test_strategy_core::test_capitulation_einstieg_modus_t1
+PASS test_strategy_core::test_conditional_stop_nachkauf_wenn_flow_bullisch
+PASS test_strategy_core::test_conditional_stop_stoppt_bei_hartem_boden
+PASS test_strategy_core::test_conditional_stop_stoppt_wenn_flow_kippt
+PASS test_strategy_core::test_confirm_t1_prueft_den_05_einstieg
+PASS test_strategy_core::test_cooldown_sperrt_wiedereinstieg_nach_stop
+PASS test_strategy_core::test_daily_fib_zone_liefert_zone
+PASS test_strategy_core::test_daily_trend_richtung
+PASS test_strategy_core::test_dedupe_gleiche_kerze_keine_doppelsignale
+PASS test_strategy_core::test_docht_stoppt_schon_beim_kerzentief_zum_stopkurs
+PASS test_strategy_core::test_e13_hebel_sind_default_aus
+PASS test_strategy_core::test_e41_docht_stoppt_frueher_als_live
+PASS test_strategy_core::test_e41_im_default_aus_exakt_dieselben_signale
+PASS test_strategy_core::test_e41_kein_nachkauf_waehrend_des_wartens_und_der_rueckeroberung
+PASS test_strategy_core::test_e41_laesst_den_nachgezogenen_stop_unberuehrt
+PASS test_strategy_core::test_e41_nachkauf_nach_rueckeroberung_zum_erreichbaren_preis
+PASS test_strategy_core::test_e41_position_bleibt_bei_langsamem_abverkauf_nicht_haengen
+PASS test_strategy_core::test_e41_preiskorrektur_aendert_ohne_e41_nichts
+PASS test_strategy_core::test_e41_rueckeroberung_ueberlebt_den_stich_und_stoppt_beim_zweiten_bruch
+PASS test_strategy_core::test_e41_szenario_hat_einen_knappen_live_stop
+PASS test_strategy_core::test_e433_fallende_futures_sind_kein_pump
+PASS test_strategy_core::test_e433_mehr_historie_aendert_muster2_nicht_bei_usd
+PASS test_strategy_core::test_e433_muster_cvd_kommt_in_evaluate_an
+PASS test_strategy_core::test_e433_ohne_kerze_zum_flowpunkt_kein_pump
+PASS test_strategy_core::test_e433_usd_erkennt_den_pump_in_dollar
+PASS test_strategy_core::test_e433_usd_rechnet_jedes_delta_mit_dem_kurs_seiner_kerze
+PASS test_strategy_core::test_e433_vorprobe_demo_slope_alt_verschieden_usd_gleich
+PASS test_strategy_core::test_e434_btc_erkennt_echte_kontrakt_aenderung
+PASS test_strategy_core::test_e434_btc_wirkt_in_allen_mustern_die_das_oi_lesen
+PASS test_strategy_core::test_e434_muster_oi_kommt_in_evaluate_an
+PASS test_strategy_core::test_e434_ohne_oi_daten_rechnen_usd_und_btc_gleich
+PASS test_strategy_core::test_e434_oi_in_btc_rechnet_jeden_punkt_mit_dem_kurs_seiner_kerze
+PASS test_strategy_core::test_e434_usd_rechnet_wie_vor_e434
+PASS test_strategy_core::test_e434_vorprobe_demo_oi_usd_erkennt_am_kurs
+PASS test_strategy_core::test_e434b_echte_kontrakt_aenderung_bleibt_sichtbar
+PASS test_strategy_core::test_e434b_kurs_allein_heisst_nicht_neues_geld
+PASS test_strategy_core::test_e434b_kursrutsch_heisst_nicht_positionen_werden_geschlossen
+PASS test_strategy_core::test_e434b_ohne_kontrakt_reihe_bleibt_die_zeile_wie_bisher
+PASS test_strategy_core::test_e435_befund_a2_mehr_historie_dreht_muster2
+PASS test_strategy_core::test_e435_szenario_erreicht_den_muster2_zweig
+PASS test_strategy_core::test_einstand_ist_tranchengewichtet
+PASS test_strategy_core::test_ema200_braucht_echte_historie
+PASS test_strategy_core::test_evaluate_bein_richtung_bias_macht_die_engine_wieder_handlungsfaehig
+PASS test_strategy_core::test_extension_ziel_trifft_jan14_hoch
+PASS test_strategy_core::test_fib_zones_gegen_video_werte
+PASS test_strategy_core::test_fib_zones_short_richtung
+PASS test_strategy_core::test_find_pivots_und_impuls
+PASS test_strategy_core::test_flowpoint_long_pct_ist_optional
+PASS test_strategy_core::test_flush_off_kein_signal
+PASS test_strategy_core::test_freeze_targets_haelt_das_ziel_fest
+PASS test_strategy_core::test_freeze_targets_wird_beim_positionsende_zurueckgesetzt
+PASS test_strategy_core::test_gegen_zonen_nimmt_das_bein_entgegen_der_richtung
+PASS test_strategy_core::test_gleiches_bein_vergleicht_preise_nicht_zeitstempel
+PASS test_strategy_core::test_high_exit_hist_default_ist_voll_wie_bisher
+PASS test_strategy_core::test_high_exit_hist_live_beschraenkt_die_pivotsuche_auf_die_live_historie
+PASS test_strategy_core::test_high_exit_verkauft_kurz_unter_dem_letzten_hoch
+PASS test_strategy_core::test_high_exit_weak_nur_ohne_spot_nachfrage
+PASS test_strategy_core::test_kein_capitulation_einstieg_bei_schluss_unter_invalidierung
+PASS test_strategy_core::test_kompass_muster1_gesunder_trend
+PASS test_strategy_core::test_kompass_muster2_derivate_pump
+PASS test_strategy_core::test_kompass_muster2_ohne_futures_cvd
+PASS test_strategy_core::test_kompass_muster3_short_covering
+PASS test_strategy_core::test_kompass_muster4_capitulation
+PASS test_strategy_core::test_kompass_muster5_ungesunder_abverkauf
+PASS test_strategy_core::test_kuerzen_fragt_je_signal_nach_der_richtung
+PASS test_strategy_core::test_kuerzen_laesst_ausstiege_unberuehrt
+PASS test_strategy_core::test_lage_aendert_keine_signale
+PASS test_strategy_core::test_lage_bericht_nimmt_den_trend_auf
+PASS test_strategy_core::test_lage_muster_wird_uebersetzt
+PASS test_strategy_core::test_lage_ohne_muster_5_hat_keinen_hinweis
+PASS test_strategy_core::test_lage_struktur_intakt_unveraendert_gebrochen
+PASS test_strategy_core::test_last_stop_ts_ueberlebt_den_positions_reset
+PASS test_strategy_core::test_liq_cascade_erkennt_nur_ausschlag
+PASS test_strategy_core::test_liq_entry_boost_stockt_bei_konfluenz_auf
+PASS test_strategy_core::test_liq_entry_filter_blockt_einstieg_ohne_konfluenz
+PASS test_strategy_core::test_liq_entry_nutzt_nur_vergangene_kerzen
+PASS test_strategy_core::test_liq_exit_spike_verkauft_in_die_kaskade
+PASS test_strategy_core::test_liq_exit_zone_nutzt_keine_zukunft
+PASS test_strategy_core::test_liq_levels_findet_nur_ausreisser
+PASS test_strategy_core::test_long_lebenszyklus_kauf1_kauf2_tp1_tp2
+PASS test_strategy_core::test_long_stoploss_bei_schluss_unter_invalidierung
+PASS test_strategy_core::test_m5_szenario_handelt_ueberhaupt_und_zwar_bei_muster_5
+PASS test_strategy_core::test_mehr_historie_aendert_die_signale_nicht
+PASS test_strategy_core::test_min_bein_pct_ueberspringt_das_kleine_bein
+PASS test_strategy_core::test_min_stop_pct_verwirft_zu_enge_stops
+PASS test_strategy_core::test_muster2_nutzt_echtes_futures_cvd_wenn_vorhanden
+PASS test_strategy_core::test_muster3_via_short_liq_kaskade
+PASS test_strategy_core::test_muster4_via_long_liq_kaskade_ohne_oi_wipeout
+PASS test_strategy_core::test_muster5_entry_erzeugt_nie_mehr_einstiege_als_ohne_fib_zone_moeglich
+PASS test_strategy_core::test_muster5_entry_macht_muster_5_zur_starken_bestaetigung
+PASS test_strategy_core::test_muster5_halten_alle_entfernt_auch_das_ziel
+PASS test_strategy_core::test_muster5_halten_alle_haelt_auch_die_ziele
+PASS test_strategy_core::test_muster5_halten_alle_verhindert_den_stop_nachzug_BEKANNTE_FOLGE
+PASS test_strategy_core::test_muster5_halten_behandelt_beide_ziele_gleich
+PASS test_strategy_core::test_muster5_halten_greift_nicht_beim_short
+PASS test_strategy_core::test_muster5_halten_greift_nur_bei_muster_5
+PASS test_strategy_core::test_muster5_halten_ist_im_default_aus_immer_wirkungslos
+PASS test_strategy_core::test_muster5_halten_leiter_entfernt_den_zwischenverkauf_nicht_das_ziel
+PASS test_strategy_core::test_muster5_halten_leiter_laesst_die_geplanten_ziele_durch
+PASS test_strategy_core::test_muster5_halten_unterdrueckt_niemals_den_stop
+PASS test_strategy_core::test_muster5_halten_unterscheidet_leiter_und_alle_wirklich
+PASS test_strategy_core::test_muster5_halten_verbraucht_keine_leiterstufe_beim_zurueckhalten
+PASS test_strategy_core::test_muster5_schalter_im_default_aendern_kein_einziges_signal
+PASS test_strategy_core::test_muster5_weicht_der_kapitulation
+PASS test_strategy_core::test_muster_hinweis_nennt_den_zeitraum_der_messung_fest
+PASS test_strategy_core::test_muster_hinweis_nur_wo_gemessen_und_ohne_namen
+PASS test_strategy_core::test_neustart_mit_rest_erlaubt_einen_einstieg_waehrend_der_rest_laeuft
+PASS test_strategy_core::test_next_pivot_beyond
+PASS test_strategy_core::test_no_flip_deckt_auch_den_neustart_mit_rest_ab
+PASS test_strategy_core::test_no_flip_kennt_nur_aufbau_und_teilverkauf
+PASS test_strategy_core::test_no_flip_laesst_den_stop_immer_durch
+PASS test_strategy_core::test_no_flip_sperrt_nachkauf_nach_teilverkauf_in_derselben_kerze
+PASS test_strategy_core::test_no_flip_sperrt_teilverkauf_nach_nachkauf_in_derselben_kerze
+PASS test_strategy_core::test_ohne_freeze_targets_wandert_das_zweite_ziel_nach_unten
+PASS test_strategy_core::test_ohne_no_flip_kauft_und_verkauft_die_engine_in_derselben_kerze
+PASS test_strategy_core::test_ohne_release_bleibt_rest_in_tp_haengen
+PASS test_strategy_core::test_ohne_rest_halten_wird_der_rest_beim_gegenmuster_verkauft
+PASS test_strategy_core::test_ohne_schalter_bleiben_die_zonen_eingefroren
+PASS test_strategy_core::test_ohne_schalter_gewinnt_das_juengste_kleine_bein
+PASS test_strategy_core::test_ohne_vorheriges_unterschreiten_ist_die_marke_nicht_geprueft
+PASS test_strategy_core::test_orderflow_detail_ist_reine_anzeige
+PASS test_strategy_core::test_orderflow_detail_nutzt_dasselbe_fenster_wie_das_muster
+PASS test_strategy_core::test_orderflow_detail_zeigt_fehlende_daten_nicht_als_null
+PASS test_strategy_core::test_orderflow_detail_zeigt_furkans_sieben_groessen
+PASS test_strategy_core::test_orderflow_richtung_kennt_flach
+PASS test_strategy_core::test_pivot_n_1d_kommt_durch_evaluate_an
+PASS test_strategy_core::test_pivot_n_1d_null_ist_das_alte_verhalten
+PASS test_strategy_core::test_pivot_n_1d_waehlt_die_groebere_ebene
+PASS test_strategy_core::test_pivot_n_1d_wirkt_nur_mit_zonen_1d
+PASS test_strategy_core::test_release_stale_rest_gibt_restposition_frei
+PASS test_strategy_core::test_release_stale_rest_greift_nicht_vor_teilgewinn
+PASS test_strategy_core::test_resample_daily_und_ema
+PASS test_strategy_core::test_reset_raeumt_die_e41_merker_ab
+PASS test_strategy_core::test_rest_halten_haelt_den_stop_trotzdem_scharf
+PASS test_strategy_core::test_rest_halten_laesst_die_position_weiterlaufen
+PASS test_strategy_core::test_rueckeroberung_1_stoppt_bei_zweitem_schluss_darunter
+PASS test_strategy_core::test_rueckeroberung_3_gibt_drei_kerzen_zeit
+PASS test_strategy_core::test_rueckeroberung_gilt_fuer_short_spiegelbildlich
+PASS test_strategy_core::test_rueckeroberung_harter_boden_stoppt_sofort
+PASS test_strategy_core::test_rueckeroberung_macht_die_marke_geprueft_und_der_naechste_bruch_stoppt_sofort
+PASS test_strategy_core::test_rueckeroberung_neue_marke_zaehlt_neu
+PASS test_strategy_core::test_short_einstieg_am_05_level
+PASS test_strategy_core::test_spot_nachfrage_ohne_genug_daten_ist_none
+PASS test_strategy_core::test_spot_nachfrage_vier_zustaende
+PASS test_strategy_core::test_stop_puffer_ignoriert_knappe_schluesse
+PASS test_strategy_core::test_stop_zweige_fragen_den_teilverkauf_waechter_gar_nicht_erst
+PASS test_strategy_core::test_stoploss_setzt_alle_zaehler_zurueck
+PASS test_strategy_core::test_strict_confirm_verlangt_beide_bestaetigungen
+PASS test_strategy_core::test_tp_ladder_gestaffelte_teilgewinne
+PASS test_strategy_core::test_trail_stop_lockert_den_stop_nie
+PASS test_strategy_core::test_trail_stop_zieht_auf_einstand_und_sichert_gewinn
+PASS test_strategy_core::test_trend_filter_blockt_long_gegen_1d_trend
+PASS test_strategy_core::test_trend_filter_blockt_nichts_wenn_die_historie_nicht_reicht
+PASS test_strategy_core::test_trend_intakt_erkennt_fortsetzung_und_bruch
+PASS test_strategy_core::test_trend_lage_liefert_klartext_oder_nichts
+PASS test_strategy_core::test_warnlicht_sperrt_NICHT_bei_bloss_neutralem_markt
+PASS test_strategy_core::test_warnlicht_sperrt_long_im_ungesunden_abverkauf
+PASS test_strategy_core::test_widerstand_exit_feuert_nicht_wenn_die_zone_schon_hinter_uns_liegt
+PASS test_strategy_core::test_widerstand_exit_nimmt_teilgewinn_am_golden_pocket_der_gegenbewegung
+PASS test_strategy_core::test_zonen_1d_die_ebenen_zeichnen_wirklich_verschiedene_beine
+PASS test_strategy_core::test_zonen_1d_gilt_nicht_als_umgehung_der_sicherungen
+PASS test_strategy_core::test_zonen_1d_kein_doppelsignal_wenn_beide_ebenen_dasselbe_bein_sehen
+PASS test_strategy_core::test_zonen_1d_liefert_einstieg_den_die_4h_ebene_verpasst
+PASS test_strategy_core::test_zonen_nachziehen_bei_intaktem_trend
+PASS test_strategy_core::test_zonen_nachziehen_erzeugt_kein_gegengeschaeft
+PASS test_strategy_core::test_zonen_nachziehen_nicht_bei_gebrochener_struktur
+PASS test_telegram_notify::test_alle_signaltypen_haben_style
+PASS test_telegram_notify::test_ampel_steht_in_den_nachrichten_mit_dem_schlusssatz
+PASS test_telegram_notify::test_e41_nachrichten_short_spiegelbildlich
+PASS test_telegram_notify::test_e41_nachrichten_sind_handybreit
+PASS test_telegram_notify::test_flush_signal_wird_markiert
+PASS test_telegram_notify::test_format_kauf2_enthaelt_alle_bausteine
+PASS test_telegram_notify::test_format_stoploss
+PASS test_telegram_notify::test_lage_abruf_ohne_sth_hat_keine_leere_zeile_dafuer
+PASS test_telegram_notify::test_lage_abruf_zeigt_die_sth_kostenbasis_mit_abstand_und_stand
+PASS test_telegram_notify::test_lage_abruf_zeigt_muster_5_mit_hinweis_und_handytauglich
+PASS test_telegram_notify::test_lage_erscheint_in_plan_und_vorschau
+PASS test_telegram_notify::test_marke_zurueckerobert_nachricht
+PASS test_telegram_notify::test_plan_nennt_die_gepruefte_marke
+PASS test_telegram_notify::test_plan_stop_zeile_folgt_der_rueckeroberungs_regel
+PASS test_telegram_notify::test_plan_und_vorschau_zeigen_muster_5_umbrochen_mit_hinweis
+PASS test_telegram_notify::test_plan_warnt_wenn_die_engine_gerade_wartet
+[DRY-RUN]
+🟢 KAUF 2 (Kernposition im Golden Pocket)
+BTC 89.564 $
+Tranche: 50 % der Position
+Stop-Referenz: 86.349 $
+Grund: Golden Pocket 89294-89564 + Bestaetigung (CAPITULATION_RESET)
+08.01.2026 00:00 UTC
+— Kein Trade-Auto-Pilot: Order selbst pruefen und platzieren.
+
+[DRY-RUN]
+🛑 STOPLOSS
+BTC 74.600 $
+Tranche: 100 % der Position
+Grund: Kerzenschluss unter Invalidierung 78741
+03.02.2026 00:00 UTC
+— Kein Trade-Auto-Pilot: Order selbst pruefen und platzieren.
+
+PASS test_telegram_notify::test_send_signals_dry_run_ohne_netz
+PASS test_telegram_notify::test_sth_zeile_ist_handybreit
+PASS test_telegram_notify::test_stop_wartet_nachricht_sagt_was_passiert_und_was_als_naechstes
+PASS test_telegram_notify::test_stop_wartet_nennt_den_harten_boden_nur_wenn_er_noch_zaehlt
+PASS test_telegram_notify::test_uebergeordneter_trend_steht_in_den_nachrichten
+PASS test_telegram_notify::test_vorschau_nennt_das_bein_nicht_doppelt
+--- 589 passed, 0 failed

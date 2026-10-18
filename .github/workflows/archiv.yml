@@ -5,8 +5,6 @@ name: Coinalyze-Archiv
 # 4h-Werte vor; ohne Archiv wandert das Backtest-Fenster jeden Tag nach vorn. Die
 # Live-Engine (signal.yml) ist davon nicht betroffen.
 on:
-  schedule:
-    - cron: "47 3 * * *"
   workflow_dispatch:
 
 permissions:
