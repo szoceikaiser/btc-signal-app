@@ -75,7 +75,7 @@ jobs:
           import json, os, re, hashlib
           from copy import deepcopy
           from pathlib import Path
-          expected = "88a425d38279f5c0d04010ebcba378c14d9b8eda8601820766bbe19dc899ef73"
+          expected = "7abc344be9e5e0794d31ce9b9c2fe5ab216d3f8292707a5a5dfa9202f71f1e78"
           raw = os.environ['REVIEWED_MONITOR_JSON']
           if len(raw.encode()) > 128*1024 or not re.fullmatch('[0-9a-f]{64}', expected):
               raise SystemExit('Reviewed monitor policy not bound')
