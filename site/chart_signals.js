@@ -3,8 +3,8 @@
   'use strict';
   const sources = {
     live_reference: {rank:0, short:'L', label:'Live-Signalreferenz (kein belegter Fill)'},
-    historical_signal_band: {rank:1, short:'H', label:'Historische Signalband-Diagnostik'},
-    simulated_v1_fill: {rank:2, short:'V1', label:'Simulierter V1-Fill (kein Brokerbeleg)'},
+    historical_signal_band: {rank:1, short:'H', label:'Historische Signalband-Diagnostik (alter Core20D-Stand 26.09.2026, kein C05)'},
+    simulated_v1_fill: {rank:2, short:'V1', label:'Simulierter V1-Fill (alter Core20D-Stand 26.09.2026, kein C05, kein Brokerbeleg)'},
   };
   function canonical(value) {
     if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
@@ -80,7 +80,7 @@
     doc = doc || document;
     container.replaceChildren();
     const note = doc.createElement('p');
-    note.textContent = 'L = Live-Referenz · H = historische Diagnostik · V1 = Modell-Fill. ' +
+    note.textContent = 'L = Live-Referenz · H/V1 = alter Core20D-Stand 26.09.2026, keine C05-Marken. ' +
       'Keine Marker-ID belegt Telegram-Zustellung oder eine manuelle/Broker-Ausführung.' +
       (issues.length ? ' Datenhinweise: ' + issues.join('; ') : '');
     container.appendChild(note);
