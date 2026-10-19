@@ -90,7 +90,9 @@ def source_files(base):
     result['live_projection.js'] = base.bounded_file(base.ROOT/'site/live_projection.js', 1024*1024)
     result['c05-report.json'] = base.bounded_file(RENDERER/'site/c05-report.json', 128*1024)
     for name in base.HISTORY:
-        result['history/'+name] = base.bounded_file(base.ROOT/'site/data'/name, 16*1024*1024)
+        source = base.ROOT/'site/data'/name
+        if source.is_file():
+            result['history/'+name] = base.bounded_file(source, 16*1024*1024)
     return result
 
 
@@ -102,6 +104,7 @@ def manifest_for(base, body, d, private_pins, renderer):
             'report':{'path':'c05-report.json', 'sha256':REPORT_SHA},
             'history':{name:{'path':'history/'+name, 'sha256':sha(raw), 'source_code_sha':CORE_SHA}
                        for name in base.HISTORY
+                       if (base.ROOT/'site/data'/name).is_file()
                        for raw in [base.bounded_file(base.ROOT/'site/data'/name,16*1024*1024)]},
             'historical_notice':'C05/S0 bis 04.10.2026 08:00 UTC; H/V1 separater alter Core20D-Stand, keine C05-Marken'}
 
