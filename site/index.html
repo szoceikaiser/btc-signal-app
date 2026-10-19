@@ -149,6 +149,9 @@ function historicalFile(name) {
   return publicPackage().then(p => LiveProjection.history(fetch, crypto, p, name));
 }
 
+// C05 books are independent of live signal inventory and chart availability.
+const reportLoaded = C05Report.mount(document.getElementById('c05-report'),fetch,crypto,publicPackage());
+
 const el = document.getElementById("chart");
 const chart = LightweightCharts.createChart(el, {
   layout: { background:{color:"#0f1218"}, textColor:"#8b94a7" },
@@ -187,9 +190,6 @@ chart.subscribeCrosshairMove(param => {
 });
 // Doppelklick/Doppeltipp: Zoom zuruecksetzen
 el.addEventListener("dblclick", () => chart.timeScale().fitContent());
-
-// C05 books are independent of live signal inventory and chart availability.
-const reportLoaded = C05Report.mount(document.getElementById('c05-report'),fetch,crypto,publicPackage());
 
 let priceLines = [];
 async function fetchJson(url) {

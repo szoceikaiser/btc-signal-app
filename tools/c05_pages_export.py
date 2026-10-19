@@ -131,11 +131,18 @@ def verify_package(base, out, d, private_pins, renderer):
             raise ValueError('Upload differs from clean bound source: '+name)
 
 
-def export(base, runtime_path, config_path, out, verify=None, identities_only=False):
+def export(base, runtime_path, config_path, out, verify=None, identities_only=False, local_check=None):
     from job_quota import read_only_environment, Headers
     read_only_environment(); quota = Headers()
     runtime = json.loads(Path(runtime_path).read_text(encoding='utf-8'))
     renderer = renderer_binding(runtime)
+    if local_check:
+        saved = json.loads(base.bounded_file(local_check,16384))
+        if (saved.get('schema') != 'btc-c05-pages-local-receipt-v1'
+                or saved.get('deployment') != runtime['deployment'] or saved.get('renderer') != renderer):
+            raise ValueError('Local package receipt differs')
+        verify_package(base,Path(out),runtime['deployment'],saved['pins'],renderer)
+        return {'get':0,'put':0,'transport':0}
     d = base.validate(runtime, quota)
     branches = [(d['private_store_repository'],b) for b in (d['store_branch'],d['fence_branch'])]
     preflight = base.public.preflight(runtime['public_access'], branches, () if identities_only else branches, quota)
@@ -178,9 +185,10 @@ if __name__ == '__main__':
     p=argparse.ArgumentParser()
     for key in ('core','runtime','config','out'): p.add_argument('--'+key,required=True)
     p.add_argument('--verify');p.add_argument('--identities-only',action='store_true')
+    p.add_argument('--local-package-check')
     a=p.parse_args()
     try:
-        export(bind_core(a.core),a.runtime,a.config,a.out,a.verify,a.identities_only)
+        export(bind_core(a.core),a.runtime,a.config,a.out,a.verify,a.identities_only,a.local_package_check)
     except Exception:
         print('Bound C05 Pages export refused; no publication.',file=sys.stderr)
         sys.exit(20)
