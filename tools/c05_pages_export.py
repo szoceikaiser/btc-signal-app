@@ -109,7 +109,7 @@ def manifest_for(base, body, d, private_pins, renderer):
             'historical_notice':'C05/S0 bis 04.10.2026 08:00 UTC; H/V1 separater alter Core20D-Stand, keine C05-Marken'}
 
 
-def verify_package(base, out, d, private_pins, renderer):
+def verify_package(base, out, d, private_pins, renderer, expected_sha, snapshot=None):
     manifest = json.loads(base.bounded_file(out/'projection-manifest.json',16384))
     filename = manifest['projection']
     if not re.fullmatch(r'projection-[0-9a-f]{64}\.json', filename):
@@ -117,11 +117,14 @@ def verify_package(base, out, d, private_pins, renderer):
     body = base.bounded_file(out/filename,750*1024)
     expected_manifest = manifest_for(base, body, d, private_pins, renderer)
     value = json.loads(body); now = int(time.time()*1000)
-    if (manifest != expected_manifest or value['pins'] != manifest['pins']
+    if (not re.fullmatch('[0-9a-f]{64}',expected_sha or '') or sha(body) != expected_sha
+            or manifest != expected_manifest or value['pins'] != manifest['pins']
             or value['schema'] != 'btc-public-projection-v1'
             or not 0 <= now-value['observed_ms'] < 120000
             or not 0 <= now-(value['signal_asof_ms']+14400000) <= 8*3600000):
         raise ValueError('Package mixed, changed or expired')
+    if snapshot is not None and body != base.project(snapshot,value['observed_ms'],manifest['pins']):
+        raise ValueError('Published projection differs from independently reread pair')
     files = source_files(base)
     files[filename] = body
     files['projection-manifest.json'] = base.canonical(manifest).encode()
@@ -144,7 +147,7 @@ def export(base, runtime_path, config_path, out, verify=None, identities_only=Fa
         if (saved.get('schema') != 'btc-c05-pages-local-receipt-v1'
                 or saved.get('deployment') != runtime['deployment'] or saved.get('renderer') != renderer):
             raise ValueError('Local package receipt differs')
-        verify_package(base,Path(out),runtime['deployment'],saved['pins'],renderer)
+        verify_package(base,Path(out),runtime['deployment'],saved['pins'],renderer,saved['projection_sha256'])
         return {'get':0,'put':0,'transport':0}
     d = base.validate(runtime, quota)
     branches = [(d['private_store_repository'],b) for b in (d['store_branch'],d['fence_branch'])]
@@ -159,9 +162,10 @@ def export(base, runtime_path, config_path, out, verify=None, identities_only=Fa
     out = Path(out)
     receipt = {'schema':'btc-c05-pages-local-receipt-v1','deployment':d,'pins':private_pins,'renderer':renderer}
     if verify:
-        if json.loads(base.bounded_file(verify,16384)) != receipt:
+        saved=json.loads(base.bounded_file(verify,16384))
+        if saved != {**receipt,'projection_sha256':saved.get('projection_sha256')}:
             raise ValueError('Pair/renderer moved since package preparation')
-        verify_package(base,out,d,private_pins,renderer)
+        verify_package(base,out,d,private_pins,renderer,saved['projection_sha256'],snapshot)
     else:
         now = int(time.time()*1000)
         if not 0 <= now-(snapshot['engine']['last_signal_ts']+14400000) <= 8*3600000:
@@ -178,8 +182,9 @@ def export(base, runtime_path, config_path, out, verify=None, identities_only=Fa
             with target.open('xb') as f: f.write(raw)
         (out/manifest['projection']).write_bytes(body)
         (out/'projection-manifest.json').write_text(base.canonical(manifest),encoding='utf-8')
+        receipt['projection_sha256']=sha(body)
         with out.with_suffix('.receipt.json').open('x',encoding='utf-8') as f: f.write(base.canonical(receipt))
-        verify_package(base,out,d,private_pins,renderer)
+        verify_package(base,out,d,private_pins,renderer,sha(body),snapshot)
     client.guard()
     return {'get':client.gets,'preflight_get':preflight,'put':0,'transport':0}
 
