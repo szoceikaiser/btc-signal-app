@@ -54,7 +54,18 @@ jobs:
       - name: Checkout exact reviewed code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
+          path: core
           ref: 20d755a4332fb32aeab08b1973b650eeae10f31e
+          token: ${{ github.token }}
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+      - name: Checkout exact independently reviewed C05 renderer
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: renderer
+          ref: 769240621314677e13da5afbf32821d6a350c9df
           token: ${{ github.token }}
           persist-credentials: false
           fetch-depth: 1
@@ -67,7 +78,8 @@ jobs:
         run: |
           [[ "$GITHUB_REPOSITORY" == "szoceikaiser/btc-signal-app" ]]
           [[ "$REVIEWED_CODE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          [[ "$(git rev-parse HEAD)" == "$REVIEWED_CODE_SHA" ]]
+          [[ "$(git -C core rev-parse HEAD)" == "$REVIEWED_CODE_SHA" ]]
+          [[ "$(git -C renderer rev-parse HEAD)" == "769240621314677e13da5afbf32821d6a350c9df" ]]
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.12.14"
@@ -89,25 +101,34 @@ jobs:
               raise ValueError('Foreign, failed or differently pinned Pages trigger')
           PY
       - name: Prepare reviewed Pages runtime only
+        working-directory: core
         env:
           REVIEWED_RUNTIME_JSON: ${{ vars.BTC_REVIEWED_PAGES_RUNTIME_JSON }}
           REVIEWED_CONFIG_JSON: ${{ vars.BTC_REVIEWED_CONFIG_JSON }}
         run: python3 tools/produktion_runtime_prepare.py --kind pages --out .runtime
       - name: Export one closed store/fence pair (read only)
+        working-directory: core
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
-          python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
+          python3 ../renderer/tools/c05_pages_export.py --core . --runtime .runtime/runtime.json
           --config .runtime/data/config.json --out .runtime/public --identities-only
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
+      - name: Validate exact complete C05 package before upload
+        working-directory: core
+        run: >-
+          python3 ../renderer/tools/c05_pages_export.py --core . --runtime .runtime/runtime.json
+          --config .runtime/data/config.json --out .runtime/public
+          --local-package-check .runtime/public.receipt.json
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
         with:
-          path: .runtime/public
+          path: core/.runtime/public
       - name: Verify unchanged closed pair immediately before deploy
+        working-directory: core
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
-          python3 tools/produktion_pages_export.py --runtime .runtime/runtime.json
+          python3 ../renderer/tools/c05_pages_export.py --core . --runtime .runtime/runtime.json
           --config .runtime/data/config.json --out .runtime/public
           --verify .runtime/public.receipt.json
       - id: deployment

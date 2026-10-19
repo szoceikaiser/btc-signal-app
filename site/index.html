@@ -35,25 +35,20 @@
                   color:var(--muted); font-size:12.5px; cursor:pointer; user-select:none; }
   #planSchalter input { accent-color:#2962ff; cursor:pointer; }
 
-  /* --- Monatsuebersicht (unten) --- */
-  #monate { background:var(--panel); border-radius:10px; padding:12px; margin-top:10px; }
-  #monate h2 { font-size:15px; margin-bottom:4px; }
-  #monate .sub { color:var(--muted); font-size:12.5px; margin-bottom:10px; }
-  #monate table { width:100%; border-collapse:collapse; font-size:13.5px; }
-  #monate th { text-align:right; color:var(--muted); font-weight:600; font-size:12px;
-    padding:4px 6px; border-bottom:1px solid #2a3242; }
-  #monate th:first-child, #monate td:first-child { text-align:left; }
-  #monate td { text-align:right; padding:5px 6px; border-bottom:1px solid #1c2330;
-               white-space:nowrap; }
-  #monate tr:last-child td { border-bottom:none; }
-  #monate tfoot td { border-top:1px solid #2a3242; font-weight:600; color:var(--text); padding-top:8px; }
-  #monate .bar { width:100%; min-width:70px; }
-  #monate .bar i { display:block; height:9px; border-radius:2px; }
-  #monate .note { color:var(--muted); font-size:12px; margin-top:10px; line-height:1.5; }
-  #monate .schwach { opacity:.62; }        /* Vergleichsspalte "mit Flush" zurueckgenommen */
-  #monate thead th[colspan] { text-align:center; }
-  @media (max-width:560px) { #monate .hidemob, #monate .engmob { display:none; }
-                             #monate table { font-size:12.5px; } }
+  #c05-report { background:var(--panel);border:1px solid #2a3e47;border-radius:10px;padding:20px;margin:14px 0 18px; }
+  #c05-report h2 {font-size:21px;margin:5px 0} #c05-report h3 {font-size:16px;margin:22px 0 8px}
+  #c05-report p {color:#adb9cb;font-size:13px;margin-top:8px;line-height:1.6}
+  .c05-heading {display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .c05-eyebrow {font-size:10px;letter-spacing:1.5px;color:#93bcb6}
+  .c05-return {color:#64dcba;font-size:30px;font-weight:700} .c05-return small {display:block;font-weight:400;font-size:11px;color:#adb9cb}
+  .c05-value {font-size:23px;margin-top:16px;font-variant-numeric:tabular-nums} .c05-value span {color:#8b94a7;padding:0 8px}
+  .c05-value strong {color:#64dcba} #c05-report .c05-notice {border-left:3px solid #c99f60;padding:9px 12px;background:#1e2632;margin:16px 0}
+  #c05-report summary {cursor:pointer;color:#b8d2ff;padding:4px 0;font-size:13px}
+  .c05-scroll {overflow-x:auto} #c05-report table {width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}
+  #c05-report th,#c05-report td {text-align:right;white-space:nowrap;padding:8px;border-bottom:1px solid #2a3242}
+  #c05-report th {font-size:11px;color:#adb9cb} #c05-report th:first-child,#c05-report td:first-child {text-align:left}
+  .c05-up {color:#64dcba} .c05-down {color:#ff9999} #c05-report a {color:#9dbdff}
+  @media (max-width:560px) {body{padding:8px} #c05-report{padding:14px}.c05-value{font-size:19px}.c05-heading{gap:10px}.c05-return{font-size:26px} #c05-report table{font-size:12px} }
 </style>
 </head>
 <body>
@@ -65,15 +60,16 @@
     <input type="checkbox" id="planAn"> Plan-Marken
   </label>
 </header>
+<section id="c05-report" aria-live="polite">Geprüfter C05-Bericht wird geladen…</section>
 <div id="wrap">
   <div id="chart"></div>
   <div id="ohlc" hidden></div>
 </div>
 <div id="status">Lade…</div>
 <div id="freshness" class="badge">Noch keine bestätigte aktuelle Projektion geladen.</div>
-<div class="legend" id="btpanel" hidden></div>
+
 <div class="legend">
-  <span><b>L</b> Live-Referenz · <b>H</b> historische Diagnostik · <b>V1</b> simulierter Fill; keine Zustell-/Brokerbelege</span>
+  <span><b>L</b> Live-Referenz · <b>H</b>/<b>V1</b> separater alter Core20D-Stand (26.09.2026), keine C05-Marken; keine Zustell-/Brokerbelege</span>
   <span><b>K1/K2</b> Kauf 0.5 / Golden Pocket</span>
   <span><b>NK</b> Nachkauf 0.786</span>
   <span><b>TVL</b> Leiter-Teilgewinn Ext. 0.8/0.9</span>
@@ -91,10 +87,11 @@
   <span><a href="https://github.com/szoceikaiser/btc-signal-app/blob/main/ANLEITUNG-EINSTELLUNGEN.md"
     style="color:#2962ff" target="_blank">⚙ Einstellungen ändern (Anleitung)</a></span>
 </div>
-<details id="signalDetails" class="legend"><summary>Signalherkunft und Ereignisse im Chart</summary><div id="signalList"></div></details>
-<section id="monate" hidden></section>
+<details id="signalDetails" class="legend"><summary>Signalherkunft · L live · H/V1 alter Stand, kein C05</summary><div id="signalList"></div></details>
+
 <script src="chart_signals.js"></script>
 <script src="live_projection.js"></script>
+<script src="c05_report.js"></script>
 <script>
 "use strict";
 const TFS = { "1h":"1h", "4h":"4h", "1D":"1d", "3D":"3d", "1W":"1w", "1M":"1M" };
@@ -152,6 +149,9 @@ function historicalFile(name) {
   return publicPackage().then(p => LiveProjection.history(fetch, crypto, p, name));
 }
 
+// C05 books are independent of live signal inventory and chart availability.
+const reportLoaded = C05Report.mount(document.getElementById('c05-report'),fetch,crypto,publicPackage());
+
 const el = document.getElementById("chart");
 const chart = LightweightCharts.createChart(el, {
   layout: { background:{color:"#0f1218"}, textColor:"#8b94a7" },
@@ -190,175 +190,6 @@ chart.subscribeCrosshairMove(param => {
 });
 // Doppelklick/Doppeltipp: Zoom zuruecksetzen
 el.addEventListener("dblclick", () => chart.timeScale().fitContent());
-
-// --- Backtest-/P&L-Panel (einmalig laden; erscheint nur, wenn ein Backtest lief)
-(async () => {
-  try {
-    const bt = await historicalFile("backtest.json");
-    if (!bt) return;
-    const p = bt.pnl;
-    const cls = p.rendite_pct >= 0 ? "up" : "down";
-    const clsBH = p.buyhold_pct >= 0 ? "up" : "down";
-    const eur = v => (v >= 0 ? "+" : "") + Math.round(v).toLocaleString("de-DE") + " €";
-    const clL = (p.long_profit || 0) >= 0 ? "up" : "down";
-    const clS = (p.short_profit || 0) >= 0 ? "up" : "down";
-    document.getElementById("btpanel").innerHTML =
-      `<span><b>Historischer Backtest ${bt.zeitraum}</b> (keine neue C05-Berechnung; bisheriger Stand ${new Date(bt.generated_at)
-        .toLocaleDateString("de-DE")})</span>` +
-      (bt.variante ? `<span>Variante: <b>${bt.variante}</b></span>` : "") +
-      `<span>Historische Simulation: 10.000 € → <b class="${cls}">${p.ende.toLocaleString("de-DE",
-        { maximumFractionDigits: 0 })} € (${p.rendite_pct >= 0 ? "+" : ""}${p.rendite_pct} %)</b> ` +
-      `<i>— Vergangenheit, keine Garantie, kein Live-Konto</i></span>` +
-      `<span>➜ <b>LONG-Trades:</b> <b class="${clL}">${eur(p.long_profit || 0)}</b> ` +
-      `(${p.long_trades || 0} Abschlüsse, ${p.long_wins || 0} im Gewinn)</span>` +
-      `<span>➜ <b>SHORT-Trades:</b> <b class="${clS}">${eur(p.short_profit || 0)}</b> ` +
-      `(${p.short_trades || 0} Abschlüsse, ${p.short_wins || 0} im Gewinn)</span>` +
-      `<span>Buy&amp;Hold zum Vergleich: <b class="${clsBH}">${p.buyhold_pct >= 0 ? "+" : ""}${p.buyhold_pct} %</b></span>` +
-      `<span>Ähnlichkeit zu Furkans Terminen: Kauf ${bt.recall_kauf}, Verkauf ${bt.recall_verkauf} — ` +
-      `<b>Ähnlichkeit ≠ Gewinn</b></span>`;
-    document.getElementById("btpanel").hidden = false;
-    renderMonate(bt);
-  } catch (e) { /* kein Backtest vorhanden -> Panel bleibt verborgen */ }
-})();
-
-// --- Monat fuer Monat (ganz unten): was haette das Konto in jedem Kalendermonat gemacht?
-// Datenquelle: pnl.monate aus backtest.json (simulate() in engine/backtest.py). Offene
-// Positionen sind zum Schlusskurs des Monats bewertet, Gewinne werden reinvestiert —
-// spaetere Monate arbeiten also mit mehr Kapital. Deshalb steht die %-Spalte daneben.
-function renderMonate(bt) {
-  const p = bt.pnl || {};
-  const ms = p.monate || [];
-  if (!ms.length) return;
-  // Zweite Spalte: dieselbe Einstellung OHNE den aggressiven Flush-Einstieg.
-  // Flush-Signale sind in Telegram und im Chart als solche markiert; ob sie mitgenommen
-  // werden, entscheidet der Nutzer bei jedem einzeln. Deshalb beide Rechnungen zeigen:
-  // "ohne Flush" = sicherer Boden, "mit Flush" = Obergrenze. Das echte Ergebnis liegt
-  // dazwischen. Die Signal-Erzeugung ist davon NICHT betroffen.
-  const po = bt.pnl_ohne_flush || null;
-  const mo = po ? Object.fromEntries((po.monate || []).map(m => [m.monat, m])) : null;
-  const MON = ["Januar","Februar","März","April","Mai","Juni",
-               "Juli","August","September","Oktober","November","Dezember"];
-  const name = k => { const [y, m] = k.split("-"); return MON[+m - 1] + " " + y; };
-  const eur = v => (v >= 0 ? "+" : "−") + Math.abs(Math.round(v)).toLocaleString("de-DE") + " €";
-  const pct = v => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1).replace(".", ",") + " %";
-  const konto = v => Math.round(v).toLocaleString("de-DE") + " €";
-  const maxAbs = Math.max(...ms.map(m => Math.abs(m.rendite_pct)), 1);
-
-  const zelle = (m, stark) => {
-    if (!m) return `<td>—</td><td>—</td>`;
-    const cls = (m.gewinn >= 0 ? "up" : "down") + (stark ? "" : " schwach");
-    return `<td class="${cls}">${eur(m.gewinn)}</td><td class="${cls}">${pct(m.rendite_pct)}</td>`;
-  };
-
-  // E24.2: Was von der Bitcoin-Bewegung kommt bei uns an? (Kaisers Frage 28.08.2026 —
-  // die Kennzahl stand bisher nur im Backtest-Bericht, nicht auf der Seite.)
-  // "davon eingefangen" nur in STEIGENDEN Monaten: in fallenden Monaten ist ein Anteil
-  // am Rueckgang keine sinnvolle Groesse — dafuer steht unten die Abwaerts-Beteiligung.
-  const hatBtc = ms.some(m => typeof m.btc_pct === "number");
-  const eingefangen = (m, basis) => {
-    if (!hatBtc || typeof m.btc_pct !== "number" || m.btc_pct <= 0)
-      return `<td class="engmob">—</td>`;
-    const r = basis ? basis.rendite_pct : m.rendite_pct;
-    return `<td class="engmob">${Math.round(r / m.btc_pct * 100)} %</td>`;
-  };
-
-  const zeilen = ms.map(m => {
-    const basis = mo ? mo[m.monat] : m;              // ohne Flush = die sichere Rechnung
-    const pos = (basis ? basis.gewinn : m.gewinn) >= 0;
-    const farbe = pos ? "#16a34a" : "#dc2626";
-    const wert = basis ? basis.rendite_pct : m.rendite_pct;
-    const br = Math.max(3, Math.abs(wert) / maxAbs * 100);
-    const bar = `<span style="display:block;position:relative;height:9px">` +
-      `<i style="position:absolute;${pos ? "left" : "right"}:50%;width:${br / 2}%;` +
-      `background:${farbe}"></i></span>`;
-    const btc = hatBtc
-      ? `<td class="${(m.btc_pct || 0) >= 0 ? "up" : "down"}">${pct(m.btc_pct || 0)}</td>`
-      : "";
-    return `<tr><td>${name(m.monat)}</td>${btc}` +
-      (mo ? zelle(basis, true) + zelle(m, false) : zelle(m, true)) +
-      (hatBtc ? eingefangen(m, basis) : "") +
-      `<td class="bar hidemob">${bar}</td></tr>`;
-  }).join("");
-
-  const gesZeile = (q) => {
-    if (!q) return `<td>—</td><td>—</td>`;
-    const c = (q.rendite_pct || 0) >= 0 ? "up" : "down";
-    return `<td class="${c}">${eur((q.ende || 10000) - 10000)}</td>` +
-           `<td class="${c}">${pct(q.rendite_pct || 0)}</td>`;
-  };
-
-  // Beteiligung: beide Rechnungen, so wie die Tabelle daueber auch beide zeigt. Sonst
-  // stuende auf der Seite eine andere Zahl als im Backtest-Bericht (der rechnet mit der
-  // Live-Variante, also MIT Flush) und man haelt eine davon fuer falsch.
-  const bet = (po && po.beteiligung) || p.beteiligung || null;
-  const betMit = po && po.beteiligung && p.beteiligung ? p.beteiligung : null;
-  const basisReihe = mo ? Object.values(mo) : ms;
-  const plus = basisReihe.filter(m => m.gewinn > 0).length;
-  const best = basisReihe.reduce((a, b) => (b.rendite_pct > a.rendite_pct ? b : a));
-  const schlecht = basisReihe.reduce((a, b) => (b.rendite_pct < a.rendite_pct ? b : a));
-
-  document.getElementById("monate").innerHTML =
-    `<h2>Monat für Monat — was hätte das Konto gemacht?</h2>` +
-    `<div class="sub">Simulation über ${bt.zeitraum} · Start 10.000 € · ` +
-    `Gebühr ${(p.fee_pct ?? 0.1).toLocaleString("de-DE")} %/Order, kein Hebel · ` +
-    `erster und letzter Monat angeschnitten.` +
-    (mo ? `<br><b>Zwei Rechnungen:</b> <b>ohne Flush</b> = nur die ruhigen Einstiege, also ` +
-          `der Boden, den man sicher mitnimmt. <b>mit Flush</b> = zusätzlich jeder ` +
-          `aggressive Kapitulations-Einstieg (im Chart und in Telegram als ⚡ markiert). ` +
-          `Wer nur manche davon mitgeht, landet dazwischen.`
-        : `<br>Variante <b>${bt.variante || "—"}</b>.`) +
-    `</div>` +
-    `<table><thead><tr><th>Monat</th>` +
-    (hatBtc ? `<th>Bitcoin</th>` : ``) +
-    (mo ? `<th colspan="2">ohne Flush</th><th colspan="2" class="schwach">mit Flush</th>`
-        : `<th>Gewinn / Verlust</th><th>%</th>`) +
-    (hatBtc ? `<th class="engmob">davon<br>eingefangen</th>` : ``) +
-    `<th class="hidemob"></th></tr></thead>` +
-    `<tbody>${zeilen}</tbody>` +
-    `<tfoot><tr><td>Gesamt</td>` + (hatBtc ? `<td>—</td>` : ``) +
-    (mo ? gesZeile(po) + gesZeile(p) : gesZeile(p)) +
-    (hatBtc ? `<td class="engmob">—</td>` : ``) +
-    `<td class="hidemob"></td></tr>` +
-    `<tr><td>größter Rückgang</td>` + (hatBtc ? `<td>—</td>` : ``) +
-    (mo ? `<td colspan="2" class="down">${pct(po.max_drawdown_pct || 0)}</td>` +
-          `<td colspan="2" class="down schwach">${pct(p.max_drawdown_pct || 0)}</td>`
-        : `<td colspan="2" class="down">${pct(p.max_drawdown_pct || 0)}</td>`) +
-    (hatBtc ? `<td class="engmob">—</td>` : ``) +
-    `<td class="hidemob"></td></tr></tfoot></table>` +
-    // E24.2: die beiden Kennzahlen aus E22, hier auf der Seite statt nur im Bericht.
-    // Sie kommen fertig aus backtest.json (dort in simulate() gerechnet) — bewusst NICHT
-    // hier noch einmal, sonst koennten Bericht und Seite verschiedene Zahlen zeigen.
-    (bet
-      ? `<div class="note" style="border-left:2px solid #2a3242;padding-left:10px">` +
-        `<b>Was fangen wir von der Marktbewegung ein?</b><br>` +
-        `<b>Aufwärts ${bet.auf_pct} %</b>${betMit ? ` (mit Flush ${betMit.auf_pct} %)` : ``} — ` +
-        `in den ${bet.auf_monate} steigenden Monaten legte Bitcoin zusammen ` +
-        `${pct(bet.auf_btc)} zu, die Engine ${pct(bet.auf_engine)}.<br>` +
-        `<b>Abwärts ${bet.ab_pct} %</b>${betMit ? ` (mit Flush ${betMit.ab_pct} %)` : ``} — ` +
-        `in den ${bet.ab_monate} fallenden Monaten verlor Bitcoin ${pct(bet.ab_btc)}, ` +
-        `die Engine ${pct(bet.ab_engine)}.<br>` +
-        `<span style="color:var(--muted)">Aufwärts ist hoch gut, abwärts ist niedrig oder ` +
-        `negativ gut. 100 % aufwärts hieße: genau wie der Markt. Ein System, das in ` +
-        `Schwäche kauft und gestaffelt Gewinne mitnimmt, liegt naturgemäß darunter — die ` +
-        `Frage ist, wie weit. Näherung: Monatsrenditen addiert statt verkettet.</span>` +
-        `</div>`
-      : ``) +
-    `<div class="note">Monate im Plus${mo ? " (ohne Flush)" : ""}: ` +
-    `<b>${plus} von ${basisReihe.length}</b> · ` +
-    `bester <b class="up">${name(best.monat)} ${pct(best.rendite_pct)}</b> · schwächster ` +
-    `<b class="down">${name(schlecht.monat)} ${pct(schlecht.rendite_pct)}</b>.<br>` +
-    (hatBtc ? `<b>„davon eingefangen"</b> ist der Anteil${mo ? " der Spalte <b>ohne Flush</b>" : ""} ` +
-              `an der Bitcoin-Bewegung des Monats — nur in steigenden Monaten, weil ein ` +
-              `Anteil am Rückgang keine sinnvolle Größe wäre.<br>` : ``) +
-    `„Größter Rückgang" ist der tiefste Einbruch unterwegs, gemessen vom jeweiligen ` +
-    `Höchststand des Kontos — nicht das Endergebnis. Je näher an null, desto ruhiger.<br>` +
-    `Die Euro-Beträge wachsen mit dem Konto, weil Gewinne reinvestiert werden — ein später ` +
-    `Monat arbeitet mit mehr Kapital als ein früher. Fair vergleichbar sind daher nur die ` +
-    `Prozente.<br><b>Das ist eine Rückrechnung auf historischen Kursen, kein Live-Konto und ` +
-    `keine Zusage für die Zukunft.</b> Sie kauft und verkauft zu exakten Signalpreisen ohne ` +
-    `Schlupf und ohne Verzögerung — in der Praxis ist das Ergebnis schlechter.</div>`;
-  document.getElementById("monate").hidden = false;
-}
 
 let priceLines = [];
 async function fetchJson(url) {
