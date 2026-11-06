@@ -260,6 +260,8 @@ def check(store_reader,code_reader,backup_reader,policy,now,admission=None):
         repo=d['private_store_repository']
         fence_record=store_reader.read(repo,d['fence_branch'],actions.FENCE_PATH)
         fence=actions.parse_fence(fence_record,d)
+        from aborted_maintenance import refuse_healthy
+        refuse_healthy(fence)
         if fence['phase']!='closed' or not fence['completion']: raise ValueError('Fence open/uninitialized')
         store_reader.current_pins[(repo,d['store_branch'],github.STORE_PATH)]=fence['completion']['stream']
         store=github.read_only(store_reader,repo,d['store_branch'],d['store_id'])

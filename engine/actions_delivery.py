@@ -84,6 +84,12 @@ def parse_fence(record, deployment):
               or run.get('attempt') != '1' or cursors[run['workflow']] != {'number': run['number'], 'id': run['id']}
               or not run['number']):
             raise ValueError('run')
+        completion = value.get('completion') or {}
+        if 'outcome' in completion:
+            from aborted_maintenance import review_evidence
+            if completion['outcome'] != 'aborted' or value['phase'] != 'closed':
+                raise ValueError('maintenance outcome')
+            review_evidence(completion['maintenance']['review'])
         return value
     except (ValueError, KeyError, TypeError, AttributeError):
         raise StoreConflict('Fence identity/shape mismatch') from None
@@ -219,6 +225,20 @@ class ActionsClient(ProductionContentsClient):
         if (value['phase'] != 'closed' or run['number'] <= value['cursors'][workflow]['number']
                 or any(c['id'] == run['id'] for c in value['cursors'].values())):
             raise StoreConflict('Open/old/repeated Actions run requires operator review')
+        if (value.get('completion') or {}).get('outcome') == 'aborted':
+            import json
+            from aborted_maintenance import validate_pair, STREAM_PIN, FENCE_PIN
+            completion = value['completion']
+            observed = self.read(deployment['private_store_repository'], deployment['store_branch'])
+            envelope = json.loads(observed['body'])
+            loc = completion['stream']
+            if (observed['commit_sha'] != loc['commit_sha'] or observed['blob_sha'] != loc['blob_sha']
+                    or self.parents(deployment['private_store_repository'], observed['commit_sha']) != [STREAM_PIN]
+                    or self.parents(deployment['private_store_repository'], record['commit_sha']) != [FENCE_PIN]
+                    or run.get('kind') not in ('signal','watch')
+                    or int(run.get('expected_start_ms', '0')) <= completion['maintenance']['review']['stopped_at_ms']):
+                raise StoreConflict('Fresh regular run after confirmed maintenance required')
+            validate_pair(value, envelope, loc)
         self.run = dict(run)
         self.fence = {**value, 'phase': 'open', 'run': dict(run),
                       'cursors': {**value['cursors'], workflow: {'number': run['number'], 'id': run['id']}},

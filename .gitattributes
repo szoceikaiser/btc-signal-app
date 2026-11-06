@@ -12,3 +12,24 @@ docs/produktionsuebernahme-2026-10/*.log -text
 # Immutable entry workflow digests use canonical LF bytes on every checkout.
 ops/produktion/*workflow.disabled.yml text eol=lf
 ops/sicherungsprobe/*.disabled.yml text eol=lf
+
+# Exact delivery-extension and entry-review bytes on every platform.
+engine/aborted_maintenance.py text eol=lf
+engine/actions_delivery.py text eol=lf
+engine/actions_freshness.py text eol=lf
+tools/p4_backup_pair.py text eol=lf
+tools/pinned_delivery_entry.py text eol=lf
+tools/produktion_pages_export.py text eol=lf
+tools/materialize_delivery_overlay.py text eol=lf
+tools/bounded_maintenance_client.py text eol=lf
+tools/maintenance_abort_step.py text eol=lf
+tools/test_release_evidence.py text eol=lf
+engine/test_production_migration.py text eol=lf
+.github/workflows/signal.yml text eol=lf
+.github/workflows/watch.yml text eol=lf
+.github/workflows/lage.yml text eol=lf
+.github/workflows/freshness.yml text eol=lf
+.github/workflows/backup.yml text eol=lf
+.github/workflows/backup-verify.yml text eol=lf
+.github/workflows/pages.yml text eol=lf
+delivery-extension.json -text
