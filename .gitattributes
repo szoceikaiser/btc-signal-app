@@ -33,3 +33,5 @@ engine/test_production_migration.py text eol=lf
 .github/workflows/backup-verify.yml text eol=lf
 .github/workflows/pages.yml text eol=lf
 delivery-extension.json -text
+
+tools/test_publication_package.py text eol=lf

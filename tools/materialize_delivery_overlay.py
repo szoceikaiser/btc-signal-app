@@ -61,7 +61,25 @@ for name in ('signal','watch','lage','freshness','backup','backup-verify','pages
             core='../core' if name=='freshness' else '.'
             extra=' --observer-root .' if name=='freshness' else ''
             text=text.replace('python3 tools/'+tool,command('../extension',core)+extra+' --tool '+tool+' --')
-    if name=="freshness":
-        text=text.replace("7abc344be9e5e0794d31ce9b9c2fe5ab216d3f8292707a5a5dfa9202f71f1e78","4fadccc45fa41b26d6c6de3784b2743454c6cfdbd38ae9260db5f815bf1c22cf")
     (ROOT/path).write_bytes(text.encode())
 print('manifest',mh,'loader',lh)
+
+# Effective policy must be supplied by an authorized reader; never infer it from stale evidence.
+import os
+review_path=os.environ.get("BTC_MONITOR_REVIEW_FILE")
+if review_path:
+    policy=json.loads(Path(review_path).read_bytes())
+    normalized=json.loads(json.dumps(policy))
+    normalized["monitor_entry"]["workflow_sha256"]="SELF_WORKFLOW_SHA256"
+    canonical=lambda v:json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False,allow_nan=False).encode()
+    old="7abc344be9e5e0794d31ce9b9c2fe5ab216d3f8292707a5a5dfa9202f71f1e78"
+    if hashlib.sha256(canonical(normalized)).hexdigest()!=old: raise ValueError("Effective reviewed monitor policy differs; stop publication")
+    for name in ("signal","watch","lage","backup","backup-verify","pages"):
+        path=".github/workflows/"+name+".yml"
+        normalized["entry_workflows"][path]=hashlib.sha256((ROOT/path).read_bytes()).hexdigest()
+    new=hashlib.sha256(canonical(normalized)).hexdigest()
+    target=ROOT/".github/workflows/freshness.yml"
+    target.write_bytes(target.read_bytes().replace(old.encode(),new.encode()))
+    print("effective monitor normalized target",new)
+else:
+    print("BLOCKED: effective monitor policy absent; freshness policy guard is provisional")
