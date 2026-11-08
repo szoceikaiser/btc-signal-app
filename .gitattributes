@@ -35,3 +35,5 @@ engine/test_production_migration.py text eol=lf
 delivery-extension.json -text
 
 tools/test_publication_package.py text eol=lf
+tools/test_delivery_workflow_yaml.py text eol=lf
+tools/requirements-workflow-yaml.txt text eol=lf
