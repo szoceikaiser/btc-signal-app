@@ -127,6 +127,8 @@ def observe(client, d, config):
     repo = d['private_store_repository']
     first = client.read(repo, d['fence_branch'], actions.FENCE_PATH)
     fence = actions.parse_fence(first, d)
+    from aborted_maintenance import refuse_healthy
+    refuse_healthy(fence)
     if fence['phase'] != 'closed' or not fence['completion'] or fence['run'] is None:
         raise github.StoreConflict('No exact closed completion to publish')
     store = github.read_only(client, repo, d['store_branch'], d['store_id'])

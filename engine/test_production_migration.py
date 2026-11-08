@@ -39,7 +39,10 @@ def fixture(root):
              'stream_id':'synthetic-stream','store_id':'synthetic-store',
              'target_binding':hashlib.sha256(b'synthetic-target').hexdigest(),
              'bot_identity':'synthetic-bot','code_sha':'a'*40}
-    target=json.loads((ROOT/'site/data/config.json').read_text(encoding='utf-8'))
+    # Freeze this migration fixture to its own P1 source, not today's strategy.
+    target=json.loads(_blob('config.json'))
+    target={k:v for k,v in target.items() if not k.startswith('_')}
+    target['muster_cvd']='usd'
     for name,value in [('source-manifest.json',manifest),('cutover.json',cutover),('config-target.json',target)]:
         (root/name).write_text(json.dumps(value,ensure_ascii=False),encoding='utf-8')
     return source,root/'source-manifest.json',root/'cutover.json',root/'config-target.json',root/'out'

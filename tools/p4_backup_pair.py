@@ -71,11 +71,15 @@ def crosscheck(value, stream_repo, stream_pin, identity, deployment, budget):
     if any(loc.get(k)!=v for k,v in expected.items()): raise ValueError('Foreign fence completion')
     b.git(stream_repo,budget,'merge-base','--is-ancestor',loc['commit_sha'],stream_pin)
     with b.batch(stream_repo,budget) as read:
-        _,body,env=b.inspect(read,loc['commit_sha'],identity,b.parser(identity))
+        parents,body,env=b.inspect(read,loc['commit_sha'],identity,b.parser(identity))
     blob=hashlib.sha1(b'blob '+str(len(body)).encode()+b'\0'+body).hexdigest()
     if (loc['revision']!=env['revision'] or loc['blob_sha']!=blob or loc['snapshot_digest']!=env['body_digest']
             or any(env['snapshot']['control'][k]!=deployment[k] for k in ('code_sha','config_sha256','bot_identity'))):
         raise ValueError('Fence completion pin mismatch')
+    if value['completion'].get('outcome') == 'aborted':
+        from aborted_maintenance import validate_pair, STREAM_PIN
+        if parents != [STREAM_PIN]: raise ValueError('Foreign maintenance parent')
+        validate_pair(value, env, loc)
 
 
 def fence_segments(root, deployment, budget):
