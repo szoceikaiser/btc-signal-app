@@ -3,9 +3,11 @@ from pathlib import Path
 import hashlib
 import json
 import subprocess
+import re
 
 ROOT=Path(__file__).resolve().parents[1]
 BASE='8b4862745afdf7e4733a7ec7648eb0cc16d65935'
+PUBLISHED='8caee66b2231a765d15f1991eaf9039ee1e8cfb9'
 m=json.loads((ROOT/'delivery-extension.json').read_bytes())
 m['files']={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in m['files']}
 (ROOT/'delivery-extension.json').write_bytes(json.dumps(m,sort_keys=True,separators=(',',':')).encode())
@@ -61,6 +63,12 @@ for name in ('signal','watch','lage','freshness','backup','backup-verify','pages
             core='../core' if name=='freshness' else '.'
             extra=' --observer-root .' if name=='freshness' else ''
             text=text.replace('python3 tools/'+tool,command('../extension',core)+extra+' --tool '+tool+' --')
+    if name in ('signal','watch','lage','backup','backup-verify'):
+        # A colon-space inside the Python bootstrap is not a YAML plain scalar.
+        # Strip chomping preserves the intended command without a final LF.
+        text,count=re.subn(r'(?m)^(        )run: (python3 -c .*)$',
+            lambda match:match[1]+'run: |-\n'+match[1]+'  '+match[2],text)
+        if count!=1: raise ValueError('Exactly one bootstrap run block required: '+name)
     (ROOT/path).write_bytes(text.encode())
 print('manifest',mh,'loader',lh)
 
@@ -72,14 +80,16 @@ if review_path:
     normalized=json.loads(json.dumps(policy))
     normalized["monitor_entry"]["workflow_sha256"]="SELF_WORKFLOW_SHA256"
     canonical=lambda v:json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False,allow_nan=False).encode()
-    old="7abc344be9e5e0794d31ce9b9c2fe5ab216d3f8292707a5a5dfa9202f71f1e78"
+    published=subprocess.check_output(['git','-C',str(ROOT),'show',PUBLISHED+':.github/workflows/freshness.yml']).decode()
+    old=re.search(r'expected = "([0-9a-f]{64})"',published).group(1)
     if hashlib.sha256(canonical(normalized)).hexdigest()!=old: raise ValueError("Effective reviewed monitor policy differs; stop publication")
     for name in ("signal","watch","lage","backup","backup-verify","pages"):
         path=".github/workflows/"+name+".yml"
         normalized["entry_workflows"][path]=hashlib.sha256((ROOT/path).read_bytes()).hexdigest()
     new=hashlib.sha256(canonical(normalized)).hexdigest()
     target=ROOT/".github/workflows/freshness.yml"
-    target.write_bytes(target.read_bytes().replace(old.encode(),new.encode()))
+    template_guard=re.search(rb'expected = "([0-9a-f]{64})"',target.read_bytes()).group(1)
+    target.write_bytes(target.read_bytes().replace(template_guard,new.encode()))
     print("effective monitor normalized target",new)
 else:
     print("BLOCKED: effective monitor policy absent; freshness policy guard is provisional")
