@@ -76,10 +76,16 @@ def crosscheck(value, stream_repo, stream_pin, identity, deployment, budget):
     if (loc['revision']!=env['revision'] or loc['blob_sha']!=blob or loc['snapshot_digest']!=env['body_digest']
             or any(env['snapshot']['control'][k]!=deployment[k] for k in ('code_sha','config_sha256','bot_identity'))):
         raise ValueError('Fence completion pin mismatch')
-    if value['completion'].get('outcome') == 'aborted':
+    if value['completion'].get('outcome') == 'aborted' and 'recovery' not in value['completion']:
         from aborted_maintenance import validate_pair, STREAM_PIN
         if parents != [STREAM_PIN]: raise ValueError('Foreign maintenance parent')
         validate_pair(value, env, loc)
+    if 'recovery' in value['completion']:
+        from safe_recovery import validate
+        validate(value,env,loc)
+        proof=value['completion']['recovery']
+        if proof['schema']=='btc-owner-abort-recovery-v1' and parents!=[proof['old_stream_commit']]:
+            raise ValueError('Owner recovery stream parent differs')
 
 
 def fence_segments(root, deployment, budget):

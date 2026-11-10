@@ -14,9 +14,24 @@ import sys
 import types
 import contextlib
 import os
+import re
 
 CORE = '20d755a4332fb32aeab08b1973b650eeae10f31e'
+
+def public_monitor_result(value):
+    known={'configuration','fence','latest_run','schedule','completions','independent_backup',
+           'backup_ancestry','final_reobservation','complete'}
+    detail=value.get('diagnostic',{})
+    result={'phase':detail.get('phase') if detail.get('phase') in known else 'monitor',
+            'status':'ok' if value.get('http_status')==200 else 'refused_or_halted'}
+    for key in ('stream_commit','fence_commit'):
+        if re.fullmatch('[0-9a-f]{40}',str(detail.get(key,''))):result[key]=detail[key]
+    return result
 MODULES = {'aborted_maintenance':'engine/aborted_maintenance.py',
+           'safe_recovery':'engine/safe_recovery.py',
+           'github_recovery_journal':'engine/github_recovery_journal.py',
+           'github_recovery':'tools/github_recovery.py',
+           'continuous_operations':'tools/continuous_operations.py',
            'actions_delivery':'engine/actions_delivery.py',
            'actions_freshness':'engine/actions_freshness.py',
            'produktion_pages_export':'tools/produktion_pages_export.py',
@@ -46,11 +61,12 @@ def install(core, extension, manifest_sha256):
     # Load original imports first. Existing objects/ROOT/check_code_pin retain core paths.
     sys.path[:0]=[str(core/'engine'),str(core/'tools')]
     entry=importlib.import_module('produktion_actions_runner')
-    modules={name:importlib.import_module(name) for name in MODULES if name!='aborted_maintenance'}
-    modules['aborted_maintenance']=types.ModuleType('aborted_maintenance')
-    sys.modules['aborted_maintenance']=modules['aborted_maintenance']
-    for name in ('aborted_maintenance','actions_delivery','actions_freshness',
-                 'produktion_pages_export','p4_backup_pair'):
+    new=('aborted_maintenance','safe_recovery','github_recovery_journal','github_recovery','continuous_operations')
+    modules={name:importlib.import_module(name) for name in MODULES if name not in new}
+    for name in new:
+        modules[name]=types.ModuleType(name);sys.modules[name]=modules[name]
+    for name in ('aborted_maintenance','safe_recovery','github_recovery_journal','actions_delivery','actions_freshness',
+                 'produktion_pages_export','p4_backup_pair','continuous_operations','github_recovery'):
         module=modules[name]; path=MODULES[name]
         module.__file__=str(core/path)
         exec(compile(sources[path],str(extension/path),'exec'),module.__dict__)
@@ -62,7 +78,7 @@ def _run(phase):
     p.add_argument('--manifest-sha256',required=True)
     p.add_argument('--kind',choices=('signal','watch','lage'))
     p.add_argument('--runtime'); p.add_argument('--data-dir')
-    p.add_argument('--tool',choices=('p4_hosted_backup.py','produktion_actions_freshness.py','renderer'))
+    p.add_argument('--tool',choices=('p4_hosted_backup.py','produktion_actions_freshness.py','renderer','continuous_operations.py'))
     p.add_argument('--renderer-root')
     p.add_argument('--observer-root')
     p.add_argument('tool_args',nargs=argparse.REMAINDER)
@@ -73,6 +89,8 @@ def _run(phase):
     if a.tool:
         import runpy
         target=Path(a.core)/'tools'/a.tool
+        if a.tool=='continuous_operations.py':
+            target=Path(a.extension)/'tools'/a.tool
         if a.tool=='produktion_actions_freshness.py':
             observer=Path(a.observer_root).resolve()
             pin='f3f054851f500af1926b149f13a2ee8890a8c2bc'
@@ -97,7 +115,14 @@ def _run(phase):
             target=renderer/'tools/c05_pages_export.py'
         sys.argv=[str(target)]+(a.tool_args[1:] if a.tool_args[:1]==['--'] else a.tool_args)
         try:
-            runpy.run_path(str(target),run_name='__main__')
+            if a.tool=='produktion_actions_freshness.py':
+                parser=argparse.ArgumentParser();parser.add_argument('--policy',required=True)
+                args=parser.parse_args(sys.argv[1:])
+                namespace=runpy.run_path(str(target),run_name='reviewed_monitor_module')
+                result=namespace['run'](args.policy)
+                phase[1]=public_monitor_result(result)
+                if result.get('http_status')!=200:raise SystemExit(20)
+            else:runpy.run_path(str(target),run_name='__main__')
         finally:
             if a.tool=='produktion_actions_freshness.py':
                 sys.modules['produktion_actions_runner']=old_entry
@@ -106,7 +131,7 @@ def _run(phase):
         entry.run_runtime(a.runtime,a.kind,a.data_dir)
 
 def main():
-    phase=['arguments']
+    phase=['arguments',None]
     code=0
     try:
         # Provider/exception text is never public, including successful fetch logs.
@@ -116,6 +141,7 @@ def main():
         code=0 if exc.code in (None,0) else 20
     except BaseException:
         code=20
+    if phase[1] is not None:print(json.dumps(phase[1],sort_keys=True))
     if code:
         print('delivery phase='+phase[0]+' reason=refused_or_halted',file=sys.stderr)
     return code

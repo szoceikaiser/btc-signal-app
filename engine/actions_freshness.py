@@ -253,18 +253,24 @@ def read_backup(reader,code_reader,policy,now):
 
 def check(store_reader,code_reader,backup_reader,policy,now,admission=None):
     from freshness import response
+    phase='configuration';pins={}
     try:
         if policy.get('enabled') is not True or policy.get('schema')!='p4-actions-monitor-v1': raise ValueError('Monitor disabled')
         d=policy['deployment']
         if d['schedule_contract']!=slots.CONTRACT: raise ValueError('Schedule contract mismatch')
         repo=d['private_store_repository']
+        phase='fence'
         fence_record=store_reader.read(repo,d['fence_branch'],actions.FENCE_PATH)
+        pins['fence_commit']=fence_record['commit_sha']
         fence=actions.parse_fence(fence_record,d)
+        if 'recovery' in (fence.get('completion') or {}):
+            raise ValueError('Fresh successful regular run after recovery required')
         from aborted_maintenance import refuse_healthy
         refuse_healthy(fence)
         if fence['phase']!='closed' or not fence['completion']: raise ValueError('Fence open/uninitialized')
         store_reader.current_pins[(repo,d['store_branch'],github.STORE_PATH)]=fence['completion']['stream']
         store=github.read_only(store_reader,repo,d['store_branch'],d['store_id'])
+        pins['stream_commit']=store._record['commit_sha']
         original=deepcopy(store._record)
         if fence['completion']['stream']!=store.confirmed_record(): raise ValueError('Fence/stream completion differs')
         if fence['run']['kind']=='lage':
@@ -275,10 +281,15 @@ def check(store_reader,code_reader,backup_reader,policy,now,admission=None):
         else:
             from produktion_actions_runner import verify_health
             verify_health(store,d,fence['run'])
+        phase='latest_run'
         verify_fence_run(code_reader,d,fence,now,policy)
+        phase='schedule'
         runs,raws=read_runs(code_reader,policy,now)
+        phase='completions'
         verify_completions(store,runs,policy,now)
+        phase='independent_backup'
         receipt,backup_record,backup_ref=read_backup(backup_reader,code_reader,policy,now)
+        phase='backup_ancestry'
         for kind,branch,path in (('stream',d['store_branch'],github.STORE_PATH),('fence',d['fence_branch'],actions.FENCE_PATH)):
             pin=receipt['manifest']['pins'][kind]
             current=original if kind=='stream' else fence_record
@@ -292,6 +303,7 @@ def check(store_reader,code_reader,backup_reader,policy,now,admission=None):
                 raise ValueError('Backup fence pin mismatch')
         # Reobserve every mutable input after ALL completion and backup checks.
         if admission: admission()
+        phase='final_reobservation'
         for route,raw in list(code_reader.mutable_metadata.items()):
             if code_reader._request('GET',route)!=raw: raise ValueError('Run/jobs moved during check')
         for route,raw in raws.items():
@@ -305,9 +317,11 @@ def check(store_reader,code_reader,backup_reader,policy,now,admission=None):
                 or not same(store_reader,repo,d['store_branch'],original)
                 or not same(store_reader,repo,d['fence_branch'],fence_record)):
             raise ValueError('Store/fence/backup moved during check')
-        return response()
+        result=response();result['diagnostic']={'phase':'complete',**pins};return result
     except ValueError as exc:
         # Only controlled local categories, never provider response/credential text.
-        return response('candidate_evidence_invalid')
+        result=response('candidate_evidence_invalid')
+        result['diagnostic']={'phase':phase,**pins};return result
     except Exception:
-        return response('candidate_evidence_unavailable')
+        result=response('candidate_evidence_unavailable')
+        result['diagnostic']={'phase':phase,**pins};return result
