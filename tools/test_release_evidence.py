@@ -33,9 +33,30 @@ def write_json(path,value): path.write_bytes(canonical(value).encode())
 
 def generate():
     OUT.mkdir(parents=True,exist_ok=False)
-    from test_production_runtime import seeded
+    from test_production_migration import fixture as legacy_fixture
+    import produktion_migrate, produktion_store
     import durable_delivery as durable,telegram_outbox as box,run_health
-    (OUT/'seed').mkdir();store,data,paths=seeded(OUT/'seed')
+    (OUT/'seed').mkdir();paths=legacy_fixture(OUT/'seed')
+    # Synthetic legacy source, explicitly flat, and the exact published C05
+    # target. No production binding or renderer constant is rewritten.
+    source=paths[0];old_config=json.loads((source/'config-source.json').read_bytes())
+    old_state=json.loads((source/'state.json').read_bytes())
+    flat=dict(pos_state='FLAT',last_signal_ts=old_state['last_signal_ts'],
+              config={k:v for k,v in old_config.items() if not k.startswith('_')},last_close=100)
+    write_json(source/'state.json',flat)
+    manifest=json.loads(paths[1].read_bytes());raw=(source/'state.json').read_bytes()
+    manifest['files']['state.json']={'sha256':hashlib.sha256(raw).hexdigest(),'size':len(raw)}
+    manifest.update(repository='synthetic-c05-source',code_sha=CORE,source_sha='d'*40,git_tree='e'*40)
+    write_json(paths[1],manifest)
+    target=json.loads((ROOT/'site/data/config.json').read_bytes())
+    from production_contract import effective_config
+    assert digest(effective_config(target))=='3efe8a17330c228a75fe879d4e7c7ed0cade766e4a07ca0c05832b88aa3d282b'
+    write_json(paths[3],target)
+    cutover=json.loads(paths[2].read_bytes());target=effective_config(target)
+    cutover.update(code_sha=CORE,source_sha='d'*40,approved_config_differences=sorted(
+        k for k in set(flat['config'])|set(target) if flat['config'].get(k)!=target.get(k)))
+    write_json(paths[2],cutover)
+    produktion_migrate.convert(*paths);store=OUT/'seed/store';produktion_store.provision(paths[-1],store)
     with durable.read_only_volume(store,'synthetic-store') as volume: snapshot=copy.deepcopy(volume.snapshot)
     snapshot['control']['code_sha']=CORE
     target='synthetic-target';assert snapshot['control']['target_binding']==hashlib.sha256(target.encode()).hexdigest()
@@ -110,11 +131,12 @@ def generate():
 
 class Provider:
     def __init__(self,fixture):
-        self.fixture=fixture;self.puts=[];self.meta=None
-    def local(self,branch):return OUT/('stream.git' if branch==BRANCH else 'fence.git')
+        self.fixture=fixture;self.puts=[];self.meta=None;self.metadata={};self.own_run=None;self.calls=[]
+    def local(self,branch):
+        return OUT/('journal.git' if branch=='recovery-journal-live' else 'stream.git' if branch==BRANCH else 'fence.git')
     def heads(self):return [(branch,git(self.local(branch),'rev-parse','refs/heads/'+branch).decode().strip()) for branch in (BRANCH,FB)]
     def locate(self,pin,path):
-        return rec(self.local(BRANCH if path==g.STORE_PATH else FB),pin,path)
+        return rec(self.local('recovery-journal-live' if path.startswith('recovery/') else BRANCH if path==g.STORE_PATH else FB),pin,path)
     def open(self,request,timeout):
         u=urllib.parse.urlsplit(request.full_url)
         if u.netloc=='github.com':
@@ -125,6 +147,25 @@ class Provider:
             value=rec(OUT/'entry.git',parts[3],path) if '/'.join(parts[1:3])=='synthetic/code' else self.locate(parts[3],path)
             return io.BytesIO(value['body'])
         parts=u.path.split('/');repo='/'.join(parts[2:4]);tail='/'+'/'.join(parts[4:]) if len(parts)>4 else ''
+        self.calls.append((request.get_method(),repo,tail))
+        if tail.startswith('/contents/recovery/incidents/'):
+            path=tail[len('/contents/'):]
+            if request.get_method()=='GET':
+                pin=urllib.parse.parse_qs(u.query)['ref'][0]
+                try:r=self.locate(pin,path)
+                except subprocess.CalledProcessError:
+                    from urllib.error import HTTPError
+                    raise HTTPError(request.full_url,404,'synthetic absent',{},None)
+                value=dict(type='file',encoding='base64',sha=r['blob_sha'],content=base64.b64encode(r['body']).decode())
+            else:
+                payload=json.loads(request.data);local=self.local('recovery-journal-live')
+                head=git(local,'rev-parse','refs/heads/recovery-journal-live').decode().strip()
+                try:old=self.locate(head,path)
+                except subprocess.CalledProcessError:old=None
+                assert payload.get('sha')==(old['blob_sha'] if old else None)
+                pin=commit_file(local,'recovery-journal-live',path,base64.b64decode(payload['content']),head)
+                value={'commit':{'sha':pin}}
+            return io.BytesIO(canonical(value).encode())
         if request.get_method()=='PUT':
             p=json.loads(request.data);branch=p['branch'];local=self.local(branch)
             old=dict(self.heads())[branch];path=tail.split('/contents/')[1]
@@ -136,10 +177,21 @@ class Provider:
             branch=tail.rsplit('/',1)[1];value=next(r['body'] for r in self.fixture['rules'] if r['repo']==repo and r['branch']==branch)
         elif tail.startswith('/rulesets/'):
             i=int(tail.rsplit('/',1)[1]);value=next(r['body'] for r in self.fixture['sets'] if r['repo']==repo and r['id']==i)
-        elif tail.startswith('/actions/runs/'):value=self.meta
+        elif tail=='/actions/runs':
+            values=[self.own_run] if self.own_run and urllib.parse.parse_qs(u.query)['status']==['in_progress'] else []
+            value={'total_count':len(values),'workflow_runs':values}
+        elif tail.startswith('/actions/runs/'):
+            rid=tail.split('/')[3]
+            value=self.metadata[rid]['jobs' if '/jobs' in tail else 'run'] if rid in self.metadata else self.meta
         elif tail.startswith('/compare/'):
-            value=dict(base_commit={'sha':CORE},merge_base_commit={'sha':CORE},status='ahead')
-        elif tail.startswith('/git/ref/heads/'):value={'object':{'sha':dict(self.heads())[tail.rsplit('/',1)[1]]}}
+            base,head=tail[len('/compare/'):].split('...')
+            local=OUT/'entry.git' if repo=='synthetic/code' else next(p for p in (self.local(BRANCH),self.local(FB),self.local('recovery-journal-live'))
+                if p.exists() and subprocess.run(['git','-C',str(p),'cat-file','-e',head],capture_output=True).returncode==0)
+            ancestor=git(local,'merge-base',base,head).decode().strip()
+            value=dict(base_commit={'sha':base},merge_base_commit={'sha':ancestor},status='identical' if base==head else 'ahead')
+        elif tail.startswith('/git/ref/heads/'):
+            branch=tail.rsplit('/',1)[1]
+            value={'object':{'sha':git(self.local(branch),'rev-parse','refs/heads/'+branch).decode().strip()}}
         elif tail.startswith('/git/commits/'):
             pin=tail.rsplit('/',1)[1];local=next(p for p in (self.local(BRANCH),self.local(FB)) if subprocess.run(['git','-C',str(p),'cat-file','-e',pin],capture_output=True).returncode==0)
             parents=git(local,'show','-s','--format=%P',pin).decode().strip().split();value={'parents':[{'sha':p} for p in parents]}
@@ -150,6 +202,55 @@ class Provider:
             value=dict(type='file',encoding='base64',sha=r['blob_sha'],content=base64.b64encode(r['body']).decode())
         else:raise AssertionError('Unexpected synthetic route')
         return io.BytesIO(canonical(value).encode())
+
+def server_recovery(p,runtime,d,owned_run,owner_slot,code,production_manifest,test_manifest):
+    """Real server-journaled executor over the SAME Git-backed provider."""
+    import github_recovery as recovery
+    from public_access import review_hash
+    watch=(ROOT/'.github/workflows/watch.yml').read_bytes().replace(production_manifest.encode(),test_manifest.encode())
+    watch_pin=commit_file(code,'synthetic','.github/workflows/watch.yml',watch,CORE)
+    recover_yaml=(ROOT/'.github/workflows/recovery.yml').read_bytes().replace(production_manifest.encode(),test_manifest.encode())
+    recovery_pin=commit_file(code,'synthetic','.github/workflows/recovery.yml',recover_yaml,watch_pin)
+    journal_repo=p.local('recovery-journal-live')
+    seed=commit_file(journal_repo,'recovery-journal-live','recovery/seed.json',b'{"synthetic":true}')
+    repos=copy.deepcopy(runtime['public_access']['repositories']);repos[REPO]['branches'].append('recovery-journal-live')
+    access,rules,sets=access_for(repos)
+    writer_review(access,'recovery_journal_write',REPO,['recovery-journal-live'])
+    proof=access['credential_reviews']['recovery_journal_write'];proof['credential_reference']='github-fine-grained-pat:21186996';proof['sha256']=review_hash(proof)
+    for (repo,branch),body in rules.items():
+        if repo==REPO and branch=='recovery-journal-live':p.fixture['rules'].append(dict(repo=repo,branch=branch,body=body))
+    for (repo,i),body in sets.items():
+        if repo==REPO and 'refs/heads/recovery-journal-live' in body['conditions']['ref_name']['include']:
+            p.fixture['sets'].append(dict(repo=repo,id=i,body=body))
+    policy=dict(schema='btc-continuous-recovery-v1',enabled=True,activation_reviewed=True,deployment=d,
+        public_access=runtime['public_access'],entry_workflows={owned_run['workflow']:hashlib.sha256(watch).hexdigest()},
+        recovery_entry=dict(repository='synthetic/code',branch='synthetic',code_sha=CORE,
+            workflow='.github/workflows/recovery.yml',workflow_sha256=hashlib.sha256(recover_yaml).hexdigest()),
+        journal=dict(repository=REPO,branch='recovery-journal-live',reviewed=True,seed_commit=seed,public_access=access,
+            credential_reference='github-fine-grained-pat:21186996',required_permissions={'contents':'write','metadata':'read'}))
+    meta=dict(id=int(owned_run['id']),run_number=owned_run['number'],run_attempt=1,path=owned_run['workflow'],head_sha=watch_pin,
+        repository={'full_name':'synthetic/code'},head_branch='synthetic',status='completed',conclusion='failure',
+        event='workflow_dispatch',display_title='btc-v2:watch:created',created_at=iso(owner_slot+100),
+        run_started_at=iso(owner_slot+200),updated_at=iso(owner_slot+500))
+    p.metadata[owned_run['id']]={'run':meta,'jobs':{'total_count':1,'jobs':[dict(id=49991,run_id=int(owned_run['id']),run_attempt=1,
+        head_sha=watch_pin,status='completed',conclusion='failure',labels=['ubuntu-24.04'],completed_at=iso(owner_slot+500))]}}
+    own=dict(id=502,run_attempt=1,path='.github/workflows/recovery.yml',head_sha=recovery_pin,head_branch='synthetic',
+        repository={'full_name':'synthetic/code'},status='in_progress')
+    p.own_run=own;p.metadata['502']={'run':own,'jobs':{'total_count':1,'jobs':[dict(id=9001,name='recover',run_id=502,
+        run_attempt=1,head_sha=recovery_pin,status='in_progress',labels=['ubuntu-24.04'])]}}
+    environment=dict(GITHUB_REPOSITORY='synthetic/code',GITHUB_REF='refs/heads/synthetic',GITHUB_WORKFLOW_REF='synthetic/code/.github/workflows/recovery.yml@refs/heads/synthetic',
+        GITHUB_RUN_ID='502',GITHUB_RUN_ATTEMPT='1',GITHUB_JOB='recover',GITHUB_SHA=recovery_pin)
+    client=recovery.Network(policy,'SYNTHETIC-WRITER','SYNTHETIC-METADATA',p.open,lambda:owner_slot+1000)
+    identity=recovery.bind_self(client,environment);result=recovery.run(client,identity)
+    assert result['outcome']=='aborted'
+    journal_path='recovery/incidents/'+result['incident']+'.json'
+    pin=git(journal_repo,'rev-parse','refs/heads/recovery-journal-live').decode().strip()
+    ledger=json.loads(rec(journal_repo,pin,journal_path)['body'])
+    assert set(ledger['writes'])=={'stream','fence'} and all(v['status']=='confirmed' for v in ledger['writes'].values())
+    assert p.metadata[owned_run['id']]['run']['conclusion']=='failure'
+    write_json(OUT/'server-recovery-result.json',result);write_json(OUT/'server-recovery-journal.json',ledger)
+    p.own_run=None
+    return recovery_pin
 
 def worker():
     import aborted_maintenance as m
@@ -186,38 +287,50 @@ def worker():
     # historical abort above. Persist both mutations and confirm real parents.
     import safe_recovery as recover
     prior=client.read(REPO,FB,a.FENCE_PATH);opened=copy.deepcopy(closed)
-    owner_slot=f['review']['stopped_at_ms']+60000
-    owned_run=dict(number=2,id='4999',attempt='1',workflow='.github/workflows/watch.yml',kind='watch',
+    owner_slot=__import__('actions_schedule').slot_at('watch',f['review']['stopped_at_ms']+900000)
+    assert owner_slot>f['review']['stopped_at_ms']
+    owned_run=dict(number=2,id='501',attempt='1',workflow='.github/workflows/watch.yml',kind='watch',
                    expected_start_ms=str(owner_slot),deadline_utc_ms=owner_slot+900000)
     opened.update(phase='open',completion=None,write_id='synthetic-generic-open',run=owned_run)
-    opened['cursors'][owned_run['workflow']]={'number':2,'id':'4999'}
+    opened['cursors'][owned_run['workflow']]={'number':2,'id':'501'}
     openpin=commit_file(p.local(FB),FB,a.FENCE_PATH,canonical(opened).encode(),prior['commit_sha'])
-    owned=g.GitHubStore(client,REPO,BRANCH,'synthetic-store','4999','1');owned.__enter__()
-    observed=client.read(REPO,BRANCH);old_env=json.loads(observed['body'])
-    review=dict(old_fence_commit=openpin,old_fence_sha256=hashlib.sha256(canonical(opened).encode()).hexdigest(),
-        run_sha256=digest({'synthetic_completed_failure':'4999'}),jobs_sha256=digest({'synthetic_hosted_worker_terminated':True}),
-        policy_sha256=digest(runtime),confirmed_at_ms=owner_slot+1000,workers_terminated=True,run_completed=True,
-        old_owner=old_env['snapshot']['control']['owner'],old_revision=old_env['revision'],old_snapshot_digest=old_env['body_digest'],old_stream_commit=observed['commit_sha'])
-    released,event=recover.release_owner(old_env,owned_run,d,review,'synthetic-generic-release')
-    client.update(REPO,BRANCH,observed['blob_sha'],canonical(released).encode(),'synthetic-generic-release')
-    saved=client.read(REPO,BRANCH);assert client.parents(REPO,saved['commit_sha'])==[observed['commit_sha']]
-    recovered_store=g.read_only(client,REPO,BRANCH,'synthetic-store')
-    recovered=recover.owner_candidate(opened,released,recovered_store.confirmed_record(),review,event,'synthetic-generic-close')
-    fence_old=client.read(REPO,FB,a.FENCE_PATH)
-    client.update(REPO,FB,fence_old['blob_sha'],canonical(recovered).encode(),'synthetic-generic-close',a.FENCE_PATH)
-    final_recovery=client.read(REPO,FB,a.FENCE_PATH);assert client.parents(REPO,final_recovery['commit_sha'])==[openpin]
-    assert recovered['completion']['outcome']=='aborted'
-    print('PASS generic owner recovery -> two confirmed actual Git CAS writes; old historical abort preserved',flush=True)
-    slot=__import__('actions_schedule').slot_at('signal',f['review']['stopped_at_ms']+4*14400000)
+    owned=g.GitHubStore(client,REPO,BRANCH,'synthetic-store','501','1');owned.__enter__()
     code=OUT/'entry.git';code.mkdir();git(code,'init','--bare')
     (code/'objects/info/alternates').write_bytes((OUT/'core/.git/objects').as_posix().encode()+b'\n')
     production_manifest=hashlib.sha256((ROOT/'delivery-extension.json').read_bytes()).hexdigest()
     test_manifest=hashlib.sha256((OUT/'extension/delivery-extension.json').read_bytes()).hexdigest()
+    recovery_pin=server_recovery(p,runtime,d,owned_run,owner_slot,code,production_manifest,test_manifest)
+    recovered_store=g.read_only(client,REPO,BRANCH,'synthetic-store')
+    final_recovery=client.read(REPO,FB,a.FENCE_PATH);recovered=json.loads(final_recovery['body'])
+    assert recovered['completion']['outcome']=='aborted'
+    print('PASS server-journaled generic owner recovery -> two confirmed actual Git CAS writes',flush=True)
+    loc=recovered_store.confirmed_record()
+    generic_pins=dict(stream={k:loc[k] for k in ('commit_sha','revision','blob_sha','snapshot_digest')},
+        fence=dict(commit_sha=final_recovery['commit_sha'],revision=int(git(p.local(FB),'rev-list','--count',final_recovery['commit_sha']).decode())-1,
+            blob_sha=final_recovery['blob_sha'],body_sha256=digest(recovered)))
+    generic_plan={**plan,'pins':generic_pins,'out':str(OUT/'pair-generic-owner')}
+    generic_backup=pair.append(generic_plan)
+    generic_restore=pair.restore(OUT/'pair-generic-owner',generic_backup['manifest'],OUT/'restored-generic-owner',generic_pins)
+    assert generic_restore['restore_blocked_verified'] and generic_restore['enabled'] is False
+    restored_fence=json.loads((OUT/'restored-generic-owner/actions-fence.original.json').read_bytes())
+    assert restored_fence==recovered and restored_fence['cursors']==recovered['cursors']
+    with durable.read_only_volume(OUT/'restored-generic-owner/stream/blocked-store','synthetic-store') as volume:
+        assert volume.snapshot['control']['mode']=='blocked'
+        assert volume.snapshot['engine']['_delivery']==recovered_store.snapshot['engine']['_delivery']
+    assert (OUT/'restored-generic-owner/RESTORE-BLOCKED.json').exists()
+    for repo in (OUT/'restored-generic-owner/stream/verification-repository',OUT/'restored-generic-owner/fence-verification-repository'):
+        assert not (repo/'objects/info/alternates').exists()
+        assert not (repo/'.git/objects/info/alternates').exists()
+    write_json(OUT/'generic-owner-restore-result.json',generic_restore)
+    print('PASS full independent P4 generic owner-aborted restore, 18 receipts/cursors/marker retained; RESTORE-BLOCKED',flush=True)
+    assert client.read(REPO,BRANCH)['commit_sha']==generic_pins['stream']['commit_sha']
+    assert client.read(REPO,FB,a.FENCE_PATH)['commit_sha']==generic_pins['fence']['commit_sha']
+    slot=__import__('actions_schedule').slot_at('signal',f['review']['stopped_at_ms']+4*14400000)
     yaml=(ROOT/'.github/workflows/signal.yml').read_bytes().replace(production_manifest.encode(),test_manifest.encode())
     (OUT/'synthetic-signal.yml').write_bytes(yaml)
-    entry_pin=commit_file(code,'synthetic','.github/workflows/signal.yml',yaml,CORE)
+    entry_pin=commit_file(code,'synthetic','.github/workflows/signal.yml',yaml,recovery_pin)
     runtime['entry_workflows']={'.github/workflows/signal.yml':hashlib.sha256(yaml).hexdigest()}
-    p.meta=dict(id=501,run_attempt=1,run_number=2,event='workflow_dispatch',repository={'full_name':'synthetic/code'},
+    p.meta=dict(id=503,run_attempt=1,run_number=2,event='workflow_dispatch',repository={'full_name':'synthetic/code'},
         path='.github/workflows/signal.yml',head_sha=entry_pin,head_branch='synthetic',created_at=iso(slot+1000),display_title='btc-v2:signal:created')
     rt=OUT/'core/.runtime';rt.mkdir(exist_ok=True);write_json(rt/'runtime.json',runtime);(rt/'data').mkdir(exist_ok=True)
     write_json(rt/'data/config.json',store.snapshot['engine']['config'])
@@ -225,41 +338,57 @@ def worker():
         BTC_DELIVERY_FENCE_BRANCH=FB,BTC_DELIVERY_STORE_ID='synthetic-store',BTC_DELIVERY_CODE_SHA=CORE,
         BTC_DELIVERY_BOT_IDENTITY=d['bot_identity'],BTC_DELIVERY_RUN_REPOSITORY='synthetic/code',
         BTC_DELIVERY_WORKFLOW='.github/workflows/signal.yml',BTC_DELIVERY_CONFIRMATION_POLICY=a.POLICY,
-        BTC_DELIVERY_RUN_ID='501',BTC_DELIVERY_RUN_ATTEMPT='1',BTC_DELIVERY_RUNNER_ROOT=str(OUT),
-        GITHUB_REPOSITORY='synthetic/code',GITHUB_RUN_ID='501',GITHUB_RUN_ATTEMPT='1',GITHUB_RUN_NUMBER='2',GITHUB_SHA=entry_pin,
+        BTC_DELIVERY_RUN_ID='503',BTC_DELIVERY_RUN_ATTEMPT='1',BTC_DELIVERY_RUNNER_ROOT=str(OUT),
+        GITHUB_REPOSITORY='synthetic/code',GITHUB_RUN_ID='503',GITHUB_RUN_ATTEMPT='1',GITHUB_RUN_NUMBER='2',GITHUB_SHA=entry_pin,
         GITHUB_REF='refs/heads/synthetic',GITHUB_WORKFLOW_REF='synthetic/code/.github/workflows/signal.yml@refs/heads/synthetic',
         GITHUB_EVENT_NAME='workflow_dispatch',BTC_DELIVERY_GITHUB_TOKEN='SYNTHETIC-STORE',GITHUB_TOKEN='SYNTHETIC-META',
         TELEGRAM_BOT_TOKEN='SYNTHETIC-TRANSPORT',TELEGRAM_CHAT_ID='synthetic-target')
     import production_confirmation,main
     real=entry.run_runtime
-    def invoke(runtime,kind,data):return real(runtime,kind,data,fetch=lambda _:([],[],[]))
+    from strategy_core import Candle,FlowPoint
+    signal_ts=slot//14400000*14400000-14400000
+    candles=[Candle(ts,100,101,99,100) for ts in range(signal_ts-300*14400000,signal_ts+1,14400000)]
+    from flow_contract import direct
+    flow=[FlowPoint(c.ts,1000,1000,1000000,0,long_pct=50,oi_btc=10000,
+        provenance={field:direct(c.ts,c.ts+14400000,'synthetic_'+field) for field in
+            ('spot_cvd','fut_cvd','oi','oi_btc','funding','long_liq','short_liq','long_pct')}) for c in candles]
+    oi=[{'ts':c.ts+14400000,'oi':1000000,'synthetic':True} for c in candles]
+    write_json(OUT/'market-fixture.json',{'synthetic':True,'signal_ts':signal_ts,'candles':[c.__dict__ for c in candles],
+        'flow':[f.__dict__ for f in flow],'oi_history':oi})
+    def invoke(runtime,kind,data):return real(runtime,kind,data,fetch=lambda _:(candles,flow,oi))
     document=yaml_parser.safe_load((OUT/'synthetic-signal.yml').read_bytes())
     command=next(step['run'] for job in document['jobs'].values() for step in job['steps'] if step.get('run','').startswith('python3 -c '))
     tokens=shlex.split(command);args=tokens[3:];args[args.index('--manifest-sha256')+1]=hashlib.sha256((OUT/'extension/delivery-extension.json').read_bytes()).hexdigest()
     before=Path.cwd()
+    real_gmtime=__import__('time').gmtime
     try:
         os.chdir(OUT)
         with patch.dict(os.environ,env),patch.object(sys,'argv',['-c']+args),patch.object(entry,'run_runtime',side_effect=invoke),\
              patch.object(production_confirmation.ProductionContentsClient,'open_request',staticmethod(p.open)),\
              patch.object(entry.time,'time',return_value=(slot+180000)/1000),\
-             patch.object(main,'deliver_telegram',side_effect=AssertionError('NO SEND')):
+             patch.object(main,'deliver_telegram',side_effect=AssertionError('NO SEND')),\
+             patch.object(main.time,'gmtime',side_effect=lambda seconds=None:real_gmtime((slot+180000)/1000 if seconds is None else seconds)):
             try:exec(tokens[2],{'__name__':'__main__'})
             except SystemExit as done:assert done.code==0,'Workflow refused'
         final=json.loads(client.read(REPO,FB,a.FENCE_PATH)['body'])
-        assert final['phase']=='closed' and final['run']['id']=='501' and 'outcome' not in final['completion']
+        assert final['phase']=='closed' and final['run']['id']=='503' and 'outcome' not in final['completion']
         assert closed['completion']['outcome']=='aborted'
-        print('PASS actual workflow bootstrap -> fresh regular run 501 -> confirmed normal completion, no send',flush=True)
+        fresh=g.read_only(client,REPO,BRANCH,'synthetic-store')
+        assert fresh.snapshot['engine']['last_signal_ts']==signal_ts
+        assert fresh.snapshot['control']['health']['successful_runs']['signal']['run']['last_signal_ts']==signal_ts
+        print('PASS real engine persisted last_signal_ts='+str(signal_ts)+' from synthetic closed candles',flush=True)
+        print('PASS actual workflow bootstrap -> fresh regular run 503 -> confirmed normal completion, no send',flush=True)
         print('PASS wrong synthetic target refused by unchanged production identity check',flush=True)
         # Exercise the real Watch workflow after the new regular Signal.
         watch_slot=__import__('actions_schedule').slot_at('watch',slot+900000)
         watch_raw=(ROOT/'.github/workflows/watch.yml').read_bytes().replace(production_manifest.encode(),test_manifest.encode())
         watch_pin=commit_file(code,'synthetic','.github/workflows/watch.yml',watch_raw,entry_pin)
         runtime['entry_workflows']['.github/workflows/watch.yml']=hashlib.sha256(watch_raw).hexdigest();write_json(rt/'runtime.json',runtime)
-        p.meta=dict(id=503,run_attempt=1,run_number=3,event='workflow_dispatch',repository={'full_name':'synthetic/code'},
+        p.meta=dict(id=504,run_attempt=1,run_number=3,event='workflow_dispatch',repository={'full_name':'synthetic/code'},
             path='.github/workflows/watch.yml',head_sha=watch_pin,head_branch='synthetic',created_at=iso(watch_slot+1000),display_title='btc-v2:watch:created')
-        watch_env={**env,'GITHUB_RUN_ID':'503','GITHUB_RUN_NUMBER':'3','GITHUB_SHA':watch_pin,
+        watch_env={**env,'GITHUB_RUN_ID':'504','GITHUB_RUN_NUMBER':'3','GITHUB_SHA':watch_pin,
             'GITHUB_WORKFLOW_REF':'synthetic/code/.github/workflows/watch.yml@refs/heads/synthetic',
-            'BTC_DELIVERY_WORKFLOW':'.github/workflows/watch.yml','BTC_DELIVERY_RUN_ID':'503'}
+            'BTC_DELIVERY_WORKFLOW':'.github/workflows/watch.yml','BTC_DELIVERY_RUN_ID':'504'}
         document=yaml_parser.safe_load(watch_raw);command=next(s['run'] for j in document['jobs'].values() for s in j['steps'] if s.get('run','').startswith('python3 -c '))
         watch_tokens=shlex.split(command);watch_args=watch_tokens[3:]
         candle=watch_slot//14400000*14400000
@@ -271,33 +400,77 @@ def worker():
             try:exec(watch_tokens[2],{'__name__':'__main__'})
             except SystemExit as done:assert done.code==0,'Fresh Watch workflow refused'
         print('PASS recovery -> real Signal workflow -> real Watch workflow, confirmed closed fence and no send',flush=True)
+        regular=g.read_only(client,REPO,BRANCH,'synthetic-store')
+        assert regular.snapshot['engine']['_delivery']['messages']==recovered_store.snapshot['engine']['_delivery']['messages']
         import runpy,produktion_pages_export as pages
+        renderer=OUT/'renderer';renderer.mkdir();git(renderer,'init')
+        git(renderer,'config','core.autocrlf','false')
+        (renderer/'.git/objects/info/alternates').write_bytes((OUT/'core/.git/objects').as_posix().encode()+b'\n')
+        renderer_pin='769240621314677e13da5afbf32821d6a350c9df'
+        git(renderer,'checkout','--detach',renderer_pin)
+        assert hashlib.sha256((renderer/'site/c05-report.json').read_bytes()).hexdigest()=='6d64486e83917a01976296c4688fb019f6c56d6d66a0f9862df36041cafb6f19'
         page_raw=(ROOT/'.github/workflows/pages.yml').read_bytes().replace(production_manifest.encode(),test_manifest.encode())
         page_pin=commit_file(code,'synthetic','.github/workflows/pages.yml',page_raw,watch_pin)
         page_runtime=json.loads((ROOT/'ops/produktion/pages-runtime.disabled.json').read_bytes())
         page_runtime.update(enabled=True,python_version=list(sys.version_info[:3]),deployment=d,public_access=runtime['public_access'],
-            entry_workflows={'.github/workflows/pages.yml':hashlib.sha256(page_raw).hexdigest()})
-        write_json(rt/'pages-runtime.json',page_runtime)
-        p.meta=dict(id=504,run_attempt=1,event='workflow_dispatch',repository={'full_name':'synthetic/code'},
+            entry_workflows={'.github/workflows/pages.yml':hashlib.sha256(page_raw).hexdigest()},
+            renderer=dict(schema='btc-c05-renderer-v1',code_sha=renderer_pin,core_code_sha=CORE,
+                runtime_config_sha256='3efe8a17330c228a75fe879d4e7c7ed0cade766e4a07ca0c05832b88aa3d282b',
+                strategy_sha256='a99be30ae26a753f9734fbe2d67ac49f33e090a691904336421742f92420f787',
+                report_sha256='6d64486e83917a01976296c4688fb019f6c56d6d66a0f9862df36041cafb6f19'))
+        write_json(rt/'runtime.json',page_runtime)
+        p.meta=dict(id=505,run_attempt=1,event='workflow_dispatch',repository={'full_name':'synthetic/code'},
             path='.github/workflows/pages.yml',head_sha=page_pin,head_branch='synthetic',created_at=iso(watch_slot+240000))
         page_env=dict(GITHUB_TOKEN='SYNTHETIC-META',GITHUB_REPOSITORY='synthetic/code',GITHUB_REF='refs/heads/synthetic',
-            GITHUB_RUN_ID='504',GITHUB_RUN_ATTEMPT='1',GITHUB_SHA=page_pin,GITHUB_EVENT_NAME='workflow_dispatch',
+            GITHUB_RUN_ID='505',GITHUB_RUN_ATTEMPT='1',GITHUB_SHA=page_pin,GITHUB_EVENT_NAME='workflow_dispatch',
             GITHUB_WORKFLOW_REF='synthetic/code/.github/workflows/pages.yml@refs/heads/synthetic')
         page_env.update(PATH=os.environ.get('PATH',''),SystemRoot=os.environ.get('SystemRoot',''))
-        with patch.dict(os.environ,page_env,clear=True),patch.object(sys,'argv',['produktion_pages_export.py','--runtime',str(rt/'pages-runtime.json'),
-                '--config',str(rt/'data/config.json'),'--out',str(rt/'pages-result')]),\
-             patch.object(production_confirmation.ProductionContentsClient,'open_request',staticmethod(p.open)),\
-             patch.object(pages.ReadClient,'open_request',staticmethod(p.open)):
-            try:runpy.run_path(str(ROOT/'tools/produktion_pages_export.py'),run_name='__main__')
-            except SystemExit as done:assert done.code==0,'Actual Pages CLI refused'
-        assert (rt/'pages-result/projection-manifest.json').is_file()
-        print('PASS recovery -> Signal -> Watch -> actual Pages projection CLI, no deployment and no send',flush=True)
-        write_json(OUT/'test-results.json',dict(synthetic=True,p4_restore=True,fresh_workflow=True,wrong_target_refused=True,
+        document=yaml_parser.safe_load(page_raw)
+        names=('Export one closed store/fence pair (read only)','Validate exact complete C05 package before upload',
+               'Verify unchanged closed pair immediately before deploy')
+        page_commands=[next(step['run'] for job in document['jobs'].values() for step in job['steps'] if step.get('name')==name) for name in names]
+        prior_puts=list(p.puts);page_now=(watch_slot+240000)/1000
+        import reviewed_actions_entry
+        os.chdir(OUT/'core')
+        cases=[(name,command,page_now,0,None) for name,command in zip(names,page_commands)]
+        stale=page_commands[0].replace('--out .runtime/public','--out .runtime/stale-public')
+        cases.append(('Reject stale data without changing freshness guard',stale,(signal_ts+12*3600000+1)/1000,20,'Signal slice too old or in future'))
+        for name,command,clock,expected,error_reason in cases:
+            parsed=shlex.split(command);errors=[]
+            def trace(frame,event,arg):
+                if event=='exception' and frame.f_code.co_filename.endswith('c05_pages_export.py'):
+                    errors.append((frame.f_code.co_name,arg[0].__name__,str(arg[1])))
+                return trace
+            with patch.dict(os.environ,page_env,clear=True),patch.object(sys,'argv',['-c']+parsed[3:]),\
+                 patch.object(production_confirmation.ProductionContentsClient,'open_request',staticmethod(p.open)),\
+                 patch.object(reviewed_actions_entry.EntryReader,'open_request',staticmethod(p.open)),\
+                 patch.object(entry.time,'time',return_value=clock):
+                sys.settrace(trace)
+                try:
+                    try:exec(parsed[2],{'__name__':'__main__'})
+                    except SystemExit as done:assert done.code==expected,(name,errors[-5:])
+                finally:sys.settrace(None)
+            if error_reason:assert any(error_reason in item[2] for item in errors),(name,errors)
+            print('PASS actual C05 Pages workflow step: '+name,flush=True)
+        assert not (rt/'stale-public').exists()
+        assert p.puts==prior_puts,'Pages may not write the store'
+        package=rt/'public';manifest=json.loads((package/'projection-manifest.json').read_bytes())
+        projection=json.loads((package/manifest['projection']).read_bytes())
+        assert projection['signal_asof_ms']==signal_ts
+        assert hashlib.sha256((package/'c05-report.json').read_bytes()).hexdigest()==page_runtime['renderer']['report_sha256']
+        write_json(OUT/'c05-page-result.json',dict(signal_asof_ms=projection['signal_asof_ms'],simulated_now_ms=int(page_now*1000),
+            package_check=True,predeploy_check=True,renderer=page_runtime['renderer'],stream_commit=client.read(REPO,BRANCH)['commit_sha'],
+            fence_commit=client.read(REPO,FB,a.FENCE_PATH)['commit_sha'],store_writes=0))
+        print('PASS serverjournal recovery -> fresh Signal -> Watch -> C05 renderer/package/predeploy; same states, no sends',flush=True)
+        write_json(OUT/'test-results.json',dict(synthetic=True,p4_restore=True,generic_owner_restore=True,server_journal=True,
+            fresh_workflow=True,watch_workflow=True,c05_workflow=True,package_check=True,predeploy_check=True,
+            stale_data_refused=True,engine_persisted_signal_ts=signal_ts,retained_receipts=18,wrong_target_refused=True,
             production_module_unchanged=hashlib.sha256((ROOT/'engine/aborted_maintenance.py').read_text().encode()).hexdigest()==f['production_source_sha256']))
     finally:os.chdir(before)
 
 if __name__=='__main__':
-    if '--worker' in sys.argv:worker()
+    if '--worker' in sys.argv:
+        with patch('socket.socket.connect',side_effect=AssertionError('REAL NETWORK FORBIDDEN')):worker()
     else:
         generate()
         raise SystemExit(subprocess.call([sys.executable,'-B',__file__,'--worker']))
