@@ -8,6 +8,7 @@ import argparse
 import base64
 from contextlib import contextmanager
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -98,7 +99,21 @@ def no_redirect_transport():
     class NoRedirect(urllib.request.HTTPRedirectHandler):
         def redirect_request(self,*args,**kwargs):raise OSError('Redirect refused')
     opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())
-    return opener.open
+    def bounded(request,timeout):
+        # Eager bounded response: even a peer trickling bytes cannot prolong a
+        # socket timeout forever. Daemon I/O cannot keep a lost runner alive.
+        from public_access import read_bytes
+        headers={}
+        def open_and_capture(req,timeout):
+            response=opener.open(req,timeout=timeout)
+            for key in ('X-RateLimit-Resource','X-RateLimit-Remaining','Link'):
+                value=response.headers.get(key)
+                if value is not None:headers[key]=value
+            return response
+        raw=read_bytes(open_and_capture,request,timeout,2*1024*1024)
+        response=io.BytesIO(raw);response.headers=headers
+        return response
+    return bounded
 
 def worker_evidence(client,run):
     from github_freshness import utc_ms
@@ -119,7 +134,12 @@ def worker_evidence(client,run):
             and utc_ms(job['completed_at'])<=int(client.clock()*1000))
     for status in ('in_progress','waiting','requested','pending','queued'):
         queued=client._request('GET',client._route(client.code,'/actions/runs?status='+status+'&per_page=100&page=1'))
-        recovery.require(queued['total_count']==0 and queued['workflow_runs']==[])
+        items=queued['workflow_runs']
+        recovery.require(queued['total_count']==len(items) and len(items)<100)
+        own=getattr(client,'self_run',None)
+        for item in items:
+            recovery.require(own is not None and all(item.get(key)==own[key] for key in
+                ('id','head_sha','path','run_attempt')) and item.get('repository',{}).get('full_name')==client.code)
     return meta,jobs
 
 def observe(client):
@@ -180,11 +200,24 @@ def recover(client):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--policy',required=True,type=Path)
-    parser.add_argument('--state-dir',required=True,type=Path)
-    parser.add_argument('--incident-fence',required=True)
+    parser.add_argument('--state-dir',type=Path)
+    parser.add_argument('--incident-fence')
+    parser.add_argument('--github',action='store_true')
     parser.add_argument('--execute',action='store_true')
     parser.add_argument('--result-file',type=Path)
     args=parser.parse_args();policy=json.loads(args.policy.read_bytes())
+    if args.github:
+        recovery.require(policy.get('enabled') is True and policy.get('activation_reviewed') is True
+            and policy['journal']['reviewed'] is True and policy['journal']['seed_commit'])
+        recovery.require(digest(policy['deployment'])=='81b176a9cce3822bc5b5daf0d4dad95c154b7b51b528e1d9b6e70954dd8f23a9')
+        import github_recovery
+        client=github_recovery.Network(policy,os.environ.get('BTC_DELIVERY_GITHUB_TOKEN'),os.environ.get('GITHUB_TOKEN'))
+        identity=github_recovery.bind_self(client,os.environ)
+        result=github_recovery.run(client,identity)
+        if args.result_file:
+            with args.result_file.open('x',encoding='utf-8') as out:out.write(canonical(result)+'\n')
+        return
+    recovery.require(args.state_dir is not None and args.incident_fence is not None)
     recovery.require(re.fullmatch('[0-9a-f]{40}',args.incident_fence) is not None)
     journal=args.state_dir/(args.incident_fence+'.sqlite')
     def emit(value):

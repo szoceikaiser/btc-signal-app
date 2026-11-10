@@ -121,7 +121,9 @@ class Provider:
             from test_free_quota import advertisement
             return advertisement(self.heads())
         if u.netloc=='raw.githubusercontent.com':
-            parts=u.path.split('/');return io.BytesIO(self.locate(parts[3],'/'.join(parts[4:]))['body'])
+            parts=u.path.split('/');path='/'.join(parts[4:])
+            value=rec(OUT/'entry.git',parts[3],path) if '/'.join(parts[1:3])=='synthetic/code' else self.locate(parts[3],path)
+            return io.BytesIO(value['body'])
         parts=u.path.split('/');repo='/'.join(parts[2:4]);tail='/'+'/'.join(parts[4:]) if len(parts)>4 else ''
         if request.get_method()=='PUT':
             p=json.loads(request.data);branch=p['branch'];local=self.local(branch)
@@ -180,6 +182,32 @@ def worker():
     try:verify_runtime_config(store.snapshot,store.snapshot['engine']['config'],target_binding=hashlib.sha256(b'wrong-synthetic-target').hexdigest())
     except ValueError:pass
     else:raise AssertionError('Wrong target accepted')
+    # A new, generic terminated-owner incident, separate from the old pinned
+    # historical abort above. Persist both mutations and confirm real parents.
+    import safe_recovery as recover
+    prior=client.read(REPO,FB,a.FENCE_PATH);opened=copy.deepcopy(closed)
+    owner_slot=f['review']['stopped_at_ms']+60000
+    owned_run=dict(number=2,id='4999',attempt='1',workflow='.github/workflows/watch.yml',kind='watch',
+                   expected_start_ms=str(owner_slot),deadline_utc_ms=owner_slot+900000)
+    opened.update(phase='open',completion=None,write_id='synthetic-generic-open',run=owned_run)
+    opened['cursors'][owned_run['workflow']]={'number':2,'id':'4999'}
+    openpin=commit_file(p.local(FB),FB,a.FENCE_PATH,canonical(opened).encode(),prior['commit_sha'])
+    owned=g.GitHubStore(client,REPO,BRANCH,'synthetic-store','4999','1');owned.__enter__()
+    observed=client.read(REPO,BRANCH);old_env=json.loads(observed['body'])
+    review=dict(old_fence_commit=openpin,old_fence_sha256=hashlib.sha256(canonical(opened).encode()).hexdigest(),
+        run_sha256=digest({'synthetic_completed_failure':'4999'}),jobs_sha256=digest({'synthetic_hosted_worker_terminated':True}),
+        policy_sha256=digest(runtime),confirmed_at_ms=owner_slot+1000,workers_terminated=True,run_completed=True,
+        old_owner=old_env['snapshot']['control']['owner'],old_revision=old_env['revision'],old_snapshot_digest=old_env['body_digest'],old_stream_commit=observed['commit_sha'])
+    released,event=recover.release_owner(old_env,owned_run,d,review,'synthetic-generic-release')
+    client.update(REPO,BRANCH,observed['blob_sha'],canonical(released).encode(),'synthetic-generic-release')
+    saved=client.read(REPO,BRANCH);assert client.parents(REPO,saved['commit_sha'])==[observed['commit_sha']]
+    recovered_store=g.read_only(client,REPO,BRANCH,'synthetic-store')
+    recovered=recover.owner_candidate(opened,released,recovered_store.confirmed_record(),review,event,'synthetic-generic-close')
+    fence_old=client.read(REPO,FB,a.FENCE_PATH)
+    client.update(REPO,FB,fence_old['blob_sha'],canonical(recovered).encode(),'synthetic-generic-close',a.FENCE_PATH)
+    final_recovery=client.read(REPO,FB,a.FENCE_PATH);assert client.parents(REPO,final_recovery['commit_sha'])==[openpin]
+    assert recovered['completion']['outcome']=='aborted'
+    print('PASS generic owner recovery -> two confirmed actual Git CAS writes; old historical abort preserved',flush=True)
     slot=__import__('actions_schedule').slot_at('signal',f['review']['stopped_at_ms']+4*14400000)
     code=OUT/'entry.git';code.mkdir();git(code,'init','--bare')
     (code/'objects/info/alternates').write_bytes((OUT/'core/.git/objects').as_posix().encode()+b'\n')
@@ -222,6 +250,48 @@ def worker():
         assert closed['completion']['outcome']=='aborted'
         print('PASS actual workflow bootstrap -> fresh regular run 501 -> confirmed normal completion, no send',flush=True)
         print('PASS wrong synthetic target refused by unchanged production identity check',flush=True)
+        # Exercise the real Watch workflow after the new regular Signal.
+        watch_slot=__import__('actions_schedule').slot_at('watch',slot+900000)
+        watch_raw=(ROOT/'.github/workflows/watch.yml').read_bytes().replace(production_manifest.encode(),test_manifest.encode())
+        watch_pin=commit_file(code,'synthetic','.github/workflows/watch.yml',watch_raw,entry_pin)
+        runtime['entry_workflows']['.github/workflows/watch.yml']=hashlib.sha256(watch_raw).hexdigest();write_json(rt/'runtime.json',runtime)
+        p.meta=dict(id=503,run_attempt=1,run_number=3,event='workflow_dispatch',repository={'full_name':'synthetic/code'},
+            path='.github/workflows/watch.yml',head_sha=watch_pin,head_branch='synthetic',created_at=iso(watch_slot+1000),display_title='btc-v2:watch:created')
+        watch_env={**env,'GITHUB_RUN_ID':'503','GITHUB_RUN_NUMBER':'3','GITHUB_SHA':watch_pin,
+            'GITHUB_WORKFLOW_REF':'synthetic/code/.github/workflows/watch.yml@refs/heads/synthetic',
+            'BTC_DELIVERY_WORKFLOW':'.github/workflows/watch.yml','BTC_DELIVERY_RUN_ID':'503'}
+        document=yaml_parser.safe_load(watch_raw);command=next(s['run'] for j in document['jobs'].values() for s in j['steps'] if s.get('run','').startswith('python3 -c '))
+        watch_tokens=shlex.split(command);watch_args=watch_tokens[3:]
+        candle=watch_slot//14400000*14400000
+        raw=[[candle+i*14400000,'100','101','99','100','1',candle+(i+1)*14400000-1] for i in range(-35,1)]
+        def watch_invoke(runtime,kind,data):return real(runtime,kind,data,watch_raw=raw,now_ms=watch_slot+180000)
+        with patch.dict(os.environ,watch_env),patch.object(sys,'argv',['-c']+watch_args),patch.object(entry,'run_runtime',side_effect=watch_invoke),\
+             patch.object(production_confirmation.ProductionContentsClient,'open_request',staticmethod(p.open)),\
+             patch.object(entry.time,'time',return_value=(watch_slot+180000)/1000),patch.object(main,'deliver_telegram',side_effect=AssertionError('NO SEND')):
+            try:exec(watch_tokens[2],{'__name__':'__main__'})
+            except SystemExit as done:assert done.code==0,'Fresh Watch workflow refused'
+        print('PASS recovery -> real Signal workflow -> real Watch workflow, confirmed closed fence and no send',flush=True)
+        import runpy,produktion_pages_export as pages
+        page_raw=(ROOT/'.github/workflows/pages.yml').read_bytes().replace(production_manifest.encode(),test_manifest.encode())
+        page_pin=commit_file(code,'synthetic','.github/workflows/pages.yml',page_raw,watch_pin)
+        page_runtime=json.loads((ROOT/'ops/produktion/pages-runtime.disabled.json').read_bytes())
+        page_runtime.update(enabled=True,python_version=list(sys.version_info[:3]),deployment=d,public_access=runtime['public_access'],
+            entry_workflows={'.github/workflows/pages.yml':hashlib.sha256(page_raw).hexdigest()})
+        write_json(rt/'pages-runtime.json',page_runtime)
+        p.meta=dict(id=504,run_attempt=1,event='workflow_dispatch',repository={'full_name':'synthetic/code'},
+            path='.github/workflows/pages.yml',head_sha=page_pin,head_branch='synthetic',created_at=iso(watch_slot+240000))
+        page_env=dict(GITHUB_TOKEN='SYNTHETIC-META',GITHUB_REPOSITORY='synthetic/code',GITHUB_REF='refs/heads/synthetic',
+            GITHUB_RUN_ID='504',GITHUB_RUN_ATTEMPT='1',GITHUB_SHA=page_pin,GITHUB_EVENT_NAME='workflow_dispatch',
+            GITHUB_WORKFLOW_REF='synthetic/code/.github/workflows/pages.yml@refs/heads/synthetic')
+        page_env.update(PATH=os.environ.get('PATH',''),SystemRoot=os.environ.get('SystemRoot',''))
+        with patch.dict(os.environ,page_env,clear=True),patch.object(sys,'argv',['produktion_pages_export.py','--runtime',str(rt/'pages-runtime.json'),
+                '--config',str(rt/'data/config.json'),'--out',str(rt/'pages-result')]),\
+             patch.object(production_confirmation.ProductionContentsClient,'open_request',staticmethod(p.open)),\
+             patch.object(pages.ReadClient,'open_request',staticmethod(p.open)):
+            try:runpy.run_path(str(ROOT/'tools/produktion_pages_export.py'),run_name='__main__')
+            except SystemExit as done:assert done.code==0,'Actual Pages CLI refused'
+        assert (rt/'pages-result/projection-manifest.json').is_file()
+        print('PASS recovery -> Signal -> Watch -> actual Pages projection CLI, no deployment and no send',flush=True)
         write_json(OUT/'test-results.json',dict(synthetic=True,p4_restore=True,fresh_workflow=True,wrong_target_refused=True,
             production_module_unchanged=hashlib.sha256((ROOT/'engine/aborted_maintenance.py').read_text().encode()).hexdigest()==f['production_source_sha256']))
     finally:os.chdir(before)

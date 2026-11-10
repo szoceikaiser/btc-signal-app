@@ -91,7 +91,7 @@ jobs:
           import json, os, re, hashlib
           from copy import deepcopy
           from pathlib import Path
-          expected = "2bcf3bb237f9b35e37d92de8c98d8f09b24544428990e8d23cf7ba9ca5f84856"
+          expected = "4fe5f956e2e54b631344e30203c8b4972980279851f23e07a8c4c6a8e272af73"
           raw = os.environ['REVIEWED_MONITOR_JSON']
           if len(raw.encode()) > 128*1024 or not re.fullmatch('[0-9a-f]{64}', expected):
               raise SystemExit('Reviewed monitor policy not bound')
@@ -115,4 +115,4 @@ jobs:
           with Path('monitor-policy.json').open('x',encoding='utf-8') as f:
               json.dump(policy,f,allow_nan=False)
           PY
-          python3 -c 'import hashlib,runpy,sys,pathlib; exec("try:\n p=\"../extension/tools/pinned_delivery_entry.py\"\n if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=\"2dc4056042ff863a4e7aa01a9308da869e3e9784c2dce1b385b42ea14878d921\": raise ValueError()\n runpy.run_path(p,run_name=\"__main__\")\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core ../core --extension ../extension --manifest-sha256 1935fc4719c5fd5ad082e71045c523be2bd48113ea28529b2677fb14a7cbe355 --observer-root . --tool produktion_actions_freshness.py -- --policy monitor-policy.json
+          python3 -c 'import hashlib,runpy,sys,pathlib; exec("try:\n p=\"../extension/tools/pinned_delivery_entry.py\"\n if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=\"b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b\": raise ValueError()\n runpy.run_path(p,run_name=\"__main__\")\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core ../core --extension ../extension --manifest-sha256 b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f --observer-root . --tool produktion_actions_freshness.py -- --policy monitor-policy.json

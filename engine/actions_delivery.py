@@ -86,11 +86,12 @@ def parse_fence(record, deployment):
             raise ValueError('run')
         completion = value.get('completion') or {}
         if 'recovery' in completion:
-            from safe_recovery import SCHEMA
-            if (value['phase']!='closed' or 'outcome' in completion
-                    or completion['recovery'].get('schema')!=SCHEMA):
+            from safe_recovery import SCHEMA,OWNER_SCHEMA
+            schema=completion['recovery'].get('schema')
+            if (value['phase']!='closed' or schema not in (SCHEMA,OWNER_SCHEMA)
+                    or (completion.get('outcome')!='aborted' if schema==OWNER_SCHEMA else 'outcome' in completion)):
                 raise ValueError('Recovery shape')
-        if 'outcome' in completion:
+        if 'outcome' in completion and 'recovery' not in completion:
             from aborted_maintenance import review_evidence
             if completion['outcome'] != 'aborted' or value['phase'] != 'closed':
                 raise ValueError('maintenance outcome')
@@ -240,7 +241,10 @@ class ActionsClient(ProductionContentsClient):
                     or int(run.get('expected_start_ms','0'))<=proof['confirmed_at_ms']):
                 raise StoreConflict('Fresh regular run after close-only recovery required')
             validate(value,json.loads(observed['body']),loc)
-        if (value.get('completion') or {}).get('outcome') == 'aborted':
+            if proof['schema']=='btc-owner-abort-recovery-v1' and self.parents(
+                    deployment['private_store_repository'],observed['commit_sha'])!=[proof['old_stream_commit']]:
+                raise StoreConflict('Released owner stream parent differs')
+        if (value.get('completion') or {}).get('outcome') == 'aborted' and 'recovery' not in value['completion']:
             from aborted_maintenance import validate_pair, STREAM_PIN, FENCE_PIN
             completion = value['completion']
             observed = self.read(deployment['private_store_repository'], deployment['store_branch'])
