@@ -4,6 +4,7 @@ Development dependency: PyYAML==6.0.3. No network or workflow execution.
 """
 import argparse
 import json
+import hashlib
 from pathlib import Path
 import subprocess
 import yaml
@@ -17,6 +18,12 @@ def published(name):
     return subprocess.check_output(['git','-C',str(ROOT),'show',PUBLISHED+':.github/workflows/'+name+'.yml']).decode()
 def runs(document):
     return [s['run'] for job in document['jobs'].values() for s in job['steps'] if 'run' in s]
+
+def current_bindings(command):
+    old_raw=subprocess.check_output(['git','-C',str(ROOT),'show',PUBLISHED+':delivery-extension.json'])
+    old=json.loads(old_raw);new_raw=(ROOT/'delivery-extension.json').read_bytes();new=json.loads(new_raw)
+    return command.replace(hashlib.sha256(old_raw).hexdigest(),hashlib.sha256(new_raw).hexdigest()).replace(
+        old['files']['tools/pinned_delivery_entry.py'],new['files']['tools/pinned_delivery_entry.py'])
 def check(source=False):
     result={}
     for name in NAMES:
@@ -32,10 +39,10 @@ def check(source=False):
             old=published(name)
             expected=[line[len('        run: '):] for line in old.splitlines() if line.startswith('        run: python3 -c ')]
             actual=[command for command in runs(document) if command.startswith('python3 -c ')]
-            assert len(expected)==len(actual)==1 and actual==expected,(name,'Shell bytes changed')
+            assert len(expected)==len(actual)==1 and actual==[current_bindings(c) for c in expected],(name,'Shell bytes changed beyond reviewed hashes')
             assert '        run: |-\n          python3 -c ' in text
         if name=='pages':
-            assert runs(document)==runs(yaml.safe_load(published(name))), 'Pages commands changed'
+            assert runs(document)==[current_bindings(c) for c in runs(yaml.safe_load(published(name)))], 'Pages commands changed beyond reviewed hashes'
         result[name]=dict(ok=True,exact_command=True if name in AFFECTED else None)
     if source:assert sum(not item['ok'] for item in result.values())==5
     return result

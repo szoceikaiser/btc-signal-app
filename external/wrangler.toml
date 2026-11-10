@@ -1,0 +1,4 @@
+name = "btc-engine-freshness"
+main = "worker.mjs"
+compatibility_date = "2026-10-19"
+# No token, queue, sender or write binding. Disabled until separate rollout.

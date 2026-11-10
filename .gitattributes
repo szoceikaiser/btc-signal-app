@@ -37,3 +37,9 @@ delivery-extension.json -text
 tools/test_publication_package.py text eol=lf
 tools/test_delivery_workflow_yaml.py text eol=lf
 tools/requirements-workflow-yaml.txt text eol=lf
+engine/safe_recovery.py text eol=lf
+tools/continuous_operations.py text eol=lf
+tools/test_continuous_operations.py text eol=lf
+tools/prepare_continuous_config.py text eol=lf
+external/** text eol=lf
+ops/continuous/** text eol=lf

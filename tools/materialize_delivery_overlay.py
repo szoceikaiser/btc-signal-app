@@ -7,7 +7,7 @@ import re
 
 ROOT=Path(__file__).resolve().parents[1]
 BASE='8b4862745afdf7e4733a7ec7648eb0cc16d65935'
-PUBLISHED='8caee66b2231a765d15f1991eaf9039ee1e8cfb9'
+PUBLISHED='514641b64445091d17a59c5a5347e50840c566b4'
 m=json.loads((ROOT/'delivery-extension.json').read_bytes())
 m['files']={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in m['files']}
 (ROOT/'delivery-extension.json').write_bytes(json.dumps(m,sort_keys=True,separators=(',',':')).encode())

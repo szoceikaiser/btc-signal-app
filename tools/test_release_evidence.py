@@ -5,6 +5,7 @@ AST except for literal binding values, and gets its own authenticated manifest.
 """
 from pathlib import Path
 import ast,base64,copy,hashlib,io,json,os,re,shlex,shutil,subprocess,sys
+import yaml as yaml_parser
 import urllib.parse
 from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[1]
@@ -204,7 +205,8 @@ def worker():
     import production_confirmation,main
     real=entry.run_runtime
     def invoke(runtime,kind,data):return real(runtime,kind,data,fetch=lambda _:([],[],[]))
-    command=next(l.strip()[5:] for l in (OUT/'synthetic-signal.yml').read_text().splitlines() if l.strip().startswith('run: python3 -c'))
+    document=yaml_parser.safe_load((OUT/'synthetic-signal.yml').read_bytes())
+    command=next(step['run'] for job in document['jobs'].values() for step in job['steps'] if step.get('run','').startswith('python3 -c '))
     tokens=shlex.split(command);args=tokens[3:];args[args.index('--manifest-sha256')+1]=hashlib.sha256((OUT/'extension/delivery-extension.json').read_bytes()).hexdigest()
     before=Path.cwd()
     try:

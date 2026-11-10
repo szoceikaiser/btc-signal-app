@@ -80,6 +80,9 @@ def crosscheck(value, stream_repo, stream_pin, identity, deployment, budget):
         from aborted_maintenance import validate_pair, STREAM_PIN
         if parents != [STREAM_PIN]: raise ValueError('Foreign maintenance parent')
         validate_pair(value, env, loc)
+    if 'recovery' in value['completion']:
+        from safe_recovery import validate
+        validate(value,env,loc)
 
 
 def fence_segments(root, deployment, budget):
