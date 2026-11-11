@@ -1,8 +1,8 @@
-/* OFFLINE PREPARATION. Public, GET-only supervisor of the reviewed full checker.
-   Default configuration cannot return healthy and performs no network access.
-   No GitHub token, Telegram transport, Store mutation, dispatch or retry. */
+/* GET-only external supervisor. Dedicated public-read GitHub credential is
+   supplied exclusively by the encrypted Worker secret binding, never source.
+   No Telegram, Store mutation, dispatch, retry or anonymous fallback. */
 export const CONFIG = Object.freeze({
-  enabled: false,
+  enabled: true,
   workflowId: 388631778,
   workflowSha256: "5e34f92668b0d4c229faef1f2597969be3fdb318ceec53036ce49b3f856a84f0",
   policyBindingSha256: "4fe5f956e2e54b631344e30203c8b4972980279851f23e07a8c4c6a8e272af73",
@@ -22,20 +22,29 @@ const timestamp = value => {
   const result = Date.parse(value); requireValue(Number.isFinite(result), 'invalid_time'); return result;
 };
 const result = (healthy, reason) => ({schema:'btc-external-checker-gate-v1', healthy, reason});
-export async function check(config, {fetchFn=(...args)=>globalThis.fetch(...args), now=Date.now(), cryptoApi=crypto}={}) {
-  let total=0, core=0, diagnosticPhase='prepare', providerStatus=null; const evidence={};
+export async function check(config, {fetchFn=(input,init)=>globalThis.fetch(input,init), now=Date.now(), cryptoApi=crypto, githubToken=''}={}) {
+  let total=0, core=0, diagnosticPhase='prepare', providerStatus=null;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
   try {
     requireValue(config?.enabled === true && Number.isSafeInteger(config.workflowId) && config.workflowId > 0
       && /^[a-f0-9]{64}$/.test(config.workflowSha256) && /^[a-f0-9]{64}$/.test(config.policyBindingSha256)
       && /^[a-f0-9]{40}$/.test(config.codeSha) && Number.isSafeInteger(now), 'monitor_unconfigured');
+    requireValue(typeof githubToken==='string' && /^github_pat_[A-Za-z0-9_]{20,240}$/.test(githubToken), 'reader_credential_unavailable');
     const due = Math.floor((now-GRACE)/PERIOD)*PERIOD;
     async function read(url, isCore) {
       requireValue(++total<=3 && (!isCore || ++core<=2), 'read_budget');
       diagnosticPhase='fetch';
-      const response = await fetchFn(url, {method:'GET',redirect:'manual',signal:controller.signal,
-        headers:{'User-Agent':'btc-external-readonly-health-v1','Accept':isCore?'application/vnd.github+json':'text/plain'}});
+      const origin = new URL(url);
+      requireValue(origin.protocol==='https:' && !origin.username && !origin.password
+        && (isCore ? origin.origin==='https://api.github.com'
+          && origin.pathname.startsWith('/repos/'+REPO+'/actions/')
+          : origin.origin==='https://raw.githubusercontent.com'
+          && origin.pathname.startsWith('/'+REPO+'/')), 'provider_target');
+      const headers={'User-Agent':'btc-external-readonly-health-v1',
+        'Accept':isCore?'application/vnd.github+json':'text/plain'};
+      if(isCore) headers.Authorization='Bearer '+githubToken;
+      const response = await fetchFn(url, {method:'GET',redirect:'manual',signal:controller.signal,headers});
       providerStatus=response.status;
       requireValue(response.status===200 && !response.redirected, 'provider_unavailable');
       requireValue(!response.headers.has('link'), 'incomplete_metadata');
@@ -43,6 +52,10 @@ export async function check(config, {fetchFn=(...args)=>globalThis.fetch(...args
         const remaining=response.headers.get('x-ratelimit-remaining'), reset=response.headers.get('x-ratelimit-reset');
         requireValue(/^\d+$/.test(remaining||'') && /^\d+$/.test(reset||'')
           && response.headers.get('x-ratelimit-resource')==='core', 'quota_unverified');
+        const limit=response.headers.get('x-ratelimit-limit');
+        requireValue(/^\d+$/.test(limit||'') && Number.isSafeInteger(Number(limit))
+          && Number(limit)>=1000 && Number(remaining)<=Number(limit)
+          && Number(reset)*1000>now && Number(reset)*1000<=now+3660000, 'authenticated_quota_unverified');
         // A local headroom check, NOT a reservation or proof of an exclusive IP pool.
         const needed=2*Math.ceil(Math.max(0,Number(reset)*1000-now)/PERIOD)+8;
         requireValue(Number(remaining)>=needed, 'quota_insufficient');
@@ -78,13 +91,13 @@ export async function check(config, {fetchFn=(...args)=>globalThis.fetch(...args
       // GitHub creation time establishes the actual slot. The scheduler's
       // earlier queue-preparation timestamp is only a bounded correlation value.
       const created=timestamp(run.created_at), slot=Math.floor(created/PERIOD)*PERIOD;
-      requireValue(created>=invoked && created-invoked<=120000 && created-slot<=30000
+      requireValue(created>=invoked && created-invoked<=120000 && created-slot<=GRACE
         && created<=now && slot>=due, 'run_time');
       if(run.status==='completed' && run.conclusion!=='success') throw new Closed('checker_failed');
       if(slot===due) dueRuns.push(run);
     }
     requireValue(dueRuns.length===1, dueRuns.length?'duplicate_checker':'checker_missing');
-    const run=dueRuns[0]; evidence.run_id=run.id; evidence.entry_commit=run.head_sha;
+    const run=dueRuns[0];
     requireValue(run.status==='completed' && run.conclusion==='success', 'checker_unfinished');
     const raw=await read('https://raw.githubusercontent.com/'+REPO+'/'+run.head_sha+'/'+PATH,false);
     const hash=Array.from(new Uint8Array(await cryptoApi.subtle.digest('SHA-256',raw)),b=>b.toString(16).padStart(2,'0')).join('');
@@ -102,21 +115,21 @@ export async function check(config, {fetchFn=(...args)=>globalThis.fetch(...args
     requireValue(Array.isArray(job.steps) && job.steps.length>=2 && job.steps.length<=20
       && job.steps.every(s=>s.status==='completed' && s.conclusion==='success')
       && STEP_NAMES.every(name=>job.steps.filter(s=>s.name===name).length===1), 'checker_steps');
-    return {...result(true,'ok'),phase:'complete',...evidence};
+    return result(true,'ok');
   } catch(error) {
     const kind=['TypeError','SyntaxError','RangeError','AbortError','Error'].includes(error?.name)?error.name:'other';
     const value=result(false,error instanceof Closed?error.reason:'evidence_unavailable_'+diagnosticPhase+'_'+kind);
     if(error instanceof Closed && error.reason==='provider_unavailable' && Number.isInteger(providerStatus)) value.provider_status=providerStatus;
-    return {...value,phase:diagnosticPhase,...evidence};
+    return value;
   } finally { clearTimeout(timer); }
 }
 export function handler(config=CONFIG, dependencies={}) {
-  return {async fetch(request) {
+  return {async fetch(request, env) {
     const url=new URL(request.url);
     if(request.method!=='GET' || url.pathname!=='/health' || url.search) {
       return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
     }
-    const value=await check(config,dependencies);
+    const value=await check(config,{...dependencies, githubToken:env?.BTC_GITHUB_HEALTH_READ_TOKEN});
     return new Response(JSON.stringify(value),{status:value.healthy?200:503,headers:{
       'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
   }};

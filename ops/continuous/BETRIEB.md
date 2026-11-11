@@ -118,12 +118,16 @@ höchstens 15 Minuten; nächster neuer Watchslot höchstens 15 Minuten, nächste
 Signalphase höchstens vier Stunden. Vollständige grüne Monitorhistorie kann
 bis zur nächsten erforderlichen Signalphase dauern; nicht künstlich begrünen.
 
-Monitor maximal 80 GET/30 Sekunden je Lauf, sechs Läufe/Stunde. Externer Worker
-maximal drei GET, davon zwei öffentliche Core-API-Reads, je Probe. Recovery
+Monitor maximal 80 GET/30 Sekunden je Lauf, sechs Läufe/Stunde. Der externe
+Worker verwendet je Probe maximal drei GET. Die beiden festen GitHub-Core-API-Ziele
+für Lauf- und Jobdaten erhalten den Lesetoken für öffentliche Daten aus dem
+verschlüsselten Cloudflare-Secret `BTC_GITHUB_HEALTH_READ_TOKEN`. Der RAW-Abruf bleibt anonym.
+Weiterleitungen und ein anonymer Fallback für die API sind gesperrt. Recovery
 nicht alle zehn Minuten voll gegen dasselbe Incident pollend starten, sondern
 einmal bei belegtem Incident; eine Reservierung bleibt dauerhaft verbraucht.
-Anonyme Corequote, geteilte Provider-IP und GitHub-Jobquoten vor Aktivierung
-aktuell messen; keine zweite Tokenrolle als Quotenbypass.
+Der externe Worker prüft die authentifizierte Corequote und die verbleibende
+Reserve bei beiden API-Abrufen. Geteilte Provider-IP und GitHub-Jobquoten vor
+Aktivierung aktuell messen. Keine zweite Tokenrolle als Quotenbypass.
 
 ## Konkrete Liveabnahme und wiederkehrende Probe
 
