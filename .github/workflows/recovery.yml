@@ -4,6 +4,11 @@ on:
     workflows: ["Signal-Engine", "Flush-Wache"]
     types: [completed]
   workflow_dispatch:
+    inputs:
+      probe_workflow_sha256:
+        description: Reviewed recovery.yml SHA-256 for the read-only production probe
+        type: string
+        required: false
 permissions:
   contents: read
   actions: read
@@ -12,7 +17,11 @@ concurrency:
   cancel-in-progress: false
 jobs:
   recover:
-    if: ${{ vars.BTC_RECOVERY_ENABLED == 'true' }}
+    if: >-
+      ${{ (vars.BTC_RECOVERY_ENABLED == 'true' && (github.event_name == 'workflow_run' || (github.event_name == 'workflow_dispatch' && inputs.probe_workflow_sha256 == ''))) ||
+          (vars.BTC_RECOVERY_ENABLED == 'false' && github.event_name == 'workflow_dispatch' &&
+           github.ref == 'refs/heads/main' && github.run_attempt == '1' &&
+           inputs.probe_workflow_sha256 != '') }}
     name: recover
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -31,6 +40,7 @@ jobs:
         with:
           python-version: '3.12.14'
       - name: Require explicitly reviewed recovery policy
+        if: ${{ vars.BTC_RECOVERY_ENABLED == 'true' && (github.event_name == 'workflow_run' || (github.event_name == 'workflow_dispatch' && inputs.probe_workflow_sha256 == '')) }}
         env:
           REVIEWED_RECOVERY_JSON: ${{ vars.BTC_RECOVERY_POLICY_JSON }}
         run: |-
@@ -48,8 +58,34 @@ jobs:
           Path('recovery-policy.json').write_text(raw,encoding='utf-8')
           PY
       - name: Inspect and recover one bounded incident
+        if: ${{ vars.BTC_RECOVERY_ENABLED == 'true' && (github.event_name == 'workflow_run' || (github.event_name == 'workflow_dispatch' && inputs.probe_workflow_sha256 == '')) }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
           BTC_DELIVERY_GITHUB_TOKEN: ${{ secrets.BTC_REVIEWED_STORE_TOKEN }}
         run: |-
           python3 -c 'import hashlib,runpy,sys,pathlib; exec("try:\n p=\"extension/tools/pinned_delivery_entry.py\"\n if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=\"b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b\": raise ValueError()\n runpy.run_path(p,run_name=\"__main__\")\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core core --extension extension --manifest-sha256 b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f --tool continuous_operations.py -- --github --policy recovery-policy.json --result-file recovery-result.json
+      - name: Observe production recovery with GET only
+        if: >-
+          ${{ vars.BTC_RECOVERY_ENABLED == 'false' && github.event_name == 'workflow_dispatch' &&
+              github.ref == 'refs/heads/main' && github.run_attempt == '1' &&
+              inputs.probe_workflow_sha256 != '' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RECOVERY_ENABLED: ${{ vars.BTC_RECOVERY_ENABLED }}
+          PROBE_WORKFLOW_SHA256: ${{ inputs.probe_workflow_sha256 }}
+          REVIEWED_RECOVERY_JSON: ${{ vars.BTC_RECOVERY_POLICY_JSON }}
+        run: |-
+          python3 - <<'PY'
+          import hashlib, sys
+          from pathlib import Path
+          try:
+              path = Path('extension/ops/continuous/recovery_read_probe.py')
+              body = path.read_bytes()
+              if hashlib.sha256(body).hexdigest() != 'a4bc9d607392bf7ce8841dc3d614088a8818e423f6cfc109ffd4dc6e0fc574f9':
+                  raise ValueError()
+              exec(compile(body, str(path), 'exec'), {'__name__': '__main__'})
+          except SystemExit:
+              raise
+          except BaseException:
+              sys.exit('recovery probe phase=bootstrap reason=binding_refused')
+          PY
