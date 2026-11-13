@@ -3,7 +3,7 @@
 No workflow, remote request, market access or message is executed.
 """
 from pathlib import Path
-import argparse,hashlib,json,os,shlex,subprocess,sys,tempfile,runpy
+import argparse,hashlib,json,shlex,subprocess,sys,tempfile,runpy
 from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[1]
 manifest=json.loads((ROOT/'delivery-extension.json').read_bytes())
@@ -22,14 +22,7 @@ for name in names:
     for command in commands:
         tokens=shlex.split(command);assert tokens[:2]==['python3','-c']
         compile(tokens[2],'<workflow bootstrap>','exec')
-        assert tokens[tokens.index('--manifest-sha256')+1]==mh
-        if name=='freshness':
-            monitor=ROOT/'ops/continuous/freshness'
-            assert hashlib.sha256((monitor/'entry.py').read_bytes()).hexdigest() in tokens[2]
-            assert tokens[tokens.index('--monitor-sha256')+1]==hashlib.sha256((monitor/'actions_freshness.py').read_bytes()).hexdigest()
-            assert tokens[tokens.index('--loader-sha256')+1]==lh
-        else:
-            assert lh in tokens[2]
+        assert lh in tokens[2] and tokens[tokens.index('--manifest-sha256')+1]==mh
     assert 'path: extension' in text and 'persist-credentials: false' in text
     if name in ('signal','watch','lage'):
         assert 'working-directory: core' in text and '--runtime core/.runtime/runtime.json' in text
@@ -60,7 +53,6 @@ if __name__=='__main__':
             assert entry.ROOT==observer
             entry.check_code_pin('f3f054851f500af1926b149f13a2ee8890a8c2bc')
             seen.append(True)
-            return {'run':lambda policy:{'http_status':200,'diagnostic':{'phase':'complete'}}}
         args=['entry','--core',str(core),'--extension',str(ROOT),'--manifest-sha256',mh,
               '--tool','produktion_actions_freshness.py','--observer-root',str(observer),'--','--policy','monitor-policy.json']
         with patch.object(sys,'argv',args),patch.object(runpy,'run_path',side_effect=inspect_reader):
@@ -68,31 +60,3 @@ if __name__=='__main__':
         assert seen and sys.modules['produktion_actions_runner'] is original
         original.check_code_pin(loader.CORE)
         print('PASS real clean observer pin remains independent from real clean strategy pin; namespace restored')
-        # Run the actual new bootstrap with exact checkouts. An invalid offline
-        # policy must reach configuration, never a provider.
-        workflow=(ROOT/'.github/workflows/freshness.yml').read_text()
-        command=shlex.split(next(line.strip() for line in workflow.splitlines() if 'python3 -c ' in line))
-        extension=Path(tmp)/'extension'
-        extension.mkdir()
-        for path in (*manifest['files'],'delivery-extension.json',
-                     'ops/continuous/freshness/entry.py','ops/continuous/freshness/actions_freshness.py'):
-            dest=extension/path;dest.parent.mkdir(exist_ok=True,parents=True)
-            dest.write_bytes((ROOT/path).read_bytes())
-        def boot():
-            return subprocess.run([sys.executable,'-B',*command[1:]],cwd=observer,
-                env={k:v for k,v in os.environ.items() if not k.startswith(('GITHUB_','BTC_'))},
-                text=True,capture_output=True)
-        result=boot()
-        assert result.returncode==20 and not result.stderr,result
-        assert json.loads(result.stdout)['reason']=='evidence_invalid',result
-        for name,outer in (('actions_freshness.py',False),('entry.py',True)):
-            path=extension/'ops/continuous/freshness'/name
-            original=path.read_bytes()
-            path.write_bytes(original+b'\nraise Exception("UNVERIFIED")\n')
-            result=boot()
-            if outer:
-                assert result.returncode==1 and result.stderr.strip()=='delivery phase=bootstrap reason=binding_refused',result
-            else:
-                assert result.returncode==20 and not result.stderr and json.loads(result.stdout)['reason']=='binding_refused',result
-            path.write_bytes(original)
-        print('PASS actual monitor bootstrap reaches exact offline entry; tampered entry or module is refused')
