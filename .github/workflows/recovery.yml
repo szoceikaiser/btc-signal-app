@@ -70,13 +70,14 @@ jobs:
               extension = Path('extension')
               path = extension / 'ops/continuous/recovery_writer.py'
               body = path.read_bytes()
-              if hashlib.sha256(body).hexdigest() != '79b56afb9ed738c0025615fd592e1a3c931e8944a789442690c8d484a050a535':
+              if hashlib.sha256(body).hexdigest() != '9a725c9855253e553ddc134eed5fb81fc9fe7d9da546e3df50dab1cf60c2e74e':
                   raise ValueError()
               entry = {'__name__': 'reviewed_recovery_writer'}
               exec(compile(body, str(path), 'exec'), entry)
-              entry['main'](Path('core'), extension, 'b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b', 'b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f')
+              status = entry['main'](Path('core'), extension, 'b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b', 'b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f')
           except BaseException:
-              sys.exit('operations phase=recovery reason=blocked_or_unconfirmed')
+              sys.exit('operations phase=writer_bootstrap reason=binding_refused')
+          sys.exit(status)
           PY
       - name: Observe production recovery with GET only
         if: >-
