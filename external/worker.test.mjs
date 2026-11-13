@@ -2,6 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
+import {readFile} from 'node:fs/promises';
 import {check,handler,CONFIG} from './worker.mjs';
 const TEST_TOKEN='github_pat_OFFLINE_FIXTURE_NOT_A_REAL_SECRET_123456';
 const TEST_ENV={BTC_GITHUB_HEALTH_READ_TOKEN:TEST_TOKEN};
@@ -40,6 +41,21 @@ function transport(f,change) {
  return{calls,fetchFn};
 }
 async function execute(f=fixtures(),change,config=READY){const t=transport(f,change);const value=await check(config,{fetchFn:t.fetchFn,now:NOW,cryptoApi:webcrypto,githubToken:TEST_TOKEN});return{value,calls:t.calls};}
+test('published config authenticates the actual monitor workflow with a slow in-slot job',async()=>{
+ const f=fixtures();
+ f.yaml=await readFile(new URL('../.github/workflows/freshness.yml',import.meta.url),'utf8');
+ f.list.workflow_runs[0].workflow_id=CONFIG.workflowId;
+ f.jobs.jobs[0].started_at=iso(DUE+115000);
+ f.jobs.jobs[0].completed_at=iso(DUE+175000);
+ const good=await execute(f,null,CONFIG);
+ assert.equal(good.value.healthy,true);
+ assert.equal(good.calls.length,3);
+ f.jobs.jobs[0].completed_at=iso(DUE+180001);
+ assert.equal((await execute(f,null,CONFIG)).value.reason,'checker_late');
+ f.jobs.jobs[0].completed_at=iso(DUE+175000);
+ f.yaml+='\n';
+ assert.equal((await execute(f,null,CONFIG)).value.reason,'unreviewed_checker');
+});
 test('disabled/unbound configuration never contacts a provider',async()=>{const r=await execute(fixtures(),null,{...CONFIG,enabled:false});assert.equal(r.value.healthy,false);assert.equal(r.calls.length,0);});
 test('missing or invalid Worker bindings fail before fetch, including with caller credentials',async()=>{
  const t=transport(fixtures());
