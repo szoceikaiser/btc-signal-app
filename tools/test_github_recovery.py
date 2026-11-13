@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+import runpy
 import urllib.error
 import urllib.parse
 from unittest.mock import patch
@@ -22,6 +23,8 @@ from production_contract import canonical,digest
 from test_continuous_operations import HTTP,git,record
 from test_betriebsabschluss import commit_file
 from test_free_public import access_for,writer_review
+
+fixed_run = runpy.run_path(str(ROOT/'ops/continuous/recovery_writer.py'))['run']
 
 class Service(HTTP):
     def __init__(self,root,owner=False):
@@ -51,6 +54,8 @@ class Service(HTTP):
             GITHUB_WORKFLOW_REF=self.d['code_repository']+'/.github/workflows/recovery.yml@refs/heads/synthetic',
             GITHUB_RUN_ID='900',GITHUB_RUN_ATTEMPT='1',GITHUB_JOB='recover',GITHUB_SHA=self.d['code_sha'])
         self.foreign=False;self.business=[];self.loss_step=None;self.control_loss=False
+        self.write_attempts=[]
+        self.published_head=None
         if owner:
             self.env['snapshot']['control']['owner']=dict(repository=self.repo,run_id='10',run_attempt='1',nonce='SYNTHETIC-OWNER')
             self.env['snapshot']['control']['health']['current_run']['status']='failed'
@@ -59,13 +64,19 @@ class Service(HTTP):
         response=io.BytesIO(canonical(value).encode());response.headers={};return response
     def open(self,request,timeout):
         u=urllib.parse.urlsplit(request.full_url);tail=u.path.removeprefix('/repos/'+self.repo)
+        if request.get_method() != 'GET':
+            self.write_attempts.append((request.get_method(), tail))
         code=u.path.startswith('/repos/'+self.d['code_repository'])
         if code:
             ct=u.path.removeprefix('/repos/'+self.d['code_repository'])
+            if self.published_head and ct.startswith('/compare/'):
+                base=self.d['code_sha']
+                assert ct=='/compare/'+base+'...'+self.published_head
+                return self.response({'base_commit':{'sha':base},'merge_base_commit':{'sha':base},'status':'ahead'})
             if ct=='/actions/runs/900':return self.response(self.own)
             if ct.startswith('/actions/runs/900/attempts/'):
                 return self.response({'total_count':1,'jobs':[dict(id=901,name='recover',run_id=900,run_attempt=1,
-                    head_sha=self.d['code_sha'],status='in_progress',labels=['ubuntu-24.04'])]})
+                    head_sha=self.own['head_sha'],status='in_progress',labels=['ubuntu-24.04'])]})
             if ct=='/contents/.github/workflows/recovery.yml':
                 raw=self.self_yaml;h=__import__('hashlib').sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
                 return self.response(dict(type='file',encoding='base64',content=base64.b64encode(raw).decode(),sha=h))
@@ -151,6 +162,70 @@ class Tests(unittest.TestCase):
         s=Service(self.root,True);s.foreign=True;c,identity=self.client(s)
         with self.assertRaises(ValueError):r.run(c,identity)
         self.assertEqual(s.business,[])
+
+    def test_first_write_requires_full_admission(self):
+        for fault in ('worker', 'receipt', 'rules'):
+            with self.subTest(fault=fault):
+                root=self.root/fault;root.mkdir();s=Service(root)
+                if fault=='worker':
+                    s.foreign=True
+                elif fault=='receipt':
+                    s.env['snapshot']['engine']['_delivery']['messages'][-1].update(
+                        status='uncertain', receipt=None, reason='process_interrupted')
+                    s.env=s.append_stream(s.env)
+                else:
+                    s.provider.rules[(s.repo,s.policy['journal']['branch'])]=[]
+                c,identity=self.client(s)
+                with self.assertRaises(ValueError):
+                    fixed_run(c,identity)
+                self.assertEqual(s.write_attempts,[])
+                self.assertEqual(git(s.jrepo,'rev-parse','refs/heads/recovery-journal-live').decode().strip(),s.seed)
+
+    def test_fixed_safe_close_and_lost_journal_response(self):
+        s=Service(self.root);s.control_loss=True
+        c,identity=self.client(s)
+        result=fixed_run(c,identity)
+        self.assertEqual(result['outcome'],'reconciled')
+        self.assertEqual(s.business,[s.d['fence_branch']])
+        self.assertEqual(len(s.write_attempts),5)
+        self.assertLessEqual(c.bootstrap,32)
+        self.assertLess(c.journal.remaining,126)
+
+    def test_fixed_resume_requires_admission_and_confirms_without_retry(self):
+        s=Service(self.root,True);s.loss_step=s.d['store_branch']
+        # Production authenticates YAML at a descendant of the pinned core,
+        # both for the recovery run and for its historical business worker.
+        s.published_head='b'*40
+        s.environment['GITHUB_SHA']=s.own['head_sha']=s.meta['head_sha']=s.jobs['jobs'][0]['head_sha']=s.published_head
+        c,identity=self.client(s)
+        with self.assertRaises(SystemExit):
+            fixed_run(c,identity)
+        self.assertEqual(s.business,[s.d['store_branch']])
+        baseline=list(s.write_attempts)
+        s.foreign=True
+        c,identity=self.client(s);identity['attempt']='2'
+        with self.assertRaises(ValueError):
+            fixed_run(c,identity)
+        self.assertEqual(s.write_attempts,baseline)
+        s.foreign=False;s.loss_step=s.d['fence_branch']
+        c,identity=self.client(s);identity['attempt']='2'
+        with self.assertRaises(SystemExit):
+            fixed_run(c,identity)
+        self.assertEqual(s.business,[s.d['store_branch'],s.d['fence_branch']])
+        baseline=list(s.write_attempts)
+        rules=s.provider.rules[(s.repo,s.policy['journal']['branch'])]
+        s.provider.rules[(s.repo,s.policy['journal']['branch'])]=[]
+        c,identity=self.client(s);identity['attempt']='3'
+        with self.assertRaises(ValueError):
+            fixed_run(c,identity)
+        self.assertEqual(s.write_attempts,baseline)
+        s.provider.rules[(s.repo,s.policy['journal']['branch'])]=rules
+        c,identity=self.client(s);identity['attempt']='3'
+        result=fixed_run(c,identity)
+        self.assertEqual(result['phase'],'already-confirmed-no-write')
+        self.assertEqual(len(s.write_attempts)-len(baseline),2)
+        self.assertEqual(s.business,[s.d['store_branch'],s.d['fence_branch']])
+        self.assertEqual(c.bootstrap,32)
     def test_hard_wallclock_for_trickling_response(self):
         release=threading.Event();ended=threading.Event()
         class Trickle:
