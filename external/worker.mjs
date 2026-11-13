@@ -4,7 +4,7 @@
 export const CONFIG = Object.freeze({
   enabled: true,
   workflowId: 388631778,
-  workflowSha256: "211f0668a3aa7d4168092f7215de5e7842efb8cefcb5e98e3cfbb5f8d4070ef5",
+  workflowSha256: "5e34f92668b0d4c229faef1f2597969be3fdb318ceec53036ce49b3f856a84f0",
   policyBindingSha256: "4fe5f956e2e54b631344e30203c8b4972980279851f23e07a8c4c6a8e272af73",
   codeSha: 'f3f054851f500af1926b149f13a2ee8890a8c2bc',
 });
