@@ -18,7 +18,12 @@ for name in names:
     body=(ROOT/'.github/workflows'/f'{name}.yml').read_bytes();text=body.decode()
     assert b'\r' not in body,name
     commands=[line.strip().removeprefix('run: ') for line in text.splitlines() if 'python3 -c ' in line]
-    assert len(commands)==(3 if name=='pages' else 1),(name,len(commands))
+    assert len(commands)==(3 if name=='pages' else 0 if name=='backup' else 1),(name,len(commands))
+    if name=='backup':
+        block=text.split("          python3 - <<'PY'\n")[-1].split('          PY\n')[0]
+        compile('\n'.join(line[10:] for line in block.splitlines()),'<backup bootstrap>','exec')
+        assert mh in block and lh in block
+        assert hashlib.sha256((ROOT/'ops/continuous/backup_diagnostic.py').read_bytes()).hexdigest() in block
     for command in commands:
         tokens=shlex.split(command);assert tokens[:2]==['python3','-c']
         compile(tokens[2],'<workflow bootstrap>','exec')
