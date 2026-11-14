@@ -35,7 +35,12 @@ def check(source=False):
             continue
         if source and name in AFFECTED:raise AssertionError('Published bug no longer reproduced: '+name)
         assert isinstance(document,dict) and isinstance(document['jobs'],dict)
-        if name in AFFECTED:
+        if name=='backup' and not source:
+            command=runs(document)[-1]
+            assert command.startswith("python3 - <<'PY'\n") and command.endswith('\nPY')
+            compile(command.split('\n',1)[1].rsplit('\nPY',1)[0],'<backup bootstrap>','exec')
+            assert hashlib.sha256((ROOT/'ops/continuous/backup_diagnostic.py').read_bytes()).hexdigest() in command
+        elif name in AFFECTED:
             old=published(name)
             expected=[line[len('        run: '):] for line in old.splitlines() if line.startswith('        run: python3 -c ')]
             actual=[command for command in runs(document) if command.startswith('python3 -c ')]
