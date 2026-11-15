@@ -79,7 +79,7 @@ def read_incident(client, journal_head, path):
     return record['blob_sha'], json.loads(record['body'])
 
 
-def run(client, identity):
+def run(client, identity, *, read_only=False):
     import github_recovery as recovery
     from production_contract import canonical, digest
     import secrets
@@ -104,6 +104,9 @@ def run(client, identity):
     proof = (fence.get('completion') or {}).get('recovery')
     if fence['phase'] == 'closed' and proof is None:
         return {'phase': 'no-open-incident', 'writes': 0}
+    if read_only:
+        client.diagnostic.reason = 'incident_present'
+        raise ValueError('Read-only observation stopped at incident')
     checkpoint(client, 'stream_read')
     stream = client.read_at(client.repo, head(client, d['store_branch']), recovery.g.STORE_PATH)
     envelope = recovery.g.GitHubStore(client, client.repo, d['store_branch'], d['store_id'], 'read-only', '1')._parse(stream)
@@ -273,7 +276,7 @@ def run(client, identity):
         incident=incident, stream_commit=released['commit_sha'], fence_commit=closed['commit_sha'])
 
 
-def execute(core, extension, loader_sha, manifest_sha, diagnostic):
+def execute(core, extension, loader_sha, manifest_sha, diagnostic, *, probe=None):
     loader = extension / 'tools/pinned_delivery_entry.py'
     raw = loader.read_bytes()
     if hashlib.sha256(raw).hexdigest() != loader_sha:
@@ -347,6 +350,9 @@ def execute(core, extension, loader_sha, manifest_sha, diagnostic):
         result = run(client, identity)
         diagnostic.enter('result_file')
         return result
+
+    if probe is not None:
+        return probe(ObservedNetwork, observed_bind, run)
 
     github_recovery.Network = ObservedNetwork
     github_recovery.bind_self = observed_bind
