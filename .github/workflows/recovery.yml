@@ -21,7 +21,12 @@ jobs:
       ${{ (vars.BTC_RECOVERY_ENABLED == 'true' && (github.event_name == 'workflow_run' || (github.event_name == 'workflow_dispatch' && inputs.probe_workflow_sha256 == ''))) ||
           (vars.BTC_RECOVERY_ENABLED == 'false' && github.event_name == 'workflow_dispatch' &&
            github.ref == 'refs/heads/main' && github.run_attempt == '1' &&
-           inputs.probe_workflow_sha256 != '') }}
+           inputs.probe_workflow_sha256 != '') ||
+          (vars.BTC_RECOVERY_ENABLED == 'false' && vars.BTC_RECOVERY_ONCE_JSON != '' &&
+           github.event_name == 'workflow_run' && github.repository == 'szoceikaiser/btc-signal-app' &&
+           github.ref == 'refs/heads/main' && github.run_attempt == '1' &&
+           github.event.workflow_run.workflow_id == 323116288 && github.event.workflow_run.run_attempt == 1 &&
+           github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.conclusion == 'success') }}
     name: recover
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -70,7 +75,7 @@ jobs:
               extension = Path('extension')
               path = extension / 'ops/continuous/recovery_writer.py'
               body = path.read_bytes()
-              if hashlib.sha256(body).hexdigest() != '9a725c9855253e553ddc134eed5fb81fc9fe7d9da546e3df50dab1cf60c2e74e':
+              if hashlib.sha256(body).hexdigest() != '0b3cebbc0d8a76aab59de0e5f42feda80ed76c48f8e09dfce67b8edd30db78c0':
                   raise ValueError()
               entry = {'__name__': 'reviewed_recovery_writer'}
               exec(compile(body, str(path), 'exec'), entry)
@@ -103,4 +108,38 @@ jobs:
               raise
           except BaseException:
               sys.exit('recovery probe phase=bootstrap reason=binding_refused')
+          PY
+      - name: Observe one regular Watch in automatic recovery
+        if: >-
+          ${{ vars.BTC_RECOVERY_ENABLED == 'false' && vars.BTC_RECOVERY_ONCE_JSON != '' &&
+           github.event_name == 'workflow_run' && github.repository == 'szoceikaiser/btc-signal-app' &&
+           github.ref == 'refs/heads/main' && github.run_attempt == '1' &&
+           github.event.workflow_run.workflow_id == 323116288 && github.event.workflow_run.run_attempt == 1 &&
+           github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.conclusion == 'success' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BTC_DELIVERY_GITHUB_TOKEN: ${{ secrets.BTC_REVIEWED_STORE_TOKEN }}
+          RECOVERY_ENABLED: ${{ vars.BTC_RECOVERY_ENABLED }}
+          RECOVERY_ONCE: ${{ vars.BTC_RECOVERY_ONCE_JSON }}
+          REVIEWED_RECOVERY_JSON: ${{ vars.BTC_RECOVERY_POLICY_JSON }}
+        run: |-
+          python3 - <<'PY'
+          import hashlib, sys
+          from pathlib import Path
+          extension = Path('extension')
+          def load(name, expected):
+              path = extension / 'ops/continuous' / (name + '.py')
+              body = path.read_bytes()
+              if hashlib.sha256(body).hexdigest() != expected:
+                  raise ValueError()
+              scope = {'__name__': name}
+              exec(compile(body, str(path), 'exec'), scope)
+              return scope
+          try:
+              writer = load('recovery_writer', '0b3cebbc0d8a76aab59de0e5f42feda80ed76c48f8e09dfce67b8edd30db78c0')
+              once = load('recovery_once', '0fb2181e9f2eac19a487238d16cbed8daee792024cda990a0f2b050836088ab6')
+              status = once['main'](writer, extension, Path('core'), 'b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b', 'b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f')
+          except Exception:
+              sys.exit('operations phase=diagnostic_bootstrap reason=binding_refused')
+          sys.exit(status)
           PY
