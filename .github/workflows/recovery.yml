@@ -138,7 +138,7 @@ jobs:
               return scope
           try:
               writer = load('recovery_writer', '0b3cebbc0d8a76aab59de0e5f42feda80ed76c48f8e09dfce67b8edd30db78c0')
-              once = load('recovery_once', '0fb2181e9f2eac19a487238d16cbed8daee792024cda990a0f2b050836088ab6')
+              once = load('recovery_once', '626831a53572b4e386e3a53f59b466ebcfc8555f6873184dcebdfbc00875d658')
               status = once['main'](writer, extension, Path('core'), 'b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b', 'b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f')
           except Exception:
               sys.exit('operations phase=diagnostic_bootstrap reason=binding_refused')
