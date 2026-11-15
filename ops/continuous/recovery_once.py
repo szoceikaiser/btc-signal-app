@@ -134,8 +134,14 @@ def verify_closed(client, source):
     public_access.deployment(policy['public_access'], d)
     business = [(STORE, d[key]) for key in ('store_branch', 'fence_branch')]
     journal = [(STORE, j['branch'])]
-    public_access.check(client, policy['public_access'], business, business)
-    public_access.check(client, j['public_access'], journal, journal)
+    # Use the job token for the public rules view, as in the manual read probe.
+    store_token = client.token
+    client.token = client.metadata.token
+    try:
+        public_access.check(client, policy['public_access'], business, business)
+        public_access.check(client, j['public_access'], journal, journal)
+    finally:
+        client.token = store_token
     public_access.credential(j['public_access'], 'recovery_journal_write', STORE, [j['branch']])
     require(j['public_access']['credential_reviews']['recovery_journal_write']
             ['credential_reference'] == j['credential_reference'])
