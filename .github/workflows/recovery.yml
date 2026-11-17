@@ -80,7 +80,7 @@ jobs:
                   raise ValueError()
               entry = {'__name__': 'reviewed_recovery_writer'}
               exec(compile(body, str(path), 'exec'), entry)
-              status = entry['main'](Path('core'), extension, 'b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b', 'b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f')
+              status = entry['main'](Path('core'), extension, '742f150242721f3043f12946ace1e1e5eb3efab29ee327dee49d3eb4e9bb8a00', 'f20d18f09ad403f2742d0af1661c9e7d83a1be63ae3d9723f195287e433e10d7')
           except BaseException:
               sys.exit('operations phase=writer_bootstrap reason=binding_refused')
           sys.exit(status)
@@ -139,7 +139,7 @@ jobs:
           try:
               writer = load('recovery_writer', '0b3cebbc0d8a76aab59de0e5f42feda80ed76c48f8e09dfce67b8edd30db78c0')
               once = load('recovery_once', '626831a53572b4e386e3a53f59b466ebcfc8555f6873184dcebdfbc00875d658')
-              status = once['main'](writer, extension, Path('core'), 'b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b', 'b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f')
+              status = once['main'](writer, extension, Path('core'), '742f150242721f3043f12946ace1e1e5eb3efab29ee327dee49d3eb4e9bb8a00', 'f20d18f09ad403f2742d0af1661c9e7d83a1be63ae3d9723f195287e433e10d7')
           except Exception:
               sys.exit('operations phase=diagnostic_bootstrap reason=binding_refused')
           sys.exit(status)

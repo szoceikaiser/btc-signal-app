@@ -96,7 +96,7 @@ jobs:
                   raise ValueError()
               scope = {'__name__': 'reviewed_backup_diagnostic'}
               exec(compile(body, str(path), 'exec'), scope)
-              status = scope['execute'](Path('.'), Path('../extension'), 'b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b', 'b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f', '0c2af464f2cd0a44f6ebd0dc2ebd5eee83d168eabc9c9879a5a2d848084fc579')
+              status = scope['execute'](Path('.'), Path('../extension'), '742f150242721f3043f12946ace1e1e5eb3efab29ee327dee49d3eb4e9bb8a00', 'f20d18f09ad403f2742d0af1661c9e7d83a1be63ae3d9723f195287e433e10d7', '0c2af464f2cd0a44f6ebd0dc2ebd5eee83d168eabc9c9879a5a2d848084fc579')
           except Exception:
               sys.exit('backup diagnostic phase=bootstrap reason=binding_refused')
           sys.exit(status)

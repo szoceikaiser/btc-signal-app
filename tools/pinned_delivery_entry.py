@@ -29,6 +29,8 @@ def public_monitor_result(value):
     return result
 MODULES = {'aborted_maintenance':'engine/aborted_maintenance.py',
            'safe_recovery':'engine/safe_recovery.py',
+           'watch_abort':'engine/watch_abort.py',
+           'watch_abort_once':'tools/watch_abort_once.py',
            'github_recovery_journal':'engine/github_recovery_journal.py',
            'github_recovery':'tools/github_recovery.py',
            'continuous_operations':'tools/continuous_operations.py',
@@ -61,12 +63,13 @@ def install(core, extension, manifest_sha256):
     # Load original imports first. Existing objects/ROOT/check_code_pin retain core paths.
     sys.path[:0]=[str(core/'engine'),str(core/'tools')]
     entry=importlib.import_module('produktion_actions_runner')
-    new=('aborted_maintenance','safe_recovery','github_recovery_journal','github_recovery','continuous_operations')
+    new=('aborted_maintenance','safe_recovery','watch_abort','watch_abort_once',
+         'github_recovery_journal','github_recovery','continuous_operations')
     modules={name:importlib.import_module(name) for name in MODULES if name not in new}
     for name in new:
         modules[name]=types.ModuleType(name);sys.modules[name]=modules[name]
-    for name in ('aborted_maintenance','safe_recovery','github_recovery_journal','actions_delivery','actions_freshness',
-                 'produktion_pages_export','p4_backup_pair','continuous_operations','github_recovery'):
+    for name in ('aborted_maintenance','safe_recovery','watch_abort','github_recovery_journal','actions_delivery','actions_freshness',
+                 'produktion_pages_export','p4_backup_pair','continuous_operations','github_recovery','watch_abort_once'):
         module=modules[name]; path=MODULES[name]
         module.__file__=str(core/path)
         exec(compile(sources[path],str(extension/path),'exec'),module.__dict__)
@@ -78,7 +81,8 @@ def _run(phase):
     p.add_argument('--manifest-sha256',required=True)
     p.add_argument('--kind',choices=('signal','watch','lage'))
     p.add_argument('--runtime'); p.add_argument('--data-dir')
-    p.add_argument('--tool',choices=('p4_hosted_backup.py','produktion_actions_freshness.py','renderer','continuous_operations.py'))
+    p.add_argument('--tool',choices=('p4_hosted_backup.py','produktion_actions_freshness.py','renderer',
+                                    'continuous_operations.py','watch_abort_once.py'))
     p.add_argument('--renderer-root')
     p.add_argument('--observer-root')
     p.add_argument('tool_args',nargs=argparse.REMAINDER)
@@ -86,6 +90,10 @@ def _run(phase):
     phase[0]='extension'
     entry=install(a.core,a.extension,a.manifest_sha256)
     phase[0]='runtime'
+    if a.tool=='watch_abort_once.py':
+        args = a.tool_args[1:] if a.tool_args[:1] == ['--'] else a.tool_args
+        phase[1] = sys.modules['watch_abort_once'].main(Path(a.extension), args)
+        return
     if a.tool:
         import runpy
         target=Path(a.core)/'tools'/a.tool
