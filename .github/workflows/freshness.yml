@@ -91,7 +91,7 @@ jobs:
           import json, os, re, hashlib
           from copy import deepcopy
           from pathlib import Path
-          expected = "4fe5f956e2e54b631344e30203c8b4972980279851f23e07a8c4c6a8e272af73"
+          expected = "09b1854f2c2223a32323b0f9227ed33da0964c3abd00bacce3634f4a8a1bdcab"
           raw = os.environ['REVIEWED_MONITOR_JSON']
           if len(raw.encode()) > 128*1024 or not re.fullmatch('[0-9a-f]{64}', expected):
               raise SystemExit('Reviewed monitor policy not bound')
@@ -115,4 +115,4 @@ jobs:
           with Path('monitor-policy.json').open('x',encoding='utf-8') as f:
               json.dump(policy,f,allow_nan=False)
           PY
-          python3 -c 'import hashlib,sys,pathlib; exec("try:\n p=pathlib.Path(\"../extension/ops/continuous/freshness/entry.py\")\n body=p.read_bytes()\n if hashlib.sha256(body).hexdigest()!=\"20f23bad4ea9d1c460f0a2e3a8d3a834b5447fff7e7a1401fa4a6cef384f130f\": raise ValueError()\n exec(compile(body,str(p),\"exec\"),{\"__name__\":\"__main__\"})\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core ../core --extension ../extension --loader-sha256 b2cf523146175d3f7216af9bab313d003f49e4405c1bb2682fd6bb93e2fdc95b --manifest-sha256 b9fb84e1357330f5829dfb1d3bcd8f5543abdcba875b7246e378de0b11f59a2f --monitor-sha256 4d4686b3797da7dcc82cd7b179a335b5a9eae51cd013ec1ba5f24cefd5ae6b08 --observer-root . --policy monitor-policy.json
+          python3 -c 'import hashlib,sys,pathlib; exec("try:\n p=pathlib.Path(\"../extension/ops/continuous/freshness/entry.py\")\n body=p.read_bytes()\n if hashlib.sha256(body).hexdigest()!=\"20f23bad4ea9d1c460f0a2e3a8d3a834b5447fff7e7a1401fa4a6cef384f130f\": raise ValueError()\n exec(compile(body,str(p),\"exec\"),{\"__name__\":\"__main__\"})\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core ../core --extension ../extension --loader-sha256 742f150242721f3043f12946ace1e1e5eb3efab29ee327dee49d3eb4e9bb8a00 --manifest-sha256 f20d18f09ad403f2742d0af1661c9e7d83a1be63ae3d9723f195287e433e10d7 --monitor-sha256 4d4686b3797da7dcc82cd7b179a335b5a9eae51cd013ec1ba5f24cefd5ae6b08 --observer-root . --policy monitor-policy.json

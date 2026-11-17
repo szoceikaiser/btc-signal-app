@@ -76,7 +76,10 @@ def crosscheck(value, stream_repo, stream_pin, identity, deployment, budget):
     if (loc['revision']!=env['revision'] or loc['blob_sha']!=blob or loc['snapshot_digest']!=env['body_digest']
             or any(env['snapshot']['control'][k]!=deployment[k] for k in ('code_sha','config_sha256','bot_identity'))):
         raise ValueError('Fence completion pin mismatch')
-    if value['completion'].get('outcome') == 'aborted' and 'recovery' not in value['completion']:
+    from watch_abort import marker, validate_stream
+    if marker(value):
+        validate_stream(value, {'commit_sha': loc['commit_sha'], 'blob_sha': blob, 'body': body})
+    elif value['completion'].get('outcome') == 'aborted' and 'recovery' not in value['completion']:
         from aborted_maintenance import validate_pair, STREAM_PIN
         if parents != [STREAM_PIN]: raise ValueError('Foreign maintenance parent')
         validate_pair(value, env, loc)
@@ -86,6 +89,17 @@ def crosscheck(value, stream_repo, stream_pin, identity, deployment, budget):
         proof=value['completion']['recovery']
         if proof['schema']=='btc-owner-abort-recovery-v1' and parents!=[proof['old_stream_commit']]:
             raise ValueError('Owner recovery stream parent differs')
+
+
+def watch_abort_history(read, parents, value, deployment):
+    from watch_abort import FENCE, PREVIOUS, marker, require, validate_history
+
+    if marker(value):
+        require(parents == [FENCE])
+        old_parents, _, opened, _ = inspect_fence(read, FENCE, deployment)
+        require(old_parents == [PREVIOUS])
+        _, _, previous, _ = inspect_fence(read, PREVIOUS, deployment)
+        validate_history(value, opened, previous)
 
 
 def fence_segments(root, deployment, budget):
@@ -138,6 +152,7 @@ def append_fence(repo,branch,pin,revision,deployment,root,budget):
                 parents,body,value,blob=inspect_fence(read,commit,deployment)
                 if parents!=([prior] if prior else []): raise ValueError('Incomplete fence ancestry')
                 transition(previous,value)
+                watch_abort_history(read,parents,value,deployment)
                 unpacked+=len(body)
                 if unpacked>b.MAX_UNPACKED: raise ValueError('Fence unpacked limit')
                 h.update((canonical([commit,prior,index,digest(value),blob])+'\n').encode())
@@ -195,6 +210,7 @@ def restore_fence(root,manifest,target,deployment,stream_repo,stream_pin,identit
                 parents,body,value,blob=inspect_fence(read,commit,deployment)
                 if parents!=([prior] if prior else []): raise ValueError('Missing fence ancestry')
                 transition(previous,value)
+                watch_abort_history(read,parents,value,deployment)
                 crosscheck(value,stream_repo,stream_pin,identity,deployment,budget)
                 h.update((canonical([commit,prior,index,digest(value),blob])+'\n').encode())
                 count+=1;unpacked+=len(body)

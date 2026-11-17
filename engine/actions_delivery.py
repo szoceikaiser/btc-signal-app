@@ -91,7 +91,10 @@ def parse_fence(record, deployment):
             if (value['phase']!='closed' or schema not in (SCHEMA,OWNER_SCHEMA)
                     or (completion.get('outcome')!='aborted' if schema==OWNER_SCHEMA else 'outcome' in completion)):
                 raise ValueError('Recovery shape')
-        if 'outcome' in completion and 'recovery' not in completion:
+        if 'watch_abort' in completion:
+            from watch_abort import validate_marker
+            validate_marker(value)
+        elif 'outcome' in completion and 'recovery' not in completion:
             from aborted_maintenance import review_evidence
             if completion['outcome'] != 'aborted' or value['phase'] != 'closed':
                 raise ValueError('maintenance outcome')
@@ -244,7 +247,20 @@ class ActionsClient(ProductionContentsClient):
             if proof['schema']=='btc-owner-abort-recovery-v1' and self.parents(
                     deployment['private_store_repository'],observed['commit_sha'])!=[proof['old_stream_commit']]:
                 raise StoreConflict('Released owner stream parent differs')
-        if (value.get('completion') or {}).get('outcome') == 'aborted' and 'recovery' not in value['completion']:
+        from watch_abort import marker
+        if marker(value):
+            from watch_abort import FENCE, PREVIOUS, require, validate_history, validate_stream
+            repo = deployment['private_store_repository']
+            proof = value['completion']['watch_abort']
+            require(run['kind'] in ('signal', 'watch')
+                    and int(run.get('expected_start_ms', '0')) > proof['confirmed_at_ms']
+                    and self.parents(repo, record['commit_sha']) == [FENCE]
+                    and self.parents(repo, FENCE) == [PREVIOUS])
+            opened = parse_fence(self.read_at(repo, FENCE, FENCE_PATH), deployment)
+            previous = parse_fence(self.read_at(repo, PREVIOUS, FENCE_PATH), deployment)
+            validate_history(value, opened, previous)
+            validate_stream(value, self.read(repo, deployment['store_branch']))
+        elif (value.get('completion') or {}).get('outcome') == 'aborted' and 'recovery' not in value['completion']:
             from aborted_maintenance import validate_pair, STREAM_PIN, FENCE_PIN
             completion = value['completion']
             observed = self.read(deployment['private_store_repository'], deployment['store_branch'])
