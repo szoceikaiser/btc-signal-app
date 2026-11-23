@@ -12,6 +12,7 @@ class Diagnostic:
         self.reason = 'refused_or_unconfirmed'
         self.gets = 0
         self.puts = 0
+        self.posts = 0
 
     def enter(self, phase):
         self.phase = phase
@@ -19,7 +20,7 @@ class Diagnostic:
 
     def output(self):
         return json.dumps(dict(phase=self.phase, reason=self.reason,
-                               get_calls=self.gets, put_calls=self.puts), sort_keys=True)
+                               get_calls=self.gets, put_calls=self.puts, post_calls=self.posts), sort_keys=True)
 
 
 def checkpoint(client, phase):
@@ -32,7 +33,7 @@ def head(client, branch):
     return client._request('GET', client._route(client.repo, '/git/ref/heads/' + branch))['object']['sha']
 
 
-def admit(client, fence, stream):
+def admit(client, fence, stream, *, early=False):
     """Reuse the writer's guards with one observation of each shared ruleset."""
     from types import SimpleNamespace
     import github_recovery as recovery
@@ -63,7 +64,10 @@ def admit(client, fence, stream):
     guards = GuardView(policy=client.policy, repo=client.repo, code=client.code,
         clock=client.clock, self_run=client.self_run, _route=client._route, _request=request,
         read=read, is_ancestor=client.is_ancestor, read_at=client.read_at)
-    return recovery.verify_guards(guards, fence, json.loads(stream['body']))
+    envelope = json.loads(stream['body'])
+    if early:
+        return recovery.verify_guards(guards, fence, envelope, early=True)
+    return recovery.verify_guards(guards, fence, envelope)
 
 
 def read_incident(client, journal_head, path):
@@ -182,6 +186,43 @@ def run(client, identity, *, read_only=False):
     else:
         safe.require(not proof and not writes)
 
+    original = json.loads(original_stream['body'])
+    source_run = original_fence['run']
+    health = original['snapshot']['control']['health']
+    success = health.get('successful_runs', {}).get('watch', {}).get('run', {})
+    early = (source_run['kind'] == 'watch' and original['snapshot']['control']['owner'] is None
+             and success.get('run_id') != source_run['id'])
+    previous_fence = None
+    if early:
+        from watch_abort import FENCE, PREVIOUS
+        checkpoint(client, 'early_watch_history')
+        parents = client.parents(client.repo, incident)
+        safe.require(incident != FENCE and len(parents) == 1 and parents[0] != PREVIOUS)
+        previous_pin = parents[0]
+        predecessor = client.read_at(client.repo, previous_pin, recovery.actions.FENCE_PATH)
+        previous_fence = recovery.actions.parse_fence(predecessor, d)
+        location = recovery.locator(original_stream, original)
+        safe.early_watch(original_fence, original, location, previous_fence, client.clock())
+        store = recovery.g.GitHubStore(client, client.repo, d['store_branch'], d['store_id'], 'read-only', '1')
+        store._envelope, store._record = original, original_stream
+        binding = health['successful_runs'][previous_fence['run']['kind']]
+        # Only immutable completion evidence may survive a worker restart.
+        # The journal plan was CAS-persisted after the original Git validation;
+        # bind its attestation to the exact stream commit and completion locator.
+        # Heads, source jobs, workflow bytes/ancestry and all writers remain fresh.
+        completion_evidence = dict(stream=pin(original_stream), completion=binding['completion'],
+                                   run=binding['run'])
+        if plan:
+            safe.require(plan['review']['previous_fence_commit'] == previous_pin
+                and plan['review']['previous_fence_sha256'] == digest(previous_fence))
+        reusable = plan and plan['review'].get('previous_completion') == completion_evidence
+        if not reusable:
+            completed = store.read_revision(binding['completion'])
+            safe.require(completed['control']['health']['completion_candidate'] == binding['run'])
+        if proof:
+            safe.require(proof['schema'] == safe.EARLY_WATCH_SCHEMA)
+            safe.early_history(fence, envelope, location, original_fence, previous_fence)
+
     if proof:
         reservation = writes.get('fence', {})
         safe.require(reservation.get('old') == plan['fence'] and reservation.get('body') == fence
@@ -194,12 +235,18 @@ def run(client, identity, *, read_only=False):
         safe.require('fence' not in writes)
 
     checkpoint(client, 'admission')
-    meta, jobs = admit(client, original_fence, original_stream)
+    if early:
+        meta, jobs = admit(client, original_fence, original_stream, early=True)
+    else:
+        meta, jobs = admit(client, original_fence, original_stream)
     checkpoint(client, 'plan_validation')
     if plan is None:
         review = dict(old_fence_commit=incident, old_fence_sha256=hashlib.sha256(fence_record['body']).hexdigest(),
             run_sha256=digest(meta), jobs_sha256=digest(jobs), policy_sha256=policy_hash,
             confirmed_at_ms=client.clock(), workers_terminated=True, run_completed=True)
+        if early:
+            review.update(previous_fence_commit=previous_pin, previous_fence_sha256=digest(previous_fence),
+                          previous_completion=completion_evidence)
         owner = envelope['snapshot']['control']['owner']
         release = event = None
         if owner is not None:
@@ -213,8 +260,10 @@ def run(client, identity, *, read_only=False):
         safe.require(review['policy_sha256'] == policy_hash and review['old_fence_commit'] == incident
             and review['old_fence_sha256'] == hashlib.sha256(canonical(original_fence).encode()).hexdigest()
             and review['workers_terminated'] is True and review['run_completed'] is True)
+        if early:
+            safe.require(plan['release'] is None and review['run_sha256'] == digest(meta)
+                and review['jobs_sha256'] == digest(jobs))
         if plan['release'] is not None:
-            original = json.loads(original_stream['body'])
             safe.require(all(review[key] == value for key, value in {
                 'old_owner': original['snapshot']['control']['owner'], 'old_revision': original['revision'],
                 'old_snapshot_digest': original['body_digest'], 'old_stream_commit': original_stream['commit_sha'],
@@ -222,7 +271,10 @@ def run(client, identity, *, read_only=False):
             release, event = safe.release_owner(original, original_fence['run'], d, review, plan['release']['write_id'])
             safe.require(release == plan['release'] and event == plan['owner_event'])
 
-    if plan['release'] is None:
+    if early:
+        close = safe.early_candidate(plan['fence_body'], envelope, recovery.locator(stream, envelope),
+            previous_fence, plan['review'], plan['close_write_id'])
+    elif plan['release'] is None:
         close = safe.candidate(plan['fence_body'], envelope, recovery.locator(stream, envelope),
             plan['review'], plan['close_write_id'])
     elif proof:
@@ -269,8 +321,9 @@ def run(client, identity, *, read_only=False):
     else:
         released, env = stream, envelope
     checkpoint(client, 'fence_write_or_readback')
+    options = {'early': True} if early else {}
     closed = recovery.confirmed_write(client, journal, 'fence', plan['fence'], close,
-        recovery.actions.FENCE_PATH, d['fence_branch'], released['commit_sha'])
+        recovery.actions.FENCE_PATH, d['fence_branch'], released['commit_sha'], **options)
     safe.validate(close, env, recovery.locator(released, env))
     return dict(phase='recovered-await-fresh-regular-run', outcome=close['completion'].get('outcome', 'reconciled'),
         incident=incident, stream_commit=released['commit_sha'], fence_commit=closed['commit_sha'])
@@ -315,6 +368,8 @@ def execute(core, extension, loader_sha, manifest_sha, diagnostic, *, probe=None
                 diagnostic.gets += 1
             elif method == 'PUT':
                 diagnostic.puts += 1
+            elif method == 'POST':
+                diagnostic.posts += 1
             try:
                 return super()._request(method, route, payload)
             except github_recovery.g.StoreHTTPFailure as exc:

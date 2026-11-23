@@ -63,7 +63,7 @@ def transition(previous, current):
     else: raise ValueError('Fence transition missing/reordered')
 
 
-def crosscheck(value, stream_repo, stream_pin, identity, deployment, budget):
+def crosscheck(value, stream_repo, stream_pin, identity, deployment, budget, early=None):
     if value['phase']=='open' or value['run'] is None: return
     loc=value['completion']['stream']
     expected={'adapter':'github','repo':identity['repo'],'branch':identity['branch'],
@@ -84,14 +84,28 @@ def crosscheck(value, stream_repo, stream_pin, identity, deployment, budget):
         if parents != [STREAM_PIN]: raise ValueError('Foreign maintenance parent')
         validate_pair(value, env, loc)
     if 'recovery' in value['completion']:
-        from safe_recovery import validate
+        from safe_recovery import EARLY_WATCH_SCHEMA, early_history, validate
         validate(value,env,loc)
         proof=value['completion']['recovery']
+        if proof['schema'] == EARLY_WATCH_SCHEMA:
+            if early is None:
+                raise ValueError('Early abort fence history missing')
+            early_history(value, env, loc, *early)
         if proof['schema']=='btc-owner-abort-recovery-v1' and parents!=[proof['old_stream_commit']]:
             raise ValueError('Owner recovery stream parent differs')
 
 
 def watch_abort_history(read, parents, value, deployment):
+    from safe_recovery import EARLY_WATCH_SCHEMA, require as recovery_require
+    proof = (value.get('completion') or {}).get('recovery', {})
+    if proof.get('schema') == EARLY_WATCH_SCHEMA:
+        pin, prior = proof['old_fence_commit'], proof['previous_fence_commit']
+        recovery_require(parents == [pin])
+        opened_parents, _, opened, _ = inspect_fence(read, pin, deployment)
+        recovery_require(opened_parents == [prior])
+        _, _, previous, _ = inspect_fence(read, prior, deployment)
+        return opened, previous
+
     from watch_abort import FENCE, PREVIOUS, marker, require, validate_history
 
     if marker(value):
@@ -210,8 +224,8 @@ def restore_fence(root,manifest,target,deployment,stream_repo,stream_pin,identit
                 parents,body,value,blob=inspect_fence(read,commit,deployment)
                 if parents!=([prior] if prior else []): raise ValueError('Missing fence ancestry')
                 transition(previous,value)
-                watch_abort_history(read,parents,value,deployment)
-                crosscheck(value,stream_repo,stream_pin,identity,deployment,budget)
+                early = watch_abort_history(read, parents, value, deployment)
+                crosscheck(value, stream_repo, stream_pin, identity, deployment, budget, early)
                 h.update((canonical([commit,prior,index,digest(value),blob])+'\n').encode())
                 count+=1;unpacked+=len(body)
                 if count>b.MAX_COMMITS or unpacked>b.MAX_UNPACKED: raise ValueError('Fence restore step limit')

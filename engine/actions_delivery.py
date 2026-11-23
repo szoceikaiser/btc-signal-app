@@ -21,6 +21,13 @@ WORKFLOWS = {'.github/workflows/signal.yml': 'signal',
              '.github/workflows/watch.yml': 'watch',
              '.github/workflows/lage.yml': 'lage'}
 active_client = ContextVar('hosted_actions_client', default=None)
+watch_phase = ContextVar('watch_diagnostic_callback', default=None)
+
+
+def watch_checkpoint(phase):
+    callback = watch_phase.get()
+    if callback is not None:
+        callback(phase)
 
 
 def command_binding(client, operation_id):
@@ -86,11 +93,13 @@ def parse_fence(record, deployment):
             raise ValueError('run')
         completion = value.get('completion') or {}
         if 'recovery' in completion:
-            from safe_recovery import SCHEMA,OWNER_SCHEMA
+            from safe_recovery import SCHEMA, OWNER_SCHEMA, EARLY_WATCH_SCHEMA, validate_early_shape
             schema=completion['recovery'].get('schema')
-            if (value['phase']!='closed' or schema not in (SCHEMA,OWNER_SCHEMA)
-                    or (completion.get('outcome')!='aborted' if schema==OWNER_SCHEMA else 'outcome' in completion)):
+            if (value['phase']!='closed' or schema not in (SCHEMA,OWNER_SCHEMA,EARLY_WATCH_SCHEMA)
+                    or (completion.get('outcome')!='aborted' if schema!=SCHEMA else 'outcome' in completion)):
                 raise ValueError('Recovery shape')
+            if schema == EARLY_WATCH_SCHEMA:
+                validate_early_shape(value)
         if 'watch_abort' in completion:
             from watch_abort import validate_marker
             validate_marker(value)
@@ -176,6 +185,7 @@ class ActionsClient(ProductionContentsClient):
         super().__init__(token, budget)
         self.environment = dict(environment)
         self.admitted = False
+        self._watch_owner_confirmed = False
         self.fence_branch = environment['BTC_DELIVERY_FENCE_BRANCH']
 
     def read(self, repo, branch, path='delivery/stream.json'):
@@ -183,12 +193,23 @@ class ActionsClient(ProductionContentsClient):
                     'delivery/stream.json':self.journal.binding['branch']}
         if repo != self.journal.binding['repo'] or expected.get(path) != branch:
             raise StoreUnavailable('Actions read branch/path differs from binding')
+        if self.admitted and path == 'delivery/stream.json' and self.case_id is None:
+            if not self._watch_owner_confirmed:
+                watch_checkpoint('watch_store_read')
         return super().read(repo,branch,path)
 
     def update(self, repo, branch, expected_blob_sha, body, write_id, path='delivery/stream.json'):
         if not self.admitted:
             raise StoreUnavailable('Business write outside admitted Actions run')
+        if not self._watch_owner_confirmed:
+            watch_checkpoint('watch_store_acquire')
         return super().update(repo,branch,expected_blob_sha,body,write_id,path)
+
+    def finalize_confirmation(self, repo, branch, commit_sha):
+        super().finalize_confirmation(repo, branch, commit_sha)
+        if self.admitted and branch == self.journal.binding['branch'] and not self._watch_owner_confirmed:
+            self._watch_owner_confirmed = True
+            watch_checkpoint('watch_store_owned')
 
     def fence_write(self, old, value):
         body = canonical(value).encode()
@@ -221,9 +242,12 @@ class ActionsClient(ProductionContentsClient):
 
     def fence_read(self, deployment):
         record = self.read(self.journal.binding['repo'], self.fence_branch, FENCE_PATH)
+        if not self.admitted:
+            watch_checkpoint('watch_fence_validate')
         return record, parse_fence(record, deployment)
 
     def acquire(self, deployment, run):
+        watch_checkpoint('watch_fence_read')
         record, value = self.fence_read(deployment)
         workflow = run.get('workflow')
         if (workflow not in WORKFLOWS or run.get('kind') != WORKFLOWS[workflow]
@@ -235,7 +259,7 @@ class ActionsClient(ProductionContentsClient):
                 or any(c['id'] == run['id'] for c in value['cursors'].values())):
             raise StoreConflict('Open/old/repeated Actions run requires operator review')
         if 'recovery' in (value.get('completion') or {}):
-            from safe_recovery import validate
+            from safe_recovery import EARLY_WATCH_SCHEMA, early_history, require, validate
             observed=self.read(deployment['private_store_repository'],deployment['store_branch'])
             loc=value['completion']['stream'];proof=value['completion']['recovery']
             if (observed['commit_sha']!=loc['commit_sha'] or observed['blob_sha']!=loc['blob_sha']
@@ -243,7 +267,15 @@ class ActionsClient(ProductionContentsClient):
                     or run['kind'] not in ('signal','watch')
                     or int(run.get('expected_start_ms','0'))<=proof['confirmed_at_ms']):
                 raise StoreConflict('Fresh regular run after close-only recovery required')
-            validate(value,json.loads(observed['body']),loc)
+            envelope = json.loads(observed['body'])
+            validate(value,envelope,loc)
+            if proof['schema'] == EARLY_WATCH_SCHEMA:
+                repo = deployment['private_store_repository']
+                opened_pin, previous_pin = proof['old_fence_commit'], proof['previous_fence_commit']
+                require(self.parents(repo, opened_pin) == [previous_pin])
+                opened = parse_fence(self.read_at(repo, opened_pin, FENCE_PATH), deployment)
+                previous = parse_fence(self.read_at(repo, previous_pin, FENCE_PATH), deployment)
+                early_history(value, envelope, loc, opened, previous)
             if proof['schema']=='btc-owner-abort-recovery-v1' and self.parents(
                     deployment['private_store_repository'],observed['commit_sha'])!=[proof['old_stream_commit']]:
                 raise StoreConflict('Released owner stream parent differs')
@@ -277,10 +309,13 @@ class ActionsClient(ProductionContentsClient):
         self.fence = {**value, 'phase': 'open', 'run': dict(run),
                       'cursors': {**value['cursors'], workflow: {'number': run['number'], 'id': run['id']}},
                       'write_id': secrets.token_hex(16), 'completion': None}
+        watch_checkpoint('watch_fence_acquire')
         self.fence_write(record, self.fence)
         self.admitted = True
+        watch_checkpoint('watch_before_store')
 
     def close(self, deployment, completion):
+        watch_checkpoint('watch_fence_close')
         record, value = self.fence_read(deployment)
         if value != self.fence or self.journal.case or self.journal.pending:
             raise StoreConflict('Actions fence changed or case unfinished')
