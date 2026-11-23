@@ -1,8 +1,7 @@
 """Close-only recovery after completed business work. Never own, send or replay.
 
-The only supported mutation closes an open fence against an independently
-confirmed successful stream after all workers have ended. Historical aborted
-maintenance remains a separate, unchanged validator.
+Validate the stream and fence evidence used by the existing recovery writer.
+Historical aborted maintenance remains a separate validator.
 """
 from copy import deepcopy
 import hashlib
@@ -12,6 +11,7 @@ from production_contract import canonical,digest,validate_v2
 
 SCHEMA='btc-close-only-recovery-v1'
 OWNER_SCHEMA='btc-owner-abort-recovery-v1'
+EARLY_WATCH_SCHEMA = 'btc-early-watch-abort-v1'
 
 def require(ok):
     if not ok:raise ValueError('Recovery evidence refused')
@@ -42,11 +42,93 @@ def completed(envelope,deployment,run):
             and finished['watch_candle_open_ms']==finished['watch_observed_ms']//14400000*14400000)
     return receipts(snapshot)
 
+def early_watch(old, envelope, locator, previous, at_ms):
+    from actions_schedule import deadline
+    from watch_abort import RUN
+
+    run = old['run']
+    prior_run = previous['run']
+    start = int(run['expected_start_ms'])
+    require(run['kind'] == 'watch' and run['id'] != RUN
+        and run['deadline_utc_ms'] == deadline('watch', start) < at_ms
+        and old['phase'] == 'open' and old['completion'] is None
+        and previous['phase'] == 'closed' and prior_run is not None
+        and prior_run['kind'] in ('signal', 'watch')
+        and int(prior_run['expected_start_ms']) < start
+        and previous['completion']['stream'] == locator
+        and set(previous['completion']) == {'stream', 'get_before_close',
+            'put_before_close', 'request_bytes_before_close', 'response_reserve_before_close'}
+        and run['number'] > previous['cursors'][run['workflow']]['number']
+        and all(run['id'] != cursor['id'] for cursor in previous['cursors'].values()))
+    cursors = {**previous['cursors'], run['workflow']: {'number': run['number'], 'id': run['id']}}
+    require(old == {**previous, 'phase': 'open', 'run': run, 'cursors': cursors,
+        'write_id': old['write_id'], 'completion': None}
+        and old['write_id'] != previous['write_id'])
+    receipts_hash = completed(envelope, old['deployment'], prior_run)
+    health = envelope['snapshot']['control']['health']
+    watch_index = health.get('completed_runs', {}).get('watch', {})
+    require(health['completion_candidate']['finished_ms'] <= start
+        and run['expected_start_ms'] not in watch_index
+        and all(entry['run']['run_id'] != run['id'] for entry in watch_index.values())
+        and all(entry['run']['run_id'] != run['id'] for entry in health['successful_runs'].values()))
+    return receipts_hash
+
+
+def early_history(value, envelope, locator, opened, previous):
+    proof = value['completion']['recovery']
+    require(proof['schema'] == EARLY_WATCH_SCHEMA
+        and digest(opened) == proof['old_fence_sha256']
+        and digest(previous) == proof['previous_fence_sha256']
+        and early_watch(opened, envelope, locator, previous, proof['confirmed_at_ms'])
+            == proof['receipts_sha256'])
+
+
+def early_candidate(old, envelope, locator, previous, review, write_id):
+    from watch_abort import FENCE, PREVIOUS
+
+    require(review['workers_terminated'] is True and review['run_completed'] is True
+        and review['old_fence_commit'] != FENCE and review['previous_fence_commit'] != PREVIOUS)
+    proof = {key: review[key] for key in ('old_fence_commit', 'old_fence_sha256',
+        'previous_fence_commit', 'previous_fence_sha256', 'run_sha256', 'jobs_sha256',
+        'policy_sha256', 'confirmed_at_ms')}
+    proof.update(schema=EARLY_WATCH_SCHEMA, old_write_id=old['write_id'],
+        failed_run=old['run']['id'], receipts_sha256=early_watch(
+            old, envelope, locator, previous, review['confirmed_at_ms']))
+    value = {**deepcopy(old), 'phase': 'closed', 'write_id': write_id,
+        'completion': {'stream': deepcopy(locator), 'outcome': 'aborted', 'recovery': proof}}
+    validate(value, envelope, locator)
+    early_history(value, envelope, locator, old, previous)
+    return value
+
+
+def validate_early_shape(value):
+    from actions_schedule import deadline
+    from watch_abort import FENCE, PREVIOUS, RUN
+
+    completion = value['completion']
+    proof = completion['recovery']
+    run = value['run']
+    require(set(completion) == {'stream', 'recovery', 'outcome'}
+        and completion['outcome'] == 'aborted'
+        and set(proof) == {'schema', 'old_fence_commit', 'old_fence_sha256',
+            'previous_fence_commit', 'previous_fence_sha256', 'run_sha256', 'jobs_sha256',
+            'policy_sha256', 'confirmed_at_ms', 'old_write_id', 'failed_run', 'receipts_sha256'}
+        and proof['schema'] == EARLY_WATCH_SCHEMA and value['phase'] == 'closed'
+        and run['kind'] == 'watch' and run['id'] != RUN and proof['failed_run'] == run['id']
+        and proof['old_fence_commit'] != FENCE and proof['previous_fence_commit'] != PREVIOUS
+        and proof['old_fence_commit'] != proof['previous_fence_commit']
+        and re.fullmatch('[0-9a-f]{40}', proof['previous_fence_commit'])
+        and re.fullmatch('[0-9a-f]{64}', proof['previous_fence_sha256'])
+        and type(proof['confirmed_at_ms']) is int
+        and run['deadline_utc_ms'] == deadline('watch', int(run['expected_start_ms'])) < proof['confirmed_at_ms'])
+
+
 def validate(value,envelope,locator):
     proof=value['completion']['recovery'];run=value['run']
     owner=proof['schema']==OWNER_SCHEMA
-    require(proof['schema'] in (SCHEMA,OWNER_SCHEMA) and value['phase']=='closed'
-        and (value['completion'].get('outcome')=='aborted' if owner else 'outcome' not in value['completion'])
+    early = proof['schema'] == EARLY_WATCH_SCHEMA
+    require(proof['schema'] in (SCHEMA,OWNER_SCHEMA,EARLY_WATCH_SCHEMA) and value['phase']=='closed'
+        and (value['completion'].get('outcome')=='aborted' if owner or early else 'outcome' not in value['completion'])
         and proof['failed_run']==run['id']
         and type(proof['confirmed_at_ms']) is int and proof['confirmed_at_ms']>0
         and all(re.fullmatch('[0-9a-f]{64}',proof[key]) for key in
@@ -74,6 +156,12 @@ def validate(value,envelope,locator):
         control['owner']=proof['old_owner']
         require(digest(snapshot)==proof['old_snapshot_digest'])
         require(owner_matches(proof['old_owner'],run,value['deployment']))
+    elif early:
+        validate_early_shape(value)
+        control = envelope['snapshot']['control']
+        require(control['owner'] is None and control['mode'] == 'active'
+            and not control['health'].get('restore_requires_reconciliation')
+            and receipts(envelope['snapshot']) == proof['receipts_sha256'])
     else:require(completed(envelope,value['deployment'],run)==proof['receipts_sha256'])
     old=deepcopy(value);old.update(phase='open',completion=None,write_id=proof['old_write_id'])
     require(hashlib.sha256(canonical(old).encode()).hexdigest()==proof['old_fence_sha256'])

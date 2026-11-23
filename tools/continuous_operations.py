@@ -115,29 +115,58 @@ def no_redirect_transport():
         return response
     return bounded
 
-def worker_evidence(client,run):
+def worker_evidence(client,run,*,early=False):
     from github_freshness import utc_ms
     meta=client._request('GET',client._route(client.code,'/actions/runs/'+run['id']))
     recovery.require(meta['status']=='completed' and meta['conclusion'] in ('failure','cancelled','success')
         and str(meta['id'])==run['id'] and meta['run_attempt']==1 and meta['run_number']==run['number']
         and meta['path']==run['workflow'] and meta['repository']['full_name']==client.code
         and meta['head_branch']==client.policy['deployment']['code_ref'].removeprefix('refs/heads/'))
+    if early:
+        from actions_schedule import deadline, run_slot
+        slot = run_slot('watch', meta)
+        recovery.require(run['kind'] == 'watch' and meta['conclusion'] == 'failure'
+            and meta['head_repository']['full_name'] == client.code
+            and str(slot) == run['expected_start_ms']
+            and deadline('watch', slot) == run['deadline_utc_ms'] < client.clock()
+            and utc_ms(meta['created_at']) <= utc_ms(meta['updated_at']) <= client.clock()
+            and not getattr(client, '_response_link', ''))
     from reviewed_actions_entry import verify
     verify(client,client.code,meta['head_sha'],client.policy['deployment']['code_sha'],run['workflow'],
            client.policy['entry_workflows'][run['workflow']])
     jobs=client._request('GET',client._route(client.code,'/actions/runs/'+run['id']+'/attempts/1/jobs?per_page=100&page=1'))
     recovery.require(1<=jobs['total_count']==len(jobs['jobs'])<=20)
+    if early:
+        recovery.require(not getattr(client, '_response_link', '')
+            and type(jobs['total_count']) is int
+            and len({job['id'] for job in jobs['jobs']}) == len(jobs['jobs'])
+            and any(job.get('name') == 'delivery' and job.get('conclusion') == 'failure'
+                    for job in jobs['jobs']))
     for job in jobs['jobs']:
         recovery.require(job['status']=='completed' and str(job['run_id'])==run['id'] and job['run_attempt']==1
             and job['head_sha']==meta['head_sha'] and job.get('completed_at')
             and 'self-hosted' not in job['labels'] and 'ubuntu-24.04' in job['labels']
-            and utc_ms(job['completed_at'])<=int(client.clock()*1000))
+            and utc_ms(job['completed_at']) <= (client.clock() if early else int(client.clock()*1000)))
+        if early:
+            recovery.require(type(job['id']) is int and job['id'] > 0
+                and job['conclusion'] in ('failure', 'success', 'cancelled', 'skipped', 'timed_out')
+                and utc_ms(meta['created_at']) <= utc_ms(job['completed_at']) <= utc_ms(meta['updated_at']))
     for status in ('in_progress','waiting','requested','pending','queued'):
         queued=client._request('GET',client._route(client.code,'/actions/runs?status='+status+'&per_page=100&page=1'))
         items=queued['workflow_runs']
-        recovery.require(queued['total_count']==len(items) and len(items)<100)
+        recovery.require(queued['total_count']==len(items) and len(items)<100
+            and (not early or (type(queued['total_count']) is int
+                               and not getattr(client, '_response_link', ''))))
         own=getattr(client,'self_run',None)
         for item in items:
+            # The already reviewed, historical read-only Freshness run can only
+            # be ignored while it is still exactly the documented queue entry.
+            if (early and status == 'queued' and item.get('status') == 'queued'
+                    and item.get('id') == 43799577702 and item.get('run_attempt') == 1
+                    and item.get('path') == '.github/workflows/freshness.yml'
+                    and item.get('head_branch') == client.policy['deployment']['code_ref'].removeprefix('refs/heads/')
+                    and item.get('repository', {}).get('full_name') == client.code):
+                continue
             recovery.require(own is not None and all(item.get(key)==own[key] for key in
                 ('id','head_sha','path','run_attempt')) and item.get('repository',{}).get('full_name')==client.code)
     return meta,jobs

@@ -4,8 +4,8 @@
 export const CONFIG = Object.freeze({
   enabled: true,
   workflowId: 388631778,
-  workflowSha256: "f600d5aeba2ca2df97c55e7c1f6eb500a9eebab1af850c5a1dbbce2f87640216",
-  policyBindingSha256: "9f5c0cb9cd5c19fc9a3160272c7e97dd6ca6ab2495d0fcc940404c6a8659fda5",
+  workflowSha256: "9c5691c12d870495984984c2db5e99a0c26f87f803a030d9563e2719afee974f",
+  policyBindingSha256: "e2ee60783cd08ed784d4e24350da391631a6fc8b216f213b4965319d9d3ec5a3",
   codeSha: 'f3f054851f500af1926b149f13a2ee8890a8c2bc',
 });
 const REPO = 'szoceikaiser/btc-signal-app';

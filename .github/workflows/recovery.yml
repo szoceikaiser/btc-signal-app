@@ -76,11 +76,11 @@ jobs:
               extension = Path('extension')
               path = extension / 'ops/continuous/recovery_writer.py'
               body = path.read_bytes()
-              if hashlib.sha256(body).hexdigest() != '0b3cebbc0d8a76aab59de0e5f42feda80ed76c48f8e09dfce67b8edd30db78c0':
+              if hashlib.sha256(body).hexdigest() != '26d5891ae1918fcd3e2a227e98b60b098e1a2ac285e049f007abc50bb4fe9b98':
                   raise ValueError()
               entry = {'__name__': 'reviewed_recovery_writer'}
               exec(compile(body, str(path), 'exec'), entry)
-              status = entry['main'](Path('core'), extension, '742f150242721f3043f12946ace1e1e5eb3efab29ee327dee49d3eb4e9bb8a00', 'f20d18f09ad403f2742d0af1661c9e7d83a1be63ae3d9723f195287e433e10d7')
+              status = entry['main'](Path('core'), extension, '6156b5b9a7e7e755ef6f3bc0b2504db446781983e192adb32006f7c69355c6ef', '4fd7155ce85380f1176dcd09771766e91197489f12319edcee6b665c8df254a8')
           except BaseException:
               sys.exit('operations phase=writer_bootstrap reason=binding_refused')
           sys.exit(status)
@@ -137,9 +137,9 @@ jobs:
               exec(compile(body, str(path), 'exec'), scope)
               return scope
           try:
-              writer = load('recovery_writer', '0b3cebbc0d8a76aab59de0e5f42feda80ed76c48f8e09dfce67b8edd30db78c0')
+              writer = load('recovery_writer', '26d5891ae1918fcd3e2a227e98b60b098e1a2ac285e049f007abc50bb4fe9b98')
               once = load('recovery_once', '626831a53572b4e386e3a53f59b466ebcfc8555f6873184dcebdfbc00875d658')
-              status = once['main'](writer, extension, Path('core'), '742f150242721f3043f12946ace1e1e5eb3efab29ee327dee49d3eb4e9bb8a00', 'f20d18f09ad403f2742d0af1661c9e7d83a1be63ae3d9723f195287e433e10d7')
+              status = once['main'](writer, extension, Path('core'), '6156b5b9a7e7e755ef6f3bc0b2504db446781983e192adb32006f7c69355c6ef', '4fd7155ce85380f1176dcd09771766e91197489f12319edcee6b665c8df254a8')
           except Exception:
               sys.exit('operations phase=diagnostic_bootstrap reason=binding_refused')
           sys.exit(status)

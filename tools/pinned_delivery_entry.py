@@ -75,6 +75,31 @@ def install(core, extension, manifest_sha256):
         exec(compile(sources[path],str(extension/path),'exec'),module.__dict__)
     return entry
 
+WATCH_PHASES = {
+    'watch_runtime_binding', 'watch_fence_read', 'watch_fence_validate',
+    'watch_fence_acquire', 'watch_before_store', 'watch_store_read',
+    'watch_store_acquire', 'watch_store_owned',
+    'watch_fence_close',
+}
+
+
+def watch_error(exc):
+    # Classify by type only. The exception's fields can contain provider data.
+    from github_delivery import StoreConflict, StoreHTTPFailure, StoreUnavailable, WriteUnconfirmed
+    for kind, code in (
+        (WriteUnconfirmed, 'write_unconfirmed'),
+        (StoreConflict, 'state_conflict'),
+        (StoreHTTPFailure, 'provider_http_error'),
+        (StoreUnavailable, 'store_unavailable'),
+        (json.JSONDecodeError, 'invalid_json'),
+        (FileNotFoundError, 'required_file_missing'),
+        (ValueError, 'validation_refused'),
+    ):
+        if isinstance(exc, kind):
+            return code
+    return 'runtime_failed'
+
+
 def _run(phase):
     p=argparse.ArgumentParser()
     p.add_argument('--core',required=True); p.add_argument('--extension',required=True)
@@ -136,22 +161,39 @@ def _run(phase):
                 sys.modules['produktion_actions_runner']=old_entry
     else:
         if not a.kind or not a.runtime or not a.data_dir: p.error('Signal/watch runtime required')
-        entry.run_runtime(a.runtime,a.kind,a.data_dir)
+        if a.kind != 'watch':
+            entry.run_runtime(a.runtime,a.kind,a.data_dir)
+            return
+        actions = sys.modules['actions_delivery']
+
+        def report(stage):
+            if stage in WATCH_PHASES:
+                phase[0] = stage
+
+        report('watch_runtime_binding')
+        token = actions.watch_phase.set(report)
+        try:
+            entry.run_runtime(a.runtime,a.kind,a.data_dir)
+        finally:
+            actions.watch_phase.reset(token)
 
 def main():
     phase=['arguments',None]
     code=0
+    reason='refused_or_halted'
     try:
         # Provider/exception text is never public, including successful fetch logs.
         with open(os.devnull,'w') as sink, contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
             _run(phase)
     except SystemExit as exc:
         code=0 if exc.code in (None,0) else 20
-    except BaseException:
+    except BaseException as exc:
         code=20
+        if phase[0] in WATCH_PHASES:
+            reason=watch_error(exc)
     if phase[1] is not None:print(json.dumps(phase[1],sort_keys=True))
     if code:
-        print('delivery phase='+phase[0]+' reason=refused_or_halted',file=sys.stderr)
+        print('delivery phase='+phase[0]+' reason='+reason,file=sys.stderr)
     return code
 
 if __name__=='__main__': raise SystemExit(main())

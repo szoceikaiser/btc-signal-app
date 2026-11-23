@@ -23,6 +23,24 @@ def locator(record,envelope):
         store_id=envelope['store_id'],revision=envelope['revision'],commit_sha=record['commit_sha'],
         blob_sha=record['blob_sha'],snapshot_digest=envelope['body_digest'])
 
+def early_fence_mutation(repo, branch, expected_commit, body):
+    return {
+        'query': (
+            'mutation($input: CreateCommitOnBranchInput!) {'
+            ' createCommitOnBranch(input: $input) { commit { oid } } }'
+        ),
+        'variables': {'input': {
+            'branch': {'repositoryNameWithOwner': repo, 'branchName': branch},
+            'expectedHeadOid': expected_commit,
+            'message': {'headline': 'reviewed early watch abort'},
+            'fileChanges': {'additions': [{
+                'path': actions.FENCE_PATH,
+                'contents': base64.b64encode(canonical(body).encode()).decode('ascii'),
+            }]},
+        }},
+    }
+
+
 class Network(g.GitHubContentsClient):
     """Finite routes, two business writes at most, separately scoped journal."""
     def __init__(self,policy,store_token,metadata_token,opener=None,clock=None):
@@ -37,7 +55,16 @@ class Network(g.GitHubContentsClient):
         safe.require(time.monotonic()-self.started<120)
         code=route==self._route(self.code,'') or route.startswith(self._route(self.code,'/'))
         store=route==self._route(self.repo,'') or route.startswith(self._route(self.repo,'/'))
-        safe.require(code or store)
+        if route == '/graphql':
+            expected = self.capability
+            d = self.policy['deployment']
+            safe.require(method == 'POST' and expected is not None and expected.get('atomic') is True
+                and expected['path'] == actions.FENCE_PATH and expected['branch'] == d['fence_branch']
+                and payload == early_fence_mutation(self.repo, expected['branch'],
+                    expected['old']['commit_sha'], expected['body']))
+            self.capability = None
+        else:
+            safe.require(code or store)
         tail=route.removeprefix(self._route(self.code if code else self.repo,''))
         control='/contents/recovery/incidents/' in tail
         if method=='GET':
@@ -53,6 +80,8 @@ class Network(g.GitHubContentsClient):
                     or re.fullmatch(r'/git/commits/[0-9a-f]{40}',tail)
                     or re.fullmatch(r'/compare/[0-9a-f]{40}\.\.\.[0-9a-f]{40}\?per_page=1',tail)
                     or tail.startswith(('/rules/branches/','/rulesets/')))
+        elif route == '/graphql':
+            pass
         elif control:
             self.control_puts+=1;safe.require(method=='PUT' and self.control_puts<=8
                 and payload['branch']==self.policy['journal']['branch']
@@ -60,7 +89,8 @@ class Network(g.GitHubContentsClient):
         else:
             safe.require(method=='PUT' and self.capability is not None)
             expected=self.capability
-            safe.require(route==self._route(self.repo,'/contents/'+expected['path'])
+            safe.require(not expected.get('atomic')
+                and route==self._route(self.repo,'/contents/'+expected['path'])
                 and payload['branch']==expected['branch'] and payload['sha']==expected['old']['blob_sha']
                 and base64.b64decode(payload['content'])==canonical(expected['body']).encode())
             self.capability=None
@@ -68,7 +98,12 @@ class Network(g.GitHubContentsClient):
         if self.journal:self.timeout=min(self.timeout,max(0,(self.journal.deadline-self.clock())/1000))
         safe.require(self.timeout>0)
         self.metadata.timeout=self.timeout
-        result=self.metadata._request(method,route,payload) if code else super()._request(method,route,payload)
+        self._response_link = ''
+        if code:
+            result = self.metadata._request(method, route, payload)
+            self._response_link = getattr(self.metadata, '_response_link', '')
+        else:
+            result = super()._request(method, route, payload)
         safe.require(time.monotonic()-self.started<120)
         if self.journal:safe.require(self.clock()<self.journal.deadline)
         return result
@@ -123,7 +158,7 @@ def inspect(client):
     parser._parse(source)
     return record,fence,source,envelope
 
-def verify_guards(client,fence,envelope):
+def verify_guards(client,fence,envelope,*,early=False):
     import public_access
     from continuous_operations import worker_evidence
     d=client.policy['deployment'];public_access.deployment(client.policy['public_access'],d)
@@ -136,7 +171,9 @@ def verify_guards(client,fence,envelope):
         ==client.policy['journal']['credential_reference'])
     safe.receipts(envelope['snapshot'])
     owner=envelope['snapshot']['control']['owner']
-    if owner is None:
+    if early:
+        safe.require(owner is None)
+    elif owner is None:
         safe.completed(envelope,d,fence['run'])
         store=g.read_only(client,client.repo,d['store_branch'],d['store_id'])
         safe.require(store._envelope==envelope)
@@ -144,9 +181,11 @@ def verify_guards(client,fence,envelope):
         prior=store.read_revision(completed['completion'])
         safe.require(prior['control']['health']['completion_candidate']==completed['run'])
     else:safe.require(safe.owner_matches(owner,fence['run'],d))
+    if early:
+        return worker_evidence(client, fence['run'], early=True)
     return worker_evidence(client,fence['run'])
 
-def confirmed_write(client,journal,key,old,body,path,branch,stream_head):
+def confirmed_write(client,journal,key,old,body,path,branch,stream_head,*,early=False):
     """Reserve once on the server, then independently resolve saved state."""
     state=journal.read()[1];reservation=state['writes'].get(key)
     if reservation:
@@ -158,14 +197,29 @@ def confirmed_write(client,journal,key,old,body,path,branch,stream_head):
         stream=client.read(client.repo,client.policy['deployment']['store_branch'])
         safe.require(all(current[key]==value for key,value in old.items()) and stream['commit_sha']==stream_head)
         client.capability=dict(path=path,branch=branch,old=old,body=body)
-        payload=dict(message='reviewed recovery '+key,branch=branch,sha=old['blob_sha'],
-                     content=base64.b64encode(canonical(body).encode()).decode())
-        try:client._request('PUT',client._route(client.repo,'/contents/'+path),payload)
-        except g.StoreUnavailable:pass
+        if early:
+            safe.require(key == 'fence' and path == actions.FENCE_PATH
+                and len(canonical(body).encode()) <= actions.MAX_FENCE_BYTES)
+            client.capability['atomic'] = True
+            payload = early_fence_mutation(client.repo, branch, old['commit_sha'], body)
+            # A missing or error reply leaves only the exact Git readback as authority.
+            try:
+                client._request('POST', '/graphql', payload)
+            except (g.StoreUnavailable, g.StoreConflict, json.JSONDecodeError):
+                pass
+            finally:
+                client.capability = None
+        else:
+            payload=dict(message='reviewed recovery '+key,branch=branch,sha=old['blob_sha'],
+                         content=base64.b64encode(canonical(body).encode()).decode())
+            try:client._request('PUT',client._route(client.repo,'/contents/'+path),payload)
+            except g.StoreUnavailable:pass
     saved=client.read(client.repo,branch,path)
     safe.require(saved['body']==canonical(body).encode() and saved['commit_sha']!=old['commit_sha']
         and client.parents(client.repo,saved['commit_sha'])==[old['commit_sha']])
     safe.require(client.read(client.repo,branch,path)==saved)
+    if early:
+        safe.require(client.read(client.repo, client.policy['deployment']['store_branch'])['commit_sha'] == stream_head)
     if reservation.get('status')!='confirmed':journal.confirm(key,{k:v for k,v in saved.items() if k!='body'})
     return saved
 
