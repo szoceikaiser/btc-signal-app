@@ -118,13 +118,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
-          python3 -c 'import hashlib,runpy,sys,pathlib; exec("try:\n p=\"../extension/tools/pinned_delivery_entry.py\"\n if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=\"6156b5b9a7e7e755ef6f3bc0b2504db446781983e192adb32006f7c69355c6ef\": raise ValueError()\n runpy.run_path(p,run_name=\"__main__\")\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core . --extension ../extension --manifest-sha256 4fd7155ce85380f1176dcd09771766e91197489f12319edcee6b665c8df254a8 --tool renderer --renderer-root ../renderer -- --core . --runtime .runtime/runtime.json
+          python3 -c 'import hashlib,runpy,sys,pathlib; exec("try:\n p=\"../extension/tools/pinned_pages_entry.py\"\n if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=\"6e7895d956ce006a0b3244fb5e8ee7abfbb2a31ac13ef02c2859ee16c301dc58\": raise ValueError()\n runpy.run_path(p,run_name=\"__main__\")\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core . --extension ../extension --manifest-sha256 28e5def7ee90e2d61c8fd8055d84358680192f6520479882183efe51186942a1 --tool renderer --renderer-root ../renderer -- --core . --runtime .runtime/runtime.json
           --config .runtime/data/config.json --out .runtime/public --identities-only
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
       - name: Validate exact complete C05 package before upload
         working-directory: core
         run: >-
-          python3 -c 'import hashlib,runpy,sys,pathlib; exec("try:\n p=\"../extension/tools/pinned_delivery_entry.py\"\n if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=\"6156b5b9a7e7e755ef6f3bc0b2504db446781983e192adb32006f7c69355c6ef\": raise ValueError()\n runpy.run_path(p,run_name=\"__main__\")\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core . --extension ../extension --manifest-sha256 4fd7155ce85380f1176dcd09771766e91197489f12319edcee6b665c8df254a8 --tool renderer --renderer-root ../renderer -- --core . --runtime .runtime/runtime.json
+          python3 -c 'import hashlib,runpy,sys,pathlib; exec("try:\n p=\"../extension/tools/pinned_pages_entry.py\"\n if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=\"6e7895d956ce006a0b3244fb5e8ee7abfbb2a31ac13ef02c2859ee16c301dc58\": raise ValueError()\n runpy.run_path(p,run_name=\"__main__\")\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core . --extension ../extension --manifest-sha256 28e5def7ee90e2d61c8fd8055d84358680192f6520479882183efe51186942a1 --tool renderer --renderer-root ../renderer -- --core . --runtime .runtime/runtime.json
           --config .runtime/data/config.json --out .runtime/public
           --local-package-check .runtime/public.receipt.json
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
@@ -135,7 +135,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
-          python3 -c 'import hashlib,runpy,sys,pathlib; exec("try:\n p=\"../extension/tools/pinned_delivery_entry.py\"\n if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=\"6156b5b9a7e7e755ef6f3bc0b2504db446781983e192adb32006f7c69355c6ef\": raise ValueError()\n runpy.run_path(p,run_name=\"__main__\")\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core . --extension ../extension --manifest-sha256 4fd7155ce85380f1176dcd09771766e91197489f12319edcee6b665c8df254a8 --tool renderer --renderer-root ../renderer -- --core . --runtime .runtime/runtime.json
+          python3 -c 'import hashlib,runpy,sys,pathlib; exec("try:\n p=\"../extension/tools/pinned_pages_entry.py\"\n if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=\"6e7895d956ce006a0b3244fb5e8ee7abfbb2a31ac13ef02c2859ee16c301dc58\": raise ValueError()\n runpy.run_path(p,run_name=\"__main__\")\nexcept SystemExit: raise\nexcept BaseException: sys.exit(\"delivery phase=bootstrap reason=binding_refused\")")' --core . --extension ../extension --manifest-sha256 28e5def7ee90e2d61c8fd8055d84358680192f6520479882183efe51186942a1 --tool renderer --renderer-root ../renderer -- --core . --runtime .runtime/runtime.json
           --config .runtime/data/config.json --out .runtime/public
           --verify .runtime/public.receipt.json
       - id: deployment
